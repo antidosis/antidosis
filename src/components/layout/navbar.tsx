@@ -30,6 +30,7 @@ export function Navbar() {
     { href: "/needs/new", label: "post" },
     { href: "/dashboard", label: "dashboard" },
     { href: "/pro", label: "pro" },
+    { href: "/pros", label: "pros" },
   ];
 
   return (

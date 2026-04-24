@@ -47,6 +47,7 @@ export async function POST(req: NextRequest) {
         userId,
         email,
         fullName: fullName || null,
+        isPro: true, // free during trial period
       },
     });
 

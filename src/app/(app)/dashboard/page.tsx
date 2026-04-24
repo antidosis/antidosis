@@ -147,6 +147,7 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-xl font-bold">{profile.fullName || "user"}</h1>
           <div className="flex items-center gap-3 text-[12px] text-[#7a6b4a] mt-1">
+            {profile.isPro && <Badge variant="default">pro</Badge>}
             {profile.isVerified && <Badge variant="success">verified</Badge>}
             {profile.ratingCount > 0 && <span className="flex items-center gap-1"><Star className="h-3 w-3" />{profile.ratingAvg.toFixed(1)}</span>}
             <span>{profile.jobsCompleted} jobs</span>

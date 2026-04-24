@@ -19,6 +19,7 @@ model Profile {
   longitude     Float?
   isVerified    Boolean  @default(false) @map("is_verified")
   isPro         Boolean  @default(false) @map("is_pro")
+  showInDirectory Boolean @default(false) @map("show_in_directory")
   stripeCustomerId      String? @map("stripe_customer_id")
   stripeSubscriptionId  String? @map("stripe_subscription_id")
   ratingAvg     Float    @default(0) @map("rating_avg")
