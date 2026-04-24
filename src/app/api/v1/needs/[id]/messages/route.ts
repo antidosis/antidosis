@@ -23,7 +23,6 @@ export async function GET(
       );
     }
 
-
     const limit = rateLimit(getRateLimitIdentifier(req, user.id), {
       windowMs: 60_000,
       maxRequests: 60,

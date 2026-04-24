@@ -252,7 +252,7 @@ export default function NeedDetailPage() {
               {need.poster.skills.map((s) => <span key={s.id} className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide border border-[#2a2a2a] text-[#7a6b4a]">{s.name}{s.isVerified && " ✓"}</span>)}
             </div>
           )}
-          {need.poster.socialLinks.length > 0 && (
+          {userId && need.poster.socialLinks.length > 0 && (
             <div className="flex flex-wrap gap-4 mt-5">
               {need.poster.socialLinks.map((link) => <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className="text-[13px] text-[#7a6b4a]/50 hover:text-[#e8c97c] transition-colors capitalize">{link.platform}</a>)}
             </div>
@@ -260,8 +260,8 @@ export default function NeedDetailPage() {
         </div>
       </div>
 
-      {/* Message Thread */}
-      {need.status === "open" && (
+      {/* Message Thread — auth only */}
+      {userId && need.status === "open" && (
         <div className="mt-10 border border-[#2a2a2a] p-6">
           <p className="text-[11px] font-medium uppercase tracking-wide text-[#7a6b4a] mb-6">messages</p>
           <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
@@ -282,16 +282,25 @@ export default function NeedDetailPage() {
             ))}
             <div ref={messagesEndRef} />
           </div>
-          {userId ? (
-            <form onSubmit={sendMessage} className="mt-4 flex gap-2">
-              <Input placeholder="ask a question or introduce yourself..." value={messageInput} onChange={(e) => setMessageInput(e.target.value)} disabled={sendingMessage} />
-              <Button type="submit" size="icon" disabled={sendingMessage}><Send className="h-4 w-4" /></Button>
-            </form>
-          ) : (
-            <p className="mt-4 text-[13px] text-[#7a6b4a]/50 text-center">
-              <Link href="/login" className="text-[#e8c97c] hover:underline">login</Link> to send a message
-            </p>
-          )}
+          <form onSubmit={sendMessage} className="mt-4 flex gap-2">
+            <Input placeholder="ask a question or introduce yourself..." value={messageInput} onChange={(e) => setMessageInput(e.target.value)} disabled={sendingMessage} />
+            <Button type="submit" size="icon" disabled={sendingMessage}><Send className="h-4 w-4" /></Button>
+          </form>
+        </div>
+      )}
+
+      {/* Auth prompt for unauth users */}
+      {!userId && need.status === "open" && (
+        <div className="mt-10 border border-[#f5b800]/20 bg-[#f5b800]/5 p-6">
+          <p className="text-[13px] text-[#e8c97c] mb-3">
+            want to message the poster or submit an offer?
+          </p>
+          <p className="text-[13px] text-[#7a6b4a]">
+            <Link href="/login" className="text-[#f5b800] hover:underline">log in</Link>{" "}
+            or{" "}
+            <Link href="/register" className="text-[#f5b800] hover:underline">create an account</Link>{" "}
+            to get started. verified accounts can message, accept needs, and view full profiles.
+          </p>
         </div>
       )}
 
@@ -308,10 +317,21 @@ export default function NeedDetailPage() {
       {!isPoster && need.status === "open" && !hasOffered && !need.contract && (
         <div className="mt-10 border border-[#2a2a2a] p-6">
           <p className="text-[11px] font-medium uppercase tracking-wide text-[#7a6b4a] mb-4">offer_to_help</p>
-          <form onSubmit={submitOffer} className="space-y-4">
-            <Textarea placeholder="introduce yourself and explain why you're a good fit..." value={offerMessage} onChange={(e) => setOfferMessage(e.target.value)} rows={3} />
-            <Button type="submit" disabled={submittingOffer}>{submittingOffer ? "submitting..." : "$ submit_offer"}</Button>
-          </form>
+          {userId ? (
+            <form onSubmit={submitOffer} className="space-y-4">
+              <Textarea placeholder="introduce yourself and explain why you're a good fit..." value={offerMessage} onChange={(e) => setOfferMessage(e.target.value)} rows={3} />
+              <Button type="submit" disabled={submittingOffer}>{submittingOffer ? "submitting..." : "$ submit_offer"}</Button>
+            </form>
+          ) : (
+            <div className="border border-[#f5b800]/20 bg-[#f5b800]/5 p-5">
+              <p className="text-[13px] text-[#e8c97c]">
+                <Link href="/login" className="text-[#f5b800] hover:underline">log in</Link>{" "}
+                or{" "}
+                <Link href="/register" className="text-[#f5b800] hover:underline">create an account</Link>{" "}
+                to submit an offer on this need.
+              </p>
+            </div>
+          )}
         </div>
       )}
 

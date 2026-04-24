@@ -11,7 +11,6 @@ const PROTECTED_ROUTES = [
 
 // API routes that require email verification
 const PROTECTED_API_PREFIXES = [
-  "/api/v1/needs",
   "/api/v1/acceptances",
   "/api/v1/messages",
   "/api/v1/upload",
@@ -19,6 +18,7 @@ const PROTECTED_API_PREFIXES = [
   "/api/v1/reviews",
   "/api/v1/profiles/me",
   "/api/v1/billing",
+  "/api/v1/pro",
 ];
 
 export async function middleware(request: NextRequest) {
