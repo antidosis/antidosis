@@ -12,6 +12,8 @@ import {
   ArrowUpRight,
   Zap,
   Globe,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -19,11 +21,12 @@ export const dynamic = "force-dynamic";
 export default function ProPage() {
   const supabase = createClient();
   const [user, setUser] = useState<{ id: string } | null>(null);
-  const [profile, setProfile] = useState<{ isPro: boolean } | null>(null);
+  const [profile, setProfile] = useState<{ isPro: boolean; showInDirectory: boolean } | null>(null);
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState(false);
   const [claimMsg, setClaimMsg] = useState<string | null>(null);
   const [claimError, setClaimError] = useState<string | null>(null);
+  const [togglingDir, setTogglingDir] = useState(false);
 
   useEffect(() => {
     async function init() {
@@ -54,6 +57,21 @@ export default function ProPage() {
       setClaimError(data.error || "Something went wrong.");
     }
     setClaiming(false);
+  }
+
+  async function toggleDirectory() {
+    if (!profile) return;
+    setTogglingDir(true);
+    const newValue = !profile.showInDirectory;
+    const res = await fetch("/api/v1/profiles/me", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ showInDirectory: newValue }),
+    });
+    if (res.ok) {
+      setProfile((p) => (p ? { ...p, showInDirectory: newValue } : p));
+    }
+    setTogglingDir(false);
   }
 
   if (loading)
@@ -164,6 +182,44 @@ export default function ProPage() {
           </div>
         )}
       </div>
+
+      {/* Directory settings for pro users */}
+      {profile?.isPro && (
+        <div className="border border-[#2a2a2a] p-6 mb-8">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              {profile.showInDirectory ? (
+                <Eye className="h-5 w-5 text-[#7cb87c] mt-0.5" />
+              ) : (
+                <EyeOff className="h-5 w-5 text-[#7a6b4a] mt-0.5" />
+              )}
+              <div>
+                <h3 className="text-sm font-bold">public_directory</h3>
+                <p className="text-[12px] text-[#7a6b4a] mt-1">
+                  {profile.showInDirectory
+                    ? "your profile is visible on the pro directory."
+                    : "your profile is hidden from the pro directory."}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={toggleDirectory}
+              disabled={togglingDir}
+              className={`px-4 py-2 text-[12px] font-medium border transition-colors ${
+                profile.showInDirectory
+                  ? "border-[#c97c7c]/30 text-[#c97c7c] hover:border-[#c97c7c]"
+                  : "border-[#7cb87c]/30 text-[#7cb87c] hover:border-[#7cb87c]"
+              }`}
+            >
+              {togglingDir
+                ? "saving..."
+                : profile.showInDirectory
+                ? "$ hide"
+                : "$ show"}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Directory link */}
       <div className="text-center pb-12">

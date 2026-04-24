@@ -4,10 +4,9 @@ import { Avatar } from "@/components/ui/avatar";
 import { Star, MapPin, Briefcase, Shield } from "lucide-react";
 
 export const dynamic = "force-dynamic";
-export const revalidate = 60;
 
-export default async function ProsDirectoryPage() {
-  const pros = await prisma.profile.findMany({
+async function fetchPros() {
+  return prisma.profile.findMany({
     where: { isPro: true, showInDirectory: true },
     orderBy: { ratingAvg: "desc" },
     take: 100,
@@ -24,6 +23,17 @@ export default async function ProsDirectoryPage() {
       skills: { select: { name: true } },
     },
   });
+}
+
+export default async function ProsDirectoryPage() {
+  let pros: Awaited<ReturnType<typeof fetchPros>> = [];
+  let error: string | null = null;
+
+  try {
+    pros = await fetchPros();
+  } catch {
+    error = "Failed to load directory. Please try again later.";
+  }
 
   return (
     <div className="max-w-3xl mx-auto px-4 md:px-8">
@@ -38,7 +48,13 @@ export default async function ProsDirectoryPage() {
         </p>
       </div>
 
-      {pros.length === 0 ? (
+      {error && (
+        <div className="border border-[#c97c7c]/20 bg-[#c97c7c]/5 p-6 mb-8 text-center">
+          <p className="text-[13px] text-[#c97c7c]">{error}</p>
+        </div>
+      )}
+
+      {!error && pros.length === 0 ? (
         <div className="border border-[#2a2a2a] p-12 text-center">
           <p className="text-[13px] text-[#7a6b4a]">
             no pros in the directory yet.
@@ -128,7 +144,7 @@ export default async function ProsDirectoryPage() {
       )}
 
       <p className="text-center text-[12px] text-[#7a6b4a]/50 py-12">
-        sorted by rating. last updated every 60 seconds.
+        sorted by rating.
       </p>
     </div>
   );

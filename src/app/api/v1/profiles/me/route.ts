@@ -51,6 +51,7 @@ const updateSchema = z.object({
   locationName: z.string().max(200).optional(),
   latitude: z.number().optional(),
   longitude: z.number().optional(),
+  showInDirectory: z.boolean().optional(),
   socialLinks: z.array(z.object({ platform: z.string(), url: z.string().url() })).optional(),
 });
 
