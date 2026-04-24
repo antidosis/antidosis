@@ -4,6 +4,10 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 const FROM_EMAIL = "Antidosis <noreply@antidosis.com>";
 
+// Resend free tier: 100 emails/day, 3,000/month
+// To verify domain: add DNS records from Resend dashboard to GoDaddy
+// To configure Supabase Auth SMTP: Project Settings > Auth > Email > SMTP
+
 export async function sendOfferReceivedEmail(
   to: string,
   needTitle: string,

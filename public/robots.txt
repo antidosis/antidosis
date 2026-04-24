@@ -5,3 +5,5 @@ Disallow: /contracts/
 Disallow: /api/
 
 Sitemap: https://antidosis.com/sitemap.xml
+
+# Host: https://antidosis.com

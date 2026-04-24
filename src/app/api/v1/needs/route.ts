@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
+import { sanitizePlainText } from "@/lib/security/sanitize";
 import { z } from "zod";
 
 const createNeedSchema = z.object({
@@ -99,6 +100,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (!user.email_confirmed_at) {
+      return NextResponse.json(
+        { error: "Email verification required", code: "EMAIL_NOT_VERIFIED" },
+        { status: 403 }
+      );
+    }
+
     // Rate limit: 5 needs per hour per user
     const limit = rateLimit(getRateLimitIdentifier(req, user.id), {
       windowMs: 60 * 60_000,
@@ -128,21 +136,21 @@ export async function POST(req: NextRequest) {
     const need = await prisma.need.create({
       data: {
         posterId: profile.id,
-        title: data.title,
-        description: data.description,
-        needCategory: data.needCategory,
+        title: sanitizePlainText(data.title),
+        description: sanitizePlainText(data.description),
+        needCategory: data.needCategory ? sanitizePlainText(data.needCategory) : undefined,
         offerType: data.offerType,
-        offerDescription: data.offerDescription,
+        offerDescription: sanitizePlainText(data.offerDescription),
         offerValue: data.offerValue,
         isLocal: data.isLocal,
-        locationName: data.locationName,
+        locationName: data.locationName ? sanitizePlainText(data.locationName) : undefined,
         latitude: data.latitude,
         longitude: data.longitude,
         deadline: data.deadline ? new Date(data.deadline) : null,
         images: data.images,
         offerImages: data.offerImages,
         requiredSkills: {
-          create: data.requiredSkills.map((name) => ({ name })),
+          create: data.requiredSkills.map((name) => ({ name: sanitizePlainText(name) })),
         },
       },
       include: {

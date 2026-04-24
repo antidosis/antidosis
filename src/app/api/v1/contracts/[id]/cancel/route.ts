@@ -14,6 +14,14 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    if (!user.email_confirmed_at) {
+      return NextResponse.json(
+        { error: "Email verification required", code: "EMAIL_NOT_VERIFIED" },
+        { status: 403 }
+      );
+    }
+
+
     const profile = await prisma.profile.findUnique({
       where: { userId: user.id },
       select: { id: true },

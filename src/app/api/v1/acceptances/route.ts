@@ -19,6 +19,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    if (!user.email_confirmed_at) {
+      return NextResponse.json(
+        { error: "Email verification required", code: "EMAIL_NOT_VERIFIED" },
+        { status: 403 }
+      );
+    }
+
+
     // Rate limit: 10 offers per hour per user
     const limit = rateLimit(getRateLimitIdentifier(req, user.id), {
       windowMs: 60 * 60_000,
