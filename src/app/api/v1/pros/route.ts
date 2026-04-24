@@ -15,11 +15,13 @@ async function handler(req: NextRequest) {
         avatarUrl: true,
         bio: true,
         locationName: true,
+        publicPhone: true,
         ratingAvg: true,
         ratingCount: true,
         jobsCompleted: true,
         isVerified: true,
         skills: { select: { name: true } },
+        credentials: { where: { isPublic: true }, select: { id: true } },
       },
     });
     return NextResponse.json(pros);

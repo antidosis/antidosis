@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
+import { auditLog, getClientInfo } from "@/lib/audit";
 
 // Routes that require email verification
 const PROTECTED_ROUTES = [
@@ -7,6 +8,7 @@ const PROTECTED_ROUTES = [
   "/dashboard",
   "/contracts",
   "/profile",
+  "/admin",
 ];
 
 // API routes that require email verification
@@ -18,10 +20,20 @@ const PROTECTED_API_PREFIXES = [
   "/api/v1/reviews",
   "/api/v1/profiles/me",
   "/api/v1/billing",
-  "/api/v1/pro",
+  "/api/v1/pro/",
+  "/api/v1/credentials",
+  "/api/v1/admin",
 ];
 
 export async function middleware(request: NextRequest) {
+  // Redirect www to non-www
+  const host = request.headers.get("host") || "";
+  if (host.startsWith("www.")) {
+    const newUrl = new URL(request.url);
+    newUrl.host = host.replace("www.", "");
+    return NextResponse.redirect(newUrl, 308);
+  }
+
   const { response, user } = await updateSession(request);
 
   const pathname = request.nextUrl.pathname;
@@ -40,6 +52,16 @@ export async function middleware(request: NextRequest) {
 
   // Not logged in
   if (!user) {
+    const { ip, userAgent } = getClientInfo(request);
+    await auditLog({
+      event: "AUTH_FAILURE",
+      ip,
+      userAgent,
+      path: pathname,
+      severity: "warning",
+      metadata: { reason: "unauthenticated" },
+    });
+
     if (isProtectedApi) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -48,6 +70,18 @@ export async function middleware(request: NextRequest) {
 
   // Check email verification
   if (!user.email_confirmed_at) {
+    const { ip, userAgent } = getClientInfo(request);
+    await auditLog({
+      event: "AUTH_FAILURE",
+      userId: user.id,
+      email: user.email,
+      ip,
+      userAgent,
+      path: pathname,
+      severity: "warning",
+      metadata: { reason: "email_not_verified" },
+    });
+
     if (isProtectedApi) {
       return NextResponse.json(
         { error: "Email verification required", code: "EMAIL_NOT_VERIFIED" },

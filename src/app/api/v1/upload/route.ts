@@ -1,11 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "gif"];
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+
+function sanitizeFolder(input: string): string {
+  // Only allow alphanumeric, hyphens, underscores
+  return input.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 50) || "general";
+}
+
+function extensionForType(type: string): string {
+  const map: Record<string, string> = {
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+    "image/gif": "gif",
+  };
+  return map[type] || "png";
+}
 
 export const dynamic = "force-dynamic";
 
@@ -24,9 +39,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-
-    // Rate limit: 10 uploads per 5 minutes per user
-    const limit = rateLimit(getRateLimitIdentifier(req, user.id), {
+    const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
       windowMs: 5 * 60_000,
       maxRequests: 10,
     });
@@ -39,7 +52,7 @@ export async function POST(req: NextRequest) {
 
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
-    const folder = (formData.get("folder") as string) || "general";
+    const folder = sanitizeFolder((formData.get("folder") as string) || "general");
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
@@ -59,7 +72,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const ext = file.name.split(".").pop() || "png";
+    const ext = extensionForType(file.type);
     const key = `${folder}/${user.id}/${crypto.randomUUID()}.${ext}`;
 
     const bytes = await file.arrayBuffer();
@@ -69,7 +82,7 @@ export async function POST(req: NextRequest) {
       .from("uploads")
       .upload(key, buffer, {
         contentType: file.type,
-        upsert: true,
+        upsert: false, // prevent overwrites
       });
 
     if (error) {

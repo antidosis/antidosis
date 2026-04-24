@@ -5,6 +5,31 @@ import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 import { z } from "zod";
 
+async function getAuthorizedProfile(userId: string, needId: string) {
+  const profile = await prisma.profile.findUnique({
+    where: { userId },
+    select: { id: true },
+  });
+  if (!profile) return null;
+
+  const need = await prisma.need.findUnique({
+    where: { id: needId },
+    select: { posterId: true },
+  });
+  if (!need) return null;
+
+  // Poster can always access
+  if (need.posterId === profile.id) return profile;
+
+  // User must have an acceptance on this need
+  const acceptance = await prisma.acceptance.findFirst({
+    where: { needId, userId: profile.id },
+  });
+  if (acceptance) return profile;
+
+  return null;
+}
+
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
@@ -23,12 +48,20 @@ export async function GET(
       );
     }
 
-    const limit = rateLimit(getRateLimitIdentifier(req, user.id), {
+    const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
       windowMs: 60_000,
       maxRequests: 60,
     });
     if (!limit.allowed) {
       return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+    }
+
+    const profile = await getAuthorizedProfile(user.id, params.id);
+    if (!profile) {
+      return NextResponse.json(
+        { error: "Forbidden: not involved in this need" },
+        { status: 403 }
+      );
     }
 
     const messages = await prisma.needMessage.findMany({
@@ -72,8 +105,14 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Rate limit: 20 messages per 5 minutes per user
-    const limit = rateLimit(getRateLimitIdentifier(req, user.id), {
+    if (!user.email_confirmed_at) {
+      return NextResponse.json(
+        { error: "Email verification required", code: "EMAIL_NOT_VERIFIED" },
+        { status: 403 }
+      );
+    }
+
+    const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
       windowMs: 5 * 60_000,
       maxRequests: 20,
     });
@@ -81,11 +120,12 @@ export async function POST(
       return NextResponse.json({ error: "Rate limit exceeded. Slow down." }, { status: 429 });
     }
 
-    const profile = await prisma.profile.findUnique({
-      where: { userId: user.id },
-    });
+    const profile = await getAuthorizedProfile(user.id, params.id);
     if (!profile) {
-      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Forbidden: not involved in this need" },
+        { status: 403 }
+      );
     }
 
     const need = await prisma.need.findUnique({

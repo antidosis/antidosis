@@ -17,6 +17,8 @@ model Profile {
   locationName  String?  @map("location_name")
   latitude      Float?
   longitude     Float?
+  publicPhone   String?  @map("public_phone")
+  privatePhone  String?  @map("private_phone")
   isVerified    Boolean  @default(false) @map("is_verified")
   isPro         Boolean  @default(false) @map("is_pro")
   showInDirectory Boolean @default(false) @map("show_in_directory")
@@ -30,6 +32,7 @@ model Profile {
 
   skills          Skill[]
   socialLinks     SocialLink[]
+  credentials     Credential[]
   needsPosted     Need[]       @relation("NeedPoster")
   acceptances     Acceptance[]
   contractsAsA    Contract[]   @relation("ContractPartyA")
@@ -43,10 +46,11 @@ model Profile {
 }
 
 model SocialLink {
-  id        String @id @default(uuid())
-  profileId String @map("profile_id")
+  id        String  @id @default(uuid())
+  profileId String  @map("profile_id")
   platform  String
   url       String
+  isPublic  Boolean @default(true) @map("is_public")
   profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   @@map("social_links")
@@ -183,4 +187,46 @@ model Review {
 
   @@unique([contractId, giverId])
   @@map("reviews")
+}
+
+model Credential {
+  id             String    @id @default(uuid())
+  profileId      String    @map("profile_id")
+  type           String
+  title          String
+  description    String?
+  documentNumber String?   @map("document_number")
+  issuedBy       String?   @map("issued_by")
+  issuedAt       DateTime? @map("issued_at")
+  expiresAt      DateTime? @map("expires_at")
+  fileUrl        String?   @map("file_url")
+  isPublic       Boolean   @default(false) @map("is_public")
+  isVerified     Boolean   @default(false) @map("is_verified")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("credentials")
+  @@index([profileId])
+  @@index([type])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  event     String
+  userId    String?  @map("user_id")
+  email     String?
+  ip        String?
+  userAgent String?  @map("user_agent")
+  path      String?
+  metadata  Json?
+  severity  String   @default("info")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([event])
+  @@index([severity])
+  @@index([createdAt])
+  @@map("audit_logs")
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
+import { auditLog, getClientInfo } from "@/lib/audit";
 import { logger } from "@/lib/logger";
 import { sanitizePlainText } from "@/lib/security/sanitize";
 import { z } from "zod";
@@ -108,7 +109,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Rate limit: 5 needs per hour per user
-    const limit = rateLimit(getRateLimitIdentifier(req, user.id), {
+    const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
       windowMs: 60 * 60_000,
       maxRequests: 5,
     });
@@ -164,6 +165,17 @@ export async function POST(req: NextRequest) {
           },
         },
       },
+    });
+
+    const { ip, userAgent } = getClientInfo(req);
+    await auditLog({
+      event: "NEED_CREATED",
+      userId: user.id,
+      email: user.email,
+      ip,
+      userAgent,
+      path: "/api/v1/needs",
+      metadata: { needId: need.id, title: need.title },
     });
 
     return NextResponse.json({ need }, { status: 201 });

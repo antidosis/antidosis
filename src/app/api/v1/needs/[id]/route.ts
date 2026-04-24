@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
 
 export async function GET(
@@ -7,6 +8,10 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const isAuthenticated = !!user;
+
     const need = await prisma.need.findUnique({
       where: { id: params.id },
       include: {
@@ -26,35 +31,39 @@ export async function GET(
           },
         },
         requiredSkills: true,
-        acceptances: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                fullName: true,
-                avatarUrl: true,
-                ratingAvg: true,
-                skills: true,
+        acceptances: isAuthenticated
+          ? {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    fullName: true,
+                    avatarUrl: true,
+                    ratingAvg: true,
+                    skills: true,
+                  },
+                },
               },
-            },
-          },
-        },
-        contract: {
-          include: {
-            partyA: {
-              select: {
-                id: true,
-                fullName: true,
+            }
+          : false,
+        contract: isAuthenticated
+          ? {
+              include: {
+                partyA: {
+                  select: {
+                    id: true,
+                    fullName: true,
+                  },
+                },
+                partyB: {
+                  select: {
+                    id: true,
+                    fullName: true,
+                  },
+                },
               },
-            },
-            partyB: {
-              select: {
-                id: true,
-                fullName: true,
-              },
-            },
-          },
-        },
+            }
+          : false,
       },
     });
 

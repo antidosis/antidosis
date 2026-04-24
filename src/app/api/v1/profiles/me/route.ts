@@ -22,16 +22,30 @@ export async function GET() {
     }
 
 
-    const profile = await prisma.profile.findUnique({
+    let profile = await prisma.profile.findUnique({
       where: { userId: user.id },
       include: {
         skills: true,
         socialLinks: true,
+        credentials: true,
       },
     });
 
+    // Auto-create profile if missing (e.g., after DB migration)
     if (!profile) {
-      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+      profile = await prisma.profile.create({
+        data: {
+          userId: user.id,
+          email: user.email || "",
+          fullName: user.user_metadata?.full_name || null,
+          isPro: true, // free during trial
+        },
+        include: {
+          skills: true,
+          socialLinks: true,
+          credentials: true,
+        },
+      });
     }
 
     return NextResponse.json(profile);
@@ -45,14 +59,16 @@ export async function GET() {
 }
 
 const updateSchema = z.object({
-  fullName: z.string().min(1).max(100).optional(),
-  bio: z.string().max(2000).optional(),
-  avatarUrl: z.string().url().optional(),
-  locationName: z.string().max(200).optional(),
-  latitude: z.number().optional(),
-  longitude: z.number().optional(),
-  showInDirectory: z.boolean().optional(),
-  socialLinks: z.array(z.object({ platform: z.string(), url: z.string().url() })).optional(),
+  fullName: z.string().max(100).optional().nullable(),
+  bio: z.string().max(2000).optional().nullable(),
+  avatarUrl: z.string().max(500).optional().nullable(),
+  locationName: z.string().max(200).optional().nullable(),
+  latitude: z.number().optional().nullable(),
+  longitude: z.number().optional().nullable(),
+  showInDirectory: z.boolean().optional().nullable(),
+  publicPhone: z.string().max(50).optional().nullable(),
+  privatePhone: z.string().max(50).optional().nullable(),
+  socialLinks: z.array(z.object({ platform: z.string().min(1), url: z.string().min(1).max(500), isPublic: z.boolean().optional() })).optional(),
 });
 
 export async function PATCH(req: NextRequest) {
@@ -68,19 +84,34 @@ export async function PATCH(req: NextRequest) {
 
     const { socialLinks, ...profileData } = data;
 
+    // Clean up empty strings to null for optional fields
+    const cleanedData = Object.fromEntries(
+      Object.entries(profileData).map(([key, value]) => [
+        key,
+        value === "" ? null : value,
+      ])
+    );
+
     const profile = await prisma.profile.update({
       where: { userId: user.id },
       data: {
-        ...profileData,
+        ...cleanedData,
         updatedAt: new Date(),
         socialLinks: socialLinks ? {
           deleteMany: {},
-          create: socialLinks,
+          create: socialLinks
+            .filter((link) => link.url.trim() !== "")
+            .map((link) => ({
+              platform: link.platform,
+              url: link.url,
+              isPublic: link.isPublic ?? true,
+            })),
         } : undefined,
       },
       include: {
         skills: true,
         socialLinks: true,
+        credentials: true,
       },
     });
 

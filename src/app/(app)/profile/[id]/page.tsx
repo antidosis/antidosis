@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { MapPin, Star, Briefcase, Shield, ArrowLeft } from "lucide-react";
+import { MapPin, Star, Briefcase, Shield, ArrowLeft, Phone, Award, FileCheck, Globe } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +13,8 @@ export default async function ProfilePage({ params }: { params: { id: string } }
     where: { id: params.id },
     include: {
       skills: true,
-      socialLinks: true,
+      socialLinks: { where: { isPublic: true } },
+      credentials: { where: { isPublic: true } },
       needsPosted: { where: { status: "open" }, orderBy: { createdAt: "desc" }, include: { requiredSkills: true, _count: { select: { acceptances: true } } }, take: 10 },
       reviewsReceived: { orderBy: { createdAt: "desc" }, include: { giver: { select: { fullName: true, avatarUrl: true } }, contract: { select: { need: { select: { title: true } } } } }, take: 10 },
     },
@@ -48,9 +49,14 @@ export default async function ProfilePage({ params }: { params: { id: string } }
               {profile.skills.map((skill) => <span key={skill.id} className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide border border-[#2a2a2a] text-[#7a6b4a]">{skill.name}{skill.isVerified && <span className="ml-1 text-[#7cb87c]">✓</span>}</span>)}
             </div>
           )}
+          {profile.publicPhone && (
+            <div className="flex items-center gap-2 mt-4 text-[13px] text-[#7a6b4a]">
+              <Phone className="h-4 w-4" />{profile.publicPhone}
+            </div>
+          )}
           {profile.socialLinks.length > 0 && (
-            <div className="flex flex-wrap gap-4 mt-6">
-              {profile.socialLinks.map((link) => <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className="text-[13px] text-[#7a6b4a]/50 hover:text-[#e8c97c] transition-colors capitalize">{link.platform}</a>)}
+            <div className="flex flex-wrap gap-4 mt-4">
+              {profile.socialLinks.map((link) => <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className="text-[13px] text-[#7a6b4a]/50 hover:text-[#e8c97c] transition-colors capitalize flex items-center gap-1"><Globe className="h-3 w-3" />{link.platform}</a>)}
             </div>
           )}
         </div>
@@ -77,6 +83,42 @@ export default async function ProfilePage({ params }: { params: { id: string } }
               {i < profile.needsPosted.length - 1 && <div className="divider" />}
             </div>
           ))}
+        </div>
+      )}
+
+      {profile.credentials.length > 0 && (
+        <div>
+          <div className="divider mb-8" />
+          <p className="text-[12px] text-[#7a6b4a] mb-6">$ ls ~{profile.fullName?.toLowerCase().replace(/\s/g, "_") || "user"}/credentials/</p>
+          <div className="space-y-0">
+            {profile.credentials.map((cred, i) => (
+              <div key={cred.id}>
+                <div className="py-4">
+                  <div className="flex items-center gap-2 flex-wrap mb-2">
+                    <Award className="h-4 w-4 text-[#c9b87c]" />
+                    <span className="text-[14px] font-medium">{cred.title}</span>
+                    <span className="px-2 py-0.5 text-[10px] uppercase tracking-wide border border-[#2a2a2a] text-[#7a6b4a]">{cred.type}</span>
+                    {cred.isVerified && <Shield className="h-3.5 w-3.5 text-[#7cb87c]" />}
+                  </div>
+                  <div className="text-[12px] text-[#7a6b4a] space-y-1">
+                    {cred.documentNumber && (
+                      <p>{"*".repeat(Math.max(0, cred.documentNumber.length - 4))}{cred.documentNumber.slice(-4)}</p>
+                    )}
+                    {cred.issuedBy && <p>issued by: {cred.issuedBy}</p>}
+                    {cred.expiresAt && (
+                      <p>expires: {new Date(cred.expiresAt).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}</p>
+                    )}
+                    {cred.fileUrl && (
+                      <a href={cred.fileUrl} target="_blank" rel="noopener noreferrer" className="text-[#f5b800] hover:underline inline-flex items-center gap-1">
+                        <FileCheck className="h-3 w-3" /> view document
+                      </a>
+                    )}
+                  </div>
+                </div>
+                {i < profile.credentials.length - 1 && <div className="divider" />}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

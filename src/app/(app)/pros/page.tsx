@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Avatar } from "@/components/ui/avatar";
-import { Star, MapPin, Briefcase, Shield } from "lucide-react";
+import { Star, MapPin, Briefcase, Shield, Phone, Award } from "lucide-react";
 
 interface ProProfile {
   id: string;
@@ -11,11 +11,13 @@ interface ProProfile {
   avatarUrl: string | null;
   bio: string | null;
   locationName: string | null;
+  publicPhone: string | null;
   ratingAvg: number;
   ratingCount: number;
   jobsCompleted: number;
   isVerified: boolean;
   skills: { name: string }[];
+  credentials: { id: string }[];
 }
 
 export const dynamic = "force-dynamic";
@@ -127,6 +129,18 @@ export default function ProsDirectoryPage() {
                       <span className="flex items-center gap-1">
                         <MapPin className="h-3 w-3" />
                         {pro.locationName}
+                      </span>
+                    )}
+                    {pro.publicPhone && (
+                      <span className="flex items-center gap-1">
+                        <Phone className="h-3 w-3" />
+                        {pro.publicPhone}
+                      </span>
+                    )}
+                    {pro.credentials.length > 0 && (
+                      <span className="flex items-center gap-1">
+                        <Award className="h-3 w-3" />
+                        {pro.credentials.length} credential{pro.credentials.length !== 1 ? "s" : ""}
                       </span>
                     )}
                   </div>

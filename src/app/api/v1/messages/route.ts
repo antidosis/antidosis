@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
     }
 
 
-    const limit = rateLimit(getRateLimitIdentifier(req, user.id), {
+    const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
       windowMs: 60_000,
       maxRequests: 60,
     });
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Rate limit: 30 messages per 5 minutes per user
-    const limit = rateLimit(getRateLimitIdentifier(req, user.id), {
+    const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
       windowMs: 5 * 60_000,
       maxRequests: 30,
     });

@@ -3,12 +3,13 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { withCors } from "@/lib/security/cors";
 import { rateLimit } from "@/lib/rate-limit";
+import { auditLog, getClientInfo } from "@/lib/audit";
 import { logger } from "@/lib/logger";
 
 async function handler(req: NextRequest) {
   // Rate limit: 3 claims per hour per IP
   const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-  const limit = rateLimit(`pro-claim:${clientIp}`, { maxRequests: 3, windowMs: 60 * 60 * 1000 });
+  const limit = await rateLimit(`pro-claim:${clientIp}`, { maxRequests: 3, windowMs: 60 * 60 * 1000 });
   if (!limit.allowed) {
     return NextResponse.json(
       { error: "Rate limit exceeded. Try again later." },
@@ -35,7 +36,16 @@ async function handler(req: NextRequest) {
       data: { isPro: true },
     });
 
-    logger.info("Pro claimed", { userId: user.id, profileId: profile.id });
+    const { ip, userAgent } = getClientInfo(req);
+    await auditLog({
+      event: "PRO_CLAIMED",
+      userId: user.id,
+      email: user.email,
+      ip,
+      userAgent,
+      path: "/api/v1/pro/claim",
+      metadata: { profileId: profile.id },
+    });
 
     return NextResponse.json(
       { success: true, message: "Pro activated. Enjoy enhanced visibility and support." }

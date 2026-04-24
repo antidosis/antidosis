@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
+import { z } from "zod";
+
+const patchSchema = z.object({
+  terms: z.string().min(1).max(10000),
+});
 
 export async function GET(
   req: NextRequest,
@@ -20,7 +25,6 @@ export async function GET(
         { status: 403 }
       );
     }
-
 
     const profile = await prisma.profile.findUnique({
       where: { userId: user.id },
@@ -90,7 +94,6 @@ export async function GET(
       return NextResponse.json({ error: "Contract not found" }, { status: 404 });
     }
 
-    // Verify user is a party to the contract
     if (contract.partyAId !== profile.id && contract.partyBId !== profile.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
@@ -137,7 +140,6 @@ export async function PATCH(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Only allow editing terms if contract is in draft or pending_terms
     if (contract.status !== "draft" && contract.status !== "pending_terms") {
       return NextResponse.json(
         { error: "Contract terms cannot be edited at this stage" },
@@ -146,13 +148,21 @@ export async function PATCH(
     }
 
     const body = await req.json();
-    const { terms } = body;
+    const parsed = patchSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid input", details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+
+    const { terms } = parsed.data;
 
     // Reset signatures when terms change
     const updated = await prisma.contract.update({
       where: { id: params.id },
       data: {
-        terms: typeof terms === "string" ? terms : JSON.stringify(terms),
+        terms,
         partyASignedAt: null,
         partyBSignedAt: null,
         status: "draft",

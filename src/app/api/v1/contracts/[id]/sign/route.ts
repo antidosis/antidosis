@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { sendContractSignedEmail } from "@/lib/email";
+import { auditLog, getClientInfo } from "@/lib/audit";
 import { logger } from "@/lib/logger";
 
 export async function POST(
@@ -117,6 +118,17 @@ export async function POST(
         logger.error("Failed to send contract signed email:", emailErr instanceof Error ? emailErr : undefined);
       }
     }
+
+    const { ip, userAgent } = getClientInfo(req);
+    await auditLog({
+      event: "CONTRACT_SIGNED",
+      userId: user.id,
+      email: user.email,
+      ip,
+      userAgent,
+      path: `/api/v1/contracts/${params.id}/sign`,
+      metadata: { contractId: params.id, bothSigned: willBothBeSigned },
+    });
 
     return NextResponse.json({ contract: updated });
   } catch (error) {

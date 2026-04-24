@@ -1,28 +1,33 @@
-/**
- * In-memory rate limiter using sliding window.
- *
- * NOTE: This is suitable for single-instance deployments (dev servers,
- * single-container VPS). For serverless/multi-instance production (Vercel,
- * AWS Lambda, etc.), replace this with Redis-based rate limiting
- * (e.g., @upstash/ratelimit) so the window is shared across all instances.
- */
+import { Redis } from "@upstash/redis";
 
+// In-memory fallback for local dev (when Upstash isn't configured)
 interface RateLimitEntry {
   count: number;
   resetAt: number;
 }
 
-const store = new Map<string, RateLimitEntry>();
+const memoryStore = new Map<string, RateLimitEntry>();
 
 // Periodic cleanup to prevent memory leaks
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, entry] of Array.from(store.entries())) {
-    if (entry.resetAt < now) {
-      store.delete(key);
+if (typeof globalThis !== "undefined") {
+  setInterval(() => {
+    const now = Date.now();
+    for (const [key, entry] of Array.from(memoryStore.entries())) {
+      if (entry.resetAt < now) {
+        memoryStore.delete(key);
+      }
     }
-  }
-}, 60_000); // Clean every 60 seconds
+  }, 60_000);
+}
+
+// Initialize Redis if credentials are available
+const redis =
+  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+    ? new Redis({
+        url: process.env.UPSTASH_REDIS_REST_URL,
+        token: process.env.UPSTASH_REDIS_REST_TOKEN,
+      })
+    : null;
 
 export interface RateLimitOptions {
   windowMs: number;
@@ -35,21 +40,39 @@ export interface RateLimitResult {
   resetAt: number;
 }
 
-export function rateLimit(
-  identifier: string,
-  options: RateLimitOptions = { windowMs: 60_000, maxRequests: 30 }
+async function redisRateLimit(
+  key: string,
+  options: RateLimitOptions
+): Promise<RateLimitResult> {
+  const windowSeconds = Math.ceil(options.windowMs / 1000);
+  const now = Date.now();
+
+  const current = await redis!.incr(key);
+  if (current === 1) {
+    await redis!.expire(key, windowSeconds);
+  }
+
+  const ttl = await redis!.ttl(key);
+  const resetAt = now + ttl * 1000;
+  const allowed = current <= options.maxRequests;
+  const remaining = Math.max(0, options.maxRequests - current);
+
+  return { allowed, remaining, resetAt };
+}
+
+function memoryRateLimit(
+  key: string,
+  options: RateLimitOptions
 ): RateLimitResult {
   const now = Date.now();
-  const key = identifier;
-  const entry = store.get(key);
+  const entry = memoryStore.get(key);
 
   if (!entry || entry.resetAt < now) {
-    // Window expired or first request — start new window
     const newEntry: RateLimitEntry = {
       count: 1,
       resetAt: now + options.windowMs,
     };
-    store.set(key, newEntry);
+    memoryStore.set(key, newEntry);
     return {
       allowed: true,
       remaining: options.maxRequests - 1,
@@ -73,11 +96,27 @@ export function rateLimit(
   };
 }
 
+export async function rateLimit(
+  identifier: string,
+  options: RateLimitOptions = { windowMs: 60_000, maxRequests: 30 }
+): Promise<RateLimitResult> {
+  const key = `ratelimit:v1:${identifier}`;
+
+  if (redis) {
+    return redisRateLimit(key, options);
+  }
+
+  return memoryRateLimit(key, options);
+}
+
 /**
  * Extract a rate-limit identifier from a request.
  * Prefers authenticated user ID, falls back to IP address.
  */
-export function getRateLimitIdentifier(req: Request, userId?: string | null): string {
+export function getRateLimitIdentifier(
+  req: Request,
+  userId?: string | null
+): string {
   if (userId) return `user:${userId}`;
 
   const forwarded = req.headers.get("x-forwarded-for");
