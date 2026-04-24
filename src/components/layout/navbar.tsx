@@ -26,10 +26,10 @@ export function Navbar() {
   }, []);
 
   const navItems = [
+    { href: "/pro", label: "pro" },
     { href: "/needs", label: "needs" },
     { href: "/needs/new", label: "post" },
     { href: "/dashboard", label: "dashboard" },
-    { href: "/pro", label: "pro" },
     { href: "/pros", label: "pros" },
   ];
 
