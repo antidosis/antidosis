@@ -46,3 +46,5 @@ prisma/*.db-journal
 # Supabase
 supabase/.temp
 supabase/.env
+
+.vercel
