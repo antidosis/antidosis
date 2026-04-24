@@ -239,7 +239,6 @@ export default function NeedDetailPage() {
               {need.poster.fullName || "anonymous"}
             </Link>
             {need.poster.isVerified && <Shield className="h-4 w-4 text-[#7cb87c]" />}
-            {need.poster.isPro && <Badge variant="default" className="text-[10px]">pro</Badge>}
           </div>
           <div className="flex flex-wrap items-center gap-3 text-[13px] text-[#7a6b4a] mt-1">
             {need.poster.ratingCount > 0 && <span className="flex items-center gap-1"><Star className="h-3.5 w-3.5" />{need.poster.ratingAvg.toFixed(1)}</span>}

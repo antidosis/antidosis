@@ -35,7 +35,6 @@ export default async function ProfilePage({ params }: { params: { id: string } }
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold tracking-tight">{profile.fullName || "anonymous"}</h1>
             {profile.isVerified && <Shield className="h-5 w-5 text-[#7cb87c]" />}
-            {profile.isPro && <Badge variant="default">pro</Badge>}
           </div>
           <div className="flex flex-wrap items-center gap-4 text-[13px] text-[#7a6b4a] mt-2">
             {profile.ratingCount > 0 && <span className="flex items-center gap-1"><Star className="h-4 w-4" />{profile.ratingAvg.toFixed(1)} ({profile.ratingCount} reviews)</span>}
