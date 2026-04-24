@@ -1,39 +1,46 @@
-import { prisma } from "@/lib/prisma";
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Avatar } from "@/components/ui/avatar";
 import { Star, MapPin, Briefcase, Shield } from "lucide-react";
 
-export const dynamic = "force-dynamic";
-
-async function fetchPros() {
-  return prisma.profile.findMany({
-    where: { isPro: true, showInDirectory: true },
-    orderBy: { ratingAvg: "desc" },
-    take: 100,
-    select: {
-      id: true,
-      fullName: true,
-      avatarUrl: true,
-      bio: true,
-      locationName: true,
-      ratingAvg: true,
-      ratingCount: true,
-      jobsCompleted: true,
-      isVerified: true,
-      skills: { select: { name: true } },
-    },
-  });
+interface ProProfile {
+  id: string;
+  fullName: string | null;
+  avatarUrl: string | null;
+  bio: string | null;
+  locationName: string | null;
+  ratingAvg: number;
+  ratingCount: number;
+  jobsCompleted: number;
+  isVerified: boolean;
+  skills: { name: string }[];
 }
 
-export default async function ProsDirectoryPage() {
-  let pros: Awaited<ReturnType<typeof fetchPros>> = [];
-  let error: string | null = null;
+export const dynamic = "force-dynamic";
 
-  try {
-    pros = await fetchPros();
-  } catch {
-    error = "Failed to load directory. Please try again later.";
-  }
+export default function ProsDirectoryPage() {
+  const [pros, setPros] = useState<ProProfile[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const res = await fetch("/api/v1/pros");
+        if (!res.ok) throw new Error("Failed to load");
+        const data = await res.json();
+        if (Array.isArray(data)) setPros(data);
+        else setError("Unexpected response");
+      } catch {
+        setError("Failed to load directory. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
 
   return (
     <div className="max-w-3xl mx-auto px-4 md:px-8">
@@ -48,13 +55,17 @@ export default async function ProsDirectoryPage() {
         </p>
       </div>
 
+      {loading && (
+        <div className="py-12 text-center text-[#7a6b4a]">loading...</div>
+      )}
+
       {error && (
         <div className="border border-[#c97c7c]/20 bg-[#c97c7c]/5 p-6 mb-8 text-center">
           <p className="text-[13px] text-[#c97c7c]">{error}</p>
         </div>
       )}
 
-      {!error && pros.length === 0 ? (
+      {!loading && !error && pros.length === 0 && (
         <div className="border border-[#2a2a2a] p-12 text-center">
           <p className="text-[13px] text-[#7a6b4a]">
             no pros in the directory yet.
@@ -69,7 +80,9 @@ export default async function ProsDirectoryPage() {
             go to pro page →
           </Link>
         </div>
-      ) : (
+      )}
+
+      {!loading && !error && pros.length > 0 && (
         <div className="space-y-px bg-[#2a2a2a]">
           {pros.map((pro) => (
             <Link
