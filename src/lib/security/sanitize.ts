@@ -1,28 +1,26 @@
-import DOMPurify from "isomorphic-dompurify";
-
 /**
- * Sanitize user-generated HTML content.
- * Removes all HTML tags and returns plain text.
- * Use for fields that should never contain HTML.
+ * Server-safe plain text sanitizer.
+ * Strips all HTML tags and decodes common HTML entities.
+ * No DOM dependencies — works in any Node.js environment.
  */
 export function sanitizePlainText(input: string): string {
   if (!input) return "";
-  return DOMPurify.sanitize(input, {
-    ALLOWED_TAGS: [],
-    ALLOWED_ATTR: [],
-    KEEP_CONTENT: true,
-  }).trim();
+  return input
+    .replace(/<[^>]*>/g, "")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, " ")
+    .trim();
 }
 
 /**
- * Sanitize user-generated content that may contain limited HTML.
- * Allows only safe inline formatting: bold, italic, links, line breaks.
+ * Rich text sanitizer for limited HTML.
+ * In a serverless context without a DOM, we strip all tags and return plain text.
+ * For true rich-text sanitization, run DOMPurify on the client before sending.
  */
 export function sanitizeRichText(input: string): string {
-  if (!input) return "";
-  return DOMPurify.sanitize(input, {
-    ALLOWED_TAGS: ["b", "strong", "i", "em", "a", "br", "p", "ul", "ol", "li"],
-    ALLOWED_ATTR: ["href", "target", "rel"],
-    ALLOW_DATA_ATTR: false,
-  }).trim();
+  return sanitizePlainText(input);
 }
