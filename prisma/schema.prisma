@@ -1,0 +1,185 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Profile {
+  id            String   @id @default(uuid())
+  userId        String   @unique @map("user_id")
+  email         String   @unique
+  fullName      String?  @map("full_name")
+  bio           String?
+  avatarUrl     String?  @map("avatar_url")
+  locationName  String?  @map("location_name")
+  latitude      Float?
+  longitude     Float?
+  isVerified    Boolean  @default(false) @map("is_verified")
+  isPro         Boolean  @default(false) @map("is_pro")
+  stripeCustomerId      String? @map("stripe_customer_id")
+  stripeSubscriptionId  String? @map("stripe_subscription_id")
+  ratingAvg     Float    @default(0) @map("rating_avg")
+  ratingCount   Int      @default(0) @map("rating_count")
+  jobsCompleted Int      @default(0) @map("jobs_completed")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  skills          Skill[]
+  socialLinks     SocialLink[]
+  needsPosted     Need[]       @relation("NeedPoster")
+  acceptances     Acceptance[]
+  contractsAsA    Contract[]   @relation("ContractPartyA")
+  contractsAsB    Contract[]   @relation("ContractPartyB")
+  reviewsGiven    Review[]     @relation("ReviewGiver")
+  reviewsReceived Review[]     @relation("ReviewReceiver")
+  messages        Message[]
+  needMessages    NeedMessage[]
+
+  @@map("profiles")
+}
+
+model SocialLink {
+  id        String @id @default(uuid())
+  profileId String @map("profile_id")
+  platform  String
+  url       String
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("social_links")
+}
+
+model Skill {
+  id         String  @id @default(uuid())
+  profileId  String  @map("profile_id")
+  name       String
+  category   String?
+  isVerified Boolean @default(false) @map("is_verified")
+  proofUrl   String? @map("proof_url")
+  profile    Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@map("skills")
+}
+
+model Need {
+  id               String   @id @default(uuid())
+  posterId         String   @map("poster_id")
+  title            String
+  description      String
+  needCategory     String?  @map("need_category")
+  offerType        String   @map("offer_type")
+  offerDescription String   @map("offer_description")
+  offerValue       Float?   @map("offer_value")
+  isLocal          Boolean  @default(true) @map("is_local")
+  locationName     String?  @map("location_name")
+  latitude         Float?
+  longitude        Float?
+  status           String   @default("open")
+  deadline         DateTime?
+  images           String[]
+  offerImages      String[] @map("offer_images")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  poster         Profile      @relation("NeedPoster", fields: [posterId], references: [id])
+  requiredSkills NeedSkill[]
+  acceptances    Acceptance[]
+  contract       Contract?
+  messages       NeedMessage[]
+
+  @@map("needs")
+}
+
+model NeedSkill {
+  id     String @id @default(uuid())
+  needId String @map("need_id")
+  name   String
+  need   Need   @relation(fields: [needId], references: [id], onDelete: Cascade)
+
+  @@map("need_skills")
+}
+
+model Acceptance {
+  id        String   @id @default(uuid())
+  needId    String   @map("need_id")
+  userId    String   @map("user_id")
+  message   String?
+  status    String   @default("pending")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  need Need    @relation(fields: [needId], references: [id], onDelete: Cascade)
+  user Profile @relation(fields: [userId], references: [id])
+
+  @@map("acceptances")
+}
+
+model Contract {
+  id              String    @id @default(uuid())
+  needId          String    @unique @map("need_id")
+  partyAId        String    @map("party_a_id")
+  partyBId        String    @map("party_b_id")
+  terms           String
+  partyASignedAt  DateTime? @map("party_a_signed_at")
+  partyBSignedAt  DateTime? @map("party_b_signed_at")
+  status          String    @default("draft")
+  aMarkedComplete Boolean   @default(false) @map("a_marked_complete")
+  bMarkedComplete Boolean   @default(false) @map("b_marked_complete")
+  completedAt     DateTime? @map("completed_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  need     Need      @relation(fields: [needId], references: [id])
+  partyA   Profile   @relation("ContractPartyA", fields: [partyAId], references: [id])
+  partyB   Profile   @relation("ContractPartyB", fields: [partyBId], references: [id])
+  messages Message[]
+  reviews  Review[]
+
+  @@map("contracts")
+}
+
+model NeedMessage {
+  id        String   @id @default(uuid())
+  needId    String   @map("need_id")
+  senderId  String   @map("sender_id")
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  need   Need    @relation(fields: [needId], references: [id], onDelete: Cascade)
+  sender Profile @relation(fields: [senderId], references: [id])
+
+  @@map("need_messages")
+}
+
+model Message {
+  id         String    @id @default(uuid())
+  contractId String?   @map("contract_id")
+  senderId   String    @map("sender_id")
+  content    String
+  createdAt  DateTime  @default(now()) @map("created_at")
+  isRead     Boolean   @default(false) @map("is_read")
+
+  contract Contract? @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  sender   Profile   @relation(fields: [senderId], references: [id])
+
+  @@map("messages")
+}
+
+model Review {
+  id         String   @id @default(uuid())
+  contractId String   @map("contract_id")
+  giverId    String   @map("giver_id")
+  receiverId String   @map("receiver_id")
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  giver    Profile  @relation("ReviewGiver", fields: [giverId], references: [id])
+  receiver Profile  @relation("ReviewReceiver", fields: [receiverId], references: [id])
+
+  @@unique([contractId, giverId])
+  @@map("reviews")
+}

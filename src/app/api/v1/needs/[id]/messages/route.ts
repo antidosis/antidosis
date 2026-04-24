@@ -1,0 +1,134 @@
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
+import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
+import { z } from "zod";
+
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const limit = rateLimit(getRateLimitIdentifier(req, user.id), {
+      windowMs: 60_000,
+      maxRequests: 60,
+    });
+    if (!limit.allowed) {
+      return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+    }
+
+    const messages = await prisma.needMessage.findMany({
+      where: { needId: params.id },
+      orderBy: { createdAt: "asc" },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            fullName: true,
+            avatarUrl: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json({ messages });
+  } catch (error) {
+    logger.error("Get need messages failed", error instanceof Error ? error : undefined, {
+      needId: params.id,
+    });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+const postSchema = z.object({
+  content: z.string().min(1).max(2000),
+});
+
+export async function POST(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Rate limit: 20 messages per 5 minutes per user
+    const limit = rateLimit(getRateLimitIdentifier(req, user.id), {
+      windowMs: 5 * 60_000,
+      maxRequests: 20,
+    });
+    if (!limit.allowed) {
+      return NextResponse.json({ error: "Rate limit exceeded. Slow down." }, { status: 429 });
+    }
+
+    const profile = await prisma.profile.findUnique({
+      where: { userId: user.id },
+    });
+    if (!profile) {
+      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    }
+
+    const need = await prisma.need.findUnique({
+      where: { id: params.id },
+      select: { status: true },
+    });
+    if (!need) {
+      return NextResponse.json({ error: "Need not found" }, { status: 404 });
+    }
+    if (need.status !== "open") {
+      return NextResponse.json(
+        { error: "Need is not open for messages" },
+        { status: 400 }
+      );
+    }
+
+    const body = await req.json();
+    const parsed = postSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid input", details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+
+    const message = await prisma.needMessage.create({
+      data: {
+        needId: params.id,
+        senderId: profile.id,
+        content: parsed.data.content,
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            fullName: true,
+            avatarUrl: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json({ message }, { status: 201 });
+  } catch (error) {
+    logger.error("Create need message failed", error instanceof Error ? error : undefined, {
+      needId: params.id,
+    });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
