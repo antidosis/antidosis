@@ -1,6 +1,9 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const API_KEY = process.env.RESEND_API_KEY;
+const isPlaceholder = !API_KEY || API_KEY.includes("placeholder") || API_KEY.includes("test");
+
+const resend = isPlaceholder ? null : new Resend(API_KEY);
 
 const FROM_EMAIL = "Antidosis <noreply@antidosis.com>";
 
@@ -8,12 +11,20 @@ const FROM_EMAIL = "Antidosis <noreply@antidosis.com>";
 // To verify domain: add DNS records from Resend dashboard to GoDaddy
 // To configure Supabase Auth SMTP: Project Settings > Auth > Email > SMTP
 
+function checkResendReady() {
+  if (isPlaceholder) {
+    console.warn("[email] RESEND_API_KEY is not configured. Emails will not be sent.");
+    return false;
+  }
+  return true;
+}
+
 export async function sendOfferReceivedEmail(
   to: string,
   needTitle: string,
   offererName: string
 ) {
-  if (!process.env.RESEND_API_KEY) return;
+  if (!checkResendReady() || !resend) return;
 
   await resend.emails.send({
     from: FROM_EMAIL,
@@ -35,7 +46,7 @@ export async function sendContractSignedEmail(
   needTitle: string,
   otherPartyName: string
 ) {
-  if (!process.env.RESEND_API_KEY) return;
+  if (!checkResendReady() || !resend) return;
 
   await resend.emails.send({
     from: FROM_EMAIL,
@@ -56,7 +67,7 @@ export async function sendContractCompletedEmail(
   to: string,
   needTitle: string
 ) {
-  if (!process.env.RESEND_API_KEY) return;
+  if (!checkResendReady() || !resend) return;
 
   await resend.emails.send({
     from: FROM_EMAIL,

@@ -25,9 +25,11 @@ export default function VerifyEmailPage() {
   async function resendVerification() {
     setLoading(true);
     setError(null);
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
     const { error: resendError } = await supabase.auth.resend({
       type: "signup",
       email,
+      options: { emailRedirectTo: `${appUrl}/login` },
     });
     if (resendError) {
       setError(resendError.message);
