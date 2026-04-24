@@ -1,10 +1,9 @@
 import { MetadataRoute } from "next";
-import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://antidosis.com";
 
   // Static routes
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -18,19 +17,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/register`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
   ];
 
-  // Dynamic need pages
-  const needs = await prisma.need.findMany({
-    where: { status: "open" },
-    select: { id: true, updatedAt: true },
-    take: 1000,
-  });
-
-  const needRoutes: MetadataRoute.Sitemap = needs.map((need) => ({
-    url: `${baseUrl}/needs/${need.id}`,
-    lastModified: need.updatedAt,
-    changeFrequency: "daily",
-    priority: 0.7,
-  }));
+  // Dynamic need pages — gracefully skip if DB is unavailable during build
+  let needRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const { prisma } = await import("@/lib/prisma");
+    const needs = await prisma.need.findMany({
+      where: { status: "open" },
+      select: { id: true, updatedAt: true },
+      take: 1000,
+    });
+    needRoutes = needs.map((need) => ({
+      url: `${baseUrl}/needs/${need.id}`,
+      lastModified: need.updatedAt,
+      changeFrequency: "daily",
+      priority: 0.7,
+    }));
+  } catch {
+    // Database not available during build — static routes only
+  }
 
   return [...staticRoutes, ...needRoutes];
 }
