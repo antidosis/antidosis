@@ -25,7 +25,12 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json({ credentials });
+    return NextResponse.json({
+      credentials: credentials.map((c) => ({
+        ...c,
+        rejectionReason: c.rejectionReason,
+      })),
+    });
   } catch (error) {
     logger.error("Admin pending credentials error:", error instanceof Error ? error : undefined);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

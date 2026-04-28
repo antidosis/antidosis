@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
 import { createClient } from "@/lib/supabase/client";
 
 import {
@@ -17,7 +19,6 @@ import {
   CheckCircle2,
   XCircle,
   ExternalLink,
-  Shield,
   Eye,
 } from "lucide-react";
 
@@ -126,7 +127,7 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <div className="py-24 text-center text-[#7a6b4a]">
+      <div className="py-24 text-center text-sm text-[#7a6b5a]">
         <Loader2 className="h-6 w-6 animate-spin mx-auto mb-4" />
         loading admin...
       </div>
@@ -135,8 +136,8 @@ export default function AdminPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 md:px-8">
-      <p className="text-[12px] text-[#7a6b4a] mb-6">$ sudo su</p>
-      <h1 className="text-xl font-bold mb-8">admin dashboard</h1>
+      <p className="text-xs text-[#7a6b5a] mb-6">$ sudo su</p>
+      <h1 className="text-2xl heading-display text-[#e8d5a3] mb-8">admin dashboard</h1>
 
       {/* Stats */}
       {stats && (
@@ -156,22 +157,22 @@ export default function AdminPage() {
 
       {/* Pending Verifications */}
       <section>
-        <p className="text-[12px] text-[#7a6b4a] mb-6">
+        <p className="text-xs text-[#7a6b5a] mb-6">
           $ ls ~/pending_verifications/ ({pending.length})
         </p>
 
         {pending.length === 0 ? (
-          <div className="py-16 text-center border border-[#2a2a2a]">
-            <CheckCircle2 className="h-8 w-8 text-[#7cb87c] mx-auto mb-3" />
-            <p className="text-[#7a6b4a] font-medium">all caught up</p>
-            <p className="text-[13px] text-[#7a6b4a]/50">no pending credential verifications</p>
-          </div>
+          <EmptyState
+            icon={<CheckCircle2 className="h-8 w-8 text-[#00e676]" />}
+            title="all caught up"
+            description="no pending credential verifications"
+          />
         ) : (
           <div className="space-y-4">
             {pending.map((cred) => (
               <div
                 key={cred.id}
-                className="border border-[#2a2a2a] p-5 hover:border-[#3a3a3a] transition-colors"
+                className="vessel p-5 hover:bg-[#1a1714] transition-colors"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
@@ -179,30 +180,27 @@ export default function AdminPage() {
                       <Avatar
                         src={cred.profile.avatarUrl}
                         name={cred.profile.fullName}
-                        size="sm"
                         className="h-8 w-8"
                       />
                       <div>
-                        <p className="text-[13px] font-medium">
+                        <p className="text-sm font-medium text-[#e8d5a3]">
                           {cred.profile.fullName || "unnamed user"}
                         </p>
-                        <p className="text-[11px] text-[#7a6b4a]">{cred.profile.email}</p>
+                        <p className="text-xs text-[#7a6b5a]">{cred.profile.email}</p>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-2 flex-wrap mb-2">
-                      <p className="text-[14px] font-medium">{cred.title}</p>
-                      <span className="px-2 py-0.5 text-[10px] uppercase tracking-wide border border-[#2a2a2a] text-[#7a6b4a]">
-                        {cred.type}
-                      </span>
+                      <p className="text-base font-medium text-[#e8d5a3]">{cred.title}</p>
+                      <Badge variant="outline">{cred.type}</Badge>
                       {cred.isPublic && (
-                        <span className="flex items-center gap-1 text-[10px] text-[#c9b87c]">
+                        <span className="flex items-center gap-1 text-xs text-[#b8a078]">
                           <Eye className="h-3 w-3" /> public
                         </span>
                       )}
                     </div>
 
-                    <div className="text-[12px] text-[#7a6b4a] space-y-1">
+                    <div className="text-xs text-[#7a6b5a] space-y-1">
                       {cred.documentNumber && (
                         <p>
                           number: {"*".repeat(Math.max(0, cred.documentNumber.length - 4))}
@@ -231,7 +229,7 @@ export default function AdminPage() {
                         </p>
                       )}
                       {cred.description && (
-                        <p className="text-[#7a6b4a]/70">{cred.description}</p>
+                        <p className="text-[#7a6b5a]/70">{cred.description}</p>
                       )}
                     </div>
 
@@ -240,7 +238,7 @@ export default function AdminPage() {
                         href={cred.fileUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-[12px] text-[#f5b800] hover:underline mt-3"
+                        className="inline-flex items-center gap-1 text-xs text-[#f5a623] hover:underline mt-3"
                       >
                         <ExternalLink className="h-3 w-3" /> view document
                       </a>
@@ -250,10 +248,9 @@ export default function AdminPage() {
                   <div className="flex flex-col gap-2">
                     <Button
                       size="sm"
-                      variant="secondary"
                       onClick={() => verifyCredential(cred.id)}
                       disabled={actioning === cred.id}
-                      className="text-[#7cb87c] border-[#7cb87c]/20"
+                      className="bg-[#00e676] text-[#0a0806] hover:bg-[#00e676]/90"
                     >
                       {actioning === cred.id ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -267,7 +264,7 @@ export default function AdminPage() {
                       variant="ghost"
                       onClick={() => rejectCredential(cred.id)}
                       disabled={actioning === cred.id}
-                      className="text-[#c97c7c]"
+                      className="text-[#ff5252]"
                     >
                       <XCircle className="h-3.5 w-3.5 mr-1" />
                       reject
@@ -295,16 +292,12 @@ function StatCard({
   accent?: boolean;
 }) {
   return (
-    <div
-      className={`border p-4 ${
-        accent ? "border-[#f5b800]/30 bg-[#f5b800]/5" : "border-[#2a2a2a]"
-      }`}
-    >
+    <div className={accent ? "vessel-lit p-5" : "vessel p-5"}>
       <div className="flex items-center gap-2 mb-2">
-        <Icon className={`h-4 w-4 ${accent ? "text-[#f5b800]" : "text-[#7a6b4a]"}`} />
-        <span className="text-[11px] text-[#7a6b4a] uppercase tracking-wide">{label}</span>
+        <Icon className={`h-4 w-4 ${accent ? "text-[#f5a623]" : "text-[#7a6b5a]"}`} />
+        <span className="text-xs text-[#7a6b5a] uppercase tracking-wide">{label}</span>
       </div>
-      <p className={`text-2xl font-bold ${accent ? "text-[#f5b800]" : ""}`}>{value}</p>
+      <p className={`text-2xl font-bold ${accent ? "text-[#f5a623]" : "text-[#e8d5a3]"}`}>{value}</p>
     </div>
   );
 }

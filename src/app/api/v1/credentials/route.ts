@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { auditLog, getClientInfo } from "@/lib/audit";
 import { logger } from "@/lib/logger";
+import { sanitizeUrl } from "@/lib/security/url";
 import { z } from "zod";
 
 const credentialTypes = [
@@ -23,9 +24,9 @@ const createSchema = z.object({
   description: z.string().max(2000).optional(),
   documentNumber: z.string().max(100).optional(),
   issuedBy: z.string().max(200).optional(),
-  issuedAt: z.string().datetime().optional(),
-  expiresAt: z.string().datetime().optional(),
-  fileUrl: z.string().url().optional(),
+  issuedAt: z.string().optional(),
+  expiresAt: z.string().optional(),
+  fileUrl: z.string().max(500).optional(),
   isPublic: z.boolean().default(false),
 });
 
@@ -86,9 +87,9 @@ export async function POST(req: NextRequest) {
         description: data.description,
         documentNumber: data.documentNumber,
         issuedBy: data.issuedBy,
-        issuedAt: data.issuedAt ? new Date(data.issuedAt) : null,
-        expiresAt: data.expiresAt ? new Date(data.expiresAt) : null,
-        fileUrl: data.fileUrl,
+        issuedAt: data.issuedAt && !isNaN(new Date(data.issuedAt).getTime()) ? new Date(data.issuedAt) : null,
+        expiresAt: data.expiresAt && !isNaN(new Date(data.expiresAt).getTime()) ? new Date(data.expiresAt) : null,
+        fileUrl: data.fileUrl ? (sanitizeUrl(data.fileUrl) || data.fileUrl) : null,
         isPublic: data.isPublic,
       },
     });

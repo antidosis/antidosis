@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { sendContractSignedEmail } from "@/lib/email";
 import { auditLog, getClientInfo } from "@/lib/audit";
 import { logger } from "@/lib/logger";
+import { createNotification } from "@/lib/notifications";
+import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 
 export async function POST(
   req: NextRequest,
@@ -33,6 +35,14 @@ export async function POST(
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
+    const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
+      windowMs: 60 * 60_000,
+      maxRequests: 10,
+    });
+    if (!limit.allowed) {
+      return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+    }
+
     const contract = await prisma.contract.findUnique({
       where: { id: params.id },
     });
@@ -48,6 +58,13 @@ export async function POST(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    if (!contract.termsLockedAt) {
+      return NextResponse.json(
+        { error: "Terms must be agreed and locked before signing" },
+        { status: 400 }
+      );
+    }
+
     if (contract.status !== "draft" && contract.status !== "pending_terms") {
       return NextResponse.json(
         { error: "Contract cannot be signed at this stage" },
@@ -55,50 +72,53 @@ export async function POST(
       );
     }
 
-    const updateData: Record<string, Date | string> = {
-      status: "pending_terms",
-    };
-
-    if (isPartyA) {
-      if (contract.partyASignedAt) {
-        return NextResponse.json(
-          { error: "Already signed" },
-          { status: 400 }
-        );
-      }
-      updateData.partyASignedAt = new Date();
-    } else {
-      if (contract.partyBSignedAt) {
-        return NextResponse.json(
-          { error: "Already signed" },
-          { status: 400 }
-        );
-      }
-      updateData.partyBSignedAt = new Date();
+    if (isPartyA && contract.partyASignedAt) {
+      return NextResponse.json(
+        { error: "Already signed" },
+        { status: 400 }
+      );
+    }
+    if (isPartyB && contract.partyBSignedAt) {
+      return NextResponse.json(
+        { error: "Already signed" },
+        { status: 400 }
+      );
     }
 
-    // Check if both signed
-    const willBothBeSigned =
-      (isPartyA && contract.partyBSignedAt) ||
-      (isPartyB && contract.partyASignedAt);
+    const updatedContract = await prisma.$transaction(async (tx) => {
+      const signatureField = isPartyA ? "partyASignedAt" : "partyBSignedAt";
+      await tx.contract.update({
+        where: { id: params.id },
+        data: { [signatureField]: new Date() },
+      });
 
-    if (willBothBeSigned) {
-      updateData.status = "active";
-    }
+      const fresh = await tx.contract.findUnique({
+        where: { id: params.id },
+        select: { partyASignedAt: true, partyBSignedAt: true, status: true },
+      });
 
-    const updated = await prisma.contract.update({
-      where: { id: params.id },
-      data: updateData,
+      if (!fresh) throw new Error("Contract not found during transaction");
+
+      if (fresh.partyASignedAt && fresh.partyBSignedAt && fresh.status !== "active") {
+        return await tx.contract.update({
+          where: { id: params.id },
+          data: { status: "active" },
+        });
+      }
+
+      return await tx.contract.findUnique({ where: { id: params.id } });
     });
 
+    const bothSigned = updatedContract?.status === "active";
+
     // Notify both parties when fully signed
-    if (willBothBeSigned) {
+    if (bothSigned) {
       try {
         const contractWithParties = await prisma.contract.findUnique({
           where: { id: params.id },
           include: {
-            partyA: { select: { email: true, fullName: true } },
-            partyB: { select: { email: true, fullName: true } },
+            partyA: { select: { id: true, email: true, fullName: true } },
+            partyB: { select: { id: true, email: true, fullName: true } },
             need: { select: { title: true } },
           },
         });
@@ -113,6 +133,21 @@ export async function POST(
             contractWithParties.need.title,
             contractWithParties.partyA.fullName || "the other party"
           );
+          // In-app notifications
+          await createNotification({
+            userId: contractWithParties.partyA.id,
+            type: "contract_signed",
+            title: "Contract signed",
+            body: `Your contract for "${contractWithParties.need.title}" is now active.`,
+            data: { contractId: params.id },
+          });
+          await createNotification({
+            userId: contractWithParties.partyB.id,
+            type: "contract_signed",
+            title: "Contract signed",
+            body: `Your contract for "${contractWithParties.need.title}" is now active.`,
+            data: { contractId: params.id },
+          });
         }
       } catch (emailErr) {
         logger.error("Failed to send contract signed email:", emailErr instanceof Error ? emailErr : undefined);
@@ -127,10 +162,10 @@ export async function POST(
       ip,
       userAgent,
       path: `/api/v1/contracts/${params.id}/sign`,
-      metadata: { contractId: params.id, bothSigned: willBothBeSigned },
+      metadata: { contractId: params.id, bothSigned },
     });
 
-    return NextResponse.json({ contract: updated });
+    return NextResponse.json({ contract: updatedContract });
   } catch (error) {
     logger.error("Sign contract error:", error instanceof Error ? error : undefined);
     return NextResponse.json(

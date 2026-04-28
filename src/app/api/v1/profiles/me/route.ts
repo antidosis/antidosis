@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
+import { sanitizeUrl } from "@/lib/security/url";
+import { normalizeMobile, isValidAustralianMobile } from "@/lib/mobile";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +40,6 @@ export async function GET() {
           userId: user.id,
           email: user.email || "",
           fullName: user.user_metadata?.full_name || null,
-          isPro: true, // free during trial
         },
         include: {
           skills: true,
@@ -68,6 +69,7 @@ const updateSchema = z.object({
   showInDirectory: z.boolean().optional().nullable(),
   publicPhone: z.string().max(50).optional().nullable(),
   privatePhone: z.string().max(50).optional().nullable(),
+  mobile: z.string().max(20).optional().nullable(),
   socialLinks: z.array(z.object({ platform: z.string().min(1), url: z.string().min(1).max(500), isPublic: z.boolean().optional() })).optional(),
 });
 
@@ -84,26 +86,60 @@ export async function PATCH(req: NextRequest) {
 
     const { socialLinks, ...profileData } = data;
 
-    // Clean up empty strings to null for optional fields
-    const cleanedData = Object.fromEntries(
+    // Clean up empty strings to null for optional fields, sanitize URLs
+    const cleanedData: Record<string, unknown> = Object.fromEntries(
       Object.entries(profileData).map(([key, value]) => [
         key,
         value === "" ? null : value,
       ])
     );
+    if (typeof cleanedData.avatarUrl === "string") {
+      cleanedData.avatarUrl = sanitizeUrl(cleanedData.avatarUrl) || cleanedData.avatarUrl;
+    }
+
+    let mobileVerifiedUpdate: boolean | undefined;
+    if (typeof cleanedData.mobile === "string" && cleanedData.mobile) {
+      const normalizedMobile = normalizeMobile(cleanedData.mobile);
+      cleanedData.mobile = normalizedMobile;
+      if (!isValidAustralianMobile(normalizedMobile)) {
+        return NextResponse.json(
+          { error: "Invalid mobile number format" },
+          { status: 400 }
+        );
+      }
+
+      const currentProfile = await prisma.profile.findUnique({
+        where: { userId: user.id },
+        select: { mobile: true, mobileVerified: true },
+      });
+
+      if (currentProfile && currentProfile.mobile !== normalizedMobile) {
+        const existingMobile = await prisma.profile.findUnique({
+          where: { mobile: normalizedMobile },
+        });
+        if (existingMobile) {
+          return NextResponse.json(
+            { error: "Mobile number already registered" },
+            { status: 409 }
+          );
+        }
+        mobileVerifiedUpdate = false;
+      }
+    }
 
     const profile = await prisma.profile.update({
       where: { userId: user.id },
       data: {
         ...cleanedData,
+        mobileVerified: mobileVerifiedUpdate !== undefined ? mobileVerifiedUpdate : undefined,
         updatedAt: new Date(),
         socialLinks: socialLinks ? {
           deleteMany: {},
           create: socialLinks
-            .filter((link) => link.url.trim() !== "")
+            .filter((link) => link.url.trim() !== "" && sanitizeUrl(link.url))
             .map((link) => ({
               platform: link.platform,
-              url: link.url,
+              url: sanitizeUrl(link.url) || link.url,
               isPublic: link.isPublic ?? true,
             })),
         } : undefined,

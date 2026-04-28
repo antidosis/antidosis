@@ -7,8 +7,8 @@ const PROTECTED_ROUTES = [
   "/needs/new",
   "/dashboard",
   "/contracts",
-  "/profile",
   "/admin",
+  "/verify-mobile",
 ];
 
 // API routes that require email verification

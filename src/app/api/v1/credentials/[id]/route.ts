@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { auditLog, getClientInfo } from "@/lib/audit";
 import { logger } from "@/lib/logger";
+import { sanitizeUrl } from "@/lib/security/url";
 import { z } from "zod";
 
 const credentialTypes = [
@@ -23,9 +24,9 @@ const updateSchema = z.object({
   description: z.string().max(2000).optional(),
   documentNumber: z.string().max(100).optional(),
   issuedBy: z.string().max(200).optional(),
-  issuedAt: z.string().datetime().optional(),
-  expiresAt: z.string().datetime().optional(),
-  fileUrl: z.string().url().optional(),
+  issuedAt: z.string().optional(),
+  expiresAt: z.string().optional(),
+  fileUrl: z.string().max(500).optional(),
   isPublic: z.boolean().optional(),
 });
 
@@ -68,9 +69,9 @@ export async function PATCH(
         ...(data.description !== undefined && { description: data.description }),
         ...(data.documentNumber !== undefined && { documentNumber: data.documentNumber }),
         ...(data.issuedBy !== undefined && { issuedBy: data.issuedBy }),
-        ...(data.issuedAt !== undefined && { issuedAt: new Date(data.issuedAt) }),
-        ...(data.expiresAt !== undefined && { expiresAt: new Date(data.expiresAt) }),
-        ...(data.fileUrl !== undefined && { fileUrl: data.fileUrl }),
+        ...(data.issuedAt !== undefined && { issuedAt: data.issuedAt && !isNaN(new Date(data.issuedAt).getTime()) ? new Date(data.issuedAt) : null }),
+        ...(data.expiresAt !== undefined && { expiresAt: data.expiresAt && !isNaN(new Date(data.expiresAt).getTime()) ? new Date(data.expiresAt) : null }),
+        ...(data.fileUrl !== undefined && { fileUrl: sanitizeUrl(data.fileUrl) || data.fileUrl }),
         ...(data.isPublic !== undefined && { isPublic: data.isPublic }),
       },
     });

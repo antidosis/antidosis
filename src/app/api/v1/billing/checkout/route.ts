@@ -20,6 +20,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const profile = await prisma.profile.findUnique({
+      where: { userId: user.id },
+    });
+
+    if (!profile) {
+      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    }
+
+    if (!profile.isVerified) {
+      return NextResponse.json(
+        { error: "Identity verification required", code: "IDENTITY_NOT_VERIFIED" },
+        { status: 403 }
+      );
+    }
+
+    if (!profile.mobileVerified) {
+      return NextResponse.json(
+        { error: "Mobile verification required", code: "MOBILE_NOT_VERIFIED" },
+        { status: 403 }
+      );
+    }
 
     // Rate limit: 5 checkout attempts per hour per user
     const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
@@ -31,14 +52,6 @@ export async function POST(req: NextRequest) {
         { error: "Too many checkout attempts. Please try again later." },
         { status: 429 }
       );
-    }
-
-    const profile = await prisma.profile.findUnique({
-      where: { userId: user.id },
-    });
-
-    if (!profile) {
-      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
     // Get or create Stripe customer

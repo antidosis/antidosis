@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
+import { createNotification } from "@/lib/notifications";
 import { z } from "zod";
 
 async function getAuthorizedProfile(userId: string, needId: string) {
@@ -64,9 +65,14 @@ export async function GET(
       );
     }
 
+    const messagesLimit = Math.min(parseInt(req.nextUrl.searchParams.get("messagesLimit") || "100", 10) || 100, 200);
+    const messagesSkip = parseInt(req.nextUrl.searchParams.get("messagesSkip") || "0", 10) || 0;
+
     const messages = await prisma.needMessage.findMany({
       where: { needId: params.id },
       orderBy: { createdAt: "asc" },
+      take: messagesLimit,
+      skip: messagesSkip,
       include: {
         sender: {
           select: {
@@ -76,6 +82,16 @@ export async function GET(
           },
         },
       },
+    });
+
+    // Mark messages from others as read
+    await prisma.needMessage.updateMany({
+      where: {
+        needId: params.id,
+        senderId: { not: profile.id },
+        isRead: false,
+      },
+      data: { isRead: true },
     });
 
     return NextResponse.json({ messages });
@@ -130,7 +146,7 @@ export async function POST(
 
     const need = await prisma.need.findUnique({
       where: { id: params.id },
-      select: { status: true },
+      select: { status: true, posterId: true },
     });
     if (!need) {
       return NextResponse.json({ error: "Need not found" }, { status: 404 });
@@ -167,6 +183,17 @@ export async function POST(
         },
       },
     });
+
+    // Notify the need poster if sender is not poster
+    if (need.posterId !== profile.id) {
+      await createNotification({
+        userId: need.posterId,
+        type: "message",
+        title: "New message on your need",
+        body: `${message.sender.fullName || "Someone"} sent a message about your need`,
+        data: { needId: params.id },
+      });
+    }
 
     return NextResponse.json({ message }, { status: 201 });
   } catch (error) {

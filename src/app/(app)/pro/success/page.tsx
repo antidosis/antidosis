@@ -9,7 +9,7 @@ export default function ProSuccessPage() {
   return (
     <Suspense
       fallback={
-        <div className="max-w-md mx-auto py-24 text-center text-zinc-400">
+        <div className="max-w-md mx-auto py-24 text-center text-[#7a6b5a]">
           Confirming your subscription...
         </div>
       }

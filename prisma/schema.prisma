@@ -16,11 +16,16 @@ model Profile {
   avatarUrl     String?  @map("avatar_url")
   locationName  String?  @map("location_name")
   latitude      Float?
-  longitude     Float?
+  longitude      Float?
   publicPhone   String?  @map("public_phone")
   privatePhone  String?  @map("private_phone")
+  mobile        String?  @unique
+  mobileVerified Boolean @default(false) @map("mobile_verified")
   isVerified    Boolean  @default(false) @map("is_verified")
   isPro         Boolean  @default(false) @map("is_pro")
+  proActivatedAt DateTime? @map("pro_activated_at")
+  proSource     String?   @map("pro_source")
+  proExpiresAt  DateTime? @map("pro_expires_at")
   showInDirectory Boolean @default(false) @map("show_in_directory")
   stripeCustomerId      String? @map("stripe_customer_id")
   stripeSubscriptionId  String? @map("stripe_subscription_id")
@@ -41,6 +46,7 @@ model Profile {
   reviewsReceived Review[]     @relation("ReviewReceiver")
   messages        Message[]
   needMessages    NeedMessage[]
+  notifications   Notification[]
 
   @@map("profiles")
 }
@@ -83,12 +89,13 @@ model Need {
   longitude        Float?
   status           String   @default("open")
   deadline         DateTime?
+  timeRange        String?  @map("time_range")
   images           String[]
   offerImages      String[] @map("offer_images")
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
 
-  poster         Profile      @relation("NeedPoster", fields: [posterId], references: [id])
+  poster         Profile      @relation("NeedPoster", fields: [posterId], references: [id], onDelete: Cascade)
   requiredSkills NeedSkill[]
   acceptances    Acceptance[]
   contract       Contract?
@@ -116,9 +123,11 @@ model Acceptance {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   need Need    @relation(fields: [needId], references: [id], onDelete: Cascade)
-  user Profile @relation(fields: [userId], references: [id])
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("acceptances")
+  @@index([needId])
+  @@index([userId])
 }
 
 model Contract {
@@ -127,22 +136,42 @@ model Contract {
   partyAId        String    @map("party_a_id")
   partyBId        String    @map("party_b_id")
   terms           String
+  partyATerms             String?   @map("party_a_terms")
+  partyBTerms             String?   @map("party_b_terms")
+  deadlineTerms           String?   @map("deadline_terms")
+  completionMethodTerms   String?   @map("completion_method_terms")
+  additionalTerms         String?   @map("additional_terms")
+  partyAUseMessageTerms   Boolean   @default(false) @map("party_a_use_message_terms")
+  partyBUseMessageTerms   Boolean   @default(false) @map("party_b_use_message_terms")
+  negotiationMessages Json? @map("negotiation_messages")
+  pdfUrl          String?   @map("pdf_url")
+  partyAAgreedAt  DateTime? @map("party_a_agreed_at")
+  partyBAgreedAt  DateTime? @map("party_b_agreed_at")
+  termsLockedAt   DateTime? @map("terms_locked_at")
   partyASignedAt  DateTime? @map("party_a_signed_at")
   partyBSignedAt  DateTime? @map("party_b_signed_at")
   status          String    @default("draft")
   aMarkedComplete Boolean   @default(false) @map("a_marked_complete")
   bMarkedComplete Boolean   @default(false) @map("b_marked_complete")
   completedAt     DateTime? @map("completed_at")
+  cancelledAt           DateTime? @map("cancelled_at")
+  cancelledById         String?   @map("cancelled_by_id")
+  cancelReason          String?   @map("cancel_reason")
+  lastSignReminderSentAt DateTime? @map("last_sign_reminder_sent_at")
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
-  need     Need      @relation(fields: [needId], references: [id])
-  partyA   Profile   @relation("ContractPartyA", fields: [partyAId], references: [id])
-  partyB   Profile   @relation("ContractPartyB", fields: [partyBId], references: [id])
+  need     Need      @relation(fields: [needId], references: [id], onDelete: Cascade)
+  partyA   Profile   @relation("ContractPartyA", fields: [partyAId], references: [id], onDelete: Cascade)
+  partyB   Profile   @relation("ContractPartyB", fields: [partyBId], references: [id], onDelete: Cascade)
   messages Message[]
   reviews  Review[]
 
   @@map("contracts")
+  @@index([needId])
+  @@index([partyAId])
+  @@index([partyBId])
+  @@index([status])
 }
 
 model NeedMessage {
@@ -150,12 +179,15 @@ model NeedMessage {
   needId    String   @map("need_id")
   senderId  String   @map("sender_id")
   content   String
+  isRead    Boolean  @default(false) @map("is_read")
   createdAt DateTime @default(now()) @map("created_at")
 
   need   Need    @relation(fields: [needId], references: [id], onDelete: Cascade)
-  sender Profile @relation(fields: [senderId], references: [id])
+  sender Profile @relation(fields: [senderId], references: [id], onDelete: Cascade)
 
   @@map("need_messages")
+  @@index([needId])
+  @@index([senderId])
 }
 
 model Message {
@@ -167,9 +199,11 @@ model Message {
   isRead     Boolean   @default(false) @map("is_read")
 
   contract Contract? @relation(fields: [contractId], references: [id], onDelete: Cascade)
-  sender   Profile   @relation(fields: [senderId], references: [id])
+  sender   Profile   @relation(fields: [senderId], references: [id], onDelete: Cascade)
 
   @@map("messages")
+  @@index([contractId])
+  @@index([senderId])
 }
 
 model Review {
@@ -177,13 +211,14 @@ model Review {
   contractId String   @map("contract_id")
   giverId    String   @map("giver_id")
   receiverId String   @map("receiver_id")
-  rating     Int
-  comment    String?
-  createdAt  DateTime @default(now()) @map("created_at")
+  rating          Int
+  comment         String?
+  privateFeedback String?  @map("private_feedback")
+  createdAt       DateTime @default(now()) @map("created_at")
 
   contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
-  giver    Profile  @relation("ReviewGiver", fields: [giverId], references: [id])
-  receiver Profile  @relation("ReviewReceiver", fields: [receiverId], references: [id])
+  giver    Profile  @relation("ReviewGiver", fields: [giverId], references: [id], onDelete: Cascade)
+  receiver Profile  @relation("ReviewReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
 
   @@unique([contractId, giverId])
   @@map("reviews")
@@ -202,6 +237,7 @@ model Credential {
   fileUrl        String?   @map("file_url")
   isPublic       Boolean   @default(false) @map("is_public")
   isVerified     Boolean   @default(false) @map("is_verified")
+  rejectionReason String?  @map("rejection_reason")
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
 
@@ -210,6 +246,37 @@ model Credential {
   @@map("credentials")
   @@index([profileId])
   @@index([type])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  type      String
+  title     String
+  body      String
+  data      Json?
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model MobileVerificationCode {
+  id        String   @id @default(uuid())
+  mobile    String
+  code      String
+  profileId String   @map("profile_id")
+  expiresAt DateTime @map("expires_at")
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([mobile])
+  @@index([profileId])
+  @@map("mobile_verification_codes")
 }
 
 model AuditLog {

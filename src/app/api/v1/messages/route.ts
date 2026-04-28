@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
+import { createNotification } from "@/lib/notifications";
 import { z } from "zod";
 
 const createSchema = z.object({
@@ -54,11 +55,18 @@ export async function GET(req: NextRequest) {
     // Verify user is party to contract
     const contract = await prisma.contract.findUnique({
       where: { id: contractId },
-      select: { partyAId: true, partyBId: true },
+      select: { partyAId: true, partyBId: true, status: true },
     });
 
     if (!contract) {
       return NextResponse.json({ error: "Contract not found" }, { status: 404 });
+    }
+
+    if (contract.status === "completed" || contract.status === "cancelled") {
+      return NextResponse.json(
+        { error: "Cannot send messages to a completed or cancelled contract" },
+        { status: 400 }
+      );
     }
 
     if (contract.partyAId !== profile.id && contract.partyBId !== profile.id) {
@@ -73,6 +81,16 @@ export async function GET(req: NextRequest) {
           select: { id: true, fullName: true, avatarUrl: true },
         },
       },
+    });
+
+    // Mark messages from others as read
+    await prisma.message.updateMany({
+      where: {
+        contractId,
+        senderId: { not: profile.id },
+        isRead: false,
+      },
+      data: { isRead: true },
     });
 
     return NextResponse.json({ messages });
@@ -91,6 +109,13 @@ export async function POST(req: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!user.email_confirmed_at) {
+      return NextResponse.json(
+        { error: "Email verification required", code: "EMAIL_NOT_VERIFIED" },
+        { status: 403 }
+      );
     }
 
     // Rate limit: 30 messages per 5 minutes per user
@@ -117,11 +142,18 @@ export async function POST(req: NextRequest) {
     // Verify user is party to contract
     const contract = await prisma.contract.findUnique({
       where: { id: contractId },
-      select: { partyAId: true, partyBId: true },
+      select: { partyAId: true, partyBId: true, status: true },
     });
 
     if (!contract) {
       return NextResponse.json({ error: "Contract not found" }, { status: 404 });
+    }
+
+    if (contract.status === "completed" || contract.status === "cancelled") {
+      return NextResponse.json(
+        { error: "Cannot send messages to a completed or cancelled contract" },
+        { status: 400 }
+      );
     }
 
     if (contract.partyAId !== profile.id && contract.partyBId !== profile.id) {
@@ -139,6 +171,36 @@ export async function POST(req: NextRequest) {
           select: { id: true, fullName: true, avatarUrl: true },
         },
       },
+    });
+
+    // Append to contract negotiation transcript for PDF generation
+    try {
+      const transcriptEntry = {
+        senderName: message.sender.fullName || "Anonymous",
+        content,
+        createdAt: message.createdAt.toISOString(),
+      };
+      await prisma.$executeRaw`
+        UPDATE "contracts"
+        SET "negotiation_messages" = 
+          CASE 
+            WHEN "negotiation_messages" IS NULL THEN ${JSON.stringify([transcriptEntry])}::jsonb
+            ELSE "negotiation_messages" || ${JSON.stringify(transcriptEntry)}::jsonb
+          END
+        WHERE "id" = ${contractId}
+      `;
+    } catch (transcriptErr) {
+      logger.error("Failed to append to negotiation transcript:", transcriptErr instanceof Error ? transcriptErr : undefined);
+    }
+
+    // Notify the other party
+    const otherPartyId = contract.partyAId === profile.id ? contract.partyBId : contract.partyAId;
+    await createNotification({
+      userId: otherPartyId,
+      type: "message",
+      title: "New message",
+      body: `${message.sender.fullName || "Someone"} sent a message in your contract`,
+      data: { contractId },
     });
 
     return NextResponse.json({ message }, { status: 201 });

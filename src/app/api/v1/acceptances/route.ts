@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
-import { sendOfferReceivedEmail } from "@/lib/email";
+import { sendInterestReceivedEmail } from "@/lib/email";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { auditLog, getClientInfo } from "@/lib/audit";
 import { logger } from "@/lib/logger";
+import { createNotification } from "@/lib/notifications";
 import { z } from "zod";
 
 const createSchema = z.object({
@@ -28,14 +29,14 @@ export async function POST(req: NextRequest) {
     }
 
 
-    // Rate limit: 10 offers per hour per user
+    // Rate limit: 10 expressions of interest per hour per user
     const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
       windowMs: 60 * 60_000,
       maxRequests: 10,
     });
     if (!limit.allowed) {
       return NextResponse.json(
-        { error: "Too many offers. Please try again later." },
+        { error: "Too many expressions of interest. Please try again later." },
         { status: 429 }
       );
     }
@@ -80,7 +81,7 @@ export async function POST(req: NextRequest) {
 
     if (existing) {
       return NextResponse.json(
-        { error: "You have already offered to help with this need" },
+        { error: "You have already expressed interest in this need" },
         { status: 400 }
       );
     }
@@ -111,19 +112,27 @@ export async function POST(req: NextRequest) {
         select: { email: true, fullName: true },
       });
       if (posterProfile?.email) {
-        await sendOfferReceivedEmail(
+        await sendInterestReceivedEmail(
           posterProfile.email,
           need.title,
           profile.fullName || "Someone"
         );
       }
+      // In-app notification
+      await createNotification({
+        userId: need.posterId,
+        type: "interest",
+        title: "New interest received",
+        body: `${profile.fullName || "Someone"} is interested in your need: "${need.title}"`,
+        data: { needId, acceptanceId: acceptance.id },
+      });
     } catch (emailErr) {
       logger.error("Failed to send offer email:", emailErr instanceof Error ? emailErr : undefined);
     }
 
     const { ip, userAgent } = getClientInfo(req);
     await auditLog({
-      event: "OFFER_MADE",
+      event: "INTEREST_EXPRESSED",
       userId: user.id,
       email: user.email,
       ip,

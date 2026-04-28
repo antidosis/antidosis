@@ -31,6 +31,10 @@ export async function GET() {
         status: true,
         createdAt: true,
         _count: { select: { acceptances: true } },
+        acceptances: {
+          where: { status: "accepted" },
+          select: { id: true },
+        },
       },
     });
 

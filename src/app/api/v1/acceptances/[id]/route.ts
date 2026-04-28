@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
-import { z } from "zod";
+import { createContractFromAcceptance } from "@/lib/contract-formation";
+import { sendInterestAcceptedEmail } from "@/lib/email";
+import { createNotification } from "@/lib/notifications";
 import { logger } from "@/lib/logger";
+import { z } from "zod";
 
 const updateSchema = z.object({
-  status: z.enum(["accepted", "declined", "withdrawn"]),
+  status: z.enum(["accepted", "declined", "withdrawn", "selected"]),
 });
 
 export async function PATCH(
@@ -26,7 +29,6 @@ export async function PATCH(
       );
     }
 
-
     const body = await req.json();
     const { status } = updateSchema.parse(body);
 
@@ -41,71 +43,101 @@ export async function PATCH(
 
     const profile = await prisma.profile.findUnique({
       where: { userId: user.id },
-      select: { id: true },
+      select: { id: true, fullName: true },
     });
 
     if (!profile) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
-    // Only need poster can accept/decline
-    // Only acceptance creator can withdraw
     const isPoster = acceptance.need.posterId === profile.id;
     const isCreator = acceptance.userId === profile.id;
 
     if (status === "withdrawn" && !isCreator) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
-    if ((status === "accepted" || status === "declined") && !isPoster) {
+
+    if ((status === "accepted" || status === "declined" || status === "selected") && !isPoster) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const updated = await prisma.acceptance.update({
-      where: { id: params.id },
-      data: { status },
-    });
+    // If selected, form contract (this is the big one)
+    if (status === "selected") {
+      // Prevent forming a contract if one already exists and is not cancelled
+      const existingContract = await prisma.contract.findUnique({
+        where: { needId: acceptance.needId },
+      });
+      if (existingContract && existingContract.status !== "cancelled") {
+        return NextResponse.json(
+          { error: "A contract already exists for this need. Cancel it first to form a new one." },
+          { status: 409 }
+        );
+      }
 
-    // If accepted, update need status and create contract
+      const contract = await createContractFromAcceptance(params.id, profile.id);
+      const updated = await prisma.acceptance.findUnique({
+        where: { id: params.id },
+      });
+      return NextResponse.json({ acceptance: updated, contract });
+    }
+
+    // If accepted, just update status and notify
     if (status === "accepted") {
+      const updated = await prisma.acceptance.update({
+        where: { id: params.id },
+        data: { status },
+      });
+
+      // Update need status to negotiating
       await prisma.need.update({
         where: { id: acceptance.needId },
         data: { status: "negotiating" },
       });
 
-      // Decline all other acceptances
-      await prisma.acceptance.updateMany({
-        where: {
-          needId: acceptance.needId,
-          id: { not: params.id },
-          status: "pending",
-        },
-        data: { status: "declined" },
-      });
+      // Notify fulfiller that their offer was accepted
+      try {
+        const fulfillerProfile = await prisma.profile.findUnique({
+          where: { id: acceptance.userId },
+          select: { email: true, fullName: true },
+        });
+        if (fulfillerProfile?.email) {
+          await sendInterestAcceptedEmail(
+            fulfillerProfile.email,
+            acceptance.need.title,
+            profile.fullName || "the poster",
+            acceptance.needId
+          );
+        }
+        await createNotification({
+          userId: acceptance.userId,
+          type: "offer_accepted",
+          title: "Interest accepted",
+          body: `Your interest in "${acceptance.need.title}" was accepted. Waiting for contract formation.`,
+          data: { needId: acceptance.needId, acceptanceId: acceptance.id },
+        });
+      } catch (notifyErr) {
+        logger.error(
+          "Offer accepted notification failed:",
+          notifyErr instanceof Error ? notifyErr : undefined
+        );
+      }
 
-      // Create contract draft
-      const contract = await prisma.contract.create({
-        data: {
-          needId: acceptance.needId,
-          partyAId: acceptance.need.posterId,
-          partyBId: acceptance.userId,
-          terms: JSON.stringify({
-            workLocation: "",
-            reciprocationLocation: "",
-            deadline: null,
-            noticePeriod: null,
-            notes: "",
-          }),
-          status: "draft",
-        },
-      });
-
-      return NextResponse.json({ acceptance: updated, contract });
+      return NextResponse.json({ acceptance: updated });
     }
+
+    // Declined or withdrawn
+    const updated = await prisma.acceptance.update({
+      where: { id: params.id },
+      data: { status },
+    });
 
     return NextResponse.json({ acceptance: updated });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors }, { status: 400 });
+    }
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
     logger.error("Update acceptance error:", error instanceof Error ? error : undefined);
     return NextResponse.json(

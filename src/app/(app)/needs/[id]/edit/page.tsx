@@ -1,0 +1,294 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { LocationAutocomplete } from "@/components/ui/location-autocomplete";
+import { ImageGallery } from "@/components/ui/image-gallery";
+import { createClient } from "@/lib/supabase/client";
+import { ArrowLeft, Plus, X, MapPin, Globe, Wrench, Package, CircleDollarSign, Camera, ImageIcon, Loader2, Calendar, Clock } from "lucide-react";
+
+export const dynamic = "force-dynamic";
+
+export default function EditNeedPage() {
+  const router = useRouter();
+  const params = useParams();
+  const needId = params.id as string;
+  const supabase = createClient();
+
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [notFound, setNotFound] = useState(false);
+
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [offerType, setOfferType] = useState<"service" | "item" | "money">("service");
+  const [offerDescription, setOfferDescription] = useState("");
+  const [offerValue, setOfferValue] = useState("");
+  const [isLocal, setIsLocal] = useState(true);
+  const [locationFormatted, setLocationFormatted] = useState("");
+  const [skillInput, setSkillInput] = useState("");
+  const [requiredSkills, setRequiredSkills] = useState<string[]>([]);
+  const [images, setImages] = useState<string[]>([]);
+  const [offerImages, setOfferImages] = useState<string[]>([]);
+  const [deadline, setDeadline] = useState("");
+  const [timeRange, setTimeRange] = useState("");
+
+  useEffect(() => {
+    async function fetchNeed() {
+      try {
+        const res = await fetch(`/api/v1/needs/${needId}`);
+        if (!res.ok) { setNotFound(true); setLoading(false); return; }
+        const data = await res.json();
+        const need = data.need;
+        if (!need) { setNotFound(true); setLoading(false); return; }
+
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) { router.push("/login"); return; }
+        const profileRes = await fetch("/api/v1/profiles/me");
+        const profile = profileRes.ok ? await profileRes.json() : null;
+        if (need.poster.id !== profile?.id) { router.push(`/needs/${needId}`); return; }
+        if (need.status !== "open") { router.push(`/needs/${needId}`); return; }
+
+        setTitle(need.title || "");
+        setDescription(need.description || "");
+        setOfferType(need.offerType || "service");
+        setOfferDescription(need.offerDescription || "");
+        setOfferValue(need.offerValue ? String(need.offerValue) : "");
+        setIsLocal(need.isLocal ?? true);
+        setLocationFormatted(need.locationName || "");
+        setRequiredSkills(need.requiredSkills?.map((s: any) => s.name) || []);
+        setImages(need.images || []);
+        setOfferImages(need.offerImages || []);
+        setDeadline(need.deadline ? need.deadline.split("T")[0] : "");
+        setTimeRange(need.timeRange || "");
+      } catch (err) {
+        console.error(err);
+        setError("failed to load need");
+      }
+      setLoading(false);
+    }
+    fetchNeed();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [needId]);
+
+  function addSkill() {
+    if (skillInput.trim() && !requiredSkills.includes(skillInput.trim())) {
+      setRequiredSkills([...requiredSkills, skillInput.trim()]);
+      setSkillInput("");
+    }
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setError(null);
+
+    const res = await fetch(`/api/v1/needs/${needId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title, description, offerType, offerDescription,
+        offerValue: offerValue ? parseFloat(offerValue) : undefined,
+        isLocal, locationName: locationFormatted,
+        requiredSkills, images, offerImages,
+        deadline: deadline || undefined,
+        timeRange: timeRange || undefined,
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      setError("error: " + (data.error?.[0]?.message || data.error || "failed"));
+      setSaving(false);
+      return;
+    }
+
+    router.push(`/needs/${needId}`);
+    router.refresh();
+  }
+
+  if (loading) return (
+    <div className="max-w-2xl mx-auto px-4 md:px-8 py-24 text-center">
+      <Loader2 className="h-6 w-6 animate-spin mx-auto mb-4 text-[#7a6b5a]" />
+      <p className="text-sm text-[#7a6b5a]">loading...</p>
+    </div>
+  );
+
+  if (notFound) return (
+    <div className="max-w-2xl mx-auto px-4 md:px-8 py-24 text-center">
+      <p className="text-sm text-[#ff5252]">error: need not found</p>
+    </div>
+  );
+
+  return (
+    <div className="max-w-2xl mx-auto px-4 md:px-8">
+      <div className="py-6">
+        <Link href={`/needs/${needId}`} className="inline-flex items-center text-sm text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors">
+          <ArrowLeft className="mr-2 h-4 w-4" />$ cd ~/needs/{needId.slice(0, 8)}
+        </Link>
+      </div>
+
+      <h1 className="heading-display text-2xl text-[#e8d5a3]">Edit Need</h1>
+      <p className="text-xs text-[#7a6b5a] mt-3">$ nano edit_need.conf</p>
+      <p className="text-sm text-[#b8a078] mb-8">update your need details</p>
+
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <section className="vessel p-5">
+          <p className="text-xs text-[#7a6b5a] uppercase tracking-wide font-medium mb-6">[need]</p>
+          <div className="space-y-6 max-w-lg">
+            <div className="space-y-2">
+              <Label>Title</Label>
+              <Input placeholder="e.g. electrical_work_1hr" value={title} onChange={(e) => setTitle(e.target.value)} required />
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Textarea placeholder="describe the work, timeline, requirements..." value={description} onChange={(e) => setDescription(e.target.value)} required rows={5} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 mb-1">
+                  <Calendar className="h-4 w-4 text-[#7a6b5a]" />
+                  <Label>Deadline (Optional)</Label>
+                </div>
+                <Input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 mb-1">
+                  <Clock className="h-4 w-4 text-[#7a6b5a]" />
+                  <Label>Time Estimate (Optional)</Label>
+                </div>
+                <Input placeholder="e.g. 2-4 hours" value={timeRange} onChange={(e) => setTimeRange(e.target.value)} />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Required Skills</Label>
+              <div className="flex gap-2">
+                <Input placeholder="e.g. electrical" value={skillInput} onChange={(e) => setSkillInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSkill(); } }} />
+                <Button type="button" variant="secondary" onClick={addSkill}><Plus className="h-4 w-4" /></Button>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-3">
+                {requiredSkills.map((skill) => (
+                  <span key={skill} className="inline-flex items-center gap-1 px-2 py-1 text-xs text-[#7a6b5a] bg-[#1a1714] border border-[#2a2420] rounded">
+                    {skill}
+                    <Button type="button" variant="ghost" onClick={() => setRequiredSkills(requiredSkills.filter((s) => s !== skill))} className="h-4 w-4 p-0 shrink-0 text-[#7a6b5a] hover:text-[#e8d5a3]">
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 mb-2">
+                <Camera className="h-4 w-4 text-[#7a6b5a]" />
+                <Label>Need Images (Optional)</Label>
+              </div>
+              <ImageGallery images={images} onChange={setImages} folder="needs" maxImages={5} label="attach photos of what you need" />
+            </div>
+          </div>
+        </section>
+
+        <section className="vessel p-5">
+          <p className="text-xs text-[#7a6b5a] uppercase tracking-wide font-medium mb-6">[offer]</p>
+          <div className="space-y-6 max-w-lg">
+            <div className="grid grid-cols-3 gap-2">
+              {(["service", "item", "money"] as const).map((type) => (
+                <Button
+                  key={type}
+                  type="button"
+                  variant="outline"
+                  onClick={() => setOfferType(type)}
+                  className={`flex flex-col items-center gap-2 h-auto py-4 px-2 ${
+                    offerType === type
+                      ? "border-[#f5a623] bg-[#f5a623]/5 text-[#e8d5a3] hover:bg-[#f5a623]/10 hover:text-[#e8d5a3]"
+                      : "border-[#2a2420] bg-[#0f0c0a] text-[#7a6b5a] hover:text-[#e8d5a3] hover:bg-[#1a1714] hover:border-[#3d3530]"
+                  }`}
+                >
+                  {type === "service" && <Wrench className="h-5 w-5" />}
+                  {type === "item" && <Package className="h-5 w-5" />}
+                  {type === "money" && <CircleDollarSign className="h-5 w-5" />}
+                  <span className="text-sm font-medium capitalize">{type}</span>
+                </Button>
+              ))}
+            </div>
+            <div className="space-y-2">
+              <Label>Offer Description</Label>
+              <Textarea placeholder="describe what you are offering..." value={offerDescription} onChange={(e) => setOfferDescription(e.target.value)} required rows={3} />
+            </div>
+            <div className="space-y-2">
+              <Label>Estimated Value (Optional)</Label>
+              <Input type="number" placeholder="0.00" value={offerValue} onChange={(e) => setOfferValue(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 mb-2">
+                <ImageIcon className="h-4 w-4 text-[#7a6b5a]" />
+                <Label>Offer Images (Optional)</Label>
+              </div>
+              <ImageGallery images={offerImages} onChange={setOfferImages} folder="offers" maxImages={5} label="attach photos of what you are offering" />
+            </div>
+          </div>
+        </section>
+
+        <section className="vessel p-5">
+          <p className="text-xs text-[#7a6b5a] uppercase tracking-wide font-medium mb-6">[location]</p>
+          <div className="space-y-6 max-w-lg">
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsLocal(true)}
+                className={`flex items-center justify-center gap-2 h-auto py-3 px-2 ${
+                  isLocal
+                    ? "border-[#f5a623] bg-[#f5a623]/5 text-[#e8d5a3] hover:bg-[#f5a623]/10 hover:text-[#e8d5a3]"
+                    : "border-[#2a2420] bg-[#0f0c0a] text-[#7a6b5a] hover:text-[#e8d5a3] hover:bg-[#1a1714] hover:border-[#3d3530]"
+                }`}
+              >
+                <MapPin className="h-4 w-4" /><span className="text-sm font-medium">local</span>
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsLocal(false)}
+                className={`flex items-center justify-center gap-2 h-auto py-3 px-2 ${
+                  !isLocal
+                    ? "border-[#f5a623] bg-[#f5a623]/5 text-[#e8d5a3] hover:bg-[#f5a623]/10 hover:text-[#e8d5a3]"
+                    : "border-[#2a2420] bg-[#0f0c0a] text-[#7a6b5a] hover:text-[#e8d5a3] hover:bg-[#1a1714] hover:border-[#3d3530]"
+                }`}
+              >
+                <Globe className="h-4 w-4" /><span className="text-sm font-medium">remote</span>
+              </Button>
+            </div>
+            {isLocal && (
+              <div className="space-y-2">
+                <Label>Location Name</Label>
+                <LocationAutocomplete
+                  value={locationFormatted}
+                  onChange={(formatted, _display) => setLocationFormatted(formatted)}
+                  placeholder="type_suburb_name..."
+                />
+              </div>
+            )}
+            {!isLocal && (
+              <div className="space-y-2">
+                <Label>Location Name</Label>
+                <Input placeholder="e.g. anywhere_australia" value={locationFormatted} onChange={(e) => setLocationFormatted(e.target.value)} />
+              </div>
+            )}
+          </div>
+        </section>
+
+        {error && <p className="text-sm text-[#ff5252]">{error}</p>}
+
+        <div className="flex gap-3 pb-12">
+          <Button type="submit" variant="default" size="lg" disabled={saving} className="flex-1">{saving ? "saving..." : "Save Changes"}</Button>
+          <Button type="button" variant="secondary" size="lg" asChild><Link href={`/needs/${needId}`}>Cancel</Link></Button>
+        </div>
+      </form>
+    </div>
+  );
+}

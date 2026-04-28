@@ -4,9 +4,18 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
+import { Button } from "@/components/ui/button";
 import { BootSequence } from "@/components/effects/boot-sequence";
 import { ScanLines } from "@/components/effects/scanlines";
 import { TerminalCursor } from "@/components/effects/terminal-cursor";
+import { ExchangeIllustration } from "@/components/visuals/exchange-illustration";
+import { IdentityIllustration } from "@/components/visuals/identity-illustration";
+import { ContractIllustration } from "@/components/visuals/contract-illustration";
+import { ReputationIllustration } from "@/components/visuals/reputation-illustration";
+import { MessageIllustration } from "@/components/visuals/message-illustration";
+import { PostIllustration } from "@/components/visuals/post-illustration";
+import { ReceiveIllustration } from "@/components/visuals/receive-illustration";
+import { HandshakeIllustration } from "@/components/visuals/handshake-illustration";
 
 export default function HomePage() {
   const [booted, setBooted] = useState(false);
@@ -26,118 +35,197 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0c0c0c] text-[#e8c97c] flex flex-col relative">
+    <div className="min-h-screen bg-[#0a0806] text-[#e8d5a3] flex flex-col relative">
       <ScanLines />
       {!hasBooted && <BootSequence onComplete={handleBootComplete} />}
       <Navbar />
 
       <main className="flex-1">
-        <div className="max-w-3xl mx-auto px-4 md:px-8">
-          {/* HERO */}
-          <section className="pt-32 pb-24 md:pt-40 md:pb-32">
+        {/* HERO */}
+        <section className="pt-32 pb-24 md:pt-40 md:pb-32">
+          <div className="max-w-6xl mx-auto px-4 md:px-8">
             <div className={`transition-all duration-700 ${booted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
-              <p className="text-[12px] text-[#7a6b4a] mb-8">
-                $ cat /etc/antidosis/motd
-              </p>
-              <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-[1.1] mb-8 glow-text">
-                exchange
-                <br />
-                <span className="text-[#f5b800]">everything.</span>
-                <TerminalCursor />
-              </h1>
-              <p className="text-[15px] text-[#7a6b4a] max-w-md leading-relaxed mb-12">
-                A marketplace for reciprocal exchange.
-                Trade skills, items, and time with people you can trust.
-                No middlemen. No bullshit.
-              </p>
-              <div className="flex flex-wrap items-center gap-3">
-                <Link href="/needs" className="btn-cmd-primary">
-                  $ browse_needs
-                </Link>
-                <Link href="/needs/new" className="btn-cmd">
-                  $ post_need
-                </Link>
+              <div className="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                  <p className="text-xs text-[#7a6b5a] mb-8 font-mono">
+                    $ cat /etc/antidosis/motd
+                  </p>
+                  <h1 className="heading-display text-5xl md:text-7xl text-[#e8d5a3] mb-8">
+                    exchange
+                    <br />
+                    <span className="text-[#f5a623]">everything.</span>
+                    <TerminalCursor />
+                  </h1>
+                  <p className="text-base text-[#7a6b5a] max-w-md leading-relaxed mb-12">
+                    The Central Coast&apos;s exchange network. Post what you need. Say what you&apos;ll give back. Connect with people you can trust.
+                    Service for service. Item for item. Cash for time. Or any mix. No middlemen. No bullshit.
+                  </p>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Button asChild size="lg">
+                      <Link href="/needs">Browse Needs</Link>
+                    </Button>
+                    <Button asChild variant="secondary" size="lg">
+                      <Link href="/needs/new">Post a Need</Link>
+                    </Button>
+                  </div>
+                </div>
+                <div className="hidden md:flex justify-center items-center">
+                  <ExchangeIllustration className="w-full max-w-[320px] text-[#e8d5a3] opacity-70" />
+                </div>
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          <div className="divider" />
+        <div className="divider" />
 
-          {/* FEATURES */}
-          <section className="py-20 md:py-28">
-            <p className="text-[12px] text-[#7a6b4a] mb-12">$ ls features/</p>
-            <div className="space-y-12">
-              <FeatureLine
-                num="01"
-                title="verified_identities"
-                desc="Email verification, social proof, skill credentials. Know who you're dealing with."
-              />
-              <FeatureLine
-                num="02"
-                title="binding_contracts"
-                desc="Terms negotiated, signed by both parties, tracked through fulfillment."
-              />
-              <FeatureLine
-                num="03"
-                title="reputation_engine"
-                desc="Bilateral 1-10 reviews. Your history becomes your passport."
-              />
-              <FeatureLine
-                num="04"
-                title="realtime_messaging"
-                desc="Negotiate inside every contract. No external apps needed."
-              />
+        {/* FEATURES */}
+        <section>
+          <div className="max-w-6xl mx-auto px-4 md:px-8 py-12">
+            <p className="text-xs text-[#7a6b5a] mb-4 font-mono">$ ls features/</p>
+          </div>
+
+          {/* 01 — Verified Identities — Gold */}
+          <div className="border-t border-[#2a2420]">
+            <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-20">
+              <div className="grid md:grid-cols-12 gap-8 items-center">
+                <div className="md:col-span-2">
+                  <span className="text-6xl md:text-7xl font-bold text-[#f5a623]/15">01</span>
+                </div>
+                <div className="md:col-span-6">
+                  <h3 className="heading-display text-xl md:text-2xl text-[#f5a623] mb-3">
+                    Verified Identities
+                  </h3>
+                  <p className="text-sm text-[#7a6b5a] leading-relaxed max-w-md">
+                    Email verification, social proof, skill credentials. Know who you&apos;re dealing with.
+                  </p>
+                </div>
+                <div className="md:col-span-4 flex justify-center">
+                  <IdentityIllustration className="w-40 h-40 text-[#f5a623] opacity-70" />
+                </div>
+              </div>
             </div>
-          </section>
+          </div>
 
-          <div className="divider" />
+          {/* 02 — Binding Contracts — Cyan */}
+          <div className="border-t border-[#2a2420]">
+            <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-20">
+              <div className="grid md:grid-cols-12 gap-8 items-center">
+                <div className="md:col-span-2">
+                  <span className="text-6xl md:text-7xl font-bold text-[#00e5ff]/15">02</span>
+                </div>
+                <div className="md:col-span-6">
+                  <h3 className="heading-display text-xl md:text-2xl text-[#00e5ff] mb-3">
+                    Binding Contracts
+                  </h3>
+                  <p className="text-sm text-[#7a6b5a] leading-relaxed max-w-md">
+                    Terms negotiated, signed by both parties, tracked through fulfillment.
+                  </p>
+                </div>
+                <div className="md:col-span-4 flex justify-center">
+                  <ContractIllustration className="w-40 h-40 text-[#00e5ff] opacity-70" />
+                </div>
+              </div>
+            </div>
+          </div>
 
-          {/* HOW IT WORKS */}
-          <section className="py-20 md:py-28">
-            <p className="text-[12px] text-[#7a6b4a] mb-12">$ cat docs/quickstart.md</p>
-            <div className="space-y-16">
-              <StepLine
+          {/* 03 — Reputation Engine — Violet */}
+          <div className="border-t border-[#2a2420]">
+            <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-20">
+              <div className="grid md:grid-cols-12 gap-8 items-center">
+                <div className="md:col-span-2">
+                  <span className="text-6xl md:text-7xl font-bold text-[#b24bf5]/15">03</span>
+                </div>
+                <div className="md:col-span-6">
+                  <h3 className="heading-display text-xl md:text-2xl text-[#b24bf5] mb-3">
+                    Reputation Engine
+                  </h3>
+                  <p className="text-sm text-[#7a6b5a] leading-relaxed max-w-md">
+                    Bilateral 1-10 reviews. Your history becomes your passport.
+                  </p>
+                </div>
+                <div className="md:col-span-4 flex justify-center">
+                  <ReputationIllustration className="w-40 h-40 text-[#b24bf5] opacity-70" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 04 — Realtime Messaging — Gold again */}
+          <div className="border-t border-[#2a2420]">
+            <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-20">
+              <div className="grid md:grid-cols-12 gap-8 items-center">
+                <div className="md:col-span-2">
+                  <span className="text-6xl md:text-7xl font-bold text-[#f5a623]/15">04</span>
+                </div>
+                <div className="md:col-span-6">
+                  <h3 className="heading-display text-xl md:text-2xl text-[#f5a623] mb-3">
+                    Realtime Messaging
+                  </h3>
+                  <p className="text-sm text-[#7a6b5a] leading-relaxed max-w-md">
+                    Negotiate inside every contract. No external apps needed.
+                  </p>
+                </div>
+                <div className="md:col-span-4 flex justify-center">
+                  <MessageIllustration className="w-40 h-40 text-[#f5a623] opacity-70" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div className="divider" />
+
+        {/* HOW IT WORKS */}
+        <section className="py-20 md:py-28 border-t border-[#2a2420]">
+          <div className="max-w-6xl mx-auto px-4 md:px-8">
+            <p className="text-xs text-[#7a6b5a] mb-12 font-mono">$ cat docs/quickstart.md</p>
+            <div className="grid md:grid-cols-3 gap-8">
+              <StepCard
                 num="01"
-                title="post what you need"
-                desc="Describe a service, item, or task. Set what you're offering in return."
+                title="Post What You Need"
+                desc="Describe a service, item, or task. Set what you&apos;re offering in return."
+                illustration={<PostIllustration className="w-24 h-24 text-[#f5a623] opacity-60" />}
               />
-              <StepLine
+              <StepCard
                 num="02"
-                title="receive verified offers"
-                desc="People with proven skills submit offers. Browse profiles, ratings, history."
+                title="Review Interested Responses"
+                desc="People with proven skills express interest. Browse their profiles, ratings, and history before you choose."
+                illustration={<ReceiveIllustration className="w-24 h-24 text-[#00e5ff] opacity-60" />}
               />
-              <StepLine
+              <StepCard
                 num="03"
-                title="form a binding contract"
+                title="Form a Binding Contract"
                 desc="Agree on terms. Sign digitally. Complete. Review. Build trust."
+                illustration={<HandshakeIllustration className="w-24 h-24 text-[#b24bf5] opacity-60" />}
               />
             </div>
-          </section>
+          </div>
+        </section>
 
-          <div className="divider" />
-
-          {/* CTA */}
-          <section className="py-20 md:py-28">
-            <p className="text-[12px] text-[#7a6b4a] mb-8">$ ./join_network.sh</p>
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight leading-[1.1] mb-6 glow-text">
-              start building
+        {/* CTA */}
+        <section className="py-20 md:py-28 border-t border-[#2a2420]">
+          <div className="max-w-6xl mx-auto px-4 md:px-8">
+            <p className="text-xs text-[#7a6b5a] mb-8 font-mono">$ ./join_network.sh</p>
+            <h2 className="heading-display text-3xl md:text-5xl text-[#e8d5a3] mb-6">
+              Start Building
               <br />
-              <span className="text-[#f5b800]">your reputation.</span>
+              <span className="text-[#f5a623]">Your Reputation.</span>
             </h2>
-            <p className="text-[15px] text-[#7a6b4a] max-w-md mb-10">
+            <p className="text-base text-[#7a6b5a] max-w-md mb-10 leading-relaxed">
               Join the Central Coast community. Post your first need.
               Become part of a network built on trust.
             </p>
             <div className="flex flex-wrap items-center gap-3">
-              <Link href="/register" className="btn-cmd-primary">
-                $ create_account
-              </Link>
-              <Link href="/needs" className="btn-cmd">
-                $ browse_needs
-              </Link>
+              <Button asChild size="lg">
+                <Link href="/register">Create Account</Link>
+              </Button>
+              <Button asChild variant="secondary" size="lg">
+                <Link href="/needs">Browse Needs</Link>
+              </Button>
             </div>
-          </section>
-        </div>
+          </div>
+        </section>
       </main>
 
       <Footer />
@@ -145,32 +233,15 @@ export default function HomePage() {
   );
 }
 
-function FeatureLine({ num, title, desc }: { num: string; title: string; desc: string }) {
+function StepCard({ num, title, desc, illustration }: { num: string; title: string; desc: string; illustration: React.ReactNode }) {
   return (
-    <div className="grid md:grid-cols-12 gap-4 md:gap-8 group">
-      <div className="md:col-span-2">
-        <span className="text-[12px] text-[#7a6b4a]">{num}</span>
+    <div className="bg-[#12100e] border border-[#2a2420] p-8 hover:border-[#f5a623]/30 transition-colors">
+      <div className="flex items-center justify-between mb-6">
+        <span className="text-4xl font-bold text-[#7a6b5a]">{num}</span>
+        {illustration}
       </div>
-      <div className="md:col-span-10">
-        <h3 className="text-base font-bold mb-2 group-hover:text-[#f5b800] transition-colors">
-          {title}
-        </h3>
-        <p className="text-[13px] text-[#7a6b4a] leading-relaxed">{desc}</p>
-      </div>
-    </div>
-  );
-}
-
-function StepLine({ num, title, desc }: { num: string; title: string; desc: string }) {
-  return (
-    <div className="grid md:grid-cols-12 gap-4 md:gap-8">
-      <div className="md:col-span-2">
-        <span className="text-5xl md:text-7xl font-bold text-[#1a1a1a]">{num}</span>
-      </div>
-      <div className="md:col-span-10 md:pt-4">
-        <h3 className="text-xl md:text-2xl font-bold mb-3">{title}</h3>
-        <p className="text-[13px] text-[#7a6b4a] leading-relaxed max-w-md">{desc}</p>
-      </div>
+      <h3 className="heading-display text-xl md:text-2xl mb-3">{title}</h3>
+      <p className="text-sm text-[#7a6b5a] leading-relaxed">{desc}</p>
     </div>
   );
 }

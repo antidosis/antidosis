@@ -14,7 +14,7 @@ export function withCors(
   return async (req: NextRequest) => {
     const origin = req.headers.get("origin");
     const isAllowed =
-      !origin || ALLOWED_ORIGINS.includes(origin) || origin.endsWith(".vercel.app");
+      !origin || ALLOWED_ORIGINS.includes(origin);
 
     if (req.method === "OPTIONS") {
       return new NextResponse(null, {

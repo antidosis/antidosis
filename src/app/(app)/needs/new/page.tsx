@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { LocationAutocomplete } from "@/components/ui/location-autocomplete";
 import { ImageGallery } from "@/components/ui/image-gallery";
 import { createClient } from "@/lib/supabase/client";
-import { ArrowLeft, Plus, X, MapPin, Globe, Wrench, Package, CircleDollarSign, Camera, ImageIcon, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Plus, X, MapPin, Globe, Wrench, Package, CircleDollarSign, Camera, ImageIcon, Lightbulb, Clock, Calendar } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +32,8 @@ export default function CreateNeedPage() {
   const [requiredSkills, setRequiredSkills] = useState<string[]>([]);
   const [images, setImages] = useState<string[]>([]);
   const [offerImages, setOfferImages] = useState<string[]>([]);
+  const [deadline, setDeadline] = useState("");
+  const [timeRange, setTimeRange] = useState("");
 
   function addSkill() {
     if (skillInput.trim() && !requiredSkills.includes(skillInput.trim())) {
@@ -56,6 +58,8 @@ export default function CreateNeedPage() {
         offerValue: offerValue ? parseFloat(offerValue) : undefined,
         isLocal, locationName: locationFormatted,
         requiredSkills, images, offerImages,
+        deadline: deadline || undefined,
+        timeRange: timeRange || undefined,
       }),
     });
 
@@ -69,141 +73,180 @@ export default function CreateNeedPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 md:px-8">
       <div className="py-6">
-        <Link href="/needs" className="inline-flex items-center text-[13px] text-[#7a6b4a] hover:text-[#e8c97c] transition-colors">
+        <Link href="/needs" className="inline-flex items-center text-sm text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors">
           <ArrowLeft className="mr-2 h-4 w-4" />$ cd ~/needs/
         </Link>
       </div>
 
-      <p className="text-[12px] text-[#7a6b4a] mb-4">$ nano new_need.conf</p>
-      <h1 className="text-3xl font-bold mb-2">post_need</h1>
-      <p className="text-[13px] text-[#7a6b4a] mb-4">describe what you need and what you are offering in exchange</p>
+      <h1 className="heading-display text-2xl text-[#e8d5a3]">Post Need</h1>
+      <p className="text-xs text-[#7a6b5a] mt-3">$ nano new_need.conf</p>
+      <p className="text-sm text-[#b8a078] mb-6">describe what you need and what you are offering in exchange</p>
 
-      <div className="border border-[#f5b800]/20 bg-[#f5b800]/5 p-4 mb-14">
+      <div className="bg-[#f5a623]/10 border border-[#f5a623]/30 p-4 mb-8">
         <div className="flex items-start gap-3">
-          <AlertTriangle className="h-4 w-4 text-[#f5b800] mt-0.5 flex-shrink-0" />
+          <Lightbulb className="h-4 w-4 text-[#f5a623] mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-[13px] text-[#e8c97c] font-medium">posts with images get 3x more offers</p>
-            <p className="text-[12px] text-[#7a6b4a] mt-1">add photos of what you need and what you are offering. it builds instant trust.</p>
+            <p className="text-sm text-[#e8d5a3] font-medium">posts with images get 3x more responses</p>
+            <p className="text-xs text-[#7a6b5a] mt-1">add photos of what you need and what you are offering. it builds instant trust.</p>
           </div>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-14">
-        <section>
-          <p className="text-[12px] text-[#7a6b4a] mb-6">[need]</p>
-          <div className="space-y-8 max-w-lg">
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <section className="vessel p-5">
+          <p className="text-xs text-[#7a6b5a] uppercase tracking-wide font-medium mb-6">[need]</p>
+          <div className="space-y-6 max-w-lg">
             <div className="space-y-2">
-              <Label>title</Label>
+              <Label>Title</Label>
               <Input placeholder="e.g. electrical_work_1hr" value={title} onChange={(e) => setTitle(e.target.value)} required />
-              <p className="text-[11px] text-[#7a6b4a]/50">be specific. &quot;fix_leaking_tap&quot; beats &quot;plumbing_help&quot;</p>
+              <p className="text-xs text-[#7a6b5a]">be specific. &quot;fix_leaking_tap&quot; beats &quot;plumbing_help&quot;</p>
             </div>
             <div className="space-y-2">
-              <Label>description</Label>
+              <Label>Description</Label>
               <Textarea placeholder="describe the work, timeline, requirements..." value={description} onChange={(e) => setDescription(e.target.value)} required rows={5} />
-              <p className="text-[11px] text-[#7a6b4a]/50">include deadlines, access details, and any tools/materials provided</p>
+              <p className="text-xs text-[#7a6b5a]">include deadlines, access details, and any tools/materials provided</p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 mb-1">
+                  <Calendar className="h-4 w-4 text-[#7a6b5a]" />
+                  <Label>Deadline (Optional)</Label>
+                </div>
+                <Input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
+                <p className="text-xs text-[#7a6b5a]">when does this need to be done by?</p>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 mb-1">
+                  <Clock className="h-4 w-4 text-[#7a6b5a]" />
+                  <Label>Time Estimate (Optional)</Label>
+                </div>
+                <Input placeholder="e.g. 2-4 hours" value={timeRange} onChange={(e) => setTimeRange(e.target.value)} />
+                <p className="text-xs text-[#7a6b5a]">how long do you estimate this will take?</p>
+              </div>
             </div>
             <div className="space-y-2">
-              <Label>required_skills</Label>
+              <Label>Required Skills</Label>
               <div className="flex gap-2">
                 <Input placeholder="e.g. electrical" value={skillInput} onChange={(e) => setSkillInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSkill(); } }} />
                 <Button type="button" variant="secondary" onClick={addSkill}><Plus className="h-4 w-4" /></Button>
               </div>
               <div className="flex flex-wrap gap-2 mt-3">
                 {requiredSkills.map((skill) => (
-                  <span key={skill} className="inline-flex items-center gap-1 px-2 py-1 text-[11px] border border-[#2a2a2a] text-[#7a6b4a]">
+                  <span key={skill} className="inline-flex items-center gap-1 px-2 py-1 text-xs text-[#7a6b5a] bg-[#1a1714] border border-[#2a2420] rounded">
                     {skill}
-                    <button type="button" onClick={() => setRequiredSkills(requiredSkills.filter((s) => s !== skill))}><X className="h-3 w-3" /></button>
+                    <Button type="button" variant="ghost" onClick={() => setRequiredSkills(requiredSkills.filter((s) => s !== skill))} className="h-4 w-4 p-0 shrink-0 text-[#7a6b5a] hover:text-[#e8d5a3]">
+                      <X className="h-3 w-3" />
+                    </Button>
                   </span>
                 ))}
               </div>
             </div>
             <div className="space-y-2">
               <div className="flex items-center gap-2 mb-2">
-                <Camera className="h-4 w-4 text-[#7a6b4a]" />
-                <Label>need_images (optional)</Label>
+                <Camera className="h-4 w-4 text-[#7a6b5a]" />
+                <Label>Need Images (Optional)</Label>
               </div>
               <ImageGallery images={images} onChange={setImages} folder="needs" maxImages={5} label="attach photos of what you need" />
             </div>
           </div>
         </section>
 
-        <div className="divider" />
-
-        <section>
-          <p className="text-[12px] text-[#7a6b4a] mb-6">[offer]</p>
-          <div className="space-y-8 max-w-lg">
+        <section className="vessel p-5">
+          <p className="text-xs text-[#7a6b5a] uppercase tracking-wide font-medium mb-6">[offer]</p>
+          <div className="space-y-6 max-w-lg">
             <div className="grid grid-cols-3 gap-2">
               {(["service", "item", "money"] as const).map((type) => (
-                <button key={type} type="button" onClick={() => setOfferType(type)}
-                  className={`flex flex-col items-center gap-2 p-4 border transition-all ${
-                    offerType === type ? "border-[#f5b800] bg-[#f5b800]/5 text-[#e8c97c]" : "border-[#2a2a2a] text-[#7a6b4a] hover:text-[#e8c97c]"
-                  }`}>
+                <Button
+                  key={type}
+                  type="button"
+                  variant="outline"
+                  onClick={() => setOfferType(type)}
+                  className={`flex flex-col items-center gap-2 h-auto py-4 px-2 ${
+                    offerType === type
+                      ? "border-[#f5a623] bg-[#f5a623]/5 text-[#e8d5a3] hover:bg-[#f5a623]/10 hover:text-[#e8d5a3]"
+                      : "border-[#2a2420] bg-[#0f0c0a] text-[#7a6b5a] hover:text-[#e8d5a3] hover:bg-[#1a1714] hover:border-[#3d3530]"
+                  }`}
+                >
                   {type === "service" && <Wrench className="h-5 w-5" />}
                   {type === "item" && <Package className="h-5 w-5" />}
                   {type === "money" && <CircleDollarSign className="h-5 w-5" />}
                   <span className="text-sm font-medium capitalize">{type}</span>
-                </button>
+                </Button>
               ))}
             </div>
             <div className="space-y-2">
-              <Label>offer_description</Label>
+              <Label>Offer Description</Label>
               <Textarea placeholder="describe what you are offering..." value={offerDescription} onChange={(e) => setOfferDescription(e.target.value)} required rows={3} />
-              <p className="text-[11px] text-[#7a6b4a]/50">the more detail, the better your match rate</p>
+              <p className="text-xs text-[#7a6b5a]">the more detail, the better your match rate</p>
             </div>
             <div className="space-y-2">
-              <Label>estimated_value (optional)</Label>
+              <Label>Estimated Value (Optional)</Label>
               <Input type="number" placeholder="0.00" value={offerValue} onChange={(e) => setOfferValue(e.target.value)} />
             </div>
             <div className="space-y-2">
               <div className="flex items-center gap-2 mb-2">
-                <ImageIcon className="h-4 w-4 text-[#7a6b4a]" />
-                <Label>offer_images (optional)</Label>
+                <ImageIcon className="h-4 w-4 text-[#7a6b5a]" />
+                <Label>Offer Images (Optional)</Label>
               </div>
               <ImageGallery images={offerImages} onChange={setOfferImages} folder="offers" maxImages={5} label="attach photos of what you are offering" />
             </div>
           </div>
         </section>
 
-        <div className="divider" />
-
-        <section>
-          <p className="text-[12px] text-[#7a6b4a] mb-6">[location]</p>
-          <div className="space-y-8 max-w-lg">
+        <section className="vessel p-5">
+          <p className="text-xs text-[#7a6b5a] uppercase tracking-wide font-medium mb-6">[location]</p>
+          <div className="space-y-6 max-w-lg">
             <div className="grid grid-cols-2 gap-2">
-              <button type="button" onClick={() => setIsLocal(true)}
-                className={`flex items-center justify-center gap-2 p-3 border transition-all ${isLocal ? "border-[#f5b800] bg-[#f5b800]/5 text-[#e8c97c]" : "border-[#2a2a2a] text-[#7a6b4a] hover:text-[#e8c97c]"}`}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsLocal(true)}
+                className={`flex items-center justify-center gap-2 h-auto py-3 px-2 ${
+                  isLocal
+                    ? "border-[#f5a623] bg-[#f5a623]/5 text-[#e8d5a3] hover:bg-[#f5a623]/10 hover:text-[#e8d5a3]"
+                    : "border-[#2a2420] bg-[#0f0c0a] text-[#7a6b5a] hover:text-[#e8d5a3] hover:bg-[#1a1714] hover:border-[#3d3530]"
+                }`}
+              >
                 <MapPin className="h-4 w-4" /><span className="text-sm font-medium">local</span>
-              </button>
-              <button type="button" onClick={() => setIsLocal(false)}
-                className={`flex items-center justify-center gap-2 p-3 border transition-all ${!isLocal ? "border-[#f5b800] bg-[#f5b800]/5 text-[#e8c97c]" : "border-[#2a2a2a] text-[#7a6b4a] hover:text-[#e8c97c]"}`}>
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsLocal(false)}
+                className={`flex items-center justify-center gap-2 h-auto py-3 px-2 ${
+                  !isLocal
+                    ? "border-[#f5a623] bg-[#f5a623]/5 text-[#e8d5a3] hover:bg-[#f5a623]/10 hover:text-[#e8d5a3]"
+                    : "border-[#2a2420] bg-[#0f0c0a] text-[#7a6b5a] hover:text-[#e8d5a3] hover:bg-[#1a1714] hover:border-[#3d3530]"
+                }`}
+              >
                 <Globe className="h-4 w-4" /><span className="text-sm font-medium">remote</span>
-              </button>
+              </Button>
             </div>
             {isLocal && (
               <div className="space-y-2">
-                <Label>location_name</Label>
+                <Label>Location Name</Label>
                 <LocationAutocomplete
                   value={locationFormatted}
                   onChange={(formatted, display) => { setLocationFormatted(formatted); setLocationDisplay(display); }}
                   placeholder="type_suburb_name..."
                 />
-                <p className="text-[11px] text-[#7a6b4a]/50">central coast trial: all suburbs autocomplete. try &quot;terrigal&quot; or &quot;2250&quot;</p>
+                <p className="text-xs text-[#7a6b5a]">central coast trial: all suburbs autocomplete. try &quot;terrigal&quot; or &quot;2250&quot;</p>
               </div>
             )}
             {!isLocal && (
               <div className="space-y-2">
-                <Label>location_name</Label>
+                <Label>Location Name</Label>
                 <Input placeholder="e.g. anywhere_australia" value={locationFormatted} onChange={(e) => setLocationFormatted(e.target.value)} />
               </div>
             )}
           </div>
         </section>
 
-        {error && <p className="text-sm text-[#c97c7c]">{error}</p>}
+        {error && <p className="text-sm text-[#ff5252]">{error}</p>}
 
         <div className="flex gap-3 pb-12">
-          <Button type="submit" size="lg" disabled={loading} className="flex-1">{loading ? "posting..." : "$ post_need"}</Button>
-          <Button type="button" variant="secondary" size="lg" asChild><Link href="/needs">$ cancel</Link></Button>
+          <Button type="submit" variant="default" size="lg" disabled={loading} className="flex-1">{loading ? "posting..." : "Post Need"}</Button>
+          <Button type="button" variant="secondary" size="lg" asChild><Link href="/needs">Cancel</Link></Button>
         </div>
       </form>
     </div>

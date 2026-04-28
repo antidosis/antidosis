@@ -2,34 +2,11 @@ import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
-      colors: {
-        void: {
-          50: "#f8f7ff",
-          100: "#e8e5ff",
-          200: "#d4ceff",
-          300: "#b8a8ff",
-          400: "#9a7eff",
-          500: "#7c5cff",
-          600: "#6d4aff",
-          700: "#5a35e8",
-          800: "#4a2dbf",
-          900: "#3d2699",
-          950: "#1a1033",
-          1000: "#0d081a",
-        },
-        neon: {
-          cyan: "#00f0ff",
-          purple: "#b829f7",
-          pink: "#ff006e",
-          lime: "#39ff14",
-        },
-      },
       fontFamily: {
         sans: [
           "Inter",
@@ -40,6 +17,21 @@ const config: Config = {
           "Roboto",
           "sans-serif",
         ],
+        heading: [
+          "Inter",
+          "SF Pro Display",
+          "Segoe UI",
+          "system-ui",
+          "sans-serif",
+        ],
+        mono: [
+          "JetBrains Mono",
+          "SF Mono",
+          "Fira Code",
+          "Cascadia Code",
+          "Consolas",
+          "monospace",
+        ],
       },
       borderRadius: {
         xl: "0.75rem",
@@ -47,29 +39,13 @@ const config: Config = {
         "3xl": "1.5rem",
         "4xl": "2rem",
       },
-      backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-conic": "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
-        "hero-glow":
-          "radial-gradient(ellipse 80% 50% at 50% -20%, rgba(120, 50, 255, 0.15), transparent)",
-        "card-glow":
-          "radial-gradient(ellipse 60% 40% at 50% 0%, rgba(120, 50, 255, 0.08), transparent)",
-        "accent-gradient":
-          "linear-gradient(135deg, #7c5cff 0%, #b829f7 50%, #ff006e 100%)",
-        "accent-gradient-subtle":
-          "linear-gradient(135deg, rgba(124,92,255,0.15) 0%, rgba(184,41,247,0.1) 100%)",
-      },
-      boxShadow: {
-        glow: "0 0 40px rgba(124, 92, 255, 0.15)",
-        "glow-sm": "0 0 20px rgba(124, 92, 255, 0.1)",
-        "glow-lg": "0 0 80px rgba(124, 92, 255, 0.2)",
-        neon: "0 0 20px rgba(0, 240, 255, 0.3)",
-      },
       animation: {
         "fade-in": "fadeIn 0.6s ease-out forwards",
         "slide-up": "slideUp 0.7s ease-out forwards",
         "pulse-glow": "pulseGlow 3s ease-in-out infinite",
+        "pulse-slow": "pulseSlow 4s ease-in-out infinite",
         float: "float 6s ease-in-out infinite",
+        shimmer: "shimmer 2s linear infinite",
       },
       keyframes: {
         fadeIn: {
@@ -84,9 +60,17 @@ const config: Config = {
           "0%, 100%": { opacity: "0.5" },
           "50%": { opacity: "1" },
         },
+        pulseSlow: {
+          "0%, 100%": { opacity: "0.6", filter: "brightness(1)" },
+          "50%": { opacity: "1", filter: "brightness(1.2)" },
+        },
         float: {
           "0%, 100%": { transform: "translateY(0px)" },
           "50%": { transform: "translateY(-10px)" },
+        },
+        shimmer: {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
         },
       },
     },

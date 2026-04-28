@@ -5,6 +5,7 @@ import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { auditLog, getClientInfo } from "@/lib/audit";
 import { logger } from "@/lib/logger";
 import { sanitizePlainText } from "@/lib/security/sanitize";
+import { sanitizeUrlArray } from "@/lib/security/url";
 import { z } from "zod";
 
 const createNeedSchema = z.object({
@@ -18,19 +19,20 @@ const createNeedSchema = z.object({
   locationName: z.string().optional(),
   latitude: z.number().optional(),
   longitude: z.number().optional(),
-  deadline: z.string().datetime().optional(),
+  deadline: z.string().optional(),
+  timeRange: z.string().max(100).optional(),
   requiredSkills: z.array(z.string()).default([]),
-  images: z.array(z.string().url()).default([]),
-  offerImages: z.array(z.string().url()).default([]),
+  images: z.array(z.string()).default([]),
+  offerImages: z.array(z.string()).default([]),
 });
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const q = searchParams.get("q");
-    const skill = searchParams.get("skill");
+    const q = searchParams.get("q")?.slice(0, 100);
+    const skill = searchParams.get("skill")?.slice(0, 50);
     const offerType = searchParams.get("type");
-    const location = searchParams.get("location");
+    const location = searchParams.get("location")?.slice(0, 100);
 
     const where: Record<string, any> = { status: "open" };
 
@@ -148,8 +150,9 @@ export async function POST(req: NextRequest) {
         latitude: data.latitude,
         longitude: data.longitude,
         deadline: data.deadline ? new Date(data.deadline) : null,
-        images: data.images,
-        offerImages: data.offerImages,
+        timeRange: data.timeRange ? sanitizePlainText(data.timeRange) : null,
+        images: sanitizeUrlArray(data.images),
+        offerImages: sanitizeUrlArray(data.offerImages),
         requiredSkills: {
           create: data.requiredSkills.map((name) => ({ name: sanitizePlainText(name) })),
         },

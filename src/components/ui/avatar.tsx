@@ -1,43 +1,46 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
+interface AvatarProps {
   src?: string | null;
   name?: string | null;
   size?: "sm" | "md" | "lg";
+  className?: string;
 }
 
-const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
-  ({ className, src, name, size = "md", ...props }, ref) => {
-    const sizeClasses = {
-      sm: "h-8 w-8 text-[10px]",
-      md: "h-10 w-10 text-xs",
-      lg: "h-14 w-14 text-sm",
-    };
+export function Avatar({ src, name, size = "md", className }: AvatarProps) {
+  const sizeClasses = {
+    sm: "h-8 w-8 text-[10px]",
+    md: "h-10 w-10 text-xs",
+    lg: "h-14 w-14 text-sm",
+  };
 
-    const initials = name
-      ? name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
-      : "?";
+  const initials = name
+    ?.split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase() || "?";
 
-    return (
-      <div
-        ref={ref}
-        className={cn(
-          "relative inline-flex items-center justify-center overflow-hidden bg-transparent border border-[#2a2a2a] flex-shrink-0",
-          sizeClasses[size],
-          className
-        )}
-        {...props}
-      >
-        {src ? (
-          <img src={src} alt={name || ""} className="h-full w-full object-cover" />
-        ) : (
-          <span className="font-medium text-[#7a6b4a]">{initials}</span>
-        )}
-      </div>
-    );
-  }
-);
-Avatar.displayName = "Avatar";
-
-export { Avatar };
+  return (
+    <div
+      className={cn(
+        "relative inline-flex items-center justify-center overflow-hidden border border-[#2a2420] bg-[#1a1714] rounded-md flex-shrink-0",
+        sizeClasses[size],
+        className
+      )}
+    >
+      {src ? (
+        <img
+          src={src}
+          alt={name || "Avatar"}
+          className="h-full w-full object-cover"
+          onError={(e) => {
+            (e.target as HTMLImageElement).style.display = "none";
+          }}
+        />
+      ) : null}
+      <span className="text-[#b8a078] font-medium">{initials}</span>
+    </div>
+  );
+}

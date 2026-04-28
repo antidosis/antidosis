@@ -9,6 +9,7 @@ const createSchema = z.object({
   receiverId: z.string().uuid(),
   rating: z.number().int().min(1).max(10),
   comment: z.string().max(2000).optional(),
+  privateFeedback: z.string().max(2000).optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -26,9 +27,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-
     const body = await req.json();
-    const { contractId, receiverId, rating, comment } = createSchema.parse(body);
+    const { contractId, receiverId, rating, comment, privateFeedback } = createSchema.parse(body);
 
     const profile = await prisma.profile.findUnique({
       where: { userId: user.id },
@@ -88,6 +88,7 @@ export async function POST(req: NextRequest) {
         receiverId,
         rating,
         comment: comment || null,
+        privateFeedback: privateFeedback || null,
       },
     });
 

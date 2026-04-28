@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { sendContractCompletedEmail } from "@/lib/email";
 import { auditLog, getClientInfo } from "@/lib/audit";
 import { logger } from "@/lib/logger";
+import { createNotification } from "@/lib/notifications";
+import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 
 export async function POST(
   req: NextRequest,
@@ -33,6 +35,14 @@ export async function POST(
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
+    const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
+      windowMs: 60 * 60_000,
+      maxRequests: 10,
+    });
+    if (!limit.allowed) {
+      return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+    }
+
     const contract = await prisma.contract.findUnique({
       where: { id: params.id },
       include: { need: true },
@@ -56,67 +66,72 @@ export async function POST(
       );
     }
 
-    const updateData: Record<string, boolean | Date | string> = {
-      status: "pending_completion",
-    };
-
-    if (isPartyA) {
-      if (contract.aMarkedComplete) {
-        return NextResponse.json(
-          { error: "Already marked complete" },
-          { status: 400 }
-        );
-      }
-      updateData.aMarkedComplete = true;
-    } else {
-      if (contract.bMarkedComplete) {
-        return NextResponse.json(
-          { error: "Already marked complete" },
-          { status: 400 }
-        );
-      }
-      updateData.bMarkedComplete = true;
+    if (isPartyA && contract.aMarkedComplete) {
+      return NextResponse.json(
+        { error: "Already marked complete" },
+        { status: 400 }
+      );
+    }
+    if (isPartyB && contract.bMarkedComplete) {
+      return NextResponse.json(
+        { error: "Already marked complete" },
+        { status: 400 }
+      );
     }
 
-    // Check if both marked complete
-    const willBothBeComplete =
-      (isPartyA && contract.bMarkedComplete) ||
-      (isPartyB && contract.aMarkedComplete);
-
-    if (willBothBeComplete) {
-      updateData.status = "completed";
-      updateData.completedAt = new Date();
-
-      // Update need status
-      await prisma.need.update({
-        where: { id: contract.needId },
-        data: { status: "completed" },
+    const updatedContract = await prisma.$transaction(async (tx) => {
+      const completionField = isPartyA ? "aMarkedComplete" : "bMarkedComplete";
+      await tx.contract.update({
+        where: { id: params.id },
+        data: { [completionField]: true, status: "pending_completion" },
       });
 
-      // Increment jobs completed for both parties
-      await prisma.profile.update({
-        where: { id: contract.partyAId },
-        data: { jobsCompleted: { increment: 1 } },
+      const fresh = await tx.contract.findUnique({
+        where: { id: params.id },
+        select: {
+          aMarkedComplete: true,
+          bMarkedComplete: true,
+          status: true,
+          needId: true,
+          partyAId: true,
+          partyBId: true,
+        },
       });
-      await prisma.profile.update({
-        where: { id: contract.partyBId },
-        data: { jobsCompleted: { increment: 1 } },
-      });
-    }
 
-    const updated = await prisma.contract.update({
-      where: { id: params.id },
-      data: updateData,
+      if (!fresh) throw new Error("Contract not found during transaction");
+
+      if (fresh.aMarkedComplete && fresh.bMarkedComplete && fresh.status !== "completed") {
+        await tx.need.update({
+          where: { id: fresh.needId },
+          data: { status: "completed" },
+        });
+        await tx.profile.update({
+          where: { id: fresh.partyAId },
+          data: { jobsCompleted: { increment: 1 } },
+        });
+        await tx.profile.update({
+          where: { id: fresh.partyBId },
+          data: { jobsCompleted: { increment: 1 } },
+        });
+        return await tx.contract.update({
+          where: { id: params.id },
+          data: { status: "completed", completedAt: new Date() },
+        });
+      }
+
+      return await tx.contract.findUnique({ where: { id: params.id } });
     });
 
+    const bothComplete = updatedContract?.status === "completed";
+
     // Notify both parties when fully complete
-    if (willBothBeComplete) {
+    if (bothComplete) {
       try {
         const contractWithParties = await prisma.contract.findUnique({
           where: { id: params.id },
           include: {
-            partyA: { select: { email: true } },
-            partyB: { select: { email: true } },
+            partyA: { select: { id: true, email: true } },
+            partyB: { select: { id: true, email: true } },
             need: { select: { title: true } },
           },
         });
@@ -129,6 +144,21 @@ export async function POST(
             contractWithParties.partyB.email,
             contractWithParties.need.title
           );
+          // In-app notifications
+          await createNotification({
+            userId: contractWithParties.partyA.id,
+            type: "contract_complete",
+            title: "Contract completed",
+            body: `Your contract for "${contractWithParties.need.title}" has been completed. Leave a review!`,
+            data: { contractId: params.id },
+          });
+          await createNotification({
+            userId: contractWithParties.partyB.id,
+            type: "contract_complete",
+            title: "Contract completed",
+            body: `Your contract for "${contractWithParties.need.title}" has been completed. Leave a review!`,
+            data: { contractId: params.id },
+          });
         }
       } catch (emailErr) {
         logger.error("Failed to send completion email:", emailErr instanceof Error ? emailErr : undefined);
@@ -143,10 +173,10 @@ export async function POST(
       ip,
       userAgent,
       path: `/api/v1/contracts/${params.id}/complete`,
-      metadata: { contractId: params.id, bothComplete: willBothBeComplete },
+      metadata: { contractId: params.id, bothComplete },
     });
 
-    return NextResponse.json({ contract: updated });
+    return NextResponse.json({ contract: updatedContract });
   } catch (error) {
     logger.error("Complete contract error:", error instanceof Error ? error : undefined);
     return NextResponse.json(

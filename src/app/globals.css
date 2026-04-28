@@ -4,24 +4,55 @@
 
 @layer base {
   :root {
-    --bg: #0c0c0c;
-    --fg: #e8c97c;
-    --fg-dim: #7a6b4a;
-    --fg-bright: #f5b800;
-    --accent: #f5b800;
-    --border: #2a2a2a;
-    --border-hover: #3a3a3a;
-    --error: #c97c7c;
-    --success: #7cb87c;
+    /* The Void — Backgrounds */
+    --void: #0a0806;
+    --void-raised: #12100e;
+    --void-hover: #1a1714;
+    --void-input: #0f0c0a;
+
+    /* Text — Aged & Warm */
+    --gold: #e8d5a3;
+    --parchment: #b8a078;
+    --leather: #7a6b5a;
+    --void-inverse: #0a0806;
+
+    /* The Three Planes */
+    /* Physical: Solar Plexus — Action, Desire, Energy */
+    --sun: #f5a623;
+    --sun-bright: #ffb84d;
+    --sun-dim: #c47a0a;
+    --ember: #ea580c;
+
+    /* Mental: Throat — Communication, Intellect, Truth */
+    --mercury: #00e5ff;
+    --mercury-dim: #00b8d4;
+    --mercury-glow: rgba(0, 229, 255, 0.25);
+    --silver: #c0b8a8;
+
+    /* Spiritual: Crown — Completion, Reward, Transcendence */
+    --quintessence: #b24bf5;
+    --quintessence-dim: #8b5cf6;
+    --quintessence-glow: rgba(178, 75, 245, 0.3);
+    --quintessence-soft: rgba(178, 75, 245, 0.08);
+
+    /* States */
+    --emerald: #00e676;
+    --ruby: #ff5252;
+    --amber-alert: #ffb300;
+
+    /* Borders — Warm Bronze */
+    --bronze: #2a2420;
+    --bronze-hover: #3d3530;
+    --bronze-accent: rgba(245, 166, 35, 0.2);
   }
 
   * {
-    border-color: var(--border);
+    border-color: var(--bronze);
   }
 
   body {
-    background: var(--bg);
-    color: var(--fg);
+    background: var(--void);
+    color: var(--gold);
     font-family: "JetBrains Mono", "SF Mono", "Fira Code", "Cascadia Code", "Consolas", monospace;
     font-size: 14px;
     line-height: 1.6;
@@ -30,31 +61,41 @@
   }
 
   ::selection {
-    background: var(--fg-dim);
-    color: var(--bg);
+    background: var(--sun);
+    color: var(--void-inverse);
+    text-shadow: none;
   }
 
+  /* WebKit scrollbars */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
   }
   ::-webkit-scrollbar-track {
-    background: var(--bg);
+    background: var(--void);
   }
   ::-webkit-scrollbar-thumb {
-    background: var(--border);
+    background: var(--bronze);
+    border-radius: 4px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--fg-dim);
+    background: var(--bronze-hover);
+  }
+
+  /* Firefox scrollbars */
+  html {
+    scrollbar-color: var(--bronze) var(--void);
+    scrollbar-width: thin;
   }
 }
 
 @layer components {
+  /* The Terminal Soul */
   .cursor-blink {
     display: inline-block;
     width: 8px;
     height: 1.2em;
-    background: var(--fg);
+    background: var(--gold);
     animation: blink 1s step-end infinite;
     vertical-align: text-bottom;
     margin-left: 2px;
@@ -64,7 +105,7 @@
     display: inline-block;
     width: 6px;
     height: 1em;
-    background: var(--fg-dim);
+    background: var(--leather);
     animation: blink 1.2s step-end infinite;
     vertical-align: text-bottom;
   }
@@ -76,109 +117,158 @@
     z-index: 9999;
     background: repeating-linear-gradient(
       0deg,
-      rgba(0, 0, 0, 0.08),
-      rgba(0, 0, 0, 0.08) 1px,
+      rgba(0, 0, 0, 0.06),
+      rgba(0, 0, 0, 0.06) 1px,
       transparent 1px,
       transparent 2px
     );
   }
 
-  .glow-text {
-    text-shadow: 0 0 20px rgba(245, 184, 0, 0.3), 0 0 40px rgba(245, 184, 0, 0.1);
+  /* Glow Effects — The Soul of the Interface */
+  .glow-gold {
+    text-shadow: 0 0 20px rgba(245, 166, 35, 0.4), 0 0 40px rgba(245, 166, 35, 0.15);
   }
 
+  .glow-gold-subtle {
+    text-shadow: 0 0 12px rgba(245, 166, 35, 0.25);
+  }
+
+  .glow-mercury {
+    text-shadow: 0 0 20px rgba(0, 229, 255, 0.35), 0 0 40px rgba(0, 229, 255, 0.12);
+  }
+
+  .glow-quintessence {
+    text-shadow: 0 0 25px rgba(178, 75, 245, 0.4), 0 0 50px rgba(178, 75, 245, 0.15);
+  }
+
+  .glow-emerald {
+    text-shadow: 0 0 20px rgba(0, 230, 118, 0.35);
+  }
+
+  .glow-ruby {
+    text-shadow: 0 0 20px rgba(255, 82, 82, 0.35);
+  }
+
+  /* Box Glows */
+  .box-glow-gold {
+    box-shadow: 0 0 30px rgba(245, 166, 35, 0.1), inset 0 1px 0 rgba(245, 166, 35, 0.08);
+  }
+
+  .box-glow-mercury {
+    box-shadow: 0 0 30px rgba(0, 229, 255, 0.08);
+  }
+
+  .box-glow-quintessence {
+    box-shadow: 0 0 40px rgba(178, 75, 245, 0.12), inset 0 1px 0 rgba(178, 75, 245, 0.1);
+  }
+
+  /* Prompt */
   .prompt {
-    color: var(--fg-dim);
+    color: var(--leather);
   }
 
   .prompt::before {
     content: "> ";
-    color: var(--accent);
+    color: var(--sun);
   }
 
+  /* Command Link */
   .cmd-link {
-    color: var(--fg);
+    color: var(--gold);
     text-decoration: none;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--bronze);
     transition: all 0.2s ease;
   }
 
   .cmd-link:hover {
-    color: var(--accent);
-    border-bottom-color: var(--accent);
+    color: var(--sun);
+    border-bottom-color: var(--sun);
+    text-shadow: 0 0 10px rgba(245, 166, 35, 0.3);
   }
 
-  .btn-cmd {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    background: transparent;
-    color: var(--fg);
-    border: 1px solid var(--border);
-    font-family: inherit;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .btn-cmd:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: rgba(245, 184, 0, 0.05);
-  }
-
-  .btn-cmd-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    background: var(--accent);
-    color: var(--bg);
-    border: 1px solid var(--accent);
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .btn-cmd-primary:hover {
-    background: var(--fg-bright);
-    border-color: var(--fg-bright);
-  }
-
-  .input-cmd {
-    width: 100%;
-    background: transparent;
-    border: none;
-    border-bottom: 1px solid var(--border);
-    padding: 8px 0;
-    color: var(--fg);
-    font-family: inherit;
-    font-size: 14px;
-    outline: none;
-    transition: border-color 0.2s ease;
-  }
-
-  .input-cmd:focus {
-    border-bottom-color: var(--accent);
-  }
-
-  .input-cmd::placeholder {
-    color: var(--fg-dim);
-    opacity: 0.5;
-  }
-
+  /* Panel / Card */
   .panel {
-    border: 1px solid var(--border);
-    background: rgba(255, 255, 255, 0.01);
+    border: 1px solid var(--bronze);
+    background: var(--void-raised);
   }
 
+  /* Divider */
   .divider {
     height: 1px;
-    background: var(--border);
+    background: linear-gradient(90deg, transparent, var(--bronze), transparent);
     width: 100%;
+  }
+
+  /* Heading Display */
+  .heading-display {
+    font-family: "Inter", "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+  }
+
+  /* The Card — Alchemical Vessel */
+  .vessel {
+    background: var(--void-raised);
+    border: 1px solid var(--bronze);
+    transition: all 0.3s ease;
+  }
+
+  .vessel:hover {
+    border-color: var(--bronze-hover);
+    background: var(--void-hover);
+  }
+
+  /* Vessel with inner light */
+  .vessel-lit {
+    background: var(--void-raised);
+    border: 1px solid var(--bronze);
+    border-top: 1px solid rgba(245, 166, 35, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .vessel-lit:hover {
+    border-color: var(--bronze-hover);
+    border-top-color: rgba(245, 166, 35, 0.35);
+    box-shadow: 0 0 30px rgba(245, 166, 35, 0.06);
+  }
+
+  /* Vessel with spiritual light */
+  .vessel-sacred {
+    background: var(--void-raised);
+    border: 1px solid var(--bronze);
+    border-top: 1px solid var(--quintessence-glow);
+    transition: all 0.3s ease;
+  }
+
+  .vessel-sacred:hover {
+    border-color: rgba(178, 75, 245, 0.25);
+    box-shadow: 0 0 40px rgba(178, 75, 245, 0.08);
+  }
+
+  /* Mercury vessel — for information cards */
+  .vessel-mercury {
+    background: var(--void-raised);
+    border: 1px solid var(--bronze);
+    border-left: 2px solid rgba(0, 229, 255, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .vessel-mercury:hover {
+    border-left-color: rgba(0, 229, 255, 0.4);
+    box-shadow: 0 0 25px rgba(0, 229, 255, 0.05);
+  }
+
+  /* Shimmer effect for loading */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      var(--void-raised) 0%,
+      var(--void-hover) 50%,
+      var(--void-raised) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s linear infinite;
   }
 }
 

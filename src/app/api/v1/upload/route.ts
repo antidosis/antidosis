@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 
@@ -12,14 +13,27 @@ function sanitizeFolder(input: string): string {
   return input.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 50) || "general";
 }
 
-function extensionForType(type: string): string {
-  const map: Record<string, string> = {
-    "image/jpeg": "jpg",
-    "image/png": "png",
-    "image/webp": "webp",
-    "image/gif": "gif",
-  };
-  return map[type] || "png";
+function detectTypeFromBuffer(buffer: Buffer): { type: string; ext: string } | null {
+  // JPEG: FF D8 FF
+  if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+    return { type: "image/jpeg", ext: "jpg" };
+  }
+  // PNG: 89 50 4E 47
+  if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47) {
+    return { type: "image/png", ext: "png" };
+  }
+  // GIF: 47 49 46 38
+  if (buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x38) {
+    return { type: "image/gif", ext: "gif" };
+  }
+  // WebP: RIFF....WEBP
+  if (
+    buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46 &&
+    buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50
+  ) {
+    return { type: "image/webp", ext: "webp" };
+  }
+  return null;
 }
 
 export const dynamic = "force-dynamic";
@@ -58,13 +72,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      return NextResponse.json(
-        { error: "Invalid file type. Only images allowed." },
-        { status: 400 }
-      );
-    }
-
     if (file.size > MAX_SIZE) {
       return NextResponse.json(
         { error: "File too large. Max 5MB." },
@@ -72,30 +79,41 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const ext = extensionForType(file.type);
-    const key = `${folder}/${user.id}/${crypto.randomUUID()}.${ext}`;
-
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    const { data, error } = await supabase.storage
+    const detected = detectTypeFromBuffer(buffer);
+    if (!detected) {
+      return NextResponse.json(
+        { error: "Invalid file type. Only JPEG, PNG, WebP, and GIF are allowed." },
+        { status: 400 }
+      );
+    }
+
+    const ext = detected.ext;
+    const key = `${folder}/${user.id}/${crypto.randomUUID()}.${ext}`;
+
+    // Use service role client to bypass RLS on storage bucket
+    const serviceClient = createServiceClient();
+
+    const { data, error } = await serviceClient.storage
       .from("uploads")
       .upload(key, buffer, {
-        contentType: file.type,
+        contentType: detected.type,
         upsert: false, // prevent overwrites
       });
 
     if (error) {
       logger.error("Upload error:", error instanceof Error ? error : undefined);
       return NextResponse.json(
-        { error: "Upload failed: " + error.message },
+        { error: "Upload failed. Please try again." },
         { status: 500 }
       );
     }
 
     const {
       data: { publicUrl },
-    } = supabase.storage.from("uploads").getPublicUrl(data.path);
+    } = serviceClient.storage.from("uploads").getPublicUrl(data.path);
 
     return NextResponse.json({ url: publicUrl, path: data.path });
   } catch (error) {

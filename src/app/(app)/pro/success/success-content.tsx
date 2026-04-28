@@ -41,7 +41,7 @@ export default function SuccessContent() {
 
   if (status === "loading") {
     return (
-      <div className="max-w-md mx-auto py-24 text-center text-[#7a6b4a]">
+      <div className="max-w-md mx-auto py-24 text-center text-[#7a6b5a]">
         confirming subscription with stripe...
       </div>
     );
@@ -50,13 +50,13 @@ export default function SuccessContent() {
   if (status === "error") {
     return (
       <div className="max-w-md mx-auto py-24 text-center">
-        <div className="inline-flex items-center justify-center p-3 border border-[#c97c7c]/20 text-[#c97c7c] mb-6">
+        <div className="inline-flex items-center justify-center p-3 border border-[#ff5252]/20 text-[#ff5252] mb-6">
           <X className="h-8 w-8" />
         </div>
         <h1 className="text-2xl font-bold mb-4">verification failed</h1>
-        <p className="text-[13px] text-[#7a6b4a] mb-8">{errorMsg}</p>
+        <p className="text-[13px] text-[#7a6b5a] mb-8">{errorMsg}</p>
         <Button className="w-full" asChild>
-          <Link href="/pro">$ back_to_pro</Link>
+          <Link href="/pro">Back to Pro</Link>
         </Button>
       </div>
     );
@@ -64,17 +64,17 @@ export default function SuccessContent() {
 
   return (
     <div className="max-w-md mx-auto py-24 text-center">
-      <div className="inline-flex items-center justify-center p-3 border border-[#7cb87c]/20 text-[#7cb87c] mb-6">
+      <div className="inline-flex items-center justify-center p-3 border border-[#00e676]/20 text-[#00e676] mb-6">
         <Check className="h-8 w-8" />
       </div>
       <h1 className="text-2xl font-bold mb-4">welcome to pro</h1>
-      <p className="text-[13px] text-[#7a6b4a] mb-8">
+      <p className="text-[13px] text-[#7a6b5a] mb-8">
         your subscription is active. you are now covered by our dispute
         resolution and loss protection.
       </p>
       <Button className="w-full" asChild>
         <Link href="/needs">
-          $ browse_needs
+          Browse Needs
           <ArrowRight className="ml-2 h-4 w-4" />
         </Link>
       </Button>

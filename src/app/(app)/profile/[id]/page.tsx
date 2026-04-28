@@ -3,152 +3,311 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { MapPin, Star, Briefcase, Shield, ArrowLeft, Phone, Award, FileCheck, Globe } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
+import {
+  MapPin,
+  Star,
+  Briefcase,
+  Shield,
+  ArrowLeft,
+  Phone,
+  Award,
+  FileCheck,
+  Globe,
+  FolderOpen,
+  ClipboardList,
+  MessageSquareText,
+} from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
-export default async function ProfilePage({ params }: { params: { id: string } }) {
+export default async function ProfilePage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const profile = await prisma.profile.findUnique({
     where: { id: params.id },
     include: {
       skills: true,
       socialLinks: { where: { isPublic: true } },
       credentials: { where: { isPublic: true } },
-      needsPosted: { where: { status: "open" }, orderBy: { createdAt: "desc" }, include: { requiredSkills: true, _count: { select: { acceptances: true } } }, take: 10 },
-      reviewsReceived: { orderBy: { createdAt: "desc" }, include: { giver: { select: { fullName: true, avatarUrl: true } }, contract: { select: { need: { select: { title: true } } } } }, take: 10 },
+      needsPosted: {
+        where: { status: "open" },
+        orderBy: { createdAt: "desc" },
+        include: {
+          requiredSkills: true,
+          _count: { select: { acceptances: true } },
+        },
+        take: 10,
+      },
+      reviewsReceived: {
+        orderBy: { createdAt: "desc" },
+        include: {
+          giver: { select: { fullName: true, avatarUrl: true } },
+          contract: { select: { need: { select: { title: true } } } },
+        },
+        take: 10,
+      },
     },
   });
 
   if (!profile) return notFound();
 
+  const username =
+    profile.fullName?.toLowerCase().replace(/\s/g, "_") || "user";
+
   return (
-    <div className="max-w-3xl mx-auto px-4 md:px-8">
+    <div className="max-w-3xl mx-auto px-4 md:px-8 space-y-10 pb-12">
       <div className="py-6">
-        <Link href="/needs" className="inline-flex items-center text-[13px] text-[#7a6b4a] hover:text-[#e8c97c] transition-colors"><ArrowLeft className="mr-2 h-4 w-4" />$ cd ~/needs/</Link>
+        <Link
+          href="/needs"
+          className="inline-flex items-center text-sm text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          $ cd ~/needs/
+        </Link>
       </div>
 
-      <p className="text-[12px] text-[#7a6b4a] mb-4">$ finger {profile.fullName?.toLowerCase().replace(/\s/g, "_") || "user"}</p>
+      <p className="text-xs text-[#7a6b5a] mb-4">$ finger {username}</p>
 
-      <div className="flex flex-col sm:flex-row items-start gap-6 pb-10">
-        <Avatar src={profile.avatarUrl} name={profile.fullName} size="lg" className="h-16 w-16" />
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight">{profile.fullName || "anonymous"}</h1>
-            {profile.isVerified && <Shield className="h-5 w-5 text-[#7cb87c]" />}
-            {profile.isPro && <Badge variant="default">pro</Badge>}
+      {/* Profile Header */}
+      <div className="vessel p-6">
+        <div className="flex flex-col sm:flex-row items-start gap-6">
+          <Avatar src={profile.avatarUrl} name={profile.fullName} size="lg" />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="heading-display text-2xl text-[#e8d5a3]">
+                {profile.fullName || "anonymous"}
+              </h1>
+              {profile.isVerified && (
+                <Shield className="h-5 w-5 text-[#00e676]" />
+              )}
+              {profile.isPro && <Badge variant="default">pro</Badge>}
+            </div>
+            <div className="flex flex-wrap items-center gap-4 text-sm text-[#b8a078] mt-2">
+              {profile.ratingCount > 0 && (
+                <span className="flex items-center gap-1 text-[#f5a623] glow-gold">
+                  <Star className="h-4 w-4 fill-current" />
+                  {profile.ratingAvg.toFixed(1)} ({profile.ratingCount} reviews)
+                </span>
+              )}
+              {profile.jobsCompleted > 0 && (
+                <span className="flex items-center gap-1">
+                  <Briefcase className="h-4 w-4" />
+                  {profile.jobsCompleted} completed
+                </span>
+              )}
+              {profile.locationName && (
+                <span className="flex items-center gap-1">
+                  <MapPin className="h-4 w-4" />
+                  {profile.locationName}
+                </span>
+              )}
+            </div>
+            {profile.bio && (
+              <p className="text-sm text-[#b8a078] mt-4 leading-relaxed">
+                {profile.bio}
+              </p>
+            )}
+            {profile.skills.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-5">
+                {profile.skills.map((skill) => (
+                  <span
+                    key={skill.id}
+                    className="text-xs text-[#b8a078] bg-[#1a1714] border border-[#2a2420] rounded px-2 py-0.5"
+                  >
+                    {skill.name}
+                    {skill.isVerified && (
+                      <span className="ml-1 text-[#00e676]">✓</span>
+                    )}
+                  </span>
+                ))}
+              </div>
+            )}
+            {profile.publicPhone && (
+              <div className="flex items-center gap-2 mt-4 text-sm text-[#b8a078]">
+                <Phone className="h-4 w-4" />
+                {profile.publicPhone}
+              </div>
+            )}
+            {profile.socialLinks.length > 0 && (
+              <div className="flex flex-wrap gap-4 mt-4">
+                {profile.socialLinks.map((link) => (
+                  <a
+                    key={link.id}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-[#b8a078] hover:text-[#e8d5a3] transition-colors capitalize flex items-center gap-1"
+                  >
+                    <Globe className="h-3 w-3" />
+                    {link.platform}
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
-          <div className="flex flex-wrap items-center gap-4 text-[13px] text-[#7a6b4a] mt-2">
-            {profile.ratingCount > 0 && <span className="flex items-center gap-1"><Star className="h-4 w-4" />{profile.ratingAvg.toFixed(1)} ({profile.ratingCount} reviews)</span>}
-            {profile.jobsCompleted > 0 && <span className="flex items-center gap-1"><Briefcase className="h-4 w-4" />{profile.jobsCompleted} completed</span>}
-            {profile.locationName && <span className="flex items-center gap-1"><MapPin className="h-4 w-4" />{profile.locationName}</span>}
-          </div>
-          {profile.bio && <p className="text-[#7a6b4a] mt-4 leading-relaxed">{profile.bio}</p>}
-          {profile.skills.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-5">
-              {profile.skills.map((skill) => <span key={skill.id} className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide border border-[#2a2a2a] text-[#7a6b4a]">{skill.name}{skill.isVerified && <span className="ml-1 text-[#7cb87c]">✓</span>}</span>)}
-            </div>
-          )}
-          {profile.publicPhone && (
-            <div className="flex items-center gap-2 mt-4 text-[13px] text-[#7a6b4a]">
-              <Phone className="h-4 w-4" />{profile.publicPhone}
-            </div>
-          )}
-          {profile.socialLinks.length > 0 && (
-            <div className="flex flex-wrap gap-4 mt-4">
-              {profile.socialLinks.map((link) => <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className="text-[13px] text-[#7a6b4a]/50 hover:text-[#e8c97c] transition-colors capitalize flex items-center gap-1"><Globe className="h-3 w-3" />{link.platform}</a>)}
-            </div>
-          )}
         </div>
       </div>
 
-      {profile.needsPosted.length > 0 && (
-        <div>
-          <div className="divider mb-8" />
-          <p className="text-[12px] text-[#7a6b4a] mb-6">$ ls ~{profile.fullName?.toLowerCase().replace(/\s/g, "_") || "user"}/needs/</p>
-          {profile.needsPosted.map((need, i) => (
-            <div key={need.id}>
-              <Link href={`/needs/${need.id}`} className="block py-5 group">
+      {/* Needs */}
+      <div className="space-y-6">
+        <p className="text-xs text-[#7a6b5a]">$ ls ~{username}/needs/</p>
+        {profile.needsPosted.length === 0 ? (
+          <EmptyState
+            title="No Active Needs"
+            description="This user hasn't posted any open needs yet."
+            icon={<FolderOpen className="h-8 w-8" />}
+          />
+        ) : (
+          <div className="space-y-4">
+            {profile.needsPosted.map((need) => (
+              <Link
+                key={need.id}
+                href={`/needs/${need.id}`}
+                className="block vessel p-5 group"
+              >
                 <div className="flex items-center justify-between">
                   <div className="min-w-0">
-                    <h3 className="font-medium group-hover:text-[#f5b800] transition-colors">{need.title}</h3>
-                    <p className="text-[13px] text-[#7a6b4a] mt-1 line-clamp-1">{need.description}</p>
+                    <h3 className="text-sm font-medium text-[#e8d5a3] group-hover:text-[#f5a623] transition-colors">
+                      {need.title}
+                    </h3>
+                    <p className="text-sm text-[#b8a078] mt-1 line-clamp-1">
+                      {need.description}
+                    </p>
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {need.requiredSkills.map((skill) => <span key={skill.id} className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide border border-[#2a2a2a] text-[#7a6b4a]/50">{skill.name}</span>)}
+                      {need.requiredSkills.map((skill) => (
+                        <span
+                          key={skill.id}
+                          className="px-2 py-0.5 text-xs font-medium uppercase tracking-wide border border-[#2a2420] text-[#7a6b5a]"
+                        >
+                          {skill.name}
+                        </span>
+                      ))}
                     </div>
                   </div>
-                  <span className="shrink-0 text-[11px] text-[#7a6b4a] uppercase tracking-wide">{need._count.acceptances} offer{need._count.acceptances !== 1 ? "s" : ""}</span>
+                  <span className="shrink-0 text-xs text-[#7a6b5a] uppercase tracking-wide">
+                    {need._count.acceptances} offer
+                    {need._count.acceptances !== 1 ? "s" : ""}
+                  </span>
                 </div>
               </Link>
-              {i < profile.needsPosted.length - 1 && <div className="divider" />}
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
 
-      {profile.credentials.length > 0 && (
-        <div>
-          <div className="divider mb-8" />
-          <p className="text-[12px] text-[#7a6b4a] mb-6">$ ls ~{profile.fullName?.toLowerCase().replace(/\s/g, "_") || "user"}/credentials/</p>
-          <div className="space-y-0">
-            {profile.credentials.map((cred, i) => (
-              <div key={cred.id}>
-                <div className="py-4">
-                  <div className="flex items-center gap-2 flex-wrap mb-2">
-                    <Award className="h-4 w-4 text-[#c9b87c]" />
-                    <span className="text-[14px] font-medium">{cred.title}</span>
-                    <span className="px-2 py-0.5 text-[10px] uppercase tracking-wide border border-[#2a2a2a] text-[#7a6b4a]">{cred.type}</span>
-                    {cred.isVerified && <Shield className="h-3.5 w-3.5 text-[#7cb87c]" />}
-                  </div>
-                  <div className="text-[12px] text-[#7a6b4a] space-y-1">
-                    {cred.documentNumber && (
-                      <p>{"*".repeat(Math.max(0, cred.documentNumber.length - 4))}{cred.documentNumber.slice(-4)}</p>
-                    )}
-                    {cred.issuedBy && <p>issued by: {cred.issuedBy}</p>}
-                    {cred.expiresAt && (
-                      <p>expires: {new Date(cred.expiresAt).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}</p>
-                    )}
-                    {cred.fileUrl && (
-                      <a href={cred.fileUrl} target="_blank" rel="noopener noreferrer" className="text-[#f5b800] hover:underline inline-flex items-center gap-1">
-                        <FileCheck className="h-3 w-3" /> view document
-                      </a>
-                    )}
-                  </div>
+      {/* Credentials */}
+      <div className="space-y-6">
+        <p className="text-xs text-[#7a6b5a]">$ ls ~{username}/credentials/</p>
+        {profile.credentials.length === 0 ? (
+          <EmptyState
+            title="No Credentials"
+            description="This user hasn't added any public credentials yet."
+            icon={<ClipboardList className="h-8 w-8" />}
+          />
+        ) : (
+          <div className="space-y-4">
+            {profile.credentials.map((cred) => (
+              <div key={cred.id} className="vessel p-5">
+                <div className="flex items-center gap-2 flex-wrap mb-2">
+                  <Award className="h-4 w-4 text-[#f5a623]" />
+                  <span className="text-sm font-medium text-[#e8d5a3]">
+                    {cred.title}
+                  </span>
+                  <span className="px-2 py-0.5 text-xs uppercase tracking-wide border border-[#2a2420] text-[#7a6b5a]">
+                    {cred.type}
+                  </span>
+                  {cred.isVerified && (
+                    <Shield className="h-3.5 w-3.5 text-[#00e676]" />
+                  )}
                 </div>
-                {i < profile.credentials.length - 1 && <div className="divider" />}
+                <div className="text-sm text-[#b8a078] space-y-1">
+                  {cred.documentNumber && (
+                    <p>
+                      {"*".repeat(
+                        Math.max(0, cred.documentNumber.length - 4)
+                      )}
+                      {cred.documentNumber.slice(-4)}
+                    </p>
+                  )}
+                  {cred.issuedBy && <p>issued by: {cred.issuedBy}</p>}
+                  {cred.expiresAt && (
+                    <p>
+                      expires:{" "}
+                      {new Date(cred.expiresAt).toLocaleDateString("en-AU", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </p>
+                  )}
+                  {cred.fileUrl && (
+                    <a
+                      href={cred.fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#f5a623] hover:underline inline-flex items-center gap-1"
+                    >
+                      <FileCheck className="h-3 w-3" /> view document
+                    </a>
+                  )}
+                </div>
               </div>
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {profile.reviewsReceived.length > 0 && (
-        <div>
-          <div className="divider mb-8" />
-          <p className="text-[12px] text-[#7a6b4a] mb-6">$ cat ~{profile.fullName?.toLowerCase().replace(/\s/g, "_") || "user"}/reviews.log</p>
-          {profile.reviewsReceived.map((review, i) => (
-            <div key={review.id}>
-              <div className="py-5">
+      {/* Reviews */}
+      <div className="space-y-6">
+        <p className="text-xs text-[#7a6b5a]">$ cat ~{username}/reviews.log</p>
+        {profile.reviewsReceived.length === 0 ? (
+          <EmptyState
+            title="No Reviews Yet"
+            description="This user hasn't received any reviews yet."
+            icon={<MessageSquareText className="h-8 w-8" />}
+          />
+        ) : (
+          <div className="space-y-4">
+            {profile.reviewsReceived.map((review) => (
+              <div key={review.id} className="vessel p-5">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <Avatar src={review.giver.avatarUrl} name={review.giver.fullName} size="sm" />
+                    <Avatar
+                      src={review.giver.avatarUrl}
+                      name={review.giver.fullName}
+                      size="sm"
+                    />
                     <div>
-                      <p className="text-[13px] font-medium">{review.giver.fullName || "anonymous"}</p>
-                      {review.contract?.need?.title && <p className="text-[11px] text-[#7a6b4a]/50">{review.contract.need.title}</p>}
+                      <p className="text-sm font-medium text-[#e8d5a3]">
+                        {review.giver.fullName || "anonymous"}
+                      </p>
+                      {review.contract?.need?.title && (
+                        <p className="text-xs text-[#7a6b5a]">
+                          {review.contract.need.title}
+                        </p>
+                      )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 text-[#e8c97c]">
+                  <div className="flex items-center gap-1 text-[#f5a623] glow-gold">
                     <Star className="h-4 w-4 fill-current" />
-                    <span className="text-[13px] font-bold">{review.rating}/10</span>
+                    <span className="text-sm font-bold">
+                      {review.rating}/10
+                    </span>
                   </div>
                 </div>
-                {review.comment && <p className="text-[13px] text-[#7a6b4a] mt-4 leading-relaxed">{review.comment}</p>}
+                {review.comment && (
+                  <p className="text-sm text-[#b8a078] mt-4 leading-relaxed">
+                    {review.comment}
+                  </p>
+                )}
               </div>
-              {i < profile.reviewsReceived.length - 1 && <div className="divider" />}
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

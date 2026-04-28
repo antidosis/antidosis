@@ -3,11 +3,13 @@ import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
+import { normalizeMobile, isValidAustralianMobile } from "@/lib/mobile";
 
 const createProfileSchema = z.object({
   userId: z.string().uuid(),
   email: z.string().email(),
   fullName: z.string().min(1).optional(),
+  mobile: z.string().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -23,7 +25,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { userId, email, fullName } = createProfileSchema.parse(body);
+    const { userId, email, fullName, mobile } = createProfileSchema.parse(body);
 
     // Security: verify the requesting user owns this userId
     if (user.id !== userId) {
@@ -42,12 +44,33 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(existing, { status: 200 });
     }
 
+    let normalizedMobile: string | undefined;
+    if (mobile) {
+      normalizedMobile = normalizeMobile(mobile);
+      if (!isValidAustralianMobile(normalizedMobile)) {
+        return NextResponse.json(
+          { error: "Invalid mobile number. Expected Australian format: +61XXXXXXXXX, 04XXXXXXXX, or 4XXXXXXXX" },
+          { status: 400 }
+        );
+      }
+
+      const mobileExists = await prisma.profile.findUnique({
+        where: { mobile: normalizedMobile },
+      });
+      if (mobileExists) {
+        return NextResponse.json(
+          { error: "Mobile number already in use" },
+          { status: 409 }
+        );
+      }
+    }
+
     const profile = await prisma.profile.create({
       data: {
         userId,
         email,
         fullName: fullName || null,
-        isPro: true, // free during trial period
+        mobile: normalizedMobile || null,
       },
     });
 

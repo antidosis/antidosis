@@ -2,16 +2,17 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center px-2 py-0.5 text-[11px] font-medium tracking-wide uppercase transition-colors font-mono",
+  "inline-flex items-center px-2 py-0.5 text-xs font-medium tracking-wide uppercase transition-colors",
   {
     variants: {
       variant: {
-        default: "bg-[#f5b800] text-[#0c0c0c] font-bold",
-        secondary: "bg-transparent text-[#7a6b4a] border border-[#2a2a2a]",
-        outline: "bg-transparent text-[#7a6b4a] border border-[#2a2a2a]",
-        success: "bg-transparent text-[#7cb87c] border border-[#7cb87c]/30",
-        warning: "bg-transparent text-[#c9b87c] border border-[#c9b87c]/30",
-        destructive: "bg-transparent text-[#c97c7c] border border-[#c97c7c]/30",
+        default: "bg-[#f5a623] text-[#0a0806] font-bold",
+        outline: "bg-transparent text-[#b8a078] border border-[#2a2420]",
+        success: "bg-transparent text-[#00e676] border border-[#00e676]/30",
+        warning: "bg-transparent text-[#ffb300] border border-[#ffb300]/30",
+        destructive: "bg-transparent text-[#ff5252] border border-[#ff5252]/30",
+        mercury: "bg-transparent text-[#00e5ff] border border-[#00e5ff]/30",
+        quintessence: "bg-transparent text-[#b24bf5] border border-[#b24bf5]/30",
       },
     },
     defaultVariants: {

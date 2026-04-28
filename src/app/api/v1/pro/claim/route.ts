@@ -26,14 +26,46 @@ async function handler(req: NextRequest) {
 
     if (!user.email_confirmed_at) {
       return NextResponse.json(
-        { error: "Email verification required" },
+        { error: "Email verification required", code: "EMAIL_NOT_VERIFIED" },
         { status: 403 }
       );
     }
 
-    const profile = await prisma.profile.update({
+    const profile = await prisma.profile.findUnique({
       where: { userId: user.id },
-      data: { isPro: true },
+    });
+
+    if (!profile) {
+      return NextResponse.json(
+        { error: "Profile not found" },
+        { status: 404 }
+      );
+    }
+
+    // Must have verified identity
+    if (!profile.isVerified) {
+      return NextResponse.json(
+        { error: "Identity verification required", code: "IDENTITY_NOT_VERIFIED" },
+        { status: 403 }
+      );
+    }
+
+    // Must have verified mobile
+    if (!profile.mobileVerified) {
+      return NextResponse.json(
+        { error: "Mobile verification required", code: "MOBILE_NOT_VERIFIED" },
+        { status: 403 }
+      );
+    }
+
+    const updatedProfile = await prisma.profile.update({
+      where: { userId: user.id },
+      data: {
+        isPro: true,
+        proActivatedAt: new Date(),
+        proSource: "free_verified",
+        proExpiresAt: null,
+      },
     });
 
     const { ip, userAgent } = getClientInfo(req);
@@ -44,7 +76,7 @@ async function handler(req: NextRequest) {
       ip,
       userAgent,
       path: "/api/v1/pro/claim",
-      metadata: { profileId: profile.id },
+      metadata: { profileId: updatedProfile.id, source: "free_verified" },
     });
 
     return NextResponse.json(

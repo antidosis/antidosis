@@ -45,11 +45,11 @@ export function BootSequence({ onComplete }: { onComplete: () => void }) {
   if (done) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-[#0c0c0c] flex items-center justify-center p-8">
+    <div className="fixed inset-0 z-[100] bg-[#0a0806] flex items-center justify-center p-8">
       <div className="w-full max-w-lg">
         <pre className="text-[13px] leading-relaxed whitespace-pre-wrap">
           {BOOT_LINES.slice(0, visibleLines).map((line, i) => (
-            <div key={i} className={line.text.startsWith("[OK]") ? "text-[#7cb87c]" : ""}>
+            <div key={i} className={line.text.startsWith("[OK]") ? "text-[#00e676]" : ""}>
               {line.text || "\u00A0"}
             </div>
           ))}

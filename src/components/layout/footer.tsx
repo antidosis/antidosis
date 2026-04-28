@@ -2,18 +2,26 @@ import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer className="border-t border-[#2a2a2a]">
-      <div className="px-4 md:px-8 py-10">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-[12px] text-[#7a6b4a]">
-          <div className="flex items-center gap-2">
-            <img src="/images/logo.png" alt="antidosis" className="h-[90px] w-auto opacity-50 hover:opacity-100 transition-opacity" />
-            <span>-- {new Date().getFullYear()}</span>
+    <footer className="border-t border-[#2a2420]">
+      <div className="px-4 md:px-8 py-8">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <img
+              src="/images/logo.png"
+              alt="antidosis"
+              width={80}
+              height={32}
+              className="h-8 w-auto opacity-70 hover:opacity-100 transition-opacity"
+            />
+            <span className="text-xs text-[#7a6b5a]">{new Date().getFullYear()}</span>
           </div>
           <div className="flex items-center gap-6">
-            <Link href="/needs" className="hover:text-[#e8c97c] transition-colors">browse</Link>
-            <Link href="/needs/new" className="hover:text-[#e8c97c] transition-colors">post</Link>
-            <Link href="/terms" className="hover:text-[#e8c97c] transition-colors">terms</Link>
-            <Link href="/privacy" className="hover:text-[#e8c97c] transition-colors">privacy</Link>
+            <Link href="/needs" className="text-xs text-[#b8a078] hover:text-[#e8d5a3] transition-colors">browse</Link>
+            <Link href="/needs/new" className="text-xs text-[#b8a078] hover:text-[#e8d5a3] transition-colors">post</Link>
+            <Link href="/examples" className="text-xs text-[#b8a078] hover:text-[#e8d5a3] transition-colors">examples</Link>
+            <Link href="/how-it-works" className="text-xs text-[#b8a078] hover:text-[#e8d5a3] transition-colors">how it works</Link>
+            <Link href="/terms" className="text-xs text-[#b8a078] hover:text-[#e8d5a3] transition-colors">terms</Link>
+            <Link href="/privacy" className="text-xs text-[#b8a078] hover:text-[#e8d5a3] transition-colors">privacy</Link>
           </div>
         </div>
       </div>

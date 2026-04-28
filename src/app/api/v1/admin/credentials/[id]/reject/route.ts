@@ -1,25 +1,56 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin";
+import { auditLog, getClientInfo } from "@/lib/audit";
 import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(
-  _req: Request,
+  req: Request,
   { params }: { params: { id: string } }
 ) {
   const auth = await requireAdmin();
   if (!auth.authorized) return auth.response;
 
   try {
+    let rejectionReason: string | undefined;
+    try {
+      const body = await req.json();
+      rejectionReason = body.rejectionReason;
+    } catch {
+      // no body, ignore
+    }
+
     const credential = await prisma.credential.update({
       where: { id: params.id },
-      data: { isVerified: false },
+      data: {
+        isVerified: false,
+        rejectionReason: rejectionReason || null,
+      },
       include: {
         profile: {
-          select: { id: true, fullName: true, email: true },
+          select: { id: true, fullName: true, email: true, userId: true },
         },
+      },
+    });
+
+    // Do NOT set Profile.isVerified = false — user might have other verified credentials
+
+    const { ip, userAgent } = getClientInfo(req);
+    await auditLog({
+      event: "CREDENTIAL_UPDATED",
+      userId: credential.profile.userId,
+      email: credential.profile.email,
+      ip,
+      userAgent,
+      path: `/api/v1/admin/credentials/${params.id}/reject`,
+      metadata: {
+        credentialId: credential.id,
+        profileId: credential.profileId,
+        action: "rejected",
+        rejectionReason: rejectionReason || null,
+        adminUserId: auth.user?.id,
       },
     });
 
