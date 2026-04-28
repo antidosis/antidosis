@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
@@ -8,9 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import { TerminalCursor } from "@/components/effects/terminal-cursor";
-import { Eye, EyeOff } from "lucide-react";
-
-export const dynamic = "force-dynamic";
+import { Eye, EyeOff, CheckCircle } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -18,10 +16,29 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailVerified, setEmailVerified] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
   const justRegistered = searchParams.get("registered") === "true";
+
+  // Handle email verification callback from Supabase
+  useEffect(() => {
+    const code = searchParams.get("code");
+    if (code) {
+      setLoading(true);
+      supabase.auth.exchangeCodeForSession(code)
+        .then(({ error }) => {
+          if (error) {
+            setError("verification failed: " + error.message);
+          } else {
+            setEmailVerified(true);
+          }
+          setLoading(false);
+        });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -70,7 +87,16 @@ export default function LoginPage() {
             access your account and manage your exchanges
           </p>
 
-          {justRegistered && (
+          {emailVerified && (
+            <div className="border border-[#00e676]/30 bg-[#00e676]/5 p-5 mb-8 flex items-center gap-3">
+              <CheckCircle className="h-5 w-5 text-[#00e676] flex-shrink-0" />
+              <p className="text-sm text-[#00e676]">
+                email verified. you can now log in.
+              </p>
+            </div>
+          )}
+
+          {justRegistered && !emailVerified && (
             <div className="border border-[#2a2420] bg-[#12100e] p-5 mb-8">
               <p className="text-sm text-[#00e676]">
                 account created. please verify your email before logging in.

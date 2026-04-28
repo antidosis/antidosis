@@ -53,14 +53,15 @@ export async function middleware(request: NextRequest) {
   // Not logged in
   if (!user) {
     const { ip, userAgent } = getClientInfo(request);
-    await auditLog({
+    // Fire-and-forget: don't block the response on audit logging
+    auditLog({
       event: "AUTH_FAILURE",
       ip,
       userAgent,
       path: pathname,
       severity: "warning",
       metadata: { reason: "unauthenticated" },
-    });
+    }).catch(() => {});
 
     if (isProtectedApi) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -71,7 +72,8 @@ export async function middleware(request: NextRequest) {
   // Check email verification
   if (!user.email_confirmed_at) {
     const { ip, userAgent } = getClientInfo(request);
-    await auditLog({
+    // Fire-and-forget: don't block the response on audit logging
+    auditLog({
       event: "AUTH_FAILURE",
       userId: user.id,
       email: user.email,
@@ -80,7 +82,7 @@ export async function middleware(request: NextRequest) {
       path: pathname,
       severity: "warning",
       metadata: { reason: "email_not_verified" },
-    });
+    }).catch(() => {});
 
     if (isProtectedApi) {
       return NextResponse.json(

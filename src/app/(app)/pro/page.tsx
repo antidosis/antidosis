@@ -21,7 +21,7 @@ import {
   Smartphone,
 } from "lucide-react";
 
-export const dynamic = "force-dynamic";
+
 
 type ProfileData = {
   isPro: boolean;
@@ -119,11 +119,10 @@ export default function ProPage() {
       <div className="bg-[#00e676]/10 border border-[#00e676]/30 p-6 mb-12 text-center">
         <div className="flex items-center justify-center gap-2 text-[#00e676] mb-2">
           <Zap className="h-5 w-5" />
-          <span className="font-semibold text-lg">free during trial</span>
+          <span className="font-semibold text-lg">free for trial region members</span>
         </div>
         <p className="text-sm text-[#7a6b5a]">
-          pro is currently free while we build traction. claim it now and keep
-          it when we launch paid tiers.
+          the Central Coast is the first trial region. verify your identity and mobile number to claim free Pro for life. no credit card. no expiry.
         </p>
       </div>
 

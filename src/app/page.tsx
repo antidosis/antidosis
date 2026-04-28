@@ -16,6 +16,7 @@ import { MessageIllustration } from "@/components/visuals/message-illustration";
 import { PostIllustration } from "@/components/visuals/post-illustration";
 import { ReceiveIllustration } from "@/components/visuals/receive-illustration";
 import { HandshakeIllustration } from "@/components/visuals/handshake-illustration";
+import { TickerBanner } from "@/components/layout/ticker-banner";
 
 export default function HomePage() {
   const [booted, setBooted] = useState(false);
@@ -57,8 +58,8 @@ export default function HomePage() {
                     <TerminalCursor />
                   </h1>
                   <p className="text-base text-[#7a6b5a] max-w-md leading-relaxed mb-12">
-                    The Central Coast&apos;s exchange network. Post what you need. Say what you&apos;ll give back. Connect with people you can trust.
-                    Service for service. Item for item. Cash for time. Or any mix. No middlemen. No bullshit.
+                    A marketplace for reciprocal exchange. Post what you need. Say what you&apos;ll give back. Connect with people you can trust.
+                    Service for service. Item for item. Cash for time. Or any mix. No middlemen. No hidden fees.
                   </p>
                   <div className="flex flex-wrap items-center gap-3">
                     <Button asChild size="lg">
@@ -76,6 +77,8 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        <TickerBanner />
 
         <div className="divider" />
 
@@ -213,8 +216,7 @@ export default function HomePage() {
               <span className="text-[#f5a623]">Your Reputation.</span>
             </h2>
             <p className="text-base text-[#7a6b5a] max-w-md mb-10 leading-relaxed">
-              Join the Central Coast community. Post your first need.
-              Become part of a network built on trust.
+              Join the first trial region. Verify your identity, get Pro for free, and help shape the future of exchange.
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <Button asChild size="lg">

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { logger } from "@/lib/logger";
 import { sanitizeUrl } from "@/lib/security/url";
 import { normalizeMobile, isValidAustralianMobile } from "@/lib/mobile";
+import { isValidCentralCoastSuburb } from "@/lib/data/central-coast-suburbs";
 
 export const dynamic = "force-dynamic";
 
@@ -83,6 +84,14 @@ export async function PATCH(req: NextRequest) {
 
     const body = await req.json();
     const data = updateSchema.parse(body);
+
+    // Trial restriction: Central Coast NSW only
+    if (data.locationName && !isValidCentralCoastSuburb(data.locationName)) {
+      return NextResponse.json(
+        { error: "Only Central Coast NSW locations are available during the trial period." },
+        { status: 400 }
+      );
+    }
 
     const { socialLinks, ...profileData } = data;
 

@@ -13,7 +13,7 @@ import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { Briefcase, FileText, HandHelping, User, Loader2, ArrowRight, Star, Shield } from "lucide-react";
 
-export const dynamic = "force-dynamic";
+
 
 type ProfileData = {
   id: string;

@@ -9,7 +9,7 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: [
-          "Inter",
+          "var(--font-sans)",
           "system-ui",
           "-apple-system",
           "BlinkMacSystemFont",
@@ -18,14 +18,14 @@ const config: Config = {
           "sans-serif",
         ],
         heading: [
-          "Inter",
+          "var(--font-sans)",
           "SF Pro Display",
           "Segoe UI",
           "system-ui",
           "sans-serif",
         ],
         mono: [
-          "JetBrains Mono",
+          "var(--font-mono)",
           "SF Mono",
           "Fira Code",
           "Cascadia Code",

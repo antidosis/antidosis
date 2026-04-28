@@ -10,9 +10,7 @@ import { Label } from "@/components/ui/label";
 import { LocationAutocomplete } from "@/components/ui/location-autocomplete";
 import { ImageGallery } from "@/components/ui/image-gallery";
 import { createClient } from "@/lib/supabase/client";
-import { ArrowLeft, Plus, X, MapPin, Globe, Wrench, Package, CircleDollarSign, Camera, ImageIcon, Loader2, Calendar, Clock } from "lucide-react";
-
-export const dynamic = "force-dynamic";
+import { ArrowLeft, Plus, X, MapPin, Wrench, Package, CircleDollarSign, Camera, ImageIcon, Loader2, Calendar, Clock, Info } from "lucide-react";
 
 export default function EditNeedPage() {
   const router = useRouter();
@@ -30,7 +28,7 @@ export default function EditNeedPage() {
   const [offerType, setOfferType] = useState<"service" | "item" | "money">("service");
   const [offerDescription, setOfferDescription] = useState("");
   const [offerValue, setOfferValue] = useState("");
-  const [isLocal, setIsLocal] = useState(true);
+  const isLocal = true; // locked to local during trial
   const [locationFormatted, setLocationFormatted] = useState("");
   const [skillInput, setSkillInput] = useState("");
   const [requiredSkills, setRequiredSkills] = useState<string[]>([]);
@@ -60,7 +58,6 @@ export default function EditNeedPage() {
         setOfferType(need.offerType || "service");
         setOfferDescription(need.offerDescription || "");
         setOfferValue(need.offerValue ? String(need.offerValue) : "");
-        setIsLocal(need.isLocal ?? true);
         setLocationFormatted(need.locationName || "");
         setRequiredSkills(need.requiredSkills?.map((s: any) => s.name) || []);
         setImages(need.images || []);
@@ -95,7 +92,7 @@ export default function EditNeedPage() {
       body: JSON.stringify({
         title, description, offerType, offerDescription,
         offerValue: offerValue ? parseFloat(offerValue) : undefined,
-        isLocal, locationName: locationFormatted,
+        isLocal: true, locationName: locationFormatted,
         requiredSkills, images, offerImages,
         deadline: deadline || undefined,
         timeRange: timeRange || undefined,
@@ -237,48 +234,23 @@ export default function EditNeedPage() {
         <section className="vessel p-5">
           <p className="text-xs text-[#7a6b5a] uppercase tracking-wide font-medium mb-6">[location]</p>
           <div className="space-y-6 max-w-lg">
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsLocal(true)}
-                className={`flex items-center justify-center gap-2 h-auto py-3 px-2 ${
-                  isLocal
-                    ? "border-[#f5a623] bg-[#f5a623]/5 text-[#e8d5a3] hover:bg-[#f5a623]/10 hover:text-[#e8d5a3]"
-                    : "border-[#2a2420] bg-[#0f0c0a] text-[#7a6b5a] hover:text-[#e8d5a3] hover:bg-[#1a1714] hover:border-[#3d3530]"
-                }`}
-              >
-                <MapPin className="h-4 w-4" /><span className="text-sm font-medium">local</span>
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsLocal(false)}
-                className={`flex items-center justify-center gap-2 h-auto py-3 px-2 ${
-                  !isLocal
-                    ? "border-[#f5a623] bg-[#f5a623]/5 text-[#e8d5a3] hover:bg-[#f5a623]/10 hover:text-[#e8d5a3]"
-                    : "border-[#2a2420] bg-[#0f0c0a] text-[#7a6b5a] hover:text-[#e8d5a3] hover:bg-[#1a1714] hover:border-[#3d3530]"
-                }`}
-              >
-                <Globe className="h-4 w-4" /><span className="text-sm font-medium">remote</span>
-              </Button>
+            <div className="bg-[#00e5ff]/10 border border-[#00e5ff]/30 p-4">
+              <div className="flex items-start gap-3">
+                <Info className="h-4 w-4 text-[#00e5ff] mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm text-[#e8d5a3] font-medium">Central Coast NSW trial region</p>
+                  <p className="text-xs text-[#7a6b5a] mt-1">only central coast suburbs are available during the pilot. remote exchanges are temporarily disabled.</p>
+                </div>
+              </div>
             </div>
-            {isLocal && (
-              <div className="space-y-2">
-                <Label>Location Name</Label>
-                <LocationAutocomplete
-                  value={locationFormatted}
-                  onChange={(formatted, _display) => setLocationFormatted(formatted)}
-                  placeholder="type_suburb_name..."
-                />
-              </div>
-            )}
-            {!isLocal && (
-              <div className="space-y-2">
-                <Label>Location Name</Label>
-                <Input placeholder="e.g. anywhere_australia" value={locationFormatted} onChange={(e) => setLocationFormatted(e.target.value)} />
-              </div>
-            )}
+            <div className="space-y-2">
+              <Label>Suburb</Label>
+              <LocationAutocomplete
+                value={locationFormatted}
+                onChange={(formatted, _display) => setLocationFormatted(formatted)}
+                placeholder="type_suburb_name..."
+              />
+            </div>
           </div>
         </section>
 

@@ -10,9 +10,9 @@ import { Label } from "@/components/ui/label";
 import { LocationAutocomplete } from "@/components/ui/location-autocomplete";
 import { ImageGallery } from "@/components/ui/image-gallery";
 import { createClient } from "@/lib/supabase/client";
-import { ArrowLeft, Plus, X, MapPin, Globe, Wrench, Package, CircleDollarSign, Camera, ImageIcon, Lightbulb, Clock, Calendar } from "lucide-react";
+import { ArrowLeft, Plus, X, MapPin, Wrench, Package, CircleDollarSign, Camera, ImageIcon, Lightbulb, Clock, Calendar, Info } from "lucide-react";
 
-export const dynamic = "force-dynamic";
+
 
 export default function CreateNeedPage() {
   const router = useRouter();
@@ -25,9 +25,8 @@ export default function CreateNeedPage() {
   const [offerType, setOfferType] = useState<"service" | "item" | "money">("service");
   const [offerDescription, setOfferDescription] = useState("");
   const [offerValue, setOfferValue] = useState("");
-  const [isLocal, setIsLocal] = useState(true);
+  const isLocal = true;
   const [locationFormatted, setLocationFormatted] = useState("");
-  const [locationDisplay, setLocationDisplay] = useState("");
   const [skillInput, setSkillInput] = useState("");
   const [requiredSkills, setRequiredSkills] = useState<string[]>([]);
   const [images, setImages] = useState<string[]>([]);
@@ -56,7 +55,7 @@ export default function CreateNeedPage() {
       body: JSON.stringify({
         title, description, offerType, offerDescription,
         offerValue: offerValue ? parseFloat(offerValue) : undefined,
-        isLocal, locationName: locationFormatted,
+        isLocal: true, locationName: locationFormatted,
         requiredSkills, images, offerImages,
         deadline: deadline || undefined,
         timeRange: timeRange || undefined,
@@ -196,49 +195,24 @@ export default function CreateNeedPage() {
         <section className="vessel p-5">
           <p className="text-xs text-[#7a6b5a] uppercase tracking-wide font-medium mb-6">[location]</p>
           <div className="space-y-6 max-w-lg">
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsLocal(true)}
-                className={`flex items-center justify-center gap-2 h-auto py-3 px-2 ${
-                  isLocal
-                    ? "border-[#f5a623] bg-[#f5a623]/5 text-[#e8d5a3] hover:bg-[#f5a623]/10 hover:text-[#e8d5a3]"
-                    : "border-[#2a2420] bg-[#0f0c0a] text-[#7a6b5a] hover:text-[#e8d5a3] hover:bg-[#1a1714] hover:border-[#3d3530]"
-                }`}
-              >
-                <MapPin className="h-4 w-4" /><span className="text-sm font-medium">local</span>
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsLocal(false)}
-                className={`flex items-center justify-center gap-2 h-auto py-3 px-2 ${
-                  !isLocal
-                    ? "border-[#f5a623] bg-[#f5a623]/5 text-[#e8d5a3] hover:bg-[#f5a623]/10 hover:text-[#e8d5a3]"
-                    : "border-[#2a2420] bg-[#0f0c0a] text-[#7a6b5a] hover:text-[#e8d5a3] hover:bg-[#1a1714] hover:border-[#3d3530]"
-                }`}
-              >
-                <Globe className="h-4 w-4" /><span className="text-sm font-medium">remote</span>
-              </Button>
+            <div className="bg-[#00e5ff]/10 border border-[#00e5ff]/30 p-4">
+              <div className="flex items-start gap-3">
+                <Info className="h-4 w-4 text-[#00e5ff] mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-sm text-[#e8d5a3] font-medium">Central Coast NSW trial region</p>
+                  <p className="text-xs text-[#7a6b5a] mt-1">only central coast suburbs are available during the pilot. remote exchanges are temporarily disabled.</p>
+                </div>
+              </div>
             </div>
-            {isLocal && (
-              <div className="space-y-2">
-                <Label>Location Name</Label>
-                <LocationAutocomplete
-                  value={locationFormatted}
-                  onChange={(formatted, display) => { setLocationFormatted(formatted); setLocationDisplay(display); }}
-                  placeholder="type_suburb_name..."
-                />
-                <p className="text-xs text-[#7a6b5a]">central coast trial: all suburbs autocomplete. try &quot;terrigal&quot; or &quot;2250&quot;</p>
-              </div>
-            )}
-            {!isLocal && (
-              <div className="space-y-2">
-                <Label>Location Name</Label>
-                <Input placeholder="e.g. anywhere_australia" value={locationFormatted} onChange={(e) => setLocationFormatted(e.target.value)} />
-              </div>
-            )}
+            <div className="space-y-2">
+              <Label>Suburb</Label>
+              <LocationAutocomplete
+                value={locationFormatted}
+                onChange={(formatted) => { setLocationFormatted(formatted); }}
+                placeholder="type_suburb_name..."
+              />
+              <p className="text-xs text-[#7a6b5a]">all central coast suburbs autocomplete. try &quot;terrigal&quot; or &quot;2250&quot;</p>
+            </div>
           </div>
         </section>
 

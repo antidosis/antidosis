@@ -301,15 +301,8 @@ export async function PATCH(
 
         if (!fresh) throw new Error("Contract not found during transaction");
 
-        // If both agreed and not yet locked, lock terms and update related records
+        // If both agreed and not yet locked, lock terms
         if (fresh.partyAAgreedAt && fresh.partyBAgreedAt && !fresh.termsLockedAt) {
-          await tx.acceptance.updateMany({
-            where: {
-              needId: fresh.needId,
-              status: { in: ["pending", "accepted"] },
-            },
-            data: { status: "declined" },
-          });
           await tx.need.update({
             where: { id: fresh.needId },
             data: { status: "contracted" },

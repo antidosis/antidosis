@@ -24,7 +24,7 @@ import {
   Info,
 } from "lucide-react";
 
-export const dynamic = "force-dynamic";
+
 
 type ContractData = {
   id: string;
@@ -238,7 +238,7 @@ export default function ContractPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
-    fetchContract();
+    await fetchContract();
   }
 
   async function agreeToTerms() {

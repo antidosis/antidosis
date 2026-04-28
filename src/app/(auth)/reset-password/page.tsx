@@ -10,8 +10,6 @@ import { TerminalCursor } from "@/components/effects/terminal-cursor";
 import { validatePassword, getPasswordStrength } from "@/lib/security/password";
 import { Check, X, Eye, EyeOff, Loader2 } from "lucide-react";
 
-export const dynamic = "force-dynamic";
-
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");

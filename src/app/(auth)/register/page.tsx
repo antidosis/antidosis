@@ -12,8 +12,6 @@ import { validatePassword, getPasswordStrength } from "@/lib/security/password";
 import { isValidAustralianMobile, normalizeMobile } from "@/lib/mobile";
 import { Check, X, Eye, EyeOff, Smartphone } from "lucide-react";
 
-export const dynamic = "force-dynamic";
-
 export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");

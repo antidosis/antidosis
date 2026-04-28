@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/ui/empty-state";
-import { MapPin, ArrowRight, CircleDollarSign, Wrench, Package, Search, Loader2, X } from "lucide-react";
+import { MapPin, ArrowRight, CircleDollarSign, Wrench, Package, Search, Loader2, X, Info } from "lucide-react";
 
-export const dynamic = "force-dynamic";
+
 
 type NeedItem = {
   id: string;
@@ -73,6 +73,16 @@ export default function NeedsPage() {
         <Button asChild variant="default">
           <Link href="/needs/new">Post Need <ArrowRight className="ml-1 h-4 w-4" /></Link>
         </Button>
+      </div>
+
+      <div className="bg-[#00e5ff]/10 border border-[#00e5ff]/30 p-4 mb-6">
+        <div className="flex items-start gap-3">
+          <Info className="h-4 w-4 text-[#00e5ff] mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="text-sm text-[#e8d5a3] font-medium">Central Coast NSW pilot</p>
+            <p className="text-xs text-[#7a6b5a] mt-1">all needs are local to the Central Coast region during the trial. remote exchanges will be available soon.</p>
+          </div>
+        </div>
       </div>
 
       <div className="vessel p-5 mb-8">

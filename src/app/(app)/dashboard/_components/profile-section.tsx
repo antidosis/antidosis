@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { FileUpload } from "@/components/ui/file-upload";
 import { LocationAutocomplete } from "@/components/ui/location-autocomplete";
-import { Pencil, CheckCircle2, Globe, Lock, Phone, ChevronDown, ChevronUp, Plus, X, Smartphone, ShieldAlert, ArrowRight } from "lucide-react";
+import { Pencil, CheckCircle2, Globe, Lock, Phone, ChevronDown, ChevronUp, Plus, X, Smartphone, ShieldAlert, ArrowRight, Info } from "lucide-react";
 
 const PLATFORMS = ["instagram", "facebook", "linkedin", "twitter", "website", "github", "other"];
 
@@ -240,6 +240,12 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
           <div className="space-y-2">
             <Label>Location</Label>
             <LocationAutocomplete value={editForm.locationName} onChange={(formatted) => setEditForm({ ...editForm, locationName: formatted })} placeholder="Search suburb..." />
+            <div className="bg-[#00e5ff]/10 border border-[#00e5ff]/30 p-3 mt-2">
+              <div className="flex items-start gap-2">
+                <Info className="h-3.5 w-3.5 text-[#00e5ff] mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-[#7a6b5a]">Central Coast NSW is the trial region. Only Central Coast suburbs are available during the pilot.</p>
+              </div>
+            </div>
           </div>
           <div className="space-y-2">
             <Label>Bio</Label>

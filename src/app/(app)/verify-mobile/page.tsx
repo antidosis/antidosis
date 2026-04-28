@@ -17,8 +17,6 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
-export const dynamic = "force-dynamic";
-
 export default function VerifyMobilePage() {
   const router = useRouter();
   const supabase = createClient();

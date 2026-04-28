@@ -22,8 +22,6 @@ interface ProProfile {
   credentials: { id: string }[];
 }
 
-export const dynamic = "force-dynamic";
-
 export default function ProsDirectoryPage() {
   const [pros, setPros] = useState<ProProfile[]>([]);
   const [loading, setLoading] = useState(true);

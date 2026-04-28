@@ -48,6 +48,8 @@ model Profile {
   needMessages    NeedMessage[]
   notifications   Notification[]
 
+  @@index([isPro])
+  @@index([stripeCustomerId])
   @@map("profiles")
 }
 
@@ -98,9 +100,11 @@ model Need {
   poster         Profile      @relation("NeedPoster", fields: [posterId], references: [id], onDelete: Cascade)
   requiredSkills NeedSkill[]
   acceptances    Acceptance[]
-  contract       Contract?
+  contracts      Contract[]
   messages       NeedMessage[]
 
+  @@index([status, createdAt])
+  @@index([posterId])
   @@map("needs")
 }
 
@@ -110,6 +114,7 @@ model NeedSkill {
   name   String
   need   Need   @relation(fields: [needId], references: [id], onDelete: Cascade)
 
+  @@index([needId, name])
   @@map("need_skills")
 }
 
@@ -132,7 +137,8 @@ model Acceptance {
 
 model Contract {
   id              String    @id @default(uuid())
-  needId          String    @unique @map("need_id")
+  needId          String    @map("need_id")
+  acceptanceId    String?   @unique @map("acceptance_id")
   partyAId        String    @map("party_a_id")
   partyBId        String    @map("party_b_id")
   terms           String
@@ -187,6 +193,7 @@ model NeedMessage {
 
   @@map("need_messages")
   @@index([needId])
+  @@index([needId, createdAt])
   @@index([senderId])
 }
 
@@ -203,6 +210,7 @@ model Message {
 
   @@map("messages")
   @@index([contractId])
+  @@index([contractId, createdAt])
   @@index([senderId])
 }
 
@@ -221,6 +229,8 @@ model Review {
   receiver Profile  @relation("ReviewReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
 
   @@unique([contractId, giverId])
+  @@index([receiverId])
+  @@index([contractId])
   @@map("reviews")
 }
 
@@ -245,6 +255,8 @@ model Credential {
 
   @@map("credentials")
   @@index([profileId])
+  @@index([profileId, isPublic])
+  @@index([isVerified])
   @@index([type])
 }
 
@@ -297,3 +309,6 @@ model AuditLog {
   @@index([createdAt])
   @@map("audit_logs")
 }
+
+// Note: Additional Profile indexes
+// isPro, stripeCustomerId, showInDirectory are added via migration

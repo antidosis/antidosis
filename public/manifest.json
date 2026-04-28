@@ -1,11 +1,11 @@
 {
   "name": "Antidosis",
   "short_name": "Antidosis",
-  "description": "Exchange skills. Build trust.",
+  "description": "A marketplace for reciprocal exchange. Post what you need. Say what you'll give back. The Central Coast is the first trial region.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#09090b",
-  "theme_color": "#09090b",
+  "background_color": "#0a0806",
+  "theme_color": "#0a0806",
   "orientation": "portrait",
   "icons": [
     {

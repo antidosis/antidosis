@@ -58,10 +58,10 @@ const examples = [
   },
   {
     id: 7,
-    needTitle: "Old iPhone 12, unlocked",
-    needDescription: "64GB, good condition, screen protector on since new. Battery health 85%.",
-    offerType: "service" as const,
-    offerDescription: "I'll tutor your kid in maths (up to Year 10)",
+    needTitle: "Maths tutor for my teenager",
+    needDescription: "Year 10 student falling behind in algebra and trig. Needs one hour a week after school, either at our place or online.",
+    offerType: "item" as const,
+    offerDescription: "An old iPhone 12, unlocked, 64GB — good condition, battery health 85%",
     location: "Woy Woy",
   },
   {
@@ -124,7 +124,7 @@ export default function ExamplesPage() {
               <span className="text-[#f5a623]">Exchange?</span>
             </h1>
             <p className="text-base text-[#7a6b5a] max-w-lg leading-relaxed mb-10">
-              Real Central Coast needs. Real exchanges. Service for service. Item for item. Cash for time. Or any mix you can imagine.
+              Real exchanges happening right now. Service for service. Item for item. Cash for time. Or any mix you can imagine.
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <Button asChild size="lg">
@@ -198,7 +198,7 @@ export default function ExamplesPage() {
               <span className="text-[#f5a623]">in Mind?</span>
             </h2>
             <p className="text-base text-[#7a6b5a] max-w-md mb-10 leading-relaxed">
-              These are just examples. Your need is unique. Post it and see who on the Central Coast can help.
+              These are just examples. Your need is unique. Post it and see who can help.
             </p>
             <Button asChild size="lg">
               <Link href="/needs/new">Post a Need <ArrowRight className="ml-2 h-4 w-4" /></Link>

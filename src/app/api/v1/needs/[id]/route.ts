@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
 import { sanitizePlainText } from "@/lib/security/sanitize";
 import { sanitizeUrlArray } from "@/lib/security/url";
+import { isValidCentralCoastSuburb } from "@/lib/data/central-coast-suburbs";
 import { z } from "zod";
 
 const updateNeedSchema = z.object({
@@ -36,22 +37,31 @@ export async function GET(
     const need = await prisma.need.findUnique({
       where: { id: params.id },
       include: {
-        poster: {
-          select: {
-            id: true,
-            fullName: true,
-            avatarUrl: true,
-            bio: true,
-            ratingAvg: true,
-            ratingCount: true,
-            locationName: true,
-            isVerified: true,
-            isPro: true,
-            jobsCompleted: true,
-            skills: true,
-            socialLinks: { where: { isPublic: true } },
-          },
-        },
+        poster: isAuthenticated
+          ? {
+              select: {
+                id: true,
+                fullName: true,
+                avatarUrl: true,
+                bio: true,
+                ratingAvg: true,
+                ratingCount: true,
+                locationName: true,
+                isVerified: true,
+                isPro: true,
+                jobsCompleted: true,
+                skills: true,
+                socialLinks: { where: { isPublic: true } },
+              },
+            }
+          : {
+              select: {
+                id: true,
+                fullName: true,
+                avatarUrl: true,
+                isVerified: true,
+              },
+            },
         requiredSkills: true,
         acceptances: isAuthenticated
           ? {
@@ -68,8 +78,9 @@ export async function GET(
               },
             }
           : false,
-        contract: isAuthenticated
+        contracts: isAuthenticated
           ? {
+              where: { status: { not: "cancelled" } },
               include: {
                 partyA: { select: { id: true, fullName: true } },
                 partyB: { select: { id: true, fullName: true } },
@@ -81,6 +92,18 @@ export async function GET(
 
     if (!need) {
       return NextResponse.json({ error: "Need not found" }, { status: 404 });
+    }
+
+    // Normalize poster fields for guests so the client doesn't crash
+    if (!isAuthenticated && need.poster) {
+      (need.poster as any).bio = null;
+      (need.poster as any).ratingAvg = 0;
+      (need.poster as any).ratingCount = 0;
+      (need.poster as any).locationName = null;
+      (need.poster as any).isPro = false;
+      (need.poster as any).jobsCompleted = 0;
+      (need.poster as any).skills = [];
+      (need.poster as any).socialLinks = [];
     }
 
     return NextResponse.json({ need });
@@ -114,7 +137,7 @@ export async function PATCH(
 
     const existingNeed = await prisma.need.findUnique({
       where: { id: params.id },
-      select: { posterId: true, status: true },
+      select: { posterId: true, status: true, isLocal: true },
     });
     if (!existingNeed) {
       return NextResponse.json({ error: "Need not found" }, { status: 404 });
@@ -128,6 +151,16 @@ export async function PATCH(
 
     const body = await req.json();
     const data = updateNeedSchema.parse(body);
+
+    // Trial restriction: Central Coast NSW only
+    const isLocal = data.isLocal ?? existingNeed.isLocal ?? true;
+    const locationName = data.locationName ?? undefined;
+    if (!isLocal || (locationName !== undefined && !isValidCentralCoastSuburb(locationName))) {
+      return NextResponse.json(
+        { error: "Only Central Coast NSW locations are available during the trial period." },
+        { status: 400 }
+      );
+    }
 
     const updateData: any = {};
     if (data.title !== undefined) updateData.title = sanitizePlainText(data.title);

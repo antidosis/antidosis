@@ -1,4 +1,5 @@
 import * as React from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 interface AvatarProps {
@@ -8,12 +9,20 @@ interface AvatarProps {
   className?: string;
 }
 
+const sizePixels = {
+  sm: 32,
+  md: 40,
+  lg: 56,
+};
+
 export function Avatar({ src, name, size = "md", className }: AvatarProps) {
   const sizeClasses = {
     sm: "h-8 w-8 text-[10px]",
     md: "h-10 w-10 text-xs",
     lg: "h-14 w-14 text-sm",
   };
+
+  const px = sizePixels[size];
 
   const initials = name
     ?.split(" ")
@@ -31,13 +40,16 @@ export function Avatar({ src, name, size = "md", className }: AvatarProps) {
       )}
     >
       {src ? (
-        <img
+        <Image
           src={src}
           alt={name || "Avatar"}
+          width={px}
+          height={px}
           className="h-full w-full object-cover"
           onError={(e) => {
-            (e.target as HTMLImageElement).style.display = "none";
+            (e.currentTarget as HTMLImageElement).style.display = "none";
           }}
+          unoptimized={src.startsWith("data:")}
         />
       ) : null}
       <span className="text-[#b8a078] font-medium">{initials}</span>

@@ -15,20 +15,33 @@ async function getAuthorizedProfile(userId: string, needId: string) {
 
   const need = await prisma.need.findUnique({
     where: { id: needId },
-    select: { posterId: true },
+    select: { posterId: true, status: true },
   });
   if (!need) return null;
 
   // Poster can always access
-  if (need.posterId === profile.id) return profile;
+  if (need.posterId === profile.id) return { ...profile, isPoster: true as const };
 
-  // User must have an acceptance on this need
+  // User with an existing acceptance can access
   const acceptance = await prisma.acceptance.findFirst({
     where: { needId, userId: profile.id },
   });
-  if (acceptance) return profile;
+  if (acceptance) return { ...profile, isPoster: false as const };
 
-  return null;
+  // Need must be open for new users to join the conversation
+  if (need.status !== "open") return null;
+
+  // Auto-create a pending acceptance for any authenticated user on an open need
+  await prisma.acceptance.create({
+    data: {
+      needId,
+      userId: profile.id,
+      status: "pending",
+      message: null,
+    },
+  });
+
+  return { ...profile, isPoster: false as const };
 }
 
 export async function GET(

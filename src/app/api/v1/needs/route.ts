@@ -6,6 +6,7 @@ import { auditLog, getClientInfo } from "@/lib/audit";
 import { logger } from "@/lib/logger";
 import { sanitizePlainText } from "@/lib/security/sanitize";
 import { sanitizeUrlArray } from "@/lib/security/url";
+import { isValidCentralCoastSuburb } from "@/lib/data/central-coast-suburbs";
 import { z } from "zod";
 
 const createNeedSchema = z.object({
@@ -81,7 +82,14 @@ export async function GET(req: NextRequest) {
       take: 50,
     });
 
-    return NextResponse.json({ needs });
+    return NextResponse.json(
+      { needs },
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=30, stale-while-revalidate=300",
+        },
+      }
+    );
   } catch (error) {
     logger.error("[API:/api/v1/needs GET]", error instanceof Error ? error : undefined);
     return NextResponse.json(
@@ -135,6 +143,14 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const data = createNeedSchema.parse(body);
+
+    // Trial restriction: Central Coast NSW only
+    if (!data.isLocal || !data.locationName || !isValidCentralCoastSuburb(data.locationName)) {
+      return NextResponse.json(
+        { error: "Only Central Coast NSW locations are available during the trial period." },
+        { status: 400 }
+      );
+    }
 
     const need = await prisma.need.create({
       data: {

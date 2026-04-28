@@ -177,3 +177,7 @@ export function findSuburb(query: string): Suburb[] {
       s.formatted.includes(q.replace(/\s/g, "_"))
   ).slice(0, 8);
 }
+
+export function isValidCentralCoastSuburb(formatted: string): boolean {
+  return CENTRAL_COAST_SUBURBS.some((s) => s.formatted === formatted);
+}

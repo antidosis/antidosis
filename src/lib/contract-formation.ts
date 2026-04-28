@@ -3,11 +3,78 @@ import { sendContractFormedEmail } from "@/lib/email";
 import { createNotification } from "@/lib/notifications";
 import { logger } from "@/lib/logger";
 
+async function notifyContractFormed(data: {
+  contractId: string;
+  needId: string;
+  needTitle: string;
+  posterId: string;
+  fulfillerId: string;
+}) {
+  try {
+    const [posterProfile, fulfillerProfile] = await Promise.all([
+      prisma.profile.findUnique({
+        where: { id: data.posterId },
+        select: { email: true, fullName: true },
+      }),
+      prisma.profile.findUnique({
+        where: { id: data.fulfillerId },
+        select: { email: true, fullName: true },
+      }),
+    ]);
+
+    if (posterProfile?.email) {
+      await sendContractFormedEmail(
+        posterProfile.email,
+        data.needTitle,
+        fulfillerProfile?.fullName || "the fulfiller",
+        data.contractId
+      );
+    }
+    if (fulfillerProfile?.email) {
+      await sendContractFormedEmail(
+        fulfillerProfile.email,
+        data.needTitle,
+        posterProfile?.fullName || "the poster",
+        data.contractId
+      );
+    }
+
+    await createNotification({
+      userId: data.posterId,
+      type: "contract_formed",
+      title: "Contract formed",
+      body: `A contract has been formed for "${data.needTitle}"`,
+      data: { needId: data.needId, contractId: data.contractId },
+    });
+
+    await createNotification({
+      userId: data.fulfillerId,
+      type: "contract_formed",
+      title: "Contract formed",
+      body: `A contract has been formed for "${data.needTitle}"`,
+      data: { needId: data.needId, contractId: data.contractId },
+    });
+  } catch (notifyErr) {
+    logger.error(
+      "Contract formation notification failed:",
+      notifyErr instanceof Error ? notifyErr : undefined
+    );
+  }
+}
+
 export async function createContractFromAcceptance(
   acceptanceId: string,
   posterProfileId: string
 ) {
-  return await prisma.$transaction(async (tx) => {
+  let notifyData: {
+    contractId: string;
+    needId: string;
+    needTitle: string;
+    posterId: string;
+    fulfillerId: string;
+  } | null = null;
+
+  const contract = await prisma.$transaction(async (tx) => {
     const acceptance = await tx.acceptance.findUnique({
       where: { id: acceptanceId },
       include: { need: true },
@@ -25,14 +92,14 @@ export async function createContractFromAcceptance(
       throw new Error("Only the need poster can form a contract");
     }
 
-    // Handle existing contract for this need (e.g. after cancellation)
+    // Handle existing contract for this acceptance (e.g. after cancellation)
     const existingContract = await tx.contract.findUnique({
-      where: { needId: acceptance.needId },
+      where: { acceptanceId: acceptance.id },
     });
 
     if (existingContract) {
       if (existingContract.status !== "cancelled") {
-        throw new Error("A contract already exists for this need");
+        throw new Error("A contract already exists for this acceptance");
       }
       // Clean up old cancelled contract and its dependent records
       await tx.review.deleteMany({ where: { contractId: existingContract.id } });
@@ -72,9 +139,10 @@ export async function createContractFromAcceptance(
     // The declination happens in the contract PATCH when terms are locked.
 
     // Create contract draft with new terms structure
-    const contract = await tx.contract.create({
+    const created = await tx.contract.create({
       data: {
         needId: acceptance.needId,
+        acceptanceId: acceptance.id,
         partyAId: acceptance.need.posterId,
         partyBId: acceptance.userId,
         terms: JSON.stringify({
@@ -106,61 +174,22 @@ export async function createContractFromAcceptance(
       data: { status: "selected" },
     });
 
-    // Keep need status as "negotiating" until terms are agreed
-    // It will be updated to "contracted" when terms are locked
+    // Capture notification data for after transaction
+    notifyData = {
+      contractId: created.id,
+      needId: acceptance.needId,
+      needTitle: need?.title || "your need",
+      posterId: acceptance.need.posterId,
+      fulfillerId: acceptance.userId,
+    };
 
-    // Notify both parties
-    try {
-      const [posterProfile, fulfillerProfile] = await Promise.all([
-        tx.profile.findUnique({
-          where: { id: acceptance.need.posterId },
-          select: { email: true, fullName: true },
-        }),
-        tx.profile.findUnique({
-          where: { id: acceptance.userId },
-          select: { email: true, fullName: true },
-        }),
-      ]);
-
-      if (posterProfile?.email) {
-        await sendContractFormedEmail(
-          posterProfile.email,
-          need?.title || "your need",
-          fulfillerProfile?.fullName || "the fulfiller",
-          contract.id
-        );
-      }
-      if (fulfillerProfile?.email) {
-        await sendContractFormedEmail(
-          fulfillerProfile.email,
-          need?.title || "your need",
-          posterProfile?.fullName || "the poster",
-          contract.id
-        );
-      }
-
-      await createNotification({
-        userId: acceptance.need.posterId,
-        type: "contract_formed",
-        title: "Contract formed",
-        body: `A contract has been formed for "${need?.title || "your need"}"`,
-        data: { needId: acceptance.needId, contractId: contract.id },
-      });
-
-      await createNotification({
-        userId: acceptance.userId,
-        type: "contract_formed",
-        title: "Contract formed",
-        body: `A contract has been formed for "${need?.title || "your need"}"`,
-        data: { needId: acceptance.needId, contractId: contract.id },
-      });
-    } catch (notifyErr) {
-      logger.error(
-        "Contract formation notification failed:",
-        notifyErr instanceof Error ? notifyErr : undefined
-      );
-    }
-
-    return contract;
+    return created;
   });
+
+  // Notify both parties (fire-and-forget after transaction commits)
+  if (notifyData) {
+    notifyContractFormed(notifyData);
+  }
+
+  return contract;
 }

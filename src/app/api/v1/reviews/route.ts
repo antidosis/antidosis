@@ -92,21 +92,18 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Update receiver's rating average
-    const receiverReviews = await prisma.review.findMany({
+    // Update receiver's rating average using aggregate (fast, no unbounded fetch)
+    const agg = await prisma.review.aggregate({
       where: { receiverId },
-      select: { rating: true },
+      _avg: { rating: true },
+      _count: { rating: true },
     });
-
-    const avg =
-      receiverReviews.reduce((sum, r) => sum + r.rating, 0) /
-      receiverReviews.length;
 
     await prisma.profile.update({
       where: { id: receiverId },
       data: {
-        ratingAvg: avg,
-        ratingCount: receiverReviews.length,
+        ratingAvg: agg._avg.rating ?? 0,
+        ratingCount: agg._count.rating,
       },
     });
 

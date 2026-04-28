@@ -63,13 +63,13 @@ export async function PATCH(
 
     // If selected, form contract (this is the big one)
     if (status === "selected") {
-      // Prevent forming a contract if one already exists and is not cancelled
+      // Prevent forming a contract if one already exists for this acceptance
       const existingContract = await prisma.contract.findUnique({
-        where: { needId: acceptance.needId },
+        where: { acceptanceId: acceptance.id },
       });
       if (existingContract && existingContract.status !== "cancelled") {
         return NextResponse.json(
-          { error: "A contract already exists for this need. Cancel it first to form a new one." },
+          { error: "A contract already exists for this acceptance. Cancel it first to form a new one." },
           { status: 409 }
         );
       }
@@ -94,33 +94,35 @@ export async function PATCH(
         data: { status: "negotiating" },
       });
 
-      // Notify fulfiller that their offer was accepted
-      try {
-        const fulfillerProfile = await prisma.profile.findUnique({
-          where: { id: acceptance.userId },
-          select: { email: true, fullName: true },
-        });
-        if (fulfillerProfile?.email) {
-          await sendInterestAcceptedEmail(
-            fulfillerProfile.email,
-            acceptance.need.title,
-            profile.fullName || "the poster",
-            acceptance.needId
+      // Notify fulfiller that their offer was accepted (fire-and-forget)
+      (async () => {
+        try {
+          const fulfillerProfile = await prisma.profile.findUnique({
+            where: { id: acceptance.userId },
+            select: { email: true, fullName: true },
+          });
+          if (fulfillerProfile?.email) {
+            await sendInterestAcceptedEmail(
+              fulfillerProfile.email,
+              acceptance.need.title,
+              profile.fullName || "the poster",
+              acceptance.needId
+            );
+          }
+          await createNotification({
+            userId: acceptance.userId,
+            type: "offer_accepted",
+            title: "Interest accepted",
+            body: `Your interest in "${acceptance.need.title}" was accepted. Waiting for contract formation.`,
+            data: { needId: acceptance.needId, acceptanceId: acceptance.id },
+          });
+        } catch (notifyErr) {
+          logger.error(
+            "Offer accepted notification failed:",
+            notifyErr instanceof Error ? notifyErr : undefined
           );
         }
-        await createNotification({
-          userId: acceptance.userId,
-          type: "offer_accepted",
-          title: "Interest accepted",
-          body: `Your interest in "${acceptance.need.title}" was accepted. Waiting for contract formation.`,
-          data: { needId: acceptance.needId, acceptanceId: acceptance.id },
-        });
-      } catch (notifyErr) {
-        logger.error(
-          "Offer accepted notification failed:",
-          notifyErr instanceof Error ? notifyErr : undefined
-        );
-      }
+      })();
 
       return NextResponse.json({ acceptance: updated });
     }

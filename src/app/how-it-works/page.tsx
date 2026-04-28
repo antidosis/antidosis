@@ -270,7 +270,7 @@ export default function HowItWorksPage() {
               <span className="text-[#f5a623]">Start?</span>
             </h2>
             <p className="text-base text-[#7a6b5a] max-w-md mb-10 leading-relaxed">
-              Join the Central Coast community. Post your first need or browse what&apos;s available.
+              Be part of the first region. Verify your identity, get Pro for free, and help build the future of exchange.
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <Button asChild size="lg">
