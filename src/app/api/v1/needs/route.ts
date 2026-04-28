@@ -10,18 +10,18 @@ import { isValidCentralCoastSuburb } from "@/lib/data/central-coast-suburbs";
 import { z } from "zod";
 
 const createNeedSchema = z.object({
-  title: z.string().min(3).max(200),
-  description: z.string().min(10).max(5000),
+  title: z.string().min(3, "Title must be at least 3 characters").max(200, "Title must be under 200 characters"),
+  description: z.string().min(10, "Description must be at least 10 characters").max(5000, "Description must be under 5000 characters"),
   needCategory: z.string().optional(),
   offerType: z.enum(["service", "item", "money"]),
-  offerDescription: z.string().min(3).max(2000),
+  offerDescription: z.string().min(3, "Offer description must be at least 3 characters").max(2000, "Offer description must be under 2000 characters"),
   offerValue: z.number().optional(),
   isLocal: z.boolean().default(true),
   locationName: z.string().optional(),
   latitude: z.number().optional(),
   longitude: z.number().optional(),
   deadline: z.string().optional(),
-  timeRange: z.string().max(100).optional(),
+  timeRange: z.string().max(100, "Time estimate must be under 100 characters").optional(),
   requiredSkills: z.array(z.string()).default([]),
   images: z.array(z.string()).default([]),
   offerImages: z.array(z.string()).default([]),
@@ -200,7 +200,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ need }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors }, { status: 400 });
+      const messages = error.errors.map((e) => `${e.path.join(".")}: ${e.message}`);
+      return NextResponse.json({ error: messages.join("; ") }, { status: 400 });
     }
     logger.error("Create need failed", error instanceof Error ? error : undefined);
     return NextResponse.json(

@@ -8,18 +8,18 @@ import { isValidCentralCoastSuburb } from "@/lib/data/central-coast-suburbs";
 import { z } from "zod";
 
 const updateNeedSchema = z.object({
-  title: z.string().min(3).max(200).optional(),
-  description: z.string().min(10).max(5000).optional(),
+  title: z.string().min(3, "Title must be at least 3 characters").max(200, "Title must be under 200 characters").optional(),
+  description: z.string().min(10, "Description must be at least 10 characters").max(5000, "Description must be under 5000 characters").optional(),
   needCategory: z.string().optional().nullable(),
   offerType: z.enum(["service", "item", "money"]).optional(),
-  offerDescription: z.string().min(3).max(2000).optional(),
+  offerDescription: z.string().min(3, "Offer description must be at least 3 characters").max(2000, "Offer description must be under 2000 characters").optional(),
   offerValue: z.number().optional().nullable(),
   isLocal: z.boolean().optional(),
   locationName: z.string().optional().nullable(),
   latitude: z.number().optional().nullable(),
   longitude: z.number().optional().nullable(),
   deadline: z.string().optional().nullable(),
-  timeRange: z.string().max(100).optional().nullable(),
+  timeRange: z.string().max(100, "Time estimate must be under 100 characters").optional().nullable(),
   requiredSkills: z.array(z.string()).optional(),
   images: z.array(z.string()).optional(),
   offerImages: z.array(z.string()).optional(),
@@ -204,7 +204,8 @@ export async function PATCH(
     return NextResponse.json({ need });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors }, { status: 400 });
+      const messages = error.errors.map((e) => `${e.path.join(".")}: ${e.message}`);
+      return NextResponse.json({ error: messages.join("; ") }, { status: 400 });
     }
     logger.error("Update need failed", error instanceof Error ? error : undefined);
     return NextResponse.json(

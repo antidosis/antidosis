@@ -101,7 +101,8 @@ export default function EditNeedPage() {
 
     const data = await res.json();
     if (!res.ok) {
-      setError("error: " + (data.error?.[0]?.message || data.error || "failed"));
+      const msg = typeof data.error === "string" ? data.error : data.error?.[0]?.message || "failed";
+      setError("error: " + msg);
       setSaving(false);
       return;
     }

@@ -63,7 +63,12 @@ export default function CreateNeedPage() {
     });
 
     const data = await res.json();
-    if (!res.ok) { setError("error: " + (data.error?.[0]?.message || data.error || "failed")); setLoading(false); return; }
+    if (!res.ok) {
+      const msg = typeof data.error === "string" ? data.error : data.error?.[0]?.message || "failed";
+      setError("error: " + msg);
+      setLoading(false);
+      return;
+    }
 
     router.push(`/needs/${data.need.id}`);
     router.refresh();
