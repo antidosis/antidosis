@@ -103,7 +103,7 @@ export async function PATCH(req: NextRequest) {
       ])
     );
     if (typeof cleanedData.avatarUrl === "string") {
-      cleanedData.avatarUrl = sanitizeUrl(cleanedData.avatarUrl) || cleanedData.avatarUrl;
+      cleanedData.avatarUrl = sanitizeUrl(cleanedData.avatarUrl);
     }
 
     let mobileVerifiedUpdate: boolean | undefined;
@@ -145,12 +145,8 @@ export async function PATCH(req: NextRequest) {
         socialLinks: socialLinks ? {
           deleteMany: {},
           create: socialLinks
-            .filter((link) => link.url.trim() !== "" && sanitizeUrl(link.url))
-            .map((link) => ({
-              platform: link.platform,
-              url: sanitizeUrl(link.url) || link.url,
-              isPublic: link.isPublic ?? true,
-            })),
+            .map((link) => ({ platform: link.platform, url: sanitizeUrl(link.url), isPublic: link.isPublic ?? true }))
+            .filter((link): link is { platform: string; url: string; isPublic: boolean } => !!link.url && link.url.trim() !== ""),
         } : undefined,
       },
       include: {

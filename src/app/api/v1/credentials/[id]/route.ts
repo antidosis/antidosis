@@ -71,7 +71,7 @@ export async function PATCH(
         ...(data.issuedBy !== undefined && { issuedBy: data.issuedBy }),
         ...(data.issuedAt !== undefined && { issuedAt: data.issuedAt && !isNaN(new Date(data.issuedAt).getTime()) ? new Date(data.issuedAt) : null }),
         ...(data.expiresAt !== undefined && { expiresAt: data.expiresAt && !isNaN(new Date(data.expiresAt).getTime()) ? new Date(data.expiresAt) : null }),
-        ...(data.fileUrl !== undefined && { fileUrl: sanitizeUrl(data.fileUrl) || data.fileUrl }),
+        ...(data.fileUrl !== undefined && { fileUrl: sanitizeUrl(data.fileUrl) }),
         ...(data.isPublic !== undefined && { isPublic: data.isPublic }),
       },
     });

@@ -25,6 +25,11 @@ const PROTECTED_API_PREFIXES = [
   "/api/v1/admin",
 ];
 
+// API routes that bypass auth entirely
+const PUBLIC_API_ROUTES = [
+  "/api/v1/billing/webhook",
+];
+
 export async function middleware(request: NextRequest) {
   // Redirect www to non-www
   const host = request.headers.get("host") || "";
@@ -45,6 +50,13 @@ export async function middleware(request: NextRequest) {
   const isProtectedApi = PROTECTED_API_PREFIXES.some((prefix) =>
     pathname.startsWith(prefix)
   );
+  const isPublicApi = PUBLIC_API_ROUTES.some((route) =>
+    pathname === route
+  );
+
+  if (isPublicApi) {
+    return response;
+  }
 
   if (!isProtectedPage && !isProtectedApi) {
     return response;

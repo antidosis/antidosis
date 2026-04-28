@@ -34,6 +34,24 @@ export async function GET(
     const { data: { user } } = await supabase.auth.getUser();
     const isAuthenticated = !!user;
 
+    // Determine viewer role
+    let profileId: string | null = null;
+    let isPoster = false;
+    if (isAuthenticated) {
+      const profile = await prisma.profile.findUnique({
+        where: { userId: user.id },
+        select: { id: true },
+      });
+      if (profile) {
+        profileId = profile.id;
+        const needPoster = await prisma.need.findUnique({
+          where: { id: params.id },
+          select: { posterId: true },
+        });
+        isPoster = needPoster?.posterId === profile.id;
+      }
+    }
+
     const need = await prisma.need.findUnique({
       where: { id: params.id },
       include: {
@@ -63,7 +81,10 @@ export async function GET(
               },
             },
         requiredSkills: true,
-        acceptances: isAuthenticated
+        // Poster sees all acceptances and contracts
+        // Non-poster sees only their own acceptance (if any)
+        // Guest sees nothing
+        acceptances: isPoster
           ? {
               include: {
                 user: {
@@ -77,8 +98,23 @@ export async function GET(
                 },
               },
             }
-          : false,
-        contracts: isAuthenticated
+          : profileId
+            ? {
+                where: { userId: profileId },
+                include: {
+                  user: {
+                    select: {
+                      id: true,
+                      fullName: true,
+                      avatarUrl: true,
+                      ratingAvg: true,
+                      skills: true,
+                    },
+                  },
+                },
+              }
+            : false,
+        contracts: isPoster
           ? {
               where: { status: { not: "cancelled" } },
               include: {

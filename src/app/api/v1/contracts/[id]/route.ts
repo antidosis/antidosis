@@ -102,7 +102,16 @@ export async function GET(
             },
           },
         },
-        reviews: true,
+        reviews: {
+          select: {
+            id: true,
+            rating: true,
+            comment: true,
+            giverId: true,
+            receiverId: true,
+            createdAt: true,
+          },
+        },
       },
     });
 
@@ -133,6 +142,13 @@ export async function PATCH(
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if (!user.email_confirmed_at) {
+      return NextResponse.json(
+        { error: "Email verification required", code: "EMAIL_NOT_VERIFIED" },
+        { status: 403 }
+      );
     }
 
     const profile = await prisma.profile.findUnique({
@@ -306,6 +322,15 @@ export async function PATCH(
           await tx.need.update({
             where: { id: fresh.needId },
             data: { status: "contracted" },
+          });
+          // Decline all other pending/accepted acceptances for this need
+          await tx.acceptance.updateMany({
+            where: {
+              needId: fresh.needId,
+              status: { in: ["pending", "accepted"] },
+              id: { not: contract.acceptanceId! },
+            },
+            data: { status: "declined" },
           });
           return await tx.contract.update({
             where: { id: params.id },

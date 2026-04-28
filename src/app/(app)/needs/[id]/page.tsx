@@ -244,8 +244,8 @@ export default function NeedDetailPage() {
   }
 
   /* -- handlers -- */
-  function handleAuthRequired() {
-    router.push(`/login?redirect=/needs/${needId}`);
+  function handleAuthRequired(register = false) {
+    router.push(`/${register ? "register" : "login"}?redirect=/needs/${needId}`);
   }
 
   function handleEmailNotVerified() {
@@ -732,7 +732,7 @@ export default function NeedDetailPage() {
                 <Button
                   variant="link"
                   className="p-0 h-auto text-[#f5a623] hover:underline text-xs"
-                  onClick={handleAuthRequired}
+                  onClick={() => handleAuthRequired(false)}
                 >
                   log in
                 </Button>
@@ -740,7 +740,7 @@ export default function NeedDetailPage() {
                 <Button
                   variant="link"
                   className="p-0 h-auto text-[#f5a623] hover:underline text-xs"
-                  onClick={handleAuthRequired}
+                  onClick={() => handleAuthRequired(true)}
                 >
                   create an account
                 </Button>
@@ -803,7 +803,7 @@ export default function NeedDetailPage() {
                   <Button
                     variant="default"
                     size="sm"
-                    onClick={handleAuthRequired}
+                    onClick={() => handleAuthRequired(false)}
                   >
                     <Lock className="h-4 w-4 mr-1.5" />
                     Log in to Interact
@@ -976,7 +976,7 @@ export default function NeedDetailPage() {
                   <Button
                     variant="link"
                     className="p-0 h-auto text-[#f5a623] hover:underline text-xs"
-                    onClick={handleAuthRequired}
+                    onClick={() => handleAuthRequired(false)}
                   >
                     log in
                   </Button>
@@ -984,7 +984,7 @@ export default function NeedDetailPage() {
                   <Button
                     variant="link"
                     className="p-0 h-auto text-[#f5a623] hover:underline text-xs"
-                    onClick={handleAuthRequired}
+                    onClick={() => handleAuthRequired(true)}
                   >
                     create an account
                   </Button>

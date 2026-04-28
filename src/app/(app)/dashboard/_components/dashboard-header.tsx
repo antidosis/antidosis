@@ -16,7 +16,7 @@ type ProfileData = {
 export function DashboardHeader({ profile }: { profile: ProfileData }) {
   return (
     <div className="flex items-center gap-4 py-6">
-      <Avatar src={null} name={profile.fullName} size="lg" className="h-14 w-14" />
+      <Avatar src={(profile as any).avatarUrl || null} name={profile.fullName} size="lg" className="h-14 w-14" />
       <div>
         <h2 className="heading-display text-xl text-[#e8d5a3]">{profile.fullName || "user"}</h2>
         <div className="flex items-center gap-3 text-xs text-[#b8a078] mt-1">

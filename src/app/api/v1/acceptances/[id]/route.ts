@@ -57,6 +57,14 @@ export async function PATCH(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    // Cannot withdraw an acceptance that has already been selected (contract formed)
+    if (status === "withdrawn" && acceptance.status === "selected") {
+      return NextResponse.json(
+        { error: "Cannot withdraw after contract formation. Cancel the contract instead." },
+        { status: 400 }
+      );
+    }
+
     if ((status === "accepted" || status === "declined" || status === "selected") && !isPoster) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }

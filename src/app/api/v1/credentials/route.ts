@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
         issuedBy: data.issuedBy,
         issuedAt: data.issuedAt && !isNaN(new Date(data.issuedAt).getTime()) ? new Date(data.issuedAt) : null,
         expiresAt: data.expiresAt && !isNaN(new Date(data.expiresAt).getTime()) ? new Date(data.expiresAt) : null,
-        fileUrl: data.fileUrl ? (sanitizeUrl(data.fileUrl) || data.fileUrl) : null,
+        fileUrl: data.fileUrl ? sanitizeUrl(data.fileUrl) : null,
         isPublic: data.isPublic,
       },
     });

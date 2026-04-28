@@ -31,17 +31,8 @@ async function getAuthorizedProfile(userId: string, needId: string) {
   // Need must be open for new users to join the conversation
   if (need.status !== "open") return null;
 
-  // Auto-create a pending acceptance for any authenticated user on an open need
-  await prisma.acceptance.create({
-    data: {
-      needId,
-      userId: profile.id,
-      status: "pending",
-      message: null,
-    },
-  });
-
-  return { ...profile, isPoster: false as const };
+  // Not involved — deny access
+  return null;
 }
 
 export async function GET(

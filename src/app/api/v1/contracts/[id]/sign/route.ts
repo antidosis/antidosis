@@ -100,6 +100,16 @@ export async function POST(
       if (!fresh) throw new Error("Contract not found during transaction");
 
       if (fresh.partyASignedAt && fresh.partyBSignedAt && fresh.status !== "active") {
+        const c = await tx.contract.findUnique({
+          where: { id: params.id },
+          select: { needId: true },
+        });
+        if (c) {
+          await tx.need.update({
+            where: { id: c.needId },
+            data: { status: "active" },
+          });
+        }
         return await tx.contract.update({
           where: { id: params.id },
           data: { status: "active" },

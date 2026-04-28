@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { generateContractPdf } from "@/lib/pdf-contract";
 import { createServiceClient } from "@/lib/supabase/service";
 import { logger } from "@/lib/logger";
+import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 
 export async function POST(
   req: NextRequest,
@@ -16,12 +17,27 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    if (!user.email_confirmed_at) {
+      return NextResponse.json(
+        { error: "Email verification required", code: "EMAIL_NOT_VERIFIED" },
+        { status: 403 }
+      );
+    }
+
     const profile = await prisma.profile.findUnique({
       where: { userId: user.id },
       select: { id: true },
     });
     if (!profile) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    }
+
+    const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
+      windowMs: 60 * 60_000,
+      maxRequests: 10,
+    });
+    if (!limit.allowed) {
+      return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
     }
 
     const contract = await prisma.contract.findUnique({

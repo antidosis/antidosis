@@ -98,15 +98,22 @@ export async function POST(
         });
       }
 
-      // Revert the selected acceptance back to accepted so the poster can re-contract
-      await tx.acceptance.updateMany({
-        where: { needId: contract.needId, status: "selected" },
-        data: { status: "accepted" },
-      });
+      // Revert only the acceptance linked to this contract back to accepted
+      if (contract.acceptanceId) {
+        await tx.acceptance.update({
+          where: { id: contract.acceptanceId },
+          data: { status: "accepted" },
+        });
+      }
 
-      // Revert declined acceptances back to pending so new offers are available
+      // Revert only declined acceptances that were declined for THIS contract
+      // (we scope by checking if they were declined after this contract was created)
       await tx.acceptance.updateMany({
-        where: { needId: contract.needId, status: "declined" },
+        where: {
+          needId: contract.needId,
+          status: "declined",
+          updatedAt: { gte: contract.createdAt },
+        },
         data: { status: "pending" },
       });
 
