@@ -41,18 +41,25 @@ export default function NeedsPage() {
   const [needs, setNeeds] = useState<NeedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(query), 350);
+    return () => clearTimeout(timer);
+  }, [query]);
 
   const fetchNeeds = useCallback(async () => {
     setLoading(true);
     const params = new URLSearchParams();
-    if (query) params.set("q", query);
+    if (debouncedQuery) params.set("q", debouncedQuery);
     if (typeFilter) params.set("type", typeFilter);
     const res = await fetch(`/api/v1/needs?${params.toString()}`);
     const data = await res.json();
     setNeeds(data.needs || []);
     setLoading(false);
-  }, [query, typeFilter]);
+  }, [debouncedQuery, typeFilter]);
 
   useEffect(() => { fetchNeeds(); }, [fetchNeeds]);
 

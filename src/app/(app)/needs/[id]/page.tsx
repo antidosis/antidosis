@@ -9,6 +9,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { createClient } from "@/lib/supabase/client";
+import { useToast } from "@/components/ui/toast";
 import {
   MapPin, ArrowLeft, CircleDollarSign, Wrench, Package, Star,
   Shield, Briefcase, Globe, Check, X, Camera, Send, Pencil,
@@ -110,6 +111,7 @@ export default function NeedDetailPage() {
   /* interest form */
   const [offerMessage, setOfferMessage] = useState("");
   const [submittingOffer, setSubmittingOffer] = useState(false);
+  const { toast } = useToast();
   const [showInterestForm, setShowInterestForm] = useState(false);
 
   /* messaging */
@@ -279,8 +281,12 @@ export default function NeedDetailPage() {
     if (res.ok) {
       setOfferMessage("");
       setShowInterestForm(false);
+      toast("Your interest has been sent to the poster", "success");
       await fetchNeed();
       await fetchMessages();
+    } else {
+      const data = await res.json().catch(() => ({ error: "Failed to submit interest" }));
+      toast(data.error || "Failed to submit interest", "error");
     }
     setSubmittingOffer(false);
   }
@@ -820,13 +826,19 @@ export default function NeedDetailPage() {
                   them below to ask questions first.
                 </p>
                 <form onSubmit={submitOffer} className="space-y-3">
-                  <Textarea
-                    placeholder="introduce yourself..."
-                    value={offerMessage}
-                    onChange={(e) => setOfferMessage(e.target.value)}
-                    rows={3}
-                    className="text-sm"
-                  />
+                  <div>
+                    <Textarea
+                      placeholder="introduce yourself..."
+                      value={offerMessage}
+                      onChange={(e) => setOfferMessage(e.target.value)}
+                      rows={3}
+                      className="text-sm"
+                      maxLength={1000}
+                    />
+                    <p className="text-xs text-[#7a6b5a] mt-1 text-right">
+                      {offerMessage.length}/1000
+                    </p>
+                  </div>
                   <Button
                     type="submit"
                     variant="default"

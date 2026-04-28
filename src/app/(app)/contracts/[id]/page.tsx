@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { createClient } from "@/lib/supabase/client";
+import { useToast } from "@/components/ui/toast";
 import {
   ArrowLeft,
   Send,
@@ -103,9 +104,19 @@ export default function ContractPage() {
   const supabase = createClient();
   const [contract, setContract] = useState<ContractData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [savingTerms, setSavingTerms] = useState(false);
+  const [agreeing, setAgreeing] = useState(false);
+  const [signing, setSigning] = useState(false);
+  const [completing, setCompleting] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [sendingMsg, setSendingMsg] = useState(false);
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [showCompleteConfirm, setShowCompleteConfirm] = useState(false);
+  const { toast } = useToast();
   const [profileId, setProfileId] = useState<string | null>(null);
   const [messageInput, setMessageInput] = useState("");
-  const [rating, setRating] = useState(10);
+  const [rating, setRating] = useState(7);
   const [reviewComment, setReviewComment] = useState("");
   const [privateFeedback, setPrivateFeedback] = useState("");
   const [generatingPdf, setGeneratingPdf] = useState(false);
@@ -220,6 +231,7 @@ export default function ContractPage() {
 
   async function saveTerms() {
     if (!contract) return;
+    setSavingTerms(true);
     const isA = contract.partyA.id === profileId;
     const body: Record<string, unknown> = {
       deadlineTerms: sharedDeadline || null,
@@ -233,21 +245,36 @@ export default function ContractPage() {
       body.partyBTerms = useMessageTerms ? null : myTerms;
       body.partyBUseMessageTerms = useMessageTerms;
     }
-    await fetch(`/api/v1/contracts/${contractId}`, {
+    const res = await fetch(`/api/v1/contracts/${contractId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({ error: "Failed to save terms" }));
+      toast(data.error || "Failed to save terms", "error");
+    } else {
+      toast("Terms saved", "success");
+    }
     await fetchContract();
+    setSavingTerms(false);
   }
 
   async function agreeToTerms() {
-    await fetch(`/api/v1/contracts/${contractId}`, {
+    setAgreeing(true);
+    const res = await fetch(`/api/v1/contracts/${contractId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ agree: true }),
     });
-    fetchContract();
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({ error: "Failed to agree" }));
+      toast(data.error || "Failed to agree to terms", "error");
+    } else {
+      toast("You have agreed to the terms", "success");
+    }
+    await fetchContract();
+    setAgreeing(false);
   }
 
   async function generatePdf() {
@@ -258,51 +285,88 @@ export default function ContractPage() {
   }
 
   async function signContract() {
-    await fetch(`/api/v1/contracts/${contractId}/sign`, { method: "POST" });
-    fetchContract();
+    setSigning(true);
+    const res = await fetch(`/api/v1/contracts/${contractId}/sign`, { method: "POST" });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({ error: "Failed to sign" }));
+      toast(data.error || "Failed to sign contract", "error");
+    } else {
+      toast("Contract signed", "success");
+    }
+    await fetchContract();
+    setSigning(false);
   }
 
   async function remindToSign() {
     setReminding(true);
-    await fetch(`/api/v1/contracts/${contractId}/remind-sign`, {
+    const res = await fetch(`/api/v1/contracts/${contractId}/remind-sign`, {
       method: "POST",
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({ error: "Failed to send reminder" }));
+      toast(data.error || "Failed to send reminder", "error");
+    } else {
+      toast("Reminder sent to the other party", "success");
+    }
     setReminding(false);
-    alert("reminder sent to the other party.");
   }
 
   async function markComplete() {
-    await fetch(`/api/v1/contracts/${contractId}/complete`, {
+    setCompleting(true);
+    const res = await fetch(`/api/v1/contracts/${contractId}/complete`, {
       method: "POST",
     });
-    fetchContract();
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({ error: "Failed to mark complete" }));
+      toast(data.error || "Failed to mark complete", "error");
+    } else {
+      toast("Marked as complete", "success");
+    }
+    await fetchContract();
+    setCompleting(false);
+    setShowCompleteConfirm(false);
   }
 
   async function cancelContract() {
-    if (!confirm("cancel this contract? the need will be re-opened.")) return;
-    await fetch(`/api/v1/contracts/${contractId}/cancel`, {
+    setCancelling(true);
+    const res = await fetch(`/api/v1/contracts/${contractId}/cancel`, {
       method: "POST",
     });
-    fetchContract();
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({ error: "Failed to cancel" }));
+      toast(data.error || "Failed to cancel contract", "error");
+    } else {
+      toast("Contract cancelled", "info");
+    }
+    await fetchContract();
+    setCancelling(false);
+    setShowCancelConfirm(false);
   }
 
   async function sendMessage(e: React.FormEvent) {
     e.preventDefault();
     if (!messageInput.trim()) return;
-    await fetch("/api/v1/messages", {
+    setSendingMsg(true);
+    const res = await fetch("/api/v1/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ contractId, content: messageInput }),
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({ error: "Failed to send message" }));
+      toast(data.error || "Failed to send message", "error");
+    }
     setMessageInput("");
-    fetchContract();
+    await fetchContract();
+    setSendingMsg(false);
   }
 
   async function submitReview() {
     if (!contract) return;
+    setSubmittingReview(true);
     const isPartyA = contract.partyA.id === profileId;
     const receiverId = isPartyA ? contract.partyB.id : contract.partyA.id;
-    await fetch("/api/v1/reviews", {
+    const res = await fetch("/api/v1/reviews", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -313,9 +377,16 @@ export default function ContractPage() {
         privateFeedback,
       }),
     });
-    fetchContract();
-    setReviewComment("");
-    setPrivateFeedback("");
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({ error: "Failed to submit review" }));
+      toast(data.error || "Failed to submit review", "error");
+    } else {
+      toast("Review submitted", "success");
+      setReviewComment("");
+      setPrivateFeedback("");
+    }
+    await fetchContract();
+    setSubmittingReview(false);
   }
 
   if (loading)
@@ -343,6 +414,7 @@ export default function ContractPage() {
     ? contract.bMarkedComplete
     : contract.aMarkedComplete;
   const hasReviewed = contract.reviews.some((r) => r.giverId === profileId);
+  const otherReview = contract.reviews.find((r) => r.receiverId === profileId);
 
   const aAgreed = !!contract.partyAAgreedAt;
   const bAgreed = !!contract.partyBAgreedAt;
@@ -406,6 +478,30 @@ export default function ContractPage() {
         <p className="text-xs text-[#7a6b5a] uppercase tracking-wide">
           contract #{contract.id.slice(0, 8)}
         </p>
+      </div>
+
+      {/* Contract Lifecycle Stepper */}
+      <div className="vessel p-5">
+        <div className="flex items-center justify-between gap-1">
+          {[
+            { label: "Negotiate", active: !termsLocked, done: termsLocked },
+            { label: "Agree", active: termsLocked && !bothSigned, done: bothSigned },
+            { label: "Sign", active: bothSigned && contract.status !== "completed" && contract.status !== "cancelled", done: contract.status === "completed" },
+            { label: "Complete", active: contract.status === "completed", done: contract.status === "completed" },
+          ].map((step, i, arr) => (
+            <div key={step.label} className="flex items-center gap-1 flex-1">
+              <div className={`flex-1 h-1.5 rounded-full transition-colors ${
+                step.done ? "bg-[#00e676]" : step.active ? "bg-[#f5a623]" : "bg-[#2a2420]"
+              }`} />
+              <span className={`text-[10px] uppercase tracking-wider whitespace-nowrap ${
+                step.done ? "text-[#00e676]" : step.active ? "text-[#f5a623]" : "text-[#7a6b5a]"
+              }`}>
+                {step.label}
+              </span>
+              {i < arr.length - 1 && <div className={`flex-1 h-1.5 rounded-full ${step.done ? "bg-[#00e676]" : "bg-[#2a2420]"}`} />}
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Original Need Post — Collapsible */}
@@ -606,7 +702,7 @@ export default function ContractPage() {
                 disabled={!canEditTerms}
               />
             </div>
-            {canEditTerms && <Button onClick={saveTerms}>Update Terms</Button>}
+            {canEditTerms && <Button onClick={saveTerms} disabled={savingTerms}>{savingTerms ? "Saving..." : "Update Terms"}</Button>}
           </div>
         </div>
 
@@ -623,11 +719,12 @@ export default function ContractPage() {
             {!iAgreed && canEditTerms && (
               <Button
                 onClick={agreeToTerms}
+                disabled={agreeing}
                 className="w-full mt-4"
                 variant="secondary"
               >
                 <Check className="h-3.5 w-3.5 mr-2" />
-                Agree to Terms
+                {agreeing ? "Agreeing..." : "Agree to Terms"}
               </Button>
             )}
             {iAgreed && !termsLocked && (
@@ -700,8 +797,8 @@ export default function ContractPage() {
               signedAt={contract.partyBSignedAt}
             />
             {canSign && (
-              <Button onClick={signContract} className="w-full mt-4">
-                Sign Contract
+              <Button onClick={signContract} disabled={signing} className="w-full mt-4">
+                {signing ? "Signing..." : "Sign Contract"}
               </Button>
             )}
             {iSigned && !bothSigned && (
@@ -764,7 +861,7 @@ export default function ContractPage() {
             </div>
           </div>
           {!iMarkedComplete && (
-            <Button onClick={markComplete} className="w-full mt-4">
+            <Button onClick={() => setShowCompleteConfirm(true)} className="w-full mt-4">
               Mark Complete
             </Button>
           )}
@@ -782,63 +879,67 @@ export default function ContractPage() {
       )}
 
       {/* Messages */}
-      {contract.status !== "completed" && contract.status !== "cancelled" && (
-        <div className="vessel p-5">
-          <h2 className="text-lg heading-display text-[#e8d5a3] mb-2">
-            Messages
-          </h2>
-          <p className="text-xs text-[#7a6b5a] mb-4">
-            messages in this thread are part of the contract record.
-          </p>
-          <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
-            {contract.messages.length === 0 && (
-              <p className="text-sm text-[#7a6b5a] text-center py-4">
-                no messages yet
-              </p>
-            )}
-            {contract.messages.map((msg) => (
+      <div className="vessel p-5">
+        <h2 className="text-lg heading-display text-[#e8d5a3] mb-2">
+          Messages
+        </h2>
+        <p className="text-xs text-[#7a6b5a] mb-4">
+          messages in this thread are part of the contract record.
+          {(contract.status === "completed" || contract.status === "cancelled") && (
+            <span className="text-[#f5a623] ml-1">(read-only)</span>
+          )}
+        </p>
+        <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+          {contract.messages.length === 0 && (
+            <p className="text-sm text-[#7a6b5a] text-center py-4">
+              no messages yet
+            </p>
+          )}
+          {contract.messages.map((msg) => (
+            <div
+              key={msg.id}
+              className={`flex gap-3 ${
+                msg.sender.id === profileId ? "flex-row-reverse" : ""
+              }`}
+            >
+              <Avatar
+                src={msg.sender.avatarUrl}
+                name={msg.sender.fullName}
+                size="sm"
+              />
               <div
-                key={msg.id}
-                className={`flex gap-3 ${
-                  msg.sender.id === profileId ? "flex-row-reverse" : ""
+                className={`max-w-lg px-4 py-2.5 text-sm ${
+                  msg.sender.id === profileId
+                    ? "bg-[#1a1714] text-[#e8d5a3] border-l-2 border-l-[#f5a623]"
+                    : "bg-[#12100e] text-[#b8a078] border border-[#2a2420]"
                 }`}
               >
-                <Avatar
-                  src={msg.sender.avatarUrl}
-                  name={msg.sender.fullName}
-                  size="sm"
-                />
-                <div
-                  className={`max-w-lg px-4 py-2.5 text-sm ${
-                    msg.sender.id === profileId
-                      ? "bg-[#1a1714] text-[#e8d5a3] border-l-2 border-l-[#f5a623]"
-                      : "bg-[#12100e] text-[#b8a078] border border-[#2a2420]"
-                  }`}
-                >
-                  <p>{msg.content}</p>
-                  <p className="text-xs text-[#7a6b5a] mt-1">
-                    {new Date(msg.createdAt).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
-                </div>
+                <p>{msg.content}</p>
+                <p className="text-xs text-[#7a6b5a] mt-1">
+                  {new Date(msg.createdAt).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
               </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
+            </div>
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
+        {contract.status !== "completed" && contract.status !== "cancelled" && (
           <form onSubmit={sendMessage} className="mt-4 flex gap-2">
             <Input
               placeholder="type a message..."
               value={messageInput}
               onChange={(e) => setMessageInput(e.target.value)}
+              disabled={sendingMsg}
             />
-            <Button type="submit" size="icon">
+            <Button type="submit" size="icon" disabled={sendingMsg}>
               <Send className="h-4 w-4" />
             </Button>
           </form>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Reviews */}
       {contract.status === "completed" && (
@@ -919,8 +1020,8 @@ export default function ContractPage() {
                   />
                 </div>
 
-                <Button onClick={submitReview} className="w-full">
-                  Submit Review
+                <Button onClick={submitReview} disabled={submittingReview} className="w-full">
+                  {submittingReview ? "Submitting..." : "Submit Review"}
                 </Button>
               </div>
             )}
@@ -928,6 +1029,20 @@ export default function ContractPage() {
               <p className="text-center text-sm text-[#7a6b5a]">
                 you have submitted your review
               </p>
+            )}
+            {otherReview && (
+              <div className="vessel p-4 mt-4">
+                <p className="text-xs text-[#7a6b5a] uppercase tracking-wide mb-2">
+                  {otherParty.fullName || "the other party"} reviewed you
+                </p>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-lg font-bold text-[#f5a623]">{otherReview.rating}</span>
+                  <span className="text-xs text-[#7a6b5a]">/ 10</span>
+                </div>
+                {otherReview.comment && (
+                  <p className="text-sm text-[#b8a078]">{otherReview.comment}</p>
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -939,12 +1054,44 @@ export default function ContractPage() {
         contract.status === "active") && (
         <div className="text-center py-12">
           <Button
-            onClick={cancelContract}
+            onClick={() => setShowCancelConfirm(true)}
             variant="ghost"
             className="text-[#ff5252]"
           >
             Cancel Contract
           </Button>
+        </div>
+      )}
+
+      {/* Confirmation Dialogs */}
+      {showCancelConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="bg-[#12100e] border border-[#2a2420] p-6 rounded-md max-w-sm w-full mx-4">
+            <p className="text-sm text-[#e8d5a3] mb-4">Cancel this contract? The need will be re-opened.</p>
+            <div className="flex gap-3">
+              <Button onClick={cancelContract} disabled={cancelling} variant="ghost" className="flex-1 text-[#ff5252]">
+                {cancelling ? "Cancelling..." : "Yes, Cancel"}
+              </Button>
+              <Button onClick={() => setShowCancelConfirm(false)} variant="secondary" className="flex-1">
+                Keep Contract
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showCompleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="bg-[#12100e] border border-[#2a2420] p-6 rounded-md max-w-sm w-full mx-4">
+            <p className="text-sm text-[#e8d5a3] mb-4">Are you sure both parties have fulfilled their obligations?</p>
+            <div className="flex gap-3">
+              <Button onClick={markComplete} disabled={completing} variant="secondary" className="flex-1">
+                {completing ? "Marking..." : "Yes, Complete"}
+              </Button>
+              <Button onClick={() => setShowCompleteConfirm(false)} variant="outline" className="flex-1">
+                Not Yet
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -13,7 +13,7 @@ const updateNeedSchema = z.object({
   needCategory: z.string().optional().nullable(),
   offerType: z.enum(["service", "item", "money"]).optional(),
   offerDescription: z.string().min(3, "Offer description must be at least 3 characters").max(2000, "Offer description must be under 2000 characters").optional(),
-  offerValue: z.number().optional().nullable(),
+  offerValue: z.number().min(0).optional().nullable(),
   isLocal: z.boolean().optional(),
   locationName: z.string().optional().nullable(),
   latitude: z.number().optional().nullable(),
@@ -214,28 +214,47 @@ export async function PATCH(
     if (data.images !== undefined) updateData.images = sanitizeUrlArray(data.images);
     if (data.offerImages !== undefined) updateData.offerImages = sanitizeUrlArray(data.offerImages);
 
-    // Handle requiredSkills update
+    // Handle requiredSkills update atomically
+    let need;
     if (data.requiredSkills !== undefined) {
-      await prisma.needSkill.deleteMany({ where: { needId: params.id } });
-      updateData.requiredSkills = {
-        create: data.requiredSkills.map((name: string) => ({ name: sanitizePlainText(name) })),
-      };
-    }
-
-    const need = await prisma.need.update({
-      where: { id: params.id },
-      data: updateData,
-      include: {
-        requiredSkills: true,
-        poster: {
-          select: {
-            id: true,
-            fullName: true,
-            avatarUrl: true,
+      need = await prisma.$transaction(async (tx) => {
+        await tx.needSkill.deleteMany({ where: { needId: params.id } });
+        return tx.need.update({
+          where: { id: params.id },
+          data: {
+            ...updateData,
+            requiredSkills: {
+              create: data.requiredSkills!.map((name: string) => ({ name: sanitizePlainText(name) })),
+            },
+          },
+          include: {
+            requiredSkills: true,
+            poster: {
+              select: {
+                id: true,
+                fullName: true,
+                avatarUrl: true,
+              },
+            },
+          },
+        });
+      });
+    } else {
+      need = await prisma.need.update({
+        where: { id: params.id },
+        data: updateData,
+        include: {
+          requiredSkills: true,
+          poster: {
+            select: {
+              id: true,
+              fullName: true,
+              avatarUrl: true,
+            },
           },
         },
-      },
-    });
+      });
+    }
 
     return NextResponse.json({ need });
   } catch (error) {

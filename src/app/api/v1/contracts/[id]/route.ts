@@ -46,8 +46,8 @@ export async function GET(
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
-    const messagesLimit = Math.min(parseInt(req.nextUrl.searchParams.get("messagesLimit") || "100", 10) || 100, 200);
-    const messagesSkip = parseInt(req.nextUrl.searchParams.get("messagesSkip") || "0", 10) || 0;
+    const messagesLimit = Math.max(1, Math.min(parseInt(req.nextUrl.searchParams.get("messagesLimit") || "100", 10) || 100, 200));
+    const messagesSkip = Math.max(0, parseInt(req.nextUrl.searchParams.get("messagesSkip") || "0", 10) || 0);
 
     const contract = await prisma.contract.findUnique({
       where: { id: params.id },

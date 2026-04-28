@@ -15,7 +15,7 @@ const createNeedSchema = z.object({
   needCategory: z.string().optional(),
   offerType: z.enum(["service", "item", "money"]),
   offerDescription: z.string().min(3, "Offer description must be at least 3 characters").max(2000, "Offer description must be under 2000 characters"),
-  offerValue: z.number().optional(),
+  offerValue: z.number().min(0).optional(),
   isLocal: z.boolean().default(true),
   locationName: z.string().optional(),
   latitude: z.number().optional(),

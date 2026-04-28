@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 import { createNotification } from "@/lib/notifications";
+import { sanitizePlainText } from "@/lib/security/sanitize";
 import { z } from "zod";
 
 const createSchema = z.object({
@@ -164,7 +165,7 @@ export async function POST(req: NextRequest) {
       data: {
         contractId,
         senderId: profile.id,
-        content,
+        content: sanitizePlainText(content),
       },
       include: {
         sender: {

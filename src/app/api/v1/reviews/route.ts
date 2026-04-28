@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
+import { sanitizePlainText } from "@/lib/security/sanitize";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
 
@@ -25,6 +27,14 @@ export async function POST(req: NextRequest) {
         { error: "Email verification required", code: "EMAIL_NOT_VERIFIED" },
         { status: 403 }
       );
+    }
+
+    const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
+      windowMs: 60 * 60_000,
+      maxRequests: 20,
+    });
+    if (!limit.allowed) {
+      return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
     }
 
     const body = await req.json();
@@ -87,8 +97,8 @@ export async function POST(req: NextRequest) {
         giverId: profile.id,
         receiverId,
         rating,
-        comment: comment || null,
-        privateFeedback: privateFeedback || null,
+        comment: comment ? sanitizePlainText(comment) : null,
+        privateFeedback: privateFeedback ? sanitizePlainText(privateFeedback) : null,
       },
     });
 

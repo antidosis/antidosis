@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/admin";
 import { auditLog, getClientInfo } from "@/lib/audit";
 import { logger } from "@/lib/logger";
+import { z } from "zod";
+import { sanitizePlainText } from "@/lib/security/sanitize";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +19,10 @@ export async function POST(
     let rejectionReason: string | undefined;
     try {
       const body = await req.json();
-      rejectionReason = body.rejectionReason;
+      const parsed = z.object({ rejectionReason: z.string().max(500).optional() }).safeParse(body);
+      if (parsed.success) {
+        rejectionReason = parsed.data.rejectionReason;
+      }
     } catch {
       // no body, ignore
     }
@@ -26,7 +31,7 @@ export async function POST(
       where: { id: params.id },
       data: {
         isVerified: false,
-        rejectionReason: rejectionReason || null,
+        rejectionReason: rejectionReason ? sanitizePlainText(rejectionReason) : null,
       },
       include: {
         profile: {
