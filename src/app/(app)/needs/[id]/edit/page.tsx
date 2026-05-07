@@ -10,7 +10,9 @@ import { Label } from "@/components/ui/label";
 import { LocationAutocomplete } from "@/components/ui/location-autocomplete";
 import { ImageGallery } from "@/components/ui/image-gallery";
 import { createClient } from "@/lib/supabase/client";
-import { ArrowLeft, Plus, X, MapPin, Wrench, Package, CircleDollarSign, Camera, ImageIcon, Loader2, Calendar, Clock, Info } from "lucide-react";
+import { ArrowLeft, Wrench, Package, CircleDollarSign, Camera, ImageIcon, Loader2, Calendar, Clock, Info } from "lucide-react";
+import { SkillAutocomplete } from "@/components/ui/skill-autocomplete";
+import { EXCHANGE_MODES, INCOMPATIBLE_EXCHANGE_MODES } from "@/lib/categories";
 
 export default function EditNeedPage() {
   const router = useRouter();
@@ -30,12 +32,21 @@ export default function EditNeedPage() {
   const [offerValue, setOfferValue] = useState("");
   const isLocal = true; // locked to local during trial
   const [locationFormatted, setLocationFormatted] = useState("");
-  const [skillInput, setSkillInput] = useState("");
   const [requiredSkills, setRequiredSkills] = useState<string[]>([]);
   const [images, setImages] = useState<string[]>([]);
   const [offerImages, setOfferImages] = useState<string[]>([]);
   const [deadline, setDeadline] = useState("");
   const [timeRange, setTimeRange] = useState("");
+  const [exchangeMode, setExchangeMode] = useState("");
+
+  // Clear exchange mode if it becomes incompatible with the selected offer type
+  useEffect(() => {
+    const incompatible = INCOMPATIBLE_EXCHANGE_MODES[offerType] || [];
+    if (exchangeMode && incompatible.includes(exchangeMode)) {
+      setExchangeMode("");
+    }
+  }, [offerType, exchangeMode]);
+  const [requiresContract, setRequiresContract] = useState(false);
 
   useEffect(() => {
     async function fetchNeed() {
@@ -51,7 +62,7 @@ export default function EditNeedPage() {
         const profileRes = await fetch("/api/v1/profiles/me");
         const profile = profileRes.ok ? await profileRes.json() : null;
         if (need.poster.id !== profile?.id) { router.push(`/needs/${needId}`); return; }
-        if (need.status !== "open") { router.push(`/needs/${needId}`); return; }
+        if (need.status !== "open" && need.status !== "archived") { router.push(`/needs/${needId}`); return; }
 
         setTitle(need.title || "");
         setDescription(need.description || "");
@@ -64,6 +75,8 @@ export default function EditNeedPage() {
         setOfferImages(need.offerImages || []);
         setDeadline(need.deadline ? need.deadline.split("T")[0] : "");
         setTimeRange(need.timeRange || "");
+        setExchangeMode(need.needCategory || "");
+        setRequiresContract(need.requiresContract ?? false);
       } catch (err) {
         console.error(err);
         setError("failed to load need");
@@ -73,13 +86,6 @@ export default function EditNeedPage() {
     fetchNeed();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [needId]);
-
-  function addSkill() {
-    if (skillInput.trim() && !requiredSkills.includes(skillInput.trim())) {
-      setRequiredSkills([...requiredSkills, skillInput.trim()]);
-      setSkillInput("");
-    }
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -91,11 +97,13 @@ export default function EditNeedPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         title, description, offerType, offerDescription,
+        needCategory: exchangeMode || null,
         offerValue: offerValue ? parseFloat(offerValue) : undefined,
         isLocal: true, locationName: locationFormatted,
         requiredSkills, images, offerImages,
         deadline: deadline || undefined,
         timeRange: timeRange || undefined,
+        requiresContract,
       }),
     });
 
@@ -125,7 +133,7 @@ export default function EditNeedPage() {
   );
 
   return (
-    <div className="max-w-2xl mx-auto px-4 md:px-8">
+    <div className="max-w-2xl lg:max-w-6xl mx-auto px-4 md:px-8">
       <div className="py-6">
         <Link href={`/needs/${needId}`} className="inline-flex items-center text-sm text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors">
           <ArrowLeft className="mr-2 h-4 w-4" />$ cd ~/needs/{needId.slice(0, 8)}
@@ -137,9 +145,11 @@ export default function EditNeedPage() {
       <p className="text-sm text-[#b8a078] mb-8">update your need details</p>
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        <section className="vessel p-5">
-          <p className="text-xs text-[#7a6b5a] uppercase tracking-wide font-medium mb-6">[need]</p>
-          <div className="space-y-6 max-w-lg">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <section className="vessel-need p-5">
+          <p className="text-xs text-[#35c2f0] uppercase tracking-wide font-medium mb-1">[what you need]</p>
+          <p className="text-xs text-[#7a6b5a] mb-5">what are you seeking from the community?</p>
+          <div className="space-y-5">
             <div className="space-y-2">
               <Label>Title</Label>
               <Input placeholder="e.g. electrical_work_1hr" value={title} onChange={(e) => setTitle(e.target.value)} required />
@@ -165,21 +175,14 @@ export default function EditNeedPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Required Skills</Label>
-              <div className="flex gap-2">
-                <Input placeholder="e.g. electrical" value={skillInput} onChange={(e) => setSkillInput(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSkill(); } }} />
-                <Button type="button" variant="secondary" onClick={addSkill}><Plus className="h-4 w-4" /></Button>
-              </div>
-              <div className="flex flex-wrap gap-2 mt-3">
-                {requiredSkills.map((skill) => (
-                  <span key={skill} className="inline-flex items-center gap-1 px-2 py-1 text-xs text-[#7a6b5a] bg-[#1a1714] border border-[#2a2420] rounded">
-                    {skill}
-                    <Button type="button" variant="ghost" onClick={() => setRequiredSkills(requiredSkills.filter((s) => s !== skill))} className="h-4 w-4 p-0 shrink-0 text-[#7a6b5a] hover:text-[#e8d5a3]">
-                      <X className="h-3 w-3" />
-                    </Button>
-                  </span>
-                ))}
-              </div>
+              <Label>Required Skills <span className="text-[#7a6b5a] font-normal">(optional)</span></Label>
+              <SkillAutocomplete
+                value={requiredSkills}
+                onChange={setRequiredSkills}
+                placeholder="Search skills… e.g. electrical, tutoring"
+                maxSkills={8}
+              />
+              <p className="text-xs text-[#7a6b5a]">add skills to help the right people find your need. browse popular skills or type your own.</p>
             </div>
             <div className="space-y-2">
               <div className="flex items-center gap-2 mb-2">
@@ -191,9 +194,10 @@ export default function EditNeedPage() {
           </div>
         </section>
 
-        <section className="vessel p-5">
-          <p className="text-xs text-[#7a6b5a] uppercase tracking-wide font-medium mb-6">[offer]</p>
-          <div className="space-y-6 max-w-lg">
+        <section className="vessel-offer p-5">
+          <p className="text-xs text-[#f5a623] uppercase tracking-wide font-medium mb-1">[what you are offering]</p>
+          <p className="text-xs text-[#7a6b5a] mb-5">this determines which exchange categories are available below</p>
+          <div className="space-y-5">
             <div className="grid grid-cols-3 gap-2">
               {(["service", "item", "money"] as const).map((type) => (
                 <Button
@@ -215,6 +219,31 @@ export default function EditNeedPage() {
               ))}
             </div>
             <div className="space-y-2">
+              <Label className="text-xs text-[#7a6b5a]">Sub-category (optional)</Label>
+              <div className="flex flex-wrap gap-2">
+                {EXCHANGE_MODES.filter((mode) => {
+                  const incompatible = INCOMPATIBLE_EXCHANGE_MODES[offerType] || [];
+                  return !incompatible.includes(mode.value);
+                }).map((mode) => {
+                  const active = exchangeMode === mode.value;
+                  return (
+                    <button
+                      key={mode.value}
+                      type="button"
+                      onClick={() => setExchangeMode(active ? "" : mode.value)}
+                      className={`text-[11px] uppercase tracking-wider px-2.5 py-1 rounded border transition-colors ${mode.twText} ${
+                        active
+                          ? `${mode.twBorder} ${mode.twBg} border-current`
+                          : "border-[#2a2420] hover:border-current"
+                      }`}
+                    >
+                      {mode.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="space-y-2">
               <Label>Offer Description</Label>
               <Textarea placeholder="describe what you are offering..." value={offerDescription} onChange={(e) => setOfferDescription(e.target.value)} required rows={3} />
             </div>
@@ -231,11 +260,35 @@ export default function EditNeedPage() {
             </div>
           </div>
         </section>
+        </div>
 
-        <section className="vessel p-5">
-          <p className="text-xs text-[#7a6b5a] uppercase tracking-wide font-medium mb-6">[location]</p>
-          <div className="space-y-6 max-w-lg">
-            <div className="bg-[#00e5ff]/10 border border-[#00e5ff]/30 p-4">
+        <section className="p-4 rounded border border-[#00e676]/30 bg-[#00e676]/5">
+          <p className="text-xs text-[#00e676] uppercase tracking-wide font-medium mb-4">[deal type]</p>
+          <div className="flex items-start gap-6">
+            <div className="pt-1">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={requiresContract}
+                  onChange={(e) => setRequiresContract(e.target.checked)}
+                  className="mt-1 accent-[#f5a623]"
+                />
+                <div>
+                  <p className="text-sm font-medium text-[#e8d5a3]">Require a formal contract</p>
+                  <p className="text-xs text-[#7a6b5a] mt-1.5 max-w-2xl">
+                    If checked, both parties must agree to terms and digitally sign a binding contract before the exchange begins.
+                    If unchecked, the deal proceeds in free form — you simply accept an interest and arrange the exchange directly.
+                  </p>
+                </div>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <section className="p-4 rounded border border-[#ff5252]/30 bg-[#ff5252]/5">
+          <p className="text-xs text-[#ff5252] uppercase tracking-wide font-medium mb-4">[location]</p>
+          <div className="space-y-4">
+            <div className="bg-[#00e5ff]/10 border border-[#00e5ff]/30 p-3">
               <div className="flex items-start gap-3">
                 <Info className="h-4 w-4 text-[#00e5ff] mt-0.5 flex-shrink-0" />
                 <div>

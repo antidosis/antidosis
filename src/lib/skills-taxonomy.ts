@@ -1,0 +1,262 @@
+export interface SkillCategory {
+  id: string;
+  label: string;
+  skills: string[];
+}
+
+export const SKILL_TAXONOMY: SkillCategory[] = [
+  {
+    id: "trades",
+    label: "Trades & Construction",
+    skills: [
+      "Electrical",
+      "Plumbing",
+      "Carpentry",
+      "Bricklaying",
+      "Tiling",
+      "Painting",
+      "Plastering",
+      "Roofing",
+      "Flooring",
+      "Concreting",
+      "Landscaping",
+      "Fencing",
+      "Glazing",
+      "Welding",
+      "Mechanic",
+      "Auto Electrician",
+      "Panel Beating",
+      "Spray Painting",
+    ],
+  },
+  {
+    id: "home",
+    label: "Home Services",
+    skills: [
+      "Cleaning",
+      "End of Lease Cleaning",
+      "Carpet Cleaning",
+      "Window Cleaning",
+      "Pool Maintenance",
+      "Gardening",
+      "Lawn Mowing",
+      "Tree Lopping",
+      "Pest Control",
+      "Rubbish Removal",
+      "Furniture Assembly",
+      "Handyman",
+      "Locksmith",
+      "Appliance Repair",
+      "Air Conditioning",
+      "Heating",
+      "Insulation",
+      "Gutter Cleaning",
+      "Pressure Washing",
+    ],
+  },
+  {
+    id: "tech",
+    label: "Technology & IT",
+    skills: [
+      "Web Development",
+      "Mobile App Development",
+      "Frontend Development",
+      "Backend Development",
+      "Full Stack Development",
+      "DevOps",
+      "Cloud Computing",
+      "Cybersecurity",
+      "Network Administration",
+      "Database Administration",
+      "Data Analysis",
+      "Machine Learning",
+      "AI Development",
+      "UI/UX Design",
+      "Graphic Design",
+      "Video Editing",
+      "Photo Editing",
+      "3D Modeling",
+      "Animation",
+      "IT Support",
+      "Computer Repair",
+      "Data Recovery",
+      "SEO",
+      "Digital Marketing",
+      "Social Media Management",
+    ],
+  },
+  {
+    id: "creative",
+    label: "Creative & Media",
+    skills: [
+      "Photography",
+      "Videography",
+      "Drone Photography",
+      "Music Production",
+      "Sound Engineering",
+      "Voice Over",
+      "Copywriting",
+      "Content Writing",
+      "Blog Writing",
+      "Technical Writing",
+      "Proofreading",
+      "Translation",
+      "Illustration",
+      "Motion Graphics",
+      "Branding",
+      "Logo Design",
+      "Interior Design",
+      "Fashion Design",
+      "Event Planning",
+      "Wedding Planning",
+      "DJ",
+      "Live Streaming",
+    ],
+  },
+  {
+    id: "education",
+    label: "Education & Tutoring",
+    skills: [
+      "Maths Tutoring",
+      "Science Tutoring",
+      "English Tutoring",
+      "Physics Tutoring",
+      "Chemistry Tutoring",
+      "Biology Tutoring",
+      "Primary School Tutoring",
+      "High School Tutoring",
+      "University Tutoring",
+      "Music Lessons",
+      "Piano Lessons",
+      "Guitar Lessons",
+      "Singing Lessons",
+      "Language Tutoring",
+      "French Tutoring",
+      "Spanish Tutoring",
+      "Mandarin Tutoring",
+      "Japanese Tutoring",
+      "Driving Lessons",
+      "Swimming Lessons",
+      "Coding Lessons",
+      "Art Lessons",
+      "Dance Lessons",
+      "Yoga Instruction",
+      "Fitness Training",
+      "Personal Training",
+    ],
+  },
+  {
+    id: "care",
+    label: "Care & Wellness",
+    skills: [
+      "Babysitting",
+      "Nannying",
+      "Childcare",
+      "Elderly Care",
+      "Disability Support",
+      "Pet Sitting",
+      "Dog Walking",
+      "Pet Grooming",
+      "Veterinary Care",
+      "Nursing",
+      "Massage Therapy",
+      "Physiotherapy",
+      "Occupational Therapy",
+      "Speech Therapy",
+      "Psychology",
+      "Counselling",
+      "Nutrition",
+      "Diet Planning",
+      "Meditation Instruction",
+      "Pilates Instruction",
+    ],
+  },
+  {
+    id: "business",
+    label: "Business & Professional",
+    skills: [
+      "Accounting",
+      "Bookkeeping",
+      "Tax Preparation",
+      "Financial Planning",
+      "Legal Advice",
+      "Contract Review",
+      "Business Consulting",
+      "Project Management",
+      "Virtual Assistance",
+      "Recruitment",
+      "Resume Writing",
+      "Interview Coaching",
+      "Public Relations",
+      "Market Research",
+      "Sales",
+      "Customer Service",
+      "Data Entry",
+      "Transcription",
+      "Notary",
+      "Conveyancing",
+    ],
+  },
+  {
+    id: "transport",
+    label: "Transport & Logistics",
+    skills: [
+      "Moving",
+      "Furniture Removal",
+      "Courier",
+      "Delivery",
+      "Uber Driving",
+      "Chauffeur",
+      "Truck Driving",
+      "Forklift Operation",
+      "Warehousing",
+      "Storage",
+      "Import/Export",
+      "Freight Forwarding",
+    ],
+  },
+  {
+    id: "food",
+    label: "Food & Hospitality",
+    skills: [
+      "Catering",
+      "Private Chef",
+      "Meal Prep",
+      "Baking",
+      "Cake Decorating",
+      "Barista",
+      "Bartending",
+      "Waiting Staff",
+      "Event Catering",
+      "BBQ Catering",
+      "Food Truck",
+    ],
+  },
+];
+
+export const ALL_SKILLS: string[] = SKILL_TAXONOMY.flatMap((c) => c.skills);
+
+export function searchSkills(query: string, exclude: string[] = []): string[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return [];
+  const normalizedExclude = exclude.map((s) => s.toLowerCase());
+  return ALL_SKILLS.filter(
+    (skill) =>
+      skill.toLowerCase().includes(q) &&
+      !normalizedExclude.includes(skill.toLowerCase())
+  ).slice(0, 12);
+}
+
+export function getSkillCategory(skillName: string): string | undefined {
+  const lower = skillName.toLowerCase();
+  for (const cat of SKILL_TAXONOMY) {
+    if (cat.skills.some((s) => s.toLowerCase() === lower)) {
+      return cat.id;
+    }
+  }
+  return undefined;
+}
+
+export function getCategoryLabel(categoryId: string): string | undefined {
+  return SKILL_TAXONOMY.find((c) => c.id === categoryId)?.label;
+}

@@ -14,12 +14,15 @@ const credentialTypes = [
   "resume",
   "identification",
   "insurance",
+  "wwcc",
+  "criminal_history",
   "business_registration",
   "other",
 ] as const;
 
 const createSchema = z.object({
   type: z.enum(credentialTypes),
+  subType: z.string().max(100).optional(),
   title: z.string().min(1).max(200),
   description: z.string().max(2000).optional(),
   documentNumber: z.string().max(100).optional(),
@@ -27,6 +30,7 @@ const createSchema = z.object({
   issuedAt: z.string().optional(),
   expiresAt: z.string().optional(),
   fileUrl: z.string().max(500).optional(),
+  backFileUrl: z.string().max(500).optional(),
   isPublic: z.boolean().default(false),
 });
 
@@ -83,6 +87,7 @@ export async function POST(req: NextRequest) {
       data: {
         profileId: profile.id,
         type: data.type,
+        subType: data.subType,
         title: data.title,
         description: data.description,
         documentNumber: data.documentNumber,
@@ -90,6 +95,7 @@ export async function POST(req: NextRequest) {
         issuedAt: data.issuedAt && !isNaN(new Date(data.issuedAt).getTime()) ? new Date(data.issuedAt) : null,
         expiresAt: data.expiresAt && !isNaN(new Date(data.expiresAt).getTime()) ? new Date(data.expiresAt) : null,
         fileUrl: data.fileUrl ? sanitizeUrl(data.fileUrl) : null,
+        backFileUrl: data.backFileUrl ? sanitizeUrl(data.backFileUrl) : null,
         isPublic: data.isPublic,
       },
     });

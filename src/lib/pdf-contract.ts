@@ -46,6 +46,8 @@ export interface ContractPdfData {
   }>;
   partyASignedAt: string | null;
   partyBSignedAt: string | null;
+  partyASignature: string | null;
+  partyBSignature: string | null;
 }
 
 export async function generateContractPdf(data: ContractPdfData): Promise<Uint8Array> {
@@ -320,15 +322,30 @@ export async function generateContractPdf(data: ContractPdfData): Promise<Uint8A
   drawText("6. DIGITAL SIGNATURES", { size: 13, bold: true, color: rgb(0.2, 0.2, 0.2) });
   y -= 18;
 
+  drawText("By signing below, both parties acknowledge they have read, understood, and agree to be bound by the terms of this contract.", { size: 9, color: rgb(0.4, 0.4, 0.4) });
+  y -= 20;
+
   if (data.partyASignedAt) {
-    drawText(`Party A signed: ${new Date(data.partyASignedAt).toLocaleString("en-AU")}`, { size: 10, color: rgb(0.2, 0.5, 0.2) });
+    drawText(`Party A: ${data.partyA.fullName || "N/A"}`, { size: 10, bold: true });
+    y -= 14;
+    if (data.partyASignature) {
+      drawText(`Signature: ${data.partyASignature}`, { size: 11, color: rgb(0.1, 0.1, 0.1) });
+      y -= 14;
+    }
+    drawText(`Signed: ${new Date(data.partyASignedAt).toLocaleString("en-AU")}`, { size: 9, color: rgb(0.2, 0.5, 0.2) });
   } else {
     drawText("Party A: ________________________________  Date: _______________", { size: 10, color: rgb(0.4, 0.4, 0.4) });
   }
-  y -= 30;
+  y -= 36;
 
   if (data.partyBSignedAt) {
-    drawText(`Party B signed: ${new Date(data.partyBSignedAt).toLocaleString("en-AU")}`, { size: 10, color: rgb(0.2, 0.5, 0.2) });
+    drawText(`Party B: ${data.partyB.fullName || "N/A"}`, { size: 10, bold: true });
+    y -= 14;
+    if (data.partyBSignature) {
+      drawText(`Signature: ${data.partyBSignature}`, { size: 11, color: rgb(0.1, 0.1, 0.1) });
+      y -= 14;
+    }
+    drawText(`Signed: ${new Date(data.partyBSignedAt).toLocaleString("en-AU")}`, { size: 9, color: rgb(0.2, 0.5, 0.2) });
   } else {
     drawText("Party B: ________________________________  Date: _______________", { size: 10, color: rgb(0.4, 0.4, 0.4) });
   }

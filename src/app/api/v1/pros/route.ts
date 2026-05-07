@@ -5,8 +5,22 @@ import { logger } from "@/lib/logger";
 
 async function handler(req: NextRequest) {
   try {
+    const { searchParams } = new URL(req.url);
+    const q = searchParams.get("q")?.slice(0, 100);
+
+    const where: Record<string, any> = { isPro: true, showInDirectory: true };
+
+    if (q) {
+      where.OR = [
+        { fullName: { contains: q, mode: "insensitive" } },
+        { bio: { contains: q, mode: "insensitive" } },
+        { skills: { some: { name: { contains: q, mode: "insensitive" } } } },
+        { locationName: { contains: q, mode: "insensitive" } },
+      ];
+    }
+
     const pros = await prisma.profile.findMany({
-      where: { isPro: true, showInDirectory: true },
+      where,
       orderBy: { ratingAvg: "desc" },
       take: 100,
       select: {
@@ -26,7 +40,7 @@ async function handler(req: NextRequest) {
     });
     return NextResponse.json(pros, {
       headers: {
-        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=600",
+        "Cache-Control": "public, s-maxage=120, stale-while-revalidate=600",
       },
     });
   } catch (error) {

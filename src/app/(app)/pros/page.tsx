@@ -4,8 +4,11 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Star, MapPin, Briefcase, Shield, Phone, Award } from "lucide-react";
+import { useApi } from "@/lib/swr-config";
+import { Star, MapPin, Briefcase, Shield, Phone, Award, Search, X, Loader2 } from "lucide-react";
 
 interface ProProfile {
   id: string;
@@ -23,26 +26,22 @@ interface ProProfile {
 }
 
 export default function ProsDirectoryPage() {
-  const [pros, setPros] = useState<ProProfile[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
 
+  // Debounce search
   useEffect(() => {
-    async function load() {
-      try {
-        const res = await fetch("/api/v1/pros");
-        if (!res.ok) throw new Error("Failed to load");
-        const data = await res.json();
-        if (Array.isArray(data)) setPros(data);
-        else setError("Unexpected response");
-      } catch {
-        setError("Failed to load directory. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
-  }, []);
+    const timer = setTimeout(() => setDebouncedQuery(query), 350);
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  const key = (() => {
+    const params = new URLSearchParams();
+    if (debouncedQuery) params.set("q", debouncedQuery);
+    return `/api/v1/pros?${params.toString()}`;
+  })();
+
+  const { data: pros, isLoading, error } = useApi<ProProfile[]>(key);
 
   return (
     <div className="max-w-5xl mx-auto px-4 md:px-8">
@@ -57,32 +56,49 @@ export default function ProsDirectoryPage() {
         </p>
       </div>
 
-      {loading && (
-        <div className="py-12 text-center text-sm text-[#7a6b5a]">loading...</div>
-      )}
-
-      {error && (
-        <div className="border border-[#ff5252]/20 bg-[#ff5252]/5 p-6 mb-8 text-center">
-          <p className="text-sm text-[#ff5252]">{error}</p>
+      {/* Search */}
+      <div className="vessel p-4 mb-8">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#7a6b5a]" />
+          <Input
+            placeholder="search by name, skill, location..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="pl-9"
+          />
+          {query && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setQuery("")}
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-[#7a6b5a] hover:text-[#e8d5a3]"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
         </div>
-      )}
+      </div>
 
-      {!loading && !error && pros.length === 0 && (
+      {isLoading && !pros ? (
+        <div className="py-12 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto text-[#7a6b5a]" /></div>
+      ) : error ? (
+        <div className="border border-[#ff5252]/20 bg-[#ff5252]/5 p-6 mb-8 text-center">
+          <p className="text-sm text-[#ff5252]">Failed to load directory. Please try again later.</p>
+        </div>
+      ) : !pros || pros.length === 0 ? (
         <EmptyState
-          title="No pros in the directory yet."
-          description="Claim pro and opt-in to public sharing to appear here."
-          action={
+          title={query ? "No pros match your search" : "No pros in the directory yet."}
+          description={query ? "try a different search term." : "Claim pro and opt-in to public sharing to appear here."}
+          action={!query ? (
             <Link
               href="/pro"
               className="inline-flex items-center gap-2 text-sm text-[#f5a623] hover:underline"
             >
               go to pro page →
             </Link>
-          }
+          ) : undefined}
         />
-      )}
-
-      {!loading && !error && pros.length > 0 && (
+      ) : (
         <div className="space-y-4">
           {pros.map((pro) => (
             <Link

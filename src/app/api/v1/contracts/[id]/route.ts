@@ -10,11 +10,10 @@ import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 const patchSchema = z.object({
   terms: z.string().min(1).max(10000).optional(),
   agree: z.boolean().optional(),
+  submitTerms: z.boolean().optional(),
+  updatedAt: z.string().optional(),
   partyATerms: z.string().max(5000).optional(),
   partyBTerms: z.string().max(5000).optional(),
-  deadlineTerms: z.string().max(2000).optional(),
-  completionMethodTerms: z.string().max(2000).optional(),
-  additionalTerms: z.string().max(5000).optional(),
   partyAUseMessageTerms: z.boolean().optional(),
   partyBUseMessageTerms: z.boolean().optional(),
 });
@@ -222,11 +221,10 @@ export async function PATCH(
     const {
       terms,
       agree,
+      submitTerms,
+      updatedAt: clientUpdatedAt,
       partyATerms,
       partyBTerms,
-      deadlineTerms,
-      completionMethodTerms,
-      additionalTerms,
       partyAUseMessageTerms,
       partyBUseMessageTerms,
     } = parsed.data;
@@ -236,14 +234,11 @@ export async function PATCH(
       terms,
       partyATerms,
       partyBTerms,
-      deadlineTerms,
-      completionMethodTerms,
-      additionalTerms,
       partyAUseMessageTerms,
       partyBUseMessageTerms,
     ].some((v) => v !== undefined);
 
-    // Terms update: reset all agreements and signatures
+    // Terms update: reset all submissions, agreements and signatures
     if (termFieldsProvided) {
       if (contract.termsLockedAt) {
         return NextResponse.json(
@@ -253,6 +248,8 @@ export async function PATCH(
       }
 
       const updateData: Record<string, unknown> = {
+        partyASubmittedAt: null,
+        partyBSubmittedAt: null,
         partyAAgreedAt: null,
         partyBAgreedAt: null,
         termsLockedAt: null,
@@ -265,9 +262,6 @@ export async function PATCH(
       if (terms !== undefined) updateData.terms = terms;
       if (partyATerms !== undefined) updateData.partyATerms = partyATerms;
       if (partyBTerms !== undefined) updateData.partyBTerms = partyBTerms;
-      if (deadlineTerms !== undefined) updateData.deadlineTerms = deadlineTerms;
-      if (completionMethodTerms !== undefined) updateData.completionMethodTerms = completionMethodTerms;
-      if (additionalTerms !== undefined) updateData.additionalTerms = additionalTerms;
       if (partyAUseMessageTerms !== undefined) updateData.partyAUseMessageTerms = partyAUseMessageTerms;
       if (partyBUseMessageTerms !== undefined) updateData.partyBUseMessageTerms = partyBUseMessageTerms;
 
@@ -279,7 +273,29 @@ export async function PATCH(
       return NextResponse.json({ contract: updated });
     }
 
-    // Agreement flow
+    // Submit terms flow
+    if (submitTerms) {
+      if (contract.termsLockedAt) {
+        return NextResponse.json(
+          { error: "Terms are already locked" },
+          { status: 400 }
+        );
+      }
+
+      const submissionField = isPartyA ? "partyASubmittedAt" : "partyBSubmittedAt";
+      const updated = await prisma.contract.update({
+        where: { id: params.id },
+        data: {
+          [submissionField]: new Date(),
+          partyAAgreedAt: null,
+          partyBAgreedAt: null,
+        },
+      });
+
+      return NextResponse.json({ contract: updated });
+    }
+
+    // Agreement flow (accept terms during review phase)
     if (agree) {
       if (contract.termsLockedAt) {
         return NextResponse.json(
@@ -288,15 +304,18 @@ export async function PATCH(
         );
       }
 
-      if (isPartyA && contract.partyAAgreedAt) {
+      // Race condition protection: reject if terms were updated since client loaded
+      if (clientUpdatedAt && contract.updatedAt.toISOString() !== clientUpdatedAt) {
         return NextResponse.json(
-          { error: "You have already agreed to these terms" },
-          { status: 400 }
+          { error: "Terms have been updated. Please review the latest terms before accepting.", code: "TERMS_CHANGED" },
+          { status: 409 }
         );
       }
-      if (isPartyB && contract.partyBAgreedAt) {
+
+      // Both parties must have submitted before either can accept
+      if (!contract.partyASubmittedAt || !contract.partyBSubmittedAt) {
         return NextResponse.json(
-          { error: "You have already agreed to these terms" },
+          { error: "Both parties must submit their terms before accepting.", code: "NOT_READY_FOR_REVIEW" },
           { status: 400 }
         );
       }
@@ -324,11 +343,14 @@ export async function PATCH(
             data: { status: "contracted" },
           });
           // Decline all other pending/accepted acceptances for this need
+          const otherAcceptanceFilter = contract.acceptanceId
+            ? { id: { not: contract.acceptanceId } }
+            : {};
           await tx.acceptance.updateMany({
             where: {
               needId: fresh.needId,
               status: { in: ["pending", "accepted"] },
-              id: { not: contract.acceptanceId! },
+              ...otherAcceptanceFilter,
             },
             data: { status: "declined" },
           });
@@ -375,6 +397,8 @@ export async function PATCH(
             negotiationMessages,
             partyASignedAt: null,
             partyBSignedAt: null,
+            partyASignature: null,
+            partyBSignature: null,
             partyATerms: contract.partyATerms,
             partyBTerms: contract.partyBTerms,
             deadlineTerms: contract.deadlineTerms,

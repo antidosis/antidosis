@@ -7,12 +7,13 @@ import { logger } from "@/lib/logger";
 import { sanitizePlainText } from "@/lib/security/sanitize";
 import { sanitizeUrlArray } from "@/lib/security/url";
 import { isValidCentralCoastSuburb } from "@/lib/data/central-coast-suburbs";
+import { EXCHANGE_MODE_VALUES } from "@/lib/categories";
 import { z } from "zod";
 
 const createNeedSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters").max(200, "Title must be under 200 characters"),
   description: z.string().min(10, "Description must be at least 10 characters").max(5000, "Description must be under 5000 characters"),
-  needCategory: z.string().optional(),
+  needCategory: z.enum(["", ...EXCHANGE_MODE_VALUES] as [string, ...string[]]).optional().nullable(),
   offerType: z.enum(["service", "item", "money"]),
   offerDescription: z.string().min(3, "Offer description must be at least 3 characters").max(2000, "Offer description must be under 2000 characters"),
   offerValue: z.number().min(0).optional(),
@@ -25,6 +26,7 @@ const createNeedSchema = z.object({
   requiredSkills: z.array(z.string()).default([]),
   images: z.array(z.string()).default([]),
   offerImages: z.array(z.string()).default([]),
+  requiresContract: z.boolean().optional().default(false),
 });
 
 export async function GET(req: NextRequest) {
@@ -34,6 +36,10 @@ export async function GET(req: NextRequest) {
     const skill = searchParams.get("skill")?.slice(0, 50);
     const offerType = searchParams.get("type");
     const location = searchParams.get("location")?.slice(0, 100);
+    const category = searchParams.get("category")?.slice(0, 50);
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
+    const limit = Math.min(50, Math.max(1, parseInt(searchParams.get("limit") || "12", 10)));
+    const skip = (page - 1) * limit;
 
     const where: Record<string, any> = { status: "open" };
 
@@ -52,6 +58,10 @@ export async function GET(req: NextRequest) {
       where.locationName = { contains: location, mode: "insensitive" };
     }
 
+    if (category && EXCHANGE_MODE_VALUES.includes(category)) {
+      where.needCategory = category;
+    }
+
     if (skill) {
       where.requiredSkills = {
         some: {
@@ -60,33 +70,37 @@ export async function GET(req: NextRequest) {
       };
     }
 
-    const needs = await prisma.need.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      include: {
-        poster: {
-          select: {
-            id: true,
-            fullName: true,
-            avatarUrl: true,
-            ratingAvg: true,
-            ratingCount: true,
-            locationName: true,
+    const [needs, total] = await Promise.all([
+      prisma.need.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+        include: {
+          poster: {
+            select: {
+              id: true,
+              fullName: true,
+              avatarUrl: true,
+              ratingAvg: true,
+              ratingCount: true,
+              locationName: true,
+            },
+          },
+          requiredSkills: true,
+          _count: {
+            select: { acceptances: true },
           },
         },
-        requiredSkills: true,
-        _count: {
-          select: { acceptances: true },
-        },
-      },
-      take: 50,
-    });
+      }),
+      prisma.need.count({ where }),
+    ]);
 
     return NextResponse.json(
-      { needs },
+      { needs, total, page, totalPages: Math.ceil(total / limit), limit },
       {
         headers: {
-          "Cache-Control": "public, s-maxage=30, stale-while-revalidate=300",
+          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
         },
       }
     );
@@ -169,6 +183,7 @@ export async function POST(req: NextRequest) {
         timeRange: data.timeRange ? sanitizePlainText(data.timeRange) : null,
         images: sanitizeUrlArray(data.images),
         offerImages: sanitizeUrlArray(data.offerImages),
+        requiresContract: data.requiresContract,
         requiredSkills: {
           create: data.requiredSkills.map((name) => ({ name: sanitizePlainText(name) })),
         },

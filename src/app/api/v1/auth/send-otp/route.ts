@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { normalizeMobile, isValidAustralianMobile } from "@/lib/mobile";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
+import twilio from "twilio";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +23,7 @@ export async function POST(req: NextRequest) {
     const identifier = getRateLimitIdentifier(req, user.id);
     const limit = await rateLimit(identifier, {
       windowMs: 60 * 60 * 1000, // 1 hour
-      maxRequests: 3,
+      maxRequests: 10,
     });
 
     if (!limit.allowed) {
@@ -93,7 +94,32 @@ export async function POST(req: NextRequest) {
       });
     });
 
-    console.log(`[DEV OTP] Mobile: ${normalizedMobile}, Code: ${code}`);
+    const twilioSid = process.env.TWILIO_ACCOUNT_SID;
+    const twilioToken = process.env.TWILIO_AUTH_TOKEN;
+    const twilioFrom = process.env.TWILIO_PHONE_NUMBER;
+
+    if (twilioSid && twilioToken && twilioFrom) {
+      try {
+        const client = twilio(twilioSid, twilioToken);
+        await client.messages.create({
+          body: `Your Antidosis verification code is: ${code}. Valid for 10 minutes.`,
+          from: twilioFrom,
+          to: normalizedMobile,
+        });
+      } catch (twilioErr: any) {
+        const twilioMessage = twilioErr?.message || String(twilioErr);
+        const twilioCode = twilioErr?.code || "unknown";
+        const twilioStatus = twilioErr?.status || "unknown";
+        logger.error(`Twilio SMS failed — code:${twilioCode} status:${twilioStatus} msg:${twilioMessage}`, twilioErr);
+        return NextResponse.json(
+          { error: `SMS delivery failed: ${twilioMessage}` },
+          { status: 502 }
+        );
+      }
+    } else {
+      // Dev fallback — log to console when Twilio is not configured
+      console.log(`[DEV OTP] Mobile: ${normalizedMobile}, Code: ${code}`);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

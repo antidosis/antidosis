@@ -41,7 +41,12 @@ export async function POST(
       return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
     }
 
-    const body = await req.json();
+    let body = {};
+    try {
+      body = await req.json();
+    } catch {
+      // no body or invalid JSON — treat as empty
+    }
     const cancelSchema = z.object({
       cancelReason: z.string().max(500).optional(),
     });
@@ -90,11 +95,11 @@ export async function POST(
         },
       });
 
-      // Re-open the need if it was contracted/negotiating/active
-      if (["negotiating", "contracted", "active"].includes(contract.need.status)) {
+      // Archive the need so the poster can review, edit, and re-post
+      if (["negotiating", "contracted", "active", "open"].includes(contract.need.status)) {
         await tx.need.update({
           where: { id: contract.needId },
-          data: { status: "open" },
+          data: { status: "archived" },
         });
       }
 

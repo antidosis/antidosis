@@ -259,6 +259,32 @@
     box-shadow: 0 0 25px rgba(0, 229, 255, 0.05);
   }
 
+  /* NEED vessel — cool border for the request / what the poster seeks */
+  .vessel-need {
+    background: var(--void-raised);
+    border: 1px solid var(--bronze);
+    border-left: 2px solid rgba(53, 194, 240, 0.25);
+    transition: all 0.3s ease;
+  }
+
+  .vessel-need:hover {
+    border-left-color: rgba(53, 194, 240, 0.5);
+    box-shadow: 0 0 25px rgba(53, 194, 240, 0.06);
+  }
+
+  /* OFFER vessel — warm border for what the poster is giving */
+  .vessel-offer {
+    background: var(--void-raised);
+    border: 1px solid var(--bronze);
+    border-left: 2px solid rgba(245, 166, 35, 0.25);
+    transition: all 0.3s ease;
+  }
+
+  .vessel-offer:hover {
+    border-left-color: rgba(245, 166, 35, 0.5);
+    box-shadow: 0 0 25px rgba(245, 166, 35, 0.06);
+  }
+
   /* Shimmer effect for loading */
   .shimmer {
     background: linear-gradient(
@@ -284,6 +310,109 @@
 
 .animate-ticker {
   animation: ticker 40s linear infinite;
+}
+
+  /* Contract Document — Parchment */
+  .contract-parchment {
+    background: #f5e6c8;
+    color: #2c1810;
+    font-family: 'Georgia', 'Times New Roman', serif;
+  }
+
+  .contract-page {
+    background: #f5e6c8;
+    color: #2c1810;
+    box-shadow: 0 1px 3px rgba(44, 24, 16, 0.15), 0 4px 12px rgba(44, 24, 16, 0.1);
+    border: 1px solid #e0c898;
+  }
+
+  .contract-heading {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-weight: 700;
+    color: #1a0f08;
+    letter-spacing: 0.02em;
+  }
+
+  .contract-body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    color: #2c1810;
+    line-height: 1.7;
+  }
+
+  .contract-label {
+    font-family: var(--font-mono), monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #8a7050;
+  }
+
+  .contract-seal {
+    border: 2px solid #1a0f08;
+    color: #1a0f08;
+    font-family: 'Georgia', serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    padding: 8px 20px;
+    display: inline-block;
+  }
+
+  .signature-line {
+    border-bottom: 1px solid #2c1810;
+    min-width: 200px;
+    display: inline-block;
+  }
+
+  .print-hidden {
+    @media print {
+      display: none !important;
+    }
+  }
+
+  .print-only {
+    display: none;
+    @media print {
+      display: block;
+    }
+  }
+
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+    font-family: 'Georgia', 'Times New Roman', serif !important;
+  }
+
+  .contract-parchment,
+  .contract-page {
+    background: white !important;
+    box-shadow: none !important;
+    border: none !important;
+    color: black !important;
+  }
+
+  .contract-heading,
+  .contract-body {
+    color: black !important;
+  }
+
+  .print-hidden {
+    display: none !important;
+  }
+
+  .print-break {
+    page-break-before: always;
+  }
+
+  /* Force all text to be black for print */
+  * {
+    color: black !important;
+    background: transparent !important;
+    border-color: #333 !important;
+    text-shadow: none !important;
+    box-shadow: none !important;
+  }
 }
 
 @media (max-width: 768px) {

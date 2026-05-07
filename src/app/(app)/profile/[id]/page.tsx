@@ -1,10 +1,12 @@
+"use client";
+
+import { useParams } from "next/navigation";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
-import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ProfileActions } from "@/components/ui/profile-actions";
+import { useApi } from "@/lib/swr-config";
 import {
   MapPin,
   Star,
@@ -18,55 +20,106 @@ import {
   FolderOpen,
   ClipboardList,
   MessageSquareText,
+  Loader2,
 } from "lucide-react";
 
-export const dynamic = "force-dynamic";
+interface Skill {
+  id: string;
+  name: string;
+  isVerified: boolean;
+}
 
-export default async function ProfilePage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    redirect(`/login?redirect=/profile/${params.id}`);
+interface SocialLink {
+  id: string;
+  platform: string;
+  url: string;
+}
+
+interface Credential {
+  id: string;
+  type: string;
+  title: string;
+  documentNumber: string | null;
+  issuedBy: string | null;
+  expiresAt: string | null;
+  fileUrl: string | null;
+  isVerified: boolean;
+}
+
+interface NeedSkill {
+  id: string;
+  name: string;
+}
+
+interface Need {
+  id: string;
+  title: string;
+  description: string;
+  requiredSkills: NeedSkill[];
+  _count: { acceptances: number };
+}
+
+interface Review {
+  id: string;
+  rating: number;
+  comment: string | null;
+  giver: { fullName: string | null; avatarUrl: string | null };
+  contract: { need: { title: string } } | null;
+}
+
+interface ProfileData {
+  id: string;
+  fullName: string | null;
+  avatarUrl: string | null;
+  bio: string | null;
+  locationName: string | null;
+  publicPhone: string | null;
+  ratingAvg: number;
+  ratingCount: number;
+  jobsCompleted: number;
+  isVerified: boolean;
+  isPro: boolean;
+  skills: Skill[];
+  socialLinks: SocialLink[];
+  credentials: Credential[];
+  needsPosted: Need[];
+  reviewsReceived: Review[];
+}
+
+export default function ProfilePage() {
+  const params = useParams();
+  const id = params.id as string;
+
+  const { data: profile, isLoading, error } = useApi<ProfileData>(
+    id ? `/api/v1/profiles/${id}` : null
+  );
+
+  if (isLoading) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 md:px-8 py-24 text-center">
+        <Loader2 className="h-6 w-6 animate-spin mx-auto text-[#7a6b5a]" />
+      </div>
+    );
   }
 
-  const profile = await prisma.profile.findUnique({
-    where: { id: params.id },
-    include: {
-      skills: true,
-      socialLinks: { where: { isPublic: true } },
-      credentials: { where: { isPublic: true } },
-      needsPosted: {
-        where: { status: "open" },
-        orderBy: { createdAt: "desc" },
-        include: {
-          requiredSkills: true,
-          _count: { select: { acceptances: true } },
-        },
-        take: 10,
-      },
-      reviewsReceived: {
-        orderBy: { createdAt: "desc" },
-        include: {
-          giver: { select: { fullName: true, avatarUrl: true } },
-          contract: { select: { need: { select: { title: true } } } },
-        },
-        take: 10,
-      },
-    },
-  });
+  if (error) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 md:px-8 py-12">
+        <div className="vessel p-6 border-[#ff5252]/30">
+          <p className="text-sm text-[#ff5252]">Failed to load profile.</p>
+        </div>
+      </div>
+    );
+  }
 
-  if (!profile) return notFound();
+  if (!profile) return null;
 
   const username =
     profile.fullName?.toLowerCase().replace(/\s/g, "_") || "user";
 
   return (
     <div className="max-w-3xl mx-auto px-4 md:px-8 space-y-10 pb-12">
-      <div className="py-6">
+      <div className="py-6 flex items-center justify-between">
         <Link
           href="/needs"
           className="inline-flex items-center text-sm text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors"
@@ -74,6 +127,7 @@ export default async function ProfilePage({
           <ArrowLeft className="mr-2 h-4 w-4" />
           $ cd ~/needs/
         </Link>
+        <ProfileActions url={`https://antidosis.com/profile/${id}`} />
       </div>
 
       <p className="text-xs text-[#7a6b5a] mb-4">$ finger {username}</p>
@@ -93,13 +147,13 @@ export default async function ProfilePage({
               {profile.isPro && <Badge variant="default">pro</Badge>}
             </div>
             <div className="flex flex-wrap items-center gap-4 text-sm text-[#b8a078] mt-2">
-              {profile.ratingCount > 0 && (
+              {(profile.ratingCount ?? 0) > 0 && (
                 <span className="flex items-center gap-1 text-[#f5a623] glow-gold">
                   <Star className="h-4 w-4 fill-current" />
-                  {profile.ratingAvg.toFixed(1)} ({profile.ratingCount} reviews)
+                  {(profile.ratingAvg ?? 0).toFixed(1)} ({profile.ratingCount} reviews)
                 </span>
               )}
-              {profile.jobsCompleted > 0 && (
+              {(profile.jobsCompleted ?? 0) > 0 && (
                 <span className="flex items-center gap-1">
                   <Briefcase className="h-4 w-4" />
                   {profile.jobsCompleted} completed

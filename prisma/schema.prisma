@@ -90,6 +90,7 @@ model Need {
   latitude         Float?
   longitude        Float?
   status           String   @default("open")
+  requiresContract Boolean  @default(false) @map("requires_contract")
   deadline         DateTime?
   timeRange        String?  @map("time_range")
   images           String[]
@@ -105,6 +106,7 @@ model Need {
 
   @@index([status, createdAt])
   @@index([posterId])
+  @@index([needCategory])
   @@map("needs")
 }
 
@@ -129,6 +131,7 @@ model Acceptance {
 
   need Need    @relation(fields: [needId], references: [id], onDelete: Cascade)
   user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages NeedMessage[]
 
   @@map("acceptances")
   @@index([needId])
@@ -151,11 +154,15 @@ model Contract {
   partyBUseMessageTerms   Boolean   @default(false) @map("party_b_use_message_terms")
   negotiationMessages Json? @map("negotiation_messages")
   pdfUrl          String?   @map("pdf_url")
+  partyASubmittedAt DateTime? @map("party_a_submitted_at")
+  partyBSubmittedAt DateTime? @map("party_b_submitted_at")
   partyAAgreedAt  DateTime? @map("party_a_agreed_at")
   partyBAgreedAt  DateTime? @map("party_b_agreed_at")
   termsLockedAt   DateTime? @map("terms_locked_at")
   partyASignedAt  DateTime? @map("party_a_signed_at")
   partyBSignedAt  DateTime? @map("party_b_signed_at")
+  partyASignature String?   @map("party_a_signature")
+  partyBSignature String?   @map("party_b_signature")
   status          String    @default("draft")
   aMarkedComplete Boolean   @default(false) @map("a_marked_complete")
   bMarkedComplete Boolean   @default(false) @map("b_marked_complete")
@@ -181,20 +188,23 @@ model Contract {
 }
 
 model NeedMessage {
-  id        String   @id @default(uuid())
-  needId    String   @map("need_id")
-  senderId  String   @map("sender_id")
-  content   String
-  isRead    Boolean  @default(false) @map("is_read")
-  createdAt DateTime @default(now()) @map("created_at")
+  id           String   @id @default(uuid())
+  needId       String   @map("need_id")
+  senderId     String   @map("sender_id")
+  acceptanceId String?  @map("acceptance_id")
+  content      String
+  isRead       Boolean  @default(false) @map("is_read")
+  createdAt    DateTime @default(now()) @map("created_at")
 
-  need   Need    @relation(fields: [needId], references: [id], onDelete: Cascade)
-  sender Profile @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  need      Need       @relation(fields: [needId], references: [id], onDelete: Cascade)
+  sender    Profile    @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  acceptance Acceptance? @relation(fields: [acceptanceId], references: [id], onDelete: Cascade)
 
   @@map("need_messages")
   @@index([needId])
   @@index([needId, createdAt])
   @@index([senderId])
+  @@index([acceptanceId])
 }
 
 model Message {
@@ -238,6 +248,7 @@ model Credential {
   id             String    @id @default(uuid())
   profileId      String    @map("profile_id")
   type           String
+  subType        String?   @map("sub_type")
   title          String
   description    String?
   documentNumber String?   @map("document_number")
@@ -245,6 +256,7 @@ model Credential {
   issuedAt       DateTime? @map("issued_at")
   expiresAt      DateTime? @map("expires_at")
   fileUrl        String?   @map("file_url")
+  backFileUrl    String?   @map("back_file_url")
   isPublic       Boolean   @default(false) @map("is_public")
   isVerified     Boolean   @default(false) @map("is_verified")
   rejectionReason String?  @map("rejection_reason")

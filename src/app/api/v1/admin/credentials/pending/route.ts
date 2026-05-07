@@ -20,6 +20,7 @@ export async function GET() {
             fullName: true,
             email: true,
             avatarUrl: true,
+            mobile: true,
           },
         },
       },

@@ -14,12 +14,15 @@ const credentialTypes = [
   "resume",
   "identification",
   "insurance",
+  "wwcc",
+  "criminal_history",
   "business_registration",
   "other",
 ] as const;
 
 const updateSchema = z.object({
   type: z.enum(credentialTypes).optional(),
+  subType: z.string().max(100).optional(),
   title: z.string().min(1).max(200).optional(),
   description: z.string().max(2000).optional(),
   documentNumber: z.string().max(100).optional(),
@@ -27,6 +30,7 @@ const updateSchema = z.object({
   issuedAt: z.string().optional(),
   expiresAt: z.string().optional(),
   fileUrl: z.string().max(500).optional(),
+  backFileUrl: z.string().max(500).optional(),
   isPublic: z.boolean().optional(),
 });
 
@@ -65,6 +69,7 @@ export async function PATCH(
       where: { id: params.id },
       data: {
         ...(data.type !== undefined && { type: data.type }),
+        ...(data.subType !== undefined && { subType: data.subType }),
         ...(data.title !== undefined && { title: data.title }),
         ...(data.description !== undefined && { description: data.description }),
         ...(data.documentNumber !== undefined && { documentNumber: data.documentNumber }),
@@ -72,6 +77,7 @@ export async function PATCH(
         ...(data.issuedAt !== undefined && { issuedAt: data.issuedAt && !isNaN(new Date(data.issuedAt).getTime()) ? new Date(data.issuedAt) : null }),
         ...(data.expiresAt !== undefined && { expiresAt: data.expiresAt && !isNaN(new Date(data.expiresAt).getTime()) ? new Date(data.expiresAt) : null }),
         ...(data.fileUrl !== undefined && { fileUrl: sanitizeUrl(data.fileUrl) }),
+        ...(data.backFileUrl !== undefined && { backFileUrl: sanitizeUrl(data.backFileUrl) }),
         ...(data.isPublic !== undefined && { isPublic: data.isPublic }),
       },
     });

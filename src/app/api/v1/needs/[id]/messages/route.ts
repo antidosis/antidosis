@@ -20,19 +20,24 @@ async function getAuthorizedProfile(userId: string, needId: string) {
   if (!need) return null;
 
   // Poster can always access
-  if (need.posterId === profile.id) return { ...profile, isPoster: true as const };
+  if (need.posterId === profile.id) {
+    return { ...profile, isPoster: true as const, acceptanceId: null as string | null, posterId: need.posterId };
+  }
 
-  // User with an existing acceptance can access
+  // User with an existing acceptance can always access
   const acceptance = await prisma.acceptance.findFirst({
     where: { needId, userId: profile.id },
+    select: { id: true, status: true },
   });
-  if (acceptance) return { ...profile, isPoster: false as const };
+  if (acceptance) {
+    return { ...profile, isPoster: false as const, acceptanceId: acceptance.id, posterId: need.posterId };
+  }
 
   // Need must be open for new users to join the conversation
   if (need.status !== "open") return null;
 
-  // Not involved — deny access
-  return null;
+  // Any authenticated user can join an open need's conversation
+  return { ...profile, isPoster: false as const, acceptanceId: null as string | null, posterId: need.posterId };
 }
 
 export async function GET(
@@ -72,8 +77,35 @@ export async function GET(
     const messagesLimit = Math.max(1, Math.min(parseInt(req.nextUrl.searchParams.get("messagesLimit") || "100", 10) || 100, 200));
     const messagesSkip = Math.max(0, parseInt(req.nextUrl.searchParams.get("messagesSkip") || "0", 10) || 0);
 
+    // Poster sees all messages (public + all private threads)
+    // Fulfiller with acceptance sees poster's public messages + their own private thread
+    // Visitor without acceptance sees poster's public messages + their own replies
+    let where: any;
+    if (profile.isPoster) {
+      where = { needId: params.id };
+    } else if (profile.acceptanceId) {
+      // Has acceptance: see poster's public msgs + own private thread
+      where = {
+        needId: params.id,
+        OR: [
+          { acceptanceId: null, senderId: profile.posterId },
+          { acceptanceId: profile.acceptanceId },
+          { senderId: profile.id },
+        ],
+      };
+    } else {
+      // Visitor without acceptance: see poster's public msgs + own msgs
+      where = {
+        needId: params.id,
+        OR: [
+          { acceptanceId: null, senderId: profile.posterId },
+          { senderId: profile.id },
+        ],
+      };
+    }
+
     const messages = await prisma.needMessage.findMany({
-      where: { needId: params.id },
+      where,
       orderBy: { createdAt: "asc" },
       take: messagesLimit,
       skip: messagesSkip,
@@ -89,12 +121,33 @@ export async function GET(
     });
 
     // Mark messages from others as read
-    await prisma.needMessage.updateMany({
-      where: {
+    let readWhere: any;
+    if (profile.isPoster) {
+      readWhere = {
         needId: params.id,
         senderId: { not: profile.id },
         isRead: false,
-      },
+      };
+    } else if (profile.acceptanceId) {
+      readWhere = {
+        needId: params.id,
+        senderId: { not: profile.id },
+        isRead: false,
+        OR: [
+          { acceptanceId: null, senderId: profile.posterId },
+          { acceptanceId: profile.acceptanceId },
+        ],
+      };
+    } else {
+      readWhere = {
+        needId: params.id,
+        senderId: profile.posterId,
+        isRead: false,
+      };
+    }
+
+    await prisma.needMessage.updateMany({
+      where: readWhere,
       data: { isRead: true },
     });
 
@@ -112,6 +165,7 @@ export async function GET(
 
 const postSchema = z.object({
   content: z.string().min(1).max(2000),
+  acceptanceId: z.string().optional(),
 });
 
 export async function POST(
@@ -155,7 +209,10 @@ export async function POST(
     if (!need) {
       return NextResponse.json({ error: "Need not found" }, { status: 404 });
     }
-    if (need.status !== "open") {
+
+    // Block new visitors from posting if need is not open
+    // Poster and acceptance holders can always post
+    if (!profile.isPoster && !profile.acceptanceId && need.status !== "open") {
       return NextResponse.json(
         { error: "Need is not open for messages" },
         { status: 400 }
@@ -171,11 +228,39 @@ export async function POST(
       );
     }
 
+    const { content, acceptanceId: bodyAcceptanceId } = parsed.data;
+
+    // Determine the target acceptance thread
+    let targetAcceptanceId: string | null = null;
+
+    if (profile.isPoster) {
+      // Poster can send publicly (null) or privately to any acceptance on this need
+      if (bodyAcceptanceId) {
+        const acceptance = await prisma.acceptance.findFirst({
+          where: { id: bodyAcceptanceId, needId: params.id },
+          select: { id: true, userId: true },
+        });
+        if (!acceptance) {
+          return NextResponse.json({ error: "Acceptance not found for this need" }, { status: 400 });
+        }
+        targetAcceptanceId = acceptance.id;
+      }
+    } else {
+      // Non-poster: if they have an acceptance, message goes to their private thread
+      // If no acceptance (visitor), message goes to public wall (null) but is filtered
+      // so only poster and themselves see it
+      if (bodyAcceptanceId && bodyAcceptanceId !== profile.acceptanceId) {
+        return NextResponse.json({ error: "Cannot send to another fulfiller's thread" }, { status: 403 });
+      }
+      targetAcceptanceId = profile.acceptanceId;
+    }
+
     const message = await prisma.needMessage.create({
       data: {
         needId: params.id,
         senderId: profile.id,
-        content: parsed.data.content,
+        acceptanceId: targetAcceptanceId,
+        content,
       },
       include: {
         sender: {
@@ -188,12 +273,28 @@ export async function POST(
       },
     });
 
-    // Notify the need poster if sender is not poster
-    if (need.posterId !== profile.id) {
+    // Notify recipient
+    if (profile.isPoster && targetAcceptanceId) {
+      // Poster sent a private message — notify the fulfiller
+      const acceptance = await prisma.acceptance.findUnique({
+        where: { id: targetAcceptanceId },
+        select: { userId: true },
+      });
+      if (acceptance) {
+        await createNotification({
+          userId: acceptance.userId,
+          type: "message",
+          title: "New private message",
+          body: `${message.sender.fullName || "The poster"} sent you a private message about their need`,
+          data: { needId: params.id },
+        });
+      }
+    } else if (!profile.isPoster) {
+      // Non-poster sent a message — notify the poster
       await createNotification({
         userId: need.posterId,
         type: "message",
-        title: "New message on your need",
+        title: profile.acceptanceId ? "New private message" : "New message on your need",
         body: `${message.sender.fullName || "Someone"} sent a message about your need`,
         data: { needId: params.id },
       });

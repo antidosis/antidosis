@@ -6,6 +6,7 @@ import { auditLog, getClientInfo } from "@/lib/audit";
 import { logger } from "@/lib/logger";
 import { createNotification } from "@/lib/notifications";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
+import { z } from "zod";
 
 export async function POST(
   req: NextRequest,
@@ -58,6 +59,19 @@ export async function POST(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    const body = await req.json().catch(() => ({}));
+    const signSchema = z.object({
+      signature: z.string().min(2).max(200),
+    });
+    const parsed = signSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Please type your full name to sign (2-200 characters)" },
+        { status: 400 }
+      );
+    }
+    const { signature } = parsed.data;
+
     if (!contract.termsLockedAt) {
       return NextResponse.json(
         { error: "Terms must be agreed and locked before signing" },
@@ -87,9 +101,10 @@ export async function POST(
 
     const updatedContract = await prisma.$transaction(async (tx) => {
       const signatureField = isPartyA ? "partyASignedAt" : "partyBSignedAt";
+      const signatureTextField = isPartyA ? "partyASignature" : "partyBSignature";
       await tx.contract.update({
         where: { id: params.id },
-        data: { [signatureField]: new Date() },
+        data: { [signatureField]: new Date(), [signatureTextField]: signature },
       });
 
       const fresh = await tx.contract.findUnique({

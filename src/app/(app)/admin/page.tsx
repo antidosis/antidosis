@@ -20,6 +20,10 @@ import {
   XCircle,
   ExternalLink,
   Eye,
+  MessageSquare,
+  ChevronDown,
+  ChevronUp,
+  Smartphone,
 } from "lucide-react";
 
 type Stats = {
@@ -36,6 +40,7 @@ type Stats = {
 type PendingCredential = {
   id: string;
   type: string;
+  subType: string | null;
   title: string;
   description: string | null;
   documentNumber: string | null;
@@ -43,6 +48,7 @@ type PendingCredential = {
   issuedAt: string | null;
   expiresAt: string | null;
   fileUrl: string | null;
+  backFileUrl: string | null;
   isPublic: boolean;
   createdAt: string;
   profile: {
@@ -50,6 +56,7 @@ type PendingCredential = {
     fullName: string | null;
     email: string;
     avatarUrl: string | null;
+    mobile: string | null;
   };
 };
 
@@ -60,6 +67,9 @@ export default function AdminPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [pending, setPending] = useState<PendingCredential[]>([]);
   const [actioning, setActioning] = useState<string | null>(null);
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     async function init() {
@@ -68,7 +78,6 @@ export default function AdminPage() {
         router.push("/login");
         return;
       }
-      // Try loading admin data — API will 403 if not admin
       const statsRes = await fetch("/api/v1/admin/stats");
       if (statsRes.status === 403) {
         router.push("/dashboard");
@@ -99,12 +108,9 @@ export default function AdminPage() {
 
   async function verifyCredential(id: string) {
     setActioning(id);
-    const res = await fetch(`/api/v1/admin/credentials/${id}/verify`, {
-      method: "POST",
-    });
+    const res = await fetch(`/api/v1/admin/credentials/${id}/verify`, { method: "POST" });
     if (res.ok) {
       setPending((prev) => prev.filter((c) => c.id !== id));
-      // Refresh stats
       const statsRes = await fetch("/api/v1/admin/stats");
       if (statsRes.ok) setStats(await statsRes.json());
     }
@@ -112,13 +118,16 @@ export default function AdminPage() {
   }
 
   async function rejectCredential(id: string) {
-    if (!confirm("Reject this credential verification?")) return;
     setActioning(id);
     const res = await fetch(`/api/v1/admin/credentials/${id}/reject`, {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rejectionReason: rejectReason.trim() || undefined }),
     });
     if (res.ok) {
       setPending((prev) => prev.filter((c) => c.id !== id));
+      setRejectingId(null);
+      setRejectReason("");
       const statsRes = await fetch("/api/v1/admin/stats");
       if (statsRes.ok) setStats(await statsRes.json());
     }
@@ -169,110 +178,209 @@ export default function AdminPage() {
           />
         ) : (
           <div className="space-y-4">
-            {pending.map((cred) => (
-              <div
-                key={cred.id}
-                className="vessel p-5 hover:bg-[#1a1714] transition-colors"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-3">
-                      <Avatar
-                        src={cred.profile.avatarUrl}
-                        name={cred.profile.fullName}
-                        className="h-8 w-8"
-                      />
-                      <div>
-                        <p className="text-sm font-medium text-[#e8d5a3]">
-                          {cred.profile.fullName || "unnamed user"}
-                        </p>
-                        <p className="text-xs text-[#7a6b5a]">{cred.profile.email}</p>
+            {pending.map((cred) => {
+              const isExpanded = expandedId === cred.id;
+              const isRejecting = rejectingId === cred.id;
+              return (
+                <div
+                  key={cred.id}
+                  className="vessel p-5 hover:bg-[#1a1714] transition-colors"
+                >
+                  {/* Header row */}
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-3">
+                        <Avatar
+                          src={cred.profile.avatarUrl}
+                          name={cred.profile.fullName}
+                          className="h-8 w-8"
+                        />
+                        <div>
+                          <p className="text-sm font-medium text-[#e8d5a3]">
+                            {cred.profile.fullName || "unnamed user"}
+                          </p>
+                          <p className="text-xs text-[#7a6b5a]">{cred.profile.email}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 flex-wrap mb-2">
+                        <p className="text-base font-medium text-[#e8d5a3]">{cred.title}</p>
+                        <Badge variant="outline">
+                          {cred.subType && cred.type === "identification"
+                            ? cred.subType.replace(/_/g, " ")
+                            : cred.type}
+                        </Badge>
+                        {cred.isPublic && (
+                          <span className="flex items-center gap-1 text-xs text-[#b8a078]">
+                            <Eye className="h-3 w-3" /> public
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Quick details (always visible) */}
+                      <div className="text-xs text-[#7a6b5a] space-y-1">
+                        {cred.documentNumber && (
+                          <p>
+                            number: {"*".repeat(Math.max(0, cred.documentNumber.length - 4))}
+                            {cred.documentNumber.slice(-4)}
+                          </p>
+                        )}
+                        {cred.issuedBy && <p>issued by: {cred.issuedBy}</p>}
+                        {cred.expiresAt && (
+                          <p>
+                            expires:{" "}
+                            {new Date(cred.expiresAt).toLocaleDateString("en-AU", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            })}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Document links */}
+                      <div className="flex items-center gap-3 mt-3">
+                        {cred.fileUrl && (
+                          <a
+                            href={cred.fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-xs text-[#f5a623] hover:underline"
+                          >
+                            <ExternalLink className="h-3 w-3" /> view document
+                          </a>
+                        )}
+                        {cred.backFileUrl && (
+                          <a
+                            href={cred.backFileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-xs text-[#f5a623] hover:underline"
+                          >
+                            <ExternalLink className="h-3 w-3" /> view back
+                          </a>
+                        )}
+                        <button
+                          onClick={() => setExpandedId(isExpanded ? null : cred.id)}
+                          className="inline-flex items-center gap-1 text-xs text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors"
+                        >
+                          {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                          {isExpanded ? "less" : "more details"}
+                        </button>
+                      </div>
+
+                      {/* Expanded details */}
+                      {isExpanded && (
+                        <div className="mt-3 pt-3 border-t border-[#2a2420]/40 text-xs text-[#7a6b5a] space-y-1">
+                          {cred.profile.mobile && (
+                            <p className="flex items-center gap-1">
+                              <Smartphone className="h-3 w-3" />
+                              {cred.profile.mobile}
+                            </p>
+                          )}
+                          {cred.issuedAt && (
+                            <p>
+                              issued:{" "}
+                              {new Date(cred.issuedAt).toLocaleDateString("en-AU", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              })}
+                            </p>
+                          )}
+                          {cred.description && (
+                            <p className="text-[#7a6b5a]/70">{cred.description}</p>
+                          )}
+                          <p>
+                            uploaded:{" "}
+                            {new Date(cred.createdAt).toLocaleDateString("en-AU", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            })}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex flex-col gap-2 shrink-0">
+                      <Button
+                        size="sm"
+                        onClick={() => verifyCredential(cred.id)}
+                        disabled={actioning === cred.id}
+                        className="bg-[#00e676] text-[#0a0806] hover:bg-[#00e676]/90"
+                      >
+                        {actioning === cred.id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
+                        )}
+                        verify
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setRejectingId(isRejecting ? null : cred.id);
+                          setRejectReason("");
+                        }}
+                        disabled={actioning === cred.id}
+                        className="text-[#ff5252]"
+                      >
+                        <XCircle className="h-3.5 w-3.5 mr-1" />
+                        {isRejecting ? "cancel" : "reject"}
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Rejection reason form */}
+                  {isRejecting && (
+                    <div className="mt-4 pt-4 border-t border-[#2a2420]/40">
+                      <div className="flex items-start gap-2">
+                        <MessageSquare className="h-4 w-4 text-[#ff5252] mt-1" />
+                        <div className="flex-1">
+                          <p className="text-xs text-[#e8d5a3] mb-2">Rejection reason (optional)</p>
+                          <textarea
+                            value={rejectReason}
+                            onChange={(e) => setRejectReason(e.target.value)}
+                            placeholder="e.g. Image unclear, expired document, wrong document type..."
+                            className="w-full bg-[#0f0c0a] border border-[#2a2420] text-[#e8d5a3] text-sm px-3 py-2 outline-none focus:border-[#ff5252] rounded mb-2 resize-none"
+                            rows={2}
+                          />
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => rejectCredential(cred.id)}
+                              disabled={actioning === cred.id}
+                              className="text-[#ff5252] border border-[#ff5252]/30 hover:bg-[#ff5252]/5"
+                            >
+                              {actioning === cred.id ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
+                              ) : (
+                                <XCircle className="h-3.5 w-3.5 mr-1" />
+                              )}
+                              confirm reject
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                setRejectingId(null);
+                                setRejectReason("");
+                              }}
+                            >
+                              cancel
+                            </Button>
+                          </div>
+                        </div>
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-2 flex-wrap mb-2">
-                      <p className="text-base font-medium text-[#e8d5a3]">{cred.title}</p>
-                      <Badge variant="outline">{cred.type}</Badge>
-                      {cred.isPublic && (
-                        <span className="flex items-center gap-1 text-xs text-[#b8a078]">
-                          <Eye className="h-3 w-3" /> public
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="text-xs text-[#7a6b5a] space-y-1">
-                      {cred.documentNumber && (
-                        <p>
-                          number: {"*".repeat(Math.max(0, cred.documentNumber.length - 4))}
-                          {cred.documentNumber.slice(-4)}
-                        </p>
-                      )}
-                      {cred.issuedBy && <p>issued by: {cred.issuedBy}</p>}
-                      {cred.issuedAt && (
-                        <p>
-                          issued:{" "}
-                          {new Date(cred.issuedAt).toLocaleDateString("en-AU", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })}
-                        </p>
-                      )}
-                      {cred.expiresAt && (
-                        <p>
-                          expires:{" "}
-                          {new Date(cred.expiresAt).toLocaleDateString("en-AU", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })}
-                        </p>
-                      )}
-                      {cred.description && (
-                        <p className="text-[#7a6b5a]/70">{cred.description}</p>
-                      )}
-                    </div>
-
-                    {cred.fileUrl && (
-                      <a
-                        href={cred.fileUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-[#f5a623] hover:underline mt-3"
-                      >
-                        <ExternalLink className="h-3 w-3" /> view document
-                      </a>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <Button
-                      size="sm"
-                      onClick={() => verifyCredential(cred.id)}
-                      disabled={actioning === cred.id}
-                      className="bg-[#00e676] text-[#0a0806] hover:bg-[#00e676]/90"
-                    >
-                      {actioning === cred.id ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      ) : (
-                        <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
-                      )}
-                      verify
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => rejectCredential(cred.id)}
-                      disabled={actioning === cred.id}
-                      className="text-[#ff5252]"
-                    >
-                      <XCircle className="h-3.5 w-3.5 mr-1" />
-                      reject
-                    </Button>
-                  </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>

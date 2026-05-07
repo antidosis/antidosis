@@ -48,6 +48,7 @@ export function Navbar() {
     { href: "/needs/new", label: "post" },
     { href: "/dashboard", label: "dashboard" },
     { href: "/pros", label: "pros" },
+    { href: "/demo/contract-flow", label: "demo" },
   ];
 
   return (

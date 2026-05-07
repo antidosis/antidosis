@@ -31,10 +31,11 @@ export default function LoginPage() {
         .then(({ error }) => {
           if (error) {
             setError("verification failed: " + error.message);
+            setLoading(false);
           } else {
-            setEmailVerified(true);
+            router.push("/needs");
+            router.refresh();
           }
-          setLoading(false);
         });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps

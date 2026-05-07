@@ -42,10 +42,26 @@ async function handler(req: NextRequest) {
       );
     }
 
-    // Must have verified identity
+    // Must have verified identity (admin-approved identification credential)
     if (!profile.isVerified) {
       return NextResponse.json(
         { error: "Identity verification required", code: "IDENTITY_NOT_VERIFIED" },
+        { status: 403 }
+      );
+    }
+
+    // Also verify there's an actual approved identification credential
+    const identificationCredential = await prisma.credential.findFirst({
+      where: {
+        profileId: profile.id,
+        type: "identification",
+        isVerified: true,
+      },
+    });
+
+    if (!identificationCredential) {
+      return NextResponse.json(
+        { error: "Approved ID document required. Upload identification in your dashboard and wait for admin approval.", code: "ID_CREDENTIAL_MISSING" },
         { status: 403 }
       );
     }

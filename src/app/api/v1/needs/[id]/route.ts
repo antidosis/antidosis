@@ -5,12 +5,13 @@ import { logger } from "@/lib/logger";
 import { sanitizePlainText } from "@/lib/security/sanitize";
 import { sanitizeUrlArray } from "@/lib/security/url";
 import { isValidCentralCoastSuburb } from "@/lib/data/central-coast-suburbs";
+import { EXCHANGE_MODE_VALUES } from "@/lib/categories";
 import { z } from "zod";
 
 const updateNeedSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters").max(200, "Title must be under 200 characters").optional(),
   description: z.string().min(10, "Description must be at least 10 characters").max(5000, "Description must be under 5000 characters").optional(),
-  needCategory: z.string().optional().nullable(),
+  needCategory: z.enum(["", ...EXCHANGE_MODE_VALUES] as [string, ...string[]]).optional().nullable(),
   offerType: z.enum(["service", "item", "money"]).optional(),
   offerDescription: z.string().min(3, "Offer description must be at least 3 characters").max(2000, "Offer description must be under 2000 characters").optional(),
   offerValue: z.number().min(0).optional().nullable(),
@@ -23,6 +24,7 @@ const updateNeedSchema = z.object({
   requiredSkills: z.array(z.string()).optional(),
   images: z.array(z.string()).optional(),
   offerImages: z.array(z.string()).optional(),
+  requiresContract: z.boolean().optional(),
 });
 
 export async function GET(
@@ -92,8 +94,14 @@ export async function GET(
                     id: true,
                     fullName: true,
                     avatarUrl: true,
+                    bio: true,
+                    locationName: true,
+                    isVerified: true,
                     ratingAvg: true,
+                    ratingCount: true,
+                    jobsCompleted: true,
                     skills: true,
+                    credentials: { select: { id: true, title: true, issuedBy: true, isVerified: true } },
                   },
                 },
               },
@@ -107,8 +115,14 @@ export async function GET(
                       id: true,
                       fullName: true,
                       avatarUrl: true,
+                      bio: true,
+                      locationName: true,
+                      isVerified: true,
                       ratingAvg: true,
+                      ratingCount: true,
+                      jobsCompleted: true,
                       skills: true,
+                      credentials: { select: { id: true, title: true, issuedBy: true, isVerified: true } },
                     },
                   },
                 },
@@ -181,8 +195,8 @@ export async function PATCH(
     if (existingNeed.posterId !== profile.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
-    if (existingNeed.status !== "open") {
-      return NextResponse.json({ error: "Can only edit open needs" }, { status: 400 });
+    if (existingNeed.status !== "open" && existingNeed.status !== "archived") {
+      return NextResponse.json({ error: "Can only edit open or archived needs" }, { status: 400 });
     }
 
     const body = await req.json();
@@ -213,6 +227,7 @@ export async function PATCH(
     if (data.timeRange !== undefined) updateData.timeRange = data.timeRange ? sanitizePlainText(data.timeRange) : null;
     if (data.images !== undefined) updateData.images = sanitizeUrlArray(data.images);
     if (data.offerImages !== undefined) updateData.offerImages = sanitizeUrlArray(data.offerImages);
+    if (data.requiresContract !== undefined) updateData.requiresContract = data.requiresContract;
 
     // Handle requiredSkills update atomically
     let need;

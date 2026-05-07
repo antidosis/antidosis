@@ -71,6 +71,13 @@ export async function PATCH(
 
     // If selected, form contract (this is the big one)
     if (status === "selected") {
+      if (!acceptance.need.requiresContract) {
+        return NextResponse.json(
+          { error: "This post does not require a formal contract." },
+          { status: 400 }
+        );
+      }
+
       // Prevent forming a contract if one already exists for this acceptance
       const existingContract = await prisma.contract.findUnique({
         where: { acceptanceId: acceptance.id },
@@ -96,11 +103,29 @@ export async function PATCH(
         data: { status },
       });
 
-      // Update need status to negotiating
-      await prisma.need.update({
-        where: { id: acceptance.needId },
-        data: { status: "negotiating" },
-      });
+      if (acceptance.need.requiresContract) {
+        // Contract-required: move to negotiating
+        await prisma.need.update({
+          where: { id: acceptance.needId },
+          data: { status: "negotiating" },
+        });
+      } else {
+        // Free-form: activate need and decline all other interests
+        await prisma.$transaction(async (tx) => {
+          await tx.need.update({
+            where: { id: acceptance.needId },
+            data: { status: "active" },
+          });
+          await tx.acceptance.updateMany({
+            where: {
+              needId: acceptance.needId,
+              status: { in: ["pending", "accepted"] },
+              id: { not: acceptance.id },
+            },
+            data: { status: "declined" },
+          });
+        });
+      }
 
       // Notify fulfiller that their offer was accepted (fire-and-forget)
       (async () => {
@@ -121,7 +146,9 @@ export async function PATCH(
             userId: acceptance.userId,
             type: "offer_accepted",
             title: "Interest accepted",
-            body: `Your interest in "${acceptance.need.title}" was accepted. Waiting for contract formation.`,
+            body: acceptance.need.requiresContract
+              ? `Your interest in "${acceptance.need.title}" was accepted. Waiting for contract formation.`
+              : `Your interest in "${acceptance.need.title}" was accepted. You can now message each other to arrange the exchange.`,
             data: { needId: acceptance.needId, acceptanceId: acceptance.id },
           });
         } catch (notifyErr) {

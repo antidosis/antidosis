@@ -108,6 +108,8 @@ export async function POST(
       negotiationMessages,
       partyASignedAt: contract.partyASignedAt?.toISOString() || null,
       partyBSignedAt: contract.partyBSignedAt?.toISOString() || null,
+      partyASignature: contract.partyASignature,
+      partyBSignature: contract.partyBSignature,
       partyATerms: contract.partyATerms,
       partyBTerms: contract.partyBTerms,
       deadlineTerms: contract.deadlineTerms,

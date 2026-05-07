@@ -31,9 +31,13 @@ export async function GET() {
         id: true,
         status: true,
         completedAt: true,
+        partyAId: true,
+        partyBId: true,
         need: { select: { title: true } },
-        partyA: { select: { fullName: true } },
-        partyB: { select: { fullName: true } },
+        partyASignedAt: true,
+        partyBSignedAt: true,
+        partyA: { select: { id: true, fullName: true } },
+        partyB: { select: { id: true, fullName: true } },
       },
     });
 

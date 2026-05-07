@@ -9,11 +9,12 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ProfileSection } from "./_components/profile-section";
 import { CredentialsSection } from "./_components/credentials-section";
 import { DashboardHeader } from "./_components/dashboard-header";
+import { ProfileChecklist } from "./_components/profile-checklist";
 import { createClient } from "@/lib/supabase/client";
+import { useApi } from "@/lib/swr-config";
 import { cn } from "@/lib/utils";
-import { Briefcase, FileText, HandHelping, User, Loader2, ArrowRight, Star, Shield } from "lucide-react";
-
-
+import { Briefcase, FileText, HandHelping, User, Loader2, ArrowRight, Star, Shield, TrendingUp, MessageSquare, RotateCcw, Pencil, X } from "lucide-react";
+import { mutate } from "swr";
 
 type ProfileData = {
   id: string;
@@ -33,11 +34,13 @@ type ProfileData = {
   jobsCompleted: number;
   skills: { id: string; name: string; isVerified: boolean }[];
   socialLinks: { id: string; platform: string; url: string; isPublic: boolean }[];
+  credentials?: any[];
 };
 
 type CredentialData = {
   id: string;
   type: string;
+  subType: string | null;
   title: string;
   description: string | null;
   documentNumber: string | null;
@@ -45,6 +48,7 @@ type CredentialData = {
   issuedAt: string | null;
   expiresAt: string | null;
   fileUrl: string | null;
+  backFileUrl: string | null;
   isPublic: boolean;
   isVerified: boolean;
 };
@@ -86,49 +90,98 @@ export default function DashboardPage() {
   const router = useRouter();
   const supabase = createClient();
   const [activeTab, setActiveTab] = useState("overview");
-  const [profile, setProfile] = useState<ProfileData | null>(null);
-  const [needs, setNeeds] = useState<any[]>([]);
-  const [contracts, setContracts] = useState<any[]>([]);
-  const [offers, setOffers] = useState<any[]>([]);
-  const [credentials, setCredentials] = useState<CredentialData[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
 
+  const { data: profile, isLoading: profileLoading } = useApi<ProfileData>(
+    authChecked ? "/api/v1/profiles/me" : null
+  );
+  const { data: needs } = useApi<any[]>(authChecked ? "/api/v1/needs/mine" : null);
+  const { data: contracts } = useApi<any[]>(authChecked ? "/api/v1/contracts/mine" : null);
+  const { data: offers } = useApi<any[]>(authChecked ? "/api/v1/acceptances/mine" : null);
+
+  // Debug: log why cancel might not show
   useEffect(() => {
-    async function init() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { router.push("/login"); return; }
-      loadData();
+    if (contracts && profile) {
+      contracts.forEach((c: any) => {
+        const posterId = c.partyAId ?? c.partyA?.id;
+        const isPoster = profile.id === posterId;
+        const fulfillerSigned = !!c.partyBSignedAt;
+        const cancellable = ["draft", "pending_terms", "active"].includes(c.status);
+        if (!isPoster || fulfillerSigned || !cancellable) {
+          console.log("[dashboard] contract", c.id, "— isPoster:", isPoster, "fulfillerSigned:", fulfillerSigned, "status:", c.status, "canCancel:", isPoster && !fulfillerSigned && cancellable);
+        }
+      });
     }
-    init();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [contracts, profile]);
 
-  async function loadData() {
+  const [cancellingContractId, setCancellingContractId] = useState<string | null>(null);
+
+  async function handleCancelContract(contractId: string) {
+    if (!confirm("Cancel this contract? The need will be archived for you to re-post later.")) return;
+    setCancellingContractId(contractId);
     try {
-      const [profileRes, needsRes, contractsRes, offersRes] = await Promise.all([
-        fetch("/api/v1/profiles/me"),
-        fetch("/api/v1/needs/mine"),
-        fetch("/api/v1/contracts/mine"),
-        fetch("/api/v1/acceptances/mine"),
-      ]);
-      if (profileRes.ok) {
-        const p = await profileRes.json();
-        setProfile(p);
-        setCredentials(p.credentials || []);
+      const res = await fetch(`/api/v1/contracts/${contractId}/cancel`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || "Failed to cancel contract");
+        return;
       }
-      if (needsRes.ok) setNeeds(await needsRes.json());
-      if (contractsRes.ok) setContracts(await contractsRes.json());
-      if (offersRes.ok) setOffers(await offersRes.json());
-    } catch (err) { console.error(err); }
-    setLoading(false);
+      mutate("/api/v1/contracts/mine");
+      mutate("/api/v1/needs/mine");
+    } catch {
+      alert("Failed to cancel contract");
+    } finally {
+      setCancellingContractId(null);
+    }
   }
 
-  if (loading) return (
+  async function handleRepostNeed(needId: string) {
+    if (!confirm("Re-post this need? It will become visible to everyone again.")) return;
+    try {
+      const res = await fetch(`/api/v1/needs/${needId}/repost`, { method: "POST" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        alert(data.error || "Failed to re-post");
+        return;
+      }
+      mutate("/api/v1/needs/mine");
+    } catch {
+      alert("Failed to re-post");
+    }
+  }
+
+  const [credentials, setCredentials] = useState<CredentialData[]>(
+    profile?.credentials || []
+  );
+
+  useEffect(() => {
+    if (profile?.credentials) {
+      setCredentials(profile.credentials);
+    }
+  }, [profile?.credentials]);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) { router.push("/login"); return; }
+      setEmailVerified(!!user.email_confirmed_at);
+      setAuthChecked(true);
+    });
+  }, [router, supabase]);
+
+  const isLoading = profileLoading || !authChecked;
+
+  if (isLoading) return (
     <div className="py-24 text-center">
       <Loader2 className="h-6 w-6 animate-spin mx-auto mb-4 text-[#b8a078]" />
       <p className="text-sm text-[#7a6b5a]">loading...</p>
     </div>
   );
+
   if (!profile) return <div className="py-24 text-center text-[#ff5252]">error: failed to load profile</div>;
 
   return (
@@ -136,9 +189,46 @@ export default function DashboardPage() {
       <h1 className="heading-display text-2xl text-[#e8d5a3] mb-2">Dashboard</h1>
       <p className="text-xs text-[#7a6b5a] mb-8">$ whoami</p>
 
-      <DashboardHeader profile={profile} />
+      <DashboardHeader profile={profile} needsCount={needs?.length ?? 0} contractsCount={contracts?.length ?? 0} offersCount={offers?.length ?? 0} />
 
-      <div className="vessel p-1 mb-10">
+      {/* Persistent quick actions — above tabs, visible on all tabs */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <Link href="/needs/new" className="group vessel p-4 hover:border-[#f5a623]/40 transition-colors">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded flex items-center justify-center bg-[#f5a623]/10 text-[#f5a623]">
+              <TrendingUp className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-[#e8d5a3] group-hover:text-[#f5a623] transition-colors">Post a Need</p>
+              <p className="text-[11px] text-[#7a6b5a]">Start a new exchange</p>
+            </div>
+          </div>
+        </Link>
+        <Link href="/needs" className="group vessel p-4 hover:border-[#35c2f0]/40 transition-colors">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded flex items-center justify-center bg-[#35c2f0]/10 text-[#35c2f0]">
+              <Briefcase className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-[#e8d5a3] group-hover:text-[#35c2f0] transition-colors">Browse Needs</p>
+              <p className="text-[11px] text-[#7a6b5a]">Find opportunities</p>
+            </div>
+          </div>
+        </Link>
+        <Link href="/pro" className="group vessel p-4 hover:border-[#f0cc33]/40 transition-colors">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded flex items-center justify-center bg-[#f0cc33]/10 text-[#f0cc33]">
+              <Star className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-[#e8d5a3] group-hover:text-[#f0cc33] transition-colors">Pro Status</p>
+              <p className="text-[11px] text-[#7a6b5a]">{profile.isPro ? "Active for life" : "Claim free Pro"}</p>
+            </div>
+          </div>
+        </Link>
+      </div>
+
+      <div className="vessel p-1 mb-8">
         <div className="flex gap-1 text-sm overflow-x-auto">
           {tabs.map((tab) => (
             <button
@@ -158,56 +248,136 @@ export default function DashboardPage() {
       </div>
 
       {activeTab === "overview" && (
-        <div className="space-y-10">
-          <ProfileSection
-            initialProfile={profile}
-            credentials={credentials}
-            onUpdate={(updated) => setProfile({ ...profile, ...updated })}
+        <div className="space-y-8">
+          {/* Profile first */}
+          <div id="profile-section">
+            <ProfileSection
+              initialProfile={profile}
+              credentials={credentials}
+              onUpdate={(updated) => {
+                // mutate profile data optimistically
+              }}
+            />
+          </div>
+
+          {/* Checklist — compact when complete, full when incomplete */}
+          <ProfileChecklist
+            profile={{ ...profile, credentials }}
+            emailVerified={emailVerified}
+            onNavigateToCredentials={() => {
+              setActiveTab("credentials");
+              setTimeout(() => {
+                document.getElementById("credentials-section")?.scrollIntoView({ behavior: "smooth" });
+              }, 100);
+            }}
           />
+
+          {/* Skills */}
           {profile.skills.length > 0 && (
             <section className="vessel p-5">
               <p className="text-xs text-[#7a6b5a] mb-4">$ cat ~/.skills</p>
               <div className="flex flex-wrap gap-2">
                 {profile.skills.map((skill) => (
-                  <span key={skill.id} className="bg-[#1a1714] border border-[#2a2420] text-xs text-[#b8a078] rounded px-2 py-1">
-                    {skill.name}{skill.isVerified && <Shield className="ml-1 h-3 w-3 text-[#00e676] inline" />}
+                  <span
+                    key={skill.id}
+                    className={`text-xs rounded px-2.5 py-1 border transition-colors ${
+                      skill.isVerified
+                        ? "bg-[#00e676]/5 border-[#00e676]/30 text-[#00e676]"
+                        : "bg-[#1a1714] border-[#2a2420] text-[#b8a078]"
+                    }`}
+                  >
+                    {skill.name}
+                    {skill.isVerified && <Shield className="ml-1 h-3 w-3 inline" />}
                   </span>
                 ))}
               </div>
             </section>
           )}
+
         </div>
       )}
 
       {activeTab === "needs" && (
         <div>
-          <p className="text-xs text-[#7a6b5a] mb-4">$ ls ~/needs/</p>
-          {needs.length === 0 ? (
-            <EmptyState
-              title="No Needs Posted"
-              description="Post your first need to start exchanging."
-              action={<Button asChild size="sm"><Link href="/needs/new">Post Need</Link></Button>}
-            />
+          {!needs || needs.length === 0 ? (
+            <>
+              <p className="text-xs text-[#7a6b5a] mb-4">$ ls ~/needs/</p>
+              <EmptyState
+                title="No Needs Posted"
+                description="Post your first need to start exchanging."
+                action={<Button asChild size="sm"><Link href="/needs/new">Post Need</Link></Button>}
+              />
+            </>
           ) : (
-            <div className="space-y-3">
-              {needs.map((need) => (
-                <div key={need.id} className="vessel p-5 mb-3 hover:bg-[#1a1714] transition-colors">
-                  <div className="flex items-center justify-between group">
-                    <div>
-                      <Link href={`/needs/${need.id}`} className="text-base font-medium text-[#e8d5a3] hover:text-[#f5a623] transition-colors">{need.title}</Link>
-                      <div className="flex items-center gap-3 text-xs text-[#7a6b5a] mt-1">
-                        <Badge variant={statusBadgeVariant(need.status)}>{need.status}</Badge>
-                        <span>{need._count?.acceptances || 0} interested</span>
-                        {need.acceptances && need.acceptances.length > 0 && (
-                          <span className="text-[#00e676]">{need.acceptances.length} ready to contract</span>
-                        )}
+            <>
+              {/* Active needs */}
+              {(() => {
+                const activeNeeds = needs.filter((n) => n.status !== "archived");
+                const archivedNeeds = needs.filter((n) => n.status === "archived");
+                return (
+                  <>
+                    <p className="text-xs text-[#7a6b5a] mb-4">$ ls ~/needs/</p>
+                    {activeNeeds.length === 0 ? (
+                      <EmptyState
+                        title="No Active Needs"
+                        description="All your needs are archived. Re-post one below or create a new need."
+                        action={<Button asChild size="sm"><Link href="/needs/new">Post Need</Link></Button>}
+                      />
+                    ) : (
+                      <div className="space-y-3 mb-8">
+                        {activeNeeds.map((need) => (
+                          <div key={need.id} className="vessel p-5 mb-3 hover:bg-[#1a1714] transition-colors border-l-2 border-l-[#35c2f0]/40">
+                            <div className="flex items-center justify-between group">
+                              <div className="min-w-0">
+                                <Link href={`/needs/${need.id}`} className="text-base font-medium text-[#e8d5a3] hover:text-[#f5a623] transition-colors block truncate">{need.title}</Link>
+                                <div className="flex items-center gap-3 text-xs text-[#7a6b5a] mt-1 flex-wrap">
+                                  <Badge variant={statusBadgeVariant(need.status)}>{need.status}</Badge>
+                                  <span>{need._count?.acceptances || 0} interested</span>
+                                  {need.acceptances && need.acceptances.length > 0 && (
+                                    <span className="text-[#00e676]">{need.acceptances.length} ready to contract</span>
+                                  )}
+                                </div>
+                              </div>
+                              <Button size="sm" variant="ghost" asChild><Link href={`/needs/${need.id}`}><ArrowRight className="h-4 w-4" /></Link></Button>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                    <Button size="sm" variant="ghost" asChild><Link href={`/needs/${need.id}`}><ArrowRight className="h-4 w-4" /></Link></Button>
-                  </div>
-                </div>
-              ))}
-            </div>
+                    )}
+
+                    {/* Archived needs */}
+                    {archivedNeeds.length > 0 && (
+                      <>
+                        <p className="text-xs text-[#7a6b5a] mb-4">$ ls ~/needs/archive/</p>
+                        <div className="space-y-3">
+                          {archivedNeeds.map((need) => (
+                            <div key={need.id} className="vessel p-5 mb-3 hover:bg-[#1a1714] transition-colors border-l-2 border-l-[#7a6b5a]/40 opacity-80">
+                              <div className="flex items-center justify-between group">
+                                <div className="min-w-0">
+                                  <p className="text-base font-medium text-[#b8a078] truncate">{need.title}</p>
+                                  <div className="flex items-center gap-3 text-xs text-[#7a6b5a] mt-1 flex-wrap">
+                                    <Badge variant="outline">archived</Badge>
+                                    <span>cancelled contract</span>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Button size="sm" variant="ghost" asChild className="text-[#b8a078] hover:text-[#e8d5a3]">
+                                    <Link href={`/needs/${need.id}/edit`}><Pencil className="h-4 w-4" /></Link>
+                                  </Button>
+                                  <Button size="sm" variant="ghost" onClick={() => handleRepostNeed(need.id)} className="text-[#00e676] hover:text-[#00e676]">
+                                    <RotateCcw className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </>
+                );
+              })()}
+            </>
           )}
         </div>
       )}
@@ -215,21 +385,56 @@ export default function DashboardPage() {
       {activeTab === "contracts" && (
         <div>
           <p className="text-xs text-[#7a6b5a] mb-4">$ ls ~/contracts/</p>
-          {contracts.length === 0 ? (
+          {!contracts || contracts.length === 0 ? (
             <EmptyState title="No Contracts Yet" description="Accept interest from someone on one of your needs to form a contract." />
           ) : (
             <div className="space-y-3">
-              {contracts.map((contract) => (
-                <div key={contract.id} className="vessel p-5 mb-3 hover:bg-[#1a1714] transition-colors">
-                  <div className="flex items-center justify-between group">
-                    <div>
-                      <p className="text-base font-medium text-[#e8d5a3]">{contract.need?.title || "contract"}</p>
-                      <div className="text-xs text-[#7a6b5a] mt-1"><Badge variant={statusBadgeVariant(contract.status)}>{contract.status}</Badge></div>
+              {contracts.map((contract) => {
+                const posterId = contract.partyAId ?? contract.partyA?.id;
+                const isPoster = profile?.id === posterId;
+                const fulfillerSigned = !!contract.partyBSignedAt;
+                const canCancel = isPoster && !fulfillerSigned &&
+                  (contract.status === "draft" || contract.status === "pending_terms" || contract.status === "active");
+                return (
+                  <div key={contract.id} className={`vessel p-5 mb-3 hover:bg-[#1a1714] transition-colors border-l-2 ${
+                    contract.status === "active" || contract.status === "completed"
+                      ? "border-l-[#00e676]/40"
+                      : contract.status === "cancelled"
+                      ? "border-l-[#ff5252]/40"
+                      : "border-l-[#f5a623]/40"
+                  }`}>
+                    <div className="flex items-center justify-between group">
+                      <div className="min-w-0">
+                        <p className="text-base font-medium text-[#e8d5a3] truncate">{contract.need?.title || "contract"}</p>
+                        <div className="flex items-center gap-2 text-xs text-[#7a6b5a] mt-1 flex-wrap">
+                          <Badge variant={statusBadgeVariant(contract.status)}>{contract.status}</Badge>
+                          {canCancel && (
+                            <span className="text-[#f5a623]">waiting for signature — you can cancel</span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {canCancel && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleCancelContract(contract.id)}
+                            disabled={cancellingContractId === contract.id}
+                            className="text-[#ff5252] hover:text-[#ff5252] hover:bg-[#ff5252]/10"
+                          >
+                            {cancellingContractId === contract.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <X className="h-4 w-4" />
+                            )}
+                          </Button>
+                        )}
+                        <Button size="sm" variant="ghost" asChild><Link href={`/contracts/${contract.id}`}><ArrowRight className="h-4 w-4" /></Link></Button>
+                      </div>
                     </div>
-                    <Button size="sm" variant="ghost" asChild><Link href={`/contracts/${contract.id}`}><ArrowRight className="h-4 w-4" /></Link></Button>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -238,7 +443,7 @@ export default function DashboardPage() {
       {activeTab === "offers" && (
         <div>
           <p className="text-xs text-[#7a6b5a] mb-4">$ ls ~/interests/</p>
-          {offers.length === 0 ? (
+          {!offers || offers.length === 0 ? (
             <EmptyState
               title="No Interests Expressed"
               description="Browse needs and express your interest."
@@ -247,10 +452,16 @@ export default function DashboardPage() {
           ) : (
             <div className="space-y-3">
               {offers.map((offer) => (
-                <div key={offer.id} className="vessel p-5 mb-3 hover:bg-[#1a1714] transition-colors">
+                <div key={offer.id} className={`vessel p-5 mb-3 hover:bg-[#1a1714] transition-colors border-l-2 ${
+                  offer.status === "selected" || offer.status === "accepted"
+                    ? "border-l-[#00e676]/40"
+                    : offer.status === "declined"
+                    ? "border-l-[#ff5252]/40"
+                    : "border-l-[#d76bf5]/40"
+                }`}>
                   <div className="flex items-center justify-between group">
-                    <div>
-                      <Link href={`/needs/${offer.need?.id}`} className="text-base font-medium text-[#e8d5a3] hover:text-[#f5a623] transition-colors">{offer.need?.title}</Link>
+                    <div className="min-w-0">
+                      <Link href={`/needs/${offer.need?.id}`} className="text-base font-medium text-[#e8d5a3] hover:text-[#f5a623] transition-colors block truncate">{offer.need?.title}</Link>
                       <div className="text-xs text-[#7a6b5a] mt-1 flex items-center gap-2 flex-wrap">
                         <Badge variant={statusBadgeVariant(offer.status)}>{offer.status}</Badge>
                         {offer.status === "accepted" && <span className="text-[#00e676]">poster accepted — contract pending</span>}
@@ -270,10 +481,12 @@ export default function DashboardPage() {
       )}
 
       {activeTab === "credentials" && (
-        <CredentialsSection
-          initialCredentials={credentials}
-          onUpdate={(creds) => setCredentials(creds)}
-        />
+        <div id="credentials-section">
+          <CredentialsSection
+            initialCredentials={credentials}
+            onUpdate={(creds) => setCredentials(creds)}
+          />
+        </div>
       )}
     </div>
   );
