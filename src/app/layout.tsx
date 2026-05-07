@@ -20,11 +20,11 @@ const siteUrl = "https://antidosis.com";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "antidosis — exchange skills. build trust.",
+    default: "antidosis — exchange anything, build trust.",
     template: "%s — antidosis",
   },
   description:
-    "A marketplace for reciprocal exchange on the Central Coast, NSW. Post what you need. Say what you'll give back. Connect with verified people you can trust. Barter, gift, or trade skills and goods locally.",
+    "A marketplace for reciprocal exchange on the Central Coast, NSW. Post what you need. Say what you'll give back. Connect with verified people you can trust. Barter, gift, or trade anything with verified locals.",
   keywords: [
     "barter",
     "exchange",
@@ -63,7 +63,7 @@ export const metadata: Metadata = {
     locale: "en_AU",
     url: siteUrl,
     siteName: "antidosis",
-    title: "antidosis — exchange skills. build trust.",
+    title: "antidosis — exchange anything, build trust.",
     description:
       "A marketplace for reciprocal exchange on the Central Coast, NSW. Post what you need. Say what you'll give back. Connect with verified people you can trust.",
     images: [
@@ -71,13 +71,13 @@ export const metadata: Metadata = {
         url: "/opengraph-image",
         width: 1200,
         height: 630,
-        alt: "antidosis — exchange skills. build trust.",
+        alt: "antidosis — exchange anything, build trust.",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "antidosis — exchange skills. build trust.",
+    title: "antidosis — exchange anything, build trust.",
     description:
       "A marketplace for reciprocal exchange on the Central Coast, NSW. Post what you need. Say what you'll give back. Connect with verified people you can trust.",
     images: ["/opengraph-image"],
@@ -166,7 +166,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               alternateName: "Antidosis Exchange",
               url: siteUrl,
               description:
-                "A marketplace for reciprocal exchange on the Central Coast, NSW. Barter, gift, and trade skills and goods with verified locals.",
+                "A marketplace for reciprocal exchange on the Central Coast, NSW. Barter, gift, and trade anything with verified locals.",
               image: `${siteUrl}/opengraph-image`,
               email: "official.antidosis@gmail.com",
               areaServed: {

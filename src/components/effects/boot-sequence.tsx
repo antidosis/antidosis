@@ -81,7 +81,7 @@ export function BootSequence({ onComplete }: { onComplete: () => void }) {
           antidosis
         </h1>
         <p className="text-xs text-[#7a6b5a] mt-2 tracking-widest uppercase">
-          exchange skills. build trust.
+          exchange anything, build trust.
         </p>
       </div>
 

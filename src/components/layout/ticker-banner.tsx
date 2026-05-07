@@ -70,6 +70,7 @@ export function TickerBanner() {
       }}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      data-nosnippet
     >
       {/* Top glow line */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#f5a623]/40 to-transparent" />
