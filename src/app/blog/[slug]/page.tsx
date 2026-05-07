@@ -61,6 +61,35 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+function parseInlineMarkdown(text: string): React.ReactNode[] {
+  const parts: React.ReactNode[] = [];
+  let remaining = text;
+  let key = 0;
+
+  // Handle **bold**
+  const boldRegex = /\*\*(.+?)\*\*/g;
+  let lastIndex = 0;
+  let match;
+
+  while ((match = boldRegex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(<span key={key++}>{text.slice(lastIndex, match.index)}</span>);
+    }
+    parts.push(
+      <strong key={key++} className="text-[#e8d5a3] font-medium">
+        {match[1]}
+      </strong>
+    );
+    lastIndex = boldRegex.lastIndex;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(<span key={key++}>{text.slice(lastIndex)}</span>);
+  }
+
+  return parts.length > 0 ? parts : [<span key={key++}>{text}</span>];
+}
+
 function renderMarkdownContent(content: string) {
   const lines = content.split("\n");
   const elements: React.ReactNode[] = [];
@@ -90,7 +119,7 @@ function renderMarkdownContent(content: string) {
     } else if (line.startsWith("- ")) {
       elements.push(
         <li key={key++} className="text-sm text-[#b8a078] ml-4 mb-2 list-disc">
-          {line.slice(2)}
+          {parseInlineMarkdown(line.slice(2))}
         </li>
       );
     } else if (line.startsWith("---")) {
@@ -102,13 +131,13 @@ function renderMarkdownContent(content: string) {
     } else if (line.startsWith("**") && line.endsWith("**")) {
       elements.push(
         <p key={key++} className="text-sm text-[#e8d5a3] font-medium mb-4">
-          {line.slice(2, -2)}
+          {parseInlineMarkdown(line.slice(2, -2))}
         </p>
       );
     } else {
       elements.push(
         <p key={key++} className="text-sm text-[#b8a078] leading-relaxed mb-4">
-          {line}
+          {parseInlineMarkdown(line)}
         </p>
       );
     }
