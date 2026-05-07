@@ -15,6 +15,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/privacy`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
     { url: `${baseUrl}/login`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
     { url: `${baseUrl}/register`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
+    { url: `${baseUrl}/how-it-works`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
+    { url: `${baseUrl}/blog`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },
   ];
 
   // Dynamic need pages — gracefully skip if DB is unavailable during build
@@ -36,5 +38,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Database not available during build — static routes only
   }
 
-  return [...staticRoutes, ...needRoutes];
+  // Blog posts
+  const { getAllSlugs } = await import("@/lib/blog");
+  const blogSlugs = getAllSlugs();
+  const blogRoutes = blogSlugs.map((slug) => ({
+    url: `${baseUrl}/blog/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: "monthly" as const,
+    priority: 0.6,
+  }));
+
+  return [...staticRoutes, ...needRoutes, ...blogRoutes];
 }

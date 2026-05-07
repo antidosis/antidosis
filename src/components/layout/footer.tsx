@@ -9,6 +9,7 @@ const linkGroups = [
       { href: "/how-it-works", label: "How It Works", external: false },
       { href: "/examples", label: "Examples", external: false },
       { href: "/demo/contract-flow", label: "Contract Demo", external: false },
+      { href: "/blog", label: "Blog", external: false },
     ],
   },
   {
