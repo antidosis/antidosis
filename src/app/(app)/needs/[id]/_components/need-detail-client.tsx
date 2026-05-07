@@ -99,7 +99,6 @@ type Credential = {
   issuedBy: string | null;
   expiresAt: string | null;
   isVerified: boolean;
-  fileUrl: string | null;
 };
 
 /* ------------------------------------------------------------------ */
@@ -727,15 +726,10 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                               )}
                             </p>
                           )}
-                          {cred.fileUrl && (
-                            <a
-                              href={cred.fileUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-[#f5a623] hover:underline inline-flex items-center gap-1"
-                            >
-                              <FileCheck className="h-3 w-3" /> view document
-                            </a>
+                          {cred.isVerified && (
+                            <span className="text-[#00e676] text-xs inline-flex items-center gap-1">
+                              <FileCheck className="h-3 w-3" /> verified
+                            </span>
                           )}
                         </div>
                       </div>

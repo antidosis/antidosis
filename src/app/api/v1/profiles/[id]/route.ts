@@ -14,7 +14,22 @@ export async function GET(
       include: {
         skills: true,
         socialLinks: { where: { isPublic: true } },
-        credentials: { where: { isPublic: true } },
+        credentials: {
+          where: { isPublic: true },
+          select: {
+            id: true,
+            type: true,
+            title: true,
+            documentNumber: true,
+            description: true,
+            issuedBy: true,
+            issuedAt: true,
+            expiresAt: true,
+            isVerified: true,
+            isPublic: true,
+            createdAt: true,
+          },
+        },
         needsPosted: {
           where: { status: "open" },
           orderBy: { createdAt: "desc" },

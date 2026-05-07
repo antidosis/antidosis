@@ -20,6 +20,19 @@ export async function GET(
     const credentials = await prisma.credential.findMany({
       where: { profileId: profile.id, isPublic: true },
       orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        type: true,
+        title: true,
+        documentNumber: true,
+        description: true,
+        issuedBy: true,
+        issuedAt: true,
+        expiresAt: true,
+        isVerified: true,
+        isPublic: true,
+        createdAt: true,
+      },
     });
 
     const redacted = credentials.map(redactCredential);

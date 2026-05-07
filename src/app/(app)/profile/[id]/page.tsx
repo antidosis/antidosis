@@ -42,7 +42,6 @@ interface Credential {
   documentNumber: string | null;
   issuedBy: string | null;
   expiresAt: string | null;
-  fileUrl: string | null;
   isVerified: boolean;
 }
 
@@ -304,15 +303,10 @@ export default function ProfilePage() {
                       })}
                     </p>
                   )}
-                  {cred.fileUrl && (
-                    <a
-                      href={cred.fileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[#f5a623] hover:underline inline-flex items-center gap-1"
-                    >
-                      <FileCheck className="h-3 w-3" /> view document
-                    </a>
+                  {cred.isVerified && (
+                    <span className="text-[#00e676] text-xs inline-flex items-center gap-1">
+                      <FileCheck className="h-3 w-3" /> verified
+                    </span>
                   )}
                 </div>
               </div>
