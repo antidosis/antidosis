@@ -63,24 +63,33 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 function parseInlineMarkdown(text: string): React.ReactNode[] {
   const parts: React.ReactNode[] = [];
-  let remaining = text;
   let key = 0;
 
-  // Handle **bold**
-  const boldRegex = /\*\*(.+?)\*\*/g;
+  // Combined regex for **bold** and *italic*
+  const regex = /(\*\*(.+?)\*\*)|(\*(.+?)\*)/g;
   let lastIndex = 0;
   let match;
 
-  while ((match = boldRegex.exec(text)) !== null) {
+  while ((match = regex.exec(text)) !== null) {
     if (match.index > lastIndex) {
       parts.push(<span key={key++}>{text.slice(lastIndex, match.index)}</span>);
     }
-    parts.push(
-      <strong key={key++} className="text-[#e8d5a3] font-medium">
-        {match[1]}
-      </strong>
-    );
-    lastIndex = boldRegex.lastIndex;
+    if (match[2] !== undefined) {
+      // Bold
+      parts.push(
+        <strong key={key++} className="text-[#e8d5a3] font-medium">
+          {match[2]}
+        </strong>
+      );
+    } else if (match[4] !== undefined) {
+      // Italic
+      parts.push(
+        <em key={key++} className="text-[#b8a078] italic">
+          {match[4]}
+        </em>
+      );
+    }
+    lastIndex = regex.lastIndex;
   }
 
   if (lastIndex < text.length) {
@@ -88,6 +97,65 @@ function parseInlineMarkdown(text: string): React.ReactNode[] {
   }
 
   return parts.length > 0 ? parts : [<span key={key++}>{text}</span>];
+}
+
+function isTableRow(line: string): boolean {
+  return line.trim().startsWith("|") && line.trim().endsWith("|");
+}
+
+function isTableSeparator(line: string): boolean {
+  return /^\|[\s|:\-]+\|$/.test(line.trim());
+}
+
+function parseTableRow(line: string): string[] {
+  return line
+    .trim()
+    .slice(1, -1)
+    .split("|")
+    .map((cell) => cell.trim());
+}
+
+function renderTable(rows: string[], startKey: number): [React.ReactNode, number] {
+  let key = startKey;
+  const headerCells = parseTableRow(rows[0]);
+  const dataRows = rows.slice(1).filter((r) => !isTableSeparator(r));
+
+  return [
+    <div key={key++} className="overflow-x-auto mb-6">
+      <table className="w-full text-left border border-[#2a2420]">
+        <thead>
+          <tr className="bg-[#1a1714]">
+            {headerCells.map((cell, ci) => (
+              <th
+                key={ci}
+                className="px-4 py-3 text-xs font-mono uppercase tracking-wider text-[#e8d5a3] border-b border-[#2a2420]"
+              >
+                {parseInlineMarkdown(cell)}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {dataRows.map((row, ri) => {
+            const cells = parseTableRow(row);
+            return (
+              <tr key={ri} className="border-b border-[#2a2420] last:border-0">
+                {cells.map((cell, ci) => (
+                  <td
+                    key={ci}
+                    className="px-4 py-3 text-sm text-[#b8a078] leading-relaxed"
+                  >
+                    {parseInlineMarkdown(cell)}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>,
+    key,
+  ];
 }
 
 function renderMarkdownContent(content: string) {
@@ -98,22 +166,37 @@ function renderMarkdownContent(content: string) {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
 
+    // Collect consecutive table rows
+    if (isTableRow(line)) {
+      const tableRows: string[] = [line];
+      let j = i + 1;
+      while (j < lines.length && isTableRow(lines[j])) {
+        tableRows.push(lines[j]);
+        j++;
+      }
+      const [tableEl, nextKey] = renderTable(tableRows, key);
+      elements.push(tableEl);
+      key = nextKey;
+      i = j - 1;
+      continue;
+    }
+
     if (line.startsWith("# ")) {
       elements.push(
         <h1 key={key++} className="heading-display text-3xl md:text-4xl text-[#e8d5a3] mt-12 mb-6">
-          {line.slice(2)}
+          {parseInlineMarkdown(line.slice(2))}
         </h1>
       );
     } else if (line.startsWith("## ")) {
       elements.push(
         <h2 key={key++} className="heading-display text-xl md:text-2xl text-[#e8d5a3] mt-10 mb-4">
-          {line.slice(3)}
+          {parseInlineMarkdown(line.slice(3))}
         </h2>
       );
     } else if (line.startsWith("### ")) {
       elements.push(
         <h3 key={key++} className="heading-display text-lg text-[#e8d5a3] mt-8 mb-3">
-          {line.slice(4)}
+          {parseInlineMarkdown(line.slice(4))}
         </h3>
       );
     } else if (line.startsWith("- ")) {
@@ -123,9 +206,7 @@ function renderMarkdownContent(content: string) {
         </li>
       );
     } else if (line.startsWith("---")) {
-      elements.push(
-        <hr key={key++} className="border-[#2a2420] my-8" />
-      );
+      elements.push(<hr key={key++} className="border-[#2a2420] my-8" />);
     } else if (line.trim() === "") {
       elements.push(<div key={key++} className="h-4" />);
     } else if (line.startsWith("**") && line.endsWith("**")) {
