@@ -750,7 +750,7 @@ export default function ContractPage() {
                         onClick={submitTerms}
                         disabled={submittingTerms || (!useMessageTerms && !myTerms.trim())}
                         size="sm"
-                        variant="secondary"
+                        className="bg-[#ff3333] hover:bg-[#ff5555] text-white border-[#ff3333]"
                       >
                         {submittingTerms ? "Submitting..." : "Submit for Review"}
                       </Button>
