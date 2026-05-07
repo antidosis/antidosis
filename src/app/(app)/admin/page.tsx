@@ -47,8 +47,8 @@ type PendingCredential = {
   issuedBy: string | null;
   issuedAt: string | null;
   expiresAt: string | null;
-  fileUrl: string | null;
-  backFileUrl: string | null;
+  signedUrl: string | null;
+  signedBackUrl: string | null;
   isPublic: boolean;
   createdAt: string;
   profile: {
@@ -240,9 +240,9 @@ export default function AdminPage() {
 
                       {/* Document links */}
                       <div className="flex items-center gap-3 mt-3">
-                        {cred.fileUrl && (
+                        {cred.signedUrl && (
                           <a
-                            href={cred.fileUrl}
+                            href={cred.signedUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1 text-xs text-[#f5a623] hover:underline"
@@ -250,9 +250,9 @@ export default function AdminPage() {
                             <ExternalLink className="h-3 w-3" /> view document
                           </a>
                         )}
-                        {cred.backFileUrl && (
+                        {cred.signedBackUrl && (
                           <a
-                            href={cred.backFileUrl}
+                            href={cred.signedBackUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1 text-xs text-[#f5a623] hover:underline"
