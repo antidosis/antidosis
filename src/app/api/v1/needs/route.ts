@@ -70,7 +70,7 @@ export async function GET(req: NextRequest) {
       };
     }
 
-    const [needs, total] = await Promise.all([
+    const [needs, total, offerTypesWithNeeds, categoriesWithNeeds, skillsWithNeeds] = await Promise.all([
       prisma.need.findMany({
         where,
         orderBy: { createdAt: "desc" },
@@ -94,10 +94,37 @@ export async function GET(req: NextRequest) {
         },
       }),
       prisma.need.count({ where }),
+      prisma.need.findMany({
+        where: { status: "open" },
+        select: { offerType: true },
+        distinct: ["offerType"],
+      }),
+      prisma.need.findMany({
+        where: { status: "open", needCategory: { not: null } },
+        select: { needCategory: true },
+        distinct: ["needCategory"],
+      }),
+      prisma.$queryRaw<{ name: string }[]>`
+        SELECT DISTINCT ns.name
+        FROM need_skills ns
+        INNER JOIN needs n ON ns.need_id = n.id
+        WHERE n.status = 'open'
+      `,
     ]);
 
     return NextResponse.json(
-      { needs, total, page, totalPages: Math.ceil(total / limit), limit },
+      {
+        needs,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
+        limit,
+        availableFilters: {
+          offerTypes: offerTypesWithNeeds.map((n) => n.offerType),
+          categories: categoriesWithNeeds.map((n) => n.needCategory).filter(Boolean) as string[],
+          skills: skillsWithNeeds.map((s) => s.name),
+        },
+      },
       {
         headers: {
           "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",

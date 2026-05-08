@@ -19,6 +19,7 @@ export async function GET() {
       totalPros,
       recentNeeds,
       recentContracts,
+      pendingContractCancellations,
     ] = await Promise.all([
       prisma.profile.count(),
       prisma.need.count(),
@@ -28,6 +29,17 @@ export async function GET() {
       prisma.profile.count({ where: { isPro: true } }),
       prisma.need.count({ where: { createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } } }),
       prisma.contract.count({ where: { createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } } }),
+      prisma.contract.count({
+        where: {
+          OR: [
+            { cancelEscalatedAt: { not: null } },
+            {
+              cancelRequestedAt: { not: null },
+              cancelResponse: null,
+            },
+          ],
+        },
+      }),
     ]);
 
     return NextResponse.json({
@@ -39,6 +51,7 @@ export async function GET() {
       totalPros,
       recentNeeds,
       recentContracts,
+      pendingContractCancellations,
     });
   } catch (error) {
     logger.error("Admin stats error:", error instanceof Error ? error : undefined);

@@ -300,7 +300,7 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
     setSubmittingOffer(false);
   }
 
-  async function handleAcceptance(id: string, status: "accepted" | "declined") {
+  async function handleAcceptance(id: string, status: "accepted" | "declined" | "removed") {
     const res = await fetch(`/api/v1/acceptances/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -1130,7 +1130,7 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
         {/* Interested list — poster only */}
         {(() => {
           const visible = need.acceptances.filter(
-            (a) => a.status === "pending" || a.status === "accepted"
+            (a) => a.status === "pending" || a.status === "accepted" || a.status === "declined"
           );
           return (
             isPoster &&
@@ -1260,6 +1260,25 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                               deal confirmed
                             </span>
                           )}
+                          {a.status === "declined" && (
+                            <span className="text-xs text-[#ff5252] flex items-center gap-1">
+                              <X className="h-3 w-3" />
+                              declined
+                            </span>
+                          )}
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 text-xs px-2 text-[#ff5252] hover:text-[#ff5252]"
+                            onClick={() => {
+                              if (window.confirm(`Remove ${a.user.fullName || "this user"}? They won't be able to express interest again.`)) {
+                                handleAcceptance(a.id, "removed");
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-3 w-3 mr-1" />
+                            remove
+                          </Button>
                         </div>
                       </div>
                       {a.message && (

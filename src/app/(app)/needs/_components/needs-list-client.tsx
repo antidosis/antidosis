@@ -72,17 +72,6 @@ export default function NeedsPage() {
     }
   }, [typeFilter, categoryFilter]);
 
-  // Skill input suggestions
-  useEffect(() => {
-    if (skillInput.trim()) {
-      setSkillSuggestions(searchSkills(skillInput));
-      setShowSkillDropdown(true);
-    } else {
-      setSkillSuggestions([]);
-      setShowSkillDropdown(false);
-    }
-  }, [skillInput]);
-
   // Build SWR key from filters
   const needsKey = (() => {
     const params = new URLSearchParams();
@@ -101,6 +90,11 @@ export default function NeedsPage() {
     page: number;
     totalPages: number;
     limit: number;
+    availableFilters: {
+      offerTypes: string[];
+      categories: string[];
+      skills: string[];
+    };
   }>(needsKey);
 
   const { data: recData } = useApi<{
@@ -111,6 +105,26 @@ export default function NeedsPage() {
   const needs = needsData?.needs || [];
   const total = needsData?.total || 0;
   const totalPages = needsData?.totalPages || 1;
+  const availableOfferTypes = needsData?.availableFilters?.offerTypes || [];
+  const availableCategories = needsData?.availableFilters?.categories || [];
+  const availableSkills = needsData?.availableFilters?.skills || [];
+
+  // Skill input suggestions — only suggest skills that exist in real posts
+  useEffect(() => {
+    const skillsPool = needsData?.availableFilters?.skills || [];
+    if (skillInput.trim()) {
+      const matches = searchSkills(skillInput);
+      setSkillSuggestions(
+        skillsPool.length > 0
+          ? matches.filter((s) => skillsPool.includes(s))
+          : matches
+      );
+      setShowSkillDropdown(true);
+    } else {
+      setSkillSuggestions([]);
+      setShowSkillDropdown(false);
+    }
+  }, [skillInput, needsData?.availableFilters?.skills]);
 
   const recMatchInfo: Record<string, { matchCount: number; matchingSkillNames: string[] }> = {};
   (recData?.matchInfo || []).forEach((m) => {
@@ -276,16 +290,18 @@ export default function NeedsPage() {
             )}
           </div>
           <div className="flex gap-2">
-            {offerTypes.map((type) => (
-              <Button
-                key={type.value}
-                variant={typeFilter === type.value ? "default" : "outline"}
-                size="sm"
-                onClick={() => setTypeFilter(type.value)}
-              >
-                {type.label}
-              </Button>
-            ))}
+            {offerTypes
+              .filter((type) => type.value === "" || availableOfferTypes.includes(type.value))
+              .map((type) => (
+                <Button
+                  key={type.value}
+                  variant={typeFilter === type.value ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setTypeFilter(type.value)}
+                >
+                  {type.label}
+                </Button>
+              ))}
           </div>
         </div>
 
@@ -327,9 +343,12 @@ export default function NeedsPage() {
           </div>
         )}
 
-        {/* Category chips */}
+        {/* Category chips — only show categories that have real posts */}
         <div className="flex flex-wrap gap-2 mt-3">
           {EXCHANGE_MODES.filter((mode) => {
+            // Hide if no real post exists in this category
+            if (!availableCategories.includes(mode.value)) return false;
+            // Hide if incompatible with selected offer type
             if (!typeFilter) return true;
             const incompatible = INCOMPATIBLE_EXCHANGE_MODES[typeFilter] || [];
             return !incompatible.includes(mode.value);

@@ -43,12 +43,13 @@ export function Navbar() {
   }, [mobileOpen]);
 
   const navItems = [
-    { href: "/pro", label: "pro" },
-    { href: "/needs", label: "needs" },
+    { href: "/how-it-works", label: "how it works" },
+    { href: "/needs", label: "browse needs" },
     { href: "/needs/new", label: "post" },
-    { href: "/dashboard", label: "dashboard" },
     { href: "/pros", label: "pros" },
+    { href: "/blog", label: "blog" },
     { href: "/demo/contract-flow", label: "demo" },
+    ...(user ? [{ href: "/dashboard", label: "dashboard" }] : []),
   ];
 
   return (
@@ -69,6 +70,7 @@ export function Navbar() {
           <nav className="hidden md:flex items-center gap-6" aria-label="Main navigation">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
+              const isDashboard = item.href === "/dashboard";
               return (
                 <Link
                   key={item.href}
@@ -76,13 +78,15 @@ export function Navbar() {
                   aria-current={isActive ? "page" : undefined}
                   className={cn(
                     "relative transition-colors py-1",
-                    isActive
-                      ? "text-[#f5a623] glow-gold-subtle"
-                      : "text-[#7a6b5a] hover:text-[#e8d5a3]"
+                    isDashboard
+                      ? "px-3 py-1.5 rounded border border-[#f5a623]/40 text-[#f5a623] hover:bg-[#f5a623]/10 hover:text-[#f5a623]"
+                      : isActive
+                        ? "text-[#f5a623] glow-gold-subtle"
+                        : "text-[#7a6b5a] hover:text-[#e8d5a3]"
                   )}
                 >
                   {item.label}
-                  {isActive && (
+                  {!isDashboard && isActive && (
                     <span className="absolute -bottom-1 left-0 right-0 h-px bg-[#f5a623] shadow-[0_0_8px_rgba(245,166,35,0.5)]" />
                   )}
                 </Link>
@@ -133,6 +137,7 @@ export function Navbar() {
           <div className="flex flex-col p-6 space-y-1">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
+              const isDashboard = item.href === "/dashboard";
               return (
                 <Link
                   key={item.href}
@@ -140,9 +145,11 @@ export function Navbar() {
                   aria-current={isActive ? "page" : undefined}
                   className={cn(
                     "py-3 text-base transition-colors border-b border-[#2a2420]/50",
-                    isActive
-                      ? "text-[#f5a623] glow-gold-subtle"
-                      : "text-[#7a6b5a] hover:text-[#e8d5a3]"
+                    isDashboard
+                      ? "text-[#f5a623] font-medium"
+                      : isActive
+                        ? "text-[#f5a623] glow-gold-subtle"
+                        : "text-[#7a6b5a] hover:text-[#e8d5a3]"
                   )}
                 >
                   {item.label}

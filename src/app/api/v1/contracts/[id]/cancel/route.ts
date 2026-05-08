@@ -84,6 +84,14 @@ export async function POST(
       );
     }
 
+    // Once terms are locked, mutual consent is required via request-cancel
+    if (contract.termsLockedAt) {
+      return NextResponse.json(
+        { error: "This contract requires mutual consent to cancel. Please request cancellation instead." },
+        { status: 400 }
+      );
+    }
+
     const updatedContract = await prisma.$transaction(async (tx) => {
       const updated = await tx.contract.update({
         where: { id: params.id },

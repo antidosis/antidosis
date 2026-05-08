@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
+import { Label } from "@/components/ui/label";
 import {
   ArrowLeft, Send, Check, Shield, FileText, Lock, Unlock, Info,
   MessageSquare, ChevronDown, ChevronUp, Printer, Star,
@@ -100,6 +101,70 @@ type Message = {
   acceptanceId: string | null;
 };
 
+type DemoReview = {
+  giverId: string;
+  receiverId: string;
+  rating: number;
+  comment: string;
+  privateFeedback: string;
+};
+
+type DemoContract = {
+  status: string;
+  partyATerms: string;
+  partyBTerms: string;
+  partyAUseMessageTerms: boolean;
+  partyBUseMessageTerms: boolean;
+  partyASubmittedAt: string | null;
+  partyBSubmittedAt: string | null;
+  partyAAgreedAt: string | null;
+  partyBAgreedAt: string | null;
+  termsLockedAt: string | null;
+  partyASignedAt: string | null;
+  partyBSignedAt: string | null;
+  partyASignature: string | null;
+  partyBSignature: string | null;
+  aMarkedComplete: boolean;
+  bMarkedComplete: boolean;
+  completedAt: string | null;
+  reviews: DemoReview[];
+  cancelRequestedById: string | null;
+  cancelRequestedAt: string | null;
+  cancelResponse: "agreed" | "declined" | null;
+  cancelResponseAt: string | null;
+  cancelEscalatedAt: string | null;
+  cancelReason: string | null;
+};
+
+function defaultContract(): DemoContract {
+  return {
+    status: "draft",
+    partyATerms: "",
+    partyBTerms: "",
+    partyAUseMessageTerms: false,
+    partyBUseMessageTerms: false,
+    partyASubmittedAt: null,
+    partyBSubmittedAt: null,
+    partyAAgreedAt: null,
+    partyBAgreedAt: null,
+    termsLockedAt: null,
+    partyASignedAt: null,
+    partyBSignedAt: null,
+    partyASignature: null,
+    partyBSignature: null,
+    aMarkedComplete: false,
+    bMarkedComplete: false,
+    completedAt: null,
+    reviews: [],
+    cancelRequestedById: null,
+    cancelRequestedAt: null,
+    cancelResponse: null,
+    cancelResponseAt: null,
+    cancelEscalatedAt: null,
+    cancelReason: null,
+  };
+}
+
 /* ─── Sub-components ─── */
 function PartySection({ party, label, isMe }: { party: typeof PARTY_A; label: string; isMe: boolean }) {
   return (
@@ -168,7 +233,7 @@ export default function ContractFlowDemoPage() {
   const router = useRouter();
 
   /* ─── View mode ─── */
-  const [currentUser, setCurrentUser] = useState<"A" | "B" | "C">("B");
+  const [currentUser, setCurrentUser] = useState<"A" | "B" | "C">("A");
   const isPartyA = currentUser === "A";
   const isPartyB = currentUser === "B";
   const isPartyC = currentUser === "C";
@@ -185,26 +250,15 @@ export default function ContractFlowDemoPage() {
   const [selectedAcceptanceId, setSelectedAcceptanceId] = useState<string | null>(null);
   const [activeThread, setActiveThread] = useState<string | null>(null);
 
-  /* ─── Contract state ─── */
-  const [status, setStatus] = useState("draft");
-  const [partyATerms, setPartyATerms] = useState("");
-  const [partyBTerms, setPartyBTerms] = useState("");
-  const [partyAUseMessageTerms, setPartyAUseMessageTerms] = useState(false);
-  const [partyBUseMessageTerms, setPartyBUseMessageTerms] = useState(false);
-  const [partyASubmittedAt, setPartyASubmittedAt] = useState<string | null>(null);
-  const [partyBSubmittedAt, setPartyBSubmittedAt] = useState<string | null>(null);
-  const [partyAAgreedAt, setPartyAAgreedAt] = useState<string | null>(null);
-  const [partyBAgreedAt, setPartyBAgreedAt] = useState<string | null>(null);
-  const [termsLockedAt, setTermsLockedAt] = useState<string | null>(null);
-  const [partyASignedAt, setPartyASignedAt] = useState<string | null>(null);
-  const [partyBSignedAt, setPartyBSignedAt] = useState<string | null>(null);
-  const [partyASignature, setPartyASignature] = useState<string | null>(null);
-  const [partyBSignature, setPartyBSignature] = useState<string | null>(null);
-  const [aMarkedComplete, setAMarkedComplete] = useState(false);
-  const [bMarkedComplete, setBMarkedComplete] = useState(false);
-  const [completedAt, setCompletedAt] = useState<string | null>(null);
+  /* ─── Per-acceptance contract state ─── */
+  const [contracts, setContracts] = useState<Record<string, DemoContract>>({});
+
+  /* ─── Messages ─── */
   const [messages, setMessages] = useState<Message[]>([]);
   const [messageInput, setMessageInput] = useState("");
+
+  /* ─── Per-user contract view state ─── */
+  const [userContractView, setUserContractView] = useState<Record<string, boolean>>({});
 
   /* ─── Local term editing ─── */
   const [myTermsDraft, setMyTermsDraft] = useState("");
@@ -213,14 +267,105 @@ export default function ContractFlowDemoPage() {
   const [signatureInput, setSignatureInput] = useState("");
   const [agreedToTermsCheck, setAgreedToTermsCheck] = useState(false);
 
+  /* ─── Review form state ─── */
+  const [rating, setRating] = useState(10);
+  const [reviewComment, setReviewComment] = useState("");
+  const [privateFeedbackDraft, setPrivateFeedbackDraft] = useState("");
+
+  /* ─── Cancel & Complete modals ─── */
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [showCompleteConfirm, setShowCompleteConfirm] = useState(false);
+  const [showRequestCancelModal, setShowRequestCancelModal] = useState(false);
+  const [showRespondCancelModal, setShowRespondCancelModal] = useState(false);
+  const [cancelReasonDraft, setCancelReasonDraft] = useState("");
+
+  /* ─── Persistence ─── */
+  const STORAGE_KEY = "antidosis-demo-contract-flow";
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.currentUser) setCurrentUser(parsed.currentUser);
+        if (typeof parsed.requiresContract === "boolean") setRequiresContract(parsed.requiresContract);
+        if (parsed.acceptances) setAcceptances(parsed.acceptances);
+        if (typeof parsed.contractFormed === "boolean") setContractFormed(parsed.contractFormed);
+        if (parsed.selectedAcceptanceId !== undefined) setSelectedAcceptanceId(parsed.selectedAcceptanceId);
+        if (parsed.activeThread !== undefined) setActiveThread(parsed.activeThread);
+        if (parsed.contracts) {
+          // Ensure loaded contracts have all required fields (defensive for schema changes)
+          const normalizedContracts: Record<string, DemoContract> = {};
+          for (const [key, val] of Object.entries(parsed.contracts as Record<string, DemoContract>)) {
+            normalizedContracts[key] = { ...defaultContract(), ...val };
+          }
+          setContracts(normalizedContracts);
+        }
+        if (parsed.userContractView) setUserContractView(parsed.userContractView);
+        if (parsed.messages) setMessages(parsed.messages);
+      }
+    } catch {
+      // ignore corrupt storage
+    }
+  }, []);
+
+  // Sync draft state when switching users so each party sees their own terms/checkbox
+  useEffect(() => {
+    const c = getContract(selectedAcceptanceId);
+    setMyTermsDraft(isPartyA ? c.partyATerms : c.partyBTerms);
+    setUseMessageTermsDraft(isPartyA ? c.partyAUseMessageTerms : c.partyBUseMessageTerms);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser, selectedAcceptanceId]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const state = {
+      currentUser,
+      requiresContract,
+      acceptances,
+      contractFormed,
+      selectedAcceptanceId,
+      activeThread,
+      contracts,
+      messages,
+      userContractView,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }, [currentUser, requiresContract, acceptances, contractFormed, selectedAcceptanceId, activeThread, contracts, messages]);
+
+  /* ─── Helpers ─── */
+  function getContract(id: string | null): DemoContract {
+    if (!id) return defaultContract();
+    return contracts[id] || defaultContract();
+  }
+
+  function updateContract(id: string | null, updates: Partial<DemoContract>) {
+    if (!id) return;
+    setContracts(prev => ({
+      ...prev,
+      [id]: { ...(prev[id] || defaultContract()), ...updates },
+    }));
+  }
+
   /* ─── Derived ─── */
   const interestAccepted = acceptances.some(a => a.status === "accepted");
   const selectedAcceptance = acceptances.find(a => a.id === selectedAcceptanceId) || null;
   const contractPartyB = selectedAcceptance ? PARTIES[selectedAcceptance.userId] : null;
   const otherParty = isPartyA ? (contractPartyB || PARTY_B) : PARTY_A;
   const myAcceptance = acceptances.find(a => a.userId === profileId);
-  const canViewContract = contractFormed && (isPartyA || selectedAcceptance?.userId === profileId);
+  const canViewContract = contractFormed && userContractView[profileId] && (isPartyA || selectedAcceptance?.userId === profileId);
   const iAmDeclined = !isPartyA && myAcceptance?.status === "declined";
+
+  const currentContract = getContract(selectedAcceptanceId);
+
+  /* ─── Cancellation derived ─── */
+  const cancelRequested = !!currentContract.cancelRequestedAt;
+  const isCancelRequester = currentContract.cancelRequestedById === profileId;
+  const cancelPending = cancelRequested && !currentContract.cancelResponse;
+  const cancelDeclined = currentContract.cancelResponse === "declined";
+  const cancelAgreed = currentContract.cancelResponse === "agreed";
+  const cancelEscalated = !!currentContract.cancelEscalatedAt;
 
   /* ─── Reset ─── */
   function resetFlow() {
@@ -229,26 +374,21 @@ export default function ContractFlowDemoPage() {
     setContractFormed(false);
     setSelectedAcceptanceId(null);
     setActiveThread(null);
-    setStatus("draft");
-    setPartyATerms("");
-    setPartyBTerms("");
-    setPartyAUseMessageTerms(false);
-    setPartyBUseMessageTerms(false);
-    setPartyASubmittedAt(null);
-    setPartyBSubmittedAt(null);
-    setPartyAAgreedAt(null);
-    setPartyBAgreedAt(null);
-    setTermsLockedAt(null);
-    setPartyASignedAt(null);
-    setPartyBSignedAt(null);
-    setPartyASignature(null);
-    setPartyBSignature(null);
-    setAMarkedComplete(false);
-    setBMarkedComplete(false);
-    setCompletedAt(null);
+    setContracts({});
     setMessages([]);
     setMyTermsDraft("");
     setUseMessageTermsDraft(false);
+    setRating(10);
+    setReviewComment("");
+    setPrivateFeedbackDraft("");
+    setShowCancelConfirm(false);
+    setShowCompleteConfirm(false);
+    setShowRequestCancelModal(false);
+    setShowRespondCancelModal(false);
+    setCancelReasonDraft("");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(STORAGE_KEY);
+    }
   }
 
   /* ─── Actions ─── */
@@ -268,12 +408,10 @@ export default function ContractFlowDemoPage() {
       a.id === acceptanceId ? { ...a, status: "accepted" } : a
     ));
     if (!requiresContract) {
-      // For free-form needs: auto-decline others since there's no contract step
       setAcceptances(prev => prev.map(a =>
         a.id === acceptanceId ? { ...a, status: "accepted" } :
         a.status === "pending" ? { ...a, status: "declined" } : a
       ));
-      setStatus("active");
     }
   }
 
@@ -287,77 +425,186 @@ export default function ContractFlowDemoPage() {
     setContractFormed(true);
     setSelectedAcceptanceId(acceptanceId);
     setActiveThread(acceptanceId);
-    setStatus("draft");
+    if (!contracts[acceptanceId]) {
+      setContracts(prev => ({ ...prev, [acceptanceId]: defaultContract() }));
+    }
+    const acc = acceptances.find(a => a.id === acceptanceId);
+    setUserContractView(prev => ({
+      ...prev,
+      [PARTY_A.id]: true,
+      ...(acc ? { [acc.userId]: true } : {}),
+    }));
   }
 
   function saveTerms() {
     if (isPartyA) {
-      setPartyATerms(myTermsDraft);
-      setPartyAUseMessageTerms(useMessageTermsDraft);
+      updateContract(selectedAcceptanceId, { partyATerms: myTermsDraft, partyAUseMessageTerms: useMessageTermsDraft });
     } else {
-      setPartyBTerms(myTermsDraft);
-      setPartyBUseMessageTerms(useMessageTermsDraft);
+      updateContract(selectedAcceptanceId, { partyBTerms: myTermsDraft, partyBUseMessageTerms: useMessageTermsDraft });
     }
   }
 
   function submitTerms() {
     const now = new Date().toISOString();
+    const c = getContract(selectedAcceptanceId);
     if (isPartyA) {
-      setPartyASubmittedAt(now);
-      setPartyATerms(myTermsDraft);
-      setPartyAUseMessageTerms(useMessageTermsDraft);
+      updateContract(selectedAcceptanceId, {
+        partyASubmittedAt: now,
+        partyATerms: myTermsDraft,
+        partyAUseMessageTerms: useMessageTermsDraft,
+        partyAAgreedAt: null,
+        partyBAgreedAt: null,
+        reviews: c.reviews ?? [],
+      });
     } else {
-      setPartyBSubmittedAt(now);
-      setPartyBTerms(myTermsDraft);
-      setPartyBUseMessageTerms(useMessageTermsDraft);
+      updateContract(selectedAcceptanceId, {
+        partyBSubmittedAt: now,
+        partyBTerms: myTermsDraft,
+        partyBUseMessageTerms: useMessageTermsDraft,
+        partyAAgreedAt: null,
+        partyBAgreedAt: null,
+        reviews: c.reviews ?? [],
+      });
     }
-    setPartyAAgreedAt(null);
-    setPartyBAgreedAt(null);
   }
 
   function agree() {
-    if (!partyASubmittedAt || !partyBSubmittedAt) return;
-    if (isPartyA) setPartyAAgreedAt(new Date().toISOString());
-    else setPartyBAgreedAt(new Date().toISOString());
-  }
-
-  // Lock terms when both parties have agreed (runs after state updates commit)
-  useEffect(() => {
-    if (partyAAgreedAt && partyBAgreedAt && !termsLockedAt) {
-      setTermsLockedAt(new Date().toISOString());
-      setStatus("pending_terms");
+    const c = getContract(selectedAcceptanceId);
+    if (!c.partyASubmittedAt || !c.partyBSubmittedAt) return;
+    if (isPartyA) {
+      updateContract(selectedAcceptanceId, { partyAAgreedAt: new Date().toISOString() });
+    } else {
+      updateContract(selectedAcceptanceId, { partyBAgreedAt: new Date().toISOString() });
     }
-  }, [partyAAgreedAt, partyBAgreedAt, termsLockedAt]);
+  }
 
   function sign(signature: string) {
     const now = new Date().toISOString();
+    const c = getContract(selectedAcceptanceId);
+    const updates: Partial<DemoContract> = {};
     if (isPartyA) {
-      setPartyASignedAt(now);
-      setPartyASignature(signature);
+      updates.partyASignedAt = now;
+      updates.partyASignature = signature;
     } else {
-      setPartyBSignedAt(now);
-      setPartyBSignature(signature);
+      updates.partyBSignedAt = now;
+      updates.partyBSignature = signature;
     }
-
-    const aSigned = isPartyA ? now : partyASignedAt;
-    const bSigned = isPartyB ? now : partyBSignedAt;
+    const aSigned = isPartyA ? now : c.partyASignedAt;
+    const bSigned = isPartyB ? now : c.partyBSignedAt;
     if (aSigned && bSigned) {
-      setStatus("active");
+      updates.status = "active";
     }
+    updateContract(selectedAcceptanceId, updates);
   }
 
   function markComplete() {
-    if (isPartyA) setAMarkedComplete(true);
-    else setBMarkedComplete(true);
+    if (isPartyA) {
+      updateContract(selectedAcceptanceId, { aMarkedComplete: true });
+    } else {
+      updateContract(selectedAcceptanceId, { bMarkedComplete: true });
+    }
   }
+
+  function cancelContract() {
+    if (!selectedAcceptanceId) return;
+    updateContract(selectedAcceptanceId, { status: "cancelled" });
+    setShowCancelConfirm(false);
+  }
+
+  function requestCancel(reason: string) {
+    if (!selectedAcceptanceId) return;
+    updateContract(selectedAcceptanceId, {
+      cancelRequestedById: profileId,
+      cancelRequestedAt: new Date().toISOString(),
+      cancelResponse: null,
+      cancelResponseAt: null,
+      cancelEscalatedAt: null,
+      cancelReason: reason || null,
+    });
+    setShowRequestCancelModal(false);
+    setCancelReasonDraft("");
+  }
+
+  function respondCancel(agree: boolean) {
+    if (!selectedAcceptanceId) return;
+    if (agree) {
+      updateContract(selectedAcceptanceId, {
+        status: "cancelled",
+        cancelResponse: "agreed",
+        cancelResponseAt: new Date().toISOString(),
+      });
+    } else {
+      updateContract(selectedAcceptanceId, {
+        cancelResponse: "declined",
+        cancelResponseAt: new Date().toISOString(),
+      });
+    }
+    setShowRespondCancelModal(false);
+  }
+
+  function escalateCancel() {
+    if (!selectedAcceptanceId) return;
+    updateContract(selectedAcceptanceId, {
+      cancelEscalatedAt: new Date().toISOString(),
+    });
+  }
+
+  function withdrawCancelRequest() {
+    if (!selectedAcceptanceId) return;
+    updateContract(selectedAcceptanceId, {
+      cancelRequestedById: null,
+      cancelRequestedAt: null,
+      cancelResponse: null,
+      cancelResponseAt: null,
+      cancelEscalatedAt: null,
+      cancelReason: null,
+    });
+  }
+
+  function submitReview() {
+    if (!selectedAcceptanceId) return;
+    const c = getContract(selectedAcceptanceId);
+    const receiverId = isPartyA ? (selectedAcceptance?.userId || PARTY_B.id) : PARTY_A.id;
+    const newReview: DemoReview = {
+      giverId: profileId,
+      receiverId,
+      rating,
+      comment: reviewComment,
+      privateFeedback: privateFeedbackDraft,
+    };
+    updateContract(selectedAcceptanceId, { reviews: [...(c.reviews ?? []), newReview] });
+    setReviewComment("");
+    setPrivateFeedbackDraft("");
+    setRating(10);
+  }
+
+  // Lock terms when both parties have agreed
+  useEffect(() => {
+    if (!selectedAcceptanceId) return;
+    const c = contracts[selectedAcceptanceId];
+    if (!c) return;
+    if (c.partyAAgreedAt && c.partyBAgreedAt && !c.termsLockedAt) {
+      updateContract(selectedAcceptanceId, {
+        termsLockedAt: new Date().toISOString(),
+        status: "pending_terms",
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contracts, selectedAcceptanceId]);
 
   // Mark contract as completed when both parties have marked complete
   useEffect(() => {
-    if (aMarkedComplete && bMarkedComplete && status !== "completed") {
-      setStatus("completed");
-      setCompletedAt(new Date().toISOString());
+    if (!selectedAcceptanceId) return;
+    const c = contracts[selectedAcceptanceId];
+    if (!c) return;
+    if (c.aMarkedComplete && c.bMarkedComplete && c.status !== "completed") {
+      updateContract(selectedAcceptanceId, {
+        status: "completed",
+        completedAt: new Date().toISOString(),
+      });
     }
-  }, [aMarkedComplete, bMarkedComplete, status]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contracts, selectedAcceptanceId]);
 
   function sendMessage(e: React.FormEvent) {
     e.preventDefault();
@@ -383,20 +630,22 @@ export default function ContractFlowDemoPage() {
   }
 
   /* ─── Derived contract values ─── */
-  const termsLocked = !!termsLockedAt;
-  const bothSigned = !!partyASignedAt && !!partyBSignedAt;
-  const iSigned = isPartyA ? !!partyASignedAt : !!partyBSignedAt;
-  const iAgreed = isPartyA ? !!partyAAgreedAt : !!partyBAgreedAt;
-  const aSubmitted = !!partyASubmittedAt;
-  const bSubmitted = !!partyBSubmittedAt;
+  const termsLocked = !!currentContract.termsLockedAt;
+  const bothSigned = !!currentContract.partyASignedAt && !!currentContract.partyBSignedAt;
+  const iSigned = isPartyA ? !!currentContract.partyASignedAt : !!currentContract.partyBSignedAt;
+  const iAgreed = isPartyA ? !!currentContract.partyAAgreedAt : !!currentContract.partyBAgreedAt;
+  const aSubmitted = !!currentContract.partyASubmittedAt;
+  const bSubmitted = !!currentContract.partyBSubmittedAt;
   const iSubmitted = isPartyA ? aSubmitted : bSubmitted;
   const bothSubmitted = aSubmitted && bSubmitted;
-  const canEditTerms = !termsLocked && !iSubmitted && (status === "draft" || status === "pending_terms");
-  const canReview = bothSubmitted && !termsLocked;
-  const canSign = termsLocked && !iSigned && (status === "draft" || status === "pending_terms");
-  const canComplete = status === "active" || status === "pending_completion";
-  const iMarkedComplete = isPartyA ? aMarkedComplete : bMarkedComplete;
-  const otherMarkedComplete = isPartyA ? bMarkedComplete : aMarkedComplete;
+  const canEditTerms = !termsLocked && !iSubmitted && (currentContract.status === "draft" || currentContract.status === "pending_terms");
+  const canReviewPhase = bothSubmitted && !termsLocked;
+  const canSign = termsLocked && !iSigned && (currentContract.status === "draft" || currentContract.status === "pending_terms");
+  const canComplete = currentContract.status === "active" || currentContract.status === "pending_completion";
+  const iMarkedComplete = isPartyA ? currentContract.aMarkedComplete : currentContract.bMarkedComplete;
+  const otherMarkedComplete = isPartyA ? currentContract.bMarkedComplete : currentContract.aMarkedComplete;
+  const hasReviewed = (currentContract.reviews ?? []).some(r => r.giverId === profileId);
+  const otherReview = (currentContract.reviews ?? []).find(r => r.receiverId === profileId);
 
   const statusLabels: Record<string, string> = {
     draft: "draft", pending_terms: "pending signatures", active: "active",
@@ -627,13 +876,13 @@ export default function ContractFlowDemoPage() {
                   return (
                     <div key={acc.id} className="vessel p-4">
                       <div className="flex items-start gap-3">
-                        <Link href={`/profile/${party.id}`} className="shrink-0">
+                        <Link href={`/demo/profile/${party.id}`} className="shrink-0">
                           <Avatar src={party.avatarUrl} name={party.fullName} size="md" />
                         </Link>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between flex-wrap gap-2">
                             <div className="flex items-center gap-2">
-                              <Link href={`/profile/${party.id}`} className="text-sm font-medium text-[#e8d5a3] hover:underline">
+                              <Link href={`/demo/profile/${party.id}`} className="text-sm font-medium text-[#e8d5a3] hover:underline">
                                 {party.fullName}
                               </Link>
                               {party.isVerified && <Shield className="h-3.5 w-3.5 text-[#00e676]" />}
@@ -778,7 +1027,7 @@ export default function ContractFlowDemoPage() {
           <div className="contract-parchment min-h-screen -mx-4 -my-8 px-4 py-8">
             {/* Nav */}
             <div className="print-hidden bg-[#0a0806] border-b border-[#2a2420] -mx-4 -mt-8 px-4 py-4 mb-8 flex items-center justify-between gap-2">
-              <Button variant="ghost" size="sm" onClick={() => setContractFormed(false)} className="text-[#7a6b5a]">
+              <Button variant="ghost" size="sm" onClick={() => setUserContractView(prev => ({ ...prev, [profileId]: false }))} className="text-[#7a6b5a]">
                 <ArrowLeft className="h-3.5 w-3.5 mr-1.5" /> Back to Need
               </Button>
               <div className="flex items-center gap-2">
@@ -799,10 +1048,44 @@ export default function ContractFlowDemoPage() {
                 <p className="contract-body text-sm text-[#5a4a3a]">
                   Ref: <span className="font-mono text-xs">{MOCK_NEED.id.slice(-6).toUpperCase()}</span>
                 </p>
-                <Badge variant={status === "active" || status === "completed" ? "quintessence" : "outline"} className="mt-3 text-[10px]">
-                  {statusLabels[status] || status}
+                <Badge variant={currentContract.status === "active" || currentContract.status === "completed" ? "quintessence" : currentContract.status === "cancelled" ? "destructive" : "outline"} className="mt-3 text-[10px]">
+                  {statusLabels[currentContract.status] || currentContract.status}
                 </Badge>
               </div>
+
+              {/* Cancelled banner */}
+              {currentContract.status === "cancelled" && (
+                <div className="contract-page p-4 print-hidden border-l-2 border-l-[#ff5252] bg-[#ff5252]/5">
+                  <p className="text-sm font-medium text-[#ff5252]">This contract has been cancelled</p>
+                  <p className="text-xs text-[#7a6b5a] mt-1">No further actions can be taken. The need is available for new interest.</p>
+                </div>
+              )}
+
+              {/* Poster cancel notice — shown when fulfiller hasn't signed yet */}
+              {isPartyA &&
+                !currentContract.partyBSignedAt &&
+                (currentContract.status === "draft" || currentContract.status === "pending_terms") && (
+                  <div className="contract-page p-4 print-hidden border-l-2 border-l-[#ff5252]/40 bg-[#ff5252]/5">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-medium text-[#ff5252]">
+                          Waiting for {contractPartyB?.fullName || PARTY_B.fullName} to sign
+                        </p>
+                        <p className="text-xs text-[#7a6b5a] mt-0.5">
+                          You can cancel this contract at any time before both parties sign. The need will return to open status so new fulfillers can express interest.
+                        </p>
+                      </div>
+                      <Button
+                        onClick={() => termsLocked ? setShowRequestCancelModal(true) : setShowCancelConfirm(true)}
+                        variant="outline"
+                        size="sm"
+                        className="text-[#ff5252] border-[#ff5252]/30 hover:border-[#ff5252]/60 hover:bg-[#ff5252]/10 shrink-0"
+                      >
+                        {termsLocked ? "Request Cancellation" : "Cancel Contract"}
+                      </Button>
+                    </div>
+                  </div>
+                )}
 
               {/* Stepper */}
               <div className="contract-page p-5 print-hidden">
@@ -810,7 +1093,7 @@ export default function ContractFlowDemoPage() {
                   {[
                     { label: "Write Terms", active: !bothSubmitted && !termsLocked, done: bothSubmitted || termsLocked },
                     { label: "Review & Accept", active: bothSubmitted && !termsLocked, done: termsLocked },
-                    { label: "Sign", active: termsLocked && !bothSigned, done: bothSigned || status === "completed" },
+                    { label: "Sign", active: termsLocked && !bothSigned, done: bothSigned || currentContract.status === "completed" },
                   ].map((step, i, arr) => (
                     <div key={step.label} className="flex items-center gap-1 flex-1">
                       <div className={`flex-1 h-1.5 rounded-full transition-colors ${step.done ? "bg-emerald-600" : step.active ? "bg-amber-600" : "bg-[#d4c4a8]"}`} />
@@ -894,21 +1177,22 @@ export default function ContractFlowDemoPage() {
                             {useMessageTermsDraft ? (
                               <p className="text-sm text-[#7a6b5a] italic">your terms will be derived from the message thread.</p>
                             ) : (
-                              <Textarea value={myTermsDraft} onChange={(e) => setMyTermsDraft(e.target.value)} placeholder="describe your terms..." rows={4} />
+                              <Textarea value={myTermsDraft} onChange={(e) => setMyTermsDraft(e.target.value)} placeholder="describe your terms..." rows={4} className="bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]" />
                             )}
                             <div className="flex gap-2 mt-3">
                               <Button size="sm" onClick={saveTerms}>Save Terms</Button>
-                              <Button size="sm" variant="secondary" onClick={submitTerms} disabled={!useMessageTermsDraft && !myTermsDraft.trim()}>
+                              <Button onClick={submitTerms} disabled={!useMessageTermsDraft && !myTermsDraft.trim()} className="bg-[#ff3333] hover:bg-[#ff5555] text-white border-[#ff3333] shadow-lg shadow-[#ff3333]/30 font-semibold px-4">
+                                <Send className="h-4 w-4 mr-2" />
                                 Submit for Review
                               </Button>
                             </div>
                           </>
                         ) : (
                           <>
-                            {(isPartyA ? partyAUseMessageTerms : partyBUseMessageTerms) ? (
+                            {(isPartyA ? currentContract.partyAUseMessageTerms : currentContract.partyBUseMessageTerms) ? (
                               <p className="text-sm text-[#7a6b5a] italic">using message thread as terms</p>
                             ) : (
-                              <p className="contract-body text-sm">{isPartyA ? partyATerms || "no terms provided." : partyBTerms || "no terms provided."}</p>
+                              <p className="contract-body text-sm">{isPartyA ? currentContract.partyATerms || "no terms provided." : currentContract.partyBTerms || "no terms provided."}</p>
                             )}
                             <p className="text-xs text-[#7a6b5a] mt-3 italic">your terms have been submitted and cannot be edited until the other party submits theirs or terms are rejected.</p>
                           </>
@@ -928,10 +1212,10 @@ export default function ContractFlowDemoPage() {
                           )}
                         </div>
                         {(isPartyA ? bSubmitted : aSubmitted) ? (
-                          (isPartyA ? partyBUseMessageTerms : partyAUseMessageTerms) ? (
+                          (isPartyA ? currentContract.partyBUseMessageTerms : currentContract.partyAUseMessageTerms) ? (
                             <p className="text-sm text-[#7a6b5a] italic">{otherParty.fullName} is using the message thread as their terms.</p>
                           ) : (
-                            <p className="contract-body text-sm">{isPartyA ? partyBTerms || "no terms provided." : partyATerms || "no terms provided."}</p>
+                            <p className="contract-body text-sm">{isPartyA ? currentContract.partyBTerms || "no terms provided." : currentContract.partyATerms || "no terms provided."}</p>
                           )
                         ) : (
                           <p className="text-sm text-[#7a6b5a] italic">waiting for {otherParty.fullName} to submit their terms...</p>
@@ -955,18 +1239,18 @@ export default function ContractFlowDemoPage() {
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="border border-[#d4b896] p-5 bg-[#f0dfc0]">
                         <p className="contract-label mb-3">{PARTY_A.fullName}&apos;s Terms</p>
-                        {partyAUseMessageTerms ? (
+                        {currentContract.partyAUseMessageTerms ? (
                           <p className="text-sm text-[#7a6b5a] italic">using message thread as terms</p>
                         ) : (
-                          <p className="contract-body text-sm whitespace-pre-line">{partyATerms || "no terms provided."}</p>
+                          <p className="contract-body text-sm whitespace-pre-line">{currentContract.partyATerms || "no terms provided."}</p>
                         )}
                       </div>
                       <div className="border border-[#d4b896] p-5 bg-[#f0dfc0]">
                         <p className="contract-label mb-3">{contractPartyB?.fullName || PARTY_B.fullName}&apos;s Terms</p>
-                        {partyBUseMessageTerms ? (
+                        {currentContract.partyBUseMessageTerms ? (
                           <p className="text-sm text-[#7a6b5a] italic">using message thread as terms</p>
                         ) : (
-                          <p className="contract-body text-sm whitespace-pre-line">{partyBTerms || "no terms provided."}</p>
+                          <p className="contract-body text-sm whitespace-pre-line">{currentContract.partyBTerms || "no terms provided."}</p>
                         )}
                       </div>
                     </div>
@@ -978,7 +1262,7 @@ export default function ContractFlowDemoPage() {
                         <div className="space-y-3">
                           <div className="flex items-center justify-between py-2">
                             <span className="contract-body font-medium">{PARTY_A.fullName}</span>
-                            {partyAAgreedAt ? (
+                            {currentContract.partyAAgreedAt ? (
                               <div className="flex items-center gap-2">
                                 <div className="h-2 w-2 rounded-full bg-emerald-600" />
                                 <Badge variant="success" className="gap-1"><Check className="h-3 w-3" /> accepted</Badge>
@@ -992,7 +1276,7 @@ export default function ContractFlowDemoPage() {
                           </div>
                           <div className="flex items-center justify-between py-2">
                             <span className="contract-body font-medium">{contractPartyB?.fullName || PARTY_B.fullName}</span>
-                            {partyBAgreedAt ? (
+                            {currentContract.partyBAgreedAt ? (
                               <div className="flex items-center gap-2">
                                 <div className="h-2 w-2 rounded-full bg-emerald-600" />
                                 <Badge variant="success" className="gap-1"><Check className="h-3 w-3" /> accepted</Badge>
@@ -1029,11 +1313,11 @@ export default function ContractFlowDemoPage() {
                   <div className="border border-[#d4b896] p-5 bg-[#f0dfc0]">
                     <p className="contract-label mb-3">Locked Terms</p>
                     <div className="space-y-3 contract-body text-sm">
-                      {partyATerms && <p><strong>{PARTY_A.fullName}:</strong> {partyATerms}</p>}
-                      {partyBTerms && <p><strong>{contractPartyB?.fullName || PARTY_B.fullName}:</strong> {partyBTerms}</p>}
+                      {currentContract.partyATerms && <p><strong>{PARTY_A.fullName}:</strong> {currentContract.partyATerms}</p>}
+                      {currentContract.partyBTerms && <p><strong>{contractPartyB?.fullName || PARTY_B.fullName}:</strong> {currentContract.partyBTerms}</p>}
                     </div>
                     <p className="text-xs text-emerald-700 mt-4 flex items-center gap-1">
-                      <Lock className="h-3 w-3" /> Terms were locked on {new Date(termsLockedAt!).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })}
+                      <Lock className="h-3 w-3" /> Terms were locked on {new Date(currentContract.termsLockedAt!).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })}
                     </p>
                   </div>
                 )}
@@ -1044,9 +1328,9 @@ export default function ContractFlowDemoPage() {
                 <div className="contract-page p-6">
                   <h2 className="contract-heading text-xl mb-4 border-b border-[#d4b896] pb-2">2. Digital Signatures</h2>
                   <div className="space-y-4">
-                    <SignatureRow name={PARTY_A.fullName} signed={!!partyASignedAt} signedAt={partyASignedAt} signatureText={partyASignature} />
+                    <SignatureRow name={PARTY_A.fullName} signed={!!currentContract.partyASignedAt} signedAt={currentContract.partyASignedAt} signatureText={currentContract.partyASignature} />
                     <div className="border-t border-[#d4b896]" />
-                    <SignatureRow name={contractPartyB?.fullName || PARTY_B.fullName} signed={!!partyBSignedAt} signedAt={partyBSignedAt} signatureText={partyBSignature} />
+                    <SignatureRow name={contractPartyB?.fullName || PARTY_B.fullName} signed={!!currentContract.partyBSignedAt} signedAt={currentContract.partyBSignedAt} signatureText={currentContract.partyBSignature} />
                   </div>
                   {canSign && (
                     <Button onClick={() => setShowSignModal(true)} className="w-full mt-4 print-hidden">
@@ -1056,10 +1340,10 @@ export default function ContractFlowDemoPage() {
                   {iSigned && !bothSigned && (
                     <p className="text-center text-sm text-[#5a4a3a] mt-4 print-hidden">waiting for {otherParty.fullName} to sign...</p>
                   )}
-                  {bothSigned && status !== "completed" && (
+                  {bothSigned && currentContract.status !== "completed" && (
                     <p className="text-center text-sm text-emerald-700 mt-4">contract is active — both parties have digitally signed</p>
                   )}
-                  {status === "completed" && (
+                  {currentContract.status === "completed" && (
                     <p className="text-center text-sm text-emerald-700 mt-4">contract complete — both parties fulfilled their obligations</p>
                   )}
                 </div>
@@ -1072,22 +1356,102 @@ export default function ContractFlowDemoPage() {
                   <div className="space-y-0">
                     <div className="flex items-center justify-between py-3">
                       <span className="contract-body">{PARTY_A.fullName}</span>
-                      {aMarkedComplete ? <Badge variant="success">done</Badge> : <span className="text-xs text-[#8a7a60] uppercase tracking-wide">pending</span>}
+                      {currentContract.aMarkedComplete ? <Badge variant="success">done</Badge> : <span className="text-xs text-[#8a7a60] uppercase tracking-wide">pending</span>}
                     </div>
                     <div className="border-t border-[#d4b896]" />
                     <div className="flex items-center justify-between py-3">
                       <span className="contract-body">{contractPartyB?.fullName || PARTY_B.fullName}</span>
-                      {bMarkedComplete ? <Badge variant="success">done</Badge> : <span className="text-xs text-[#8a7a60] uppercase tracking-wide">pending</span>}
+                      {currentContract.bMarkedComplete ? <Badge variant="success">done</Badge> : <span className="text-xs text-[#8a7a60] uppercase tracking-wide">pending</span>}
                     </div>
                   </div>
                   {!iMarkedComplete && (
-                    <Button onClick={markComplete} className="w-full mt-4">Mark Complete</Button>
+                    <Button onClick={() => setShowCompleteConfirm(true)} className="w-full mt-4">Mark Complete</Button>
                   )}
                   {iMarkedComplete && !otherMarkedComplete && (
                     <p className="text-center text-sm text-[#5a4a3a] mt-4">waiting for the other party...</p>
                   )}
                   {iMarkedComplete && otherMarkedComplete && (
                     <p className="text-center text-sm text-emerald-700 mt-4">contract complete</p>
+                  )}
+                </div>
+              )}
+
+              {/* Reviews */}
+              {currentContract.status === "completed" && (
+                <div className="contract-page p-6">
+                  <h2 className="contract-heading text-xl mb-4 border-b border-[#d4b896] pb-2">4. Reviews</h2>
+                  {!hasReviewed && (
+                    <div className="space-y-4">
+                      <div className="bg-[#f0dfc0] border border-[#d4b896] rounded-sm p-4">
+                        <p className="text-sm text-[#5a4a3a] font-medium mb-1">Rating Guide</p>
+                        <p className="text-xs text-[#7a6b5a] mb-2">Default excellence. Unless there was a significant problem, keep it at 10.</p>
+                        <div className="text-xs text-[#7a6b5a] space-y-1">
+                          <p>• 10: default — everything went well, no change needed</p>
+                          <p>• 8-9: good — minor suggestions go in private feedback</p>
+                          <p>• 5-7: average — explain what was missing in your review</p>
+                          <p>• 1-4: poor — only for significant problems</p>
+                        </div>
+                      </div>
+                      <p className="text-sm text-[#5a4a3a]">Rate {otherParty.fullName}</p>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="range"
+                          min={1}
+                          max={10}
+                          value={rating}
+                          onChange={(e) => setRating(parseInt(e.target.value))}
+                          className={`flex-1 transition-all duration-300 ${rating === 10 ? "accent-[#00e676]" : "accent-[#f5a623]"}`}
+                        />
+                        <span className={`text-lg font-bold w-12 text-center transition-colors duration-300 ${rating === 10 ? "text-[#00e676]" : "text-[#e8d5a3]"}`}>
+                          {rating}
+                        </span>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm text-[#5a4a3a]">Public Review</Label>
+                        <Textarea
+                          placeholder="share your experience publicly..."
+                          value={reviewComment}
+                          onChange={(e) => setReviewComment(e.target.value)}
+                          rows={3}
+                          className="bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-sm text-[#5a4a3a]">Private Feedback (only visible to {otherParty.fullName}, not on their public profile)</Label>
+                        <Textarea
+                          placeholder="share constructive criticism privately..."
+                          value={privateFeedbackDraft}
+                          onChange={(e) => setPrivateFeedbackDraft(e.target.value)}
+                          rows={3}
+                          className="bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]"
+                        />
+                      </div>
+                      <Button onClick={submitReview} className="w-full">Submit Review</Button>
+                    </div>
+                  )}
+                  {hasReviewed && (
+                    <p className="text-center text-sm text-[#5a4a3a]">You have submitted your review</p>
+                  )}
+                  {otherReview && (
+                    <div className="border border-[#d4b896] p-4 mt-4 bg-[#f0dfc0]">
+                      <p className="text-xs text-[#7a6b5a] uppercase tracking-wide mb-2">{otherParty.fullName} reviewed you</p>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-lg font-bold text-[#f5a623]">{otherReview.rating}</span>
+                        <span className="text-xs text-[#7a6b5a]">/ 10</span>
+                      </div>
+                      {otherReview.comment && (
+                        <div className="mb-2">
+                          <p className="text-[10px] text-[#7a6b5a] uppercase tracking-wide mb-1">Public Review</p>
+                          <p className="text-sm text-[#5a4a3a]">{otherReview.comment}</p>
+                        </div>
+                      )}
+                      {otherReview.privateFeedback && (
+                        <div className="mt-2 pt-2 border-t border-[#d4b896]">
+                          <p className="text-[10px] text-[#7a6b5a] uppercase tracking-wide mb-1">Private Feedback</p>
+                          <p className="text-sm text-[#5a4a3a]">{otherReview.privateFeedback}</p>
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               )}
@@ -1109,10 +1473,161 @@ export default function ContractFlowDemoPage() {
                     </div>
                   ))}
                 </div>
-                <form onSubmit={sendMessage} className="mt-3 flex gap-2 items-center">
-                  <Input placeholder="type a message..." value={messageInput} onChange={(e) => setMessageInput(e.target.value)} className="h-9 text-sm bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]" />
-                  <Button type="submit" size="icon" className="h-9 w-9 shrink-0"><Send className="h-4 w-4" /></Button>
-                </form>
+                {currentContract.status !== "completed" && currentContract.status !== "cancelled" && (
+                  <form onSubmit={sendMessage} className="mt-3 flex gap-2 items-center">
+                    <Input placeholder="type a message..." value={messageInput} onChange={(e) => setMessageInput(e.target.value)} className="h-9 text-sm bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]" />
+                    <Button type="submit" size="icon" className="h-9 w-9 shrink-0"><Send className="h-4 w-4" /></Button>
+                  </form>
+                )}
+              </div>
+
+              {/* Cancellation UI */}
+              {currentContract.status !== "cancelled" && !cancelAgreed && (
+                <div className="print-hidden space-y-4">
+                  {/* Escalated banner */}
+                  {cancelEscalated && (
+                    <div className="contract-page p-4 border-l-2 border-l-amber-500 bg-amber-500/5">
+                      <p className="text-sm font-medium text-amber-500">Escalated to admin</p>
+                      <p className="text-xs text-[#7a6b5a] mt-1">This cancellation request has been escalated to an admin for review.</p>
+                    </div>
+                  )}
+
+                  {/* Pending request — requester view */}
+                  {cancelPending && isCancelRequester && (
+                    <div className="contract-page p-4 border-l-2 border-l-amber-500 bg-amber-500/5">
+                      <p className="text-sm font-medium text-amber-500">Cancellation requested</p>
+                      <p className="text-xs text-[#7a6b5a] mt-1">Waiting for {otherParty.fullName} to respond.</p>
+                      <Button onClick={withdrawCancelRequest} variant="ghost" size="sm" className="text-[#7a6b5a] mt-2">
+                        Withdraw Request
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Pending request — other party view */}
+                  {cancelPending && !isCancelRequester && (
+                    <div className="contract-page p-4 border-l-2 border-l-[#ff5252] bg-[#ff5252]/5">
+                      <p className="text-sm font-medium text-[#ff5252]">
+                        {PARTIES[currentContract.cancelRequestedById!]?.fullName || "The other party"} requested to cancel this contract
+                      </p>
+                      {currentContract.cancelReason && (
+                        <p className="text-xs text-[#7a6b5a] mt-1">Reason: {currentContract.cancelReason}</p>
+                      )}
+                      <div className="flex gap-2 mt-3">
+                        <Button onClick={() => setShowRespondCancelModal(true)} variant="outline" size="sm" className="text-[#ff5252] border-[#ff5252]/30">
+                          Respond
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Declined — requester view */}
+                  {cancelDeclined && isCancelRequester && (
+                    <div className="contract-page p-4 border-l-2 border-l-[#ff5252] bg-[#ff5252]/5">
+                      <p className="text-sm font-medium text-[#ff5252]">{otherParty.fullName} declined your cancellation request</p>
+                      <p className="text-xs text-[#7a6b5a] mt-1">The contract will continue. You can escalate to an admin for review.</p>
+                      <Button onClick={escalateCancel} variant="ghost" size="sm" className="text-[#ff5252] mt-2">
+                        Escalate to Admin
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* No pending request — show action button */}
+                  {!cancelPending && !cancelDeclined && !cancelEscalated && (
+                    <div className="text-center py-6">
+                      {!termsLocked && (currentContract.status === "draft" || currentContract.status === "pending_terms") ? (
+                        <Button onClick={() => setShowCancelConfirm(true)} variant="ghost" className="text-[#ff5252]">
+                          Cancel Contract
+                        </Button>
+                      ) : (
+                        <Button onClick={() => setShowRequestCancelModal(true)} variant="ghost" className="text-[#ff5252]">
+                          Request Cancellation
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Cancel Confirmation Modal */}
+        {showCancelConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+            <div className="bg-[#12100e] border border-[#2a2420] p-6 rounded-md max-w-sm w-full mx-4">
+              <p className="text-sm text-[#e8d5a3] mb-4">Cancel this contract? The need will return to open status so new fulfillers can express interest.</p>
+              <div className="flex gap-3">
+                <Button onClick={cancelContract} variant="ghost" className="flex-1 text-[#ff5252]">
+                  Yes, Cancel
+                </Button>
+                <Button onClick={() => setShowCancelConfirm(false)} variant="secondary" className="flex-1">
+                  Keep Contract
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Complete Confirmation Modal */}
+        {showCompleteConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+            <div className="bg-[#12100e] border border-[#2a2420] p-6 rounded-md max-w-sm w-full mx-4">
+              <p className="text-sm text-[#e8d5a3] mb-4">Are you sure both parties have fulfilled their obligations?</p>
+              <div className="flex gap-3">
+                <Button onClick={() => { markComplete(); setShowCompleteConfirm(false); }} variant="secondary" className="flex-1">
+                  Yes, Complete
+                </Button>
+                <Button onClick={() => setShowCompleteConfirm(false)} variant="outline" className="flex-1">
+                  Not Yet
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Request Cancellation Modal */}
+        {showRequestCancelModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+            <div className="bg-[#12100e] border border-[#2a2420] p-6 rounded-md max-w-sm w-full mx-4">
+              <p className="text-sm text-[#e8d5a3] mb-2">Request Cancellation</p>
+              <p className="text-xs text-[#7a6b5a] mb-4">
+                The other party must agree to cancel this contract. You can optionally provide a reason.
+              </p>
+              <Textarea
+                placeholder="Reason for cancellation (optional)..."
+                value={cancelReasonDraft}
+                onChange={(e) => setCancelReasonDraft(e.target.value)}
+                rows={3}
+                className="bg-[#0f0c0a] border-[#2a2420] text-[#e8d5a3] placeholder:text-[#7a6b5a] mb-4"
+              />
+              <div className="flex gap-3">
+                <Button onClick={() => requestCancel(cancelReasonDraft)} variant="ghost" className="flex-1 text-[#ff5252]">
+                  Request Cancellation
+                </Button>
+                <Button onClick={() => { setShowRequestCancelModal(false); setCancelReasonDraft(""); }} variant="secondary" className="flex-1">
+                  Back
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Respond Cancellation Modal */}
+        {showRespondCancelModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+            <div className="bg-[#12100e] border border-[#2a2420] p-6 rounded-md max-w-sm w-full mx-4">
+              <p className="text-sm text-[#e8d5a3] mb-2">Respond to Cancellation Request</p>
+              <p className="text-xs text-[#7a6b5a] mb-4">
+                {PARTIES[currentContract.cancelRequestedById!]?.fullName || "The other party"} requested to cancel this contract.
+                {currentContract.cancelReason && ` Reason: "${currentContract.cancelReason}"`}
+              </p>
+              <div className="flex gap-3">
+                <Button onClick={() => respondCancel(true)} variant="ghost" className="flex-1 text-[#ff5252]">
+                  Agree to Cancel
+                </Button>
+                <Button onClick={() => respondCancel(false)} variant="secondary" className="flex-1">
+                  Decline
+                </Button>
               </div>
             </div>
           </div>

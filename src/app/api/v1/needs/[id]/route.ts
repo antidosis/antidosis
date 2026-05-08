@@ -88,6 +88,7 @@ export async function GET(
         // Guest sees nothing
         acceptances: isPoster
           ? {
+              where: { status: { not: "removed" } },
               include: {
                 user: {
                   select: {

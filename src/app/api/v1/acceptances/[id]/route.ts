@@ -8,7 +8,7 @@ import { logger } from "@/lib/logger";
 import { z } from "zod";
 
 const updateSchema = z.object({
-  status: z.enum(["accepted", "declined", "withdrawn", "selected"]),
+  status: z.enum(["accepted", "declined", "withdrawn", "selected", "removed"]),
 });
 
 export async function PATCH(
@@ -65,8 +65,16 @@ export async function PATCH(
       );
     }
 
-    if ((status === "accepted" || status === "declined" || status === "selected") && !isPoster) {
+    if ((status === "accepted" || status === "declined" || status === "selected" || status === "removed") && !isPoster) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // Cannot remove an acceptance that has already been selected (contract formed)
+    if (status === "removed" && acceptance.status === "selected") {
+      return NextResponse.json(
+        { error: "Cannot remove after contract formation. Cancel the contract instead." },
+        { status: 400 }
+      );
     }
 
     // If selected, form contract (this is the big one)

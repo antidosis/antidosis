@@ -181,6 +181,55 @@ function renderMarkdownContent(content: string) {
       continue;
     }
 
+    // Collect consecutive blockquote lines
+    if (line.startsWith("> ")) {
+      const quoteLines: string[] = [line.slice(2)];
+      let j = i + 1;
+      while (j < lines.length && lines[j].startsWith("> ")) {
+        quoteLines.push(lines[j].slice(2));
+        j++;
+      }
+      elements.push(
+        <blockquote
+          key={key++}
+          className="border-l-2 border-[#f5a623] pl-4 py-2 my-4 bg-[#1a1714]/50 rounded-r"
+        >
+          <p className="text-sm text-[#b8a078] italic leading-relaxed">
+            {parseInlineMarkdown(quoteLines.join(" "))}
+          </p>
+        </blockquote>
+      );
+      i = j - 1;
+      continue;
+    }
+
+    // Collect consecutive ordered list items
+    const orderedMatch = line.match(/^(\d+)\.\s/);
+    if (orderedMatch) {
+      const listItems: string[] = [line.slice(orderedMatch[0].length)];
+      let j = i + 1;
+      while (j < lines.length) {
+        const nextMatch = lines[j].match(/^(\d+)\.\s/);
+        if (nextMatch) {
+          listItems.push(lines[j].slice(nextMatch[0].length));
+          j++;
+        } else {
+          break;
+        }
+      }
+      elements.push(
+        <ol key={key++} className="list-decimal ml-6 mb-4 space-y-2">
+          {listItems.map((item, idx) => (
+            <li key={idx} className="text-sm text-[#b8a078] pl-2">
+              {parseInlineMarkdown(item)}
+            </li>
+          ))}
+        </ol>
+      );
+      i = j - 1;
+      continue;
+    }
+
     if (line.startsWith("# ")) {
       elements.push(
         <h1 key={key++} className="heading-display text-3xl md:text-4xl text-[#e8d5a3] mt-12 mb-6">

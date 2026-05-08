@@ -37,6 +37,17 @@ type Stats = {
   recentContracts: number;
 };
 
+type PendingCancellation = {
+  id: string;
+  status: string;
+  cancelRequestedAt: string;
+  cancelEscalatedAt: string | null;
+  cancelReason: string | null;
+  need: { id: string; title: string };
+  partyA: { id: string; fullName: string | null; email: string; avatarUrl: string | null };
+  partyB: { id: string; fullName: string | null; email: string; avatarUrl: string | null };
+};
+
 type PendingCredential = {
   id: string;
   type: string;
@@ -66,7 +77,9 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<Stats | null>(null);
   const [pending, setPending] = useState<PendingCredential[]>([]);
+  const [pendingCancellations, setPendingCancellations] = useState<PendingCancellation[]>([]);
   const [actioning, setActioning] = useState<string | null>(null);
+  const [forceCancellingId, setForceCancellingId] = useState<string | null>(null);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -91,19 +104,35 @@ export default function AdminPage() {
 
   async function loadData() {
     try {
-      const [statsRes, pendingRes] = await Promise.all([
+      const [statsRes, pendingRes, cancellationsRes] = await Promise.all([
         fetch("/api/v1/admin/stats"),
         fetch("/api/v1/admin/credentials/pending"),
+        fetch("/api/v1/admin/contracts/pending-cancellation"),
       ]);
       if (statsRes.ok) setStats(await statsRes.json());
       if (pendingRes.ok) {
         const data = await pendingRes.json();
         setPending(data.credentials || []);
       }
+      if (cancellationsRes.ok) {
+        const data = await cancellationsRes.json();
+        setPendingCancellations(data.contracts || []);
+      }
     } catch (err) {
       console.error(err);
     }
     setLoading(false);
+  }
+
+  async function forceCancelContract(id: string) {
+    setForceCancellingId(id);
+    const res = await fetch(`/api/v1/admin/contracts/${id}/force-cancel`, { method: "POST" });
+    if (res.ok) {
+      setPendingCancellations((prev) => prev.filter((c) => c.id !== id));
+      const statsRes = await fetch("/api/v1/admin/stats");
+      if (statsRes.ok) setStats(await statsRes.json());
+    }
+    setForceCancellingId(null);
   }
 
   async function verifyCredential(id: string) {
@@ -381,6 +410,69 @@ export default function AdminPage() {
                 </div>
               );
             })}
+          </div>
+        )}
+      </section>
+
+      <div className="divider mb-8" />
+
+      {/* Pending Contract Cancellations */}
+      <section>
+        <p className="text-xs text-[#7a6b5a] mb-6">
+          $ ls ~/pending_contract_cancellations/ ({pendingCancellations.length})
+        </p>
+
+        {pendingCancellations.length === 0 ? (
+          <EmptyState
+            icon={<CheckCircle2 className="h-8 w-8 text-[#00e676]" />}
+            title="all caught up"
+            description="no pending contract cancellations"
+          />
+        ) : (
+          <div className="space-y-4">
+            {pendingCancellations.map((c) => (
+              <div key={c.id} className="vessel p-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-2">
+                      <FileText className="h-4 w-4 text-[#f5a623]" />
+                      <p className="text-sm font-medium text-[#e8d5a3]">{c.need.title}</p>
+                    </div>
+                    <div className="flex items-center gap-3 text-xs text-[#7a6b5a] mb-2">
+                      <span>{c.partyA.fullName || "Unknown"}</span>
+                      <span>vs</span>
+                      <span>{c.partyB.fullName || "Unknown"}</span>
+                    </div>
+                    <div className="text-xs text-[#7a6b5a] space-y-1">
+                      <p>
+                        Requested: {new Date(c.cancelRequestedAt).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                      </p>
+                      {c.cancelEscalatedAt && (
+                        <p className="text-amber-500">
+                          Escalated: {new Date(c.cancelEscalatedAt).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                        </p>
+                      )}
+                      {c.cancelReason && <p>Reason: {c.cancelReason}</p>}
+                    </div>
+                  </div>
+                  <div className="shrink-0">
+                    <Button
+                      size="sm"
+                      onClick={() => forceCancelContract(c.id)}
+                      disabled={forceCancellingId === c.id}
+                      className="bg-[#ff5252] text-white hover:bg-[#ff5252]/90"
+                    >
+                      {forceCancellingId === c.id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
+                      ) : (
+                        <XCircle className="h-3.5 w-3.5 mr-1" />
+                      )}
+                      Force Cancel
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </section>

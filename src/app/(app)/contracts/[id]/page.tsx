@@ -58,6 +58,12 @@ type ContractData = {
   aMarkedComplete: boolean;
   bMarkedComplete: boolean;
   completedAt: string | null;
+  cancelRequestedById: string | null;
+  cancelRequestedAt: string | null;
+  cancelResponse: string | null;
+  cancelResponseAt: string | null;
+  cancelEscalatedAt: string | null;
+  cancelReason: string | null;
   need: {
     id: string;
     title: string;
@@ -125,6 +131,12 @@ export default function ContractPage() {
   const [submittingReview, setSubmittingReview] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showCompleteConfirm, setShowCompleteConfirm] = useState(false);
+  const [showRequestCancelModal, setShowRequestCancelModal] = useState(false);
+  const [showRespondCancelModal, setShowRespondCancelModal] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [requestingCancel, setRequestingCancel] = useState(false);
+  const [respondingCancel, setRespondingCancel] = useState(false);
+  const [escalating, setEscalating] = useState(false);
   const [showSignModal, setShowSignModal] = useState(false);
   const [signatureInput, setSignatureInput] = useState("");
   const [agreedToTermsCheck, setAgreedToTermsCheck] = useState(false);
@@ -381,6 +393,58 @@ export default function ContractPage() {
     setShowCancelConfirm(false);
   }
 
+  async function requestCancel() {
+    setRequestingCancel(true);
+    const res = await fetch(`/api/v1/contracts/${contractId}/request-cancel`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reason: cancelReason }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({ error: "Failed to request cancellation" }));
+      toast(data.error || "Failed to request cancellation", "error");
+    } else {
+      toast("Cancellation requested", "info");
+    }
+    await fetchContract();
+    setRequestingCancel(false);
+    setShowRequestCancelModal(false);
+    setCancelReason("");
+  }
+
+  async function respondCancel(agree: boolean) {
+    setRespondingCancel(true);
+    const res = await fetch(`/api/v1/contracts/${contractId}/respond-cancel`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ agree }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({ error: "Failed to respond" }));
+      toast(data.error || "Failed to respond to cancellation request", "error");
+    } else {
+      toast(agree ? "Cancellation agreed — contract is cancelled" : "Cancellation declined", agree ? "info" : "success");
+    }
+    await fetchContract();
+    setRespondingCancel(false);
+    setShowRespondCancelModal(false);
+  }
+
+  async function escalateCancel() {
+    setEscalating(true);
+    const res = await fetch(`/api/v1/contracts/${contractId}/escalate-cancel`, {
+      method: "POST",
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({ error: "Failed to escalate" }));
+      toast(data.error || "Failed to escalate to admin", "error");
+    } else {
+      toast("Escalated to admin for review", "info");
+    }
+    await fetchContract();
+    setEscalating(false);
+  }
+
   async function sendMessage(e: React.FormEvent) {
     e.preventDefault();
     if (!messageInput.trim()) return;
@@ -459,6 +523,13 @@ export default function ContractPage() {
   const iAgreed = isPartyA ? aAgreed : bAgreed;
   const termsLocked = !!contract.termsLockedAt;
 
+  const cancelRequested = !!contract.cancelRequestedAt;
+  const isCancelRequester = contract.cancelRequestedById === profileId;
+  const cancelPending = cancelRequested && !contract.cancelResponse;
+  const cancelDeclined = contract.cancelResponse === "declined";
+  const cancelAgreed = contract.cancelResponse === "agreed";
+  const cancelEscalated = !!contract.cancelEscalatedAt;
+
   const aSubmitted = !!contract.partyASubmittedAt;
   const bSubmitted = !!contract.partyBSubmittedAt;
   const iSubmitted = isPartyA ? aSubmitted : bSubmitted;
@@ -529,7 +600,9 @@ export default function ContractPage() {
             variant={
               contract.status === "active" || contract.status === "completed"
                 ? "quintessence"
-                : "outline"
+                : contract.status === "cancelled"
+                  ? "destructive"
+                  : "outline"
             }
             className="text-[10px]"
           >
@@ -537,6 +610,16 @@ export default function ContractPage() {
           </Badge>
         </div>
       </div>
+
+      {/* Cancelled banner */}
+      {contract.status === "cancelled" && (
+        <div className="contract-page p-4 print-hidden border-l-2 border-l-[#ff5252] bg-[#ff5252]/5">
+          <p className="text-sm font-medium text-[#ff5252]">This contract has been cancelled</p>
+          <p className="text-xs text-[#7a6b5a] mt-1">
+            No further actions can be taken. The need is available for new interest.
+          </p>
+        </div>
+      )}
 
       {/* Contract Lifecycle Stepper */}
       <div className="contract-page p-5 print-hidden">
@@ -568,7 +651,7 @@ export default function ContractPage() {
           <div className="contract-page p-4 print-hidden border-l-2 border-l-[#ff5252]/40 bg-[#ff5252]/5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-medium text-[#e8d5a3]">
+                <p className="text-sm font-medium text-[#ff5252]">
                   Waiting for {contract.partyB.fullName || "the fulfiller"} to sign
                 </p>
                 <p className="text-xs text-[#7a6b5a] mt-0.5">
@@ -576,12 +659,12 @@ export default function ContractPage() {
                 </p>
               </div>
               <Button
-                onClick={() => setShowCancelConfirm(true)}
+                onClick={() => termsLocked ? setShowRequestCancelModal(true) : setShowCancelConfirm(true)}
                 variant="outline"
                 size="sm"
                 className="text-[#ff5252] border-[#ff5252]/30 hover:border-[#ff5252]/60 hover:bg-[#ff5252]/10 shrink-0"
               >
-                Cancel Contract
+                {termsLocked ? "Request Cancellation" : "Cancel Contract"}
               </Button>
             </div>
           </div>
@@ -740,6 +823,7 @@ export default function ContractPage() {
                         onChange={(e) => setMyTerms(e.target.value)}
                         placeholder="describe your terms, expectations, requirements..."
                         rows={4}
+                        className="bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]"
                       />
                     )}
                     <div className="flex gap-2 mt-3">
@@ -749,9 +833,9 @@ export default function ContractPage() {
                       <Button
                         onClick={submitTerms}
                         disabled={submittingTerms || (!useMessageTerms && !myTerms.trim())}
-                        size="sm"
-                        className="bg-[#ff3333] hover:bg-[#ff5555] text-white border-[#ff3333]"
+                        className="bg-[#ff3333] hover:bg-[#ff5555] text-white border-[#ff3333] shadow-lg shadow-[#ff3333]/30 font-semibold px-4"
                       >
+                        <Send className="h-4 w-4 mr-2" />
                         {submittingTerms ? "Submitting..." : "Submit for Review"}
                       </Button>
                     </div>
@@ -1099,6 +1183,7 @@ export default function ContractPage() {
               value={messageInput}
               onChange={(e) => setMessageInput(e.target.value)}
               disabled={sendingMsg}
+              className="bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]"
             />
             <Button type="submit" size="icon" disabled={sendingMsg}>
               <Send className="h-4 w-4" />
@@ -1162,6 +1247,7 @@ export default function ContractPage() {
                     value={reviewComment}
                     onChange={(e) => setReviewComment(e.target.value)}
                     rows={3}
+                    className="bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]"
                   />
                 </div>
 
@@ -1176,6 +1262,7 @@ export default function ContractPage() {
                     value={privateFeedback}
                     onChange={(e) => setPrivateFeedback(e.target.value)}
                     rows={3}
+                    className="bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]"
                   />
                 </div>
 
@@ -1207,18 +1294,67 @@ export default function ContractPage() {
         </div>
       )}
 
-      {/* Cancel */}
-      {(contract.status === "draft" ||
-        contract.status === "pending_terms" ||
-        contract.status === "active") && (
-        <div className="text-center py-12">
-          <Button
-            onClick={() => setShowCancelConfirm(true)}
-            variant="ghost"
-            className="text-[#ff5252]"
-          >
-            Cancel Contract
-          </Button>
+      {/* Cancellation UI */}
+      {contract.status !== "cancelled" && !cancelAgreed && (
+        <div className="space-y-4 py-8">
+          {/* Escalated banner */}
+          {cancelEscalated && (
+            <div className="contract-page p-4 border-l-2 border-l-amber-500 bg-amber-500/5">
+              <p className="text-sm font-medium text-amber-500">Escalated to admin</p>
+              <p className="text-xs text-[#7a6b5a] mt-1">This cancellation request has been escalated to an admin for review.</p>
+            </div>
+          )}
+
+          {/* Pending request — requester view */}
+          {cancelPending && isCancelRequester && (
+            <div className="contract-page p-4 border-l-2 border-l-amber-500 bg-amber-500/5">
+              <p className="text-sm font-medium text-amber-500">Cancellation requested</p>
+              <p className="text-xs text-[#7a6b5a] mt-1">Waiting for {otherParty.fullName || "the other party"} to respond.</p>
+            </div>
+          )}
+
+          {/* Pending request — other party view */}
+          {cancelPending && !isCancelRequester && (
+            <div className="contract-page p-4 border-l-2 border-l-[#ff5252] bg-[#ff5252]/5">
+              <p className="text-sm font-medium text-[#ff5252]">
+                {contract.cancelRequestedById === contract.partyA.id ? contract.partyA.fullName || "The poster" : contract.partyB.fullName || "The fulfiller"} requested to cancel this contract
+              </p>
+              {contract.cancelReason && (
+                <p className="text-xs text-[#7a6b5a] mt-1">Reason: {contract.cancelReason}</p>
+              )}
+              <div className="flex gap-2 mt-3">
+                <Button onClick={() => setShowRespondCancelModal(true)} variant="outline" size="sm" className="text-[#ff5252] border-[#ff5252]/30">
+                  Respond
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Declined — requester view */}
+          {cancelDeclined && isCancelRequester && (
+            <div className="contract-page p-4 border-l-2 border-l-[#ff5252] bg-[#ff5252]/5">
+              <p className="text-sm font-medium text-[#ff5252]">{otherParty.fullName || "The other party"} declined your cancellation request</p>
+              <p className="text-xs text-[#7a6b5a] mt-1">The contract will continue. You can escalate to an admin for review.</p>
+              <Button onClick={escalateCancel} disabled={escalating} variant="ghost" size="sm" className="text-[#ff5252] mt-2">
+                {escalating ? "Escalating..." : "Escalate to Admin"}
+              </Button>
+            </div>
+          )}
+
+          {/* No pending request — show action button */}
+          {!cancelPending && !cancelDeclined && !cancelEscalated && (
+            <div className="text-center">
+              {!termsLocked && (contract.status === "draft" || contract.status === "pending_terms") ? (
+                <Button onClick={() => setShowCancelConfirm(true)} variant="ghost" className="text-[#ff5252]">
+                  Cancel Contract
+                </Button>
+              ) : (
+                <Button onClick={() => setShowRequestCancelModal(true)} variant="ghost" className="text-[#ff5252]">
+                  Request Cancellation
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -1248,6 +1384,54 @@ export default function ContractPage() {
               </Button>
               <Button onClick={() => setShowCompleteConfirm(false)} variant="outline" className="flex-1">
                 Not Yet
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Request Cancellation Modal */}
+      {showRequestCancelModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="bg-[#12100e] border border-[#2a2420] p-6 rounded-md max-w-sm w-full mx-4">
+            <p className="text-sm text-[#e8d5a3] mb-2">Request Cancellation</p>
+            <p className="text-xs text-[#7a6b5a] mb-4">
+              The other party must agree to cancel this contract. You can optionally provide a reason.
+            </p>
+            <Textarea
+              placeholder="Reason for cancellation (optional)..."
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              rows={3}
+              className="bg-[#0f0c0a] border-[#2a2420] text-[#e8d5a3] placeholder:text-[#7a6b5a] mb-4"
+            />
+            <div className="flex gap-3">
+              <Button onClick={requestCancel} disabled={requestingCancel} variant="ghost" className="flex-1 text-[#ff5252]">
+                {requestingCancel ? "Requesting..." : "Request Cancellation"}
+              </Button>
+              <Button onClick={() => { setShowRequestCancelModal(false); setCancelReason(""); }} variant="secondary" className="flex-1">
+                Back
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Respond Cancellation Modal */}
+      {showRespondCancelModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="bg-[#12100e] border border-[#2a2420] p-6 rounded-md max-w-sm w-full mx-4">
+            <p className="text-sm text-[#e8d5a3] mb-2">Respond to Cancellation Request</p>
+            <p className="text-xs text-[#7a6b5a] mb-4">
+              {contract?.cancelRequestedById === contract?.partyA.id ? contract?.partyA.fullName || "The poster" : contract?.partyB.fullName || "The fulfiller"} requested to cancel this contract.
+              {contract?.cancelReason && ` Reason: "${contract.cancelReason}"`}
+            </p>
+            <div className="flex gap-3">
+              <Button onClick={() => respondCancel(true)} disabled={respondingCancel} variant="ghost" className="flex-1 text-[#ff5252]">
+                {respondingCancel ? "Processing..." : "Agree to Cancel"}
+              </Button>
+              <Button onClick={() => respondCancel(false)} disabled={respondingCancel} variant="secondary" className="flex-1">
+                Decline
               </Button>
             </div>
           </div>
