@@ -105,7 +105,6 @@ export default function NeedsPage() {
   const needs = needsData?.needs || [];
   const total = needsData?.total || 0;
   const totalPages = needsData?.totalPages || 1;
-  const availableOfferTypes = needsData?.availableFilters?.offerTypes || [];
   const availableCategories = needsData?.availableFilters?.categories || [];
   const availableSkills = needsData?.availableFilters?.skills || [];
 
@@ -290,18 +289,16 @@ export default function NeedsPage() {
             )}
           </div>
           <div className="flex gap-2">
-            {offerTypes
-              .filter((type) => type.value === "" || availableOfferTypes.includes(type.value))
-              .map((type) => (
-                <Button
-                  key={type.value}
-                  variant={typeFilter === type.value ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setTypeFilter(type.value)}
-                >
-                  {type.label}
-                </Button>
-              ))}
+            {offerTypes.map((type) => (
+              <Button
+                key={type.value}
+                variant={typeFilter === type.value ? "default" : "outline"}
+                size="sm"
+                onClick={() => setTypeFilter(type.value)}
+              >
+                {type.label}
+              </Button>
+            ))}
           </div>
         </div>
 
