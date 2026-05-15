@@ -114,6 +114,10 @@ export const metadata: Metadata = {
   verification: {
     google: "google-site-verification-code",
   },
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#0a0806" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0806" },
+  ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

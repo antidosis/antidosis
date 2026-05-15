@@ -25,6 +25,7 @@ const updateNeedSchema = z.object({
   images: z.array(z.string()).optional(),
   offerImages: z.array(z.string()).optional(),
   requiresContract: z.boolean().optional(),
+  status: z.enum(["open", "archived"]).optional(),
 });
 
 export async function GET(
@@ -89,7 +90,13 @@ export async function GET(
         acceptances: isPoster
           ? {
               where: { status: { not: "removed" } },
-              include: {
+              select: {
+                id: true,
+                userId: true,
+                message: true,
+                status: true,
+                posterMarkedComplete: true,
+                fulfillerMarkedComplete: true,
                 user: {
                   select: {
                     id: true,
@@ -110,7 +117,13 @@ export async function GET(
           : profileId
             ? {
                 where: { userId: profileId },
-                include: {
+                select: {
+                  id: true,
+                  userId: true,
+                  message: true,
+                  status: true,
+                  posterMarkedComplete: true,
+                  fulfillerMarkedComplete: true,
                   user: {
                     select: {
                       id: true,
@@ -229,6 +242,7 @@ export async function PATCH(
     if (data.images !== undefined) updateData.images = sanitizeUrlArray(data.images);
     if (data.offerImages !== undefined) updateData.offerImages = sanitizeUrlArray(data.offerImages);
     if (data.requiresContract !== undefined) updateData.requiresContract = data.requiresContract;
+    if (data.status !== undefined) updateData.status = data.status;
 
     // Handle requiredSkills update atomically
     let need;

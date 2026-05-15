@@ -9,6 +9,7 @@ const PROTECTED_ROUTES = [
   "/contracts",
   "/admin",
   "/verify-mobile",
+  "/terminal",
 ];
 
 // API routes that require email verification
@@ -23,6 +24,7 @@ const PROTECTED_API_PREFIXES = [
   "/api/v1/pro/",
   "/api/v1/credentials",
   "/api/v1/admin",
+  "/api/v1/terminal",
 ];
 
 // API routes that bypass auth entirely

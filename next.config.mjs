@@ -42,7 +42,7 @@ const nextConfig = {
           },
           {
             key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=(self)",
+            value: "camera=(), microphone=(self), geolocation=(self)",
           },
           {
             key: "Content-Security-Policy",
@@ -51,6 +51,7 @@ const nextConfig = {
               "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://static.cloudflareinsights.com",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' blob: data: https://*.supabase.co",
+              "media-src 'self' https://*.supabase.co",
               "font-src 'self'",
               "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://accelerate.prisma-data.net",
               "frame-src 'self' https://checkout.stripe.com",

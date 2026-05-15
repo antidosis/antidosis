@@ -32,6 +32,7 @@ model Profile {
   ratingAvg     Float    @default(0) @map("rating_avg")
   ratingCount   Int      @default(0) @map("rating_count")
   jobsCompleted Int      @default(0) @map("jobs_completed")
+  lastSeenAt    DateTime? @map("last_seen_at")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
@@ -47,6 +48,14 @@ model Profile {
   messages        Message[]
   needMessages    NeedMessage[]
   notifications   Notification[]
+  terminalMessages TerminalMessage[]
+  dmThreadsAsA    DirectMessageThread[] @relation("DMUserA")
+  dmThreadsAsB    DirectMessageThread[] @relation("DMUserB")
+  directMessages  DirectMessage[]
+  blocksInitiated Block[]               @relation("blocksInitiated")
+  blocksReceived  Block[]               @relation("blocksReceived")
+  friendsAsA      Friend[]              @relation("friendsAsA")
+  friendsAsB      Friend[]              @relation("friendsAsB")
 
   @@index([isPro])
   @@index([stripeCustomerId])
@@ -121,17 +130,20 @@ model NeedSkill {
 }
 
 model Acceptance {
-  id        String   @id @default(uuid())
-  needId    String   @map("need_id")
-  userId    String   @map("user_id")
-  message   String?
-  status    String   @default("pending")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id                     String   @id @default(uuid())
+  needId                 String   @map("need_id")
+  userId                 String   @map("user_id")
+  message                String?
+  status                 String   @default("pending")
+  posterMarkedComplete   Boolean  @default(false) @map("poster_marked_complete")
+  fulfillerMarkedComplete Boolean @default(false) @map("fulfiller_marked_complete")
+  createdAt              DateTime @default(now()) @map("created_at")
+  updatedAt              DateTime @updatedAt @map("updated_at")
 
   need Need    @relation(fields: [needId], references: [id], onDelete: Cascade)
   user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
   messages NeedMessage[]
+  reviews  Review[]
 
   @@map("acceptances")
   @@index([needId])
@@ -230,22 +242,26 @@ model Message {
 }
 
 model Review {
-  id         String   @id @default(uuid())
-  contractId String   @map("contract_id")
-  giverId    String   @map("giver_id")
-  receiverId String   @map("receiver_id")
+  id              String   @id @default(uuid())
+  contractId      String?  @map("contract_id")
+  acceptanceId    String?  @map("acceptance_id")
+  giverId         String   @map("giver_id")
+  receiverId      String   @map("receiver_id")
   rating          Int
   comment         String?
   privateFeedback String?  @map("private_feedback")
   createdAt       DateTime @default(now()) @map("created_at")
 
-  contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
-  giver    Profile  @relation("ReviewGiver", fields: [giverId], references: [id], onDelete: Cascade)
-  receiver Profile  @relation("ReviewReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  contract   Contract?  @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  acceptance Acceptance? @relation(fields: [acceptanceId], references: [id], onDelete: Cascade)
+  giver      Profile    @relation("ReviewGiver", fields: [giverId], references: [id], onDelete: Cascade)
+  receiver   Profile    @relation("ReviewReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
 
   @@unique([contractId, giverId])
+  @@unique([acceptanceId, giverId])
   @@index([receiverId])
   @@index([contractId])
+  @@index([acceptanceId])
   @@map("reviews")
 }
 
@@ -325,6 +341,134 @@ model AuditLog {
   @@index([severity])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+model TerminalChannel {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  type        String   @default("public")
+  order       Int      @default(0)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  messages    TerminalMessage[]
+
+  @@index([type])
+  @@index([order])
+  @@map("terminal_channels")
+}
+
+model TerminalMessage {
+  id          String   @id @default(uuid())
+  channelId   String   @map("channel_id")
+  senderId    String   @map("sender_id")
+  content     String
+  attachments Json?    @default("[]")
+  deletedAt   DateTime? @map("deleted_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  channel     TerminalChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  sender      Profile         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  reactions   TerminalMessageReaction[]
+
+  @@index([channelId])
+  @@index([channelId, createdAt])
+  @@index([senderId])
+  @@map("terminal_messages")
+}
+
+model TerminalMessageReaction {
+  id        String   @id @default(uuid())
+  messageId String   @map("message_id")
+  userId    String   @map("user_id")
+  emoji     String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  message   TerminalMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId, emoji])
+  @@index([messageId])
+  @@map("terminal_message_reactions")
+}
+
+model DirectMessageThread {
+  id        String   @id @default(uuid())
+  userAId   String   @map("user_a_id")
+  userBId   String   @map("user_b_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  messages  DirectMessage[]
+  userA     Profile @relation("DMUserA", fields: [userAId], references: [id], onDelete: Cascade)
+  userB     Profile @relation("DMUserB", fields: [userBId], references: [id], onDelete: Cascade)
+
+  @@unique([userAId, userBId])
+  @@index([userAId])
+  @@index([userBId])
+  @@map("direct_message_threads")
+}
+
+model DirectMessage {
+  id          String   @id @default(uuid())
+  threadId    String   @map("thread_id")
+  senderId    String   @map("sender_id")
+  content     String
+  attachments Json?    @default("[]")
+  isRead      Boolean  @default(false) @map("is_read")
+  deletedAt   DateTime? @map("deleted_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  thread      DirectMessageThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  sender      Profile             @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  reactions   DirectMessageReaction[]
+
+  @@index([threadId])
+  @@index([threadId, createdAt])
+  @@index([senderId])
+  @@map("direct_messages")
+}
+
+model DirectMessageReaction {
+  id        String   @id @default(uuid())
+  messageId String   @map("message_id")
+  userId    String   @map("user_id")
+  emoji     String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  message   DirectMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId, emoji])
+  @@index([messageId])
+  @@map("direct_message_reactions")
+}
+
+model Block {
+  id        String   @id @default(uuid())
+  blockerId String   @map("blocker_id")
+  blockedId String   @map("blocked_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  blocker Profile @relation("blocksInitiated", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked Profile @relation("blocksReceived", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@unique([blockerId, blockedId])
+  @@index([blockedId])
+  @@map("blocks")
+}
+
+model Friend {
+  id        String   @id @default(uuid())
+  userAId   String   @map("user_a_id")
+  userBId   String   @map("user_b_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  userA Profile @relation("friendsAsA", fields: [userAId], references: [id], onDelete: Cascade)
+  userB Profile @relation("friendsAsB", fields: [userBId], references: [id], onDelete: Cascade)
+
+  @@unique([userAId, userBId])
+  @@index([userBId])
+  @@map("friends")
 }
 
 // Note: Additional Profile indexes

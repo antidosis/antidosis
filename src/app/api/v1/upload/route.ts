@@ -4,9 +4,12 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-const ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "gif"];
-const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_TYPES = [
+  "image/jpeg", "image/png", "image/webp", "image/gif",
+  "audio/webm", "audio/ogg", "audio/wav", "audio/mpeg", "audio/mp3",
+];
+const ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "gif", "webm", "ogg", "wav", "mp3", "mpeg"];
+const MAX_SIZE = 10 * 1024 * 1024; // 10MB
 
 function sanitizeFolder(input: string): string {
   // Only allow alphanumeric, hyphens, underscores
@@ -32,6 +35,28 @@ function detectTypeFromBuffer(buffer: Buffer): { type: string; ext: string } | n
     buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50
   ) {
     return { type: "image/webp", ext: "webp" };
+  }
+  // WebM: 1A 45 DF A3 (Matroska/EBML header)
+  if (buffer[0] === 0x1a && buffer[1] === 0x45 && buffer[2] === 0xdf && buffer[3] === 0xa3) {
+    return { type: "audio/webm", ext: "webm" };
+  }
+  // OGG: 4F 67 67 53 ("OggS")
+  if (buffer[0] === 0x4f && buffer[1] === 0x67 && buffer[2] === 0x67 && buffer[3] === 0x53) {
+    return { type: "audio/ogg", ext: "ogg" };
+  }
+  // WAV: RIFF....WAVE (distinguish from WebP by checking bytes 8-11)
+  if (
+    buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46 &&
+    buffer[8] === 0x57 && buffer[9] === 0x41 && buffer[10] === 0x56 && buffer[11] === 0x45
+  ) {
+    return { type: "audio/wav", ext: "wav" };
+  }
+  // MP3: ID3 tag (49 44 33) or MPEG sync word (FF FB / FF F3 / FF F2)
+  if (
+    (buffer[0] === 0x49 && buffer[1] === 0x44 && buffer[2] === 0x33) ||
+    (buffer[0] === 0xff && (buffer[1] === 0xfb || buffer[1] === 0xf3 || buffer[1] === 0xf2))
+  ) {
+    return { type: "audio/mpeg", ext: "mp3" };
   }
   return null;
 }
@@ -74,7 +99,7 @@ export async function POST(req: NextRequest) {
 
     if (file.size > MAX_SIZE) {
       return NextResponse.json(
-        { error: "File too large. Max 5MB." },
+        { error: "File too large. Max 10MB." },
         { status: 400 }
       );
     }
@@ -85,7 +110,7 @@ export async function POST(req: NextRequest) {
     const detected = detectTypeFromBuffer(buffer);
     if (!detected) {
       return NextResponse.json(
-        { error: "Invalid file type. Only JPEG, PNG, WebP, and GIF are allowed." },
+        { error: "Invalid file type. Only images (JPEG, PNG, WebP, GIF) and audio (WebM, OGG, WAV, MP3) are allowed." },
         { status: 400 }
       );
     }

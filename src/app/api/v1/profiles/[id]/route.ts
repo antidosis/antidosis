@@ -1,14 +1,38 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
+import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(
-  _req: Request,
+  req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    // Check for blocks if viewer is authenticated
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const viewer = await prisma.profile.findUnique({
+        where: { userId: user.id },
+        select: { id: true },
+      });
+      if (viewer) {
+        const isBlocked = await prisma.block.findFirst({
+          where: {
+            OR: [
+              { blockerId: viewer.id, blockedId: params.id },
+              { blockerId: params.id, blockedId: viewer.id },
+            ],
+          },
+        });
+        if (isBlocked) {
+          return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+        }
+      }
+    }
+
     const profile = await prisma.profile.findUnique({
       where: { id: params.id },
       include: {

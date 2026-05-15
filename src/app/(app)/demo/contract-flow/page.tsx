@@ -89,7 +89,9 @@ type Acceptance = {
   id: string;
   userId: string;
   message: string;
-  status: "pending" | "accepted" | "declined";
+  status: "pending" | "accepted" | "declined" | "completed";
+  posterMarkedComplete: boolean;
+  fulfillerMarkedComplete: boolean;
 };
 
 type Message = {
@@ -253,6 +255,9 @@ export default function ContractFlowDemoPage() {
   /* ─── Per-acceptance contract state ─── */
   const [contracts, setContracts] = useState<Record<string, DemoContract>>({});
 
+  /* ─── Free-form reviews (not tied to contracts) ─── */
+  const [freeFormReviews, setFreeFormReviews] = useState<Record<string, DemoReview[]>>({});
+
   /* ─── Messages ─── */
   const [messages, setMessages] = useState<Message[]>([]);
   const [messageInput, setMessageInput] = useState("");
@@ -271,6 +276,9 @@ export default function ContractFlowDemoPage() {
   const [rating, setRating] = useState(10);
   const [reviewComment, setReviewComment] = useState("");
   const [privateFeedbackDraft, setPrivateFeedbackDraft] = useState("");
+
+  /* ─── Free-form poster inline review ─── */
+  const [posterReviewAccId, setPosterReviewAccId] = useState<string | null>(null);
 
   /* ─── Cancel & Complete modals ─── */
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
@@ -304,6 +312,15 @@ export default function ContractFlowDemoPage() {
         }
         if (parsed.userContractView) setUserContractView(parsed.userContractView);
         if (parsed.messages) setMessages(parsed.messages);
+        if (parsed.freeFormReviews) setFreeFormReviews(parsed.freeFormReviews);
+        // Defensive: ensure loaded acceptances have new fields
+        if (parsed.acceptances) {
+          setAcceptances(parsed.acceptances.map((a: Acceptance) => ({
+            ...a,
+            posterMarkedComplete: a.posterMarkedComplete ?? false,
+            fulfillerMarkedComplete: a.fulfillerMarkedComplete ?? false,
+          })));
+        }
       }
     } catch {
       // ignore corrupt storage
@@ -330,9 +347,10 @@ export default function ContractFlowDemoPage() {
       contracts,
       messages,
       userContractView,
+      freeFormReviews,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }, [currentUser, requiresContract, acceptances, contractFormed, selectedAcceptanceId, activeThread, contracts, messages]);
+  }, [currentUser, requiresContract, acceptances, contractFormed, selectedAcceptanceId, activeThread, contracts, messages, freeFormReviews]);
 
   /* ─── Helpers ─── */
   function getContract(id: string | null): DemoContract {
@@ -398,6 +416,8 @@ export default function ContractFlowDemoPage() {
       userId: isPartyB ? PARTY_B.id : PARTY_C.id,
       message: interestMessage,
       status: "pending",
+      posterMarkedComplete: false,
+      fulfillerMarkedComplete: false,
     };
     setAcceptances(prev => [...prev, newAcceptance]);
     setInterestMessage("");
@@ -412,6 +432,8 @@ export default function ContractFlowDemoPage() {
         a.id === acceptanceId ? { ...a, status: "accepted" } :
         a.status === "pending" ? { ...a, status: "declined" } : a
       ));
+      setSelectedAcceptanceId(acceptanceId);
+      setActiveThread(acceptanceId);
     }
   }
 
@@ -578,6 +600,43 @@ export default function ContractFlowDemoPage() {
     setRating(10);
   }
 
+  function markCompleteFreeForm(acceptanceId: string) {
+    setAcceptances(prev => prev.map(a => {
+      if (a.id !== acceptanceId) return a;
+      const isPoster = isPartyA;
+      const updated = {
+        ...a,
+        posterMarkedComplete: isPoster ? true : a.posterMarkedComplete,
+        fulfillerMarkedComplete: !isPoster ? true : a.fulfillerMarkedComplete,
+      };
+      if (updated.posterMarkedComplete && updated.fulfillerMarkedComplete) {
+        return { ...updated, status: "completed" as const };
+      }
+      return updated;
+    }));
+  }
+
+  function submitReviewFreeForm(acceptanceId: string) {
+    const acc = acceptances.find(a => a.id === acceptanceId);
+    if (!acc) return;
+    const receiverId = isPartyA ? acc.userId : PARTY_A.id;
+    const newReview: DemoReview = {
+      giverId: profileId,
+      receiverId,
+      rating,
+      comment: reviewComment,
+      privateFeedback: privateFeedbackDraft,
+    };
+    setFreeFormReviews(prev => ({
+      ...prev,
+      [acceptanceId]: [...(prev[acceptanceId] ?? []), newReview],
+    }));
+    setReviewComment("");
+    setPrivateFeedbackDraft("");
+    setRating(10);
+    setPosterReviewAccId(null);
+  }
+
   // Lock terms when both parties have agreed
   useEffect(() => {
     if (!selectedAcceptanceId) return;
@@ -646,6 +705,19 @@ export default function ContractFlowDemoPage() {
   const otherMarkedComplete = isPartyA ? currentContract.bMarkedComplete : currentContract.aMarkedComplete;
   const hasReviewed = (currentContract.reviews ?? []).some(r => r.giverId === profileId);
   const otherReview = (currentContract.reviews ?? []).find(r => r.receiverId === profileId);
+
+  /* ─── Free-form derived values ─── */
+  const freeFormAccepted = acceptances.find(a => a.status === "accepted" || a.status === "completed");
+  const freeFormCompleted = freeFormAccepted?.status === "completed";
+  const iMarkedCompleteFreeForm = isPartyA
+    ? (freeFormAccepted?.posterMarkedComplete ?? false)
+    : (freeFormAccepted?.fulfillerMarkedComplete ?? false);
+  const otherMarkedCompleteFreeForm = isPartyA
+    ? (freeFormAccepted?.fulfillerMarkedComplete ?? false)
+    : (freeFormAccepted?.posterMarkedComplete ?? false);
+  const hasReviewedFreeForm = freeFormAccepted
+    ? (freeFormReviews[freeFormAccepted.id] ?? []).some(r => r.giverId === profileId)
+    : false;
 
   const statusLabels: Record<string, string> = {
     draft: "draft", pending_terms: "pending signatures", active: "active",
@@ -860,9 +932,190 @@ export default function ContractFlowDemoPage() {
                 <div className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-[#00e676]" />
                   <p className="text-sm text-[#00e676]">
-                    {requiresContract ? "poster accepted — ready to form contract" : "poster accepted — deal confirmed"}
+                    {requiresContract
+                      ? "poster accepted — ready to form contract"
+                      : myAcceptance.posterMarkedComplete && !myAcceptance.fulfillerMarkedComplete
+                        ? "poster marked complete — waiting for you"
+                        : !myAcceptance.posterMarkedComplete && myAcceptance.fulfillerMarkedComplete
+                          ? "you marked complete — waiting for poster"
+                          : "poster accepted — deal confirmed"}
                   </p>
                 </div>
+                {/* Free-form mark complete — non-poster */}
+                {!requiresContract && (
+                  <div className="mt-3 flex items-center gap-2">
+                    {!myAcceptance.fulfillerMarkedComplete ? (
+                      <Button
+                        size="sm"
+                        variant="default"
+                        className="h-7 text-xs"
+                        onClick={() => myAcceptance && markCompleteFreeForm(myAcceptance.id)}
+                      >
+                        <Check className="h-3 w-3 mr-1" />
+                        Mark as complete
+                      </Button>
+                    ) : (
+                      <span className="text-xs text-[#00e676]">you marked complete</span>
+                    )}
+                    {myAcceptance.posterMarkedComplete && (
+                      <span className="text-xs text-[#00e676]">poster marked complete</span>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {!isPartyA && myAcceptance?.status === "completed" && (
+              <div className="p-3 rounded border bg-[#00e676]/5 border-[#00e676]/30 mb-6">
+                <div className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-[#00e676]" />
+                  <p className="text-sm text-[#00e676]">deal completed — thank you!</p>
+                </div>
+                {/* Free-form review — non-poster */}
+                {!requiresContract && !hasReviewedFreeForm && (
+                  <div className="mt-3">
+                    <div className="bg-[#1a1714] border border-[#2a2420] p-3 rounded space-y-3">
+                      <p className="text-xs text-[#e8d5a3] font-medium">Leave a review</p>
+                      <div>
+                        <label className="text-xs text-[#7a6b5a] block mb-1">Rating (1–10)</label>
+                        <input
+                          type="range"
+                          min={1}
+                          max={10}
+                          value={rating}
+                          onChange={(e) => setRating(parseInt(e.target.value))}
+                          className="w-full accent-[#f5a623]"
+                        />
+                        <div className="flex justify-between text-xs text-[#7a6b5a] mt-1">
+                          <span>1</span>
+                          <span className="text-[#f5a623] font-medium">{rating}</span>
+                          <span>10</span>
+                        </div>
+                      </div>
+                      <Textarea
+                        placeholder="What went well?"
+                        value={reviewComment}
+                        onChange={(e) => setReviewComment(e.target.value)}
+                        rows={2}
+                        className="text-sm"
+                      />
+                      <Textarea
+                        placeholder="Private feedback (only visible to moderators)"
+                        value={privateFeedbackDraft}
+                        onChange={(e) => setPrivateFeedbackDraft(e.target.value)}
+                        rows={2}
+                        className="text-sm"
+                      />
+                      <Button
+                        size="sm"
+                        variant="default"
+                        className="h-7 text-xs"
+                        onClick={() => myAcceptance && submitReviewFreeForm(myAcceptance.id)}
+                      >
+                        <Star className="h-3 w-3 mr-1" />
+                        Submit Review
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                {!requiresContract && hasReviewedFreeForm && (
+                  <p className="text-xs text-[#7a6b5a] mt-2">You have already reviewed this deal.</p>
+                )}
+              </div>
+            )}
+
+            {/* Poster prominent review banner — free-form completed */}
+            {isPartyA && freeFormCompleted && !requiresContract && (
+              <div className="p-4 rounded border bg-[#00e676]/5 border-[#00e676]/30 mb-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <Check className="h-4 w-4 text-[#00e676]" />
+                  <p className="text-sm text-[#00e676] font-medium">Deal completed</p>
+                </div>
+                <p className="text-xs text-[#7a6b5a] mb-3">
+                  Leave a review to close this deal out and help build trust in the community.
+                </p>
+                {!(freeFormReviews[freeFormAccepted?.id ?? ""] ?? []).some(r => r.giverId === PARTY_A.id) && posterReviewAccId !== freeFormAccepted?.id && (
+                  <Button
+                    size="sm"
+                    variant="default"
+                    className="h-8 text-xs"
+                    type="button"
+                    onClick={() => {
+                      if (freeFormAccepted) {
+                        setPosterReviewAccId(freeFormAccepted.id);
+                        setRating(10);
+                        setReviewComment("");
+                        setPrivateFeedbackDraft("");
+                      }
+                    }}
+                  >
+                    <Star className="h-3 w-3 mr-1" />
+                    Leave a Review
+                  </Button>
+                )}
+                {freeFormAccepted && posterReviewAccId === freeFormAccepted.id && (
+                  <div className="mt-3 bg-[#1a1714] border border-[#2a2420] p-3 rounded space-y-3">
+                    <div>
+                      <label className="text-xs text-[#7a6b5a] block mb-1">Rating (1–10)</label>
+                      <input
+                        type="range"
+                        min={1}
+                        max={10}
+                        value={rating}
+                        onChange={(e) => setRating(parseInt(e.target.value))}
+                        className="w-full accent-[#f5a623]"
+                      />
+                      <div className="flex justify-between text-xs text-[#7a6b5a] mt-1">
+                        <span>1</span>
+                        <span className="text-[#f5a623] font-medium">{rating}</span>
+                        <span>10</span>
+                      </div>
+                    </div>
+                    <Textarea
+                      placeholder="What went well?"
+                      value={reviewComment}
+                      onChange={(e) => setReviewComment(e.target.value)}
+                      rows={2}
+                      className="text-sm"
+                    />
+                    <Textarea
+                      placeholder="Private feedback (only visible to moderators)"
+                      value={privateFeedbackDraft}
+                      onChange={(e) => setPrivateFeedbackDraft(e.target.value)}
+                      rows={2}
+                      className="text-sm"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="default"
+                        className="h-7 text-xs"
+                        type="button"
+                        onClick={() => {
+                          if (freeFormAccepted) {
+                            submitReviewFreeForm(freeFormAccepted.id);
+                            setPosterReviewAccId(null);
+                          }
+                        }}
+                      >
+                        <Star className="h-3 w-3 mr-1" />
+                        Submit Review
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="h-7 text-xs"
+                        type="button"
+                        onClick={() => setPosterReviewAccId(null)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                {freeFormAccepted && (freeFormReviews[freeFormAccepted.id] ?? []).some(r => r.giverId === PARTY_A.id) && (
+                  <p className="text-xs text-[#7a6b5a] mt-2">You have already reviewed this deal. Thank you!</p>
+                )}
               </div>
             )}
 
@@ -904,7 +1157,32 @@ export default function ContractFlowDemoPage() {
                                 </Button>
                               )}
                               {acc.status === "accepted" && !requiresContract && (
-                                <Badge variant="success" className="text-[10px]">Deal confirmed</Badge>
+                                <div className="flex flex-col gap-1.5 items-end">
+                                  <Badge variant="success" className="text-[10px]">Deal confirmed</Badge>
+                                  <div className="flex items-center gap-1.5">
+                                    {!acc.posterMarkedComplete ? (
+                                      <Button
+                                        size="sm"
+                                        variant="default"
+                                        className="h-6 text-[10px] px-2"
+                                        onClick={() => markCompleteFreeForm(acc.id)}
+                                      >
+                                        <Check className="h-3 w-3 mr-1" />
+                                        Mark complete
+                                      </Button>
+                                    ) : (
+                                      <span className="text-[10px] text-[#00e676]">you marked complete</span>
+                                    )}
+                                    {acc.fulfillerMarkedComplete && (
+                                      <span className="text-[10px] text-[#00e676]">fulfiller marked complete</span>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                              {acc.status === "completed" && !requiresContract && (
+                                <div className="flex flex-col gap-1.5 items-end">
+                                  <Badge variant="success" className="text-[10px]">Deal completed</Badge>
+                                </div>
                               )}
                             </div>
                           </div>
@@ -925,6 +1203,7 @@ export default function ContractFlowDemoPage() {
                               {acc.message}
                             </div>
                           )}
+
                         </div>
                       </div>
                     </div>
@@ -977,7 +1256,7 @@ export default function ContractFlowDemoPage() {
                   {isPartyA
                     ? "Public — anyone viewing this need can see these messages"
                     : myAcceptance
-                      ? "Public wall + your private thread — your replies go to your private thread"
+                      ? "Private thread — only you and the poster can see these messages"
                       : "Only the poster can see your messages — other visitors cannot"}
                 </div>
               )}
@@ -1018,6 +1297,26 @@ export default function ContractFlowDemoPage() {
                 <Input placeholder={isPartyA && activeThread !== null ? "send a private message..." : "post a public message..."} value={messageInput} onChange={(e) => setMessageInput(e.target.value)} className="h-9 text-sm" />
                 <Button type="submit" size="icon" className="h-9 w-9 shrink-0"><Send className="h-4 w-4" /></Button>
               </form>
+
+              {/* Reviews display for poster */}
+              {isPartyA && freeFormAccepted && (freeFormReviews[freeFormAccepted.id] ?? []).length > 0 && (
+                <div className="mt-6 space-y-3">
+                  {(freeFormReviews[freeFormAccepted.id] ?? []).map((review, i) => {
+                    const reviewer = PARTIES[review.giverId];
+                    const reviewee = PARTIES[review.receiverId];
+                    return (
+                      <div key={i} className="bg-[#1a1714] border border-[#2a2420] p-3 rounded">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Star className="h-3 w-3 text-[#f5a623]" />
+                          <span className="text-sm font-medium text-[#e8d5a3]">{review.rating}/10</span>
+                          <span className="text-xs text-[#7a6b5a]">from {reviewer?.fullName || "anonymous"} to {reviewee?.fullName || "anonymous"}</span>
+                        </div>
+                        {review.comment && <p className="text-xs text-[#b8a078] mt-1">{review.comment}</p>}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </>
         )}

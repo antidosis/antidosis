@@ -3,6 +3,9 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    color-scheme: dark;
+  }
   :root {
     /* The Void — Backgrounds */
     --void: #0a0806;
@@ -310,6 +313,15 @@
 
 .animate-ticker {
   animation: ticker 40s linear infinite;
+}
+
+@keyframes terminal-fade-in {
+  from { opacity: 0; transform: translateY(2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-terminal-fade {
+  animation: terminal-fade-in 0.2s ease both;
 }
 
   /* Contract Document — Parchment */

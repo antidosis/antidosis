@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "./notification-bell";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Terminal } from "lucide-react";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -49,6 +49,7 @@ export function Navbar() {
     { href: "/pros", label: "pros" },
     { href: "/blog", label: "blog" },
     { href: "/demo/contract-flow", label: "demo" },
+    ...(user ? [{ href: "/terminal", label: "terminal", isTerminal: true as const }] : []),
     ...(user ? [{ href: "/dashboard", label: "dashboard" }] : []),
   ];
 
@@ -71,22 +72,26 @@ export function Navbar() {
             {navItems.map((item) => {
               const isActive = pathname === item.href;
               const isDashboard = item.href === "/dashboard";
+              const isTerminal = item.href === "/terminal";
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   aria-current={isActive ? "page" : undefined}
                   className={cn(
-                    "relative transition-colors py-1",
+                    "relative transition-colors py-1 flex items-center gap-1.5",
                     isDashboard
                       ? "px-3 py-1.5 rounded border border-[#f5a623]/40 text-[#f5a623] hover:bg-[#f5a623]/10 hover:text-[#f5a623]"
-                      : isActive
-                        ? "text-[#f5a623] glow-gold-subtle"
-                        : "text-[#7a6b5a] hover:text-[#e8d5a3]"
+                      : isTerminal
+                        ? "px-3 py-1.5 rounded border border-[#00e5ff]/30 text-[#00e5ff] hover:bg-[#00e5ff]/10 hover:text-[#00e5ff]"
+                        : isActive
+                          ? "text-[#f5a623] glow-gold-subtle"
+                          : "text-[#7a6b5a] hover:text-[#e8d5a3]"
                   )}
                 >
+                  {isTerminal && <Terminal className="h-3 w-3" />}
                   {item.label}
-                  {!isDashboard && isActive && (
+                  {!isDashboard && !isTerminal && isActive && (
                     <span className="absolute -bottom-1 left-0 right-0 h-px bg-[#f5a623] shadow-[0_0_8px_rgba(245,166,35,0.5)]" />
                   )}
                 </Link>
@@ -138,20 +143,24 @@ export function Navbar() {
             {navItems.map((item) => {
               const isActive = pathname === item.href;
               const isDashboard = item.href === "/dashboard";
+              const isTerminal = item.href === "/terminal";
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   aria-current={isActive ? "page" : undefined}
                   className={cn(
-                    "py-3 text-base transition-colors border-b border-[#2a2420]/50",
+                    "py-3 text-base transition-colors border-b border-[#2a2420]/50 flex items-center gap-2",
                     isDashboard
                       ? "text-[#f5a623] font-medium"
-                      : isActive
-                        ? "text-[#f5a623] glow-gold-subtle"
-                        : "text-[#7a6b5a] hover:text-[#e8d5a3]"
+                      : isTerminal
+                        ? "text-[#00e5ff] font-medium"
+                        : isActive
+                          ? "text-[#f5a623] glow-gold-subtle"
+                          : "text-[#7a6b5a] hover:text-[#e8d5a3]"
                   )}
                 >
+                  {isTerminal && <Terminal className="h-4 w-4" />}
                   {item.label}
                 </Link>
               );

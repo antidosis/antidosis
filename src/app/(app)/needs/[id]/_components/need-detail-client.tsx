@@ -61,6 +61,8 @@ type NeedDetail = {
     userId: string;
     message: string | null;
     status: string;
+    posterMarkedComplete: boolean;
+    fulfillerMarkedComplete: boolean;
     user: {
       id: string;
       fullName: string | null;
@@ -142,6 +144,17 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
     acceptanceId?: string;
     userName?: string;
   } | null>(null);
+
+  /* free-form completion */
+  const [markingComplete, setMarkingComplete] = useState(false);
+
+  /* review form */
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [posterReviewAcceptanceId, setPosterReviewAcceptanceId] = useState<string | null>(null);
+  const [reviewRating, setReviewRating] = useState(10);
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewPrivateFeedback, setReviewPrivateFeedback] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -364,6 +377,54 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
       fetchMessages();
     }
     setSendingMessage(false);
+  }
+
+  async function handleMarkComplete(acceptanceId: string) {
+    setMarkingComplete(true);
+    const res = await fetch(`/api/v1/acceptances/${acceptanceId}/complete`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      toast(data.bothComplete ? "Deal completed! Leave a review." : "Marked as complete. Waiting for the other party.", "success");
+      fetchNeed();
+    } else {
+      const data = await res.json().catch(() => ({ error: "Failed to mark complete" }));
+      toast(data.error || "Failed to mark complete", "error");
+    }
+    setMarkingComplete(false);
+  }
+
+  async function submitReview(acceptanceId: string, receiverId: string) {
+    if (!reviewRating || reviewRating < 1 || reviewRating > 10) {
+      toast("Rating must be between 1 and 10", "error");
+      return;
+    }
+    setSubmittingReview(true);
+    const res = await fetch("/api/v1/reviews", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        acceptanceId,
+        receiverId,
+        rating: reviewRating,
+        comment: reviewComment,
+        privateFeedback: reviewPrivateFeedback,
+      }),
+    });
+    if (res.ok) {
+      toast("Review submitted!", "success");
+      setShowReviewForm(false);
+      setReviewRating(10);
+      setReviewComment("");
+      setReviewPrivateFeedback("");
+      fetchNeed();
+    } else {
+      const data = await res.json().catch(() => ({ error: "Failed to submit review" }));
+      toast(data.error || "Failed to submit review", "error");
+    }
+    setSubmittingReview(false);
   }
 
   /* -- render guards -- */
@@ -883,7 +944,7 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
             )}
 
             {/* Interest status — non-poster only */}
-            {canExpressInterest && myAcceptance && (
+            {!isPoster && myAcceptance && (
               <div
                 className={`p-3 rounded border ${
                   myAcceptance.status === "accepted"
@@ -917,9 +978,17 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                     {myAcceptance.status === "accepted" &&
                       (need.requiresContract
                         ? "poster accepted — ready to form contract"
-                        : "poster accepted — deal confirmed")}
+                        : need.status === "completed"
+                          ? "deal completed"
+                          : myAcceptance.posterMarkedComplete && !myAcceptance.fulfillerMarkedComplete
+                            ? "poster marked complete — waiting for you"
+                            : !myAcceptance.posterMarkedComplete && myAcceptance.fulfillerMarkedComplete
+                              ? "you marked complete — waiting for poster"
+                              : "poster accepted — deal confirmed")}
                     {myAcceptance.status === "declined" &&
                       "your interest was declined"}
+                    {myAcceptance.status === "completed" &&
+                      "deal completed — thank you!"}
                   </p>
                 </div>
                 {myAcceptance.message && (
@@ -928,6 +997,112 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                       your intro:{" "}
                     </span>
                     {myAcceptance.message}
+                  </div>
+                )}
+                {/* Free-form mark complete — non-poster */}
+                {myAcceptance.status === "accepted" && !need.requiresContract && need.status === "active" && (
+                  <div className="mt-3">
+                    {!myAcceptance.fulfillerMarkedComplete ? (
+                      <Button
+                        size="sm"
+                        variant="default"
+                        className="h-7 text-xs"
+                        onClick={() => handleMarkComplete(myAcceptance.id)}
+                        disabled={markingComplete}
+                      >
+                        {markingComplete ? (
+                          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                        ) : (
+                          <Check className="h-3 w-3 mr-1" />
+                        )}
+                        Mark as complete
+                      </Button>
+                    ) : (
+                      <span className="text-xs text-[#00e676] flex items-center gap-1">
+                        <Check className="h-3 w-3" /> you marked complete
+                      </span>
+                    )}
+                    {myAcceptance.posterMarkedComplete && (
+                      <span className="text-xs text-[#00e676] flex items-center gap-1 ml-3">
+                        <Check className="h-3 w-3" /> poster marked complete
+                      </span>
+                    )}
+                  </div>
+                )}
+                {/* Free-form review — non-poster */}
+                {myAcceptance.status === "completed" && !need.requiresContract && (
+                  <div className="mt-3">
+                    {showReviewForm ? (
+                      <div className="bg-[#1a1714] border border-[#2a2420] p-3 rounded space-y-3">
+                        <p className="text-xs text-[#e8d5a3] font-medium">Leave a review</p>
+                        <div>
+                          <label className="text-xs text-[#7a6b5a] block mb-1">Rating (1–10)</label>
+                          <input
+                            type="range"
+                            min={1}
+                            max={10}
+                            value={reviewRating}
+                            onChange={(e) => setReviewRating(parseInt(e.target.value))}
+                            className="w-full accent-[#f5a623]"
+                          />
+                          <div className="flex justify-between text-xs text-[#7a6b5a] mt-1">
+                            <span>1</span>
+                            <span className="text-[#f5a623] font-medium">{reviewRating}</span>
+                            <span>10</span>
+                          </div>
+                        </div>
+                        <Textarea
+                          placeholder="What went well?"
+                          value={reviewComment}
+                          onChange={(e) => setReviewComment(e.target.value)}
+                          rows={2}
+                          className="text-sm"
+                          maxLength={2000}
+                        />
+                        <Textarea
+                          placeholder="Private feedback (only visible to moderators)"
+                          value={reviewPrivateFeedback}
+                          onChange={(e) => setReviewPrivateFeedback(e.target.value)}
+                          rows={2}
+                          className="text-sm"
+                          maxLength={2000}
+                        />
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="default"
+                            className="h-7 text-xs"
+                            onClick={() => submitReview(myAcceptance.id, need.poster.id)}
+                            disabled={submittingReview}
+                          >
+                            {submittingReview ? (
+                              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                            ) : (
+                              <Star className="h-3 w-3 mr-1" />
+                            )}
+                            Submit Review
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            className="h-7 text-xs"
+                            onClick={() => setShowReviewForm(false)}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="h-7 text-xs"
+                        onClick={() => setShowReviewForm(true)}
+                      >
+                        <Star className="h-3 w-3 mr-1" />
+                        Leave a review
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>
@@ -980,7 +1155,7 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                     {isPoster
                       ? "Public — anyone viewing this need can see these messages"
                       : hasOffered
-                        ? "Public wall + your private thread — your replies go to your private thread"
+                        ? "Private thread — only you and the poster can see these messages"
                         : "Only the poster can see your messages — other visitors cannot"
                     }
                   </div>
@@ -1254,11 +1429,58 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                               </Button>
                             </>
                           )}
-                          {a.status === "accepted" && !need.requiresContract && (
-                            <span className="text-xs text-[#00e676] flex items-center gap-1">
-                              <Check className="h-3 w-3" />
-                              deal confirmed
-                            </span>
+                          {a.status === "accepted" && !need.requiresContract && need.status === "active" && (
+                            <div className="flex flex-col gap-1.5 items-end">
+                              <span className="text-xs text-[#00e676] flex items-center gap-1">
+                                <Check className="h-3 w-3" />
+                                deal confirmed
+                              </span>
+                              <div className="flex items-center gap-1.5">
+                                {!a.posterMarkedComplete ? (
+                                  <Button
+                                    size="sm"
+                                    variant="default"
+                                    className="h-6 text-[10px] px-2"
+                                    onClick={() => handleMarkComplete(a.id)}
+                                    disabled={markingComplete}
+                                  >
+                                    {markingComplete ? (
+                                      <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                    ) : (
+                                      <Check className="h-3 w-3 mr-1" />
+                                    )}
+                                    Mark complete
+                                  </Button>
+                                ) : (
+                                  <span className="text-[10px] text-[#00e676]">you marked complete</span>
+                                )}
+                                {a.fulfillerMarkedComplete && (
+                                  <span className="text-[10px] text-[#00e676]">fulfiller marked complete</span>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                          {a.status === "completed" && !need.requiresContract && (
+                            <div className="flex flex-col gap-1.5 items-end">
+                              <span className="text-xs text-[#00e676] flex items-center gap-1">
+                                <Check className="h-3 w-3" />
+                                deal completed
+                              </span>
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                className="h-6 text-[10px] px-2"
+                                onClick={() => {
+                                  setPosterReviewAcceptanceId(a.id);
+                                  setReviewRating(10);
+                                  setReviewComment("");
+                                  setReviewPrivateFeedback("");
+                                }}
+                              >
+                                <Star className="h-3 w-3 mr-1" />
+                                Review
+                              </Button>
+                            </div>
                           )}
                           {a.status === "declined" && (
                             <span className="text-xs text-[#ff5252] flex items-center gap-1">
@@ -1285,6 +1507,68 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                         <p className="text-xs text-[#b8a078] mt-2 bg-[#0f0c0a] p-2.5 rounded">
                           {a.message}
                         </p>
+                      )}
+                      {/* Poster review form inline */}
+                      {posterReviewAcceptanceId === a.id && (
+                        <div className="mt-3 bg-[#1a1714] border border-[#2a2420] p-3 rounded space-y-3">
+                          <p className="text-xs text-[#e8d5a3] font-medium">Leave a review for {a.user.fullName || "this fulfiller"}</p>
+                          <div>
+                            <label className="text-xs text-[#7a6b5a] block mb-1">Rating (1–10)</label>
+                            <input
+                              type="range"
+                              min={1}
+                              max={10}
+                              value={reviewRating}
+                              onChange={(e) => setReviewRating(parseInt(e.target.value))}
+                              className="w-full accent-[#f5a623]"
+                            />
+                            <div className="flex justify-between text-xs text-[#7a6b5a] mt-1">
+                              <span>1</span>
+                              <span className="text-[#f5a623] font-medium">{reviewRating}</span>
+                              <span>10</span>
+                            </div>
+                          </div>
+                          <Textarea
+                            placeholder="What went well?"
+                            value={reviewComment}
+                            onChange={(e) => setReviewComment(e.target.value)}
+                            rows={2}
+                            className="text-sm"
+                            maxLength={2000}
+                          />
+                          <Textarea
+                            placeholder="Private feedback (only visible to moderators)"
+                            value={reviewPrivateFeedback}
+                            onChange={(e) => setReviewPrivateFeedback(e.target.value)}
+                            rows={2}
+                            className="text-sm"
+                            maxLength={2000}
+                          />
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="default"
+                              className="h-7 text-xs"
+                              onClick={() => submitReview(a.id, a.user.id)}
+                              disabled={submittingReview}
+                            >
+                              {submittingReview ? (
+                                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                              ) : (
+                                <Star className="h-3 w-3 mr-1" />
+                              )}
+                              Submit Review
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              className="h-7 text-xs"
+                              onClick={() => setPosterReviewAcceptanceId(null)}
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
                       )}
                     </div>
                   ))}

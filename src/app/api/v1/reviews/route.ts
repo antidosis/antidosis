@@ -7,7 +7,8 @@ import { z } from "zod";
 import { logger } from "@/lib/logger";
 
 const createSchema = z.object({
-  contractId: z.string().uuid(),
+  contractId: z.string().uuid().optional(),
+  acceptanceId: z.string().uuid().optional(),
   receiverId: z.string().uuid(),
   rating: z.number().int().min(1).max(10),
   comment: z.string().max(2000).optional(),
@@ -38,7 +39,14 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { contractId, receiverId, rating, comment, privateFeedback } = createSchema.parse(body);
+    const { contractId, acceptanceId, receiverId, rating, comment, privateFeedback } = createSchema.parse(body);
+
+    if (!contractId && !acceptanceId) {
+      return NextResponse.json(
+        { error: "Either contractId or acceptanceId is required" },
+        { status: 400 }
+      );
+    }
 
     const profile = await prisma.profile.findUnique({
       where: { userId: user.id },
@@ -49,58 +57,122 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
-    const contract = await prisma.contract.findUnique({
-      where: { id: contractId },
-      include: { reviews: true },
-    });
+    let review;
 
-    if (!contract) {
-      return NextResponse.json({ error: "Contract not found" }, { status: 404 });
-    }
+    if (contractId) {
+      const contract = await prisma.contract.findUnique({
+        where: { id: contractId },
+        include: { reviews: true },
+      });
 
-    if (contract.status !== "completed") {
-      return NextResponse.json(
-        { error: "Contract must be completed before reviewing" },
-        { status: 400 }
+      if (!contract) {
+        return NextResponse.json({ error: "Contract not found" }, { status: 404 });
+      }
+
+      if (contract.status !== "completed") {
+        return NextResponse.json(
+          { error: "Contract must be completed before reviewing" },
+          { status: 400 }
+        );
+      }
+
+      if (contract.partyAId !== profile.id && contract.partyBId !== profile.id) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+
+      const isPartyA = contract.partyAId === profile.id;
+      const otherPartyId = isPartyA ? contract.partyBId : contract.partyAId;
+      if (receiverId !== otherPartyId) {
+        return NextResponse.json(
+          { error: "Invalid review recipient" },
+          { status: 400 }
+        );
+      }
+
+      const existing = contract.reviews.find(
+        (r) => r.giverId === profile.id && r.contractId === contractId
       );
-    }
+      if (existing) {
+        return NextResponse.json(
+          { error: "You have already reviewed this contract" },
+          { status: 400 }
+        );
+      }
 
-    // Verify user is a party
-    if (contract.partyAId !== profile.id && contract.partyBId !== profile.id) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+      review = await prisma.review.create({
+        data: {
+          contractId,
+          giverId: profile.id,
+          receiverId,
+          rating,
+          comment: comment ? sanitizePlainText(comment) : null,
+          privateFeedback: privateFeedback ? sanitizePlainText(privateFeedback) : null,
+        },
+      });
+    } else {
+      // acceptanceId path — free-form deal review
+      const acceptance = await prisma.acceptance.findUnique({
+        where: { id: acceptanceId },
+        include: {
+          need: true,
+          reviews: true,
+        },
+      });
 
-    // Verify receiver is the other party
-    const isPartyA = contract.partyAId === profile.id;
-    const otherPartyId = isPartyA ? contract.partyBId : contract.partyAId;
-    if (receiverId !== otherPartyId) {
-      return NextResponse.json(
-        { error: "Invalid review recipient" },
-        { status: 400 }
+      if (!acceptance) {
+        return NextResponse.json({ error: "Acceptance not found" }, { status: 404 });
+      }
+
+      if (acceptance.need.requiresContract) {
+        return NextResponse.json(
+          { error: "This need requires a contract. Use contract review instead." },
+          { status: 400 }
+        );
+      }
+
+      if (acceptance.status !== "completed") {
+        return NextResponse.json(
+          { error: "Deal must be completed before reviewing" },
+          { status: 400 }
+        );
+      }
+
+      const isPoster = acceptance.need.posterId === profile.id;
+      const isFulfiller = acceptance.userId === profile.id;
+
+      if (!isPoster && !isFulfiller) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+
+      const otherPartyId = isPoster ? acceptance.userId : acceptance.need.posterId;
+      if (receiverId !== otherPartyId) {
+        return NextResponse.json(
+          { error: "Invalid review recipient" },
+          { status: 400 }
+        );
+      }
+
+      const existing = acceptance.reviews.find(
+        (r) => r.giverId === profile.id && r.acceptanceId === acceptanceId
       );
-    }
+      if (existing) {
+        return NextResponse.json(
+          { error: "You have already reviewed this deal" },
+          { status: 400 }
+        );
+      }
 
-    // Check for existing review
-    const existing = contract.reviews.find(
-      (r) => r.giverId === profile.id && r.contractId === contractId
-    );
-    if (existing) {
-      return NextResponse.json(
-        { error: "You have already reviewed this contract" },
-        { status: 400 }
-      );
+      review = await prisma.review.create({
+        data: {
+          acceptanceId,
+          giverId: profile.id,
+          receiverId,
+          rating,
+          comment: comment ? sanitizePlainText(comment) : null,
+          privateFeedback: privateFeedback ? sanitizePlainText(privateFeedback) : null,
+        },
+      });
     }
-
-    const review = await prisma.review.create({
-      data: {
-        contractId,
-        giverId: profile.id,
-        receiverId,
-        rating,
-        comment: comment ? sanitizePlainText(comment) : null,
-        privateFeedback: privateFeedback ? sanitizePlainText(privateFeedback) : null,
-      },
-    });
 
     // Update receiver's rating average using aggregate (fast, no unbounded fetch)
     const agg = await prisma.review.aggregate({

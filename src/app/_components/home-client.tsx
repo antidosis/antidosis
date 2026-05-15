@@ -16,7 +16,10 @@ import { ReputationIllustration } from "@/components/visuals/reputation-illustra
 import { PostIllustration } from "@/components/visuals/post-illustration";
 import { ReceiveIllustration } from "@/components/visuals/receive-illustration";
 import { HandshakeIllustration } from "@/components/visuals/handshake-illustration";
+import { TerminalPreview } from "@/components/terminal-preview";
+import { LiveBadge } from "@/components/live-badge";
 import { TickerBanner } from "@/components/layout/ticker-banner";
+import { LaunchCountdown, LaunchBanner } from "@/components/launch-countdown";
 import { useInView } from "@/hooks/use-in-view";
 import { cn } from "@/lib/utils";
 import { ArrowRight, ShieldCheck, Star, MessageSquare, Zap, ScrollText } from "lucide-react";
@@ -68,6 +71,7 @@ export default function HomePage() {
       <ScanLines />
       {!hasBooted && <BootSequence onComplete={handleBootComplete} />}
       <Navbar />
+      <LaunchBanner />
 
       <main className="flex-1">
         {/* HERO */}
@@ -121,6 +125,8 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        <LaunchCountdown />
 
         <TickerBanner />
 
@@ -282,14 +288,53 @@ export default function HomePage() {
                       Built-in Messaging
                     </h3>
                     <p className="text-sm text-[#7a6b5a] leading-relaxed max-w-md">
-                      Negotiate inside every exchange. No external apps needed.
-                      Full message history stays with the contract.
+                      Negotiate inside every exchange. DM anyone in the community
+                      Terminal. No external apps needed. Full message history
+                      stays with the contract.
                     </p>
                   </Reveal>
                 </div>
                 <div className="md:col-span-4 flex justify-center">
                   <Reveal delay={150}>
                     <MessageSquare className="w-32 h-32 text-[#f5a623] opacity-40" />
+                  </Reveal>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 05 — Community Terminal — Cyan */}
+          <div className="border-t border-[#2a2420]">
+            <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-20">
+              <div className="grid md:grid-cols-12 gap-8 items-center">
+                <div className="md:col-span-2">
+                  <span className="text-6xl md:text-7xl font-bold text-[#00e5ff]/15">
+                    05
+                  </span>
+                </div>
+                <div className="md:col-span-5">
+                  <Reveal>
+                    <div className="flex items-center gap-3 mb-3">
+                      <h3 className="heading-display text-xl md:text-2xl text-[#00e5ff]">
+                        Community Terminal
+                      </h3>
+                      <LiveBadge />
+                    </div>
+                    <p className="text-sm text-[#7a6b5a] leading-relaxed max-w-md mb-4">
+                      Join real-time channels like #general, #trades, and #help.
+                      Message anyone directly with /dm. Get notified when
+                      someone mentions you. The community lives here.
+                    </p>
+                    <Button asChild variant="secondary" size="sm">
+                      <Link href="/terminal">
+                        Open Terminal <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </Reveal>
+                </div>
+                <div className="md:col-span-5">
+                  <Reveal delay={150}>
+                    <TerminalPreview />
                   </Reveal>
                 </div>
               </div>

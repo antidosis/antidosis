@@ -10,10 +10,12 @@ import { ProfileSection } from "./_components/profile-section";
 import { CredentialsSection } from "./_components/credentials-section";
 import { DashboardHeader } from "./_components/dashboard-header";
 import { ProfileChecklist } from "./_components/profile-checklist";
+import { TerminalActivityFeed } from "./_components/terminal-activity-feed";
+import { SocialSection } from "./_components/social-section";
 import { createClient } from "@/lib/supabase/client";
 import { useApi } from "@/lib/swr-config";
 import { cn } from "@/lib/utils";
-import { Briefcase, FileText, HandHelping, User, Loader2, ArrowRight, Star, Shield, TrendingUp, MessageSquare, RotateCcw, Pencil, X } from "lucide-react";
+import { Briefcase, FileText, HandHelping, User, Loader2, ArrowRight, Star, Shield, TrendingUp, MessageSquare, RotateCcw, Pencil, X, Users } from "lucide-react";
 import { mutate } from "swr";
 
 type ProfileData = {
@@ -59,6 +61,7 @@ const tabs = [
   { id: "contracts", label: "Contracts", icon: FileText },
   { id: "offers", label: "My Interests", icon: HandHelping },
   { id: "credentials", label: "Proof & Credentials", icon: Star },
+  { id: "community", label: "Community", icon: Users },
 ];
 
 function statusBadgeVariant(status: string) {
@@ -486,6 +489,14 @@ export default function DashboardPage() {
             initialCredentials={credentials}
             onUpdate={(creds) => setCredentials(creds)}
           />
+        </div>
+      )}
+
+      {activeTab === "community" && (
+        <div className="space-y-6">
+          <p className="text-xs text-[#7a6b5a] mb-4">$ tail -f ~/community.log</p>
+          <SocialSection />
+          <TerminalActivityFeed />
         </div>
       )}
     </div>
