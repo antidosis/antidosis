@@ -35,7 +35,7 @@ import {
 } from "./terminal-session";
 import { parseIntent, generateAgentResponse } from "./terminal-agent";
 import { advanceWizard, getSteps } from "./terminal-wizard";
-import { formatTime, getThemeColors, getWelcomeArt, type ThemeColors } from "./terminal-render";
+import { formatTime, getThemeColors, type ThemeColors } from "./terminal-render";
 
 // Types
 
@@ -361,7 +361,6 @@ export default function TerminalClient() {
     const hasWelcomed = sessionStorage.getItem(welcomeId);
     if (!hasWelcomed) {
       sessionStorage.setItem(welcomeId, "1");
-      addSys(getWelcomeArt(), "info");
       addSys(
         "Welcome, " + (myProfile?.fullName || "Guest") + "! Type /help to get started.",
         "info"
@@ -1644,10 +1643,7 @@ export default function TerminalClient() {
             <div className="space-y-2">
               {activeContext?.type === "channel" && !messages.length && !sysMessages.length && !wizard && !pendingChoices && (
                 <div className="mb-4">
-                  <pre className="whitespace-pre-wrap text-[7px] leading-[8px] font-mono opacity-60" style={{ color: "var(--term-accent)" }}>
-                    {getWelcomeArt()}
-                  </pre>
-                  <p className="mt-3 text-[13px]" style={{ color: "var(--term-muted)" }}>
+                  <p className="text-[13px]" style={{ color: "var(--term-muted)" }}>
                     <span style={{ color: "var(--term-accent)" }}>#</span>{" "}
                     <span style={{ color: "var(--term-accent)" }}>{activeContext.name}</span>
                     {" - "}
@@ -1657,17 +1653,14 @@ export default function TerminalClient() {
                     Welcome to <span style={{ color: "var(--term-accent)" }}>#{activeContext.name}</span>!
                   </p>
                   <p className="mt-1 text-[13px]" style={{ color: "var(--term-muted)" }}>
-                    No messages here yet. Be the first to say something - just type below and hit enter.
+                    No messages here yet. Be the first to say something — just type below and hit enter.
                   </p>
                 </div>
               )}
 
               {activeContext?.type === "console" && !sysMessages.length && !wizard && !pendingChoices && (
                 <div className="mb-4">
-                  <pre className="whitespace-pre-wrap text-[7px] leading-[8px] font-mono opacity-60" style={{ color: "var(--term-accent)" }}>
-                    {getWelcomeArt()}
-                  </pre>
-                  <p className="mt-3 text-[13px]" style={{ color: "var(--term-success)" }}>
+                  <p className="text-[13px]" style={{ color: "var(--term-success)" }}>
                     &gt; Console
                   </p>
                   <p className="mt-2 text-[13px]">

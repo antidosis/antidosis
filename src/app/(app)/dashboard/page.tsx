@@ -15,7 +15,7 @@ import { SocialSection } from "./_components/social-section";
 import { createClient } from "@/lib/supabase/client";
 import { useApi } from "@/lib/swr-config";
 import { cn } from "@/lib/utils";
-import { Briefcase, FileText, HandHelping, User, Loader2, ArrowRight, Star, Shield, TrendingUp, MessageSquare, RotateCcw, Pencil, X, Users } from "lucide-react";
+import { Briefcase, FileText, HandHelping, User, Loader2, ArrowRight, Star, Shield, TrendingUp, MessageSquare, RotateCcw, Pencil, X, Users, Trash2, AlertTriangle } from "lucide-react";
 import { mutate } from "swr";
 
 type ProfileData = {
@@ -95,6 +95,8 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const [emailVerified, setEmailVerified] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   const { data: profile, isLoading: profileLoading } = useApi<ProfileData>(
     authChecked ? "/api/v1/profiles/me" : null
@@ -296,6 +298,71 @@ export default function DashboardPage() {
               </div>
             </section>
           )}
+
+          {/* Delete Account */}
+          <section className="vessel p-5 border-[#ff5252]/20">
+            <p className="text-xs text-[#7a6b5a] mb-4">$ rm -rf ~/</p>
+            {!showDeleteConfirm ? (
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="flex items-center gap-2 text-sm text-[#ff5252] hover:text-[#ff5252]/80 transition-colors"
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete Account
+              </button>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5 text-[#ff5252] shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-[#e8d5a3]">Delete your account?</p>
+                    <p className="text-xs text-[#7a6b5a] mt-1">
+                      This will permanently delete your profile, needs, contracts, messages, and all associated data.
+                      This cannot be undone.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setShowDeleteConfirm(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="bg-[#ff5252] hover:bg-[#ff5252]/80 text-white"
+                    onClick={async () => {
+                      setDeletingAccount(true);
+                      try {
+                        const res = await fetch("/api/v1/profiles/me", { method: "DELETE" });
+                        if (!res.ok) {
+                          const data = await res.json().catch(() => ({}));
+                          alert(data.error || "Failed to delete account");
+                          setDeletingAccount(false);
+                          return;
+                        }
+                        await supabase.auth.signOut();
+                        router.push("/");
+                      } catch {
+                        alert("Failed to delete account");
+                        setDeletingAccount(false);
+                      }
+                    }}
+                    disabled={deletingAccount}
+                  >
+                    {deletingAccount ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Trash2 className="h-4 w-4 mr-2" />
+                    )}
+                    {deletingAccount ? "Deleting..." : "Permanently Delete"}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </section>
 
         </div>
       )}

@@ -26,7 +26,6 @@ import {
   fmtImageGrid,
   xpBar,
   badgeLine,
-  getWelcomeArt,
   getTrophyArt,
   getCelebrationBanner,
 } from "./terminal-render";

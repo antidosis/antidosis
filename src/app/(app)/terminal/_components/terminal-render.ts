@@ -282,24 +282,6 @@ export function badgeLine(icon: string, name: string, desc: string): string {
   return `    ${icon} ${name.padEnd(18)} — ${desc}`;
 }
 
-// ─── Welcome ASCII ───────────────────────────────────────────
-
-export function getWelcomeArt(): string {
-  return getAntidosisBanner() + "\n\n        T E R M I N A L   O S   v 2 . 0 . 0     ";
-}
-
-export function getAntidosisBanner(): string {
-  return (
-    `\n` +
-    `   █████  ███╗   ██╗████████╗██╗██████╗  ██████╗ ███████╗██╗███████╗\n` +
-    `  ██╔══██╗████╗  ██║╚══██╔══╝██║██╔══██╗██╔═══██╗██╔════╝██║██╔════╝\n` +
-    `  ███████║██╔██╗ ██║   ██║   ██║██║  ██║██║   ██║███████╗██║███████╗\n` +
-    `  ██╔══██║██║╚██╗██║   ██║   ██║██║  ██║██║   ██║╚════██║██║╚════██║\n` +
-    `  ██║  ██║██║ ╚████║   ██║   ██║██████╔╝╚██████╔╝███████║██║███████║\n` +
-    `  ╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═╝   ╚═╝╚═════╝  ╚═════╝ ╚══════╝╚═╝╚══════╝\n`
-  );
-}
-
 // ─── Achievement Art ─────────────────────────────────────────
 
 export function getTrophyArt(): string {

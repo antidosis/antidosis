@@ -130,7 +130,8 @@ function ProDashboard({
     : null;
 
   const isFree = profile.proSource === "free_verified";
-  const isPaid = profile.proSource?.startsWith("paid") || profile.proExpiresAt;
+  const isPlayStore = profile.proSource === "play_store";
+  const isPaid = profile.proSource?.startsWith("paid") || isPlayStore || !!profile.proExpiresAt;
 
   const benefits = [
     { icon: <Star className="h-4 w-4" />, label: "Enhanced Visibility", desc: "Pro badge on profile & posts. Seen first by need posters." },
@@ -161,7 +162,12 @@ function ProDashboard({
               <Infinity className="h-3 w-3 mr-1" /> free for life
             </Badge>
           )}
-          {isPaid && (
+          {isPlayStore && (
+            <Badge variant="outline" className="border-[#35c2f0]/30 text-[#35c2f0]">
+              <Smartphone className="h-3 w-3 mr-1" /> google play
+            </Badge>
+          )}
+          {isPaid && !isPlayStore && (
             <Badge variant="outline" className="border-[#35c2f0]/30 text-[#35c2f0]">
               <Clock className="h-3 w-3 mr-1" /> active subscription
             </Badge>
@@ -257,7 +263,7 @@ function ProDashboard({
             )}
             <div className="flex justify-between">
               <span>plan</span>
-              <span className="text-[#f0cc33]">{isFree ? "free for life" : isPaid ? "subscription" : "pro"}</span>
+              <span className="text-[#f0cc33]">{isFree ? "free for life" : isPlayStore ? "google play" : isPaid ? "subscription" : "pro"}</span>
             </div>
             <div className="flex justify-between">
               <span>expires</span>
