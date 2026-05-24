@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { z } from "zod";
 
+import { withApiHandler } from "@/lib/api-handler";
 import { logger } from "@/lib/logger";
 import { createNotification } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
@@ -14,94 +15,89 @@ const createSchema = z.object({
   content: z.string().min(1).max(5000),
 });
 
-export async function GET(req: NextRequest) {
-  try {
-    const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    if (!user.email_confirmed_at) {
-      return NextResponse.json(
-        { error: "Email verification required", code: "EMAIL_NOT_VERIFIED" },
-        { status: 403 }
-      );
-    }
-
-    const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
-      windowMs: 60_000,
-      maxRequests: 60,
-    });
-    if (!limit.allowed) {
-      return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
-    }
-
-    const profile = await prisma.profile.findUnique({
-      where: { userId: user.id },
-      select: { id: true },
-    });
-
-    if (!profile) {
-      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
-    }
-
-    const contractId = req.nextUrl.searchParams.get("contractId");
-    if (!contractId) {
-      return NextResponse.json({ error: "contractId required" }, { status: 400 });
-    }
-
-    // Verify user is party to contract
-    const contract = await prisma.contract.findUnique({
-      where: { id: contractId },
-      select: { partyAId: true, partyBId: true, status: true },
-    });
-
-    if (!contract) {
-      return NextResponse.json({ error: "Contract not found" }, { status: 404 });
-    }
-
-    if (contract.status === "completed" || contract.status === "cancelled") {
-      return NextResponse.json(
-        { error: "Cannot send messages to a completed or cancelled contract" },
-        { status: 400 }
-      );
-    }
-
-    if (contract.partyAId !== profile.id && contract.partyBId !== profile.id) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
-    const messages = await prisma.message.findMany({
-      where: { contractId },
-      orderBy: { createdAt: "asc" },
-      include: {
-        sender: {
-          select: { id: true, fullName: true, avatarUrl: true },
-        },
-      },
-    });
-
-    // Mark messages from others as read
-    await prisma.message.updateMany({
-      where: {
-        contractId,
-        senderId: { not: profile.id },
-        isRead: false,
-      },
-      data: { isRead: true },
-    });
-
-    return NextResponse.json({ messages });
-  } catch (error) {
-    logger.error("Get contract messages failed", error instanceof Error ? error : undefined);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+export const GET = withApiHandler(async (req: NextRequest) => {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-}
 
-export async function POST(req: NextRequest) {
+  if (!user.email_confirmed_at) {
+    return NextResponse.json(
+      { error: "Email verification required", code: "EMAIL_NOT_VERIFIED" },
+      { status: 403 }
+    );
+  }
+
+  const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
+    windowMs: 60_000,
+    maxRequests: 60,
+  });
+  if (!limit.allowed) {
+    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+  }
+
+  const profile = await prisma.profile.findUnique({
+    where: { userId: user.id },
+    select: { id: true },
+  });
+
+  if (!profile) {
+    return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+  }
+
+  const contractId = req.nextUrl.searchParams.get("contractId");
+  if (!contractId) {
+    return NextResponse.json({ error: "contractId required" }, { status: 400 });
+  }
+
+  // Verify user is party to contract
+  const contract = await prisma.contract.findUnique({
+    where: { id: contractId },
+    select: { partyAId: true, partyBId: true, status: true },
+  });
+
+  if (!contract) {
+    return NextResponse.json({ error: "Contract not found" }, { status: 404 });
+  }
+
+  if (contract.status === "completed" || contract.status === "cancelled") {
+    return NextResponse.json(
+      { error: "Cannot send messages to a completed or cancelled contract" },
+      { status: 400 }
+    );
+  }
+
+  if (contract.partyAId !== profile.id && contract.partyBId !== profile.id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const messages = await prisma.message.findMany({
+    where: { contractId },
+    orderBy: { createdAt: "asc" },
+    include: {
+      sender: {
+        select: { id: true, fullName: true, avatarUrl: true },
+      },
+    },
+  });
+
+  // Mark messages from others as read
+  await prisma.message.updateMany({
+    where: {
+      contractId,
+      senderId: { not: profile.id },
+      isRead: false,
+    },
+    data: { isRead: true },
+  });
+
+  return NextResponse.json({ messages });
+});
+
+export const POST = withApiHandler(async (req: NextRequest) => {
   try {
     const supabase = createClient();
     const {
@@ -211,7 +207,6 @@ export async function POST(req: NextRequest) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors }, { status: 400 });
     }
-    logger.error("Create contract message failed", error instanceof Error ? error : undefined);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    throw error;
   }
-}
+});

@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { z } from "zod";
 
-import { logger } from "@/lib/logger";
+import { withApiHandler } from "@/lib/api-handler";
 import { normalizeMobile, isValidAustralianMobile } from "@/lib/mobile";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
@@ -14,7 +14,7 @@ const createProfileSchema = z.object({
   mobile: z.string().optional(),
 });
 
-export async function POST(req: NextRequest) {
+export const POST = withApiHandler(async (req: NextRequest) => {
   try {
     const supabase = createClient();
     const {
@@ -77,7 +77,6 @@ export async function POST(req: NextRequest) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors }, { status: 400 });
     }
-    logger.error("[API:/api/v1/profiles POST]", error instanceof Error ? error : undefined);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    throw error;
   }
-}
+});

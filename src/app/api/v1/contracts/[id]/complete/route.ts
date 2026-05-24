@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+import { withApiHandler } from "@/lib/api-handler";
 import { auditLog, getClientInfo } from "@/lib/audit";
 import { sendContractCompletedEmail } from "@/lib/email";
 import { logger } from "@/lib/logger";
@@ -8,8 +9,8 @@ import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  try {
+export const POST = withApiHandler(
+  async (req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
     const supabase = createClient();
     const {
       data: { user },
@@ -170,8 +171,5 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     });
 
     return NextResponse.json({ contract: updatedContract });
-  } catch (error) {
-    logger.error("Complete contract error:", error instanceof Error ? error : undefined);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-}
+);

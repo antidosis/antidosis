@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
-import { logger } from "@/lib/logger";
+import { withApiHandler } from "@/lib/api-handler";
 import { prisma } from "@/lib/prisma";
 import { redactCredential } from "@/lib/redaction";
 
-export async function GET(_req: Request, { params }: { params: { id: string } }) {
-  try {
+export const GET = withApiHandler(
+  async (_req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
     const profile = await prisma.profile.findUnique({
       where: { id: params.id },
       select: { id: true },
@@ -36,8 +36,5 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
     const redacted = credentials.map(redactCredential);
 
     return NextResponse.json({ credentials: redacted });
-  } catch (error) {
-    logger.error("Public credentials error:", error instanceof Error ? error : undefined);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-}
+);

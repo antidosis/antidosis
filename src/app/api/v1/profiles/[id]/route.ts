@@ -1,13 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { logger } from "@/lib/logger";
+import { withApiHandler } from "@/lib/api-handler";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  try {
+export const GET = withApiHandler(
+  async (req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
     // Check for blocks if viewer is authenticated
     const supabase = createClient();
     const {
@@ -83,8 +83,5 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
         "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
       },
     });
-  } catch (error) {
-    logger.error("Failed to fetch profile", error as Error);
-    return NextResponse.json({ error: "Failed to load profile" }, { status: 500 });
   }
-}
+);

@@ -1,10 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+import { withApiHandler } from "@/lib/api-handler";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 
-export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
-  try {
+export const DELETE = withApiHandler(
+  async (_req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
     const supabase = createClient();
     const {
       data: { user },
@@ -22,8 +23,5 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
     });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("[terminal/blocks DELETE] error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-}
+);

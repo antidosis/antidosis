@@ -2,14 +2,14 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { z } from "zod";
 
-import { logger } from "@/lib/logger";
+import { withApiHandler } from "@/lib/api-handler";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { createReviewSchema } from "@/lib/schemas";
 import { sanitizePlainText } from "@/lib/security/sanitize";
 import { createClient } from "@/lib/supabase/server";
 
-export async function POST(req: NextRequest) {
+export const POST = withApiHandler(async (req: NextRequest) => {
   try {
     const supabase = createClient();
     const {
@@ -182,7 +182,6 @@ export async function POST(req: NextRequest) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors }, { status: 400 });
     }
-    logger.error("Create review error:", error instanceof Error ? error : undefined);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    throw error;
   }
-}
+});

@@ -1,15 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+import { withApiHandler } from "@/lib/api-handler";
 import { sendContractSignReminderEmail } from "@/lib/email";
-import { logger } from "@/lib/logger";
 import { createNotification } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 
 const REMINDER_COOLDOWN_MS = 60 * 60 * 1000; // 1 hour
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  try {
+export const POST = withApiHandler(
+  async (req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
     const supabase = createClient();
     const {
       data: { user },
@@ -105,8 +105,5 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    logger.error("Remind sign error:", error instanceof Error ? error : undefined);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-}
+);
