@@ -56,7 +56,31 @@ type ProfileData = {
   jobsCompleted: number;
   skills: { id: string; name: string; isVerified: boolean }[];
   socialLinks: { id: string; platform: string; url: string; isPublic: boolean }[];
-  credentials?: any[];
+  credentials?: CredentialData[];
+};
+
+type NeedItem = {
+  id: string;
+  title: string;
+  status: string;
+  _count?: { acceptances?: number };
+  acceptances?: unknown[];
+};
+
+type ContractItem = {
+  id: string;
+  status: string;
+  partyAId?: string;
+  partyA?: { id: string };
+  partyBSignedAt?: string | null;
+  need?: { title: string };
+};
+
+type OfferItem = {
+  id: string;
+  status: string;
+  message?: string | null;
+  need?: { id: string; title: string };
 };
 
 type CredentialData = {
@@ -121,14 +145,14 @@ export default function DashboardPage() {
   const { data: profile, isLoading: profileLoading } = useApi<ProfileData>(
     authChecked ? "/api/v1/profiles/me" : null
   );
-  const { data: needs } = useApi<any[]>(authChecked ? "/api/v1/needs/mine" : null);
-  const { data: contracts } = useApi<any[]>(authChecked ? "/api/v1/contracts/mine" : null);
-  const { data: offers } = useApi<any[]>(authChecked ? "/api/v1/acceptances/mine" : null);
+  const { data: needs } = useApi<NeedItem[]>(authChecked ? "/api/v1/needs/mine" : null);
+  const { data: contracts } = useApi<ContractItem[]>(authChecked ? "/api/v1/contracts/mine" : null);
+  const { data: offers } = useApi<OfferItem[]>(authChecked ? "/api/v1/acceptances/mine" : null);
 
   // Debug: log why cancel might not show
   useEffect(() => {
     if (contracts && profile) {
-      contracts.forEach((c: any) => {
+      contracts.forEach((c) => {
         const posterId = c.partyAId ?? c.partyA?.id;
         const isPoster = profile.id === posterId;
         const fulfillerSigned = !!c.partyBSignedAt;
