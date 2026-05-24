@@ -2,45 +2,40 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { z } from "zod";
 
+import { withApiHandler } from "@/lib/api-handler";
 import { auditLog, getClientInfo } from "@/lib/audit";
-import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { createCredentialSchema } from "@/lib/schemas";
 import { sanitizeUrl } from "@/lib/security/url";
 import { createClient } from "@/lib/supabase/server";
 
-export async function GET() {
-  try {
-    const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const profile = await prisma.profile.findUnique({
-      where: { userId: user.id },
-      select: { id: true },
-    });
-
-    if (!profile) {
-      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
-    }
-
-    const credentials = await prisma.credential.findMany({
-      where: { profileId: profile.id },
-      orderBy: { createdAt: "desc" },
-    });
-
-    return NextResponse.json({ credentials });
-  } catch (error) {
-    logger.error("List credentials error:", error instanceof Error ? error : undefined);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+export const GET = withApiHandler(async (req: NextRequest) => {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-}
 
-export async function POST(req: NextRequest) {
+  const profile = await prisma.profile.findUnique({
+    where: { userId: user.id },
+    select: { id: true },
+  });
+
+  if (!profile) {
+    return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+  }
+
+  const credentials = await prisma.credential.findMany({
+    where: { profileId: profile.id },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return NextResponse.json({ credentials });
+});
+
+export const POST = withApiHandler(async (req: NextRequest) => {
   try {
     const supabase = createClient();
     const {
@@ -100,7 +95,6 @@ export async function POST(req: NextRequest) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors }, { status: 400 });
     }
-    logger.error("Create credential error:", error instanceof Error ? error : undefined);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    throw error;
   }
-}
+});

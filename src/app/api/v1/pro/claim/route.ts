@@ -1,27 +1,27 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+import { withApiHandler } from "@/lib/api-handler";
 import { auditLog, getClientInfo } from "@/lib/audit";
-import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { withCors } from "@/lib/security/cors";
 import { createClient } from "@/lib/supabase/server";
 
-async function handler(req: NextRequest) {
-  // Rate limit: 3 claims per hour per IP
-  const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-  const limit = await rateLimit(`pro-claim:${clientIp}`, {
-    maxRequests: 3,
-    windowMs: 60 * 60 * 1000,
-  });
-  if (!limit.allowed) {
-    return NextResponse.json(
-      { error: "Rate limit exceeded. Try again later." },
-      { status: 429, headers: { "X-RateLimit-Remaining": "0" } }
-    );
-  }
+export const POST = withCors(
+  withApiHandler(async (req: NextRequest) => {
+    // Rate limit: 3 claims per hour per IP
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const limit = await rateLimit(`pro-claim:${clientIp}`, {
+      maxRequests: 3,
+      windowMs: 60 * 60 * 1000,
+    });
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: "Rate limit exceeded. Try again later." },
+        { status: 429, headers: { "X-RateLimit-Remaining": "0" } }
+      );
+    }
 
-  try {
     const supabase = createClient();
     const {
       data: { user },
@@ -106,10 +106,5 @@ async function handler(req: NextRequest) {
       success: true,
       message: "Pro activated. Enjoy enhanced visibility and support.",
     });
-  } catch (error) {
-    logger.error("Failed to claim pro", error as Error, { endpoint: "POST /api/v1/pro/claim" });
-    return NextResponse.json({ error: "Failed to activate pro" }, { status: 500 });
-  }
-}
-
-export const POST = withCors(handler);
+  })
+);

@@ -2,8 +2,8 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { z } from "zod";
 
+import { withApiHandler } from "@/lib/api-handler";
 import { auditLog, getClientInfo } from "@/lib/audit";
-import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { sanitizeUrl } from "@/lib/security/url";
 import { createClient } from "@/lib/supabase/server";
@@ -48,73 +48,74 @@ async function getUserCredential(userId: string, credentialId: string) {
   });
 }
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-  try {
-    const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export const PATCH = withApiHandler(
+  async (req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
+    try {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+
+      const credential = await getUserCredential(user.id, params.id);
+      if (!credential) {
+        return NextResponse.json({ error: "Credential not found" }, { status: 404 });
+      }
+
+      const body = await req.json();
+      const data = updateSchema.parse(body);
+
+      const updated = await prisma.credential.update({
+        where: { id: params.id },
+        data: {
+          ...(data.type !== undefined && { type: data.type }),
+          ...(data.subType !== undefined && { subType: data.subType }),
+          ...(data.title !== undefined && { title: data.title }),
+          ...(data.description !== undefined && { description: data.description }),
+          ...(data.documentNumber !== undefined && { documentNumber: data.documentNumber }),
+          ...(data.issuedBy !== undefined && { issuedBy: data.issuedBy }),
+          ...(data.issuedAt !== undefined && {
+            issuedAt:
+              data.issuedAt && !isNaN(new Date(data.issuedAt).getTime())
+                ? new Date(data.issuedAt)
+                : null,
+          }),
+          ...(data.expiresAt !== undefined && {
+            expiresAt:
+              data.expiresAt && !isNaN(new Date(data.expiresAt).getTime())
+                ? new Date(data.expiresAt)
+                : null,
+          }),
+          ...(data.fileUrl !== undefined && { fileUrl: sanitizeUrl(data.fileUrl) }),
+          ...(data.backFileUrl !== undefined && { backFileUrl: sanitizeUrl(data.backFileUrl) }),
+          ...(data.isPublic !== undefined && { isPublic: data.isPublic }),
+        },
+      });
+
+      const { ip, userAgent } = getClientInfo(req);
+      await auditLog({
+        event: "CREDENTIAL_UPDATED",
+        userId: user.id,
+        email: user.email,
+        ip,
+        userAgent,
+        metadata: { credentialId: params.id },
+      });
+
+      return NextResponse.json({ credential: updated });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return NextResponse.json({ error: error.errors }, { status: 400 });
+      }
+      throw error;
     }
-
-    const credential = await getUserCredential(user.id, params.id);
-    if (!credential) {
-      return NextResponse.json({ error: "Credential not found" }, { status: 404 });
-    }
-
-    const body = await req.json();
-    const data = updateSchema.parse(body);
-
-    const updated = await prisma.credential.update({
-      where: { id: params.id },
-      data: {
-        ...(data.type !== undefined && { type: data.type }),
-        ...(data.subType !== undefined && { subType: data.subType }),
-        ...(data.title !== undefined && { title: data.title }),
-        ...(data.description !== undefined && { description: data.description }),
-        ...(data.documentNumber !== undefined && { documentNumber: data.documentNumber }),
-        ...(data.issuedBy !== undefined && { issuedBy: data.issuedBy }),
-        ...(data.issuedAt !== undefined && {
-          issuedAt:
-            data.issuedAt && !isNaN(new Date(data.issuedAt).getTime())
-              ? new Date(data.issuedAt)
-              : null,
-        }),
-        ...(data.expiresAt !== undefined && {
-          expiresAt:
-            data.expiresAt && !isNaN(new Date(data.expiresAt).getTime())
-              ? new Date(data.expiresAt)
-              : null,
-        }),
-        ...(data.fileUrl !== undefined && { fileUrl: sanitizeUrl(data.fileUrl) }),
-        ...(data.backFileUrl !== undefined && { backFileUrl: sanitizeUrl(data.backFileUrl) }),
-        ...(data.isPublic !== undefined && { isPublic: data.isPublic }),
-      },
-    });
-
-    const { ip, userAgent } = getClientInfo(req);
-    await auditLog({
-      event: "CREDENTIAL_UPDATED",
-      userId: user.id,
-      email: user.email,
-      ip,
-      userAgent,
-      metadata: { credentialId: params.id },
-    });
-
-    return NextResponse.json({ credential: updated });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors }, { status: 400 });
-    }
-    logger.error("Update credential error:", error instanceof Error ? error : undefined);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
-  try {
+export const DELETE = withApiHandler(
+  async (req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
     const supabase = createClient();
     const {
       data: { user },
@@ -141,8 +142,5 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    logger.error("Delete credential error:", error instanceof Error ? error : undefined);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-}
+);

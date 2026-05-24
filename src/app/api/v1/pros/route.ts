@@ -1,11 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { logger } from "@/lib/logger";
+import { withApiHandler } from "@/lib/api-handler";
 import { prisma } from "@/lib/prisma";
 import { withCors } from "@/lib/security/cors";
 
-async function handler(req: NextRequest) {
-  try {
+export const GET = withCors(
+  withApiHandler(async (req: NextRequest) => {
     const { searchParams } = new URL(req.url);
     const q = searchParams.get("q")?.slice(0, 100);
 
@@ -44,10 +44,5 @@ async function handler(req: NextRequest) {
         "Cache-Control": "public, s-maxage=120, stale-while-revalidate=600",
       },
     });
-  } catch (error) {
-    logger.error("Failed to fetch pros directory", error as Error);
-    return NextResponse.json({ error: "Failed to load directory" }, { status: 500 });
-  }
-}
-
-export const GET = withCors(handler);
+  })
+);

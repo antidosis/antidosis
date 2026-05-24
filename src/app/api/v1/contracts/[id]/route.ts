@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+import { withApiHandler } from "@/lib/api-handler";
 import { logger } from "@/lib/logger";
 import { generateContractPdf } from "@/lib/pdf-contract";
 import { prisma } from "@/lib/prisma";
@@ -8,8 +9,8 @@ import { patchContractSchema } from "@/lib/schemas";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  try {
+export const GET = withApiHandler(
+  async (req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
     const supabase = createClient();
     const {
       data: { user },
@@ -118,14 +119,11 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     }
 
     return NextResponse.json({ contract });
-  } catch (error) {
-    logger.error("Get contract error:", error instanceof Error ? error : undefined);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-  try {
+export const PATCH = withApiHandler(
+  async (req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
     const supabase = createClient();
     const {
       data: { user },
@@ -431,8 +429,5 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     }
 
     return NextResponse.json({ contract });
-  } catch (error) {
-    logger.error("Update contract error:", error instanceof Error ? error : undefined);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-}
+);

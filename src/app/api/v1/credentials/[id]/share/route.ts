@@ -1,12 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { logger } from "@/lib/logger";
+import { withApiHandler } from "@/lib/api-handler";
 import { prisma } from "@/lib/prisma";
 import { formatCredentialForMessage } from "@/lib/redaction";
 import { createClient } from "@/lib/supabase/server";
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  try {
+export const POST = withApiHandler(
+  async (req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
     const supabase = createClient();
     const {
       data: { user },
@@ -34,8 +34,5 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     const shareText = formatCredentialForMessage(credential);
     return NextResponse.json({ shareText });
-  } catch (error) {
-    logger.error("Share credential error:", error instanceof Error ? error : undefined);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-}
+);

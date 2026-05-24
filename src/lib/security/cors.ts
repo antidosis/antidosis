@@ -11,7 +11,7 @@ const ALLOWED_ORIGINS = [
   "https://antidosis-kqs9nele2-martins-projects-5d68d645.vercel.app",
 ];
 
-export function withCors(handler: (req: NextRequest) => Promise<NextResponse> | NextResponse) {
+export function withCors(handler: (req: NextRequest) => Promise<Response> | Response) {
   return async (req: NextRequest) => {
     const origin = req.headers.get("origin");
     const isAllowed = !origin || ALLOWED_ORIGINS.includes(origin);
