@@ -242,7 +242,7 @@ export const COMMANDS: TerminalCommand[] = [
   // ─── Phase 2: Needs ───
   {
     name: "needs",
-    aliases: ["wall", "browse", "list"],
+    aliases: ["wall", "browse"],
     description: "Browse open needs. Use filters like /needs skill:gardening or /needs mine",
     usage: "/needs [filter]",
     example: "/needs skill:gardening",
@@ -282,7 +282,7 @@ export const COMMANDS: TerminalCommand[] = [
   },
   {
     name: "repost",
-    aliases: ["renew", "bump"],
+    aliases: ["bump"],
     description: "Repost an expired or archived need",
     usage: "/repost <needId>",
     example: "/repost a1b2c3d4",
@@ -521,7 +521,7 @@ export const COMMANDS: TerminalCommand[] = [
   },
   {
     name: "search",
-    aliases: ["find", "lookup"],
+    aliases: ["find"],
     description: "Search across needs, users, and skills",
     usage: "/search <query>",
     example: "/search gardening",
@@ -553,7 +553,7 @@ export const COMMANDS: TerminalCommand[] = [
   // ─── Phase 7: Lab ───
   {
     name: "lab",
-    aliases: ["sandbox", "playground", "draft"],
+    aliases: ["sandbox", "playground"],
     description: "Enter your personal lab (private sandbox)",
     usage: "/lab",
     example: "/lab",
@@ -717,7 +717,7 @@ export const COMMANDS: TerminalCommand[] = [
   },
   {
     name: "directory",
-    aliases: ["dir"],
+    aliases: [],
     description: "Toggle Pro directory visibility",
     usage: "/directory on|off",
     example: "/directory on",
@@ -843,7 +843,7 @@ export const COMMANDS: TerminalCommand[] = [
   },
   {
     name: "subscribe",
-    aliases: ["renew", "pro-renew"],
+    aliases: ["pro-renew"],
     description: "Subscribe or renew Pro membership",
     usage: "/subscribe",
     example: "/subscribe",
@@ -1059,7 +1059,7 @@ export const COMMANDS: TerminalCommand[] = [
   // ─── Shell (NEW) ───
   {
     name: "ls",
-    aliases: ["list", "dir"],
+    aliases: ["dir"],
     description: "List items at a filesystem path",
     usage: "/ls [path]",
     example: "/ls home/needs",
@@ -1079,7 +1079,7 @@ export const COMMANDS: TerminalCommand[] = [
   },
   {
     name: "cat",
-    aliases: ["show", "view"],
+    aliases: ["show"],
     description: "Display item details",
     usage: "/cat <id>",
     example: "/cat a1b2c3d4",
