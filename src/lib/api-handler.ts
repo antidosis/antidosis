@@ -11,17 +11,25 @@ function generateRequestId(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-export type ApiHandler = (req: NextRequest, ctx: ApiContext) => Promise<Response>;
+export type ApiHandler = (
+  req: NextRequest,
+  ctx: ApiContext,
+  ...args: unknown[]
+) => Promise<Response>;
 
 /**
  * Wraps an API route handler with structured logging, error handling,
  * request timing, and request ID propagation.
  *
+ * Preserves Next.js route params by forwarding all arguments.
+ *
  * Usage:
- *   export const GET = withApiHandler(async (req, ctx) => { ... });
+ *   export const GET = withApiHandler(async (req, ctx, { params }) => { ... });
  */
-export function withApiHandler(handler: ApiHandler): (req: NextRequest) => Promise<Response> {
-  return async (req: NextRequest) => {
+export function withApiHandler(
+  handler: ApiHandler
+): (req: NextRequest, ...args: unknown[]) => Promise<Response> {
+  return async (req: NextRequest, ...args: unknown[]) => {
     const requestId = generateRequestId();
     const startTime = Date.now();
     const method = req.method;
@@ -34,7 +42,7 @@ export function withApiHandler(handler: ApiHandler): (req: NextRequest) => Promi
     });
 
     try {
-      const response = await handler(req, { requestId, startTime });
+      const response = await handler(req, { requestId, startTime }, ...args);
       const latencyMs = Date.now() - startTime;
       const status = response.status;
 
