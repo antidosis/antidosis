@@ -46,6 +46,9 @@ import { useToast } from "@/components/ui/toast";
 import { getExchangeMode } from "@/lib/categories";
 import { createClient } from "@/lib/supabase/client";
 
+import { ConfirmDialog } from "./confirm-dialog";
+import { ReviewForm } from "./review-form";
+
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
 /* ------------------------------------------------------------------ */
@@ -1036,65 +1039,17 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                 {myAcceptance.status === "completed" && !need.requiresContract && (
                   <div className="mt-3">
                     {showReviewForm ? (
-                      <div className="bg-[#1a1714] border border-[#2a2420] p-3 rounded space-y-3">
-                        <p className="text-xs text-[#e8d5a3] font-medium">Leave a review</p>
-                        <div>
-                          <label className="text-xs text-[#7a6b5a] block mb-1">Rating (1–10)</label>
-                          <input
-                            type="range"
-                            min={1}
-                            max={10}
-                            value={reviewRating}
-                            onChange={(e) => setReviewRating(parseInt(e.target.value))}
-                            className="w-full accent-[#f5a623]"
-                          />
-                          <div className="flex justify-between text-xs text-[#7a6b5a] mt-1">
-                            <span>1</span>
-                            <span className="text-[#f5a623] font-medium">{reviewRating}</span>
-                            <span>10</span>
-                          </div>
-                        </div>
-                        <Textarea
-                          placeholder="What went well?"
-                          value={reviewComment}
-                          onChange={(e) => setReviewComment(e.target.value)}
-                          rows={2}
-                          className="text-sm"
-                          maxLength={2000}
-                        />
-                        <Textarea
-                          placeholder="Private feedback (only visible to moderators)"
-                          value={reviewPrivateFeedback}
-                          onChange={(e) => setReviewPrivateFeedback(e.target.value)}
-                          rows={2}
-                          className="text-sm"
-                          maxLength={2000}
-                        />
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="default"
-                            className="h-7 text-xs"
-                            onClick={() => submitReview(myAcceptance.id, need.poster.id)}
-                            disabled={submittingReview}
-                          >
-                            {submittingReview ? (
-                              <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                            ) : (
-                              <Star className="h-3 w-3 mr-1" />
-                            )}
-                            Submit Review
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            className="h-7 text-xs"
-                            onClick={() => setShowReviewForm(false)}
-                          >
-                            Cancel
-                          </Button>
-                        </div>
-                      </div>
+                      <ReviewForm
+                        rating={reviewRating}
+                        comment={reviewComment}
+                        privateFeedback={reviewPrivateFeedback}
+                        submitting={submittingReview}
+                        onRatingChange={setReviewRating}
+                        onCommentChange={setReviewComment}
+                        onPrivateFeedbackChange={setReviewPrivateFeedback}
+                        onSubmit={() => submitReview(myAcceptance.id, need.poster.id)}
+                        onCancel={() => setShowReviewForm(false)}
+                      />
                     ) : (
                       <Button
                         size="sm"
@@ -1525,68 +1480,19 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                       )}
                       {/* Poster review form inline */}
                       {posterReviewAcceptanceId === a.id && (
-                        <div className="mt-3 bg-[#1a1714] border border-[#2a2420] p-3 rounded space-y-3">
-                          <p className="text-xs text-[#e8d5a3] font-medium">
-                            Leave a review for {a.user.fullName || "this fulfiller"}
-                          </p>
-                          <div>
-                            <label className="text-xs text-[#7a6b5a] block mb-1">
-                              Rating (1–10)
-                            </label>
-                            <input
-                              type="range"
-                              min={1}
-                              max={10}
-                              value={reviewRating}
-                              onChange={(e) => setReviewRating(parseInt(e.target.value))}
-                              className="w-full accent-[#f5a623]"
-                            />
-                            <div className="flex justify-between text-xs text-[#7a6b5a] mt-1">
-                              <span>1</span>
-                              <span className="text-[#f5a623] font-medium">{reviewRating}</span>
-                              <span>10</span>
-                            </div>
-                          </div>
-                          <Textarea
-                            placeholder="What went well?"
-                            value={reviewComment}
-                            onChange={(e) => setReviewComment(e.target.value)}
-                            rows={2}
-                            className="text-sm"
-                            maxLength={2000}
+                        <div className="mt-3">
+                          <ReviewForm
+                            title={`Leave a review for ${a.user.fullName || "this fulfiller"}`}
+                            rating={reviewRating}
+                            comment={reviewComment}
+                            privateFeedback={reviewPrivateFeedback}
+                            submitting={submittingReview}
+                            onRatingChange={setReviewRating}
+                            onCommentChange={setReviewComment}
+                            onPrivateFeedbackChange={setReviewPrivateFeedback}
+                            onSubmit={() => submitReview(a.id, a.user.id)}
+                            onCancel={() => setPosterReviewAcceptanceId(null)}
                           />
-                          <Textarea
-                            placeholder="Private feedback (only visible to moderators)"
-                            value={reviewPrivateFeedback}
-                            onChange={(e) => setReviewPrivateFeedback(e.target.value)}
-                            rows={2}
-                            className="text-sm"
-                            maxLength={2000}
-                          />
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              variant="default"
-                              className="h-7 text-xs"
-                              onClick={() => submitReview(a.id, a.user.id)}
-                              disabled={submittingReview}
-                            >
-                              {submittingReview ? (
-                                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                              ) : (
-                                <Star className="h-3 w-3 mr-1" />
-                              )}
-                              Submit Review
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="secondary"
-                              className="h-7 text-xs"
-                              onClick={() => setPosterReviewAcceptanceId(null)}
-                            >
-                              Cancel
-                            </Button>
-                          </div>
                         </div>
                       )}
                     </div>
@@ -1600,23 +1506,12 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
 
       {/* ========== CONFIRM DIALOG ========== */}
       {confirmDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0a0806]/80 p-4">
-          <div className="vessel p-5 max-w-sm w-full">
-            <p className="text-sm font-medium text-[#e8d5a3] mb-5">
-              {confirmDialog.type === "delete"
-                ? "Delete this need? This cannot be undone."
-                : `Form a contract with ${confirmDialog.userName}?`}
-            </p>
-            <div className="flex gap-2 justify-end">
-              <Button variant="secondary" size="sm" onClick={() => setConfirmDialog(null)}>
-                Cancel
-              </Button>
-              <Button size="sm" variant="default" onClick={executeConfirm}>
-                Confirm
-              </Button>
-            </div>
-          </div>
-        </div>
+        <ConfirmDialog
+          type={confirmDialog.type}
+          userName={confirmDialog.userName}
+          onCancel={() => setConfirmDialog(null)}
+          onConfirm={executeConfirm}
+        />
       )}
     </>
   );
