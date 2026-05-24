@@ -129,7 +129,6 @@ export function ProfileChecklist({
   emailVerified,
   onNavigateToCredentials,
 }: ProfileChecklistProps) {
-  const hasCredentials = (profile.credentials?.length || 0) > 0;
   const hasIdentification = profile.credentials?.some((c) => c.type === "identification") ?? false;
   const profileComplete = !!(
     profile.fullName &&

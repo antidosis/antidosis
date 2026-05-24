@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 
 import { EB_Garamond } from "next/font/google";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 import {
   ArrowLeft,
@@ -297,8 +296,6 @@ function SignatureRow({
 }
 
 export default function ContractFlowDemoPage() {
-  const router = useRouter();
-
   /* ─── View mode ─── */
   const [currentUser, setCurrentUser] = useState<"A" | "B" | "C">("A");
   const isPartyA = currentUser === "A";
@@ -430,6 +427,7 @@ export default function ContractFlowDemoPage() {
     activeThread,
     contracts,
     messages,
+    userContractView,
     freeFormReviews,
   ]);
 
@@ -798,7 +796,6 @@ export default function ContractFlowDemoPage() {
     !termsLocked &&
     !iSubmitted &&
     (currentContract.status === "draft" || currentContract.status === "pending_terms");
-  const canReviewPhase = bothSubmitted && !termsLocked;
   const canSign =
     termsLocked &&
     !iSigned &&
@@ -819,12 +816,6 @@ export default function ContractFlowDemoPage() {
     (a) => a.status === "accepted" || a.status === "completed"
   );
   const freeFormCompleted = freeFormAccepted?.status === "completed";
-  const iMarkedCompleteFreeForm = isPartyA
-    ? (freeFormAccepted?.posterMarkedComplete ?? false)
-    : (freeFormAccepted?.fulfillerMarkedComplete ?? false);
-  const otherMarkedCompleteFreeForm = isPartyA
-    ? (freeFormAccepted?.fulfillerMarkedComplete ?? false)
-    : (freeFormAccepted?.posterMarkedComplete ?? false);
   const hasReviewedFreeForm = freeFormAccepted
     ? (freeFormReviews[freeFormAccepted.id] ?? []).some((r) => r.giverId === profileId)
     : false;

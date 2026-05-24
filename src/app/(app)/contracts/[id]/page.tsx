@@ -545,8 +545,6 @@ export default function ContractPage() {
     !termsLocked &&
     !iSubmitted &&
     (contract.status === "draft" || contract.status === "pending_terms");
-  // Review phase: both submitted, not yet locked, can accept
-  const canReview = bothSubmitted && !termsLocked;
   const canSign =
     termsLocked && !iSigned && (contract.status === "draft" || contract.status === "pending_terms");
 

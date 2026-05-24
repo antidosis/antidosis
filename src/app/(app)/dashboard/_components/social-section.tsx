@@ -23,7 +23,7 @@ export function SocialSection() {
       user: { id: string; fullName: string | null; avatarUrl: string | null };
     }[];
   }>("/api/v1/terminal/friends");
-  const { data: blocksData, isLoading: blocksLoading } = useApi<{
+  const { data: blocksData, isLoading: _blocksLoading } = useApi<{
     blocks: {
       id: string;
       user: { id: string; fullName: string | null; avatarUrl: string | null };

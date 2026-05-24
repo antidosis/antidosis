@@ -228,6 +228,7 @@ export default function TerminalClient() {
         }
       })
       .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   // Fetch DM threads
@@ -307,6 +308,7 @@ export default function TerminalClient() {
         }
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeContext]);
 
   // Auto-scroll (smart)

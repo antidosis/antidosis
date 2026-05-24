@@ -122,7 +122,6 @@ export default function NeedsPage() {
   const total = needsData?.total || 0;
   const totalPages = needsData?.totalPages || 1;
   const availableCategories = needsData?.availableFilters?.categories || [];
-  const availableSkills = needsData?.availableFilters?.skills || [];
 
   // Skill input suggestions — only suggest skills that exist in real posts
   useEffect(() => {

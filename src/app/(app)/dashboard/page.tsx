@@ -338,7 +338,7 @@ export default function DashboardPage() {
             <ProfileSection
               initialProfile={profile}
               credentials={credentials}
-              onUpdate={(updated) => {
+              onUpdate={(_updated) => {
                 // mutate profile data optimistically
               }}
             />
