@@ -1,30 +1,18 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 import { useRouter } from "next/navigation";
 
-import {
-  X,
-  Menu,
-  Loader2,
-  Paperclip,
-  Send,
-  Smile,
-  Trash2,
-  ImageIcon,
-  Mic,
-  MicOff,
-  Reply,
-  CornerDownRight,
-} from "lucide-react";
+import { X, Menu, Loader2, Paperclip, Send, Smile, Mic, MicOff, Reply } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 
 import { COMMANDS, findClosestCommand } from "./terminal-commands";
 import { dispatchCommand } from "./terminal-handlers";
-import { formatTime, getThemeColors } from "./terminal-render";
+import { useThemeStyles, useNotificationSound, useSwipeGesture } from "./terminal-hooks";
+import { TerminalMessageList } from "./terminal-message-list";
 import {
   loadSession,
   saveSession,
@@ -34,184 +22,23 @@ import {
   type TerminalSession,
   type WizardState,
 } from "./terminal-session";
+import { TerminalSidebar } from "./terminal-sidebar";
+import type {
+  Channel,
+  Thread,
+  Msg,
+  SysMsg,
+  ActiveContext,
+  OnlineUser,
+  PendingChoice,
+  ReplyTarget,
+  Attachment,
+} from "./terminal-types";
 import { advanceWizard, getSteps } from "./terminal-wizard";
-
-// Types
-
-interface Channel {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  type: string;
-  order: number;
-}
-
-interface Thread {
-  id: string;
-  otherUser: {
-    id: string;
-    fullName: string | null;
-    avatarUrl: string | null;
-  };
-  lastMessage: {
-    id: string;
-    content: string;
-    createdAt: string;
-    senderId: string;
-    isRead: boolean;
-  } | null;
-  unreadCount: number;
-  updatedAt: string;
-}
-
-interface Reaction {
-  id: string;
-  emoji: string;
-  userId: string;
-}
-
-interface Attachment {
-  url: string;
-  type: string;
-  name: string;
-}
-
-interface Msg {
-  id: string;
-  content: string;
-  attachments: Attachment[];
-  createdAt: string;
-  sender: {
-    id: string;
-    fullName: string | null;
-    avatarUrl: string | null;
-  };
-  reactions: Reaction[];
-}
-
-interface ActiveContext {
-  type: "channel" | "dm" | "console";
-  id?: string;
-  name?: string;
-  threadId?: string;
-  otherUserId?: string;
-  otherUserName?: string;
-}
-
-interface SysMsg {
-  id: string;
-  text: string;
-  type: "info" | "error" | "success" | "command";
-  timestamp: number;
-}
-
-interface OnlineUser {
-  id: string;
-  fullName: string | null;
-  avatarUrl: string | null;
-}
-
-interface PendingChoice {
-  type: "dm" | "profile";
-  options: { id: string; fullName: string | null; locationName: string | null }[];
-}
-
-interface ReplyTarget {
-  id: string;
-  content: string;
-  senderName: string | null;
-}
 
 // Constants
 
 const COMMON_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "🔥", "🎉", "🙏", "👏", "🤔"];
-
-// Helpers
-
-function getInitials(name: string | null | undefined): string {
-  if (!name) return "?";
-  const parts = name.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-}
-
-function uuid(): string {
-  return crypto.randomUUID();
-}
-
-function useThemeStyles(themeName: string) {
-  const t = useMemo(() => getThemeColors(themeName), [themeName]);
-  return {
-    vars: {
-      "--term-bg": t.bg,
-      "--term-sidebar-bg": t.sidebarBg,
-      "--term-accent": t.accent,
-      "--term-accent-hover": t.accentHover,
-      "--term-text": t.text,
-      "--term-muted": t.muted,
-      "--term-border": t.border,
-      "--term-error": t.error,
-      "--term-success": t.success,
-    } as React.CSSProperties,
-    t,
-  };
-}
-
-function useNotificationSound(enabled: boolean) {
-  const ctxRef = useRef<AudioContext | null>(null);
-
-  const play = useCallback(() => {
-    if (!enabled) return;
-    try {
-      if (!ctxRef.current) ctxRef.current = new AudioContext();
-      const ctx = ctxRef.current;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(880, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.1);
-      gain.gain.setValueAtTime(0.1, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.15);
-    } catch {
-      // ignore
-    }
-  }, [enabled]);
-
-  return play;
-}
-
-function useSwipeGesture(onOpen: () => void, onClose: () => void) {
-  const touchStartX = useRef(0);
-  const touchStartY = useRef(0);
-
-  useEffect(() => {
-    const onTouchStart = (e: TouchEvent) => {
-      touchStartX.current = e.touches[0].clientX;
-      touchStartY.current = e.touches[0].clientY;
-    };
-
-    const onTouchEnd = (e: TouchEvent) => {
-      if (window.innerWidth >= 768) return;
-      const dx = e.changedTouches[0].clientX - touchStartX.current;
-      const dy = e.changedTouches[0].clientY - touchStartY.current;
-      if (Math.abs(dy) > Math.abs(dx)) return;
-      if (dx > 80 && touchStartX.current < 40) onOpen();
-      if (dx < -80) onClose();
-    };
-
-    document.addEventListener("touchstart", onTouchStart, { passive: true });
-    document.addEventListener("touchend", onTouchEnd, { passive: true });
-    return () => {
-      document.removeEventListener("touchstart", onTouchStart);
-      document.removeEventListener("touchend", onTouchEnd);
-    };
-  }, [onOpen, onClose]);
-}
 
 // Component
 
@@ -907,7 +734,10 @@ export default function TerminalClient() {
   // ─── Helpers ─────────────────────────────────────────────────
 
   function addSys(text: string, type: SysMsg["type"] = "info") {
-    setSysMessages((prev) => [...prev, { id: uuid(), text, type, timestamp: Date.now() }]);
+    setSysMessages((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), text, type, timestamp: Date.now() },
+    ]);
   }
 
   async function uploadFile(file: File): Promise<Attachment | null> {
@@ -972,7 +802,7 @@ export default function TerminalClient() {
             ...m,
             reactions: [
               ...m.reactions,
-              { id: uuid(), emoji, userId: myProfile?.id || user?.id || "" },
+              { id: crypto.randomUUID(), emoji, userId: myProfile?.id || user?.id || "" },
             ],
           };
         })
@@ -995,158 +825,6 @@ export default function TerminalClient() {
     } catch {
       // ignore
     }
-  }
-
-  function renderInline(text: string, keyPrefix: string): React.ReactNode[] {
-    const nodes: React.ReactNode[] = [];
-    let remaining = text;
-    let safety = 0;
-
-    const patterns = [
-      {
-        regex: /\*\*(.+?)\*\*/,
-        el: (t: string, k: string) => (
-          <strong key={k} style={{ color: "var(--term-accent)" }}>
-            {t}
-          </strong>
-        ),
-      },
-      {
-        regex: /__(.+?)__/,
-        el: (t: string, k: string) => (
-          <strong key={k} style={{ color: "var(--term-accent)" }}>
-            {t}
-          </strong>
-        ),
-      },
-      {
-        regex: /~~(.+?)~~/,
-        el: (t: string, k: string) => (
-          <del key={k} style={{ color: "var(--term-muted)" }}>
-            {t}
-          </del>
-        ),
-      },
-      {
-        regex: /`(.+?)`/,
-        el: (t: string, k: string) => (
-          <code
-            key={k}
-            style={{
-              background: "var(--term-border)",
-              padding: "0 4px",
-              borderRadius: 2,
-              fontSize: "12px",
-            }}
-          >
-            {t}
-          </code>
-        ),
-      },
-      { regex: /\*(.+?)\*/, el: (t: string, k: string) => <em key={k}>{t}</em> },
-    ];
-
-    while (remaining && safety++ < 50) {
-      let bestIdx = -1;
-      let bestMatch: RegExpMatchArray | null = null;
-      let bestPat = patterns[0];
-
-      for (const pat of patterns) {
-        const m = remaining.match(pat.regex);
-        if (m && (bestIdx === -1 || (m.index !== undefined && m.index < bestIdx))) {
-          bestIdx = m.index ?? -1;
-          bestMatch = m;
-          bestPat = pat;
-        }
-      }
-
-      if (bestMatch && bestIdx !== -1 && bestIdx >= 0) {
-        if (bestIdx > 0) {
-          nodes.push(...renderMentions(remaining.slice(0, bestIdx), keyPrefix + "-pre" + safety));
-        }
-        nodes.push(bestPat.el(bestMatch[1], keyPrefix + "-fmt" + safety));
-        remaining = remaining.slice(bestIdx + bestMatch[0].length);
-      } else {
-        nodes.push(...renderMentions(remaining, keyPrefix + "-txt" + safety));
-        break;
-      }
-    }
-
-    return nodes;
-  }
-
-  function renderMentions(text: string, keyPrefix: string): React.ReactNode[] {
-    const mentionRegex = /@([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/gi;
-    const parts: React.ReactNode[] = [];
-    let lastIdx = 0;
-    let match;
-    let count = 0;
-    while ((match = mentionRegex.exec(text)) !== null) {
-      parts.push(<span key={keyPrefix + "-m" + count++}>{text.slice(lastIdx, match.index)}</span>);
-      parts.push(
-        <span
-          key={keyPrefix + "-m" + count++}
-          style={{ color: "var(--term-accent)", fontWeight: 600 }}
-        >
-          @{match[1].slice(0, 8)}
-        </span>
-      );
-      lastIdx = match.index + match[0].length;
-    }
-    parts.push(<span key={keyPrefix + "-m" + count++}>{text.slice(lastIdx)}</span>);
-    return parts;
-  }
-
-  function renderContent(content: string): React.ReactNode {
-    // Check for reply marker
-    const replyRegex = /^>reply:([^:]+):([^:]+):(.+)\n/;
-    const replyMatch = content.match(replyRegex);
-    const actualContent = replyMatch ? content.slice(replyMatch[0].length) : content;
-
-    const linkRegex = /(https?:\/\/[^\s]+)/g;
-    const segments = actualContent.split(linkRegex);
-
-    const isSafeUrl = (url: string): boolean => {
-      try {
-        const u = new URL(url);
-        return u.protocol === "http:" || u.protocol === "https:";
-      } catch {
-        return false;
-      }
-    };
-
-    const rendered = segments.map((seg, i) => {
-      if (linkRegex.test(seg) && isSafeUrl(seg)) {
-        return (
-          <a
-            key={"link-" + i}
-            href={seg}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: "var(--term-accent)", textDecoration: "underline" }}
-          >
-            {seg.length > 50 ? seg.slice(0, 50) + "…" : seg}
-          </a>
-        );
-      }
-      return <span key={"txt-" + i}>{renderInline(seg, "seg-" + i)}</span>;
-    });
-
-    if (!replyMatch) return <>{rendered}</>;
-
-    return (
-      <>
-        <div
-          className="mb-1 border-l-2 pl-2 text-[11px] italic"
-          style={{ borderColor: "var(--term-muted)", color: "var(--term-muted)" }}
-        >
-          <CornerDownRight className="mr-1 inline h-3 w-3" />
-          {replyMatch[2]}:{" "}
-          {replyMatch[3].length > 60 ? replyMatch[3].slice(0, 60) + "…" : replyMatch[3]}
-        </div>
-        {rendered}
-      </>
-    );
   }
 
   async function submitWizard(type: WizardState["type"], data: Record<string, any>) {
@@ -1625,172 +1303,32 @@ export default function TerminalClient() {
       className="flex h-[85dvh] font-mono"
       style={{ ...themeVars, background: "var(--term-bg)", color: "var(--term-text)" }}
     >
-      {/* Sidebar */}
-      <div
-        className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed inset-y-0 left-0 z-50 flex w-[220px] flex-col overflow-y-auto border-r transition-transform duration-200 md:static md:translate-x-0`}
-        style={{ borderColor: "var(--term-border)", background: "var(--term-sidebar-bg)" }}
-      >
-        <div className="flex justify-end p-2 md:hidden">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setSidebarOpen(false)}
-            className="h-8 w-8"
-            style={{ color: "var(--term-muted)" }}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-
-        <div className="px-3 pt-3">
-          <div
-            className="mb-1.5 text-[10px] uppercase tracking-widest"
-            style={{ color: "var(--term-muted)" }}
-          >
-            Console
-          </div>
-          <button
-            onClick={() => {
-              setActiveContext({ type: "console", name: "Console" });
-              setSidebarOpen(false);
-            }}
-            className="flex w-full items-center gap-1.5 py-[3px] text-[13px] transition-colors focus:outline-none"
-            style={{
-              color:
-                activeContext?.type === "console" ? "var(--term-success)" : "var(--term-muted)",
-              borderLeft:
-                activeContext?.type === "console"
-                  ? "2px solid var(--term-success)"
-                  : "2px solid transparent",
-              paddingLeft: activeContext?.type === "console" ? "6px" : "8px",
-            }}
-          >
-            <span style={{ color: "var(--term-muted)" }}>&gt;</span>
-            <span className="truncate">Console</span>
-          </button>
-          <div
-            className="mb-1.5 mt-3 text-[10px] uppercase tracking-widest"
-            style={{ color: "var(--term-muted)" }}
-          >
-            Channels
-          </div>
-          {channels.map((ch) => {
-            const isActive = activeContext?.type === "channel" && activeContext.id === ch.id;
-            const unread = channelUnread[ch.id] || 0;
-            return (
-              <button
-                key={ch.id}
-                onClick={() => {
-                  setActiveContext({ type: "channel", id: ch.id, name: ch.name });
-                  setSidebarOpen(false);
-                }}
-                className="flex w-full items-center gap-1.5 py-[3px] text-[13px] transition-colors focus:outline-none"
-                style={{
-                  color: isActive ? "var(--term-accent)" : "var(--term-muted)",
-                  borderLeft: isActive ? "2px solid var(--term-accent)" : "2px solid transparent",
-                  paddingLeft: isActive ? "6px" : "8px",
-                }}
-              >
-                <span style={{ color: "var(--term-muted)" }}>#</span>
-                <span className="truncate">{ch.name.replace(/^#/, "")}</span>
-                {unread > 0 && (
-                  <span
-                    className="ml-auto flex h-4 min-w-[16px] items-center justify-center px-1 text-[9px] font-bold"
-                    style={{ background: "var(--term-accent)", color: "var(--term-bg)" }}
-                  >
-                    {unread > 99 ? "99+" : unread}
-                  </span>
-                )}
-                {ch.type === "staff" && (
-                  <span
-                    className="ml-auto text-[9px] uppercase tracking-wider"
-                    style={{ color: "var(--term-accent)" }}
-                  >
-                    Staff
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-        {dmThreads.length > 0 && (
-          <div className="mt-4 border-t px-3 pt-3" style={{ borderColor: "var(--term-border)" }}>
-            <div
-              className="mb-1.5 text-[10px] uppercase tracking-widest"
-              style={{ color: "var(--term-muted)" }}
-            >
-              Direct Messages
-            </div>
-            {dmThreads.map((thread) => {
-              const isActive = activeContext?.type === "dm" && activeContext.threadId === thread.id;
-              return (
-                <button
-                  key={thread.id}
-                  onClick={() => {
-                    setActiveContext({
-                      type: "dm",
-                      threadId: thread.id,
-                      otherUserId: thread.otherUser.id,
-                      otherUserName: thread.otherUser.fullName || "User",
-                    });
-                    setSidebarOpen(false);
-                  }}
-                  className="flex w-full items-center gap-2 py-[3px] text-[13px] transition-colors focus:outline-none"
-                  style={{
-                    color: isActive ? "var(--term-accent)" : "var(--term-muted)",
-                    borderLeft: isActive ? "2px solid var(--term-accent)" : "2px solid transparent",
-                    paddingLeft: isActive ? "6px" : "8px",
-                  }}
-                >
-                  <div
-                    className="flex h-[18px] w-[18px] shrink-0 items-center justify-center text-[9px]"
-                    style={{ background: "var(--term-border)", color: "var(--term-muted)" }}
-                  >
-                    {getInitials(thread.otherUser.fullName)}
-                  </div>
-                  <span className="truncate">{thread.otherUser.fullName || "User"}</span>
-                  {thread.unreadCount > 0 && (
-                    <span
-                      className="ml-auto flex h-4 min-w-[16px] items-center justify-center px-1 text-[9px] font-bold"
-                      style={{ background: "var(--term-accent)", color: "var(--term-bg)" }}
-                    >
-                      {thread.unreadCount}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        )}
-        <div className="mt-auto border-t px-3 py-3" style={{ borderColor: "var(--term-border)" }}>
-          <div
-            className="mb-1.5 text-[10px] uppercase tracking-widest"
-            style={{ color: "var(--term-muted)" }}
-          >
-            Online Now
-          </div>
-          {onlineUsers.length > 0 ? (
-            onlineUsers.map((u) => (
-              <div
-                key={u.id}
-                className="flex items-center gap-2 py-[2px] text-[13px]"
-                style={{ color: "var(--term-muted)" }}
-              >
-                <div
-                  className="h-[6px] w-[6px] shrink-0"
-                  style={{ background: "var(--term-success)" }}
-                />
-                <span className="truncate">{u.fullName || "User"}</span>
-              </div>
-            ))
-          ) : (
-            <div className="py-[2px] text-[13px] italic" style={{ color: "var(--term-muted)" }}>
-              No one online
-            </div>
-          )}
-        </div>
-      </div>
-
+      <TerminalSidebar
+        sidebarOpen={sidebarOpen}
+        onCloseSidebar={() => setSidebarOpen(false)}
+        channels={channels}
+        dmThreads={dmThreads}
+        onlineUsers={onlineUsers}
+        activeContext={activeContext}
+        channelUnread={channelUnread}
+        onSelectChannel={(ch) => {
+          setActiveContext({ type: "channel", id: ch.id, name: ch.name });
+          setSidebarOpen(false);
+        }}
+        onSelectDm={(thread) => {
+          setActiveContext({
+            type: "dm",
+            threadId: thread.id,
+            otherUserId: thread.otherUser.id,
+            otherUserName: thread.otherUser.fullName || "User",
+          });
+          setSidebarOpen(false);
+        }}
+        onSelectConsole={() => {
+          setActiveContext({ type: "console", name: "Console" });
+          setSidebarOpen(false);
+        }}
+      />
       {/* Main */}
       <div className="flex min-w-0 flex-1 flex-col" style={{ background: "var(--term-bg)" }}>
         {/* Header */}
@@ -1843,293 +1381,34 @@ export default function TerminalClient() {
           </div>
         )}
 
-        {/* Messages */}
-        <div
-          ref={scrollRef}
+        <TerminalMessageList
+          messages={messages}
+          sysMessages={sysMessages}
+          isLoading={isLoading}
+          activeContext={activeContext}
+          channels={channels}
+          myProfileId={myProfile?.id}
+          isAdmin={isAdmin}
+          wizard={wizard}
+          pendingChoices={pendingChoices}
+          typingUsers={typingUsers}
+          showScrollButton={showScrollButton}
+          showEmojiPicker={showEmojiPicker}
           onScroll={onScroll}
-          className="relative flex-1 min-h-0 overflow-y-auto px-4 py-2"
-        >
-          {isLoading ? (
-            <div className="flex h-full items-center justify-center">
-              <Loader2 className="h-6 w-6 animate-spin" style={{ color: "var(--term-accent)" }} />
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {activeContext?.type === "channel" &&
-                !messages.length &&
-                !sysMessages.length &&
-                !wizard &&
-                !pendingChoices && (
-                  <div className="mb-4">
-                    <p className="text-[13px]" style={{ color: "var(--term-muted)" }}>
-                      <span style={{ color: "var(--term-accent)" }}>#</span>{" "}
-                      <span style={{ color: "var(--term-accent)" }}>{activeContext.name}</span>
-                      {" - "}
-                      {channels.find((c) => c.id === activeContext.id)?.description ||
-                        "General discussion"}
-                    </p>
-                    <p className="mt-2 text-[13px]">
-                      Welcome to{" "}
-                      <span style={{ color: "var(--term-accent)" }}>#{activeContext.name}</span>!
-                    </p>
-                    <p className="mt-1 text-[13px]" style={{ color: "var(--term-muted)" }}>
-                      No messages here yet. Be the first to say something — just type below and hit
-                      enter.
-                    </p>
-                  </div>
-                )}
-
-              {activeContext?.type === "console" &&
-                !sysMessages.length &&
-                !wizard &&
-                !pendingChoices && (
-                  <div className="mb-4">
-                    <p className="text-[13px]" style={{ color: "var(--term-success)" }}>
-                      &gt; Console
-                    </p>
-                    <p className="mt-2 text-[13px]">
-                      This is your private space. Only you can see what you type here.
-                    </p>
-                    <p className="mt-1 text-[13px]" style={{ color: "var(--term-muted)" }}>
-                      Try <span style={{ color: "var(--term-accent)" }}>/help</span> to see
-                      commands, or select a channel to chat with others.
-                    </p>
-                  </div>
-                )}
-
-              {sysMessages.map((sys) => (
-                <div
-                  key={sys.id}
-                  className="text-[13px]"
-                  style={{
-                    color:
-                      sys.type === "error"
-                        ? "var(--term-error)"
-                        : sys.type === "success"
-                          ? "var(--term-success)"
-                          : sys.type === "command"
-                            ? "var(--term-accent)"
-                            : "var(--term-muted)",
-                  }}
-                >
-                  <pre className="whitespace-pre-wrap font-mono">{sys.text}</pre>
-                </div>
-              ))}
-
-              {wizard && (
-                <div className="border-l-2 pl-3" style={{ borderColor: "var(--term-accent)" }}>
-                  <p className="text-[11px] font-semibold" style={{ color: "var(--term-accent)" }}>
-                    Wizard
-                  </p>
-                  <pre className="whitespace-pre-wrap text-[13px]">{wizard.prompt}</pre>
-                  <p className="mt-1 text-[11px]" style={{ color: "var(--term-muted)" }}>
-                    Type your response or /cancel to quit
-                  </p>
-                </div>
-              )}
-
-              {pendingChoices && (
-                <div className="border-l-2 pl-3" style={{ borderColor: "var(--term-accent)" }}>
-                  <p className="text-[11px] font-semibold" style={{ color: "var(--term-accent)" }}>
-                    Choose an option:
-                  </p>
-                  {pendingChoices.options.map((opt, i) => (
-                    <p key={opt.id} className="text-[13px]">
-                      {i + 1}. {opt.fullName || "Unknown"} ({opt.locationName || "No location"})
-                    </p>
-                  ))}
-                </div>
-              )}
-
-              {/* Typing indicator */}
-              {Object.keys(typingUsers).length > 0 && (
-                <div
-                  className="flex items-center gap-2 py-1 text-[11px] italic"
-                  style={{ color: "var(--term-muted)" }}
-                >
-                  <span className="flex gap-0.5">
-                    <span className="animate-bounce">•</span>
-                    <span className="animate-bounce" style={{ animationDelay: "0.1s" }}>
-                      •
-                    </span>
-                    <span className="animate-bounce" style={{ animationDelay: "0.2s" }}>
-                      •
-                    </span>
-                  </span>
-                  {Object.keys(typingUsers).join(", ")} typing...
-                </div>
-              )}
-
-              {messages.map((msg, idx) => {
-                const prev = messages[idx - 1];
-                const isGrouped =
-                  prev &&
-                  prev.sender.id === msg.sender.id &&
-                  new Date(msg.createdAt).getTime() - new Date(prev.createdAt).getTime() <
-                    5 * 60 * 1000;
-                return (
-                  <div key={msg.id} className="group">
-                    {!isGrouped && (
-                      <div className="flex items-baseline gap-2">
-                        <span
-                          className="text-[11px] shrink-0"
-                          style={{ color: "var(--term-muted)" }}
-                        >
-                          {formatTime(msg.createdAt)}
-                        </span>
-                        <span
-                          className="text-[13px] font-semibold"
-                          style={{ color: "var(--term-accent)" }}
-                        >
-                          {msg.sender.fullName || "User"}
-                        </span>
-                        <button
-                          onClick={() => navigator.clipboard.writeText(msg.content).catch(() => {})}
-                          className="opacity-0 transition-opacity group-hover:opacity-100"
-                          title="Copy text"
-                        >
-                          <span className="text-[10px]" style={{ color: "var(--term-muted)" }}>
-                            copy
-                          </span>
-                        </button>
-                        {(msg.sender.id === myProfile?.id || isAdmin) && (
-                          <button
-                            onClick={() => deleteMessage(msg.id)}
-                            className="opacity-0 transition-opacity group-hover:opacity-100"
-                            title="Delete"
-                          >
-                            <Trash2 className="h-3 w-3" style={{ color: "var(--term-muted)" }} />
-                          </button>
-                        )}
-                      </div>
-                    )}
-                    <div className="pl-[52px] text-[13px]">{renderContent(msg.content)}</div>
-                    {msg.attachments.length > 0 && (
-                      <div className="mt-1 flex flex-wrap gap-2 pl-[52px]">
-                        {msg.attachments.map((att, i) =>
-                          att.type.startsWith("audio/") ? (
-                            <audio
-                              key={i}
-                              controls
-                              preload="metadata"
-                              className="h-8 max-w-[280px]"
-                              src={att.url}
-                            />
-                          ) : (
-                            <button
-                              key={i}
-                              onClick={() => {
-                                if (att.type.startsWith("image/")) {
-                                  setLightboxImage(att.url);
-                                } else {
-                                  window.open(att.url, "_blank");
-                                }
-                              }}
-                              className="flex items-center gap-1 px-2 py-0.5 text-[11px]"
-                              style={{
-                                background: "var(--term-border)",
-                                color: "var(--term-accent)",
-                              }}
-                            >
-                              {att.type.startsWith("image/") ? (
-                                <ImageIcon className="h-3 w-3" />
-                              ) : (
-                                <Paperclip className="h-3 w-3" />
-                              )}
-                              {att.name}
-                            </button>
-                          )
-                        )}
-                      </div>
-                    )}
-                    {msg.reactions.length > 0 && (
-                      <div className="mt-1 flex flex-wrap gap-1 pl-[52px]">
-                        {msg.reactions.map((r) => (
-                          <button
-                            key={r.id}
-                            onClick={() => toggleReaction(msg.id, r.emoji)}
-                            className="px-1 py-0 text-[11px]"
-                            style={{ background: "var(--term-border)" }}
-                          >
-                            {r.emoji}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                    <div className="mt-0.5 flex gap-2 pl-[52px] opacity-0 transition-opacity group-hover:opacity-100">
-                      <button
-                        onClick={() => setShowEmojiPicker(msg.id)}
-                        className="text-[11px]"
-                        style={{ color: "var(--term-muted)" }}
-                      >
-                        + react
-                      </button>
-                      <button
-                        onClick={() =>
-                          setReplyingTo({
-                            id: msg.id,
-                            content: msg.content,
-                            senderName: msg.sender.fullName,
-                          })
-                        }
-                        className="flex items-center gap-0.5 text-[11px]"
-                        style={{ color: "var(--term-muted)" }}
-                      >
-                        <Reply className="h-3 w-3" /> reply
-                      </button>
-                    </div>
-                    {showEmojiPicker === msg.id && (
-                      <div
-                        className="mt-1 flex flex-wrap gap-1 pl-[52px] p-1.5"
-                        style={{ background: "var(--term-border)" }}
-                      >
-                        {COMMON_EMOJIS.map((emoji) => (
-                          <button
-                            key={emoji}
-                            onClick={() => {
-                              toggleReaction(msg.id, emoji);
-                              setShowEmojiPicker(null);
-                            }}
-                            className="p-0.5 text-sm hover:opacity-80"
-                          >
-                            {emoji}
-                          </button>
-                        ))}
-                        <button
-                          onClick={() => setShowEmojiPicker(null)}
-                          className="ml-1 text-[11px]"
-                          style={{ color: "var(--term-muted)" }}
-                        >
-                          cancel
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-          {showScrollButton && (
-            <button
-              onClick={() => {
-                if (scrollRef.current) {
-                  scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-                  isNearBottomRef.current = true;
-                  setShowScrollButton(false);
-                }
-              }}
-              className="absolute bottom-3 right-4 flex h-7 w-7 items-center justify-center rounded-full text-[11px]"
-              style={{
-                background: "var(--term-border)",
-                color: "var(--term-accent)",
-                border: "1px solid var(--term-accent)",
-              }}
-            >
-              ↓
-            </button>
-          )}
-        </div>
-
+          onScrollToBottom={() => {
+            if (scrollRef.current) {
+              scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+              isNearBottomRef.current = true;
+              setShowScrollButton(false);
+            }
+          }}
+          onDeleteMessage={deleteMessage}
+          onToggleReaction={toggleReaction}
+          onShowEmojiPicker={setShowEmojiPicker}
+          onReplyTo={setReplyingTo}
+          onLightbox={setLightboxImage}
+          scrollRef={scrollRef}
+        />
         {/* Input */}
         <div className="shrink-0 px-4 py-1.5" style={{ borderTop: "1px solid var(--term-border)" }}>
           {replyingTo && (
