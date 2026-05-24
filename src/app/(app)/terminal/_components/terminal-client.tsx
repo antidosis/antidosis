@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 
 import { COMMANDS, findClosestCommand } from "./terminal-commands";
-import { dispatchCommand } from "./terminal-handlers";
+import { dispatchCommand } from "./terminal-handlers/index";
 import { useThemeStyles, useNotificationSound, useSwipeGesture } from "./terminal-hooks";
 import { TerminalMessageList } from "./terminal-message-list";
 import {
