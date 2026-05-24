@@ -28,7 +28,7 @@ export type ApiHandler<TArgs extends unknown[] = unknown[]> = (
  */
 export function withApiHandler<TArgs extends unknown[]>(
   handler: ApiHandler<TArgs>
-): (req: NextRequest, ...args: TArgs) => Promise<Response> {
+): (req: NextRequest, ...args: TArgs) => Promise<NextResponse> {
   return async (req: NextRequest, ...args: TArgs) => {
     const requestId = generateRequestId();
     const startTime = Date.now();
@@ -59,7 +59,7 @@ export function withApiHandler<TArgs extends unknown[]>(
         response.headers.set("x-request-id", requestId);
       }
 
-      return response;
+      return response as NextResponse;
     } catch (error) {
       const latencyMs = Date.now() - startTime;
       const err = error instanceof Error ? error : new Error(String(error));
