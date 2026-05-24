@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowLeft,
   Wrench,
@@ -17,6 +18,8 @@ import {
   Calendar,
   Info,
 } from "lucide-react";
+import { useForm, Controller } from "react-hook-form";
+import { type z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { ImageGallery } from "@/components/ui/image-gallery";
@@ -26,84 +29,74 @@ import { LocationAutocomplete } from "@/components/ui/location-autocomplete";
 import { SkillAutocomplete } from "@/components/ui/skill-autocomplete";
 import { Textarea } from "@/components/ui/textarea";
 import { EXCHANGE_MODES, INCOMPATIBLE_EXCHANGE_MODES } from "@/lib/categories";
+import { createNeedSchema } from "@/lib/schemas";
 import { createClient } from "@/lib/supabase/client";
+
+type FormData = z.input<typeof createNeedSchema>;
 
 export default function CreateNeedPage() {
   const router = useRouter();
   const supabase = createClient();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [offerType, setOfferType] = useState<"service" | "item" | "money">("service");
-  const [offerDescription, setOfferDescription] = useState("");
-  const [offerValue, setOfferValue] = useState("");
-  const isLocal = true;
-  const [locationFormatted, setLocationFormatted] = useState("");
-  const [requiredSkills, setRequiredSkills] = useState<string[]>([]);
-  const [images, setImages] = useState<string[]>([]);
-  const [offerImages, setOfferImages] = useState<string[]>([]);
-  const [deadline, setDeadline] = useState("");
-  const [timeRange, setTimeRange] = useState("");
-  const [exchangeMode, setExchangeMode] = useState("");
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    setValue,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<FormData>({
+    resolver: zodResolver(createNeedSchema),
+    defaultValues: {
+      offerType: "service",
+      isLocal: true,
+      requiredSkills: [],
+      images: [],
+      offerImages: [],
+      requiresContract: false,
+    },
+  });
+
+  const offerType = watch("offerType");
+  const exchangeMode = watch("needCategory");
 
   // Clear exchange mode if it becomes incompatible with the selected offer type
   useEffect(() => {
     const incompatible = INCOMPATIBLE_EXCHANGE_MODES[offerType] || [];
     if (exchangeMode && incompatible.includes(exchangeMode)) {
-      setExchangeMode("");
+      setValue("needCategory", undefined);
     }
-  }, [offerType, exchangeMode]);
-  const [requiresContract, setRequiresContract] = useState(false);
+  }, [offerType, exchangeMode, setValue]);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
+  async function onSubmit(data: FormData) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) {
-      setError("error: you must be logged in.");
-      setLoading(false);
+      setError("root", { message: "error: you must be logged in." });
       return;
     }
 
     const res = await fetch("/api/v1/needs", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title,
-        description,
-        offerType,
-        offerDescription,
-        needCategory: exchangeMode || undefined,
-        offerValue: offerValue ? parseFloat(offerValue) : undefined,
-        isLocal: true,
-        locationName: locationFormatted,
-        requiredSkills,
-        images,
-        offerImages,
-        deadline: deadline || undefined,
-        timeRange: timeRange || undefined,
-        requiresContract,
-      }),
+      body: JSON.stringify(data),
     });
 
-    const data = await res.json();
+    const json = await res.json();
     if (!res.ok) {
       const msg =
-        typeof data.error === "string" ? data.error : data.error?.[0]?.message || "failed";
-      setError("error: " + msg);
-      setLoading(false);
+        typeof json.error === "string" ? json.error : json.error?.[0]?.message || "failed";
+      setError("root", { message: "error: " + msg });
       return;
     }
 
-    router.push(`/needs/${data.need.id}`);
+    router.push(`/needs/${json.need.id}`);
     router.refresh();
   }
+
+  const rootError = errors.root?.message;
 
   return (
     <div className="max-w-2xl lg:max-w-6xl mx-auto px-4 md:px-8">
@@ -136,7 +129,7 @@ export default function CreateNeedPage() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <section className="vessel-need p-5">
             <p className="text-xs text-[#35c2f0] uppercase tracking-wide font-medium mb-1">
@@ -146,40 +139,35 @@ export default function CreateNeedPage() {
             <div className="space-y-5">
               <div className="space-y-2">
                 <Label>Title</Label>
-                <Input
-                  placeholder="e.g. electrical_work_1hr"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
-                />
+                <Input placeholder="e.g. electrical_work_1hr" {...register("title")} />
+                {errors.title && <p className="text-xs text-[#ff5252]">{errors.title.message}</p>}
                 <p className="text-xs text-[#7a6b5a]">
                   be specific. &quot;fix_leaking_tap&quot; beats &quot;plumbing_help&quot;
                 </p>
               </div>
+
               <div className="space-y-2">
                 <Label>Description</Label>
                 <Textarea
                   placeholder="describe the work, timeline, requirements..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  required
                   rows={5}
+                  {...register("description")}
                 />
+                {errors.description && (
+                  <p className="text-xs text-[#ff5252]">{errors.description.message}</p>
+                )}
                 <p className="text-xs text-[#7a6b5a]">
                   include deadlines, access details, and any tools/materials provided
                 </p>
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 mb-1">
                     <Calendar className="h-4 w-4 text-[#7a6b5a]" />
                     <Label>Deadline (Optional)</Label>
                   </div>
-                  <Input
-                    type="date"
-                    value={deadline}
-                    onChange={(e) => setDeadline(e.target.value)}
-                  />
+                  <Input type="date" {...register("deadline")} />
                   <p className="text-xs text-[#7a6b5a]">when does this need to be done by?</p>
                 </div>
                 <div className="space-y-2">
@@ -187,40 +175,50 @@ export default function CreateNeedPage() {
                     <Clock className="h-4 w-4 text-[#7a6b5a]" />
                     <Label>Time Estimate (Optional)</Label>
                   </div>
-                  <Input
-                    placeholder="e.g. 2-4 hours"
-                    value={timeRange}
-                    onChange={(e) => setTimeRange(e.target.value)}
-                  />
+                  <Input placeholder="e.g. 2-4 hours" {...register("timeRange")} />
                   <p className="text-xs text-[#7a6b5a]">how long do you estimate this will take?</p>
                 </div>
               </div>
+
               <div className="space-y-2">
                 <Label>
                   Required Skills <span className="text-[#7a6b5a] font-normal">(optional)</span>
                 </Label>
-                <SkillAutocomplete
-                  value={requiredSkills}
-                  onChange={setRequiredSkills}
-                  placeholder="Search skills… e.g. electrical, tutoring"
-                  maxSkills={8}
+                <Controller
+                  name="requiredSkills"
+                  control={control}
+                  render={({ field }) => (
+                    <SkillAutocomplete
+                      value={field.value ?? []}
+                      onChange={field.onChange}
+                      placeholder="Search skills… e.g. electrical, tutoring"
+                      maxSkills={8}
+                    />
+                  )}
                 />
                 <p className="text-xs text-[#7a6b5a]">
                   add skills to help the right people find your need. browse popular skills or type
                   your own.
                 </p>
               </div>
+
               <div className="space-y-2">
                 <div className="flex items-center gap-2 mb-2">
                   <Camera className="h-4 w-4 text-[#7a6b5a]" />
                   <Label>Need Images (Optional)</Label>
                 </div>
-                <ImageGallery
-                  images={images}
-                  onChange={setImages}
-                  folder="needs"
-                  maxImages={5}
-                  label="attach photos of what you need"
+                <Controller
+                  name="images"
+                  control={control}
+                  render={({ field }) => (
+                    <ImageGallery
+                      images={field.value ?? []}
+                      onChange={field.onChange}
+                      folder="needs"
+                      maxImages={5}
+                      label="attach photos of what you need"
+                    />
+                  )}
                 />
               </div>
             </div>
@@ -240,7 +238,7 @@ export default function CreateNeedPage() {
                     key={type}
                     type="button"
                     variant="outline"
-                    onClick={() => setOfferType(type)}
+                    onClick={() => setValue("offerType", type)}
                     className={`flex flex-col items-center gap-2 h-auto py-4 px-2 ${
                       offerType === type
                         ? "border-[#f5a623] bg-[#f5a623]/5 text-[#e8d5a3] hover:bg-[#f5a623]/10 hover:text-[#e8d5a3]"
@@ -254,6 +252,7 @@ export default function CreateNeedPage() {
                   </Button>
                 ))}
               </div>
+
               <div className="space-y-2">
                 <Label className="text-xs text-[#7a6b5a]">Sub-category (optional)</Label>
                 <div className="flex flex-wrap gap-2">
@@ -266,7 +265,7 @@ export default function CreateNeedPage() {
                       <button
                         key={mode.value}
                         type="button"
-                        onClick={() => setExchangeMode(active ? "" : mode.value)}
+                        onClick={() => setValue("needCategory", active ? undefined : mode.value)}
                         className={`text-[11px] uppercase tracking-wider px-2.5 py-1 rounded border transition-colors ${mode.twText} ${
                           active
                             ? `${mode.twBorder} ${mode.twBg} border-current`
@@ -279,39 +278,51 @@ export default function CreateNeedPage() {
                   })}
                 </div>
               </div>
+
               <div className="space-y-2">
                 <Label>Offer Description</Label>
                 <Textarea
                   placeholder="describe what you are offering..."
-                  value={offerDescription}
-                  onChange={(e) => setOfferDescription(e.target.value)}
-                  required
                   rows={3}
+                  {...register("offerDescription")}
                 />
+                {errors.offerDescription && (
+                  <p className="text-xs text-[#ff5252]">{errors.offerDescription.message}</p>
+                )}
                 <p className="text-xs text-[#7a6b5a]">
                   the more detail, the better your match rate
                 </p>
               </div>
+
               <div className="space-y-2">
                 <Label>Estimated Value (Optional)</Label>
                 <Input
                   type="number"
                   placeholder="0.00"
-                  value={offerValue}
-                  onChange={(e) => setOfferValue(e.target.value)}
+                  {...register("offerValue", { valueAsNumber: true })}
                 />
+                {errors.offerValue && (
+                  <p className="text-xs text-[#ff5252]">{errors.offerValue.message}</p>
+                )}
               </div>
+
               <div className="space-y-2">
                 <div className="flex items-center gap-2 mb-2">
                   <ImageIcon className="h-4 w-4 text-[#7a6b5a]" />
                   <Label>Offer Images (Optional)</Label>
                 </div>
-                <ImageGallery
-                  images={offerImages}
-                  onChange={setOfferImages}
-                  folder="offers"
-                  maxImages={5}
-                  label="attach photos of what you are offering"
+                <Controller
+                  name="offerImages"
+                  control={control}
+                  render={({ field }) => (
+                    <ImageGallery
+                      images={field.value ?? []}
+                      onChange={field.onChange}
+                      folder="offers"
+                      maxImages={5}
+                      label="attach photos of what you are offering"
+                    />
+                  )}
                 />
               </div>
             </div>
@@ -327,8 +338,7 @@ export default function CreateNeedPage() {
               <label className="flex items-start gap-3 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={requiresContract}
-                  onChange={(e) => setRequiresContract(e.target.checked)}
+                  {...register("requiresContract")}
                   className="mt-1 accent-[#f5a623]"
                 />
                 <div>
@@ -365,13 +375,20 @@ export default function CreateNeedPage() {
             </div>
             <div className="space-y-2">
               <Label>Suburb</Label>
-              <LocationAutocomplete
-                value={locationFormatted}
-                onChange={(formatted) => {
-                  setLocationFormatted(formatted);
-                }}
-                placeholder="type_suburb_name..."
+              <Controller
+                name="locationName"
+                control={control}
+                render={({ field }) => (
+                  <LocationAutocomplete
+                    value={field.value || ""}
+                    onChange={field.onChange}
+                    placeholder="type_suburb_name..."
+                  />
+                )}
               />
+              {errors.locationName && (
+                <p className="text-xs text-[#ff5252]">{errors.locationName.message}</p>
+              )}
               <p className="text-xs text-[#7a6b5a]">
                 all central coast suburbs autocomplete. try &quot;terrigal&quot; or &quot;2250&quot;
               </p>
@@ -379,11 +396,17 @@ export default function CreateNeedPage() {
           </div>
         </section>
 
-        {error && <p className="text-sm text-[#ff5252]">{error}</p>}
+        {rootError && <p className="text-sm text-[#ff5252]">{rootError}</p>}
 
         <div className="flex gap-3 pb-12">
-          <Button type="submit" variant="default" size="lg" disabled={loading} className="flex-1">
-            {loading ? "posting..." : "Post Need"}
+          <Button
+            type="submit"
+            variant="default"
+            size="lg"
+            disabled={isSubmitting}
+            className="flex-1"
+          >
+            {isSubmitting ? "posting..." : "Post Need"}
           </Button>
           <Button type="button" variant="secondary" size="lg" asChild>
             <Link href="/needs">Cancel</Link>
