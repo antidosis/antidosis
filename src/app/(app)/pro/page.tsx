@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+
 import ProClient from "./_components/pro-client";
 
 const siteUrl = "https://antidosis.com";

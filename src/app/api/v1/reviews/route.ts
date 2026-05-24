@@ -1,24 +1,20 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
-import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
-import { sanitizePlainText } from "@/lib/security/sanitize";
-import { z } from "zod";
-import { logger } from "@/lib/logger";
+import { type NextRequest, NextResponse } from "next/server";
 
-const createSchema = z.object({
-  contractId: z.string().uuid().optional(),
-  acceptanceId: z.string().uuid().optional(),
-  receiverId: z.string().uuid(),
-  rating: z.number().int().min(1).max(10),
-  comment: z.string().max(2000).optional(),
-  privateFeedback: z.string().max(2000).optional(),
-});
+import { z } from "zod";
+
+import { logger } from "@/lib/logger";
+import { prisma } from "@/lib/prisma";
+import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
+import { createReviewSchema } from "@/lib/schemas";
+import { sanitizePlainText } from "@/lib/security/sanitize";
+import { createClient } from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -39,7 +35,8 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { contractId, acceptanceId, receiverId, rating, comment, privateFeedback } = createSchema.parse(body);
+    const { contractId, acceptanceId, receiverId, rating, comment, privateFeedback } =
+      createReviewSchema.parse(body);
 
     if (!contractId && !acceptanceId) {
       return NextResponse.json(
@@ -83,10 +80,7 @@ export async function POST(req: NextRequest) {
       const isPartyA = contract.partyAId === profile.id;
       const otherPartyId = isPartyA ? contract.partyBId : contract.partyAId;
       if (receiverId !== otherPartyId) {
-        return NextResponse.json(
-          { error: "Invalid review recipient" },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: "Invalid review recipient" }, { status: 400 });
       }
 
       const existing = contract.reviews.find(
@@ -146,20 +140,14 @@ export async function POST(req: NextRequest) {
 
       const otherPartyId = isPoster ? acceptance.userId : acceptance.need.posterId;
       if (receiverId !== otherPartyId) {
-        return NextResponse.json(
-          { error: "Invalid review recipient" },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: "Invalid review recipient" }, { status: 400 });
       }
 
       const existing = acceptance.reviews.find(
         (r) => r.giverId === profile.id && r.acceptanceId === acceptanceId
       );
       if (existing) {
-        return NextResponse.json(
-          { error: "You have already reviewed this deal" },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: "You have already reviewed this deal" }, { status: 400 });
       }
 
       review = await prisma.review.create({
@@ -195,9 +183,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.errors }, { status: 400 });
     }
     logger.error("Create review error:", error instanceof Error ? error : undefined);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -1,0 +1,7 @@
+node_modules/
+.next/
+mobile/
+apply-index.js
+check-braces.js
+check-syntax.js
+next.config.mjs

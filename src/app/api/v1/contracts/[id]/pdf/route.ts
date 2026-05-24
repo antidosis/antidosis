@@ -1,18 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
-import { generateContractPdf } from "@/lib/pdf-contract";
-import { createServiceClient } from "@/lib/supabase/service";
-import { logger } from "@/lib/logger";
-import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
+import { type NextRequest, NextResponse } from "next/server";
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+import { logger } from "@/lib/logger";
+import { generateContractPdf } from "@/lib/pdf-contract";
+import { prisma } from "@/lib/prisma";
+import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
+import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
+
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -75,11 +75,18 @@ export async function POST(
 
     // Terms must be locked before PDF generation
     if (!contract.termsLockedAt) {
-      return NextResponse.json({ error: "Terms must be agreed before generating PDF" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Terms must be agreed before generating PDF" },
+        { status: 400 }
+      );
     }
 
     let terms: any = {};
-    try { terms = JSON.parse(contract.terms); } catch { /* ignore */ }
+    try {
+      terms = JSON.parse(contract.terms);
+    } catch {
+      /* ignore */
+    }
 
     const negotiationMessages = (contract.negotiationMessages as any[]) || [];
 
@@ -134,9 +141,7 @@ export async function POST(
       return NextResponse.json({ error: "Failed to store PDF" }, { status: 500 });
     }
 
-    const { data: urlData } = serviceClient.storage
-      .from("uploads")
-      .getPublicUrl(fileName);
+    const { data: urlData } = serviceClient.storage.from("uploads").getPublicUrl(fileName);
 
     // Save PDF URL to contract
     await prisma.contract.update({

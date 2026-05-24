@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { TerminalCursor } from "./terminal-cursor";
+
 import { ShieldCheck, Lock, Users } from "lucide-react";
+
+import { TerminalCursor } from "./terminal-cursor";
 
 const BOOT_LINES = [
   { text: "initializing antidosis marketplace...", delay: 200 },
@@ -35,7 +37,7 @@ export function BootSequence({ onComplete }: { onComplete: () => void }) {
     // Trust signals fade in after logo
     const signalsTimer = setTimeout(() => setSignalsVisible(true), 600);
 
-    let timeouts: ReturnType<typeof setTimeout>[] = [];
+    const timeouts: ReturnType<typeof setTimeout>[] = [];
 
     BOOT_LINES.forEach((line, i) => {
       const t = setTimeout(() => {
@@ -116,8 +118,8 @@ export function BootSequence({ onComplete }: { onComplete: () => void }) {
                   line.text.startsWith("[OK]")
                     ? "text-[#00e676]"
                     : line.text === "ready."
-                    ? "text-[#f5a623] font-semibold"
-                    : "text-[#7a6b5a]"
+                      ? "text-[#f5a623] font-semibold"
+                      : "text-[#7a6b5a]"
                 }`}
               >
                 {line.text || "\u00A0"}

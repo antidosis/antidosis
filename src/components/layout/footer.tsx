@@ -28,9 +28,7 @@ const linkGroups = [
   },
   {
     title: "Support",
-    links: [
-      { href: "mailto:official.antidosis@gmail.com", label: "Contact", external: true },
-    ],
+    links: [{ href: "mailto:official.antidosis@gmail.com", label: "Contact", external: true }],
   },
 ];
 
@@ -55,8 +53,8 @@ export function Footer() {
                 />
               </Link>
               <p className="text-sm text-[#7a6b5a] leading-relaxed max-w-xs mb-6">
-                A marketplace for reciprocal exchange. Post what you need. Offer
-                what you have. Build trust through every transaction.
+                A marketplace for reciprocal exchange. Post what you need. Offer what you have.
+                Build trust through every transaction.
               </p>
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#00e676] animate-pulse" />
@@ -99,9 +97,7 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="border-t border-[#2a2420] py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-xs text-[#7a6b5a]">
-              &copy; {year} Antidosis. All rights reserved.
-            </p>
+            <p className="text-xs text-[#7a6b5a]">&copy; {year} Antidosis. All rights reserved.</p>
             <p className="text-xs text-[#7a6b5a]">
               Crafted with intention on the Central Coast, NSW.
             </p>

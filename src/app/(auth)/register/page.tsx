@@ -1,16 +1,19 @@
 "use client";
 
 import { useState } from "react";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
+import { Check, X, Eye, EyeOff, Smartphone } from "lucide-react";
+
+import { TerminalCursor } from "@/components/effects/terminal-cursor";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/client";
-import { TerminalCursor } from "@/components/effects/terminal-cursor";
-import { validatePassword, getPasswordStrength } from "@/lib/security/password";
 import { isValidAustralianMobile, normalizeMobile } from "@/lib/mobile";
-import { Check, X, Eye, EyeOff, Smartphone } from "lucide-react";
+import { validatePassword, getPasswordStrength } from "@/lib/security/password";
+import { createClient } from "@/lib/supabase/client";
 
 export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
@@ -124,11 +127,10 @@ export default function RegisterPage() {
         <div className="w-full max-w-sm">
           <p className="text-xs text-[#7a6b5a] mb-8">$ register --new-user</p>
           <h1 className="heading-display text-2xl text-[#e8d5a3] mb-2">
-            create_account<TerminalCursor />
+            create_account
+            <TerminalCursor />
           </h1>
-          <p className="text-sm text-[#b8a078] mb-12">
-            initialize profile and join the network
-          </p>
+          <p className="text-sm text-[#b8a078] mb-12">initialize profile and join the network</p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
@@ -185,11 +187,7 @@ export default function RegisterPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-[#7a6b5a] hover:text-[#e8d5a3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f5a623] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0806] rounded-sm"
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
 
@@ -202,9 +200,7 @@ export default function RegisterPage() {
                     </span>
                   </div>
                   <div className="h-1.5 bg-[#12100e]">
-                    <div
-                      className={`h-full transition-all duration-300 ${strengthBar}`}
-                    />
+                    <div className={`h-full transition-all duration-300 ${strengthBar}`} />
                   </div>
                   <div className="space-y-1">
                     {[
@@ -223,10 +219,7 @@ export default function RegisterPage() {
                         test: /[^A-Za-z0-9]/.test(password),
                       },
                     ].map((req) => (
-                      <div
-                        key={req.label}
-                        className="flex items-center gap-2 text-xs"
-                      >
+                      <div key={req.label} className="flex items-center gap-2 text-xs">
                         {req.test ? (
                           <Check className="h-3 w-3 text-[#00e676]" />
                         ) : (
@@ -254,9 +247,7 @@ export default function RegisterPage() {
                 />
                 <button
                   type="button"
-                  onClick={() =>
-                    setShowConfirmPassword(!showConfirmPassword)
-                  }
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-[#7a6b5a] hover:text-[#e8d5a3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f5a623] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0806] rounded-sm"
                 >
                   {showConfirmPassword ? (
@@ -281,18 +272,13 @@ export default function RegisterPage() {
                 className="text-xs text-[#7a6b5a] font-normal leading-relaxed cursor-pointer"
               >
                 i agree to the{" "}
-                <Link
-                  href="/terms"
-                  className="text-[#f5a623] hover:underline underline-offset-4"
-                >
+                <Link href="/terms" className="text-[#f5a623] hover:underline underline-offset-4">
                   terms of service
                 </Link>
               </Label>
             </div>
 
-            {error && (
-              <p className="text-sm text-[#ff5252]">error: {error}</p>
-            )}
+            {error && <p className="text-sm text-[#ff5252]">error: {error}</p>}
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "creating..." : "create_account"}
             </Button>

@@ -1,10 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
+import { type NextRequest, NextResponse } from "next/server";
+
+import { z } from "zod";
+
 import { auditLog, getClientInfo } from "@/lib/audit";
 import { logger } from "@/lib/logger";
+import { prisma } from "@/lib/prisma";
 import { sanitizeUrl } from "@/lib/security/url";
-import { z } from "zod";
+import { createClient } from "@/lib/supabase/server";
 
 const credentialTypes = [
   "license",
@@ -46,13 +48,12 @@ async function getUserCredential(userId: string, credentialId: string) {
   });
 }
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -74,8 +75,18 @@ export async function PATCH(
         ...(data.description !== undefined && { description: data.description }),
         ...(data.documentNumber !== undefined && { documentNumber: data.documentNumber }),
         ...(data.issuedBy !== undefined && { issuedBy: data.issuedBy }),
-        ...(data.issuedAt !== undefined && { issuedAt: data.issuedAt && !isNaN(new Date(data.issuedAt).getTime()) ? new Date(data.issuedAt) : null }),
-        ...(data.expiresAt !== undefined && { expiresAt: data.expiresAt && !isNaN(new Date(data.expiresAt).getTime()) ? new Date(data.expiresAt) : null }),
+        ...(data.issuedAt !== undefined && {
+          issuedAt:
+            data.issuedAt && !isNaN(new Date(data.issuedAt).getTime())
+              ? new Date(data.issuedAt)
+              : null,
+        }),
+        ...(data.expiresAt !== undefined && {
+          expiresAt:
+            data.expiresAt && !isNaN(new Date(data.expiresAt).getTime())
+              ? new Date(data.expiresAt)
+              : null,
+        }),
         ...(data.fileUrl !== undefined && { fileUrl: sanitizeUrl(data.fileUrl) }),
         ...(data.backFileUrl !== undefined && { backFileUrl: sanitizeUrl(data.backFileUrl) }),
         ...(data.isPublic !== undefined && { isPublic: data.isPublic }),
@@ -102,13 +113,12 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

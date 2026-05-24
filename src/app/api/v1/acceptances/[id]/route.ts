@@ -1,23 +1,24 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
+import { type NextRequest, NextResponse } from "next/server";
+
+import { z } from "zod";
+
 import { createContractFromAcceptance } from "@/lib/contract-formation";
 import { sendInterestAcceptedEmail } from "@/lib/email";
-import { createNotification } from "@/lib/notifications";
 import { logger } from "@/lib/logger";
-import { z } from "zod";
+import { createNotification } from "@/lib/notifications";
+import { prisma } from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
 
 const updateSchema = z.object({
   status: z.enum(["accepted", "declined", "withdrawn", "selected", "removed"]),
 });
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -65,7 +66,13 @@ export async function PATCH(
       );
     }
 
-    if ((status === "accepted" || status === "declined" || status === "selected" || status === "removed") && !isPoster) {
+    if (
+      (status === "accepted" ||
+        status === "declined" ||
+        status === "selected" ||
+        status === "removed") &&
+      !isPoster
+    ) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -92,7 +99,10 @@ export async function PATCH(
       });
       if (existingContract && existingContract.status !== "cancelled") {
         return NextResponse.json(
-          { error: "A contract already exists for this acceptance. Cancel it first to form a new one." },
+          {
+            error:
+              "A contract already exists for this acceptance. Cancel it first to form a new one.",
+          },
           { status: 409 }
         );
       }
@@ -185,9 +195,6 @@ export async function PATCH(
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
     logger.error("Update acceptance error:", error instanceof Error ? error : undefined);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

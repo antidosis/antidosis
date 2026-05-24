@@ -3,13 +3,7 @@
  * Blocks dangerous schemes that could lead to XSS or unexpected behavior.
  */
 
-const BLOCKED_SCHEMES = [
-  "javascript:",
-  "data:",
-  "blob:",
-  "vbscript:",
-  "file:",
-];
+const BLOCKED_SCHEMES = ["javascript:", "data:", "blob:", "vbscript:", "file:"];
 
 /**
  * Check if a URL string is safe to store and render.

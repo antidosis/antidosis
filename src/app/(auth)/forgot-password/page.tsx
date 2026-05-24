@@ -1,13 +1,16 @@
 "use client";
 
 import { useState } from "react";
+
 import Link from "next/link";
+
+import { ArrowLeft } from "lucide-react";
+
+import { TerminalCursor } from "@/components/effects/terminal-cursor";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
-import { TerminalCursor } from "@/components/effects/terminal-cursor";
-import { ArrowLeft } from "lucide-react";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -21,14 +24,10 @@ export default function ForgotPasswordPage() {
     setLoading(true);
     setError(null);
 
-    const appUrl =
-      process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
-    const { error: authError } = await supabase.auth.resetPasswordForEmail(
-      email,
-      {
-        redirectTo: `${appUrl}/reset-password`,
-      }
-    );
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+    const { error: authError } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${appUrl}/reset-password`,
+    });
 
     if (authError) {
       setError(authError.message);
@@ -56,7 +55,8 @@ export default function ForgotPasswordPage() {
         <div className="w-full max-w-sm">
           <p className="text-xs text-[#7a6b5a] mb-8">$ passwd --reset</p>
           <h1 className="heading-display text-2xl text-[#e8d5a3] mb-2">
-            reset_password<TerminalCursor />
+            reset_password
+            <TerminalCursor />
           </h1>
           <p className="text-sm text-[#b8a078] mb-12">
             enter your email and we&apos;ll send you a reset link
@@ -70,10 +70,7 @@ export default function ForgotPasswordPage() {
               </p>
               <div className="mt-6 text-center">
                 <Button variant="link" size="sm" asChild>
-                  <Link
-                    href="/login"
-                    className="inline-flex items-center gap-2"
-                  >
+                  <Link href="/login" className="inline-flex items-center gap-2">
                     <ArrowLeft className="h-4 w-4" />
                     back to login
                   </Link>
@@ -93,9 +90,7 @@ export default function ForgotPasswordPage() {
                   required
                 />
               </div>
-              {error && (
-                <p className="text-sm text-[#ff5252]">error: {error}</p>
-              )}
+              {error && <p className="text-sm text-[#ff5252]">error: {error}</p>}
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "sending..." : "send_reset_link"}
               </Button>

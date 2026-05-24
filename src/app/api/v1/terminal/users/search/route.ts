@@ -1,12 +1,15 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+
 import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET(req: NextRequest) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -38,14 +41,15 @@ export async function GET(req: NextRequest) {
       select: { blockerId: true, blockedId: true },
     });
     const excludedIds = new Set<string>();
-    blockedIds.forEach((b) => { excludedIds.add(b.blockerId); excludedIds.add(b.blockedId); });
+    blockedIds.forEach((b) => {
+      excludedIds.add(b.blockerId);
+      excludedIds.add(b.blockedId);
+    });
 
     const profiles = await prisma.profile.findMany({
       where: {
         id: { notIn: Array.from(excludedIds) },
-        OR: [
-          { fullName: { contains: q, mode: "insensitive" } },
-        ],
+        OR: [{ fullName: { contains: q, mode: "insensitive" } }],
       },
       take: 10,
       select: {

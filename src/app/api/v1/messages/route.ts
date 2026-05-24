@@ -1,11 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
-import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
+import { type NextRequest, NextResponse } from "next/server";
+
+import { z } from "zod";
+
 import { logger } from "@/lib/logger";
 import { createNotification } from "@/lib/notifications";
+import { prisma } from "@/lib/prisma";
+import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { sanitizePlainText } from "@/lib/security/sanitize";
-import { z } from "zod";
+import { createClient } from "@/lib/supabase/server";
 
 const createSchema = z.object({
   contractId: z.string().uuid(),
@@ -15,7 +17,9 @@ const createSchema = z.object({
 export async function GET(req: NextRequest) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -26,7 +30,6 @@ export async function GET(req: NextRequest) {
         { status: 403 }
       );
     }
-
 
     const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
       windowMs: 60_000,
@@ -47,10 +50,7 @@ export async function GET(req: NextRequest) {
 
     const contractId = req.nextUrl.searchParams.get("contractId");
     if (!contractId) {
-      return NextResponse.json(
-        { error: "contractId required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "contractId required" }, { status: 400 });
     }
 
     // Verify user is party to contract
@@ -97,17 +97,16 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ messages });
   } catch (error) {
     logger.error("Get contract messages failed", error instanceof Error ? error : undefined);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -191,7 +190,10 @@ export async function POST(req: NextRequest) {
         WHERE "id" = ${contractId}
       `;
     } catch (transcriptErr) {
-      logger.error("Failed to append to negotiation transcript:", transcriptErr instanceof Error ? transcriptErr : undefined);
+      logger.error(
+        "Failed to append to negotiation transcript:",
+        transcriptErr instanceof Error ? transcriptErr : undefined
+      );
     }
 
     // Notify the other party
@@ -210,9 +212,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.errors }, { status: 400 });
     }
     logger.error("Create contract message failed", error instanceof Error ? error : undefined);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

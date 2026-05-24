@@ -1,10 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
-import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
+import { type NextRequest, NextResponse } from "next/server";
+
+import { z } from "zod";
+
 import { logger } from "@/lib/logger";
 import { createNotification } from "@/lib/notifications";
-import { z } from "zod";
+import { prisma } from "@/lib/prisma";
+import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
+import { createClient } from "@/lib/supabase/server";
 
 async function getAuthorizedProfile(userId: string, needId: string) {
   const profile = await prisma.profile.findUnique({
@@ -21,7 +23,12 @@ async function getAuthorizedProfile(userId: string, needId: string) {
 
   // Poster can always access
   if (need.posterId === profile.id) {
-    return { ...profile, isPoster: true as const, acceptanceId: null as string | null, posterId: need.posterId };
+    return {
+      ...profile,
+      isPoster: true as const,
+      acceptanceId: null as string | null,
+      posterId: need.posterId,
+    };
   }
 
   // User with an existing acceptance can always access
@@ -30,23 +37,32 @@ async function getAuthorizedProfile(userId: string, needId: string) {
     select: { id: true, status: true },
   });
   if (acceptance) {
-    return { ...profile, isPoster: false as const, acceptanceId: acceptance.id, posterId: need.posterId };
+    return {
+      ...profile,
+      isPoster: false as const,
+      acceptanceId: acceptance.id,
+      posterId: need.posterId,
+    };
   }
 
   // Need must be open for new users to join the conversation
   if (need.status !== "open") return null;
 
   // Any authenticated user can join an open need's conversation
-  return { ...profile, isPoster: false as const, acceptanceId: null as string | null, posterId: need.posterId };
+  return {
+    ...profile,
+    isPoster: false as const,
+    acceptanceId: null as string | null,
+    posterId: need.posterId,
+  };
 }
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -68,14 +84,17 @@ export async function GET(
 
     const profile = await getAuthorizedProfile(user.id, params.id);
     if (!profile) {
-      return NextResponse.json(
-        { error: "Forbidden: not involved in this need" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Forbidden: not involved in this need" }, { status: 403 });
     }
 
-    const messagesLimit = Math.max(1, Math.min(parseInt(req.nextUrl.searchParams.get("messagesLimit") || "100", 10) || 100, 200));
-    const messagesSkip = Math.max(0, parseInt(req.nextUrl.searchParams.get("messagesSkip") || "0", 10) || 0);
+    const messagesLimit = Math.max(
+      1,
+      Math.min(parseInt(req.nextUrl.searchParams.get("messagesLimit") || "100", 10) || 100, 200)
+    );
+    const messagesSkip = Math.max(
+      0,
+      parseInt(req.nextUrl.searchParams.get("messagesSkip") || "0", 10) || 0
+    );
 
     // Poster sees all messages (public + all private threads)
     // Fulfiller with acceptance sees poster's public messages + their own private thread
@@ -97,10 +116,7 @@ export async function GET(
       // Visitor without acceptance: see poster's public msgs + own msgs
       where = {
         needId: params.id,
-        OR: [
-          { acceptanceId: null, senderId: profile.posterId },
-          { senderId: profile.id },
-        ],
+        OR: [{ acceptanceId: null, senderId: profile.posterId }, { senderId: profile.id }],
       };
     }
 
@@ -156,10 +172,7 @@ export async function GET(
     logger.error("Get need messages failed", error instanceof Error ? error : undefined, {
       needId: params.id,
     });
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -168,13 +181,12 @@ const postSchema = z.object({
   acceptanceId: z.string().optional(),
 });
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -196,10 +208,7 @@ export async function POST(
 
     const profile = await getAuthorizedProfile(user.id, params.id);
     if (!profile) {
-      return NextResponse.json(
-        { error: "Forbidden: not involved in this need" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Forbidden: not involved in this need" }, { status: 403 });
     }
 
     const need = await prisma.need.findUnique({
@@ -213,10 +222,7 @@ export async function POST(
     // Block new visitors from posting if need is not open
     // Poster and acceptance holders can always post
     if (!profile.isPoster && !profile.acceptanceId && need.status !== "open") {
-      return NextResponse.json(
-        { error: "Need is not open for messages" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Need is not open for messages" }, { status: 400 });
     }
 
     const body = await req.json();
@@ -241,7 +247,10 @@ export async function POST(
           select: { id: true, userId: true },
         });
         if (!acceptance) {
-          return NextResponse.json({ error: "Acceptance not found for this need" }, { status: 400 });
+          return NextResponse.json(
+            { error: "Acceptance not found for this need" },
+            { status: 400 }
+          );
         }
         targetAcceptanceId = acceptance.id;
       }
@@ -250,7 +259,10 @@ export async function POST(
       // If no acceptance (visitor), message goes to public wall (null) but is filtered
       // so only poster and themselves see it
       if (bodyAcceptanceId && bodyAcceptanceId !== profile.acceptanceId) {
-        return NextResponse.json({ error: "Cannot send to another fulfiller's thread" }, { status: 403 });
+        return NextResponse.json(
+          { error: "Cannot send to another fulfiller's thread" },
+          { status: 403 }
+        );
       }
       targetAcceptanceId = profile.acceptanceId;
     }
@@ -305,9 +317,6 @@ export async function POST(
     logger.error("Create need message failed", error instanceof Error ? error : undefined, {
       needId: params.id,
     });
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -1,11 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { type NextRequest, NextResponse } from "next/server";
+
 import { prisma } from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET(req: NextRequest) {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { searchParams } = new URL(req.url);
@@ -37,7 +40,13 @@ export async function GET(req: NextRequest) {
           ],
         },
         take: 10,
-        select: { id: true, fullName: true, locationName: true, ratingAvg: true, ratingCount: true },
+        select: {
+          id: true,
+          fullName: true,
+          locationName: true,
+          ratingAvg: true,
+          ratingCount: true,
+        },
       }),
       prisma.profile.findMany({
         where: {
@@ -48,7 +57,13 @@ export async function GET(req: NextRequest) {
           ],
         },
         take: 10,
-        select: { id: true, fullName: true, locationName: true, ratingAvg: true, ratingCount: true },
+        select: {
+          id: true,
+          fullName: true,
+          locationName: true,
+          ratingAvg: true,
+          ratingCount: true,
+        },
       }),
     ]);
 

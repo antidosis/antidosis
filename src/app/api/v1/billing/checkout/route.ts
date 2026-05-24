@@ -1,14 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe";
-import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
-import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
+import { type NextRequest, NextResponse } from "next/server";
+
 import { logger } from "@/lib/logger";
+import { prisma } from "@/lib/prisma";
+import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
+import { stripe } from "@/lib/stripe";
+import { createClient } from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -74,10 +77,7 @@ export async function POST(req: NextRequest) {
 
     const priceId = process.env.STRIPE_PRICE_ID;
     if (!priceId) {
-      return NextResponse.json(
-        { error: "Stripe price ID not configured" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Stripe price ID not configured" }, { status: 500 });
     }
 
     const origin = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
@@ -102,9 +102,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ url: session.url });
   } catch (error) {
     logger.error("Checkout failed", error instanceof Error ? error : undefined);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

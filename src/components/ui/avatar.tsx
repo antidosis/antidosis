@@ -1,5 +1,7 @@
 import * as React from "react";
+
 import Image from "next/image";
+
 import { cn } from "@/lib/utils";
 
 interface AvatarProps {
@@ -24,12 +26,13 @@ export function Avatar({ src, name, size = "md", className }: AvatarProps) {
 
   const px = sizePixels[size];
 
-  const initials = name
-    ?.split(" ")
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase() || "?";
+  const initials =
+    name
+      ?.split(" ")
+      .map((n) => n[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "?";
 
   return (
     <div

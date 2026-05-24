@@ -1,11 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(req: NextRequest) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -18,7 +21,10 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
-    const limit = Math.max(1, Math.min(parseInt(req.nextUrl.searchParams.get("limit") || "20", 10) || 20, 50));
+    const limit = Math.max(
+      1,
+      Math.min(parseInt(req.nextUrl.searchParams.get("limit") || "20", 10) || 20, 50)
+    );
 
     // 1. Recent DMs sent to user
     const dmMessages = await prisma.directMessage.findMany({
@@ -121,7 +127,12 @@ export async function GET(req: NextRequest) {
         content: m.content,
         createdAt: m.createdAt.toISOString(),
         sender: m.sender,
-        context: { type: "channel" as const, id: m.channel.id, name: `#${m.channel.name}`, slug: m.channel.slug },
+        context: {
+          type: "channel" as const,
+          id: m.channel.id,
+          name: `#${m.channel.name}`,
+          slug: m.channel.slug,
+        },
       })),
       ...dmMentions.map((m) => ({
         type: "mention" as const,
@@ -137,7 +148,12 @@ export async function GET(req: NextRequest) {
         content: m.content,
         createdAt: m.createdAt.toISOString(),
         sender: m.sender,
-        context: { type: "channel" as const, id: m.channel.id, name: `#${m.channel.name}`, slug: m.channel.slug },
+        context: {
+          type: "channel" as const,
+          id: m.channel.id,
+          name: `#${m.channel.name}`,
+          slug: m.channel.slug,
+        },
       })),
     ];
 

@@ -1,19 +1,37 @@
 "use client";
 
 import { useState } from "react";
+
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Avatar } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { FileUpload } from "@/components/ui/file-upload";
-import { LocationAutocomplete } from "@/components/ui/location-autocomplete";
+
 import {
-  Pencil, CheckCircle2, Globe, Lock, Phone, ChevronDown, ChevronUp, Plus, X,
-  Smartphone, ShieldAlert, ArrowRight, Info, MapPin, ExternalLink, Award,
-  Shield, Crown,
+  Pencil,
+  CheckCircle2,
+  Globe,
+  Lock,
+  Phone,
+  ChevronDown,
+  ChevronUp,
+  Plus,
+  X,
+  Smartphone,
+  ShieldAlert,
+  ArrowRight,
+  Info,
+  MapPin,
+  ExternalLink,
+  Award,
+  Shield,
+  Crown,
 } from "lucide-react";
+
+import { Avatar } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { FileUpload } from "@/components/ui/file-upload";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { LocationAutocomplete } from "@/components/ui/location-autocomplete";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/toast";
 
 const PLATFORMS = ["instagram", "facebook", "linkedin", "twitter", "website", "github", "other"];
@@ -116,28 +134,40 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
     if (newPublicLinkUrl.trim()) {
       setEditForm({
         ...editForm,
-        publicSocialLinks: [...editForm.publicSocialLinks, { platform: newPublicLinkPlatform, url: newPublicLinkUrl.trim(), isPublic: true }],
+        publicSocialLinks: [
+          ...editForm.publicSocialLinks,
+          { platform: newPublicLinkPlatform, url: newPublicLinkUrl.trim(), isPublic: true },
+        ],
       });
       setNewPublicLinkUrl("");
     }
   }
 
   function removePublicLink(i: number) {
-    setEditForm({ ...editForm, publicSocialLinks: editForm.publicSocialLinks.filter((_, idx) => idx !== i) });
+    setEditForm({
+      ...editForm,
+      publicSocialLinks: editForm.publicSocialLinks.filter((_, idx) => idx !== i),
+    });
   }
 
   function addPrivateLink() {
     if (newPrivateLinkUrl.trim()) {
       setEditForm({
         ...editForm,
-        privateSocialLinks: [...editForm.privateSocialLinks, { platform: newPrivateLinkPlatform, url: newPrivateLinkUrl.trim(), isPublic: false }],
+        privateSocialLinks: [
+          ...editForm.privateSocialLinks,
+          { platform: newPrivateLinkPlatform, url: newPrivateLinkUrl.trim(), isPublic: false },
+        ],
       });
       setNewPrivateLinkUrl("");
     }
   }
 
   function removePrivateLink(i: number) {
-    setEditForm({ ...editForm, privateSocialLinks: editForm.privateSocialLinks.filter((_, idx) => idx !== i) });
+    setEditForm({
+      ...editForm,
+      privateSocialLinks: editForm.privateSocialLinks.filter((_, idx) => idx !== i),
+    });
   }
 
   // ─── Derived display data ───
@@ -160,7 +190,12 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
           {/* ─── Header ─── */}
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-4">
-              <Avatar src={editForm.avatarUrl} name={editForm.fullName} size="lg" className="h-14 w-14 sm:h-16 sm:w-16 shrink-0" />
+              <Avatar
+                src={editForm.avatarUrl}
+                name={editForm.fullName}
+                size="lg"
+                className="h-14 w-14 sm:h-16 sm:w-16 shrink-0"
+              />
               <div className="min-w-0">
                 <h2 className="heading-display text-xl sm:text-2xl text-[#e8d5a3]">
                   {editForm.fullName || "Your Name"}
@@ -190,7 +225,12 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                 </div>
               </div>
             </div>
-            <Button size="sm" variant="ghost" onClick={() => setIsEditing(true)} className="shrink-0 text-[#7a6b5a] hover:text-[#e8d5a3]">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setIsEditing(true)}
+              className="shrink-0 text-[#7a6b5a] hover:text-[#e8d5a3]"
+            >
               <Pencil className="h-3.5 w-3.5 mr-1.5" /> Edit
             </Button>
           </div>
@@ -234,7 +274,9 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                   <div className="rounded border border-[#2a2420] bg-[#12100e]/50 p-4">
                     <div className="flex items-center gap-2 mb-3">
                       <Globe className="h-3.5 w-3.5 text-[#f5a623]" />
-                      <span className="text-xs font-medium text-[#e8d5a3] uppercase tracking-wider">Public</span>
+                      <span className="text-xs font-medium text-[#e8d5a3] uppercase tracking-wider">
+                        Public
+                      </span>
                     </div>
                     <div className="space-y-2.5">
                       {editForm.publicPhone && (
@@ -271,7 +313,9 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                   <div className="rounded border border-[#2a2420] bg-[#12100e]/50 p-4">
                     <div className="flex items-center gap-2 mb-3">
                       <Lock className="h-3.5 w-3.5 text-[#7a6b5a]" />
-                      <span className="text-xs font-medium text-[#e8d5a3] uppercase tracking-wider">Private</span>
+                      <span className="text-xs font-medium text-[#e8d5a3] uppercase tracking-wider">
+                        Private
+                      </span>
                     </div>
                     <div className="space-y-2.5">
                       {editForm.privatePhone && (
@@ -323,26 +367,51 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
       ) : (
         <form onSubmit={saveProfile} className="space-y-6 max-w-lg">
           <div className="flex items-center gap-4">
-            <Avatar src={editForm.avatarUrl} name={editForm.fullName} size="lg" className="h-14 w-14" />
-            <FileUpload folder="avatars" onUpload={(url) => setEditForm({ ...editForm, avatarUrl: url })}>Change Avatar</FileUpload>
+            <Avatar
+              src={editForm.avatarUrl}
+              name={editForm.fullName}
+              size="lg"
+              className="h-14 w-14"
+            />
+            <FileUpload
+              folder="avatars"
+              onUpload={(url) => setEditForm({ ...editForm, avatarUrl: url })}
+            >
+              Change Avatar
+            </FileUpload>
           </div>
           <div className="space-y-2">
             <Label>Full Name</Label>
-            <Input value={editForm.fullName} onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })} />
+            <Input
+              value={editForm.fullName}
+              onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
+            />
           </div>
           <div className="space-y-2">
             <Label>Location</Label>
-            <LocationAutocomplete value={editForm.locationName} onChange={(formatted) => setEditForm({ ...editForm, locationName: formatted })} placeholder="Search suburb..." />
+            <LocationAutocomplete
+              value={editForm.locationName}
+              onChange={(formatted) => setEditForm({ ...editForm, locationName: formatted })}
+              placeholder="Search suburb..."
+            />
             <div className="bg-[#00e5ff]/10 border border-[#00e5ff]/30 p-3 mt-2">
               <div className="flex items-start gap-2">
                 <Info className="h-3.5 w-3.5 text-[#00e5ff] mt-0.5 flex-shrink-0" />
-                <p className="text-xs text-[#7a6b5a]">Central Coast NSW is the trial region. Only Central Coast suburbs are available during the pilot.</p>
+                <p className="text-xs text-[#7a6b5a]">
+                  Central Coast NSW is the trial region. Only Central Coast suburbs are available
+                  during the pilot.
+                </p>
               </div>
             </div>
           </div>
           <div className="space-y-2">
             <Label>Bio</Label>
-            <Textarea value={editForm.bio} onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })} placeholder="Tell us about yourself..." rows={4} />
+            <Textarea
+              value={editForm.bio}
+              onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
+              placeholder="Tell us about yourself..."
+              rows={4}
+            />
           </div>
           <div className="space-y-2">
             <Label>Mobile Number</Label>
@@ -354,26 +423,42 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                 placeholder="+61 412 345 678"
               />
             </div>
-            <p className="text-xs text-[#7a6b5a]">Used for account security. Australian format only.</p>
+            <p className="text-xs text-[#7a6b5a]">
+              Used for account security. Australian format only.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="vessel">
-              <button type="button" onClick={() => setPublicPanelOpen(!publicPanelOpen)} className="w-full flex items-center justify-between p-4 text-left hover:bg-[#1a1714] transition-colors">
+              <button
+                type="button"
+                onClick={() => setPublicPanelOpen(!publicPanelOpen)}
+                className="w-full flex items-center justify-between p-4 text-left hover:bg-[#1a1714] transition-colors"
+              >
                 <div className="flex items-center gap-2">
                   <Globe className="h-4 w-4 text-[#f5a623]" />
                   <span className="text-sm font-medium text-[#e8d5a3]">Public Profile</span>
                 </div>
-                {publicPanelOpen ? <ChevronUp className="h-4 w-4 text-[#7a6b5a]" /> : <ChevronDown className="h-4 w-4 text-[#7a6b5a]" />}
+                {publicPanelOpen ? (
+                  <ChevronUp className="h-4 w-4 text-[#7a6b5a]" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-[#7a6b5a]" />
+                )}
               </button>
               {publicPanelOpen && (
                 <div className="px-4 pb-4 space-y-4 border-t border-[#2a2420]">
-                  <p className="text-xs text-[#7a6b5a] pt-3">Shown in the pros directory. Anyone can find and contact you.</p>
+                  <p className="text-xs text-[#7a6b5a] pt-3">
+                    Shown in the pros directory. Anyone can find and contact you.
+                  </p>
                   <div className="space-y-2">
                     <Label>Phone</Label>
                     <div className="flex items-center gap-2">
                       <Phone className="h-3.5 w-3.5 text-[#7a6b5a]" />
-                      <Input value={editForm.publicPhone} onChange={(e) => setEditForm({ ...editForm, publicPhone: e.target.value })} placeholder="Public contact number" />
+                      <Input
+                        value={editForm.publicPhone}
+                        onChange={(e) => setEditForm({ ...editForm, publicPhone: e.target.value })}
+                        placeholder="Public contact number"
+                      />
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -381,18 +466,47 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                     <div className="space-y-2">
                       {editForm.publicSocialLinks.map((link, i) => (
                         <div key={i} className="flex items-center gap-2">
-                          <span className="text-xs text-[#f5a623] w-16 uppercase">{link.platform}</span>
+                          <span className="text-xs text-[#f5a623] w-16 uppercase">
+                            {link.platform}
+                          </span>
                           <span className="text-xs text-[#b8a078] flex-1 truncate">{link.url}</span>
-                          <button type="button" onClick={() => removePublicLink(i)} className="text-[#7a6b5a] hover:text-[#ff5252]"><X className="h-3.5 w-3.5" /></button>
+                          <button
+                            type="button"
+                            onClick={() => removePublicLink(i)}
+                            className="text-[#7a6b5a] hover:text-[#ff5252]"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
                         </div>
                       ))}
                     </div>
                     <div className="flex gap-2">
-                      <select value={newPublicLinkPlatform} onChange={(e) => setNewPublicLinkPlatform(e.target.value)} className="bg-[#0f0c0a] border border-[#2a2420] text-[#e8d5a3] text-xs px-2 py-1.5 outline-none focus:border-[#f5a623] rounded">
-                        {PLATFORMS.map((p) => <option key={p} value={p}>{p}</option>)}
+                      <select
+                        value={newPublicLinkPlatform}
+                        onChange={(e) => setNewPublicLinkPlatform(e.target.value)}
+                        className="bg-[#0f0c0a] border border-[#2a2420] text-[#e8d5a3] text-xs px-2 py-1.5 outline-none focus:border-[#f5a623] rounded"
+                      >
+                        {PLATFORMS.map((p) => (
+                          <option key={p} value={p}>
+                            {p}
+                          </option>
+                        ))}
                       </select>
-                      <Input placeholder="https://..." value={newPublicLinkUrl} onChange={(e) => setNewPublicLinkUrl(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addPublicLink(); } }} className="flex-1 text-xs py-1.5" />
-                      <Button type="button" variant="secondary" size="sm" onClick={addPublicLink}><Plus className="h-3.5 w-3.5" /></Button>
+                      <Input
+                        placeholder="https://..."
+                        value={newPublicLinkUrl}
+                        onChange={(e) => setNewPublicLinkUrl(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            addPublicLink();
+                          }
+                        }}
+                        className="flex-1 text-xs py-1.5"
+                      />
+                      <Button type="button" variant="secondary" size="sm" onClick={addPublicLink}>
+                        <Plus className="h-3.5 w-3.5" />
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -400,21 +514,35 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
             </div>
 
             <div className="vessel">
-              <button type="button" onClick={() => setPrivatePanelOpen(!privatePanelOpen)} className="w-full flex items-center justify-between p-4 text-left hover:bg-[#1a1714] transition-colors">
+              <button
+                type="button"
+                onClick={() => setPrivatePanelOpen(!privatePanelOpen)}
+                className="w-full flex items-center justify-between p-4 text-left hover:bg-[#1a1714] transition-colors"
+              >
                 <div className="flex items-center gap-2">
                   <Lock className="h-4 w-4 text-[#7a6b5a]" />
                   <span className="text-sm font-medium text-[#e8d5a3]">Private Profile</span>
                 </div>
-                {privatePanelOpen ? <ChevronUp className="h-4 w-4 text-[#7a6b5a]" /> : <ChevronDown className="h-4 w-4 text-[#7a6b5a]" />}
+                {privatePanelOpen ? (
+                  <ChevronUp className="h-4 w-4 text-[#7a6b5a]" />
+                ) : (
+                  <ChevronDown className="h-4 w-4 text-[#7a6b5a]" />
+                )}
               </button>
               {privatePanelOpen && (
                 <div className="px-4 pb-4 space-y-4 border-t border-[#2a2420]">
-                  <p className="text-xs text-[#7a6b5a] pt-3">Shared when messaging about needs. More detail builds trust.</p>
+                  <p className="text-xs text-[#7a6b5a] pt-3">
+                    Shared when messaging about needs. More detail builds trust.
+                  </p>
                   <div className="space-y-2">
                     <Label>Phone</Label>
                     <div className="flex items-center gap-2">
                       <Phone className="h-3.5 w-3.5 text-[#7a6b5a]" />
-                      <Input value={editForm.privatePhone} onChange={(e) => setEditForm({ ...editForm, privatePhone: e.target.value })} placeholder="Private contact number" />
+                      <Input
+                        value={editForm.privatePhone}
+                        onChange={(e) => setEditForm({ ...editForm, privatePhone: e.target.value })}
+                        placeholder="Private contact number"
+                      />
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -422,18 +550,47 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                     <div className="space-y-2">
                       {editForm.privateSocialLinks.map((link, i) => (
                         <div key={i} className="flex items-center gap-2">
-                          <span className="text-xs text-[#f5a623] w-16 uppercase">{link.platform}</span>
+                          <span className="text-xs text-[#f5a623] w-16 uppercase">
+                            {link.platform}
+                          </span>
                           <span className="text-xs text-[#b8a078] flex-1 truncate">{link.url}</span>
-                          <button type="button" onClick={() => removePrivateLink(i)} className="text-[#7a6b5a] hover:text-[#ff5252]"><X className="h-3.5 w-3.5" /></button>
+                          <button
+                            type="button"
+                            onClick={() => removePrivateLink(i)}
+                            className="text-[#7a6b5a] hover:text-[#ff5252]"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
                         </div>
                       ))}
                     </div>
                     <div className="flex gap-2">
-                      <select value={newPrivateLinkPlatform} onChange={(e) => setNewPrivateLinkPlatform(e.target.value)} className="bg-[#0f0c0a] border border-[#2a2420] text-[#e8d5a3] text-xs px-2 py-1.5 outline-none focus:border-[#f5a623] rounded">
-                        {PLATFORMS.map((p) => <option key={p} value={p}>{p}</option>)}
+                      <select
+                        value={newPrivateLinkPlatform}
+                        onChange={(e) => setNewPrivateLinkPlatform(e.target.value)}
+                        className="bg-[#0f0c0a] border border-[#2a2420] text-[#e8d5a3] text-xs px-2 py-1.5 outline-none focus:border-[#f5a623] rounded"
+                      >
+                        {PLATFORMS.map((p) => (
+                          <option key={p} value={p}>
+                            {p}
+                          </option>
+                        ))}
                       </select>
-                      <Input placeholder="https://..." value={newPrivateLinkUrl} onChange={(e) => setNewPrivateLinkUrl(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addPrivateLink(); } }} className="flex-1 text-xs py-1.5" />
-                      <Button type="button" variant="secondary" size="sm" onClick={addPrivateLink}><Plus className="h-3.5 w-3.5" /></Button>
+                      <Input
+                        placeholder="https://..."
+                        value={newPrivateLinkUrl}
+                        onChange={(e) => setNewPrivateLinkUrl(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            addPrivateLink();
+                          }
+                        }}
+                        className="flex-1 text-xs py-1.5"
+                      />
+                      <Button type="button" variant="secondary" size="sm" onClick={addPrivateLink}>
+                        <Plus className="h-3.5 w-3.5" />
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -442,8 +599,12 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
           </div>
 
           <div className="flex items-center gap-3">
-            <Button type="submit" disabled={saving}>{saving ? "Saving..." : "Save Profile"}</Button>
-            <Button type="button" variant="ghost" onClick={() => setIsEditing(false)}>Cancel</Button>
+            <Button type="submit" disabled={saving}>
+              {saving ? "Saving..." : "Save Profile"}
+            </Button>
+            <Button type="button" variant="ghost" onClick={() => setIsEditing(false)}>
+              Cancel
+            </Button>
           </div>
         </form>
       )}

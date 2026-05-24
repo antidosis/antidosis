@@ -163,7 +163,10 @@ export const CENTRAL_COAST_SUBURBS: Suburb[] = [
 ];
 
 export function formatLocation(name: string, postcode?: string): string {
-  const clean = name.toLowerCase().replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, "_");
+  const clean = name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, "")
+    .replace(/\s+/g, "_");
   return postcode ? `${clean}_${postcode}` : clean;
 }
 

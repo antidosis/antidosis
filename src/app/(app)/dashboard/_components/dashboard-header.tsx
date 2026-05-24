@@ -1,8 +1,8 @@
 "use client";
 
-import { Avatar } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Star, Briefcase, FileText, HandHelping, Shield, Crown } from "lucide-react";
+
+import { Avatar } from "@/components/ui/avatar";
 
 type ProfileData = {
   fullName: string | null;
@@ -70,7 +70,12 @@ export function DashboardHeader({
       {/* Main header card */}
       <div className="vessel-lit p-5 sm:p-6">
         <div className="flex flex-col sm:flex-row items-start gap-5">
-          <Avatar src={profile.avatarUrl || null} name={profile.fullName} size="lg" className="h-16 w-16" />
+          <Avatar
+            src={profile.avatarUrl || null}
+            name={profile.fullName}
+            size="lg"
+            className="h-16 w-16"
+          />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h2 className="heading-display text-xl sm:text-2xl text-[#e8d5a3]">
@@ -115,9 +120,7 @@ export function DashboardHeader({
                 <p className="text-sm font-semibold" style={{ color: stat.color }}>
                   {stat.value}
                 </p>
-                <p className="text-[10px] text-[#7a6b5a] uppercase tracking-wider">
-                  {stat.sub}
-                </p>
+                <p className="text-[10px] text-[#7a6b5a] uppercase tracking-wider">{stat.sub}</p>
               </div>
             </div>
           ))}

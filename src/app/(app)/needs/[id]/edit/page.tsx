@@ -1,18 +1,32 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
+
 import Link from "next/link";
+import { useRouter, useParams } from "next/navigation";
+
+import {
+  ArrowLeft,
+  Wrench,
+  Package,
+  CircleDollarSign,
+  Camera,
+  ImageIcon,
+  Loader2,
+  Calendar,
+  Clock,
+  Info,
+} from "lucide-react";
+
 import { Button } from "@/components/ui/button";
+import { ImageGallery } from "@/components/ui/image-gallery";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { LocationAutocomplete } from "@/components/ui/location-autocomplete";
-import { ImageGallery } from "@/components/ui/image-gallery";
-import { createClient } from "@/lib/supabase/client";
-import { ArrowLeft, Wrench, Package, CircleDollarSign, Camera, ImageIcon, Loader2, Calendar, Clock, Info } from "lucide-react";
 import { SkillAutocomplete } from "@/components/ui/skill-autocomplete";
+import { Textarea } from "@/components/ui/textarea";
 import { EXCHANGE_MODES, INCOMPATIBLE_EXCHANGE_MODES } from "@/lib/categories";
+import { createClient } from "@/lib/supabase/client";
 
 export default function EditNeedPage() {
   const router = useRouter();
@@ -52,17 +66,36 @@ export default function EditNeedPage() {
     async function fetchNeed() {
       try {
         const res = await fetch(`/api/v1/needs/${needId}`);
-        if (!res.ok) { setNotFound(true); setLoading(false); return; }
+        if (!res.ok) {
+          setNotFound(true);
+          setLoading(false);
+          return;
+        }
         const data = await res.json();
         const need = data.need;
-        if (!need) { setNotFound(true); setLoading(false); return; }
+        if (!need) {
+          setNotFound(true);
+          setLoading(false);
+          return;
+        }
 
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) { router.push("/login"); return; }
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) {
+          router.push("/login");
+          return;
+        }
         const profileRes = await fetch("/api/v1/profiles/me");
         const profile = profileRes.ok ? await profileRes.json() : null;
-        if (need.poster.id !== profile?.id) { router.push(`/needs/${needId}`); return; }
-        if (need.status !== "open" && need.status !== "archived") { router.push(`/needs/${needId}`); return; }
+        if (need.poster.id !== profile?.id) {
+          router.push(`/needs/${needId}`);
+          return;
+        }
+        if (need.status !== "open" && need.status !== "archived") {
+          router.push(`/needs/${needId}`);
+          return;
+        }
 
         setTitle(need.title || "");
         setDescription(need.description || "");
@@ -96,11 +129,17 @@ export default function EditNeedPage() {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        title, description, offerType, offerDescription,
+        title,
+        description,
+        offerType,
+        offerDescription,
         needCategory: exchangeMode || null,
         offerValue: offerValue ? parseFloat(offerValue) : undefined,
-        isLocal: true, locationName: locationFormatted,
-        requiredSkills, images, offerImages,
+        isLocal: true,
+        locationName: locationFormatted,
+        requiredSkills,
+        images,
+        offerImages,
         deadline: deadline || undefined,
         timeRange: timeRange || undefined,
         requiresContract,
@@ -109,7 +148,8 @@ export default function EditNeedPage() {
 
     const data = await res.json();
     if (!res.ok) {
-      const msg = typeof data.error === "string" ? data.error : data.error?.[0]?.message || "failed";
+      const msg =
+        typeof data.error === "string" ? data.error : data.error?.[0]?.message || "failed";
       setError("error: " + msg);
       setSaving(false);
       return;
@@ -119,23 +159,28 @@ export default function EditNeedPage() {
     router.refresh();
   }
 
-  if (loading) return (
-    <div className="max-w-2xl mx-auto px-4 md:px-8 py-24 text-center">
-      <Loader2 className="h-6 w-6 animate-spin mx-auto mb-4 text-[#7a6b5a]" />
-      <p className="text-sm text-[#7a6b5a]">loading...</p>
-    </div>
-  );
+  if (loading)
+    return (
+      <div className="max-w-2xl mx-auto px-4 md:px-8 py-24 text-center">
+        <Loader2 className="h-6 w-6 animate-spin mx-auto mb-4 text-[#7a6b5a]" />
+        <p className="text-sm text-[#7a6b5a]">loading...</p>
+      </div>
+    );
 
-  if (notFound) return (
-    <div className="max-w-2xl mx-auto px-4 md:px-8 py-24 text-center">
-      <p className="text-sm text-[#ff5252]">error: need not found</p>
-    </div>
-  );
+  if (notFound)
+    return (
+      <div className="max-w-2xl mx-auto px-4 md:px-8 py-24 text-center">
+        <p className="text-sm text-[#ff5252]">error: need not found</p>
+      </div>
+    );
 
   return (
     <div className="max-w-2xl lg:max-w-6xl mx-auto px-4 md:px-8">
       <div className="py-6">
-        <Link href={`/needs/${needId}`} className="inline-flex items-center text-sm text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors">
+        <Link
+          href={`/needs/${needId}`}
+          className="inline-flex items-center text-sm text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors"
+        >
           <ArrowLeft className="mr-2 h-4 w-4" />$ cd ~/needs/{needId.slice(0, 8)}
         </Link>
       </div>
@@ -146,124 +191,179 @@ export default function EditNeedPage() {
 
       <form onSubmit={handleSubmit} className="space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <section className="vessel-need p-5">
-          <p className="text-xs text-[#35c2f0] uppercase tracking-wide font-medium mb-1">[what you need]</p>
-          <p className="text-xs text-[#7a6b5a] mb-5">what are you seeking from the community?</p>
-          <div className="space-y-5">
-            <div className="space-y-2">
-              <Label>Title</Label>
-              <Input placeholder="e.g. electrical_work_1hr" value={title} onChange={(e) => setTitle(e.target.value)} required />
-            </div>
-            <div className="space-y-2">
-              <Label>Description</Label>
-              <Textarea placeholder="describe the work, timeline, requirements..." value={description} onChange={(e) => setDescription(e.target.value)} required rows={5} />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+          <section className="vessel-need p-5">
+            <p className="text-xs text-[#35c2f0] uppercase tracking-wide font-medium mb-1">
+              [what you need]
+            </p>
+            <p className="text-xs text-[#7a6b5a] mb-5">what are you seeking from the community?</p>
+            <div className="space-y-5">
               <div className="space-y-2">
-                <div className="flex items-center gap-2 mb-1">
-                  <Calendar className="h-4 w-4 text-[#7a6b5a]" />
-                  <Label>Deadline (Optional)</Label>
-                </div>
-                <Input type="date" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
+                <Label>Title</Label>
+                <Input
+                  placeholder="e.g. electrical_work_1hr"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  required
+                />
               </div>
               <div className="space-y-2">
-                <div className="flex items-center gap-2 mb-1">
-                  <Clock className="h-4 w-4 text-[#7a6b5a]" />
-                  <Label>Time Estimate (Optional)</Label>
+                <Label>Description</Label>
+                <Textarea
+                  placeholder="describe the work, timeline, requirements..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  required
+                  rows={5}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Calendar className="h-4 w-4 text-[#7a6b5a]" />
+                    <Label>Deadline (Optional)</Label>
+                  </div>
+                  <Input
+                    type="date"
+                    value={deadline}
+                    onChange={(e) => setDeadline(e.target.value)}
+                  />
                 </div>
-                <Input placeholder="e.g. 2-4 hours" value={timeRange} onChange={(e) => setTimeRange(e.target.value)} />
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Clock className="h-4 w-4 text-[#7a6b5a]" />
+                    <Label>Time Estimate (Optional)</Label>
+                  </div>
+                  <Input
+                    placeholder="e.g. 2-4 hours"
+                    value={timeRange}
+                    onChange={(e) => setTimeRange(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>
+                  Required Skills <span className="text-[#7a6b5a] font-normal">(optional)</span>
+                </Label>
+                <SkillAutocomplete
+                  value={requiredSkills}
+                  onChange={setRequiredSkills}
+                  placeholder="Search skills… e.g. electrical, tutoring"
+                  maxSkills={8}
+                />
+                <p className="text-xs text-[#7a6b5a]">
+                  add skills to help the right people find your need. browse popular skills or type
+                  your own.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <Camera className="h-4 w-4 text-[#7a6b5a]" />
+                  <Label>Need Images (Optional)</Label>
+                </div>
+                <ImageGallery
+                  images={images}
+                  onChange={setImages}
+                  folder="needs"
+                  maxImages={5}
+                  label="attach photos of what you need"
+                />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label>Required Skills <span className="text-[#7a6b5a] font-normal">(optional)</span></Label>
-              <SkillAutocomplete
-                value={requiredSkills}
-                onChange={setRequiredSkills}
-                placeholder="Search skills… e.g. electrical, tutoring"
-                maxSkills={8}
-              />
-              <p className="text-xs text-[#7a6b5a]">add skills to help the right people find your need. browse popular skills or type your own.</p>
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 mb-2">
-                <Camera className="h-4 w-4 text-[#7a6b5a]" />
-                <Label>Need Images (Optional)</Label>
-              </div>
-              <ImageGallery images={images} onChange={setImages} folder="needs" maxImages={5} label="attach photos of what you need" />
-            </div>
-          </div>
-        </section>
+          </section>
 
-        <section className="vessel-offer p-5">
-          <p className="text-xs text-[#f5a623] uppercase tracking-wide font-medium mb-1">[what you are offering]</p>
-          <p className="text-xs text-[#7a6b5a] mb-5">this determines which exchange categories are available below</p>
-          <div className="space-y-5">
-            <div className="grid grid-cols-3 gap-2">
-              {(["service", "item", "money"] as const).map((type) => (
-                <Button
-                  key={type}
-                  type="button"
-                  variant="outline"
-                  onClick={() => setOfferType(type)}
-                  className={`flex flex-col items-center gap-2 h-auto py-4 px-2 ${
-                    offerType === type
-                      ? "border-[#f5a623] bg-[#f5a623]/5 text-[#e8d5a3] hover:bg-[#f5a623]/10 hover:text-[#e8d5a3]"
-                      : "border-[#2a2420] bg-[#0f0c0a] text-[#7a6b5a] hover:text-[#e8d5a3] hover:bg-[#1a1714] hover:border-[#3d3530]"
-                  }`}
-                >
-                  {type === "service" && <Wrench className="h-5 w-5" />}
-                  {type === "item" && <Package className="h-5 w-5" />}
-                  {type === "money" && <CircleDollarSign className="h-5 w-5" />}
-                  <span className="text-sm font-medium capitalize">{type}</span>
-                </Button>
-              ))}
-            </div>
-            <div className="space-y-2">
-              <Label className="text-xs text-[#7a6b5a]">Sub-category (optional)</Label>
-              <div className="flex flex-wrap gap-2">
-                {EXCHANGE_MODES.filter((mode) => {
-                  const incompatible = INCOMPATIBLE_EXCHANGE_MODES[offerType] || [];
-                  return !incompatible.includes(mode.value);
-                }).map((mode) => {
-                  const active = exchangeMode === mode.value;
-                  return (
-                    <button
-                      key={mode.value}
-                      type="button"
-                      onClick={() => setExchangeMode(active ? "" : mode.value)}
-                      className={`text-[11px] uppercase tracking-wider px-2.5 py-1 rounded border transition-colors ${mode.twText} ${
-                        active
-                          ? `${mode.twBorder} ${mode.twBg} border-current`
-                          : "border-[#2a2420] hover:border-current"
-                      }`}
-                    >
-                      {mode.label}
-                    </button>
-                  );
-                })}
+          <section className="vessel-offer p-5">
+            <p className="text-xs text-[#f5a623] uppercase tracking-wide font-medium mb-1">
+              [what you are offering]
+            </p>
+            <p className="text-xs text-[#7a6b5a] mb-5">
+              this determines which exchange categories are available below
+            </p>
+            <div className="space-y-5">
+              <div className="grid grid-cols-3 gap-2">
+                {(["service", "item", "money"] as const).map((type) => (
+                  <Button
+                    key={type}
+                    type="button"
+                    variant="outline"
+                    onClick={() => setOfferType(type)}
+                    className={`flex flex-col items-center gap-2 h-auto py-4 px-2 ${
+                      offerType === type
+                        ? "border-[#f5a623] bg-[#f5a623]/5 text-[#e8d5a3] hover:bg-[#f5a623]/10 hover:text-[#e8d5a3]"
+                        : "border-[#2a2420] bg-[#0f0c0a] text-[#7a6b5a] hover:text-[#e8d5a3] hover:bg-[#1a1714] hover:border-[#3d3530]"
+                    }`}
+                  >
+                    {type === "service" && <Wrench className="h-5 w-5" />}
+                    {type === "item" && <Package className="h-5 w-5" />}
+                    {type === "money" && <CircleDollarSign className="h-5 w-5" />}
+                    <span className="text-sm font-medium capitalize">{type}</span>
+                  </Button>
+                ))}
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs text-[#7a6b5a]">Sub-category (optional)</Label>
+                <div className="flex flex-wrap gap-2">
+                  {EXCHANGE_MODES.filter((mode) => {
+                    const incompatible = INCOMPATIBLE_EXCHANGE_MODES[offerType] || [];
+                    return !incompatible.includes(mode.value);
+                  }).map((mode) => {
+                    const active = exchangeMode === mode.value;
+                    return (
+                      <button
+                        key={mode.value}
+                        type="button"
+                        onClick={() => setExchangeMode(active ? "" : mode.value)}
+                        className={`text-[11px] uppercase tracking-wider px-2.5 py-1 rounded border transition-colors ${mode.twText} ${
+                          active
+                            ? `${mode.twBorder} ${mode.twBg} border-current`
+                            : "border-[#2a2420] hover:border-current"
+                        }`}
+                      >
+                        {mode.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Offer Description</Label>
+                <Textarea
+                  placeholder="describe what you are offering..."
+                  value={offerDescription}
+                  onChange={(e) => setOfferDescription(e.target.value)}
+                  required
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Estimated Value (Optional)</Label>
+                <Input
+                  type="number"
+                  placeholder="0.00"
+                  value={offerValue}
+                  onChange={(e) => setOfferValue(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <ImageIcon className="h-4 w-4 text-[#7a6b5a]" />
+                  <Label>Offer Images (Optional)</Label>
+                </div>
+                <ImageGallery
+                  images={offerImages}
+                  onChange={setOfferImages}
+                  folder="offers"
+                  maxImages={5}
+                  label="attach photos of what you are offering"
+                />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label>Offer Description</Label>
-              <Textarea placeholder="describe what you are offering..." value={offerDescription} onChange={(e) => setOfferDescription(e.target.value)} required rows={3} />
-            </div>
-            <div className="space-y-2">
-              <Label>Estimated Value (Optional)</Label>
-              <Input type="number" placeholder="0.00" value={offerValue} onChange={(e) => setOfferValue(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 mb-2">
-                <ImageIcon className="h-4 w-4 text-[#7a6b5a]" />
-                <Label>Offer Images (Optional)</Label>
-              </div>
-              <ImageGallery images={offerImages} onChange={setOfferImages} folder="offers" maxImages={5} label="attach photos of what you are offering" />
-            </div>
-          </div>
-        </section>
+          </section>
         </div>
 
         <section className="p-4 rounded border border-[#00e676]/30 bg-[#00e676]/5">
-          <p className="text-xs text-[#00e676] uppercase tracking-wide font-medium mb-4">[deal type]</p>
+          <p className="text-xs text-[#00e676] uppercase tracking-wide font-medium mb-4">
+            [deal type]
+          </p>
           <div className="flex items-start gap-6">
             <div className="pt-1">
               <label className="flex items-start gap-3 cursor-pointer">
@@ -276,8 +376,9 @@ export default function EditNeedPage() {
                 <div>
                   <p className="text-sm font-medium text-[#e8d5a3]">Require a formal contract</p>
                   <p className="text-xs text-[#7a6b5a] mt-1.5 max-w-2xl">
-                    If checked, both parties must agree to terms and digitally sign a binding contract before the exchange begins.
-                    If unchecked, the deal proceeds in free form — you simply accept an interest and arrange the exchange directly.
+                    If checked, both parties must agree to terms and digitally sign a binding
+                    contract before the exchange begins. If unchecked, the deal proceeds in free
+                    form — you simply accept an interest and arrange the exchange directly.
                   </p>
                 </div>
               </label>
@@ -286,14 +387,21 @@ export default function EditNeedPage() {
         </section>
 
         <section className="p-4 rounded border border-[#ff5252]/30 bg-[#ff5252]/5">
-          <p className="text-xs text-[#ff5252] uppercase tracking-wide font-medium mb-4">[location]</p>
+          <p className="text-xs text-[#ff5252] uppercase tracking-wide font-medium mb-4">
+            [location]
+          </p>
           <div className="space-y-4">
             <div className="bg-[#00e5ff]/10 border border-[#00e5ff]/30 p-3">
               <div className="flex items-start gap-3">
                 <Info className="h-4 w-4 text-[#00e5ff] mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-sm text-[#e8d5a3] font-medium">Central Coast NSW trial region</p>
-                  <p className="text-xs text-[#7a6b5a] mt-1">only central coast suburbs are available during the pilot. remote exchanges are temporarily disabled.</p>
+                  <p className="text-sm text-[#e8d5a3] font-medium">
+                    Central Coast NSW trial region
+                  </p>
+                  <p className="text-xs text-[#7a6b5a] mt-1">
+                    only central coast suburbs are available during the pilot. remote exchanges are
+                    temporarily disabled.
+                  </p>
                 </div>
               </div>
             </div>
@@ -311,8 +419,12 @@ export default function EditNeedPage() {
         {error && <p className="text-sm text-[#ff5252]">{error}</p>}
 
         <div className="flex gap-3 pb-12">
-          <Button type="submit" variant="default" size="lg" disabled={saving} className="flex-1">{saving ? "saving..." : "Save Changes"}</Button>
-          <Button type="button" variant="secondary" size="lg" asChild><Link href={`/needs/${needId}`}>Cancel</Link></Button>
+          <Button type="submit" variant="default" size="lg" disabled={saving} className="flex-1">
+            {saving ? "saving..." : "Save Changes"}
+          </Button>
+          <Button type="button" variant="secondary" size="lg" asChild>
+            <Link href={`/needs/${needId}`}>Cancel</Link>
+          </Button>
         </div>
       </form>
     </div>

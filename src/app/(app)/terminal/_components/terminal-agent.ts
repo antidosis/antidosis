@@ -91,13 +91,7 @@ const INTENT_PATTERNS: { intent: Intent; patterns: RegExp[]; weight: number }[] 
   },
   {
     intent: "SIGN_CONTRACT",
-    patterns: [
-      /^sign\b/i,
-      /^agree to\b/i,
-      /^approve\b/i,
-      /^confirm (the )?contract/i,
-      /^i agree/i,
-    ],
+    patterns: [/^sign\b/i, /^agree to\b/i, /^approve\b/i, /^confirm (the )?contract/i, /^i agree/i],
     weight: 0.85,
   },
   {
@@ -115,24 +109,12 @@ const INTENT_PATTERNS: { intent: Intent; patterns: RegExp[]; weight: number }[] 
   },
   {
     intent: "REMIND",
-    patterns: [
-      /^remind\b/i,
-      /^nudge\b/i,
-      /^poke\b/i,
-      /^send a reminder/i,
-      /^follow up/i,
-    ],
+    patterns: [/^remind\b/i, /^nudge\b/i, /^poke\b/i, /^send a reminder/i, /^follow up/i],
     weight: 0.8,
   },
   {
     intent: "CANCEL",
-    patterns: [
-      /^cancel\b/i,
-      /^abort\b/i,
-      /^stop\b/i,
-      /^withdraw\b/i,
-      /^call off/i,
-    ],
+    patterns: [/^cancel\b/i, /^abort\b/i, /^stop\b/i, /^withdraw\b/i, /^call off/i],
     weight: 0.8,
   },
   {
@@ -178,13 +160,7 @@ const INTENT_PATTERNS: { intent: Intent; patterns: RegExp[]; weight: number }[] 
   },
   {
     intent: "WHOAMI",
-    patterns: [
-      /^who am i/i,
-      /^my profile/i,
-      /^about me/i,
-      /^my info/i,
-      /^my details/i,
-    ],
+    patterns: [/^who am i/i, /^my profile/i, /^about me/i, /^my info/i, /^my details/i],
     weight: 0.9,
   },
   {
@@ -201,13 +177,7 @@ const INTENT_PATTERNS: { intent: Intent; patterns: RegExp[]; weight: number }[] 
   },
   {
     intent: "PROFILE",
-    patterns: [
-      /^profile\b/i,
-      /^who is\b/i,
-      /^view\b/i,
-      /^show me\s+\w+/i,
-      /^look up\b/i,
-    ],
+    patterns: [/^profile\b/i, /^who is\b/i, /^view\b/i, /^show me\s+\w+/i, /^look up\b/i],
     weight: 0.8,
   },
   {
@@ -224,13 +194,7 @@ const INTENT_PATTERNS: { intent: Intent; patterns: RegExp[]; weight: number }[] 
   },
   {
     intent: "REVIEW",
-    patterns: [
-      /^review\b/i,
-      /^rate\b/i,
-      /^leave (a )?review/i,
-      /^feedback\b/i,
-      /^how was/i,
-    ],
+    patterns: [/^review\b/i, /^rate\b/i, /^leave (a )?review/i, /^feedback\b/i, /^how was/i],
     weight: 0.8,
   },
   {
@@ -279,16 +243,31 @@ export function parseIntent(input: string): ParsedIntent {
   if (text.startsWith("/")) {
     const cmd = text.slice(1).split(" ")[0].toLowerCase();
     const intentMap: Record<string, Intent> = {
-      post: "CREATE_NEED", needs: "BROWSE", need: "BROWSE",
-      dm: "DM", msg: "DM", message: "DM",
-      sign: "SIGN_CONTRACT", complete: "COMPLETE_DEAL",
-      remind: "REMIND", cancel: "CANCEL", help: "HELP",
-      stats: "STATS", dashboard: "STATS", activity: "ACTIVITY",
-      whoami: "WHOAMI", notifications: "NOTIFICATIONS",
-      profile: "PROFILE", pros: "PROS", review: "REVIEW",
-      contract: "VIEW_CONTRACT", contracts: "VIEW_CONTRACT",
-      accept: "ACCEPT_NEED", ask: "ASK_AGENT",
-      search: "SEARCH", find: "SEARCH",
+      post: "CREATE_NEED",
+      needs: "BROWSE",
+      need: "BROWSE",
+      dm: "DM",
+      msg: "DM",
+      message: "DM",
+      sign: "SIGN_CONTRACT",
+      complete: "COMPLETE_DEAL",
+      remind: "REMIND",
+      cancel: "CANCEL",
+      help: "HELP",
+      stats: "STATS",
+      dashboard: "STATS",
+      activity: "ACTIVITY",
+      whoami: "WHOAMI",
+      notifications: "NOTIFICATIONS",
+      profile: "PROFILE",
+      pros: "PROS",
+      review: "REVIEW",
+      contract: "VIEW_CONTRACT",
+      contracts: "VIEW_CONTRACT",
+      accept: "ACCEPT_NEED",
+      ask: "ASK_AGENT",
+      search: "SEARCH",
+      find: "SEARCH",
     };
     const intent = intentMap[cmd] || "UNKNOWN";
     const args = extractArgs(text);
@@ -420,31 +399,41 @@ function buildPendingActionsResponse(context: UserContext): string {
   if (context.pendingSignatures.length > 0) {
     parts.push(
       `  📝 ${context.pendingSignatures.length} contract${context.pendingSignatures.length > 1 ? "s" : ""} waiting for your signature:` +
-      context.pendingSignatures.map((c) => `\n     • ${c.need?.title || "Contract"} → /sign ${c.id.slice(0, 8)}`).join("")
+        context.pendingSignatures
+          .map((c) => `\n     • ${c.need?.title || "Contract"} → /sign ${c.id.slice(0, 8)}`)
+          .join("")
     );
   }
 
   if (context.pendingCompletions.length > 0) {
     parts.push(
       `  ✅ ${context.pendingCompletions.length} deal${context.pendingCompletions.length > 1 ? "s" : ""} waiting for completion:` +
-      context.pendingCompletions.map((c) => `\n     • ${c.need?.title || "Deal"} → /complete ${c.id.slice(0, 8)}`).join("")
+        context.pendingCompletions
+          .map((c) => `\n     • ${c.need?.title || "Deal"} → /complete ${c.id.slice(0, 8)}`)
+          .join("")
     );
   }
 
   if (context.pendingReviews.length > 0) {
     parts.push(
       `  ⭐ ${context.pendingReviews.length} review${context.pendingReviews.length > 1 ? "s" : ""} pending:` +
-      context.pendingReviews.map((r) => `\n     • ${r.title || "Deal"} → /review ${r.id.slice(0, 8)}`).join("")
+        context.pendingReviews
+          .map((r) => `\n     • ${r.title || "Deal"} → /review ${r.id.slice(0, 8)}`)
+          .join("")
     );
   }
 
   if (context.unreadDmCount > 0) {
-    parts.push(`  💬 ${context.unreadDmCount} unread DM${context.unreadDmCount > 1 ? "s" : ""} → /dm threads`);
+    parts.push(
+      `  💬 ${context.unreadDmCount} unread DM${context.unreadDmCount > 1 ? "s" : ""} → /dm threads`
+    );
   }
 
   const unreadNotifs = context.notifications.filter((n) => !n.read).length;
   if (unreadNotifs > 0) {
-    parts.push(`  🔴 ${unreadNotifs} unread notification${unreadNotifs > 1 ? "s" : ""} → /notifications`);
+    parts.push(
+      `  🔴 ${unreadNotifs} unread notification${unreadNotifs > 1 ? "s" : ""} → /notifications`
+    );
   }
 
   if (parts.length === 0) {
@@ -456,9 +445,7 @@ function buildPendingActionsResponse(context: UserContext): string {
 
 // ─── Contextual Suggestions ──────────────────────────────────
 
-export function getContextualSuggestion(
-  context: UserContext
-): string | null {
+export function getContextualSuggestion(context: UserContext): string | null {
   if (context.pendingSignatures.length > 0) {
     const c = context.pendingSignatures[0];
     return `📝 You have a contract waiting for signature: /sign ${c.id.slice(0, 8)}`;

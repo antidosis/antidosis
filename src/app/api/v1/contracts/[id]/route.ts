@@ -1,30 +1,19 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
-import { generateContractPdf } from "@/lib/pdf-contract";
-import { createServiceClient } from "@/lib/supabase/service";
+import { type NextRequest, NextResponse } from "next/server";
+
 import { logger } from "@/lib/logger";
-import { z } from "zod";
+import { generateContractPdf } from "@/lib/pdf-contract";
+import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
+import { patchContractSchema } from "@/lib/schemas";
+import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service";
 
-const patchSchema = z.object({
-  terms: z.string().min(1).max(10000).optional(),
-  agree: z.boolean().optional(),
-  submitTerms: z.boolean().optional(),
-  updatedAt: z.string().optional(),
-  partyATerms: z.string().max(5000).optional(),
-  partyBTerms: z.string().max(5000).optional(),
-  partyAUseMessageTerms: z.boolean().optional(),
-  partyBUseMessageTerms: z.boolean().optional(),
-});
-
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -45,8 +34,14 @@ export async function GET(
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
-    const messagesLimit = Math.max(1, Math.min(parseInt(req.nextUrl.searchParams.get("messagesLimit") || "100", 10) || 100, 200));
-    const messagesSkip = Math.max(0, parseInt(req.nextUrl.searchParams.get("messagesSkip") || "0", 10) || 0);
+    const messagesLimit = Math.max(
+      1,
+      Math.min(parseInt(req.nextUrl.searchParams.get("messagesLimit") || "100", 10) || 100, 200)
+    );
+    const messagesSkip = Math.max(
+      0,
+      parseInt(req.nextUrl.searchParams.get("messagesSkip") || "0", 10) || 0
+    );
 
     const contract = await prisma.contract.findUnique({
       where: { id: params.id },
@@ -125,20 +120,16 @@ export async function GET(
     return NextResponse.json({ contract });
   } catch (error) {
     logger.error("Get contract error:", error instanceof Error ? error : undefined);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -210,7 +201,7 @@ export async function PATCH(
     }
 
     const body = await req.json();
-    const parsed = patchSchema.safeParse(body);
+    const parsed = patchContractSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
         { error: "Invalid input", details: parsed.error.flatten() },
@@ -262,8 +253,10 @@ export async function PATCH(
       if (terms !== undefined) updateData.terms = terms;
       if (partyATerms !== undefined) updateData.partyATerms = partyATerms;
       if (partyBTerms !== undefined) updateData.partyBTerms = partyBTerms;
-      if (partyAUseMessageTerms !== undefined) updateData.partyAUseMessageTerms = partyAUseMessageTerms;
-      if (partyBUseMessageTerms !== undefined) updateData.partyBUseMessageTerms = partyBUseMessageTerms;
+      if (partyAUseMessageTerms !== undefined)
+        updateData.partyAUseMessageTerms = partyAUseMessageTerms;
+      if (partyBUseMessageTerms !== undefined)
+        updateData.partyBUseMessageTerms = partyBUseMessageTerms;
 
       const updated = await prisma.contract.update({
         where: { id: params.id },
@@ -276,10 +269,7 @@ export async function PATCH(
     // Submit terms flow
     if (submitTerms) {
       if (contract.termsLockedAt) {
-        return NextResponse.json(
-          { error: "Terms are already locked" },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: "Terms are already locked" }, { status: 400 });
       }
 
       const submissionField = isPartyA ? "partyASubmittedAt" : "partyBSubmittedAt";
@@ -298,16 +288,16 @@ export async function PATCH(
     // Agreement flow (accept terms during review phase)
     if (agree) {
       if (contract.termsLockedAt) {
-        return NextResponse.json(
-          { error: "Terms are already locked" },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: "Terms are already locked" }, { status: 400 });
       }
 
       // Race condition protection: reject if terms were updated since client loaded
       if (clientUpdatedAt && contract.updatedAt.toISOString() !== clientUpdatedAt) {
         return NextResponse.json(
-          { error: "Terms have been updated. Please review the latest terms before accepting.", code: "TERMS_CHANGED" },
+          {
+            error: "Terms have been updated. Please review the latest terms before accepting.",
+            code: "TERMS_CHANGED",
+          },
           { status: 409 }
         );
       }
@@ -315,7 +305,10 @@ export async function PATCH(
       // Both parties must have submitted before either can accept
       if (!contract.partyASubmittedAt || !contract.partyBSubmittedAt) {
         return NextResponse.json(
-          { error: "Both parties must submit their terms before accepting.", code: "NOT_READY_FOR_REVIEW" },
+          {
+            error: "Both parties must submit their terms before accepting.",
+            code: "NOT_READY_FOR_REVIEW",
+          },
           { status: 400 }
         );
       }
@@ -368,7 +361,11 @@ export async function PATCH(
       if (updatedContract?.termsLockedAt && !contract.termsLockedAt) {
         try {
           let termsParsed: any = {};
-          try { termsParsed = JSON.parse(contract.terms); } catch { /* ignore */ }
+          try {
+            termsParsed = JSON.parse(contract.terms);
+          } catch {
+            /* ignore */
+          }
 
           const negotiationMessages = (contract.negotiationMessages as any[]) || [];
 
@@ -418,9 +415,7 @@ export async function PATCH(
             });
 
           if (!uploadError) {
-            const { data: urlData } = serviceClient.storage
-              .from("uploads")
-              .getPublicUrl(fileName);
+            const { data: urlData } = serviceClient.storage.from("uploads").getPublicUrl(fileName);
 
             finalContract = await prisma.contract.update({
               where: { id: params.id },
@@ -438,9 +433,6 @@ export async function PATCH(
     return NextResponse.json({ contract });
   } catch (error) {
     logger.error("Update contract error:", error instanceof Error ? error : undefined);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

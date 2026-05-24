@@ -129,7 +129,9 @@
 
   /* Glow Effects — The Soul of the Interface */
   .glow-gold {
-    text-shadow: 0 0 20px rgba(245, 166, 35, 0.4), 0 0 40px rgba(245, 166, 35, 0.15);
+    text-shadow:
+      0 0 20px rgba(245, 166, 35, 0.4),
+      0 0 40px rgba(245, 166, 35, 0.15);
   }
 
   .glow-gold-subtle {
@@ -137,11 +139,15 @@
   }
 
   .glow-mercury {
-    text-shadow: 0 0 20px rgba(0, 229, 255, 0.35), 0 0 40px rgba(0, 229, 255, 0.12);
+    text-shadow:
+      0 0 20px rgba(0, 229, 255, 0.35),
+      0 0 40px rgba(0, 229, 255, 0.12);
   }
 
   .glow-quintessence {
-    text-shadow: 0 0 25px rgba(178, 75, 245, 0.4), 0 0 50px rgba(178, 75, 245, 0.15);
+    text-shadow:
+      0 0 25px rgba(178, 75, 245, 0.4),
+      0 0 50px rgba(178, 75, 245, 0.15);
   }
 
   .glow-emerald {
@@ -154,7 +160,9 @@
 
   /* Box Glows */
   .box-glow-gold {
-    box-shadow: 0 0 30px rgba(245, 166, 35, 0.1), inset 0 1px 0 rgba(245, 166, 35, 0.08);
+    box-shadow:
+      0 0 30px rgba(245, 166, 35, 0.1),
+      inset 0 1px 0 rgba(245, 166, 35, 0.08);
   }
 
   .box-glow-mercury {
@@ -162,7 +170,9 @@
   }
 
   .box-glow-quintessence {
-    box-shadow: 0 0 40px rgba(178, 75, 245, 0.12), inset 0 1px 0 rgba(178, 75, 245, 0.1);
+    box-shadow:
+      0 0 40px rgba(178, 75, 245, 0.12),
+      inset 0 1px 0 rgba(178, 75, 245, 0.1);
   }
 
   /* Prompt */
@@ -302,13 +312,22 @@
 }
 
 @keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }
 
 @keyframes ticker {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 .animate-ticker {
@@ -316,84 +335,92 @@
 }
 
 @keyframes terminal-fade-in {
-  from { opacity: 0; transform: translateY(2px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-terminal-fade {
   animation: terminal-fade-in 0.2s ease both;
 }
 
-  /* Contract Document — Parchment */
-  .contract-parchment {
-    background: #f5e6c8;
-    color: #2c1810;
-    font-family: 'Georgia', 'Times New Roman', serif;
-  }
+/* Contract Document — Parchment */
+.contract-parchment {
+  background: #f5e6c8;
+  color: #2c1810;
+  font-family: "Georgia", "Times New Roman", serif;
+}
 
-  .contract-page {
-    background: #f5e6c8;
-    color: #2c1810;
-    box-shadow: 0 1px 3px rgba(44, 24, 16, 0.15), 0 4px 12px rgba(44, 24, 16, 0.1);
-    border: 1px solid #e0c898;
-  }
+.contract-page {
+  background: #f5e6c8;
+  color: #2c1810;
+  box-shadow:
+    0 1px 3px rgba(44, 24, 16, 0.15),
+    0 4px 12px rgba(44, 24, 16, 0.1);
+  border: 1px solid #e0c898;
+}
 
-  .contract-heading {
-    font-family: 'Georgia', 'Times New Roman', serif;
-    font-weight: 700;
-    color: #1a0f08;
-    letter-spacing: 0.02em;
-  }
+.contract-heading {
+  font-family: "Georgia", "Times New Roman", serif;
+  font-weight: 700;
+  color: #1a0f08;
+  letter-spacing: 0.02em;
+}
 
-  .contract-body {
-    font-family: 'Georgia', 'Times New Roman', serif;
-    color: #2c1810;
-    line-height: 1.7;
-  }
+.contract-body {
+  font-family: "Georgia", "Times New Roman", serif;
+  color: #2c1810;
+  line-height: 1.7;
+}
 
-  .contract-label {
-    font-family: var(--font-mono), monospace;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #8a7050;
-  }
+.contract-label {
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #8a7050;
+}
 
-  .contract-seal {
-    border: 2px solid #1a0f08;
-    color: #1a0f08;
-    font-family: 'Georgia', serif;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    padding: 8px 20px;
-    display: inline-block;
-  }
+.contract-seal {
+  border: 2px solid #1a0f08;
+  color: #1a0f08;
+  font-family: "Georgia", serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 8px 20px;
+  display: inline-block;
+}
 
-  .signature-line {
-    border-bottom: 1px solid #2c1810;
-    min-width: 200px;
-    display: inline-block;
-  }
+.signature-line {
+  border-bottom: 1px solid #2c1810;
+  min-width: 200px;
+  display: inline-block;
+}
 
-  .print-hidden {
-    @media print {
-      display: none !important;
-    }
+.print-hidden {
+  @media print {
+    display: none !important;
   }
+}
 
-  .print-only {
-    display: none;
-    @media print {
-      display: block;
-    }
+.print-only {
+  display: none;
+  @media print {
+    display: block;
   }
+}
 
 @media print {
   body {
     background: white !important;
     color: black !important;
-    font-family: 'Georgia', 'Times New Roman', serif !important;
+    font-family: "Georgia", "Times New Roman", serif !important;
   }
 
   .contract-parchment,

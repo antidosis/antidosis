@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useCallback, useRef, useEffect } from "react";
+
 import { X, CheckCircle2, AlertCircle, Info } from "lucide-react";
 
 export type ToastType = "success" | "error" | "info";
@@ -37,12 +38,15 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const toast = useCallback((message: string, type: ToastType = "info") => {
-    const id = Math.random().toString(36).slice(2, 9);
-    setToasts((prev) => [...prev, { id, message, type }]);
-    const timer = setTimeout(() => dismiss(id), 5000);
-    timers.current.set(id, timer);
-  }, [dismiss]);
+  const toast = useCallback(
+    (message: string, type: ToastType = "info") => {
+      const id = Math.random().toString(36).slice(2, 9);
+      setToasts((prev) => [...prev, { id, message, type }]);
+      const timer = setTimeout(() => dismiss(id), 5000);
+      timers.current.set(id, timer);
+    },
+    [dismiss]
+  );
 
   useEffect(() => {
     const currentTimers = timers.current;

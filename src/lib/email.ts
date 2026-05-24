@@ -144,10 +144,7 @@ export async function sendContractSignedEmail(
   });
 }
 
-export async function sendContractCompletedEmail(
-  to: string,
-  needTitle: string
-) {
+export async function sendContractCompletedEmail(to: string, needTitle: string) {
   if (!checkResendReady() || !resend) return;
 
   await resend.emails.send({

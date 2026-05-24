@@ -4,12 +4,13 @@
 
 Log into [GoDaddy DNS Management](https://dcc.godaddy.com/manage/antidosis.com/dns) for `antidosis.com` and add:
 
-| Type | Name | Value | TTL |
-|------|------|-------|-----|
-| A | @ | 76.76.21.21 | 600 |
-| CNAME | www | cname.vercel-dns.com | 600 |
+| Type  | Name | Value                | TTL |
+| ----- | ---- | -------------------- | --- |
+| A     | @    | 76.76.21.21          | 600 |
+| CNAME | www  | cname.vercel-dns.com | 600 |
 
 Then in [Vercel Dashboard](https://vercel.com/dashboard):
+
 1. Select project `antidosis`
 2. Go to **Settings → Domains**
 3. Add `antidosis.com` and `www.antidosis.com`
@@ -24,35 +25,41 @@ Then in [Vercel Dashboard](https://vercel.com/dashboard):
 Resend sends transactional emails from your domain (e.g. `noreply@antidosis.com`).
 
 ### 2a. Sign up & add domain
+
 1. Go to [resend.com](https://resend.com) → sign up (free)
 2. Go to **Domains → Add Domain**
 3. Enter `antidosis.com`
 4. Resend will show DNS records (DKIM, SPF, DMARC) to add
 
 ### 2b. Add Resend DNS records to GoDaddy
+
 Copy the DNS records from Resend and add them in GoDaddy DNS:
 
-| Type | Name | Value | TTL |
-|------|------|-------|-----|
-| TXT | _dmarc | `v=DMARC1; p=quarantine; rua=mailto:...` | 3600 |
-| TXT | [resend-dkim-name] | `[resend-dkim-value]` | 3600 |
-| TXT | @ | `v=spf1 include:...` | 3600 |
+| Type | Name               | Value                                    | TTL  |
+| ---- | ------------------ | ---------------------------------------- | ---- |
+| TXT  | \_dmarc            | `v=DMARC1; p=quarantine; rua=mailto:...` | 3600 |
+| TXT  | [resend-dkim-name] | `[resend-dkim-value]`                    | 3600 |
+| TXT  | @                  | `v=spf1 include:...`                     | 3600 |
 
-*Exact values are shown in your Resend dashboard.*
+_Exact values are shown in your Resend dashboard._
 
 ### 2c. Verify domain in Resend
+
 Click "Verify" in Resend. It may take a few minutes.
 
 ### 2d. Get API key
+
 1. In Resend, go to **API Keys → Create API Key**
 2. Name it `antidosis-prod`
 3. Copy the key (starts with `re_`)
 
 ### 2e. Set API key on Vercel
+
 ```bash
 vercel env add RESEND_API_KEY production
 # paste the real key when prompted
 ```
+
 Or via Vercel Dashboard → Project → Settings → Environment Variables.
 
 ---
@@ -62,6 +69,7 @@ Or via Vercel Dashboard → Project → Settings → Environment Variables.
 Supabase sends verification emails. By default they come from `@supabase.co`. To use your domain:
 
 ### 3a. Enable Confirm Email
+
 1. [Supabase Dashboard](https://supabase.com/dashboard) → your project
 2. **Authentication → Providers → Email**
 3. Toggle **Confirm email** ON
@@ -71,6 +79,7 @@ Supabase sends verification emails. By default they come from `@supabase.co`. To
    - `https://antidosis.com/login`
 
 ### 3b. Configure Custom SMTP (uses Resend)
+
 1. **Project Settings → Auth → Email → SMTP**
 2. Toggle **Enable Custom SMTP**
 3. Fill in:
@@ -83,7 +92,9 @@ Supabase sends verification emails. By default they come from `@supabase.co`. To
 4. Save
 
 ### 3c. Customize email templates (optional)
+
 In **Authentication → Email Templates**, update:
+
 - **Confirm signup** subject: `Verify your Antidosis account`
 - **Magic Link** subject: `Your Antidosis login link`
 - Replace `{{ .SiteURL }}` with `https://antidosis.com` in template URLs
@@ -92,18 +103,18 @@ In **Authentication → Email Templates**, update:
 
 ## 4. Environment Variables Summary
 
-| Variable | Current Value | Action Needed |
-|----------|--------------|---------------|
-| `NEXT_PUBLIC_APP_URL` | `https://antidosis.com` | ✅ Done |
-| `APP_URL` | `https://antidosis.com` | ✅ Done |
-| `RESEND_API_KEY` | placeholder | Replace with real key |
-| `STRIPE_SECRET_KEY` | placeholder | Replace for payments |
-| `STRIPE_WEBHOOK_SECRET` | placeholder | Replace for payments |
-| `STRIPE_PRICE_ID` | placeholder | Replace for payments |
-| `DATABASE_URL` | set | ✅ Done |
-| `SUPABASE_SERVICE_ROLE_KEY` | set | ✅ Done |
-| `NEXT_PUBLIC_SUPABASE_URL` | set | ✅ Done |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | set | ✅ Done |
+| Variable                        | Current Value           | Action Needed         |
+| ------------------------------- | ----------------------- | --------------------- |
+| `NEXT_PUBLIC_APP_URL`           | `https://antidosis.com` | ✅ Done               |
+| `APP_URL`                       | `https://antidosis.com` | ✅ Done               |
+| `RESEND_API_KEY`                | placeholder             | Replace with real key |
+| `STRIPE_SECRET_KEY`             | placeholder             | Replace for payments  |
+| `STRIPE_WEBHOOK_SECRET`         | placeholder             | Replace for payments  |
+| `STRIPE_PRICE_ID`               | placeholder             | Replace for payments  |
+| `DATABASE_URL`                  | set                     | ✅ Done               |
+| `SUPABASE_SERVICE_ROLE_KEY`     | set                     | ✅ Done               |
+| `NEXT_PUBLIC_SUPABASE_URL`      | set                     | ✅ Done               |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | set                     | ✅ Done               |
 
 ---
 

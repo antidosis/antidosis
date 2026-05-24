@@ -1,13 +1,17 @@
 "use client";
 
+import { useState, useEffect } from "react";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
-import { useState, useEffect } from "react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { NotificationBell } from "./notification-bell";
+
 import { Menu, X, Terminal } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
+
+import { NotificationBell } from "./notification-bell";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -17,7 +21,9 @@ export function Navbar() {
 
   useEffect(() => {
     async function getUser() {
-      const { data: { user: authUser } } = await supabase.auth.getUser();
+      const {
+        data: { user: authUser },
+      } = await supabase.auth.getUser();
       if (authUser) setUser(authUser);
     }
     getUser();
@@ -25,7 +31,9 @@ export function Navbar() {
       if (event === "SIGNED_OUT") setUser(null);
       else if (session?.user) setUser(session.user);
     });
-    return () => { listener.subscription.unsubscribe(); };
+    return () => {
+      listener.subscription.unsubscribe();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -39,7 +47,9 @@ export function Navbar() {
     } else {
       document.body.style.overflow = "";
     }
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [mobileOpen]);
 
   const navItems = [
@@ -104,7 +114,12 @@ export function Navbar() {
             {user && <NotificationBell />}
             {!user ? (
               <>
-                <Link href="/login" className="text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors text-sm">login</Link>
+                <Link
+                  href="/login"
+                  className="text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors text-sm"
+                >
+                  login
+                </Link>
                 <Button asChild size="sm">
                   <Link href="/register">register</Link>
                 </Button>
@@ -112,7 +127,7 @@ export function Navbar() {
             ) : (
               <button
                 type="button"
-                onClick={() => supabase.auth.signOut().then(() => window.location.href = "/")}
+                onClick={() => supabase.auth.signOut().then(() => (window.location.href = "/"))}
                 className="text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors text-sm"
               >
                 logout
@@ -168,7 +183,10 @@ export function Navbar() {
             <div className="pt-6 flex flex-col gap-3">
               {!user ? (
                 <>
-                  <Link href="/login" className="py-3 text-base text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors border-b border-[#2a2420]/50">
+                  <Link
+                    href="/login"
+                    className="py-3 text-base text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors border-b border-[#2a2420]/50"
+                  >
                     login
                   </Link>
                   <Button asChild className="justify-center mt-2">
@@ -178,7 +196,7 @@ export function Navbar() {
               ) : (
                 <button
                   type="button"
-                  onClick={() => supabase.auth.signOut().then(() => window.location.href = "/")}
+                  onClick={() => supabase.auth.signOut().then(() => (window.location.href = "/"))}
                   className="py-3 text-base text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors text-left"
                 >
                   logout

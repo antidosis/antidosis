@@ -1,33 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
-import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
-import { auditLog, getClientInfo } from "@/lib/audit";
-import { logger } from "@/lib/logger";
-import { sanitizePlainText } from "@/lib/security/sanitize";
-import { sanitizeUrlArray } from "@/lib/security/url";
-import { isValidCentralCoastSuburb } from "@/lib/data/central-coast-suburbs";
-import { EXCHANGE_MODE_VALUES } from "@/lib/categories";
+import { type NextRequest, NextResponse } from "next/server";
+
 import { z } from "zod";
 
-const createNeedSchema = z.object({
-  title: z.string().min(3, "Title must be at least 3 characters").max(200, "Title must be under 200 characters"),
-  description: z.string().min(10, "Description must be at least 10 characters").max(5000, "Description must be under 5000 characters"),
-  needCategory: z.enum(["", ...EXCHANGE_MODE_VALUES] as [string, ...string[]]).optional().nullable(),
-  offerType: z.enum(["service", "item", "money"]),
-  offerDescription: z.string().min(3, "Offer description must be at least 3 characters").max(2000, "Offer description must be under 2000 characters"),
-  offerValue: z.number().min(0).optional(),
-  isLocal: z.boolean().default(true),
-  locationName: z.string().optional(),
-  latitude: z.number().optional(),
-  longitude: z.number().optional(),
-  deadline: z.string().optional(),
-  timeRange: z.string().max(100, "Time estimate must be under 100 characters").optional(),
-  requiredSkills: z.array(z.string()).default([]),
-  images: z.array(z.string()).default([]),
-  offerImages: z.array(z.string()).default([]),
-  requiresContract: z.boolean().optional().default(false),
-});
+import { auditLog, getClientInfo } from "@/lib/audit";
+import { EXCHANGE_MODE_VALUES } from "@/lib/categories";
+import { isValidCentralCoastSuburb } from "@/lib/data/central-coast-suburbs";
+import { logger } from "@/lib/logger";
+import { prisma } from "@/lib/prisma";
+import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
+import { createNeedSchema } from "@/lib/schemas";
+import { sanitizePlainText } from "@/lib/security/sanitize";
+import { sanitizeUrlArray } from "@/lib/security/url";
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET(req: NextRequest) {
   try {
@@ -70,47 +54,48 @@ export async function GET(req: NextRequest) {
       };
     }
 
-    const [needs, total, offerTypesWithNeeds, categoriesWithNeeds, skillsWithNeeds] = await Promise.all([
-      prisma.need.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        skip,
-        take: limit,
-        include: {
-          poster: {
-            select: {
-              id: true,
-              fullName: true,
-              avatarUrl: true,
-              ratingAvg: true,
-              ratingCount: true,
-              locationName: true,
+    const [needs, total, offerTypesWithNeeds, categoriesWithNeeds, skillsWithNeeds] =
+      await Promise.all([
+        prisma.need.findMany({
+          where,
+          orderBy: { createdAt: "desc" },
+          skip,
+          take: limit,
+          include: {
+            poster: {
+              select: {
+                id: true,
+                fullName: true,
+                avatarUrl: true,
+                ratingAvg: true,
+                ratingCount: true,
+                locationName: true,
+              },
+            },
+            requiredSkills: true,
+            _count: {
+              select: { acceptances: true },
             },
           },
-          requiredSkills: true,
-          _count: {
-            select: { acceptances: true },
-          },
-        },
-      }),
-      prisma.need.count({ where }),
-      prisma.need.findMany({
-        where: { status: "open" },
-        select: { offerType: true },
-        distinct: ["offerType"],
-      }),
-      prisma.need.findMany({
-        where: { status: "open", needCategory: { not: null } },
-        select: { needCategory: true },
-        distinct: ["needCategory"],
-      }),
-      prisma.$queryRaw<{ name: string }[]>`
+        }),
+        prisma.need.count({ where }),
+        prisma.need.findMany({
+          where: { status: "open" },
+          select: { offerType: true },
+          distinct: ["offerType"],
+        }),
+        prisma.need.findMany({
+          where: { status: "open", needCategory: { not: null } },
+          select: { needCategory: true },
+          distinct: ["needCategory"],
+        }),
+        prisma.$queryRaw<{ name: string }[]>`
         SELECT DISTINCT ns.name
         FROM need_skills ns
         INNER JOIN needs n ON ns.need_id = n.id
         WHERE n.status = 'open'
       `,
-    ]);
+      ]);
 
     return NextResponse.json(
       {
@@ -133,23 +118,19 @@ export async function GET(req: NextRequest) {
     );
   } catch (error) {
     logger.error("[API:/api/v1/needs GET]", error instanceof Error ? error : undefined);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
     }
 
     if (!user.email_confirmed_at) {
@@ -176,10 +157,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!profile) {
-      return NextResponse.json(
-        { error: "Profile not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
     const body = await req.json();
@@ -246,9 +224,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: messages.join("; ") }, { status: 400 });
     }
     logger.error("Create need failed", error instanceof Error ? error : undefined);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

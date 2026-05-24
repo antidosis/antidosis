@@ -1,19 +1,19 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
-import { sendContractCompletedEmail } from "@/lib/email";
+import { type NextRequest, NextResponse } from "next/server";
+
 import { auditLog, getClientInfo } from "@/lib/audit";
+import { sendContractCompletedEmail } from "@/lib/email";
 import { logger } from "@/lib/logger";
 import { createNotification } from "@/lib/notifications";
+import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
+import { createClient } from "@/lib/supabase/server";
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -24,7 +24,6 @@ export async function POST(
         { status: 403 }
       );
     }
-
 
     const profile = await prisma.profile.findUnique({
       where: { userId: user.id },
@@ -60,23 +59,14 @@ export async function POST(
     }
 
     if (contract.status !== "active" && contract.status !== "pending_completion") {
-      return NextResponse.json(
-        { error: "Contract is not active" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Contract is not active" }, { status: 400 });
     }
 
     if (isPartyA && contract.aMarkedComplete) {
-      return NextResponse.json(
-        { error: "Already marked complete" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Already marked complete" }, { status: 400 });
     }
     if (isPartyB && contract.bMarkedComplete) {
-      return NextResponse.json(
-        { error: "Already marked complete" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Already marked complete" }, { status: 400 });
     }
 
     const updatedContract = await prisma.$transaction(async (tx) => {
@@ -161,7 +151,10 @@ export async function POST(
           });
         }
       } catch (emailErr) {
-        logger.error("Failed to send completion email:", emailErr instanceof Error ? emailErr : undefined);
+        logger.error(
+          "Failed to send completion email:",
+          emailErr instanceof Error ? emailErr : undefined
+        );
       }
     }
 
@@ -179,9 +172,6 @@ export async function POST(
     return NextResponse.json({ contract: updatedContract });
   } catch (error) {
     logger.error("Complete contract error:", error instanceof Error ? error : undefined);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

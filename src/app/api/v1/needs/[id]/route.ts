@@ -1,40 +1,21 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
-import { logger } from "@/lib/logger";
-import { sanitizePlainText } from "@/lib/security/sanitize";
-import { sanitizeUrlArray } from "@/lib/security/url";
-import { isValidCentralCoastSuburb } from "@/lib/data/central-coast-suburbs";
-import { EXCHANGE_MODE_VALUES } from "@/lib/categories";
+import { type NextRequest, NextResponse } from "next/server";
+
 import { z } from "zod";
 
-const updateNeedSchema = z.object({
-  title: z.string().min(3, "Title must be at least 3 characters").max(200, "Title must be under 200 characters").optional(),
-  description: z.string().min(10, "Description must be at least 10 characters").max(5000, "Description must be under 5000 characters").optional(),
-  needCategory: z.enum(["", ...EXCHANGE_MODE_VALUES] as [string, ...string[]]).optional().nullable(),
-  offerType: z.enum(["service", "item", "money"]).optional(),
-  offerDescription: z.string().min(3, "Offer description must be at least 3 characters").max(2000, "Offer description must be under 2000 characters").optional(),
-  offerValue: z.number().min(0).optional().nullable(),
-  isLocal: z.boolean().optional(),
-  locationName: z.string().optional().nullable(),
-  latitude: z.number().optional().nullable(),
-  longitude: z.number().optional().nullable(),
-  deadline: z.string().optional().nullable(),
-  timeRange: z.string().max(100, "Time estimate must be under 100 characters").optional().nullable(),
-  requiredSkills: z.array(z.string()).optional(),
-  images: z.array(z.string()).optional(),
-  offerImages: z.array(z.string()).optional(),
-  requiresContract: z.boolean().optional(),
-  status: z.enum(["open", "archived"]).optional(),
-});
+import { isValidCentralCoastSuburb } from "@/lib/data/central-coast-suburbs";
+import { logger } from "@/lib/logger";
+import { prisma } from "@/lib/prisma";
+import { updateNeedSchema } from "@/lib/schemas";
+import { sanitizePlainText } from "@/lib/security/sanitize";
+import { sanitizeUrlArray } from "@/lib/security/url";
+import { createClient } from "@/lib/supabase/server";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     const isAuthenticated = !!user;
 
     // Determine viewer role
@@ -109,7 +90,9 @@ export async function GET(
                     ratingCount: true,
                     jobsCompleted: true,
                     skills: true,
-                    credentials: { select: { id: true, title: true, issuedBy: true, isVerified: true } },
+                    credentials: {
+                      select: { id: true, title: true, issuedBy: true, isVerified: true },
+                    },
                   },
                 },
               },
@@ -136,7 +119,9 @@ export async function GET(
                       ratingCount: true,
                       jobsCompleted: true,
                       skills: true,
-                      credentials: { select: { id: true, title: true, issuedBy: true, isVerified: true } },
+                      credentials: {
+                        select: { id: true, title: true, issuedBy: true, isVerified: true },
+                      },
                     },
                   },
                 },
@@ -173,20 +158,16 @@ export async function GET(
     return NextResponse.json({ need });
   } catch (error) {
     logger.error("Get need error:", error instanceof Error ? error : undefined);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -228,17 +209,23 @@ export async function PATCH(
 
     const updateData: any = {};
     if (data.title !== undefined) updateData.title = sanitizePlainText(data.title);
-    if (data.description !== undefined) updateData.description = sanitizePlainText(data.description);
-    if (data.needCategory !== undefined) updateData.needCategory = data.needCategory ? sanitizePlainText(data.needCategory) : null;
+    if (data.description !== undefined)
+      updateData.description = sanitizePlainText(data.description);
+    if (data.needCategory !== undefined)
+      updateData.needCategory = data.needCategory ? sanitizePlainText(data.needCategory) : null;
     if (data.offerType !== undefined) updateData.offerType = data.offerType;
-    if (data.offerDescription !== undefined) updateData.offerDescription = sanitizePlainText(data.offerDescription);
+    if (data.offerDescription !== undefined)
+      updateData.offerDescription = sanitizePlainText(data.offerDescription);
     if (data.offerValue !== undefined) updateData.offerValue = data.offerValue;
     if (data.isLocal !== undefined) updateData.isLocal = data.isLocal;
-    if (data.locationName !== undefined) updateData.locationName = data.locationName ? sanitizePlainText(data.locationName) : null;
+    if (data.locationName !== undefined)
+      updateData.locationName = data.locationName ? sanitizePlainText(data.locationName) : null;
     if (data.latitude !== undefined) updateData.latitude = data.latitude;
     if (data.longitude !== undefined) updateData.longitude = data.longitude;
-    if (data.deadline !== undefined) updateData.deadline = data.deadline ? new Date(data.deadline) : null;
-    if (data.timeRange !== undefined) updateData.timeRange = data.timeRange ? sanitizePlainText(data.timeRange) : null;
+    if (data.deadline !== undefined)
+      updateData.deadline = data.deadline ? new Date(data.deadline) : null;
+    if (data.timeRange !== undefined)
+      updateData.timeRange = data.timeRange ? sanitizePlainText(data.timeRange) : null;
     if (data.images !== undefined) updateData.images = sanitizeUrlArray(data.images);
     if (data.offerImages !== undefined) updateData.offerImages = sanitizeUrlArray(data.offerImages);
     if (data.requiresContract !== undefined) updateData.requiresContract = data.requiresContract;
@@ -254,7 +241,9 @@ export async function PATCH(
           data: {
             ...updateData,
             requiredSkills: {
-              create: data.requiredSkills!.map((name: string) => ({ name: sanitizePlainText(name) })),
+              create: data.requiredSkills!.map((name: string) => ({
+                name: sanitizePlainText(name),
+              })),
             },
           },
           include: {
@@ -293,20 +282,16 @@ export async function PATCH(
       return NextResponse.json({ error: messages.join("; ") }, { status: 400 });
     }
     logger.error("Update need failed", error instanceof Error ? error : undefined);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -338,9 +323,6 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     logger.error("Delete need failed", error instanceof Error ? error : undefined);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

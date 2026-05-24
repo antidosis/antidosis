@@ -19,7 +19,10 @@ export function ProgressRing({
   const color = pct === 1 ? "#00e676" : pct >= 0.6 ? "#f5a623" : "#7a6b5a";
 
   return (
-    <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
+    <div
+      className="relative inline-flex items-center justify-center"
+      style={{ width: size, height: size }}
+    >
       <svg width={size} height={size} className="-rotate-90">
         <circle
           cx={size / 2}

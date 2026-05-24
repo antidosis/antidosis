@@ -1,21 +1,17 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
+import { AlertCircle, Smartphone, Loader2, ArrowLeft, ShieldCheck } from "lucide-react";
+
+import { TerminalCursor } from "@/components/effects/terminal-cursor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createClient } from "@/lib/supabase/client";
 import { maskMobile } from "@/lib/mobile";
-import { TerminalCursor } from "@/components/effects/terminal-cursor";
-import {
-  CheckCircle2,
-  AlertCircle,
-  Smartphone,
-  Loader2,
-  ArrowLeft,
-  ShieldCheck,
-} from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function VerifyMobilePage() {
   const router = useRouter();
@@ -37,7 +33,9 @@ export default function VerifyMobilePage() {
 
   useEffect(() => {
     async function init() {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         router.push("/login");
         return;
@@ -144,7 +142,10 @@ export default function VerifyMobilePage() {
   return (
     <div className="min-h-screen bg-[#0a0806] text-[#e8d5a3]">
       <div className="px-4 md:px-8 py-4 border-b border-[#2a2420]">
-        <Link href="/dashboard" className="flex items-center gap-2 text-sm text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors">
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-2 text-sm text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors"
+        >
           <ArrowLeft className="h-4 w-4" />
           Back to Dashboard
         </Link>
@@ -154,7 +155,8 @@ export default function VerifyMobilePage() {
         <div className="w-full max-w-sm">
           <p className="text-xs text-[#7a6b5a] mb-8">$ verify-mobile --init</p>
           <h1 className="heading-display text-2xl text-[#e8d5a3] mb-2">
-            mobile_verification<TerminalCursor />
+            mobile_verification
+            <TerminalCursor />
           </h1>
           <p className="text-sm text-[#b8a078] mb-12">
             secure your account with a verified mobile number
@@ -206,14 +208,8 @@ export default function VerifyMobilePage() {
                 </div>
 
                 {!otpSent ? (
-                  <Button
-                    onClick={sendOtp}
-                    disabled={sending}
-                    className="w-full"
-                  >
-                    {sending ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    ) : null}
+                  <Button onClick={sendOtp} disabled={sending} className="w-full">
+                    {sending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                     Send OTP
                   </Button>
                 ) : (
@@ -241,9 +237,7 @@ export default function VerifyMobilePage() {
                           {formatTime(countdown)}
                         </span>
                       </span>
-                      {countdown === 0 && (
-                        <span className="text-[#ff5252]">code expired</span>
-                      )}
+                      {countdown === 0 && <span className="text-[#ff5252]">code expired</span>}
                     </div>
 
                     <Button
@@ -251,9 +245,7 @@ export default function VerifyMobilePage() {
                       disabled={verifying || code.length !== 6 || countdown === 0}
                       className="w-full"
                     >
-                      {verifying ? (
-                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                      ) : null}
+                      {verifying ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                       Verify
                     </Button>
 

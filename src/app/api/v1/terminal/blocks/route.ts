@@ -1,11 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET() {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const profile = await prisma.profile.findUnique({
@@ -24,7 +27,9 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json({ blocks: blocks.map((b) => ({ id: b.id, user: b.blocked, createdAt: b.createdAt })) });
+    return NextResponse.json({
+      blocks: blocks.map((b) => ({ id: b.id, user: b.blocked, createdAt: b.createdAt })),
+    });
   } catch (error) {
     console.error("[terminal/blocks GET] error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
@@ -34,7 +39,9 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const profile = await prisma.profile.findUnique({
@@ -46,9 +53,13 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const blockedId = body.blockedId as string;
     if (!blockedId) return NextResponse.json({ error: "blockedId required" }, { status: 400 });
-    if (blockedId === profile.id) return NextResponse.json({ error: "Cannot block yourself" }, { status: 400 });
+    if (blockedId === profile.id)
+      return NextResponse.json({ error: "Cannot block yourself" }, { status: 400 });
 
-    const target = await prisma.profile.findUnique({ where: { id: blockedId }, select: { id: true } });
+    const target = await prisma.profile.findUnique({
+      where: { id: blockedId },
+      select: { id: true },
+    });
     if (!target) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     // Check if already blocked

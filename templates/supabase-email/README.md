@@ -5,13 +5,13 @@ Copy the HTML from each file into your Supabase dashboard:
 
 ## Subject Lines
 
-| Template | Subject |
-|----------|---------|
-| Confirm signup | `Confirm your Antidosis account` |
-| Invite user | `You've been invited to Antidosis` |
-| Magic Link | `Log in to Antidosis` |
-| Change Email Address | `Confirm your new email address` |
-| Reset Password | `Reset your Antidosis password` |
+| Template             | Subject                            |
+| -------------------- | ---------------------------------- |
+| Confirm signup       | `Confirm your Antidosis account`   |
+| Invite user          | `You've been invited to Antidosis` |
+| Magic Link           | `Log in to Antidosis`              |
+| Change Email Address | `Confirm your new email address`   |
+| Reset Password       | `Reset your Antidosis password`    |
 
 ## How to apply
 

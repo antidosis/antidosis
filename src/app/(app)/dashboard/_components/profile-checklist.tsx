@@ -1,9 +1,14 @@
 "use client";
 
-import Link from "next/link";
 import {
-  Mail, User, Smartphone, ShieldCheck, Award, Crown,
-  CheckCircle2, ArrowRight,
+  Mail,
+  User,
+  Smartphone,
+  ShieldCheck,
+  Award,
+  Crown,
+  CheckCircle2,
+  ArrowRight,
 } from "lucide-react";
 
 /* ─── 6-segment circular tracker ───
@@ -119,10 +124,19 @@ interface ProfileChecklistProps {
   onNavigateToCredentials?: () => void;
 }
 
-export function ProfileChecklist({ profile, emailVerified, onNavigateToCredentials }: ProfileChecklistProps) {
+export function ProfileChecklist({
+  profile,
+  emailVerified,
+  onNavigateToCredentials,
+}: ProfileChecklistProps) {
   const hasCredentials = (profile.credentials?.length || 0) > 0;
   const hasIdentification = profile.credentials?.some((c) => c.type === "identification") ?? false;
-  const profileComplete = !!(profile.fullName && profile.bio && profile.avatarUrl && profile.locationName);
+  const profileComplete = !!(
+    profile.fullName &&
+    profile.bio &&
+    profile.avatarUrl &&
+    profile.locationName
+  );
 
   const doneMap: Record<string, boolean> = {
     email: emailVerified,
@@ -149,10 +163,19 @@ export function ProfileChecklist({ profile, emailVerified, onNavigateToCredentia
   }
 
   return (
-    <div className={`flex items-center gap-6 sm:gap-8 mb-6 ${allDone ? "justify-center" : "flex-col sm:flex-row"}`}>
+    <div
+      className={`flex items-center gap-6 sm:gap-8 mb-6 ${allDone ? "justify-center" : "flex-col sm:flex-row"}`}
+    >
       {/* ─── Circular Tracker ─── */}
-      <div className="relative shrink-0" style={{ width: allDone ? 120 : 220, height: allDone ? 120 : 220 }}>
-        <svg viewBox="0 0 200 200" className="w-full h-full" style={{ transform: "rotate(-30deg)" }}>
+      <div
+        className="relative shrink-0"
+        style={{ width: allDone ? 120 : 220, height: allDone ? 120 : 220 }}
+      >
+        <svg
+          viewBox="0 0 200 200"
+          className="w-full h-full"
+          style={{ transform: "rotate(-30deg)" }}
+        >
           {/* Background track */}
           {STEPS.map((_, i) => {
             const start = i * (360 / STEPS.length);
@@ -188,52 +211,60 @@ export function ProfileChecklist({ profile, emailVerified, onNavigateToCredentia
         </svg>
 
         {/* ─── Centre badge ─── */}
-        <div className="absolute inset-0 flex items-center justify-center" style={{ transform: "rotate(0deg)" }}>
+        <div
+          className="absolute inset-0 flex items-center justify-center"
+          style={{ transform: "rotate(0deg)" }}
+        >
           <div className="flex flex-col items-center justify-center">
             {allDone ? (
               <>
                 <div className="h-12 w-12 rounded-full bg-[#00e676]/10 border border-[#00e676]/30 flex items-center justify-center mb-1">
                   <CheckCircle2 className="h-6 w-6 text-[#00e676]" />
                 </div>
-                <span className="text-[10px] uppercase tracking-wider text-[#00e676] font-medium">verified</span>
+                <span className="text-[10px] uppercase tracking-wider text-[#00e676] font-medium">
+                  verified
+                </span>
               </>
             ) : (
               <>
                 <span className="text-3xl font-bold text-[#e8d5a3]">{completed}</span>
-                <span className="text-[10px] uppercase tracking-wider text-[#7a6b5a]">of {STEPS.length}</span>
+                <span className="text-[10px] uppercase tracking-wider text-[#7a6b5a]">
+                  of {STEPS.length}
+                </span>
               </>
             )}
           </div>
         </div>
 
         {/* ─── Icon markers on each slice (hidden when complete) ─── */}
-        {!allDone && STEPS.map((step, i) => {
-          const angle = i * (360 / STEPS.length) + SLICE / 2 - 30; // undo SVG rotation
-          const pos = polar(CX, CY, 74, angle);
-          const isDone = doneMap[step.id];
-          const Icon = step.icon;
-          return (
-            <div
-              key={`icon-${step.id}`}
-              className={`absolute flex items-center justify-center h-7 w-7 rounded-full border transition-colors ${
-                isDone
-                  ? "border-transparent"
-                  : "border-[#2a2420] bg-[#12100e] cursor-pointer hover:border-[#3d3530]"
-              }`}
-              style={{
-                left: `${(pos.x / 200) * 100}%`,
-                top: `${(pos.y / 200) * 100}%`,
-                transform: "translate(-50%, -50%)",
-                backgroundColor: isDone ? step.bg : undefined,
-                color: isDone ? step.color : "#7a6b5a",
-              }}
-              onClick={() => handleSliceClick(step)}
-              title={step.label}
-            >
-              <Icon className="h-3.5 w-3.5" />
-            </div>
-          );
-        })}
+        {!allDone &&
+          STEPS.map((step, i) => {
+            const angle = i * (360 / STEPS.length) + SLICE / 2 - 30; // undo SVG rotation
+            const pos = polar(CX, CY, 74, angle);
+            const isDone = doneMap[step.id];
+            const Icon = step.icon;
+            return (
+              <div
+                key={`icon-${step.id}`}
+                className={`absolute flex items-center justify-center h-7 w-7 rounded-full border transition-colors ${
+                  isDone
+                    ? "border-transparent"
+                    : "border-[#2a2420] bg-[#12100e] cursor-pointer hover:border-[#3d3530]"
+                }`}
+                style={{
+                  left: `${(pos.x / 200) * 100}%`,
+                  top: `${(pos.y / 200) * 100}%`,
+                  transform: "translate(-50%, -50%)",
+                  backgroundColor: isDone ? step.bg : undefined,
+                  color: isDone ? step.color : "#7a6b5a",
+                }}
+                onClick={() => handleSliceClick(step)}
+                title={step.label}
+              >
+                <Icon className="h-3.5 w-3.5" />
+              </div>
+            );
+          })}
       </div>
 
       {/* ─── Step list (hidden when complete) ─── */}
@@ -257,12 +288,17 @@ export function ProfileChecklist({ profile, emailVerified, onNavigateToCredentia
                 >
                   <div
                     className="flex items-center justify-center h-7 w-7 rounded-full shrink-0"
-                    style={{ backgroundColor: isDone ? `${step.color}15` : "#1a1714", color: isDone ? step.color : "#7a6b5a" }}
+                    style={{
+                      backgroundColor: isDone ? `${step.color}15` : "#1a1714",
+                      color: isDone ? step.color : "#7a6b5a",
+                    }}
                   >
                     <Icon className="h-3.5 w-3.5" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm ${isDone ? "text-[#7a6b5a] line-through" : "text-[#e8d5a3]"}`}>
+                    <p
+                      className={`text-sm ${isDone ? "text-[#7a6b5a] line-through" : "text-[#e8d5a3]"}`}
+                    >
                       {step.label}
                     </p>
                     <p className="text-[11px] text-[#7a6b5a]">{step.description}</p>

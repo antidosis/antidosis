@@ -1,6 +1,8 @@
 import * as React from "react";
+
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
+
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
@@ -12,10 +14,8 @@ const buttonVariants = cva(
           "bg-[#f5a623] text-[#0a0806] font-bold hover:bg-[#ffb84d] hover:shadow-[0_0_20px_rgba(245,166,35,0.3)]",
         secondary:
           "bg-transparent text-[#e8d5a3] border border-[#2a2420] hover:border-[#f5a623] hover:text-[#f5a623] hover:shadow-[0_0_15px_rgba(245,166,35,0.1)]",
-        ghost:
-          "bg-transparent text-[#b8a078] hover:text-[#e8d5a3] hover:bg-[#1a1714]",
-        link:
-          "bg-transparent text-[#f5a623] hover:underline underline-offset-4 hover:glow-gold-subtle",
+        ghost: "bg-transparent text-[#b8a078] hover:text-[#e8d5a3] hover:bg-[#1a1714]",
+        link: "bg-transparent text-[#f5a623] hover:underline underline-offset-4 hover:glow-gold-subtle",
         destructive:
           "bg-transparent text-[#ff5252] border border-[#ff5252]/20 hover:border-[#ff5252]/40 hover:bg-[#ff5252]/5 hover:shadow-[0_0_15px_rgba(255,82,82,0.1)]",
         outline:
@@ -40,8 +40,7 @@ const buttonVariants = cva(
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
 
@@ -49,11 +48,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
     return (
-      <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
-        ref={ref}
-        {...props}
-      />
+      <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />
     );
   }
 );

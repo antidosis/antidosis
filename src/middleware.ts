@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { updateSession } from "@/lib/supabase/middleware";
+
 import { auditLog, getClientInfo } from "@/lib/audit";
+import { updateSession } from "@/lib/supabase/middleware";
 
 // Routes that require email verification
 const PROTECTED_ROUTES = [
@@ -28,9 +29,7 @@ const PROTECTED_API_PREFIXES = [
 ];
 
 // API routes that bypass auth entirely
-const PUBLIC_API_ROUTES = [
-  "/api/v1/billing/webhook",
-];
+const PUBLIC_API_ROUTES = ["/api/v1/billing/webhook"];
 
 export async function middleware(request: NextRequest) {
   // Redirect www to non-www
@@ -46,15 +45,9 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // Check if this is a protected route
-  const isProtectedPage = PROTECTED_ROUTES.some((route) =>
-    pathname.startsWith(route)
-  );
-  const isProtectedApi = PROTECTED_API_PREFIXES.some((prefix) =>
-    pathname.startsWith(prefix)
-  );
-  const isPublicApi = PUBLIC_API_ROUTES.some((route) =>
-    pathname === route
-  );
+  const isProtectedPage = PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
+  const isProtectedApi = PROTECTED_API_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+  const isPublicApi = PUBLIC_API_ROUTES.some((route) => pathname === route);
 
   if (isPublicApi) {
     return response;
@@ -104,16 +97,12 @@ export async function middleware(request: NextRequest) {
         { status: 403 }
       );
     }
-    return NextResponse.redirect(
-      new URL("/verify-email", request.url)
-    );
+    return NextResponse.redirect(new URL("/verify-email", request.url));
   }
 
   return response;
 }
 
 export const config = {
-  matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
-  ],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"],
 };

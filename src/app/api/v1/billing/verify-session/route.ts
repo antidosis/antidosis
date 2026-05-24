@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+
 import { stripe } from "@/lib/stripe";
 
 export const dynamic = "force-dynamic";
@@ -10,10 +11,7 @@ export async function GET(req: NextRequest) {
     const sessionId = searchParams.get("session_id");
 
     if (!sessionId) {
-      return NextResponse.json(
-        { error: "Missing session_id" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Missing session_id" }, { status: 400 });
     }
 
     // Verify the session exists and was paid with Stripe
@@ -32,10 +30,10 @@ export async function GET(req: NextRequest) {
       subscriptionId: session.subscription,
     });
   } catch (error: any) {
-    logger.error("[API:/api/v1/billing/verify-session]", error instanceof Error ? error : undefined);
-    return NextResponse.json(
-      { error: "Invalid session" },
-      { status: 400 }
+    logger.error(
+      "[API:/api/v1/billing/verify-session]",
+      error instanceof Error ? error : undefined
     );
+    return NextResponse.json({ error: "Invalid session" }, { status: 400 });
   }
 }

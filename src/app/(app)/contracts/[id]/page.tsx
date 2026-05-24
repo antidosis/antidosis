@@ -1,17 +1,11 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+
+import { EB_Garamond } from "next/font/google";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { EB_Garamond } from "next/font/google";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Avatar } from "@/components/ui/avatar";
-import { createClient } from "@/lib/supabase/client";
-import { useToast } from "@/components/ui/toast";
+
 import {
   ArrowLeft,
   Send,
@@ -26,6 +20,15 @@ import {
   Info,
   Printer,
 } from "lucide-react";
+
+import { Avatar } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/toast";
+import { createClient } from "@/lib/supabase/client";
 
 const ebGaramond = EB_Garamond({
   subsets: ["latin"],
@@ -234,17 +237,10 @@ export default function ContractPage() {
 
       const pid = currentProfileId ?? profileId;
       const isA = data.contract.partyA.id === pid;
-      setMyTerms(
-        isA
-          ? data.contract.partyATerms || ""
-          : data.contract.partyBTerms || ""
-      );
+      setMyTerms(isA ? data.contract.partyATerms || "" : data.contract.partyBTerms || "");
       setUseMessageTerms(
-        isA
-          ? data.contract.partyAUseMessageTerms
-          : data.contract.partyBUseMessageTerms
+        isA ? data.contract.partyAUseMessageTerms : data.contract.partyBUseMessageTerms
       );
-
     } catch {
       /* ignore */
     }
@@ -307,7 +303,10 @@ export default function ContractPage() {
     if (!res.ok) {
       const data = await res.json().catch(() => ({ error: "Failed to agree" }));
       if (res.status === 409 && data.code === "TERMS_CHANGED") {
-        toast("Terms were updated by the other party. Please review the latest terms before accepting.", "error");
+        toast(
+          "Terms were updated by the other party. Please review the latest terms before accepting.",
+          "error"
+        );
       } else {
         toast(data.error || "Failed to agree to terms", "error");
       }
@@ -423,7 +422,10 @@ export default function ContractPage() {
       const data = await res.json().catch(() => ({ error: "Failed to respond" }));
       toast(data.error || "Failed to respond to cancellation request", "error");
     } else {
-      toast(agree ? "Cancellation agreed — contract is cancelled" : "Cancellation declined", agree ? "info" : "success");
+      toast(
+        agree ? "Cancellation agreed — contract is cancelled" : "Cancellation declined",
+        agree ? "info" : "success"
+      );
     }
     await fetchContract();
     setRespondingCancel(false);
@@ -493,9 +495,7 @@ export default function ContractPage() {
 
   if (loading)
     return (
-      <div className="max-w-3xl mx-auto py-24 text-center text-[#7a6b5a]">
-        loading contract...
-      </div>
+      <div className="max-w-3xl mx-auto py-24 text-center text-[#7a6b5a]">loading contract...</div>
     );
   if (!contract)
     return (
@@ -509,12 +509,8 @@ export default function ContractPage() {
   const otherParty = isPartyA ? contract.partyB : contract.partyA;
   const bothSigned = contract.partyASignedAt && contract.partyBSignedAt;
   const iSigned = isPartyA ? !!contract.partyASignedAt : !!contract.partyBSignedAt;
-  const iMarkedComplete = isPartyA
-    ? contract.aMarkedComplete
-    : contract.bMarkedComplete;
-  const otherMarkedComplete = isPartyA
-    ? contract.bMarkedComplete
-    : contract.aMarkedComplete;
+  const iMarkedComplete = isPartyA ? contract.aMarkedComplete : contract.bMarkedComplete;
+  const otherMarkedComplete = isPartyA ? contract.bMarkedComplete : contract.aMarkedComplete;
   const hasReviewed = contract.reviews.some((r) => r.giverId === profileId);
   const otherReview = contract.reviews.find((r) => r.receiverId === profileId);
 
@@ -550,12 +546,9 @@ export default function ContractPage() {
     !iSubmitted &&
     (contract.status === "draft" || contract.status === "pending_terms");
   // Review phase: both submitted, not yet locked, can accept
-  const canReview =
-    bothSubmitted && !termsLocked;
+  const canReview = bothSubmitted && !termsLocked;
   const canSign =
-    termsLocked &&
-    !iSigned &&
-    (contract.status === "draft" || contract.status === "pending_terms");
+    termsLocked && !iSigned && (contract.status === "draft" || contract.status === "pending_terms");
 
   const theirTerms = isPartyA ? contract.partyBTerms : contract.partyATerms;
   const theyUseMessageTerms = isPartyA
@@ -574,11 +567,7 @@ export default function ContractPage() {
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Need
           </Link>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => window.print()}
-          >
+          <Button variant="secondary" size="sm" onClick={() => window.print()}>
             <Printer className="h-3.5 w-3.5 mr-1.5" />
             Print Contract
           </Button>
@@ -586,922 +575,1014 @@ export default function ContractPage() {
       </div>
 
       <div className="max-w-3xl mx-auto px-4 md:px-8 space-y-8 pb-12 pt-8">
-      {/* Contract Document Header */}
-      <div className="text-center pb-6 border-b border-[#d4b896]">
-        <div className="contract-seal mb-4">Antidosis</div>
-        <h1 className="contract-heading text-3xl md:text-4xl mb-2">
-          Binding Exchange Contract
-        </h1>
-        <p className="contract-body text-sm text-[#5a4a3a]">
-          Contract Reference: <span className="font-mono text-xs">{contract.id.slice(0, 8).toUpperCase()}</span>
-        </p>
-        <div className="flex items-center justify-center gap-2 mt-3">
-          <Badge
-            variant={
-              contract.status === "active" || contract.status === "completed"
-                ? "quintessence"
-                : contract.status === "cancelled"
-                  ? "destructive"
-                  : "outline"
-            }
-            className="text-[10px]"
-          >
-            {statusLabels[contract.status] || contract.status}
-          </Badge>
-        </div>
-      </div>
-
-      {/* Cancelled banner */}
-      {contract.status === "cancelled" && (
-        <div className="contract-page p-4 print-hidden border-l-2 border-l-[#ff5252] bg-[#ff5252]/5">
-          <p className="text-sm font-medium text-[#ff5252]">This contract has been cancelled</p>
-          <p className="text-xs text-[#7a6b5a] mt-1">
-            No further actions can be taken. The need is available for new interest.
+        {/* Contract Document Header */}
+        <div className="text-center pb-6 border-b border-[#d4b896]">
+          <div className="contract-seal mb-4">Antidosis</div>
+          <h1 className="contract-heading text-3xl md:text-4xl mb-2">Binding Exchange Contract</h1>
+          <p className="contract-body text-sm text-[#5a4a3a]">
+            Contract Reference:{" "}
+            <span className="font-mono text-xs">{contract.id.slice(0, 8).toUpperCase()}</span>
           </p>
-        </div>
-      )}
-
-      {/* Contract Lifecycle Stepper */}
-      <div className="contract-page p-5 print-hidden">
-        <div className="flex items-center justify-between gap-1">
-          {[
-            { label: "Write Terms", active: !bothSubmitted && !termsLocked, done: bothSubmitted || termsLocked },
-            { label: "Review & Accept", active: bothSubmitted && !termsLocked, done: termsLocked },
-            { label: "Sign", active: termsLocked && !bothSigned, done: bothSigned || contract.status === "completed" },
-          ].map((step, i, arr) => (
-            <div key={step.label} className="flex items-center gap-1 flex-1">
-              <div className={`flex-1 h-1.5 rounded-full transition-colors ${
-                step.done ? "bg-emerald-600" : step.active ? "bg-amber-600" : "bg-[#d4c4a8]"
-              }`} />
-              <span className={`text-[10px] uppercase tracking-wider whitespace-nowrap ${
-                step.done ? "text-emerald-700" : step.active ? "text-amber-700" : "text-[#8a7a60]"
-              }`}>
-                {step.label}
-              </span>
-              {i < arr.length - 1 && <div className={`flex-1 h-1.5 rounded-full ${step.done ? "bg-emerald-600" : "bg-[#d4c4a8]"}`} />}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Poster cancel notice — shown when fulfiller hasn't signed yet */}
-      {isPartyA &&
-        !contract.partyBSignedAt &&
-        (contract.status === "draft" || contract.status === "pending_terms") && (
-          <div className="contract-page p-4 print-hidden border-l-2 border-l-[#ff5252]/40 bg-[#ff5252]/5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <p className="text-sm font-medium text-[#ff5252]">
-                  Waiting for {contract.partyB.fullName || "the fulfiller"} to sign
-                </p>
-                <p className="text-xs text-[#7a6b5a] mt-0.5">
-                  You can cancel this contract at any time before both parties sign. The need will be archived so you can edit and re-post it.
-                </p>
-              </div>
-              <Button
-                onClick={() => termsLocked ? setShowRequestCancelModal(true) : setShowCancelConfirm(true)}
-                variant="outline"
-                size="sm"
-                className="text-[#ff5252] border-[#ff5252]/30 hover:border-[#ff5252]/60 hover:bg-[#ff5252]/10 shrink-0"
-              >
-                {termsLocked ? "Request Cancellation" : "Cancel Contract"}
-              </Button>
-            </div>
+          <div className="flex items-center justify-center gap-2 mt-3">
+            <Badge
+              variant={
+                contract.status === "active" || contract.status === "completed"
+                  ? "quintessence"
+                  : contract.status === "cancelled"
+                    ? "destructive"
+                    : "outline"
+              }
+              className="text-[10px]"
+            >
+              {statusLabels[contract.status] || contract.status}
+            </Badge>
           </div>
-        )}
+        </div>
 
-      {/* Original Need Post — Collapsible */}
-      <div className="contract-page p-5 print-hidden">
-        <button
-          onClick={() => setShowNeedDetails(!showNeedDetails)}
-          className="w-full flex items-center justify-between text-left hover:bg-[#1a1714] transition-colors"
-        >
-          <span className="text-xs font-medium uppercase tracking-wide text-[#7a6b5a]">
-            Original Need Post
-          </span>
-          {showNeedDetails ? (
-            <ChevronUp className="h-4 w-4 text-[#7a6b5a]" />
-          ) : (
-            <ChevronDown className="h-4 w-4 text-[#7a6b5a]" />
-          )}
-        </button>
-        {showNeedDetails && (
-          <div className="pt-4 space-y-4">
-            <p className="text-sm text-[#b8a078] leading-relaxed whitespace-pre-line">
-              {contract.need.description}
+        {/* Cancelled banner */}
+        {contract.status === "cancelled" && (
+          <div className="contract-page p-4 print-hidden border-l-2 border-l-[#ff5252] bg-[#ff5252]/5">
+            <p className="text-sm font-medium text-[#ff5252]">This contract has been cancelled</p>
+            <p className="text-xs text-[#7a6b5a] mt-1">
+              No further actions can be taken. The need is available for new interest.
             </p>
-            <div className="flex items-start gap-3">
-              <div className="text-sm text-[#b8a078]">
-                <span className="text-xs uppercase tracking-wide text-[#7a6b5a] block mb-1">
-                  Offering In Exchange
-                </span>
-                {contract.need.offerDescription}
-              </div>
-            </div>
-            {contract.need.images.length > 0 && (
-              <div className="flex flex-wrap gap-3">
-                {contract.need.images.map((url, i) => (
-                  <img
-                    key={i}
-                    src={url}
-                    alt=""
-                    className="h-24 w-24 object-cover border border-[#2a2420]"
-                  />
-                ))}
-              </div>
-            )}
           </div>
         )}
-      </div>
 
-      {/* Parties */}
-      <div className="contract-page p-6">
-        <p className="contract-label mb-4">Parties to this Agreement</p>
-        <div className="grid sm:grid-cols-2 gap-6">
-          <PartySection party={contract.partyA} label="Party A — Need Poster" isMe={isPartyA} />
-          <PartySection party={contract.partyB} label="Party B — Fulfiller" isMe={isPartyB} />
-        </div>
-      </div>
-
-      {/* Negotiation Transcript */}
-      {contract.negotiationMessages.length > 0 && (
-        <div className="contract-page p-5">
-          <h2 className="text-lg heading-display text-[#e8d5a3] mb-4 flex items-center gap-2">
-            <MessageSquare className="h-4 w-4" />
-            Negotiation Transcript
-          </h2>
-          <div className="space-y-4 max-h-72 overflow-y-auto pr-2">
-            {contract.negotiationMessages.map((msg, idx) => (
-              <div key={idx} className="border-l-2 border-l-[#2a2420] pl-3">
-                <p className="text-xs text-[#7a6b5a]">
-                  {msg.senderName || "anonymous"} —{" "}
-                  {new Date(msg.createdAt).toLocaleString("en-AU", {
-                    day: "numeric",
-                    month: "short",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
-                <p className="text-sm text-[#b8a078] mt-1">{msg.content}</p>
+        {/* Contract Lifecycle Stepper */}
+        <div className="contract-page p-5 print-hidden">
+          <div className="flex items-center justify-between gap-1">
+            {[
+              {
+                label: "Write Terms",
+                active: !bothSubmitted && !termsLocked,
+                done: bothSubmitted || termsLocked,
+              },
+              {
+                label: "Review & Accept",
+                active: bothSubmitted && !termsLocked,
+                done: termsLocked,
+              },
+              {
+                label: "Sign",
+                active: termsLocked && !bothSigned,
+                done: bothSigned || contract.status === "completed",
+              },
+            ].map((step, i, arr) => (
+              <div key={step.label} className="flex items-center gap-1 flex-1">
+                <div
+                  className={`flex-1 h-1.5 rounded-full transition-colors ${
+                    step.done ? "bg-emerald-600" : step.active ? "bg-amber-600" : "bg-[#d4c4a8]"
+                  }`}
+                />
+                <span
+                  className={`text-[10px] uppercase tracking-wider whitespace-nowrap ${
+                    step.done
+                      ? "text-emerald-700"
+                      : step.active
+                        ? "text-amber-700"
+                        : "text-[#8a7a60]"
+                  }`}
+                >
+                  {step.label}
+                </span>
+                {i < arr.length - 1 && (
+                  <div
+                    className={`flex-1 h-1.5 rounded-full ${step.done ? "bg-emerald-600" : "bg-[#d4c4a8]"}`}
+                  />
+                )}
               </div>
             ))}
           </div>
         </div>
-      )}
 
-      {/* Terms Section */}
-      <div className="contract-page p-6 space-y-6">
-        <div className="flex items-center justify-between border-b border-[#d4b896] pb-4">
-          <h2 className="contract-heading text-xl">
-            1. Terms of Agreement
-          </h2>
-          {termsLocked ? (
-            <span className="text-xs font-medium uppercase tracking-wide text-[#00e676] flex items-center gap-1">
-              <Lock className="h-3 w-3" />
-              locked
+        {/* Poster cancel notice — shown when fulfiller hasn't signed yet */}
+        {isPartyA &&
+          !contract.partyBSignedAt &&
+          (contract.status === "draft" || contract.status === "pending_terms") && (
+            <div className="contract-page p-4 print-hidden border-l-2 border-l-[#ff5252]/40 bg-[#ff5252]/5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-medium text-[#ff5252]">
+                    Waiting for {contract.partyB.fullName || "the fulfiller"} to sign
+                  </p>
+                  <p className="text-xs text-[#7a6b5a] mt-0.5">
+                    You can cancel this contract at any time before both parties sign. The need will
+                    be archived so you can edit and re-post it.
+                  </p>
+                </div>
+                <Button
+                  onClick={() =>
+                    termsLocked ? setShowRequestCancelModal(true) : setShowCancelConfirm(true)
+                  }
+                  variant="outline"
+                  size="sm"
+                  className="text-[#ff5252] border-[#ff5252]/30 hover:border-[#ff5252]/60 hover:bg-[#ff5252]/10 shrink-0"
+                >
+                  {termsLocked ? "Request Cancellation" : "Cancel Contract"}
+                </Button>
+              </div>
+            </div>
+          )}
+
+        {/* Original Need Post — Collapsible */}
+        <div className="contract-page p-5 print-hidden">
+          <button
+            onClick={() => setShowNeedDetails(!showNeedDetails)}
+            className="w-full flex items-center justify-between text-left hover:bg-[#1a1714] transition-colors"
+          >
+            <span className="text-xs font-medium uppercase tracking-wide text-[#7a6b5a]">
+              Original Need Post
             </span>
-          ) : bothSubmitted ? (
-            <span className="text-xs font-medium uppercase tracking-wide text-[#f5a623] flex items-center gap-1">
-              <Info className="h-3 w-3" />
-              review phase
-            </span>
-          ) : (
-            <span className="text-xs font-medium uppercase tracking-wide text-[#ff5252] flex items-center gap-1">
-              <Unlock className="h-3 w-3" />
-              writing terms
-            </span>
+            {showNeedDetails ? (
+              <ChevronUp className="h-4 w-4 text-[#7a6b5a]" />
+            ) : (
+              <ChevronDown className="h-4 w-4 text-[#7a6b5a]" />
+            )}
+          </button>
+          {showNeedDetails && (
+            <div className="pt-4 space-y-4">
+              <p className="text-sm text-[#b8a078] leading-relaxed whitespace-pre-line">
+                {contract.need.description}
+              </p>
+              <div className="flex items-start gap-3">
+                <div className="text-sm text-[#b8a078]">
+                  <span className="text-xs uppercase tracking-wide text-[#7a6b5a] block mb-1">
+                    Offering In Exchange
+                  </span>
+                  {contract.need.offerDescription}
+                </div>
+              </div>
+              {contract.need.images.length > 0 && (
+                <div className="flex flex-wrap gap-3">
+                  {contract.need.images.map((url, i) => (
+                    <img
+                      key={i}
+                      src={url}
+                      alt=""
+                      className="h-24 w-24 object-cover border border-[#2a2420]"
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           )}
         </div>
 
-        {/* Phase 1: Write Terms */}
-        {!bothSubmitted && !termsLocked && (
-          <>
-            <div className="bg-[#f0dfc0] border border-[#d4b896] rounded-sm p-4 print-hidden">
-              <p className="text-sm text-[#5a4a3a] font-medium mb-1">
-                Phase 1: Write Your Terms
-              </p>
-              <p className="text-xs text-[#7a6b5a]">
-                Both parties must write and submit their own terms before review can begin.
-                You can edit your terms until you submit them.
-              </p>
-            </div>
+        {/* Parties */}
+        <div className="contract-page p-6">
+          <p className="contract-label mb-4">Parties to this Agreement</p>
+          <div className="grid sm:grid-cols-2 gap-6">
+            <PartySection party={contract.partyA} label="Party A — Need Poster" isMe={isPartyA} />
+            <PartySection party={contract.partyB} label="Party B — Fulfiller" isMe={isPartyB} />
+          </div>
+        </div>
 
-            <div className="grid md:grid-cols-2 gap-6 print-hidden">
-              {/* My Terms — Write Mode */}
-              <div className="border border-[#d4b896] p-5 bg-[#f0dfc0]">
-                <div className="flex items-center justify-between mb-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-[#7a6b5a]">
-                    Your Terms
+        {/* Negotiation Transcript */}
+        {contract.negotiationMessages.length > 0 && (
+          <div className="contract-page p-5">
+            <h2 className="text-lg heading-display text-[#e8d5a3] mb-4 flex items-center gap-2">
+              <MessageSquare className="h-4 w-4" />
+              Negotiation Transcript
+            </h2>
+            <div className="space-y-4 max-h-72 overflow-y-auto pr-2">
+              {contract.negotiationMessages.map((msg, idx) => (
+                <div key={idx} className="border-l-2 border-l-[#2a2420] pl-3">
+                  <p className="text-xs text-[#7a6b5a]">
+                    {msg.senderName || "anonymous"} —{" "}
+                    {new Date(msg.createdAt).toLocaleString("en-AU", {
+                      day: "numeric",
+                      month: "short",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </p>
-                  {iSubmitted && (
-                    <span className="text-[10px] font-medium uppercase tracking-wide text-[#00e676] flex items-center gap-1">
-                      <Check className="h-3 w-3" />
-                      submitted
-                    </span>
+                  <p className="text-sm text-[#b8a078] mt-1">{msg.content}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Terms Section */}
+        <div className="contract-page p-6 space-y-6">
+          <div className="flex items-center justify-between border-b border-[#d4b896] pb-4">
+            <h2 className="contract-heading text-xl">1. Terms of Agreement</h2>
+            {termsLocked ? (
+              <span className="text-xs font-medium uppercase tracking-wide text-[#00e676] flex items-center gap-1">
+                <Lock className="h-3 w-3" />
+                locked
+              </span>
+            ) : bothSubmitted ? (
+              <span className="text-xs font-medium uppercase tracking-wide text-[#f5a623] flex items-center gap-1">
+                <Info className="h-3 w-3" />
+                review phase
+              </span>
+            ) : (
+              <span className="text-xs font-medium uppercase tracking-wide text-[#ff5252] flex items-center gap-1">
+                <Unlock className="h-3 w-3" />
+                writing terms
+              </span>
+            )}
+          </div>
+
+          {/* Phase 1: Write Terms */}
+          {!bothSubmitted && !termsLocked && (
+            <>
+              <div className="bg-[#f0dfc0] border border-[#d4b896] rounded-sm p-4 print-hidden">
+                <p className="text-sm text-[#5a4a3a] font-medium mb-1">Phase 1: Write Your Terms</p>
+                <p className="text-xs text-[#7a6b5a]">
+                  Both parties must write and submit their own terms before review can begin. You
+                  can edit your terms until you submit them.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6 print-hidden">
+                {/* My Terms — Write Mode */}
+                <div className="border border-[#d4b896] p-5 bg-[#f0dfc0]">
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-xs font-medium uppercase tracking-wide text-[#7a6b5a]">
+                      Your Terms
+                    </p>
+                    {iSubmitted && (
+                      <span className="text-[10px] font-medium uppercase tracking-wide text-[#00e676] flex items-center gap-1">
+                        <Check className="h-3 w-3" />
+                        submitted
+                      </span>
+                    )}
+                  </div>
+                  {canEditTerms ? (
+                    <>
+                      <label className="flex items-center gap-2 mb-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={useMessageTerms}
+                          onChange={(e) => setUseMessageTerms(e.target.checked)}
+                          className="accent-[#f5a623]"
+                        />
+                        <span className="text-sm text-[#5a4a3a]">
+                          use message thread as my terms
+                        </span>
+                      </label>
+                      {useMessageTerms ? (
+                        <p className="text-sm text-[#7a6b5a] italic">
+                          your terms will be derived from the message thread.
+                        </p>
+                      ) : (
+                        <Textarea
+                          value={myTerms}
+                          onChange={(e) => setMyTerms(e.target.value)}
+                          placeholder="describe your terms, expectations, requirements..."
+                          rows={4}
+                          className="bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]"
+                        />
+                      )}
+                      <div className="flex gap-2 mt-3">
+                        <Button onClick={saveTerms} disabled={savingTerms} size="sm">
+                          {savingTerms ? "Saving..." : "Save Terms"}
+                        </Button>
+                        <Button
+                          onClick={submitTerms}
+                          disabled={submittingTerms || (!useMessageTerms && !myTerms.trim())}
+                          className="bg-[#ff3333] hover:bg-[#ff5555] text-white border-[#ff3333] shadow-lg shadow-[#ff3333]/30 font-semibold px-4"
+                        >
+                          <Send className="h-4 w-4 mr-2" />
+                          {submittingTerms ? "Submitting..." : "Submit for Review"}
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {(
+                        isPartyA ? contract.partyAUseMessageTerms : contract.partyBUseMessageTerms
+                      ) ? (
+                        <p className="text-sm text-[#7a6b5a] italic">
+                          using message thread as terms
+                        </p>
+                      ) : (
+                        <p className="text-sm text-[#b8a078] whitespace-pre-line">
+                          {myTerms || "no terms provided."}
+                        </p>
+                      )}
+                      <p className="text-xs text-[#7a6b5a] mt-3 italic">
+                        your terms have been submitted and cannot be edited until the other party
+                        submits theirs or terms are rejected.
+                      </p>
+                    </>
                   )}
                 </div>
-                {canEditTerms ? (
-                  <>
-                    <label className="flex items-center gap-2 mb-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={useMessageTerms}
-                        onChange={(e) => setUseMessageTerms(e.target.checked)}
-                        className="accent-[#f5a623]"
-                      />
-                      <span className="text-sm text-[#5a4a3a]">
-                        use message thread as my terms
+
+                {/* Their Terms — Write Mode (waiting) */}
+                <div className="border border-[#d4b896] p-5 bg-[#f0dfc0]">
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-xs font-medium uppercase tracking-wide text-[#7a6b5a]">
+                      {otherParty.fullName || "Other Party"}&apos;s Terms
+                    </p>
+                    {(isPartyA ? bSubmitted : aSubmitted) ? (
+                      <span className="text-[10px] font-medium uppercase tracking-wide text-[#00e676] flex items-center gap-1">
+                        <Check className="h-3 w-3" />
+                        submitted
                       </span>
-                    </label>
-                    {useMessageTerms ? (
-                      <p className="text-sm text-[#7a6b5a] italic">
-                        your terms will be derived from the message thread.
-                      </p>
                     ) : (
-                      <Textarea
-                        value={myTerms}
-                        onChange={(e) => setMyTerms(e.target.value)}
-                        placeholder="describe your terms, expectations, requirements..."
-                        rows={4}
-                        className="bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]"
-                      />
+                      <span className="text-[10px] font-medium uppercase tracking-wide text-[#ff5252]">
+                        waiting...
+                      </span>
                     )}
-                    <div className="flex gap-2 mt-3">
-                      <Button onClick={saveTerms} disabled={savingTerms} size="sm">
-                        {savingTerms ? "Saving..." : "Save Terms"}
-                      </Button>
-                      <Button
-                        onClick={submitTerms}
-                        disabled={submittingTerms || (!useMessageTerms && !myTerms.trim())}
-                        className="bg-[#ff3333] hover:bg-[#ff5555] text-white border-[#ff3333] shadow-lg shadow-[#ff3333]/30 font-semibold px-4"
-                      >
-                        <Send className="h-4 w-4 mr-2" />
-                        {submittingTerms ? "Submitting..." : "Submit for Review"}
-                      </Button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    {(isPartyA ? contract.partyAUseMessageTerms : contract.partyBUseMessageTerms) ? (
+                  </div>
+                  {(isPartyA ? bSubmitted : aSubmitted) ? (
+                    theyUseMessageTerms ? (
                       <p className="text-sm text-[#7a6b5a] italic">
-                        using message thread as terms
+                        {otherParty.fullName || "the other party"} is using the message thread as
+                        their terms.
                       </p>
                     ) : (
                       <p className="text-sm text-[#b8a078] whitespace-pre-line">
-                        {myTerms || "no terms provided."}
+                        {theirTerms || "no terms provided."}
                       </p>
-                    )}
-                    <p className="text-xs text-[#7a6b5a] mt-3 italic">
-                      your terms have been submitted and cannot be edited until the other party submits theirs or terms are rejected.
-                    </p>
-                  </>
-                )}
-              </div>
-
-              {/* Their Terms — Write Mode (waiting) */}
-              <div className="border border-[#d4b896] p-5 bg-[#f0dfc0]">
-                <div className="flex items-center justify-between mb-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-[#7a6b5a]">
-                    {otherParty.fullName || "Other Party"}&apos;s Terms
-                  </p>
-                  {(isPartyA ? bSubmitted : aSubmitted) ? (
-                    <span className="text-[10px] font-medium uppercase tracking-wide text-[#00e676] flex items-center gap-1">
-                      <Check className="h-3 w-3" />
-                      submitted
-                    </span>
+                    )
                   ) : (
-                    <span className="text-[10px] font-medium uppercase tracking-wide text-[#ff5252]">
-                      waiting...
-                    </span>
+                    <p className="text-sm text-[#7a6b5a] italic">
+                      waiting for {otherParty.fullName || "the other party"} to submit their
+                      terms...
+                    </p>
                   )}
                 </div>
-                {(isPartyA ? bSubmitted : aSubmitted) ? (
-                  theyUseMessageTerms ? (
-                    <p className="text-sm text-[#7a6b5a] italic">
-                      {otherParty.fullName || "the other party"} is using the message thread as their terms.
-                    </p>
-                  ) : (
-                    <p className="text-sm text-[#b8a078] whitespace-pre-line">
-                      {theirTerms || "no terms provided."}
-                    </p>
-                  )
-                ) : (
-                  <p className="text-sm text-[#7a6b5a] italic">
-                    waiting for {otherParty.fullName || "the other party"} to submit their terms...
-                  </p>
-                )}
               </div>
-            </div>
-          </>
-        )}
+            </>
+          )}
 
-        {/* Phase 2: Review & Accept */}
-        {(bothSubmitted || termsLocked) && (
-          <>
-            {!termsLocked && (
-              <div className="bg-[#f0dfc0] border border-[#d4b896] rounded-sm p-4 print-hidden">
-                <p className="text-sm text-[#5a4a3a] font-medium mb-1">
-                  Phase 2: Review & Accept
-                </p>
-                <p className="text-xs text-[#7a6b5a]">
-                  Both parties have submitted their terms. Review them carefully before accepting.
-                  Once both parties accept, terms will be locked and the contract moves to signing.
-                </p>
-              </div>
-            )}
-
-            {/* Both parties' terms side by side — readonly */}
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="border border-[#d4b896] p-5 bg-[#f0dfc0]">
-                <p className="text-xs font-medium uppercase tracking-wide text-[#7a6b5a] mb-3">
-                  {contract.partyA.fullName || "Party A"}&apos;s Terms
-                </p>
-                {contract.partyAUseMessageTerms ? (
-                  <p className="text-sm text-[#7a6b5a] italic">
-                    using message thread as terms
+          {/* Phase 2: Review & Accept */}
+          {(bothSubmitted || termsLocked) && (
+            <>
+              {!termsLocked && (
+                <div className="bg-[#f0dfc0] border border-[#d4b896] rounded-sm p-4 print-hidden">
+                  <p className="text-sm text-[#5a4a3a] font-medium mb-1">
+                    Phase 2: Review & Accept
                   </p>
-                ) : (
-                  <p className="text-sm text-[#2c1810] whitespace-pre-line leading-relaxed">
-                    {contract.partyATerms || "no terms provided."}
+                  <p className="text-xs text-[#7a6b5a]">
+                    Both parties have submitted their terms. Review them carefully before accepting.
+                    Once both parties accept, terms will be locked and the contract moves to
+                    signing.
                   </p>
-                )}
-              </div>
-              <div className="border border-[#d4b896] p-5 bg-[#f0dfc0]">
-                <p className="text-xs font-medium uppercase tracking-wide text-[#7a6b5a] mb-3">
-                  {contract.partyB.fullName || "Party B"}&apos;s Terms
-                </p>
-                {contract.partyBUseMessageTerms ? (
-                  <p className="text-sm text-[#7a6b5a] italic">
-                    using message thread as terms
-                  </p>
-                ) : (
-                  <p className="text-sm text-[#2c1810] whitespace-pre-line leading-relaxed">
-                    {contract.partyBTerms || "no terms provided."}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Agreement status + Accept button */}
-            {!termsLocked && (
-              <div className="border border-[#d4b896] p-5 bg-[#f0dfc0] print-hidden">
-                <p className="text-xs font-medium uppercase tracking-wide text-[#7a6b5a] mb-4">
-                  Acceptance Status
-                </p>
-                <div className="space-y-3">
-                  <AgreementRow name={contract.partyA.fullName} agreed={aAgreed} />
-                  <AgreementRow name={contract.partyB.fullName} agreed={bAgreed} />
                 </div>
-                {!iAgreed && (
-                  <div className="mt-5 space-y-3">
-                    <Button
-                      onClick={agreeToTerms}
-                      disabled={agreeing}
-                      className="w-full"
-                      style={{ background: '#1a0f08', color: '#f5e6c8', border: '1px solid #2c1810' }}
-                    >
-                      <Check className="h-4 w-4 mr-2" />
-                      {agreeing ? "Accepting..." : "I Accept These Terms"}
-                    </Button>
-                    <p className="text-center text-xs text-[#7a6b5a]">
-                      By clicking accept, you agree to be bound by both parties&apos; terms as shown above.
-                    </p>
-                  </div>
-                )}
-                {iAgreed && !termsLocked && (
-                  <div className="mt-5 text-center">
-                    <p className="text-sm text-[#5a4a3a] font-medium">
-                      You have accepted these terms
-                    </p>
-                    <p className="text-xs text-[#7a6b5a] mt-1">
-                      waiting for the other party to accept...
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-          </>
-        )}
-      </div>
+              )}
 
-      {/* PDF Section */}
-      {termsLocked && (
-        <div className="contract-page p-5 print-hidden">
-          <h2 className="text-lg heading-display text-[#e8d5a3] mb-4 flex items-center gap-2">
-            <FileText className="h-4 w-4" />
-            Contract Document
-          </h2>
-          {contract.pdfUrl ? (
-            <div className="space-y-3">
-              <p className="text-sm text-[#00e676]">
-                contract pdf generated and ready for signing
-              </p>
-              <Button size="sm" variant="mercury" asChild>
-                <a
-                  href={contract.pdfUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <FileText className="h-3.5 w-3.5 mr-2" />
-                  Download PDF
-                </a>
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <p className="text-sm text-[#b8a078]">
-                terms are locked. generate the contract document to proceed.
-              </p>
-              <Button size="sm" onClick={generatePdf} disabled={generatingPdf}>
-                {generatingPdf ? "generating..." : "Generate Contract PDF"}
-              </Button>
-            </div>
+              {/* Both parties' terms side by side — readonly */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="border border-[#d4b896] p-5 bg-[#f0dfc0]">
+                  <p className="text-xs font-medium uppercase tracking-wide text-[#7a6b5a] mb-3">
+                    {contract.partyA.fullName || "Party A"}&apos;s Terms
+                  </p>
+                  {contract.partyAUseMessageTerms ? (
+                    <p className="text-sm text-[#7a6b5a] italic">using message thread as terms</p>
+                  ) : (
+                    <p className="text-sm text-[#2c1810] whitespace-pre-line leading-relaxed">
+                      {contract.partyATerms || "no terms provided."}
+                    </p>
+                  )}
+                </div>
+                <div className="border border-[#d4b896] p-5 bg-[#f0dfc0]">
+                  <p className="text-xs font-medium uppercase tracking-wide text-[#7a6b5a] mb-3">
+                    {contract.partyB.fullName || "Party B"}&apos;s Terms
+                  </p>
+                  {contract.partyBUseMessageTerms ? (
+                    <p className="text-sm text-[#7a6b5a] italic">using message thread as terms</p>
+                  ) : (
+                    <p className="text-sm text-[#2c1810] whitespace-pre-line leading-relaxed">
+                      {contract.partyBTerms || "no terms provided."}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Agreement status + Accept button */}
+              {!termsLocked && (
+                <div className="border border-[#d4b896] p-5 bg-[#f0dfc0] print-hidden">
+                  <p className="text-xs font-medium uppercase tracking-wide text-[#7a6b5a] mb-4">
+                    Acceptance Status
+                  </p>
+                  <div className="space-y-3">
+                    <AgreementRow name={contract.partyA.fullName} agreed={aAgreed} />
+                    <AgreementRow name={contract.partyB.fullName} agreed={bAgreed} />
+                  </div>
+                  {!iAgreed && (
+                    <div className="mt-5 space-y-3">
+                      <Button
+                        onClick={agreeToTerms}
+                        disabled={agreeing}
+                        className="w-full"
+                        style={{
+                          background: "#1a0f08",
+                          color: "#f5e6c8",
+                          border: "1px solid #2c1810",
+                        }}
+                      >
+                        <Check className="h-4 w-4 mr-2" />
+                        {agreeing ? "Accepting..." : "I Accept These Terms"}
+                      </Button>
+                      <p className="text-center text-xs text-[#7a6b5a]">
+                        By clicking accept, you agree to be bound by both parties&apos; terms as
+                        shown above.
+                      </p>
+                    </div>
+                  )}
+                  {iAgreed && !termsLocked && (
+                    <div className="mt-5 text-center">
+                      <p className="text-sm text-[#5a4a3a] font-medium">
+                        You have accepted these terms
+                      </p>
+                      <p className="text-xs text-[#7a6b5a] mt-1">
+                        waiting for the other party to accept...
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
           )}
         </div>
-      )}
 
-      {/* Signatures */}
-      {termsLocked && (
-        <div className="contract-page p-6">
-          <h2 className="contract-heading text-xl mb-4 border-b border-[#d4b896] pb-2">
-            2. Digital Signatures
-          </h2>
-          <div className="space-y-4">
-            <SignatureRow
-              name={contract.partyA.fullName}
-              signed={!!contract.partyASignedAt}
-              signedAt={contract.partyASignedAt}
-              signatureText={contract.partyASignature}
-            />
-            <div className="border-t border-[#2a2420]" />
-            <SignatureRow
-              name={contract.partyB.fullName}
-              signed={!!contract.partyBSignedAt}
-              signedAt={contract.partyBSignedAt}
-              signatureText={contract.partyBSignature}
-            />
-            {canSign && (
-              <Button onClick={() => setShowSignModal(true)} className="w-full mt-4">
-                <FileText className="h-3.5 w-3.5 mr-2" />
-                Sign Contract
+        {/* PDF Section */}
+        {termsLocked && (
+          <div className="contract-page p-5 print-hidden">
+            <h2 className="text-lg heading-display text-[#e8d5a3] mb-4 flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Contract Document
+            </h2>
+            {contract.pdfUrl ? (
+              <div className="space-y-3">
+                <p className="text-sm text-[#00e676]">
+                  contract pdf generated and ready for signing
+                </p>
+                <Button size="sm" variant="mercury" asChild>
+                  <a href={contract.pdfUrl} target="_blank" rel="noopener noreferrer">
+                    <FileText className="h-3.5 w-3.5 mr-2" />
+                    Download PDF
+                  </a>
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-sm text-[#b8a078]">
+                  terms are locked. generate the contract document to proceed.
+                </p>
+                <Button size="sm" onClick={generatePdf} disabled={generatingPdf}>
+                  {generatingPdf ? "generating..." : "Generate Contract PDF"}
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Signatures */}
+        {termsLocked && (
+          <div className="contract-page p-6">
+            <h2 className="contract-heading text-xl mb-4 border-b border-[#d4b896] pb-2">
+              2. Digital Signatures
+            </h2>
+            <div className="space-y-4">
+              <SignatureRow
+                name={contract.partyA.fullName}
+                signed={!!contract.partyASignedAt}
+                signedAt={contract.partyASignedAt}
+                signatureText={contract.partyASignature}
+              />
+              <div className="border-t border-[#2a2420]" />
+              <SignatureRow
+                name={contract.partyB.fullName}
+                signed={!!contract.partyBSignedAt}
+                signedAt={contract.partyBSignedAt}
+                signatureText={contract.partyBSignature}
+              />
+              {canSign && (
+                <Button onClick={() => setShowSignModal(true)} className="w-full mt-4">
+                  <FileText className="h-3.5 w-3.5 mr-2" />
+                  Sign Contract
+                </Button>
+              )}
+              {iSigned && !bothSigned && (
+                <div className="space-y-3 mt-4">
+                  <p className="text-center text-sm text-[#7a6b5a]">
+                    waiting for {otherParty.fullName || "the other party"} to sign...
+                  </p>
+                  <Button
+                    onClick={remindToSign}
+                    disabled={reminding}
+                    variant="mercury"
+                    className="w-full"
+                  >
+                    {reminding ? "sending reminder..." : "Remind to Sign"}
+                  </Button>
+                </div>
+              )}
+              {bothSigned && contract.status !== "completed" && contract.status !== "cancelled" && (
+                <p className="text-center text-sm text-[#b24bf5] mt-4">
+                  contract is active — both parties have digitally signed
+                </p>
+              )}
+              {contract.status === "completed" && (
+                <p className="text-center text-sm text-[#00e676] mt-4">
+                  contract complete — both parties fulfilled their obligations
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Active / Completion */}
+        {(contract.status === "active" || contract.status === "pending_completion") && (
+          <div className="contract-page p-5 print-hidden">
+            <h2 className="text-lg heading-display text-[#e8d5a3] mb-4">Completion</h2>
+            <div className="space-y-0">
+              <div className="flex items-center justify-between py-3">
+                <span className="text-sm text-[#b8a078]">
+                  {contract.partyA.fullName || "party_a"}
+                </span>
+                {contract.aMarkedComplete ? (
+                  <Badge variant="success">done</Badge>
+                ) : (
+                  <span className="text-xs text-[#7a6b5a] uppercase tracking-wide">pending</span>
+                )}
+              </div>
+              <div className="border-t border-[#2a2420]" />
+              <div className="flex items-center justify-between py-3">
+                <span className="text-sm text-[#b8a078]">
+                  {contract.partyB.fullName || "party_b"}
+                </span>
+                {contract.bMarkedComplete ? (
+                  <Badge variant="success">done</Badge>
+                ) : (
+                  <span className="text-xs text-[#7a6b5a] uppercase tracking-wide">pending</span>
+                )}
+              </div>
+            </div>
+            {!iMarkedComplete && (
+              <Button onClick={() => setShowCompleteConfirm(true)} className="w-full mt-4">
+                Mark Complete
               </Button>
             )}
-            {iSigned && !bothSigned && (
-              <div className="space-y-3 mt-4">
-                <p className="text-center text-sm text-[#7a6b5a]">
-                  waiting for {otherParty.fullName || "the other party"} to
-                  sign...
+            {iMarkedComplete && !otherMarkedComplete && (
+              <p className="text-center text-sm text-[#7a6b5a] mt-4">
+                waiting for the other party...
+              </p>
+            )}
+            {iMarkedComplete && otherMarkedComplete && (
+              <p className="text-center text-sm text-[#00e676] mt-4">contract complete</p>
+            )}
+          </div>
+        )}
+
+        {/* Messages */}
+        <div className="contract-page p-5 print-hidden">
+          <h2 className="text-lg heading-display text-[#e8d5a3] mb-2">Messages</h2>
+          <p className="text-xs text-[#7a6b5a] mb-4">
+            messages in this thread are part of the contract record.
+            {(contract.status === "completed" || contract.status === "cancelled") && (
+              <span className="text-[#f5a623] ml-1">(read-only)</span>
+            )}
+          </p>
+          <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+            {contract.messages.length === 0 && (
+              <p className="text-sm text-[#7a6b5a] text-center py-4">no messages yet</p>
+            )}
+            {contract.messages.map((msg) => (
+              <div
+                key={msg.id}
+                className={`flex gap-3 ${msg.sender.id === profileId ? "flex-row-reverse" : ""}`}
+              >
+                <Avatar src={msg.sender.avatarUrl} name={msg.sender.fullName} size="sm" />
+                <div
+                  className={`max-w-lg px-4 py-2.5 text-sm ${
+                    msg.sender.id === profileId
+                      ? "bg-[#1a1714] text-[#e8d5a3] border-l-2 border-l-[#f5a623]"
+                      : "bg-[#12100e] text-[#b8a078] border border-[#2a2420]"
+                  }`}
+                >
+                  <p>{msg.content}</p>
+                  <p className="text-xs text-[#7a6b5a] mt-1">
+                    {new Date(msg.createdAt).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+          {contract.status !== "completed" && contract.status !== "cancelled" && (
+            <form onSubmit={sendMessage} className="mt-4 flex gap-2">
+              <Input
+                placeholder="type a message..."
+                value={messageInput}
+                onChange={(e) => setMessageInput(e.target.value)}
+                disabled={sendingMsg}
+                className="bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]"
+              />
+              <Button type="submit" size="icon" disabled={sendingMsg}>
+                <Send className="h-4 w-4" />
+              </Button>
+            </form>
+          )}
+        </div>
+
+        {/* Reviews */}
+        {contract.status === "completed" && (
+          <div className="contract-page p-5 print-hidden">
+            <h2 className="text-lg heading-display text-[#e8d5a3] mb-4">Reviews</h2>
+            <div className="space-y-6">
+              {!hasReviewed && (
+                <div className="space-y-4">
+                  {/* Rating Guidance */}
+                  <div className="vessel-lit p-5">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Info className="h-4 w-4 text-[#f5a623]" />
+                      <p className="text-sm font-medium text-[#e8d5a3]">Rating Guide</p>
+                    </div>
+                    <p className="text-sm text-[#b8a078] mb-2">
+                      Default excellence. Unless there was a significant problem, keep it at 10.
+                      Constructive feedback is more valuable than a low score.
+                    </p>
+                    <div className="text-xs text-[#7a6b5a] space-y-1">
+                      <p>• 10: default — everything went well, no change needed</p>
+                      <p>• 8-9: good — minor suggestions go in private feedback</p>
+                      <p>• 5-7: average — explain what was missing in your review</p>
+                      <p>• 1-4: poor — only for significant problems</p>
+                    </div>
+                  </div>
+
+                  <p className="text-sm text-[#b8a078]">
+                    rate {otherParty.fullName || "the other party"}
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="range"
+                      min={1}
+                      max={10}
+                      value={rating}
+                      onChange={(e) => setRating(parseInt(e.target.value))}
+                      className={`flex-1 transition-all duration-300 ${rating === 10 ? "accent-[#00e676]" : "accent-[#f5a623]"}`}
+                    />
+                    <span
+                      className={`text-lg font-bold w-12 text-center transition-colors duration-300 ${rating === 10 ? "text-[#00e676]" : "text-[#e8d5a3]"}`}
+                    >
+                      {rating}
+                    </span>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Public Review (shown on their profile)</Label>
+                    <Textarea
+                      placeholder="share your experience publicly..."
+                      value={reviewComment}
+                      onChange={(e) => setReviewComment(e.target.value)}
+                      rows={3}
+                      className="bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>
+                      Private Feedback (only visible to {otherParty.fullName || "them"}, not on
+                      their public profile)
+                    </Label>
+                    <Textarea
+                      placeholder="share constructive criticism privately..."
+                      value={privateFeedback}
+                      onChange={(e) => setPrivateFeedback(e.target.value)}
+                      rows={3}
+                      className="bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]"
+                    />
+                  </div>
+
+                  <Button onClick={submitReview} disabled={submittingReview} className="w-full">
+                    {submittingReview ? "Submitting..." : "Submit Review"}
+                  </Button>
+                </div>
+              )}
+              {hasReviewed && (
+                <p className="text-center text-sm text-[#7a6b5a]">you have submitted your review</p>
+              )}
+              {otherReview && (
+                <div className="vessel p-4 mt-4">
+                  <p className="text-xs text-[#7a6b5a] uppercase tracking-wide mb-2">
+                    {otherParty.fullName || "the other party"} reviewed you
+                  </p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-lg font-bold text-[#f5a623]">{otherReview.rating}</span>
+                    <span className="text-xs text-[#7a6b5a]">/ 10</span>
+                  </div>
+                  {otherReview.comment && (
+                    <p className="text-sm text-[#b8a078]">{otherReview.comment}</p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Cancellation UI */}
+        {contract.status !== "cancelled" && !cancelAgreed && (
+          <div className="space-y-4 py-8">
+            {/* Escalated banner */}
+            {cancelEscalated && (
+              <div className="contract-page p-4 border-l-2 border-l-amber-500 bg-amber-500/5">
+                <p className="text-sm font-medium text-amber-500">Escalated to admin</p>
+                <p className="text-xs text-[#7a6b5a] mt-1">
+                  This cancellation request has been escalated to an admin for review.
+                </p>
+              </div>
+            )}
+
+            {/* Pending request — requester view */}
+            {cancelPending && isCancelRequester && (
+              <div className="contract-page p-4 border-l-2 border-l-amber-500 bg-amber-500/5">
+                <p className="text-sm font-medium text-amber-500">Cancellation requested</p>
+                <p className="text-xs text-[#7a6b5a] mt-1">
+                  Waiting for {otherParty.fullName || "the other party"} to respond.
+                </p>
+              </div>
+            )}
+
+            {/* Pending request — other party view */}
+            {cancelPending && !isCancelRequester && (
+              <div className="contract-page p-4 border-l-2 border-l-[#ff5252] bg-[#ff5252]/5">
+                <p className="text-sm font-medium text-[#ff5252]">
+                  {contract.cancelRequestedById === contract.partyA.id
+                    ? contract.partyA.fullName || "The poster"
+                    : contract.partyB.fullName || "The fulfiller"}{" "}
+                  requested to cancel this contract
+                </p>
+                {contract.cancelReason && (
+                  <p className="text-xs text-[#7a6b5a] mt-1">Reason: {contract.cancelReason}</p>
+                )}
+                <div className="flex gap-2 mt-3">
+                  <Button
+                    onClick={() => setShowRespondCancelModal(true)}
+                    variant="outline"
+                    size="sm"
+                    className="text-[#ff5252] border-[#ff5252]/30"
+                  >
+                    Respond
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Declined — requester view */}
+            {cancelDeclined && isCancelRequester && (
+              <div className="contract-page p-4 border-l-2 border-l-[#ff5252] bg-[#ff5252]/5">
+                <p className="text-sm font-medium text-[#ff5252]">
+                  {otherParty.fullName || "The other party"} declined your cancellation request
+                </p>
+                <p className="text-xs text-[#7a6b5a] mt-1">
+                  The contract will continue. You can escalate to an admin for review.
                 </p>
                 <Button
-                  onClick={remindToSign}
-                  disabled={reminding}
-                  variant="mercury"
-                  className="w-full"
+                  onClick={escalateCancel}
+                  disabled={escalating}
+                  variant="ghost"
+                  size="sm"
+                  className="text-[#ff5252] mt-2"
                 >
-                  {reminding ? "sending reminder..." : "Remind to Sign"}
+                  {escalating ? "Escalating..." : "Escalate to Admin"}
                 </Button>
               </div>
             )}
-            {bothSigned && contract.status !== "completed" && contract.status !== "cancelled" && (
-              <p className="text-center text-sm text-[#b24bf5] mt-4">
-                contract is active — both parties have digitally signed
-              </p>
-            )}
-            {contract.status === "completed" && (
-              <p className="text-center text-sm text-[#00e676] mt-4">
-                contract complete — both parties fulfilled their obligations
-              </p>
-            )}
-          </div>
-        </div>
-      )}
 
-      {/* Active / Completion */}
-      {(contract.status === "active" ||
-        contract.status === "pending_completion") && (
-        <div className="contract-page p-5 print-hidden">
-          <h2 className="text-lg heading-display text-[#e8d5a3] mb-4">
-            Completion
-          </h2>
-          <div className="space-y-0">
-            <div className="flex items-center justify-between py-3">
-              <span className="text-sm text-[#b8a078]">
-                {contract.partyA.fullName || "party_a"}
-              </span>
-              {contract.aMarkedComplete ? (
-                <Badge variant="success">done</Badge>
-              ) : (
-                <span className="text-xs text-[#7a6b5a] uppercase tracking-wide">
-                  pending
-                </span>
-              )}
-            </div>
-            <div className="border-t border-[#2a2420]" />
-            <div className="flex items-center justify-between py-3">
-              <span className="text-sm text-[#b8a078]">
-                {contract.partyB.fullName || "party_b"}
-              </span>
-              {contract.bMarkedComplete ? (
-                <Badge variant="success">done</Badge>
-              ) : (
-                <span className="text-xs text-[#7a6b5a] uppercase tracking-wide">
-                  pending
-                </span>
-              )}
-            </div>
-          </div>
-          {!iMarkedComplete && (
-            <Button onClick={() => setShowCompleteConfirm(true)} className="w-full mt-4">
-              Mark Complete
-            </Button>
-          )}
-          {iMarkedComplete && !otherMarkedComplete && (
-            <p className="text-center text-sm text-[#7a6b5a] mt-4">
-              waiting for the other party...
-            </p>
-          )}
-          {iMarkedComplete && otherMarkedComplete && (
-            <p className="text-center text-sm text-[#00e676] mt-4">
-              contract complete
-            </p>
-          )}
-        </div>
-      )}
-
-      {/* Messages */}
-      <div className="contract-page p-5 print-hidden">
-        <h2 className="text-lg heading-display text-[#e8d5a3] mb-2">
-          Messages
-        </h2>
-        <p className="text-xs text-[#7a6b5a] mb-4">
-          messages in this thread are part of the contract record.
-          {(contract.status === "completed" || contract.status === "cancelled") && (
-            <span className="text-[#f5a623] ml-1">(read-only)</span>
-          )}
-        </p>
-        <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
-          {contract.messages.length === 0 && (
-            <p className="text-sm text-[#7a6b5a] text-center py-4">
-              no messages yet
-            </p>
-          )}
-          {contract.messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex gap-3 ${
-                msg.sender.id === profileId ? "flex-row-reverse" : ""
-              }`}
-            >
-              <Avatar
-                src={msg.sender.avatarUrl}
-                name={msg.sender.fullName}
-                size="sm"
-              />
-              <div
-                className={`max-w-lg px-4 py-2.5 text-sm ${
-                  msg.sender.id === profileId
-                    ? "bg-[#1a1714] text-[#e8d5a3] border-l-2 border-l-[#f5a623]"
-                    : "bg-[#12100e] text-[#b8a078] border border-[#2a2420]"
-                }`}
-              >
-                <p>{msg.content}</p>
-                <p className="text-xs text-[#7a6b5a] mt-1">
-                  {new Date(msg.createdAt).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
-              </div>
-            </div>
-          ))}
-          <div ref={messagesEndRef} />
-        </div>
-        {contract.status !== "completed" && contract.status !== "cancelled" && (
-          <form onSubmit={sendMessage} className="mt-4 flex gap-2">
-            <Input
-              placeholder="type a message..."
-              value={messageInput}
-              onChange={(e) => setMessageInput(e.target.value)}
-              disabled={sendingMsg}
-              className="bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]"
-            />
-            <Button type="submit" size="icon" disabled={sendingMsg}>
-              <Send className="h-4 w-4" />
-            </Button>
-          </form>
-        )}
-      </div>
-
-      {/* Reviews */}
-      {contract.status === "completed" && (
-        <div className="contract-page p-5 print-hidden">
-          <h2 className="text-lg heading-display text-[#e8d5a3] mb-4">
-            Reviews
-          </h2>
-          <div className="space-y-6">
-            {!hasReviewed && (
-              <div className="space-y-4">
-                {/* Rating Guidance */}
-                <div className="vessel-lit p-5">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Info className="h-4 w-4 text-[#f5a623]" />
-                    <p className="text-sm font-medium text-[#e8d5a3]">
-                      Rating Guide
-                    </p>
-                  </div>
-                  <p className="text-sm text-[#b8a078] mb-2">
-                    Default excellence. Unless there was a significant problem, keep it at 10.
-                    Constructive feedback is more valuable than a low score.
-                  </p>
-                  <div className="text-xs text-[#7a6b5a] space-y-1">
-                    <p>• 10: default — everything went well, no change needed</p>
-                    <p>• 8-9: good — minor suggestions go in private feedback</p>
-                    <p>• 5-7: average — explain what was missing in your review</p>
-                    <p>• 1-4: poor — only for significant problems</p>
-                  </div>
-                </div>
-
-                <p className="text-sm text-[#b8a078]">
-                  rate {otherParty.fullName || "the other party"}
-                </p>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="range"
-                    min={1}
-                    max={10}
-                    value={rating}
-                    onChange={(e) => setRating(parseInt(e.target.value))}
-                    className={`flex-1 transition-all duration-300 ${rating === 10 ? "accent-[#00e676]" : "accent-[#f5a623]"}`}
-                  />
-                  <span className={`text-lg font-bold w-12 text-center transition-colors duration-300 ${rating === 10 ? "text-[#00e676]" : "text-[#e8d5a3]"}`}>
-                    {rating}
-                  </span>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>
-                    Public Review (shown on their profile)
-                  </Label>
-                  <Textarea
-                    placeholder="share your experience publicly..."
-                    value={reviewComment}
-                    onChange={(e) => setReviewComment(e.target.value)}
-                    rows={3}
-                    className="bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>
-                    Private Feedback (only visible to{" "}
-                    {otherParty.fullName || "them"}, not on their public
-                    profile)
-                  </Label>
-                  <Textarea
-                    placeholder="share constructive criticism privately..."
-                    value={privateFeedback}
-                    onChange={(e) => setPrivateFeedback(e.target.value)}
-                    rows={3}
-                    className="bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]"
-                  />
-                </div>
-
-                <Button onClick={submitReview} disabled={submittingReview} className="w-full">
-                  {submittingReview ? "Submitting..." : "Submit Review"}
-                </Button>
-              </div>
-            )}
-            {hasReviewed && (
-              <p className="text-center text-sm text-[#7a6b5a]">
-                you have submitted your review
-              </p>
-            )}
-            {otherReview && (
-              <div className="vessel p-4 mt-4">
-                <p className="text-xs text-[#7a6b5a] uppercase tracking-wide mb-2">
-                  {otherParty.fullName || "the other party"} reviewed you
-                </p>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-lg font-bold text-[#f5a623]">{otherReview.rating}</span>
-                  <span className="text-xs text-[#7a6b5a]">/ 10</span>
-                </div>
-                {otherReview.comment && (
-                  <p className="text-sm text-[#b8a078]">{otherReview.comment}</p>
+            {/* No pending request — show action button */}
+            {!cancelPending && !cancelDeclined && !cancelEscalated && (
+              <div className="text-center">
+                {!termsLocked &&
+                (contract.status === "draft" || contract.status === "pending_terms") ? (
+                  <Button
+                    onClick={() => setShowCancelConfirm(true)}
+                    variant="ghost"
+                    className="text-[#ff5252]"
+                  >
+                    Cancel Contract
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={() => setShowRequestCancelModal(true)}
+                    variant="ghost"
+                    className="text-[#ff5252]"
+                  >
+                    Request Cancellation
+                  </Button>
                 )}
               </div>
             )}
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Cancellation UI */}
-      {contract.status !== "cancelled" && !cancelAgreed && (
-        <div className="space-y-4 py-8">
-          {/* Escalated banner */}
-          {cancelEscalated && (
-            <div className="contract-page p-4 border-l-2 border-l-amber-500 bg-amber-500/5">
-              <p className="text-sm font-medium text-amber-500">Escalated to admin</p>
-              <p className="text-xs text-[#7a6b5a] mt-1">This cancellation request has been escalated to an admin for review.</p>
-            </div>
-          )}
-
-          {/* Pending request — requester view */}
-          {cancelPending && isCancelRequester && (
-            <div className="contract-page p-4 border-l-2 border-l-amber-500 bg-amber-500/5">
-              <p className="text-sm font-medium text-amber-500">Cancellation requested</p>
-              <p className="text-xs text-[#7a6b5a] mt-1">Waiting for {otherParty.fullName || "the other party"} to respond.</p>
-            </div>
-          )}
-
-          {/* Pending request — other party view */}
-          {cancelPending && !isCancelRequester && (
-            <div className="contract-page p-4 border-l-2 border-l-[#ff5252] bg-[#ff5252]/5">
-              <p className="text-sm font-medium text-[#ff5252]">
-                {contract.cancelRequestedById === contract.partyA.id ? contract.partyA.fullName || "The poster" : contract.partyB.fullName || "The fulfiller"} requested to cancel this contract
+        {/* Confirmation Dialogs */}
+        {showCancelConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+            <div className="bg-[#12100e] border border-[#2a2420] p-6 rounded-md max-w-sm w-full mx-4">
+              <p className="text-sm text-[#e8d5a3] mb-4">
+                Cancel this contract? The need will be archived so you can edit and re-post it
+                later.
               </p>
-              {contract.cancelReason && (
-                <p className="text-xs text-[#7a6b5a] mt-1">Reason: {contract.cancelReason}</p>
-              )}
-              <div className="flex gap-2 mt-3">
-                <Button onClick={() => setShowRespondCancelModal(true)} variant="outline" size="sm" className="text-[#ff5252] border-[#ff5252]/30">
-                  Respond
+              <div className="flex gap-3">
+                <Button
+                  onClick={cancelContract}
+                  disabled={cancelling}
+                  variant="ghost"
+                  className="flex-1 text-[#ff5252]"
+                >
+                  {cancelling ? "Cancelling..." : "Yes, Cancel"}
+                </Button>
+                <Button
+                  onClick={() => setShowCancelConfirm(false)}
+                  variant="secondary"
+                  className="flex-1"
+                >
+                  Keep Contract
                 </Button>
               </div>
             </div>
-          )}
-
-          {/* Declined — requester view */}
-          {cancelDeclined && isCancelRequester && (
-            <div className="contract-page p-4 border-l-2 border-l-[#ff5252] bg-[#ff5252]/5">
-              <p className="text-sm font-medium text-[#ff5252]">{otherParty.fullName || "The other party"} declined your cancellation request</p>
-              <p className="text-xs text-[#7a6b5a] mt-1">The contract will continue. You can escalate to an admin for review.</p>
-              <Button onClick={escalateCancel} disabled={escalating} variant="ghost" size="sm" className="text-[#ff5252] mt-2">
-                {escalating ? "Escalating..." : "Escalate to Admin"}
-              </Button>
-            </div>
-          )}
-
-          {/* No pending request — show action button */}
-          {!cancelPending && !cancelDeclined && !cancelEscalated && (
-            <div className="text-center">
-              {!termsLocked && (contract.status === "draft" || contract.status === "pending_terms") ? (
-                <Button onClick={() => setShowCancelConfirm(true)} variant="ghost" className="text-[#ff5252]">
-                  Cancel Contract
+          </div>
+        )}
+        {showCompleteConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+            <div className="bg-[#12100e] border border-[#2a2420] p-6 rounded-md max-w-sm w-full mx-4">
+              <p className="text-sm text-[#e8d5a3] mb-4">
+                Are you sure both parties have fulfilled their obligations?
+              </p>
+              <div className="flex gap-3">
+                <Button
+                  onClick={markComplete}
+                  disabled={completing}
+                  variant="secondary"
+                  className="flex-1"
+                >
+                  {completing ? "Marking..." : "Yes, Complete"}
                 </Button>
-              ) : (
-                <Button onClick={() => setShowRequestCancelModal(true)} variant="ghost" className="text-[#ff5252]">
-                  Request Cancellation
+                <Button
+                  onClick={() => setShowCompleteConfirm(false)}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Not Yet
                 </Button>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Confirmation Dialogs */}
-      {showCancelConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="bg-[#12100e] border border-[#2a2420] p-6 rounded-md max-w-sm w-full mx-4">
-            <p className="text-sm text-[#e8d5a3] mb-4">Cancel this contract? The need will be archived so you can edit and re-post it later.</p>
-            <div className="flex gap-3">
-              <Button onClick={cancelContract} disabled={cancelling} variant="ghost" className="flex-1 text-[#ff5252]">
-                {cancelling ? "Cancelling..." : "Yes, Cancel"}
-              </Button>
-              <Button onClick={() => setShowCancelConfirm(false)} variant="secondary" className="flex-1">
-                Keep Contract
-              </Button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-      {showCompleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="bg-[#12100e] border border-[#2a2420] p-6 rounded-md max-w-sm w-full mx-4">
-            <p className="text-sm text-[#e8d5a3] mb-4">Are you sure both parties have fulfilled their obligations?</p>
-            <div className="flex gap-3">
-              <Button onClick={markComplete} disabled={completing} variant="secondary" className="flex-1">
-                {completing ? "Marking..." : "Yes, Complete"}
-              </Button>
-              <Button onClick={() => setShowCompleteConfirm(false)} variant="outline" className="flex-1">
-                Not Yet
-              </Button>
+        )}
+
+        {/* Request Cancellation Modal */}
+        {showRequestCancelModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+            <div className="bg-[#12100e] border border-[#2a2420] p-6 rounded-md max-w-sm w-full mx-4">
+              <p className="text-sm text-[#e8d5a3] mb-2">Request Cancellation</p>
+              <p className="text-xs text-[#7a6b5a] mb-4">
+                The other party must agree to cancel this contract. You can optionally provide a
+                reason.
+              </p>
+              <Textarea
+                placeholder="Reason for cancellation (optional)..."
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                rows={3}
+                className="bg-[#0f0c0a] border-[#2a2420] text-[#e8d5a3] placeholder:text-[#7a6b5a] mb-4"
+              />
+              <div className="flex gap-3">
+                <Button
+                  onClick={requestCancel}
+                  disabled={requestingCancel}
+                  variant="ghost"
+                  className="flex-1 text-[#ff5252]"
+                >
+                  {requestingCancel ? "Requesting..." : "Request Cancellation"}
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowRequestCancelModal(false);
+                    setCancelReason("");
+                  }}
+                  variant="secondary"
+                  className="flex-1"
+                >
+                  Back
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Request Cancellation Modal */}
-      {showRequestCancelModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="bg-[#12100e] border border-[#2a2420] p-6 rounded-md max-w-sm w-full mx-4">
-            <p className="text-sm text-[#e8d5a3] mb-2">Request Cancellation</p>
-            <p className="text-xs text-[#7a6b5a] mb-4">
-              The other party must agree to cancel this contract. You can optionally provide a reason.
-            </p>
-            <Textarea
-              placeholder="Reason for cancellation (optional)..."
-              value={cancelReason}
-              onChange={(e) => setCancelReason(e.target.value)}
-              rows={3}
-              className="bg-[#0f0c0a] border-[#2a2420] text-[#e8d5a3] placeholder:text-[#7a6b5a] mb-4"
-            />
-            <div className="flex gap-3">
-              <Button onClick={requestCancel} disabled={requestingCancel} variant="ghost" className="flex-1 text-[#ff5252]">
-                {requestingCancel ? "Requesting..." : "Request Cancellation"}
-              </Button>
-              <Button onClick={() => { setShowRequestCancelModal(false); setCancelReason(""); }} variant="secondary" className="flex-1">
-                Back
-              </Button>
+        {/* Respond Cancellation Modal */}
+        {showRespondCancelModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+            <div className="bg-[#12100e] border border-[#2a2420] p-6 rounded-md max-w-sm w-full mx-4">
+              <p className="text-sm text-[#e8d5a3] mb-2">Respond to Cancellation Request</p>
+              <p className="text-xs text-[#7a6b5a] mb-4">
+                {contract?.cancelRequestedById === contract?.partyA.id
+                  ? contract?.partyA.fullName || "The poster"
+                  : contract?.partyB.fullName || "The fulfiller"}{" "}
+                requested to cancel this contract.
+                {contract?.cancelReason && ` Reason: "${contract.cancelReason}"`}
+              </p>
+              <div className="flex gap-3">
+                <Button
+                  onClick={() => respondCancel(true)}
+                  disabled={respondingCancel}
+                  variant="ghost"
+                  className="flex-1 text-[#ff5252]"
+                >
+                  {respondingCancel ? "Processing..." : "Agree to Cancel"}
+                </Button>
+                <Button
+                  onClick={() => respondCancel(false)}
+                  disabled={respondingCancel}
+                  variant="secondary"
+                  className="flex-1"
+                >
+                  Decline
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Respond Cancellation Modal */}
-      {showRespondCancelModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="bg-[#12100e] border border-[#2a2420] p-6 rounded-md max-w-sm w-full mx-4">
-            <p className="text-sm text-[#e8d5a3] mb-2">Respond to Cancellation Request</p>
-            <p className="text-xs text-[#7a6b5a] mb-4">
-              {contract?.cancelRequestedById === contract?.partyA.id ? contract?.partyA.fullName || "The poster" : contract?.partyB.fullName || "The fulfiller"} requested to cancel this contract.
-              {contract?.cancelReason && ` Reason: "${contract.cancelReason}"`}
-            </p>
-            <div className="flex gap-3">
-              <Button onClick={() => respondCancel(true)} disabled={respondingCancel} variant="ghost" className="flex-1 text-[#ff5252]">
-                {respondingCancel ? "Processing..." : "Agree to Cancel"}
-              </Button>
-              <Button onClick={() => respondCancel(false)} disabled={respondingCancel} variant="secondary" className="flex-1">
-                Decline
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Signature Modal */}
-      {showSignModal && contract && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-          <div className="bg-[#f5e6c8] border border-[#d4b896] p-6 rounded-sm max-w-md w-full mx-4 shadow-2xl">
-            <div className="text-center mb-5">
-              <div className="contract-seal text-lg mb-2">Antidosis</div>
-              <h3 className="contract-heading text-xl text-[#1a0f08]">Digital Signature</h3>
-              <p className="text-xs text-[#5a4a3a] mt-1">You are about to sign a legally binding contract</p>
-            </div>
-
-            <div className="bg-[#f0dfc0] border border-[#d4b896] p-3 mb-4 text-xs text-[#5a4a3a]">
-              <p className="font-medium mb-1">Contract Summary:</p>
-              <p><strong>Need:</strong> {contract.need.title}</p>
-              <p><strong>Party A:</strong> {contract.partyA.fullName}</p>
-              <p><strong>Party B:</strong> {contract.partyB.fullName}</p>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <Label className="text-xs text-[#5a4a3a] uppercase tracking-wider mb-1.5 block">
-                  Type your full name as your signature
-                </Label>
-                <Input
-                  value={signatureInput}
-                  onChange={(e) => setSignatureInput(e.target.value)}
-                  placeholder={`e.g. ${isPartyA ? contract.partyA.fullName : contract.partyB.fullName}`}
-                  className="bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]"
-                />
+        {/* Signature Modal */}
+        {showSignModal && contract && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+            <div className="bg-[#f5e6c8] border border-[#d4b896] p-6 rounded-sm max-w-md w-full mx-4 shadow-2xl">
+              <div className="text-center mb-5">
+                <div className="contract-seal text-lg mb-2">Antidosis</div>
+                <h3 className="contract-heading text-xl text-[#1a0f08]">Digital Signature</h3>
+                <p className="text-xs text-[#5a4a3a] mt-1">
+                  You are about to sign a legally binding contract
+                </p>
               </div>
 
-              <label className="flex items-start gap-2.5 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={agreedToTermsCheck}
-                  onChange={(e) => setAgreedToTermsCheck(e.target.checked)}
-                  className="accent-[#f5a623] mt-0.5"
-                />
-                <span className="text-xs text-[#5a4a3a] leading-relaxed">
-                  I have read and understood the terms of this contract. I agree to be legally bound by both parties&apos; terms as shown above. I understand this constitutes a digital signature under the <em>Electronic Transactions Act 1999</em> (Cth).
-                </span>
-              </label>
-            </div>
+              <div className="bg-[#f0dfc0] border border-[#d4b896] p-3 mb-4 text-xs text-[#5a4a3a]">
+                <p className="font-medium mb-1">Contract Summary:</p>
+                <p>
+                  <strong>Need:</strong> {contract.need.title}
+                </p>
+                <p>
+                  <strong>Party A:</strong> {contract.partyA.fullName}
+                </p>
+                <p>
+                  <strong>Party B:</strong> {contract.partyB.fullName}
+                </p>
+              </div>
 
-            <div className="flex gap-3 mt-5">
-              <Button
-                onClick={() => signContract(signatureInput.trim())}
-                disabled={signing || !signatureInput.trim() || !agreedToTermsCheck}
-                className="flex-1"
-                style={{ background: '#1a0f08', color: '#f5e6c8', border: '1px solid #2c1810' }}
-              >
-                {signing ? "Signing..." : "Sign Contract"}
-              </Button>
-              <Button
-                onClick={() => { setShowSignModal(false); setSignatureInput(""); setAgreedToTermsCheck(false); }}
-                variant="outline"
-                className="flex-1 border-[#d4b896] text-[#5a4a3a] hover:bg-[#f0dfc0]"
-              >
-                Cancel
-              </Button>
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-xs text-[#5a4a3a] uppercase tracking-wider mb-1.5 block">
+                    Type your full name as your signature
+                  </Label>
+                  <Input
+                    value={signatureInput}
+                    onChange={(e) => setSignatureInput(e.target.value)}
+                    placeholder={`e.g. ${isPartyA ? contract.partyA.fullName : contract.partyB.fullName}`}
+                    className="bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]"
+                  />
+                </div>
+
+                <label className="flex items-start gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={agreedToTermsCheck}
+                    onChange={(e) => setAgreedToTermsCheck(e.target.checked)}
+                    className="accent-[#f5a623] mt-0.5"
+                  />
+                  <span className="text-xs text-[#5a4a3a] leading-relaxed">
+                    I have read and understood the terms of this contract. I agree to be legally
+                    bound by both parties&apos; terms as shown above. I understand this constitutes
+                    a digital signature under the <em>Electronic Transactions Act 1999</em> (Cth).
+                  </span>
+                </label>
+              </div>
+
+              <div className="flex gap-3 mt-5">
+                <Button
+                  onClick={() => signContract(signatureInput.trim())}
+                  disabled={signing || !signatureInput.trim() || !agreedToTermsCheck}
+                  className="flex-1"
+                  style={{ background: "#1a0f08", color: "#f5e6c8", border: "1px solid #2c1810" }}
+                >
+                  {signing ? "Signing..." : "Sign Contract"}
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowSignModal(false);
+                    setSignatureInput("");
+                    setAgreedToTermsCheck(false);
+                  }}
+                  variant="outline"
+                  className="flex-1 border-[#d4b896] text-[#5a4a3a] hover:bg-[#f0dfc0]"
+                >
+                  Cancel
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -1520,7 +1601,9 @@ function PartySection({
       <div className="flex items-center justify-between mb-3">
         <span className="contract-label">{label}</span>
         {isMe && (
-          <span className="text-[10px] font-medium uppercase tracking-wider text-[#8a7a60]">you</span>
+          <span className="text-[10px] font-medium uppercase tracking-wider text-[#8a7a60]">
+            you
+          </span>
         )}
       </div>
       <div className="flex items-center gap-3">
@@ -1538,17 +1621,11 @@ function PartySection({
             <span className="text-base font-semibold text-[#1a0f08] hidden print:inline">
               {party.fullName || "anonymous"}
             </span>
-            {party.isVerified && (
-              <Shield className="h-3.5 w-3.5 text-emerald-600" />
-            )}
+            {party.isVerified && <Shield className="h-3.5 w-3.5 text-emerald-600" />}
           </div>
           <div className="text-sm text-[#5a4a3a] mt-0.5">
-            {party.ratingCount > 0 && (
-              <span>{party.ratingAvg.toFixed(1)} ★</span>
-            )}
-            {party.locationName && (
-              <span className="ml-2">{party.locationName}</span>
-            )}
+            {party.ratingCount > 0 && <span>{party.ratingAvg.toFixed(1)} ★</span>}
+            {party.locationName && <span className="ml-2">{party.locationName}</span>}
           </div>
         </div>
       </div>
@@ -1582,9 +1659,7 @@ function SignatureRow({
   return (
     <div className="py-4">
       <div className="flex items-center justify-between mb-2">
-        <span className="contract-body font-semibold">
-          {name || "anonymous"}
-        </span>
+        <span className="contract-body font-semibold">{name || "anonymous"}</span>
         {signed ? (
           <Badge variant="success" className="gap-1 print-hidden">
             <Check className="h-3 w-3" />
@@ -1610,7 +1685,10 @@ function SignatureRow({
       )}
       <div className="signature-line" />
       {signed && signatureText ? (
-        <p className="text-sm text-[#2c1810] mt-1 font-serif italic" style={{ fontFamily: "'Georgia', serif" }}>
+        <p
+          className="text-sm text-[#2c1810] mt-1 font-serif italic"
+          style={{ fontFamily: "'Georgia', serif" }}
+        >
           {signatureText}
         </p>
       ) : (
@@ -1620,13 +1698,7 @@ function SignatureRow({
   );
 }
 
-function AgreementRow({
-  name,
-  agreed,
-}: {
-  name: string | null;
-  agreed: boolean;
-}) {
+function AgreementRow({ name, agreed }: { name: string | null; agreed: boolean }) {
   return (
     <div className="flex items-center justify-between py-2">
       <span className="contract-body font-medium">{name || "anonymous"}</span>
@@ -1637,14 +1709,14 @@ function AgreementRow({
             <Check className="h-3 w-3" />
             agreed
           </Badge>
-          <span className="text-xs text-emerald-700 uppercase tracking-wide hidden print:inline">agreed</span>
+          <span className="text-xs text-emerald-700 uppercase tracking-wide hidden print:inline">
+            agreed
+          </span>
         </div>
       ) : (
         <div className="flex items-center gap-2 print-hidden">
           <div className="h-2 w-2 rounded-full bg-[#8a7a60]" />
-          <span className="text-xs text-[#8a7a60] uppercase tracking-wide">
-            pending agreement
-          </span>
+          <span className="text-xs text-[#8a7a60] uppercase tracking-wide">pending agreement</span>
         </div>
       )}
     </div>

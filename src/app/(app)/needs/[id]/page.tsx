@@ -1,6 +1,9 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+
+import type { Metadata } from "next";
+
 import { prisma } from "@/lib/prisma";
+
 import NeedDetailClient from "./_components/need-detail-client";
 
 type Props = {
@@ -37,15 +40,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const title = need.title;
   const category = need.needCategory ?? "General";
-  const location = need.isLocal
-    ? need.locationName ?? "Central Coast, NSW"
-    : "Online / Remote";
+  const location = need.isLocal ? (need.locationName ?? "Central Coast, NSW") : "Online / Remote";
   const posterName = need.poster?.fullName ?? "Someone";
 
   const description =
-    need.description.length > 160
-      ? need.description.slice(0, 157) + "..."
-      : need.description;
+    need.description.length > 160 ? need.description.slice(0, 157) + "..." : need.description;
 
   const siteUrl = "https://antidosis.com";
 

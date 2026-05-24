@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Input } from "./input";
-import { findSuburb, formatLocation, type Suburb } from "@/lib/data/central-coast-suburbs";
+
+import { findSuburb, type Suburb } from "@/lib/data/central-coast-suburbs";
 import { cn } from "@/lib/utils";
+
+import { Input } from "./input";
 
 interface LocationAutocompleteProps {
   value: string;
@@ -12,7 +14,12 @@ interface LocationAutocompleteProps {
   className?: string;
 }
 
-export function LocationAutocomplete({ value, onChange, placeholder = "search_suburb...", className }: LocationAutocompleteProps) {
+export function LocationAutocomplete({
+  value,
+  onChange,
+  placeholder = "search_suburb...",
+  className,
+}: LocationAutocompleteProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Suburb[]>([]);
   const [open, setOpen] = useState(false);
@@ -43,7 +50,9 @@ export function LocationAutocomplete({ value, onChange, placeholder = "search_su
       <Input
         value={query}
         onChange={(e) => handleInputChange(e.target.value)}
-        onFocus={() => { if (results.length > 0) setOpen(true); }}
+        onFocus={() => {
+          if (results.length > 0) setOpen(true);
+        }}
         placeholder={placeholder}
       />
       {open && results.length > 0 && (

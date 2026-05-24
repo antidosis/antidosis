@@ -1,9 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+
 import { ArrowRight, MapPin, Clock } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 
 // ═══════════════════════════════════════════════════════════════
 //  CONFIGURE YOUR REGIONAL LAUNCH DATE HERE
@@ -46,9 +49,7 @@ function pad(n: number) {
 //  FULL HOMEPAGE COUNTDOWN SECTION
 // ═══════════════════════════════════════════════════════════════
 export function LaunchCountdown() {
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>(() =>
-    calculateTimeLeft(REGIONAL_LAUNCH_DATE)
-  );
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>(() => calculateTimeLeft(REGIONAL_LAUNCH_DATE));
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -65,10 +66,8 @@ export function LaunchCountdown() {
     <section
       className="relative w-full overflow-hidden border-y border-[#f5a623]/15"
       style={{
-        background:
-          "linear-gradient(180deg, #0f0c0a 0%, #0a0806 50%, #0f0c0a 100%)",
-        boxShadow:
-          "inset 0 0 60px rgba(245,166,35,0.03), 0 0 30px rgba(245,166,35,0.04)",
+        background: "linear-gradient(180deg, #0f0c0a 0%, #0a0806 50%, #0f0c0a 100%)",
+        boxShadow: "inset 0 0 60px rgba(245,166,35,0.03), 0 0 30px rgba(245,166,35,0.04)",
       }}
     >
       {/* Top glow line */}
@@ -76,9 +75,7 @@ export function LaunchCountdown() {
 
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-14 md:py-20">
         {/* Terminal prompt */}
-        <p className="text-xs text-[#7a6b5a] mb-8 font-mono">
-          $ ./regional_launch --countdown
-        </p>
+        <p className="text-xs text-[#7a6b5a] mb-8 font-mono">$ ./regional_launch --countdown</p>
 
         {/* Header */}
         <div className="mb-10 md:mb-14">
@@ -107,18 +104,14 @@ export function LaunchCountdown() {
                 year: "numeric",
               })}
             </span>
-            , Antidosis unlocks for Wollongong, Newcastle, and the Gold Coast.
-            Verify now and keep Pro for life — no matter how far we expand.
+            , Antidosis unlocks for Wollongong, Newcastle, and the Gold Coast. Verify now and keep
+            Pro for life — no matter how far we expand.
           </p>
         </div>
 
         {/* Countdown grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-10 md:mb-14 max-w-2xl">
-          <CountdownBox
-            value={mounted ? pad(timeLeft.days) : "--"}
-            label="Days"
-            accent="#f5a623"
-          />
+          <CountdownBox value={mounted ? pad(timeLeft.days) : "--"} label="Days" accent="#f5a623" />
           <CountdownBox
             value={mounted ? pad(timeLeft.hours) : "--"}
             label="Hours"
@@ -162,8 +155,8 @@ export function LaunchCountdown() {
 
         {/* Footer note */}
         <p className="mt-6 text-xs text-[#7a6b5a]/60">
-          Central Coast members verified before launch receive Pro at no cost,
-          permanently. No credit card required.
+          Central Coast members verified before launch receive Pro at no cost, permanently. No
+          credit card required.
         </p>
       </div>
 
@@ -173,15 +166,7 @@ export function LaunchCountdown() {
   );
 }
 
-function CountdownBox({
-  value,
-  label,
-  accent,
-}: {
-  value: string;
-  label: string;
-  accent: string;
-}) {
+function CountdownBox({ value, label, accent }: { value: string; label: string; accent: string }) {
   return (
     <div
       className="relative vessel-lit p-4 md:p-5 text-center group"
@@ -193,9 +178,7 @@ function CountdownBox({
       >
         {value}
       </div>
-      <div className="text-[10px] md:text-xs text-[#7a6b5a] uppercase tracking-widest">
-        {label}
-      </div>
+      <div className="text-[10px] md:text-xs text-[#7a6b5a] uppercase tracking-widest">{label}</div>
       {/* Subtle accent glow on hover */}
       <div
         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
@@ -211,9 +194,7 @@ function CountdownBox({
 //  THIN GLOBAL BANNER (appears below navbar on all pages)
 // ═══════════════════════════════════════════════════════════════
 export function LaunchBanner() {
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>(() =>
-    calculateTimeLeft(REGIONAL_LAUNCH_DATE)
-  );
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>(() => calculateTimeLeft(REGIONAL_LAUNCH_DATE));
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {

@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { createClient } from "@/lib/supabase/client";
+
 import { useToast } from "@/components/ui/toast";
+import { createClient } from "@/lib/supabase/client";
 
 function playNotificationSound() {
   try {
@@ -32,7 +33,9 @@ export function NotificationRealtime() {
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
     async function setup() {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) return;
 
       const res = await fetch("/api/v1/profiles/me");

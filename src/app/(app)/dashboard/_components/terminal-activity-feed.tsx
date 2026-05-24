@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useApi } from "@/lib/swr-config";
+
 import { MessageSquare, Hash, AtSign, Loader2 } from "lucide-react";
+
+import { useApi } from "@/lib/swr-config";
 
 type ActivityItem = {
   type: "dm" | "mention" | "channel";
@@ -15,7 +17,12 @@ type ActivityItem = {
 
 function getInitials(name: string | null) {
   if (!name) return "?";
-  return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 function timeAgo(date: string): string {

@@ -1,20 +1,20 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
-import { sendContractSignedEmail } from "@/lib/email";
+import { type NextRequest, NextResponse } from "next/server";
+
 import { auditLog, getClientInfo } from "@/lib/audit";
+import { sendContractSignedEmail } from "@/lib/email";
 import { logger } from "@/lib/logger";
 import { createNotification } from "@/lib/notifications";
+import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
-import { z } from "zod";
+import { signContractSchema } from "@/lib/schemas";
+import { createClient } from "@/lib/supabase/server";
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -25,7 +25,6 @@ export async function POST(
         { status: 403 }
       );
     }
-
 
     const profile = await prisma.profile.findUnique({
       where: { userId: user.id },
@@ -60,10 +59,7 @@ export async function POST(
     }
 
     const body = await req.json().catch(() => ({}));
-    const signSchema = z.object({
-      signature: z.string().min(2).max(200),
-    });
-    const parsed = signSchema.safeParse(body);
+    const parsed = signContractSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
         { error: "Please type your full name to sign (2-200 characters)" },
@@ -87,16 +83,10 @@ export async function POST(
     }
 
     if (isPartyA && contract.partyASignedAt) {
-      return NextResponse.json(
-        { error: "Already signed" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Already signed" }, { status: 400 });
     }
     if (isPartyB && contract.partyBSignedAt) {
-      return NextResponse.json(
-        { error: "Already signed" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Already signed" }, { status: 400 });
     }
 
     const updatedContract = await prisma.$transaction(async (tx) => {
@@ -175,7 +165,10 @@ export async function POST(
           });
         }
       } catch (emailErr) {
-        logger.error("Failed to send contract signed email:", emailErr instanceof Error ? emailErr : undefined);
+        logger.error(
+          "Failed to send contract signed email:",
+          emailErr instanceof Error ? emailErr : undefined
+        );
       }
     }
 
@@ -193,9 +186,6 @@ export async function POST(
     return NextResponse.json({ contract: updatedContract });
   } catch (error) {
     logger.error("Sign contract error:", error instanceof Error ? error : undefined);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

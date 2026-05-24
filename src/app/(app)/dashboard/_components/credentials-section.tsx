@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Button } from "@/components/ui/button";
+
+import { Plus, Eye, EyeOff, Trash2, FileCheck, ShieldCheck, Info } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { FileUpload } from "@/components/ui/file-upload";
-import { Plus, X, Eye, EyeOff, Trash2, FileCheck, ShieldCheck, Info } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 type CredentialData = {
   id: string;
@@ -121,7 +123,14 @@ function getFieldConfig(type: string, subType?: string | null): FieldConfig {
         default:
           return {
             titleLabel: "ID Type",
-            titlePlaceholder: subType === "photo_id" ? "Photo ID Card" : subType === "proof_of_age" ? "Proof of Age Card" : subType === "medicare" ? "Medicare Card" : "Identification",
+            titlePlaceholder:
+              subType === "photo_id"
+                ? "Photo ID Card"
+                : subType === "proof_of_age"
+                  ? "Proof of Age Card"
+                  : subType === "medicare"
+                    ? "Medicare Card"
+                    : "Identification",
             titleRequired: false,
             showDescription: false,
             docNumLabel: "Card Number",
@@ -350,14 +359,26 @@ export function CredentialsSection({ initialCredentials, onUpdate }: Credentials
     isPublic: false,
   });
 
-  const config = useMemo(() => getFieldConfig(credForm.type, credForm.subType), [credForm.type, credForm.subType]);
+  const config = useMemo(
+    () => getFieldConfig(credForm.type, credForm.subType),
+    [credForm.type, credForm.subType]
+  );
 
   function closeCredForm() {
     setCredFormOpen(false);
     setEditingCred(null);
     setCredForm({
-      type: "qualification", subType: "", title: "", description: "", documentNumber: "",
-      issuedBy: "", issuedAt: "", expiresAt: "", fileUrl: "", backFileUrl: "", isPublic: false,
+      type: "qualification",
+      subType: "",
+      title: "",
+      description: "",
+      documentNumber: "",
+      issuedBy: "",
+      issuedAt: "",
+      expiresAt: "",
+      fileUrl: "",
+      backFileUrl: "",
+      isPublic: false,
     });
   }
 
@@ -367,7 +388,12 @@ export function CredentialsSection({ initialCredentials, onUpdate }: Credentials
       ...prev,
       type,
       subType: type === "identification" ? "drivers_licence" : "",
-      title: type === "wwcc" ? "Working With Children Check" : type === "criminal_history" ? "National Police Check" : newConfig.titlePlaceholder,
+      title:
+        type === "wwcc"
+          ? "Working With Children Check"
+          : type === "criminal_history"
+            ? "National Police Check"
+            : newConfig.titlePlaceholder,
       isPublic: newConfig.forcePrivate ? false : prev.isPublic,
     }));
   }
@@ -377,7 +403,18 @@ export function CredentialsSection({ initialCredentials, onUpdate }: Credentials
     setCredForm((prev) => ({
       ...prev,
       subType,
-      title: subType === "drivers_licence" ? "Driver's Licence" : subType === "passport" ? "Passport" : subType === "photo_id" ? "Photo ID Card" : subType === "proof_of_age" ? "Proof of Age Card" : subType === "medicare" ? "Medicare Card" : "Identification",
+      title:
+        subType === "drivers_licence"
+          ? "Driver's Licence"
+          : subType === "passport"
+            ? "Passport"
+            : subType === "photo_id"
+              ? "Photo ID Card"
+              : subType === "proof_of_age"
+                ? "Proof of Age Card"
+                : subType === "medicare"
+                  ? "Medicare Card"
+                  : "Identification",
       isPublic: newConfig.forcePrivate ? false : prev.isPublic,
     }));
   }
@@ -398,11 +435,14 @@ export function CredentialsSection({ initialCredentials, onUpdate }: Credentials
       backFileUrl: credForm.backFileUrl || undefined,
       isPublic: config.forcePrivate ? false : credForm.isPublic,
     };
-    const res = await fetch(editingCred ? `/api/v1/credentials/${editingCred}` : "/api/v1/credentials", {
-      method: editingCred ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    const res = await fetch(
+      editingCred ? `/api/v1/credentials/${editingCred}` : "/api/v1/credentials",
+      {
+        method: editingCred ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }
+    );
     if (res.ok) {
       closeCredForm();
       const credsRes = await fetch("/api/v1/credentials");
@@ -467,15 +507,25 @@ export function CredentialsSection({ initialCredentials, onUpdate }: Credentials
           <Info className="h-4 w-4 text-[#00e5ff] mt-0.5 flex-shrink-0" />
           <div className="text-xs text-[#7a6b5a] space-y-1">
             <p className="text-[#e8d5a3] font-medium">How identity verification works</p>
-            <p>Upload a government-issued ID (driver&apos;s licence, passport, etc.) as an <strong>&ldquo;identification&rdquo;</strong> type credential. Our team reviews and approves it within 24 hours. Once approved, your profile is verified and you can claim <strong>free Pro</strong> for life.</p>
-            <p>You can also add qualifications, licenses, certifications, WWCC, police checks, and insurance to build extra trust.</p>
+            <p>
+              Upload a government-issued ID (driver&apos;s licence, passport, etc.) as an{" "}
+              <strong>&ldquo;identification&rdquo;</strong> type credential. Our team reviews and
+              approves it within 24 hours. Once approved, your profile is verified and you can claim{" "}
+              <strong>free Pro</strong> for life.
+            </p>
+            <p>
+              You can also add qualifications, licenses, certifications, WWCC, police checks, and
+              insurance to build extra trust.
+            </p>
           </div>
         </div>
       </div>
 
       {credFormOpen && (
         <div className="vessel p-6 mb-8">
-          <p className="text-xs text-[#f5a623] mb-4">{editingCred ? "Edit Credential" : "Add Credential"}</p>
+          <p className="text-xs text-[#f5a623] mb-4">
+            {editingCred ? "Edit Credential" : "Add Credential"}
+          </p>
           <form onSubmit={saveCredential} className="space-y-4 max-w-lg">
             {/* Type */}
             <div className="space-y-2">
@@ -486,7 +536,9 @@ export function CredentialsSection({ initialCredentials, onUpdate }: Credentials
                 className="w-full bg-[#0f0c0a] border border-[#2a2420] text-[#e8d5a3] text-sm px-3 py-2 outline-none focus:border-[#f5a623] rounded"
               >
                 {TYPE_OPTIONS.map((t) => (
-                  <option key={t.value} value={t.value}>{t.label}</option>
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -501,7 +553,9 @@ export function CredentialsSection({ initialCredentials, onUpdate }: Credentials
                   className="w-full bg-[#0f0c0a] border border-[#2a2420] text-[#e8d5a3] text-sm px-3 py-2 outline-none focus:border-[#f5a623] rounded"
                 >
                   {ID_SUBTYPES.map((t) => (
-                    <option key={t.value} value={t.value}>{t.label}</option>
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -560,33 +614,57 @@ export function CredentialsSection({ initialCredentials, onUpdate }: Credentials
               {config.showIssuedAt && (
                 <div className="space-y-2">
                   <Label>Issued At</Label>
-                  <Input type="date" value={credForm.issuedAt} onChange={(e) => setCredForm({ ...credForm, issuedAt: e.target.value })} />
+                  <Input
+                    type="date"
+                    value={credForm.issuedAt}
+                    onChange={(e) => setCredForm({ ...credForm, issuedAt: e.target.value })}
+                  />
                 </div>
               )}
               {config.showExpiresAt && (
                 <div className="space-y-2">
                   <Label>{config.expiresLabel}</Label>
-                  <Input type="date" value={credForm.expiresAt} onChange={(e) => setCredForm({ ...credForm, expiresAt: e.target.value })} />
+                  <Input
+                    type="date"
+                    value={credForm.expiresAt}
+                    onChange={(e) => setCredForm({ ...credForm, expiresAt: e.target.value })}
+                  />
                 </div>
               )}
             </div>
 
             {/* File Upload(s) */}
             <div className="space-y-2">
-              <Label>Document File {config.fileRequired && <span className="text-[#ff5252]">*</span>}</Label>
-              <FileUpload folder="credentials" onUpload={(url) => setCredForm({ ...credForm, fileUrl: url })}>
-                {credForm.fileUrl ? "Change File" : config.showBackFile ? "Upload Front" : "Upload File"}
+              <Label>
+                Document File {config.fileRequired && <span className="text-[#ff5252]">*</span>}
+              </Label>
+              <FileUpload
+                folder="credentials"
+                onUpload={(url) => setCredForm({ ...credForm, fileUrl: url })}
+              >
+                {credForm.fileUrl
+                  ? "Change File"
+                  : config.showBackFile
+                    ? "Upload Front"
+                    : "Upload File"}
               </FileUpload>
-              {credForm.fileUrl && <p className="text-xs text-[#7a6b5a] truncate">{credForm.fileUrl}</p>}
+              {credForm.fileUrl && (
+                <p className="text-xs text-[#7a6b5a] truncate">{credForm.fileUrl}</p>
+              )}
             </div>
 
             {config.showBackFile && (
               <div className="space-y-2">
                 <Label>Back of Document</Label>
-                <FileUpload folder="credentials" onUpload={(url) => setCredForm({ ...credForm, backFileUrl: url })}>
+                <FileUpload
+                  folder="credentials"
+                  onUpload={(url) => setCredForm({ ...credForm, backFileUrl: url })}
+                >
                   {credForm.backFileUrl ? "Change File" : "Upload Back"}
                 </FileUpload>
-                {credForm.backFileUrl && <p className="text-xs text-[#7a6b5a] truncate">{credForm.backFileUrl}</p>}
+                {credForm.backFileUrl && (
+                  <p className="text-xs text-[#7a6b5a] truncate">{credForm.backFileUrl}</p>
+                )}
               </div>
             )}
 
@@ -600,7 +678,9 @@ export function CredentialsSection({ initialCredentials, onUpdate }: Credentials
                   onChange={(e) => setCredForm({ ...credForm, isPublic: e.target.checked })}
                   className="accent-[#f5a623]"
                 />
-                <Label htmlFor="isPublic" className="cursor-pointer">Public (visible on profile)</Label>
+                <Label htmlFor="isPublic" className="cursor-pointer">
+                  Public (visible on profile)
+                </Label>
               </div>
             )}
             {config.forcePrivate && (
@@ -610,8 +690,12 @@ export function CredentialsSection({ initialCredentials, onUpdate }: Credentials
             )}
 
             <div className="flex gap-2 pt-2">
-              <Button type="submit" disabled={credSaving}>{credSaving ? "Saving..." : "Save"}</Button>
-              <Button type="button" variant="ghost" onClick={closeCredForm}>Cancel</Button>
+              <Button type="submit" disabled={credSaving}>
+                {credSaving ? "Saving..." : "Save"}
+              </Button>
+              <Button type="button" variant="ghost" onClick={closeCredForm}>
+                Cancel
+              </Button>
             </div>
           </form>
         </div>
@@ -621,7 +705,10 @@ export function CredentialsSection({ initialCredentials, onUpdate }: Credentials
         <div className="py-24 text-center vessel">
           <ShieldCheck className="h-8 w-8 text-[#7a6b5a] mx-auto mb-3" />
           <p className="text-sm font-medium text-[#b8a078] mb-2">No Credentials Yet</p>
-          <p className="text-xs text-[#7a6b5a] max-w-sm mx-auto">Add your ID to get verified. Qualifications, licenses, WWCC, police checks, and insurance also help you get selected for needs.</p>
+          <p className="text-xs text-[#7a6b5a] max-w-sm mx-auto">
+            Add your ID to get verified. Qualifications, licenses, WWCC, police checks, and
+            insurance also help you get selected for needs.
+          </p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -632,38 +719,90 @@ export function CredentialsSection({ initialCredentials, onUpdate }: Credentials
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-base font-medium text-[#e8d5a3]">{cred.title}</p>
                     <Badge variant="outline">
-                      {cred.type === "wwcc" ? "WWCC" : cred.type === "criminal_history" ? "Police Check" : cred.subType ? ID_SUBTYPES.find(s => s.value === cred.subType)?.label || cred.subType : cred.type}
+                      {cred.type === "wwcc"
+                        ? "WWCC"
+                        : cred.type === "criminal_history"
+                          ? "Police Check"
+                          : cred.subType
+                            ? ID_SUBTYPES.find((s) => s.value === cred.subType)?.label ||
+                              cred.subType
+                            : cred.type}
                     </Badge>
-                    {cred.isVerified && (
-                      <Badge variant="quintessence">Verified</Badge>
-                    )}
+                    {cred.isVerified && <Badge variant="quintessence">Verified</Badge>}
                     {!cred.isPublic && <EyeOff className="h-3.5 w-3.5 text-[#7a6b5a]" />}
                     {cred.isPublic && <Eye className="h-3.5 w-3.5 text-[#00e5ff]" />}
                   </div>
                   <div className="text-xs text-[#b8a078] mt-2 space-y-1">
-                    {cred.documentNumber && <p>Number: {"*".repeat(Math.max(0, cred.documentNumber.length - 4))}{cred.documentNumber.slice(-4)}</p>}
+                    {cred.documentNumber && (
+                      <p>
+                        Number: {"*".repeat(Math.max(0, cred.documentNumber.length - 4))}
+                        {cred.documentNumber.slice(-4)}
+                      </p>
+                    )}
                     {cred.issuedBy && <p>Issued by: {cred.issuedBy}</p>}
-                    {cred.issuedAt && <p>Issued: {new Date(cred.issuedAt).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}</p>}
-                    {cred.expiresAt && <p>Expires: {new Date(cred.expiresAt).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}</p>}
+                    {cred.issuedAt && (
+                      <p>
+                        Issued:{" "}
+                        {new Date(cred.issuedAt).toLocaleDateString("en-AU", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </p>
+                    )}
+                    {cred.expiresAt && (
+                      <p>
+                        Expires:{" "}
+                        {new Date(cred.expiresAt).toLocaleDateString("en-AU", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </p>
+                    )}
                     {cred.description && <p className="text-[#7a6b5a]">{cred.description}</p>}
                     {cred.fileUrl && (
-                      <a href={cred.fileUrl} target="_blank" rel="noopener noreferrer" className="text-[#f5a623] hover:underline inline-flex items-center gap-1">
+                      <a
+                        href={cred.fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#f5a623] hover:underline inline-flex items-center gap-1"
+                      >
                         <FileCheck className="h-3 w-3" /> View Document
                       </a>
                     )}
                     {cred.backFileUrl && (
-                      <a href={cred.backFileUrl} target="_blank" rel="noopener noreferrer" className="text-[#f5a623] hover:underline inline-flex items-center gap-1 ml-3">
+                      <a
+                        href={cred.backFileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[#f5a623] hover:underline inline-flex items-center gap-1 ml-3"
+                      >
                         <FileCheck className="h-3 w-3" /> View Back
                       </a>
                     )}
                   </div>
                 </div>
                 <div className="flex items-center gap-1 ml-4">
-                  <Button size="sm" variant="ghost" onClick={() => toggleVisibility(cred.id, cred.isPublic)} title={cred.isPublic ? "Make private" : "Make public"}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => toggleVisibility(cred.id, cred.isPublic)}
+                    title={cred.isPublic ? "Make private" : "Make public"}
+                  >
                     {cred.isPublic ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={() => startEdit(cred)} title="Edit"><span className="text-xs">Edit</span></Button>
-                  <Button size="sm" variant="ghost" onClick={() => deleteCredential(cred.id)} title="Delete"><Trash2 className="h-4 w-4 text-[#ff5252]" /></Button>
+                  <Button size="sm" variant="ghost" onClick={() => startEdit(cred)} title="Edit">
+                    <span className="text-xs">Edit</span>
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => deleteCredential(cred.id)}
+                    title="Delete"
+                  >
+                    <Trash2 className="h-4 w-4 text-[#ff5252]" />
+                  </Button>
                 </div>
               </div>
             </div>

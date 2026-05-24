@@ -1,11 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
-import { logger } from "@/lib/logger";
-import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
-import { auditLog, getClientInfo } from "@/lib/audit";
-import { createNotification } from "@/lib/notifications";
+import { type NextRequest, NextResponse } from "next/server";
+
 import { z } from "zod";
+
+import { auditLog, getClientInfo } from "@/lib/audit";
+import { logger } from "@/lib/logger";
+import { createNotification } from "@/lib/notifications";
+import { prisma } from "@/lib/prisma";
+import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
+import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -13,13 +15,12 @@ const respondSchema = z.object({
   agree: z.boolean(),
 });
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -188,9 +189,6 @@ export async function POST(
     }
   } catch (error) {
     logger.error("Respond cancel error:", error instanceof Error ? error : undefined);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

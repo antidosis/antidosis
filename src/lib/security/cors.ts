@@ -1,20 +1,20 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 const ALLOWED_ORIGINS = [
   "http://localhost:3000",
+  "http://localhost:5173",
+  "capacitor://localhost",
+  "https://localhost",
   "https://antidosis.vercel.app",
   "https://antidosis.com",
   "https://www.antidosis.com",
   "https://antidosis-kqs9nele2-martins-projects-5d68d645.vercel.app",
 ];
 
-export function withCors(
-  handler: (req: NextRequest) => Promise<NextResponse> | NextResponse
-) {
+export function withCors(handler: (req: NextRequest) => Promise<NextResponse> | NextResponse) {
   return async (req: NextRequest) => {
     const origin = req.headers.get("origin");
-    const isAllowed =
-      !origin || ALLOWED_ORIGINS.includes(origin);
+    const isAllowed = !origin || ALLOWED_ORIGINS.includes(origin);
 
     if (req.method === "OPTIONS") {
       return new NextResponse(null, {

@@ -1,14 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+
+import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
-import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       return NextResponse.json({ error: "Authentication required" }, { status: 401 });
@@ -26,7 +29,10 @@ export async function GET(req: NextRequest) {
     const userSkillNames = profile.skills.map((s) => s.name.toLowerCase());
 
     if (userSkillNames.length === 0) {
-      return NextResponse.json({ needs: [], message: "Add skills to your profile to get recommendations" });
+      return NextResponse.json({
+        needs: [],
+        message: "Add skills to your profile to get recommendations",
+      });
     }
 
     const needs = await prisma.need.findMany({

@@ -1,8 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+
 import Link from "next/link";
+
 import { Bell, CheckCheck, Clock, MessageSquare, Hash } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 
 type Notification = {
@@ -29,7 +32,9 @@ export function NotificationBell() {
         setNotifications(data.notifications || []);
         setUnreadCount(data.unreadCount || 0);
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }
 
   useEffect(() => {
@@ -59,9 +64,7 @@ export function NotificationBell() {
 
   async function markRead(id: string) {
     await fetch(`/api/v1/notifications/${id}/read`, { method: "PATCH" });
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-    );
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
     setUnreadCount((c) => Math.max(0, c - 1));
   }
 
@@ -150,15 +153,31 @@ export function NotificationBell() {
                   )}
                 >
                   <div className="flex items-start gap-2">
-                    <div className={cn("mt-1 h-2 w-2 rounded-full flex-shrink-0", n.isRead ? "bg-transparent" : "bg-[#f5a623] shadow-[0_0_6px_rgba(245,166,35,0.5)]")} />
+                    <div
+                      className={cn(
+                        "mt-1 h-2 w-2 rounded-full flex-shrink-0",
+                        n.isRead
+                          ? "bg-transparent"
+                          : "bg-[#f5a623] shadow-[0_0_6px_rgba(245,166,35,0.5)]"
+                      )}
+                    />
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
-                      {(n.type === "dm_message" || n.type === "mention") && <MessageSquare className="h-3 w-3 text-[#00e5ff]" />}
-                      {(n.type === "channel_message") && <Hash className="h-3 w-3 text-[#f5a623]" />}
-                      <p className={cn("text-xs leading-snug", !n.isRead ? "text-[#e8d5a3] font-medium" : "text-[#b8a078]")}>
-                        {n.title}
-                      </p>
-                    </div>
+                        {(n.type === "dm_message" || n.type === "mention") && (
+                          <MessageSquare className="h-3 w-3 text-[#00e5ff]" />
+                        )}
+                        {n.type === "channel_message" && (
+                          <Hash className="h-3 w-3 text-[#f5a623]" />
+                        )}
+                        <p
+                          className={cn(
+                            "text-xs leading-snug",
+                            !n.isRead ? "text-[#e8d5a3] font-medium" : "text-[#b8a078]"
+                          )}
+                        >
+                          {n.title}
+                        </p>
+                      </div>
                       <p className="text-xs text-[#7a6b5a] mt-0.5 line-clamp-2">{n.body}</p>
                       <div className="flex items-center gap-1 mt-1 text-xs text-[#7a6b5a]">
                         <Clock className="h-3 w-3" />

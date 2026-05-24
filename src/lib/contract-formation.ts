@@ -1,7 +1,7 @@
-import { prisma } from "@/lib/prisma";
 import { sendContractFormedEmail } from "@/lib/email";
-import { createNotification } from "@/lib/notifications";
 import { logger } from "@/lib/logger";
+import { createNotification } from "@/lib/notifications";
+import { prisma } from "@/lib/prisma";
 
 async function notifyContractFormed(data: {
   contractId: string;
@@ -62,10 +62,7 @@ async function notifyContractFormed(data: {
   }
 }
 
-export async function createContractFromAcceptance(
-  acceptanceId: string,
-  posterProfileId: string
-) {
+export async function createContractFromAcceptance(acceptanceId: string, posterProfileId: string) {
   let notifyData: {
     contractId: string;
     needId: string;

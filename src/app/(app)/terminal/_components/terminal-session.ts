@@ -192,8 +192,8 @@ export function addXp(session: TerminalSession, action: keyof typeof XP_TABLE): 
 
 export function getLevel(xp: number): { level: number; title: string; nextThreshold: number } {
   const thresholds = [
-    0, 100, 300, 600, 1000, 1500, 2100, 2800, 3600, 4500,
-    5500, 6600, 7800, 9100, 10500, 12000, 13600, 15300, 17100, 19000,
+    0, 100, 300, 600, 1000, 1500, 2100, 2800, 3600, 4500, 5500, 6600, 7800, 9100, 10500, 12000,
+    13600, 15300, 17100, 19000,
   ];
   let level = 1;
   for (let i = 0; i < thresholds.length; i++) {
@@ -201,27 +201,48 @@ export function getLevel(xp: number): { level: number; title: string; nextThresh
     else break;
   }
   const titles = [
-    "Newcomer", "Seedling", "Trader", "Regular", "Dealmaker",
-    "Connector", "Pillar", "Veteran", "Master", "Legend",
-    "Grandmaster", "Oracle", "Titan", "Immortal", "Demigod",
-    "Avatar", "Cosmic", "Eternal", "Transcendent", "Omnipotent",
+    "Newcomer",
+    "Seedling",
+    "Trader",
+    "Regular",
+    "Dealmaker",
+    "Connector",
+    "Pillar",
+    "Veteran",
+    "Master",
+    "Legend",
+    "Grandmaster",
+    "Oracle",
+    "Titan",
+    "Immortal",
+    "Demigod",
+    "Avatar",
+    "Cosmic",
+    "Eternal",
+    "Transcendent",
+    "Omnipotent",
   ];
   const next = thresholds[level] ?? thresholds[thresholds.length - 1] * 2;
   return { level, title: titles[level - 1] ?? "Beyond", nextThreshold: next };
 }
 
-export function checkBadges(session: TerminalSession, stats: {
-  needsPosted: number;
-  dealsCompleted: number;
-  messagesSent: number;
-  reviewsGiven: number;
-  ratingAvg: number | null;
-  isVerified: boolean;
-  isPro: boolean;
-}): string[] {
+export function checkBadges(
+  session: TerminalSession,
+  stats: {
+    needsPosted: number;
+    dealsCompleted: number;
+    messagesSent: number;
+    reviewsGiven: number;
+    ratingAvg: number | null;
+    isVerified: boolean;
+    isPro: boolean;
+  }
+): string[] {
   const newBadges: string[] = [];
   const has = (b: string) => session.badges.includes(b);
-  const award = (b: string) => { if (!has(b)) newBadges.push(b); };
+  const award = (b: string) => {
+    if (!has(b)) newBadges.push(b);
+  };
 
   if (stats.needsPosted >= 1) award("🌱 Seedling");
   if (stats.dealsCompleted >= 5) award("🤝 Dealmaker");

@@ -11,12 +11,7 @@ interface LogContext {
   [key: string]: unknown;
 }
 
-function formatLog(
-  level: string,
-  message: string,
-  context?: LogContext,
-  error?: Error
-) {
+function formatLog(level: string, message: string, context?: LogContext, error?: Error) {
   const timestamp = new Date().toISOString();
 
   if (isProduction) {

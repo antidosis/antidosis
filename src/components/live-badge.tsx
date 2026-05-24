@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+
 import { Users } from "lucide-react";
 
 export function LiveBadge({ className = "" }: { className?: string }) {

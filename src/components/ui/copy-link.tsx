@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+
+import { Link2, Check } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
-import { Link2, Check } from "lucide-react";
 
 export function CopyLinkButton({ url, label = "Copy link" }: { url: string; label?: string }) {
   const { toast } = useToast();

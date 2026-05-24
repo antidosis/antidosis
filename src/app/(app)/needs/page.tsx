@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+
 import NeedsListClient from "./_components/needs-list-client";
 
 const siteUrl = "https://antidosis.com";

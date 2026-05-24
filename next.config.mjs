@@ -18,7 +18,8 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: "/((?!_next/static|_next/image|favicon|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|json)$).*)",
+        source:
+          "/((?!_next/static|_next/image|favicon|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|json)$).*)",
         headers: [
           {
             key: "X-Frame-Options",

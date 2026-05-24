@@ -1,19 +1,19 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+
+import { sendContractSignReminderEmail } from "@/lib/email";
+import { logger } from "@/lib/logger";
+import { createNotification } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
-import { sendContractSignReminderEmail } from "@/lib/email";
-import { createNotification } from "@/lib/notifications";
-import { logger } from "@/lib/logger";
 
 const REMINDER_COOLDOWN_MS = 60 * 60 * 1000; // 1 hour
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -53,11 +53,11 @@ export async function POST(
     }
 
     // Can only remind if terms are locked and contract is pending signatures
-    if (!contract.termsLockedAt || (contract.status !== "draft" && contract.status !== "pending_terms")) {
-      return NextResponse.json(
-        { error: "Cannot remind at this stage" },
-        { status: 400 }
-      );
+    if (
+      !contract.termsLockedAt ||
+      (contract.status !== "draft" && contract.status !== "pending_terms")
+    ) {
+      return NextResponse.json({ error: "Cannot remind at this stage" }, { status: 400 });
     }
 
     // Determine who hasn't signed
@@ -65,10 +65,7 @@ export async function POST(
     const otherSigned = isPartyA ? !!contract.partyBSignedAt : !!contract.partyASignedAt;
 
     if (otherSigned) {
-      return NextResponse.json(
-        { error: "The other party has already signed" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "The other party has already signed" }, { status: 400 });
     }
 
     // Rate limiting: check last reminder time
@@ -110,9 +107,6 @@ export async function POST(
     return NextResponse.json({ success: true });
   } catch (error) {
     logger.error("Remind sign error:", error instanceof Error ? error : undefined);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

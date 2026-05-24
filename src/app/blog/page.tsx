@@ -1,9 +1,11 @@
-import type { Metadata } from "next";
 import Link from "next/link";
-import { Navbar } from "@/components/layout/navbar";
-import { Footer } from "@/components/layout/footer";
-import { blogPosts } from "@/lib/blog";
+
 import { ArrowRight, Clock, Calendar } from "lucide-react";
+import type { Metadata } from "next";
+
+import { Footer } from "@/components/layout/footer";
+import { Navbar } from "@/components/layout/navbar";
+import { blogPosts } from "@/lib/blog";
 
 const siteUrl = "https://antidosis.com";
 
@@ -49,12 +51,10 @@ export default function BlogIndexPage() {
           {/* Header */}
           <div className="mb-16">
             <p className="text-xs font-mono text-[#7a6b5a] mb-4">$ ls articles/</p>
-            <h1 className="heading-display text-4xl md:text-5xl text-[#e8d5a3] mb-4">
-              Blog
-            </h1>
+            <h1 className="heading-display text-4xl md:text-5xl text-[#e8d5a3] mb-4">Blog</h1>
             <p className="text-[#b8a078] max-w-xl">
-              Guides, stories, and insights about barter, exchange, and building
-              community on the Central Coast.
+              Guides, stories, and insights about barter, exchange, and building community on the
+              Central Coast.
             </p>
           </div>
 
@@ -79,9 +79,7 @@ export default function BlogIndexPage() {
                   <h2 className="heading-display text-xl md:text-2xl text-[#e8d5a3] group-hover:text-[#00e5ff] transition-colors mb-3">
                     {post.title}
                   </h2>
-                  <p className="text-sm text-[#b8a078] leading-relaxed mb-4">
-                    {post.excerpt}
-                  </p>
+                  <p className="text-sm text-[#b8a078] leading-relaxed mb-4">{post.excerpt}</p>
                   <div className="flex items-center gap-4 text-xs text-[#7a6b5a]">
                     <span className="flex items-center gap-1.5">
                       <Calendar className="h-3 w-3" />
@@ -107,9 +105,7 @@ export default function BlogIndexPage() {
 
           {/* CTA */}
           <div className="mt-16 text-center">
-            <p className="text-sm text-[#7a6b5a] mb-4">
-              Want to share your exchange story?
-            </p>
+            <p className="text-sm text-[#7a6b5a] mb-4">Want to share your exchange story?</p>
             <a
               href="mailto:official.antidosis@gmail.com?subject=Blog%20Submission"
               className="inline-flex items-center gap-2 text-sm text-[#00e5ff] hover:underline"

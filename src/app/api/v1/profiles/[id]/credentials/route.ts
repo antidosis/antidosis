@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
+
+import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { redactCredential } from "@/lib/redaction";
-import { logger } from "@/lib/logger";
 
-export async function GET(
-  _req: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(_req: Request, { params }: { params: { id: string } }) {
   try {
     const profile = await prisma.profile.findUnique({
       where: { id: params.id },

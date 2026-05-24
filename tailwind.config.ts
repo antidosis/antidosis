@@ -18,13 +18,7 @@ const config: Config = {
           "Roboto",
           "sans-serif",
         ],
-        heading: [
-          "var(--font-sans)",
-          "SF Pro Display",
-          "Segoe UI",
-          "system-ui",
-          "sans-serif",
-        ],
+        heading: ["var(--font-sans)", "SF Pro Display", "Segoe UI", "system-ui", "sans-serif"],
         mono: [
           "var(--font-mono)",
           "SF Mono",

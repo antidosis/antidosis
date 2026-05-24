@@ -1,14 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
+
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+
+import { Eye, EyeOff, CheckCircle } from "lucide-react";
+
+import { TerminalCursor } from "@/components/effects/terminal-cursor";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
-import { TerminalCursor } from "@/components/effects/terminal-cursor";
-import { Eye, EyeOff, CheckCircle } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -27,18 +30,17 @@ export default function LoginPage() {
     const code = searchParams.get("code");
     if (code) {
       setLoading(true);
-      supabase.auth.exchangeCodeForSession(code)
-        .then(({ error }) => {
-          if (error) {
-            setError("verification failed: " + error.message);
-            setLoading(false);
-          } else {
-            router.push("/needs");
-            router.refresh();
-          }
-        });
+      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+        if (error) {
+          setError("verification failed: " + error.message);
+          setLoading(false);
+        } else {
+          router.push("/needs");
+          router.refresh();
+        }
+      });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -82,7 +84,8 @@ export default function LoginPage() {
         <div className="w-full max-w-sm">
           <p className="text-xs text-[#7a6b5a] mb-8">$ login --existing-user</p>
           <h1 className="heading-display text-2xl text-[#e8d5a3] mb-2">
-            authenticate<TerminalCursor />
+            authenticate
+            <TerminalCursor />
           </h1>
           <p className="text-sm text-[#b8a078] mb-12">
             access your account and manage your exchanges
@@ -91,9 +94,7 @@ export default function LoginPage() {
           {emailVerified && (
             <div className="border border-[#00e676]/30 bg-[#00e676]/5 p-5 mb-8 flex items-center gap-3">
               <CheckCircle className="h-5 w-5 text-[#00e676] flex-shrink-0" />
-              <p className="text-sm text-[#00e676]">
-                email verified. you can now log in.
-              </p>
+              <p className="text-sm text-[#00e676]">email verified. you can now log in.</p>
             </div>
           )}
 
@@ -134,11 +135,7 @@ export default function LoginPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-[#7a6b5a] hover:text-[#e8d5a3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f5a623] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0806] rounded-sm"
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>

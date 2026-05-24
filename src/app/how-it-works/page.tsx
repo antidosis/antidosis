@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+
 import HowItWorksClient from "./_components/how-it-works-client";
 
 const siteUrl = "https://antidosis.com";

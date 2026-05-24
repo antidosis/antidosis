@@ -1,7 +1,8 @@
 "use client";
 
-import { FileUpload } from "./file-upload";
 import { X } from "lucide-react";
+
+import { FileUpload } from "./file-upload";
 
 interface ImageGalleryProps {
   images: string[];
@@ -11,7 +12,13 @@ interface ImageGalleryProps {
   label?: string;
 }
 
-export function ImageGallery({ images, onChange, folder = "needs", maxImages = 5, label }: ImageGalleryProps) {
+export function ImageGallery({
+  images,
+  onChange,
+  folder = "needs",
+  maxImages = 5,
+  label,
+}: ImageGalleryProps) {
   function addImage(url: string) {
     if (images.length < maxImages) {
       onChange([...images, url]);
@@ -24,11 +31,17 @@ export function ImageGallery({ images, onChange, folder = "needs", maxImages = 5
 
   return (
     <div className="space-y-3">
-      {label && <p className="text-xs font-medium uppercase tracking-wide text-[#b8a078]">{label}</p>}
+      {label && (
+        <p className="text-xs font-medium uppercase tracking-wide text-[#b8a078]">{label}</p>
+      )}
       <div className="flex flex-wrap gap-3">
         {images.map((url, i) => (
           <div key={i} className="relative">
-            <img src={url} alt="" className="h-20 w-20 object-cover border border-[#2a2420] rounded-md" />
+            <img
+              src={url}
+              alt=""
+              className="h-20 w-20 object-cover border border-[#2a2420] rounded-md"
+            />
             <button
               type="button"
               onClick={() => removeImage(i)}
@@ -39,7 +52,9 @@ export function ImageGallery({ images, onChange, folder = "needs", maxImages = 5
           </div>
         ))}
         {images.length < maxImages && (
-          <FileUpload folder={folder} onUpload={addImage}>add_image</FileUpload>
+          <FileUpload folder={folder} onUpload={addImage}>
+            add_image
+          </FileUpload>
         )}
       </div>
       {images.length > 0 && (

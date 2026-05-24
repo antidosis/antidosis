@@ -1,4 +1,4 @@
-import useSWR, { SWRConfiguration } from "swr";
+import useSWR, { type SWRConfiguration } from "swr";
 
 export const fetcher = async (url: string) => {
   const res = await fetch(url);

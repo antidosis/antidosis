@@ -1,12 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Avatar } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { EmptyState } from "@/components/ui/empty-state";
-import { createClient } from "@/lib/supabase/client";
 
 import {
   Loader2,
@@ -25,6 +21,12 @@ import {
   ChevronUp,
   Smartphone,
 } from "lucide-react";
+
+import { Avatar } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { createClient } from "@/lib/supabase/client";
 
 type Stats = {
   totalUsers: number;
@@ -86,7 +88,9 @@ export default function AdminPage() {
 
   useEffect(() => {
     async function init() {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) {
         router.push("/login");
         return;
@@ -185,7 +189,12 @@ export default function AdminPage() {
           <StatCard icon={Briefcase} label="needs" value={stats.totalNeeds} />
           <StatCard icon={FileText} label="contracts" value={stats.totalContracts} />
           <StatCard icon={Award} label="credentials" value={stats.totalCredentials} />
-          <StatCard icon={Clock} label="pending verifications" value={stats.pendingVerifications} accent />
+          <StatCard
+            icon={Clock}
+            label="pending verifications"
+            value={stats.pendingVerifications}
+            accent
+          />
           <StatCard icon={Briefcase} label="needs (7d)" value={stats.recentNeeds} />
           <StatCard icon={FileText} label="contracts (7d)" value={stats.recentContracts} />
         </div>
@@ -211,10 +220,7 @@ export default function AdminPage() {
               const isExpanded = expandedId === cred.id;
               const isRejecting = rejectingId === cred.id;
               return (
-                <div
-                  key={cred.id}
-                  className="vessel p-5 hover:bg-[#1a1714] transition-colors"
-                >
+                <div key={cred.id} className="vessel p-5 hover:bg-[#1a1714] transition-colors">
                   {/* Header row */}
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
@@ -293,7 +299,11 @@ export default function AdminPage() {
                           onClick={() => setExpandedId(isExpanded ? null : cred.id)}
                           className="inline-flex items-center gap-1 text-xs text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors"
                         >
-                          {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                          {isExpanded ? (
+                            <ChevronUp className="h-3 w-3" />
+                          ) : (
+                            <ChevronDown className="h-3 w-3" />
+                          )}
                           {isExpanded ? "less" : "more details"}
                         </button>
                       </div>
@@ -445,11 +455,25 @@ export default function AdminPage() {
                     </div>
                     <div className="text-xs text-[#7a6b5a] space-y-1">
                       <p>
-                        Requested: {new Date(c.cancelRequestedAt).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                        Requested:{" "}
+                        {new Date(c.cancelRequestedAt).toLocaleDateString("en-AU", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </p>
                       {c.cancelEscalatedAt && (
                         <p className="text-amber-500">
-                          Escalated: {new Date(c.cancelEscalatedAt).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                          Escalated:{" "}
+                          {new Date(c.cancelEscalatedAt).toLocaleDateString("en-AU", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
                         </p>
                       )}
                       {c.cancelReason && <p>Reason: {c.cancelReason}</p>}
@@ -497,7 +521,9 @@ function StatCard({
         <Icon className={`h-4 w-4 ${accent ? "text-[#f5a623]" : "text-[#7a6b5a]"}`} />
         <span className="text-xs text-[#7a6b5a] uppercase tracking-wide">{label}</span>
       </div>
-      <p className={`text-2xl font-bold ${accent ? "text-[#f5a623]" : "text-[#e8d5a3]"}`}>{value}</p>
+      <p className={`text-2xl font-bold ${accent ? "text-[#f5a623]" : "text-[#e8d5a3]"}`}>
+        {value}
+      </p>
     </div>
   );
 }

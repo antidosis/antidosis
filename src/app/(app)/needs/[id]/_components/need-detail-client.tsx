@@ -1,23 +1,50 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
+import {
+  MapPin,
+  ArrowLeft,
+  CircleDollarSign,
+  Wrench,
+  Package,
+  Star,
+  Shield,
+  Briefcase,
+  Globe,
+  Check,
+  X,
+  Camera,
+  Send,
+  Pencil,
+  Trash2,
+  Calendar,
+  Clock,
+  MessageSquare,
+  FileText,
+  ExternalLink,
+  Handshake,
+  ChevronDown,
+  ChevronUp,
+  Lock,
+  Award,
+  FileCheck,
+  Loader2,
+  Info,
+} from "lucide-react";
+
+import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Avatar } from "@/components/ui/avatar";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { createClient } from "@/lib/supabase/client";
-import { useToast } from "@/components/ui/toast";
-import {
-  MapPin, ArrowLeft, CircleDollarSign, Wrench, Package, Star,
-  Shield, Briefcase, Globe, Check, X, Camera, Send, Pencil,
-  Trash2, Calendar, Clock, MessageSquare, FileText, ExternalLink,
-  Handshake, ChevronDown, ChevronUp, Lock, Award, FileCheck, Loader2, Info,
-} from "lucide-react";
 import { CopyLinkButton } from "@/components/ui/copy-link";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/toast";
 import { getExchangeMode } from "@/lib/categories";
+import { createClient } from "@/lib/supabase/client";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -161,7 +188,9 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
   /* -- init -- */
   useEffect(() => {
     async function init() {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (user) {
         try {
           const res = await fetch("/api/v1/profiles/me");
@@ -169,7 +198,9 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
             const profile = await res.json();
             setProfileId(profile.id);
           }
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
       }
       await Promise.all([fetchNeed(), fetchMessages()]);
     }
@@ -196,26 +227,31 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
         () => fetchMessages()
       )
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      supabase.removeChannel(channel);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [needId]);
 
   /* -- lazy credentials -- */
-  const fetchCredentials = useCallback(async (posterId: string) => {
-    if (credentials.length > 0 || credLoading) return;
-    setCredLoading(true);
-    try {
-      const res = await fetch(`/api/v1/profiles/${posterId}/credentials`);
-      if (res.ok) {
-        const data = await res.json();
-        setCredentials(data.credentials ?? []);
+  const fetchCredentials = useCallback(
+    async (posterId: string) => {
+      if (credentials.length > 0 || credLoading) return;
+      setCredLoading(true);
+      try {
+        const res = await fetch(`/api/v1/profiles/${posterId}/credentials`);
+        if (res.ok) {
+          const data = await res.json();
+          setCredentials(data.credentials ?? []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch credentials:", err);
+      } finally {
+        setCredLoading(false);
       }
-    } catch (err) {
-      console.error("Failed to fetch credentials:", err);
-    } finally {
-      setCredLoading(false);
-    }
-  }, [credentials.length, credLoading]);
+    },
+    [credentials.length, credLoading]
+  );
 
   useEffect(() => {
     if (profileExpanded && need && profileId) {
@@ -387,7 +423,12 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
     });
     if (res.ok) {
       const data = await res.json();
-      toast(data.bothComplete ? "Deal completed! Leave a review." : "Marked as complete. Waiting for the other party.", "success");
+      toast(
+        data.bothComplete
+          ? "Deal completed! Leave a review."
+          : "Marked as complete. Waiting for the other party.",
+        "success"
+      );
       fetchNeed();
     } else {
       const data = await res.json().catch(() => ({ error: "Failed to mark complete" }));
@@ -463,9 +504,8 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
     );
 
   const descTooLong = need.description.length > 500;
-  const displayDesc = descTooLong && !descExpanded
-    ? need.description.slice(0, 500) + "..."
-    : need.description;
+  const displayDesc =
+    descTooLong && !descExpanded ? need.description.slice(0, 500) + "..." : need.description;
 
   return (
     <>
@@ -479,21 +519,22 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
             <ArrowLeft className="mr-1.5 h-3.5 w-3.5" />
             browse needs
           </Link>
-          <CopyLinkButton url={`${typeof window !== "undefined" ? window.location.origin : ""}/needs/${need.id}`} label="Copy link" />
+          <CopyLinkButton
+            url={`${typeof window !== "undefined" ? window.location.origin : ""}/needs/${need.id}`}
+            label="Copy link"
+          />
         </div>
 
         <div className="flex flex-wrap items-start gap-3 mb-3">
-          <h1 className="heading-display text-2xl md:text-3xl text-[#e8d5a3]">
-            {need.title}
-          </h1>
+          <h1 className="heading-display text-2xl md:text-3xl text-[#e8d5a3]">{need.title}</h1>
           {need.status !== "open" && (
             <Badge
               variant={
                 need.status === "completed"
                   ? "success"
                   : need.status === "cancelled"
-                  ? "destructive"
-                  : "warning"
+                    ? "destructive"
+                    : "warning"
               }
               className="mt-1.5 capitalize"
             >
@@ -518,15 +559,18 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
               {s.name}
             </span>
           ))}
-          {need.needCategory && (() => {
-            const mode = getExchangeMode(need.needCategory);
-            if (!mode) return null;
-            return (
-              <span className={`px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border rounded flex items-center gap-1 ${mode.twText} ${mode.twBorder} ${mode.twBg}`}>
-                {mode.label}
-              </span>
-            );
-          })()}
+          {need.needCategory &&
+            (() => {
+              const mode = getExchangeMode(need.needCategory);
+              if (!mode) return null;
+              return (
+                <span
+                  className={`px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border rounded flex items-center gap-1 ${mode.twText} ${mode.twBorder} ${mode.twBg}`}
+                >
+                  {mode.label}
+                </span>
+              );
+            })()}
           <span className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-[#2a2420] text-[#7a6b5a] bg-[#1a1714] rounded flex items-center gap-1">
             <MapPin className="h-3 w-3" /> local
           </span>
@@ -566,7 +610,9 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
         <div className="bg-[#00e5ff]/10 border border-[#00e5ff]/30 p-3 mb-6">
           <div className="flex items-start gap-2">
             <Info className="h-3.5 w-3.5 text-[#00e5ff] mt-0.5 flex-shrink-0" />
-            <p className="text-xs text-[#7a6b5a]">Central Coast NSW trial region — all needs are local during the pilot.</p>
+            <p className="text-xs text-[#7a6b5a]">
+              Central Coast NSW trial region — all needs are local during the pilot.
+            </p>
           </div>
         </div>
 
@@ -575,9 +621,7 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-2">
               <Camera className="h-3.5 w-3.5 text-[#7a6b5a]" />
-              <span className="text-xs text-[#7a6b5a] uppercase tracking-wider">
-                need images
-              </span>
+              <span className="text-xs text-[#7a6b5a] uppercase tracking-wider">need images</span>
             </div>
             <div className="flex gap-2 overflow-x-auto pb-2 snap-x">
               {need.images.map((url, i) => (
@@ -601,9 +645,7 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
             </span>
           </div>
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <p className="text-sm font-medium text-[#e8d5a3]">
-              {need.offerDescription}
-            </p>
+            <p className="text-sm font-medium text-[#e8d5a3]">{need.offerDescription}</p>
             {need.offerValue && (
               <span className="text-xs text-[#b8a078]">
                 est. ${need.offerValue.toLocaleString()}
@@ -628,21 +670,17 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
         <div className="vessel p-4 mb-6">
           {/* Collapsed header */}
           <div className="flex items-center gap-3">
-            <Avatar
-              src={need.poster.avatarUrl}
-              name={need.poster.fullName}
-              size="md"
-            />
+            <Avatar src={need.poster.avatarUrl} name={need.poster.fullName} size="md" />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-base font-medium text-[#e8d5a3]">
                   {need.poster.fullName || "anonymous"}
                 </span>
-                {need.poster.isVerified && (
-                  <Shield className="h-4 w-4 text-[#00e676]" />
-                )}
+                {need.poster.isVerified && <Shield className="h-4 w-4 text-[#00e676]" />}
                 {profileId && need.poster.isPro && (
-                  <Badge variant="default" className="text-[10px]">pro</Badge>
+                  <Badge variant="default" className="text-[10px]">
+                    pro
+                  </Badge>
                 )}
               </div>
               {profileId ? (
@@ -651,9 +689,7 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                     <span className="flex items-center gap-1">
                       <Star className="h-3 w-3 text-[#f5a623]" />
                       {need.poster.ratingAvg.toFixed(1)}
-                      <span className="text-[#7a6b5a]/60">
-                        ({need.poster.ratingCount})
-                      </span>
+                      <span className="text-[#7a6b5a]/60">({need.poster.ratingCount})</span>
                     </span>
                   )}
                   {need.poster.jobsCompleted > 0 && (
@@ -670,9 +706,7 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                   )}
                 </div>
               ) : (
-                <p className="text-xs text-[#7a6b5a] mt-0.5">
-                  log in to see full profile
-                </p>
+                <p className="text-xs text-[#7a6b5a] mt-0.5">log in to see full profile</p>
               )}
             </div>
             {profileId && (
@@ -695,16 +729,12 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
           {profileId && profileExpanded && (
             <div className="mt-4 pt-4 border-t border-[#2a2420] space-y-4">
               {need.poster.bio && (
-                <p className="text-sm text-[#b8a078] leading-relaxed">
-                  {need.poster.bio}
-                </p>
+                <p className="text-sm text-[#b8a078] leading-relaxed">{need.poster.bio}</p>
               )}
 
               {need.poster.skills.length > 0 && (
                 <div>
-                  <p className="text-[10px] text-[#7a6b5a] uppercase tracking-wider mb-2">
-                    skills
-                  </p>
+                  <p className="text-[10px] text-[#7a6b5a] uppercase tracking-wider mb-2">skills</p>
                   <div className="flex flex-wrap gap-1.5">
                     {need.poster.skills.map((s) => (
                       <span
@@ -712,9 +742,7 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                         className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide border border-[#2a2420] text-[#7a6b5a] bg-[#1a1714] rounded"
                       >
                         {s.name}
-                        {s.isVerified && (
-                          <span className="text-[#00e676] ml-0.5">✓</span>
-                        )}
+                        {s.isVerified && <span className="text-[#00e676] ml-0.5">✓</span>}
                       </span>
                     ))}
                   </div>
@@ -723,9 +751,7 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
 
               {need.poster.socialLinks.length > 0 && (
                 <div>
-                  <p className="text-[10px] text-[#7a6b5a] uppercase tracking-wider mb-2">
-                    links
-                  </p>
+                  <p className="text-[10px] text-[#7a6b5a] uppercase tracking-wider mb-2">links</p>
                   <div className="flex flex-wrap gap-3">
                     {need.poster.socialLinks.map((link) => (
                       <a
@@ -754,9 +780,7 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                     loading...
                   </div>
                 ) : credentials.length === 0 ? (
-                  <p className="text-xs text-[#7a6b5a]">
-                    no public credentials
-                  </p>
+                  <p className="text-xs text-[#7a6b5a]">no public credentials</p>
                 ) : (
                   <div className="space-y-2">
                     {credentials.map((cred) => (
@@ -766,25 +790,22 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                       >
                         <div className="flex items-center gap-2 flex-wrap">
                           <Award className="h-3.5 w-3.5 text-[#f5a623]" />
-                          <span className="text-sm font-medium text-[#e8d5a3]">
-                            {cred.title}
-                          </span>
+                          <span className="text-sm font-medium text-[#e8d5a3]">{cred.title}</span>
                           <span className="px-1.5 py-0 text-[9px] uppercase tracking-wide border border-[#2a2420] text-[#7a6b5a]">
                             {cred.type}
                           </span>
-                          {cred.isVerified && (
-                            <Shield className="h-3 w-3 text-[#00e676]" />
-                          )}
+                          {cred.isVerified && <Shield className="h-3 w-3 text-[#00e676]" />}
                         </div>
                         <div className="text-xs text-[#7a6b5a] mt-1 space-y-0.5">
                           {cred.issuedBy && <p>issued by: {cred.issuedBy}</p>}
                           {cred.expiresAt && (
                             <p>
                               expires:{" "}
-                              {new Date(cred.expiresAt).toLocaleDateString(
-                                "en-AU",
-                                { day: "numeric", month: "short", year: "numeric" }
-                              )}
+                              {new Date(cred.expiresAt).toLocaleDateString("en-AU", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                              })}
                             </p>
                           )}
                           {cred.isVerified && (
@@ -815,9 +836,7 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
             <div className="mt-3 bg-[#1a1714] border border-[#2a2420] p-3 rounded">
               <div className="flex items-center gap-2 text-[#7a6b5a]">
                 <Lock className="h-3.5 w-3.5" />
-                <p className="text-xs">
-                  profile details are only visible to registered users
-                </p>
+                <p className="text-xs">profile details are only visible to registered users</p>
               </div>
               <p className="text-xs text-[#b8a078] mt-1.5">
                 <Button
@@ -850,9 +869,7 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                 className="bg-[#00e676]/5 border-l-2 border-[#00e676] p-4 flex items-center justify-between"
               >
                 <div>
-                  <p className="text-sm font-medium text-[#00e676]">
-                    contract formed
-                  </p>
+                  <p className="text-sm font-medium text-[#00e676]">contract formed</p>
                   <Badge variant="success" className="mt-1 capitalize text-[10px]">
                     {c.status}
                   </Badge>
@@ -881,21 +898,13 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                       <Handshake className="h-4 w-4 mr-1.5" />
                       {showInterestForm ? "Cancel" : "Express Interest"}
                     </Button>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={scrollToMessages}
-                    >
+                    <Button variant="secondary" size="sm" onClick={scrollToMessages}>
                       <MessageSquare className="h-4 w-4 mr-1.5" />
                       Message
                     </Button>
                   </>
                 ) : (
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onClick={() => handleAuthRequired(false)}
-                  >
+                  <Button variant="default" size="sm" onClick={() => handleAuthRequired(false)}>
                     <Lock className="h-4 w-4 mr-1.5" />
                     Log in to Interact
                   </Button>
@@ -907,8 +916,8 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
             {canExpressInterest && showInterestForm && profileId && !hasOffered && (
               <div className="vessel p-4">
                 <p className="text-xs text-[#7a6b5a] mb-3">
-                  tell the poster why you are a good fit. you can also message
-                  them below to ask questions first.
+                  tell the poster why you are a good fit. you can also message them below to ask
+                  questions first.
                 </p>
                 <form onSubmit={submitOffer} className="space-y-3">
                   <div>
@@ -924,12 +933,7 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                       {offerMessage.length}/1000
                     </p>
                   </div>
-                  <Button
-                    type="submit"
-                    variant="default"
-                    size="sm"
-                    disabled={submittingOffer}
-                  >
+                  <Button type="submit" variant="default" size="sm" disabled={submittingOffer}>
                     {submittingOffer ? (
                       <>
                         <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
@@ -950,8 +954,8 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                   myAcceptance.status === "accepted"
                     ? "bg-[#00e676]/5 border-[#00e676]/30"
                     : myAcceptance.status === "declined"
-                    ? "bg-[#ff5252]/5 border-[#ff5252]/30"
-                    : "bg-[#1a1714] border-[#2a2420]"
+                      ? "bg-[#ff5252]/5 border-[#ff5252]/30"
+                      : "bg-[#1a1714] border-[#2a2420]"
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -961,34 +965,31 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                   {myAcceptance.status === "accepted" && (
                     <Check className="h-4 w-4 text-[#00e676]" />
                   )}
-                  {myAcceptance.status === "declined" && (
-                    <X className="h-4 w-4 text-[#ff5252]" />
-                  )}
+                  {myAcceptance.status === "declined" && <X className="h-4 w-4 text-[#ff5252]" />}
                   <p
                     className={`text-sm ${
                       myAcceptance.status === "accepted"
                         ? "text-[#00e676]"
                         : myAcceptance.status === "declined"
-                        ? "text-[#ff5252]"
-                        : "text-[#7a6b5a]"
+                          ? "text-[#ff5252]"
+                          : "text-[#7a6b5a]"
                     }`}
                   >
-                    {myAcceptance.status === "pending" &&
-                      "your interest is pending review"}
+                    {myAcceptance.status === "pending" && "your interest is pending review"}
                     {myAcceptance.status === "accepted" &&
                       (need.requiresContract
                         ? "poster accepted — ready to form contract"
                         : need.status === "completed"
                           ? "deal completed"
-                          : myAcceptance.posterMarkedComplete && !myAcceptance.fulfillerMarkedComplete
+                          : myAcceptance.posterMarkedComplete &&
+                              !myAcceptance.fulfillerMarkedComplete
                             ? "poster marked complete — waiting for you"
-                            : !myAcceptance.posterMarkedComplete && myAcceptance.fulfillerMarkedComplete
+                            : !myAcceptance.posterMarkedComplete &&
+                                myAcceptance.fulfillerMarkedComplete
                               ? "you marked complete — waiting for poster"
                               : "poster accepted — deal confirmed")}
-                    {myAcceptance.status === "declined" &&
-                      "your interest was declined"}
-                    {myAcceptance.status === "completed" &&
-                      "deal completed — thank you!"}
+                    {myAcceptance.status === "declined" && "your interest was declined"}
+                    {myAcceptance.status === "completed" && "deal completed — thank you!"}
                   </p>
                 </div>
                 {myAcceptance.message && (
@@ -1000,35 +1001,37 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                   </div>
                 )}
                 {/* Free-form mark complete — non-poster */}
-                {myAcceptance.status === "accepted" && !need.requiresContract && need.status === "active" && (
-                  <div className="mt-3">
-                    {!myAcceptance.fulfillerMarkedComplete ? (
-                      <Button
-                        size="sm"
-                        variant="default"
-                        className="h-7 text-xs"
-                        onClick={() => handleMarkComplete(myAcceptance.id)}
-                        disabled={markingComplete}
-                      >
-                        {markingComplete ? (
-                          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                        ) : (
-                          <Check className="h-3 w-3 mr-1" />
-                        )}
-                        Mark as complete
-                      </Button>
-                    ) : (
-                      <span className="text-xs text-[#00e676] flex items-center gap-1">
-                        <Check className="h-3 w-3" /> you marked complete
-                      </span>
-                    )}
-                    {myAcceptance.posterMarkedComplete && (
-                      <span className="text-xs text-[#00e676] flex items-center gap-1 ml-3">
-                        <Check className="h-3 w-3" /> poster marked complete
-                      </span>
-                    )}
-                  </div>
-                )}
+                {myAcceptance.status === "accepted" &&
+                  !need.requiresContract &&
+                  need.status === "active" && (
+                    <div className="mt-3">
+                      {!myAcceptance.fulfillerMarkedComplete ? (
+                        <Button
+                          size="sm"
+                          variant="default"
+                          className="h-7 text-xs"
+                          onClick={() => handleMarkComplete(myAcceptance.id)}
+                          disabled={markingComplete}
+                        >
+                          {markingComplete ? (
+                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                          ) : (
+                            <Check className="h-3 w-3 mr-1" />
+                          )}
+                          Mark as complete
+                        </Button>
+                      ) : (
+                        <span className="text-xs text-[#00e676] flex items-center gap-1">
+                          <Check className="h-3 w-3" /> you marked complete
+                        </span>
+                      )}
+                      {myAcceptance.posterMarkedComplete && (
+                        <span className="text-xs text-[#00e676] flex items-center gap-1 ml-3">
+                          <Check className="h-3 w-3" /> poster marked complete
+                        </span>
+                      )}
+                    </div>
+                  )}
                 {/* Free-form review — non-poster */}
                 {myAcceptance.status === "completed" && !need.requiresContract && (
                   <div className="mt-3">
@@ -1114,7 +1117,11 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                 <div className="flex items-center gap-2 mb-4">
                   <MessageSquare className="h-3.5 w-3.5 text-[#7a6b5a]" />
                   <span className="text-xs text-[#7a6b5a] uppercase tracking-wider">
-                    {isPoster && activeMessageThread ? "private messages" : hasOffered ? "messages" : "public messages"}
+                    {isPoster && activeMessageThread
+                      ? "private messages"
+                      : hasOffered
+                        ? "messages"
+                        : "public messages"}
                   </span>
                 </div>
 
@@ -1156,8 +1163,7 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                       ? "Public — anyone viewing this need can see these messages"
                       : hasOffered
                         ? "Private thread — only you and the poster can see these messages"
-                        : "Only the poster can see your messages — other visitors cannot"
-                    }
+                        : "Only the poster can see your messages — other visitors cannot"}
                   </div>
                 )}
 
@@ -1170,11 +1176,12 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
 
                 <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
                   {(() => {
-                    const filtered = isPoster && activeMessageThread
-                      ? messages.filter((m) => m.acceptanceId === activeMessageThread)
-                      : isPoster
-                        ? messages.filter((m) => m.acceptanceId === null)
-                        : messages;
+                    const filtered =
+                      isPoster && activeMessageThread
+                        ? messages.filter((m) => m.acceptanceId === activeMessageThread)
+                        : isPoster
+                          ? messages.filter((m) => m.acceptanceId === null)
+                          : messages;
                     return (
                       <>
                         {filtered.length === 0 && (
@@ -1226,10 +1233,7 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                   <div ref={messagesEndRef} />
                 </div>
 
-                <form
-                  onSubmit={sendMessage}
-                  className="mt-3 flex gap-2 items-center"
-                >
+                <form onSubmit={sendMessage} className="mt-3 flex gap-2 items-center">
                   <Input
                     placeholder={
                       isPoster && activeMessageThread
@@ -1242,13 +1246,17 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                     }
                     value={messageInput}
                     onChange={(e) => setMessageInput(e.target.value)}
-                    disabled={sendingMessage || (!isPoster && !hasOffered && need.status !== "open")}
+                    disabled={
+                      sendingMessage || (!isPoster && !hasOffered && need.status !== "open")
+                    }
                     className="h-9 text-sm"
                   />
                   <Button
                     type="submit"
                     size="icon"
-                    disabled={sendingMessage || (!isPoster && !hasOffered && need.status !== "open")}
+                    disabled={
+                      sendingMessage || (!isPoster && !hasOffered && need.status !== "open")
+                    }
                     className="h-9 w-9 shrink-0"
                   >
                     <Send className="h-4 w-4" />
@@ -1257,9 +1265,7 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
               </div>
             ) : (
               <div className="bg-[#f5a623]/5 border border-[#f5a623]/20 p-4 rounded">
-                <p className="text-sm text-[#e8d5a3] mb-2">
-                  want to message the poster?
-                </p>
+                <p className="text-sm text-[#e8d5a3] mb-2">want to message the poster?</p>
                 <p className="text-xs text-[#b8a078]">
                   <Button
                     variant="link"
@@ -1327,14 +1333,13 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-start gap-2.5 min-w-0">
-                          <Avatar
-                            src={a.user.avatarUrl}
-                            name={a.user.fullName}
-                            size="sm"
-                          />
+                          <Avatar src={a.user.avatarUrl} name={a.user.fullName} size="sm" />
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5">
-                              <Link href={`/profile/${a.user.id}`} className="text-sm font-medium text-[#e8d5a3] truncate hover:underline">
+                              <Link
+                                href={`/profile/${a.user.id}`}
+                                className="text-sm font-medium text-[#e8d5a3] truncate hover:underline"
+                              >
                                 {a.user.fullName || "anonymous"}
                               </Link>
                               {a.user.isVerified && (
@@ -1345,25 +1350,33 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                             </div>
                             <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-[#7a6b5a]">
                               {a.user.ratingAvg > 0 && (
-                                <span>{a.user.ratingAvg.toFixed(1)} ★ ({a.user.ratingCount})</span>
+                                <span>
+                                  {a.user.ratingAvg.toFixed(1)} ★ ({a.user.ratingCount})
+                                </span>
                               )}
                               {a.user.jobsCompleted > 0 && (
                                 <span>{a.user.jobsCompleted} jobs done</span>
                               )}
-                              {a.user.locationName && (
-                                <span>{a.user.locationName}</span>
-                              )}
+                              {a.user.locationName && <span>{a.user.locationName}</span>}
                             </div>
                             {a.user.bio && (
-                              <p className="text-[10px] text-[#b8a078] mt-0.5 line-clamp-1">{a.user.bio}</p>
+                              <p className="text-[10px] text-[#b8a078] mt-0.5 line-clamp-1">
+                                {a.user.bio}
+                              </p>
                             )}
                             <div className="flex flex-wrap gap-1 mt-1">
                               {a.user.skills.slice(0, 4).map((s) => (
-                                <span key={s.id} className="px-1.5 py-0.5 text-[9px] uppercase tracking-wider border border-[#2a2420] text-[#7a6b5a]">{s.name}</span>
+                                <span
+                                  key={s.id}
+                                  className="px-1.5 py-0.5 text-[9px] uppercase tracking-wider border border-[#2a2420] text-[#7a6b5a]"
+                                >
+                                  {s.name}
+                                </span>
                               ))}
                               {a.user.credentials.length > 0 && (
                                 <span className="px-1.5 py-0.5 text-[9px] uppercase tracking-wider border border-[#00e676]/30 text-[#00e676]">
-                                  {a.user.credentials.filter((c) => c.isVerified).length}/{a.user.credentials.length} credentials
+                                  {a.user.credentials.filter((c) => c.isVerified).length}/
+                                  {a.user.credentials.length} credentials
                                 </span>
                               )}
                             </div>
@@ -1376,9 +1389,7 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                                 size="sm"
                                 variant="default"
                                 className="h-7 text-xs px-2"
-                                onClick={() =>
-                                  handleAcceptance(a.id, "accepted")
-                                }
+                                onClick={() => handleAcceptance(a.id, "accepted")}
                               >
                                 <Check className="h-3 w-3 mr-1" />
                                 accept
@@ -1387,9 +1398,7 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                                 size="sm"
                                 variant="secondary"
                                 className="h-7 text-xs px-2"
-                                onClick={() =>
-                                  handleAcceptance(a.id, "declined")
-                                }
+                                onClick={() => handleAcceptance(a.id, "declined")}
                               >
                                 <X className="h-3 w-3 mr-1" />
                                 decline
@@ -1412,54 +1421,56 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                                 disabled={confirmingContract === a.id}
                               >
                                 <FileText className="h-3 w-3 mr-1" />
-                                {confirmingContract === a.id
-                                  ? "..."
-                                  : "contract"}
+                                {confirmingContract === a.id ? "..." : "contract"}
                               </Button>
                               <Button
                                 size="sm"
                                 variant="secondary"
                                 className="h-7 text-xs px-2"
-                                onClick={() =>
-                                  handleAcceptance(a.id, "declined")
-                                }
+                                onClick={() => handleAcceptance(a.id, "declined")}
                               >
                                 <X className="h-3 w-3 mr-1" />
                                 decline
                               </Button>
                             </>
                           )}
-                          {a.status === "accepted" && !need.requiresContract && need.status === "active" && (
-                            <div className="flex flex-col gap-1.5 items-end">
-                              <span className="text-xs text-[#00e676] flex items-center gap-1">
-                                <Check className="h-3 w-3" />
-                                deal confirmed
-                              </span>
-                              <div className="flex items-center gap-1.5">
-                                {!a.posterMarkedComplete ? (
-                                  <Button
-                                    size="sm"
-                                    variant="default"
-                                    className="h-6 text-[10px] px-2"
-                                    onClick={() => handleMarkComplete(a.id)}
-                                    disabled={markingComplete}
-                                  >
-                                    {markingComplete ? (
-                                      <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                                    ) : (
-                                      <Check className="h-3 w-3 mr-1" />
-                                    )}
-                                    Mark complete
-                                  </Button>
-                                ) : (
-                                  <span className="text-[10px] text-[#00e676]">you marked complete</span>
-                                )}
-                                {a.fulfillerMarkedComplete && (
-                                  <span className="text-[10px] text-[#00e676]">fulfiller marked complete</span>
-                                )}
+                          {a.status === "accepted" &&
+                            !need.requiresContract &&
+                            need.status === "active" && (
+                              <div className="flex flex-col gap-1.5 items-end">
+                                <span className="text-xs text-[#00e676] flex items-center gap-1">
+                                  <Check className="h-3 w-3" />
+                                  deal confirmed
+                                </span>
+                                <div className="flex items-center gap-1.5">
+                                  {!a.posterMarkedComplete ? (
+                                    <Button
+                                      size="sm"
+                                      variant="default"
+                                      className="h-6 text-[10px] px-2"
+                                      onClick={() => handleMarkComplete(a.id)}
+                                      disabled={markingComplete}
+                                    >
+                                      {markingComplete ? (
+                                        <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                      ) : (
+                                        <Check className="h-3 w-3 mr-1" />
+                                      )}
+                                      Mark complete
+                                    </Button>
+                                  ) : (
+                                    <span className="text-[10px] text-[#00e676]">
+                                      you marked complete
+                                    </span>
+                                  )}
+                                  {a.fulfillerMarkedComplete && (
+                                    <span className="text-[10px] text-[#00e676]">
+                                      fulfiller marked complete
+                                    </span>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            )}
                           {a.status === "completed" && !need.requiresContract && (
                             <div className="flex flex-col gap-1.5 items-end">
                               <span className="text-xs text-[#00e676] flex items-center gap-1">
@@ -1493,7 +1504,11 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                             variant="ghost"
                             className="h-7 text-xs px-2 text-[#ff5252] hover:text-[#ff5252]"
                             onClick={() => {
-                              if (window.confirm(`Remove ${a.user.fullName || "this user"}? They won't be able to express interest again.`)) {
+                              if (
+                                window.confirm(
+                                  `Remove ${a.user.fullName || "this user"}? They won't be able to express interest again.`
+                                )
+                              ) {
                                 handleAcceptance(a.id, "removed");
                               }
                             }}
@@ -1511,9 +1526,13 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                       {/* Poster review form inline */}
                       {posterReviewAcceptanceId === a.id && (
                         <div className="mt-3 bg-[#1a1714] border border-[#2a2420] p-3 rounded space-y-3">
-                          <p className="text-xs text-[#e8d5a3] font-medium">Leave a review for {a.user.fullName || "this fulfiller"}</p>
+                          <p className="text-xs text-[#e8d5a3] font-medium">
+                            Leave a review for {a.user.fullName || "this fulfiller"}
+                          </p>
                           <div>
-                            <label className="text-xs text-[#7a6b5a] block mb-1">Rating (1–10)</label>
+                            <label className="text-xs text-[#7a6b5a] block mb-1">
+                              Rating (1–10)
+                            </label>
                             <input
                               type="range"
                               min={1}
@@ -1589,11 +1608,7 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
                 : `Form a contract with ${confirmDialog.userName}?`}
             </p>
             <div className="flex gap-2 justify-end">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setConfirmDialog(null)}
-              >
+              <Button variant="secondary" size="sm" onClick={() => setConfirmDialog(null)}>
                 Cancel
               </Button>
               <Button size="sm" variant="default" onClick={executeConfirm}>

@@ -1,14 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
+
 import Link from "next/link";
+
+import { Star, MapPin, Briefcase, Shield, Phone, Award, Search, X, Loader2 } from "lucide-react";
+
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
 import { useApi } from "@/lib/swr-config";
-import { Star, MapPin, Briefcase, Shield, Phone, Award, Search, X, Loader2 } from "lucide-react";
 
 interface ProProfile {
   id: string;
@@ -51,8 +54,7 @@ export default function ProsDirectoryPage() {
           pro <span className="text-[#f5a623]">directory</span>
         </h1>
         <p className="text-sm text-[#7a6b5a] max-w-lg mt-4">
-          trusted traders who have committed to the pro standard. browse,
-          connect, trade.
+          trusted traders who have committed to the pro standard. browse, connect, trade.
         </p>
       </div>
 
@@ -80,23 +82,33 @@ export default function ProsDirectoryPage() {
       </div>
 
       {isLoading && !pros ? (
-        <div className="py-12 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto text-[#7a6b5a]" /></div>
+        <div className="py-12 text-center">
+          <Loader2 className="h-6 w-6 animate-spin mx-auto text-[#7a6b5a]" />
+        </div>
       ) : error ? (
         <div className="border border-[#ff5252]/20 bg-[#ff5252]/5 p-6 mb-8 text-center">
-          <p className="text-sm text-[#ff5252]">Failed to load directory. Please try again later.</p>
+          <p className="text-sm text-[#ff5252]">
+            Failed to load directory. Please try again later.
+          </p>
         </div>
       ) : !pros || pros.length === 0 ? (
         <EmptyState
           title={query ? "No pros match your search" : "No pros in the directory yet."}
-          description={query ? "try a different search term." : "Claim pro and opt-in to public sharing to appear here."}
-          action={!query ? (
-            <Link
-              href="/pro"
-              className="inline-flex items-center gap-2 text-sm text-[#f5a623] hover:underline"
-            >
-              go to pro page →
-            </Link>
-          ) : undefined}
+          description={
+            query
+              ? "try a different search term."
+              : "Claim pro and opt-in to public sharing to appear here."
+          }
+          action={
+            !query ? (
+              <Link
+                href="/pro"
+                className="inline-flex items-center gap-2 text-sm text-[#f5a623] hover:underline"
+              >
+                go to pro page →
+              </Link>
+            ) : undefined
+          }
         />
       ) : (
         <div className="space-y-4">
@@ -118,9 +130,7 @@ export default function ProsDirectoryPage() {
                     <h3 className="text-base font-bold text-[#e8d5a3]">
                       {pro.fullName || "anonymous"}
                     </h3>
-                    {pro.isVerified && (
-                      <Shield className="h-4 w-4 text-[#00e676]" />
-                    )}
+                    {pro.isVerified && <Shield className="h-4 w-4 text-[#00e676]" />}
                     <Badge variant="default">pro</Badge>
                   </div>
 
@@ -157,11 +167,7 @@ export default function ProsDirectoryPage() {
                     )}
                   </div>
 
-                  {pro.bio && (
-                    <p className="text-sm text-[#7a6b5a] mt-3 line-clamp-2">
-                      {pro.bio}
-                    </p>
-                  )}
+                  {pro.bio && <p className="text-sm text-[#7a6b5a] mt-3 line-clamp-2">{pro.bio}</p>}
 
                   {pro.skills.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-3">
@@ -182,9 +188,7 @@ export default function ProsDirectoryPage() {
         </div>
       )}
 
-      <p className="text-center text-xs text-[#7a6b5a]/50 py-12">
-        sorted by rating.
-      </p>
+      <p className="text-center text-xs text-[#7a6b5a]/50 py-12">sorted by rating.</p>
     </div>
   );
 }

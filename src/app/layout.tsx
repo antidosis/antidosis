@@ -1,5 +1,7 @@
-import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+
+import type { Metadata } from "next";
+
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/toast";
 
@@ -199,7 +201,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               priceRange: "$$",
               openingHoursSpecification: {
                 "@type": "OpeningHoursSpecification",
-                dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+                dayOfWeek: [
+                  "Monday",
+                  "Tuesday",
+                  "Wednesday",
+                  "Thursday",
+                  "Friday",
+                  "Saturday",
+                  "Sunday",
+                ],
                 opens: "00:00",
                 closes: "23:59",
               },
@@ -207,7 +217,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body className={`${inter.variable} ${jetbrainsMono.variable} antialiased bg-[#0a0806] text-[#e8d5a3]`}>
+      <body
+        className={`${inter.variable} ${jetbrainsMono.variable} antialiased bg-[#0a0806] text-[#e8d5a3]`}
+      >
         <ToastProvider>{children}</ToastProvider>
       </body>
     </html>

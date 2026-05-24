@@ -1,12 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
-import { sendInterestReceivedEmail } from "@/lib/email";
-import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
+import { type NextRequest, NextResponse } from "next/server";
+
+import { z } from "zod";
+
 import { auditLog, getClientInfo } from "@/lib/audit";
+import { sendInterestReceivedEmail } from "@/lib/email";
 import { logger } from "@/lib/logger";
 import { createNotification } from "@/lib/notifications";
-import { z } from "zod";
+import { prisma } from "@/lib/prisma";
+import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
+import { createClient } from "@/lib/supabase/server";
 
 const createSchema = z.object({
   needId: z.string().uuid(),
@@ -16,7 +18,9 @@ const createSchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -27,7 +31,6 @@ export async function POST(req: NextRequest) {
         { status: 403 }
       );
     }
-
 
     // Rate limit: 10 expressions of interest per hour per user
     const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
@@ -68,10 +71,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (need.posterId === profile.id) {
-      return NextResponse.json(
-        { error: "Cannot accept your own need" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Cannot accept your own need" }, { status: 400 });
     }
 
     // Check for existing acceptance
@@ -147,9 +147,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.errors }, { status: 400 });
     }
     logger.error("Create acceptance failed", error instanceof Error ? error : undefined);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

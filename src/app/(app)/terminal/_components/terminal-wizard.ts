@@ -5,13 +5,22 @@
  * All wizards mirror web form field order and validation exactly.
  */
 
-import type { WizardState } from "./terminal-session";
 import { EXCHANGE_MODES, INCOMPATIBLE_EXCHANGE_MODES, getExchangeMode } from "@/lib/categories";
 import { CENTRAL_COAST_SUBURBS } from "@/lib/data/central-coast-suburbs";
 
+import type { WizardState } from "./terminal-session";
+
 // ─── Wizard Step Types ───────────────────────────────────────
 
-type StepType = "text" | "number" | "choice" | "confirm" | "multiselect" | "date" | "file" | "review";
+type StepType =
+  | "text"
+  | "number"
+  | "choice"
+  | "confirm"
+  | "multiselect"
+  | "date"
+  | "file"
+  | "review";
 
 interface WizardStep {
   field: string;
@@ -109,9 +118,10 @@ const CONTRACT_CHOICES = [
 
 function getNeedCategoryChoices(offerType: string | undefined) {
   const incompatible = offerType ? INCOMPATIBLE_EXCHANGE_MODES[offerType] || [] : [];
-  return EXCHANGE_MODES
-    .filter((m) => !incompatible.includes(m.value))
-    .map((m, i) => ({ value: m.value, label: `${i + 1}. ${m.label}` }));
+  return EXCHANGE_MODES.filter((m) => !incompatible.includes(m.value)).map((m, i) => ({
+    value: m.value,
+    label: `${i + 1}. ${m.label}`,
+  }));
 }
 
 const POST_WIZARD_STEPS: WizardStep[] = [
@@ -126,7 +136,8 @@ const POST_WIZARD_STEPS: WizardStep[] = [
     field: "description",
     type: "text",
     prompt: "Tell us more about it. What's the situation, timeline, and any requirements?",
-    placeholder: "e.g. The tap under the sink has been dripping for a week. I have the replacement washer. Needs to be done by Saturday.",
+    placeholder:
+      "e.g. The tap under the sink has been dripping for a week. I have the replacement washer. Needs to be done by Saturday.",
     validate: minMaxValidator(10, 5000),
   },
   {
@@ -147,7 +158,8 @@ const POST_WIZARD_STEPS: WizardStep[] = [
   {
     field: "images",
     type: "text",
-    prompt: "Got a photo of what you need? Click the 📎 paperclip below to attach up to 5 images, then press Enter.",
+    prompt:
+      "Got a photo of what you need? Click the 📎 paperclip below to attach up to 5 images, then press Enter.",
     validate: urlValidator(),
     optional: true,
   },
@@ -192,7 +204,8 @@ const POST_WIZARD_STEPS: WizardStep[] = [
   {
     field: "offerImages",
     type: "text",
-    prompt: "Got a photo of what you're offering? Click the 📎 paperclip below to attach up to 5 images, then press Enter.",
+    prompt:
+      "Got a photo of what you're offering? Click the 📎 paperclip below to attach up to 5 images, then press Enter.",
     validate: urlValidator(),
     optional: true,
   },
@@ -298,13 +311,13 @@ const CREDENTIAL_WIZARD_STEPS: WizardStep[] = [
   {
     field: "title",
     type: "text",
-    prompt: "Title (e.g. \"Working With Children Check\"):",
+    prompt: 'Title (e.g. "Working With Children Check"):',
     validate: minMaxValidator(1, 200),
   },
   {
     field: "subType",
     type: "text",
-    prompt: "Sub-type (optional, e.g. \"Class 1\"):",
+    prompt: 'Sub-type (optional, e.g. "Class 1"):',
     optional: true,
   },
   {
@@ -365,17 +378,20 @@ const CREDENTIAL_WIZARD_STEPS: WizardStep[] = [
 
 const TUTORIAL_STEPS: { prompt: string; check?: string; hint?: string }[] = [
   {
-    prompt: "👋 Welcome! I'm your Terminal guide. Let's get you started.\n\nFirst, let's see who you are. Type /whoami and press Enter.",
+    prompt:
+      "👋 Welcome! I'm your Terminal guide. Let's get you started.\n\nFirst, let's see who you are. Type /whoami and press Enter.",
     check: "whoami",
     hint: "Type /whoami and press Enter.",
   },
   {
-    prompt: "Great! Now let's see what's happening on the platform. Type /needs to browse open needs.",
+    prompt:
+      "Great! Now let's see what's happening on the platform. Type /needs to browse open needs.",
     check: "needs",
     hint: "Type /needs and press Enter.",
   },
   {
-    prompt: "Nice! You can browse needs. Now let's say hello to someone. First, see who's online: type /who",
+    prompt:
+      "Nice! You can browse needs. Now let's say hello to someone. First, see who's online: type /who",
     check: "who",
     hint: "Type /who and press Enter.",
   },
@@ -390,18 +406,23 @@ const TUTORIAL_STEPS: { prompt: string; check?: string; hint?: string }[] = [
     hint: "Type /stats and press Enter.",
   },
   {
-    prompt: "Excellent. You're getting the hang of this! One more thing — the help system. Type /help",
+    prompt:
+      "Excellent. You're getting the hang of this! One more thing — the help system. Type /help",
     check: "help",
     hint: "Type /help and press Enter.",
   },
   {
-    prompt: "🎉 Tutorial complete! You're ready to use the Terminal.\n\nPro tip: Type /tips anytime for random advice, and /help advanced when you want to see everything.\n\nWelcome to the community!",
+    prompt:
+      "🎉 Tutorial complete! You're ready to use the Terminal.\n\nPro tip: Type /tips anytime for random advice, and /help advanced when you want to see everything.\n\nWelcome to the community!",
   },
 ];
 
 // ─── Wizard Engine ───────────────────────────────────────────
 
-export function createWizard(type: WizardState["type"], initData?: Record<string, any>): WizardState {
+export function createWizard(
+  type: WizardState["type"],
+  initData?: Record<string, any>
+): WizardState {
   return {
     type,
     step: 0,
@@ -410,7 +431,11 @@ export function createWizard(type: WizardState["type"], initData?: Record<string
   };
 }
 
-export function getPrompt(type: WizardState["type"], step: number, data: Record<string, any>): string {
+export function getPrompt(
+  type: WizardState["type"],
+  step: number,
+  data: Record<string, any>
+): string {
   if (type === "tutorial") {
     const s = TUTORIAL_STEPS[step];
     if (!s) return "Tutorial complete! Type /exit or continue exploring.";
@@ -483,7 +508,12 @@ export function advanceWizard(
   const text = input.trim();
 
   if (text === "/cancel" || text === "/quit" || text === "/abort") {
-    return { state: { ...state, step: -1, prompt: "Wizard cancelled." }, done: true, cancelled: true, goBack: false };
+    return {
+      state: { ...state, step: -1, prompt: "Wizard cancelled." },
+      done: true,
+      cancelled: true,
+      goBack: false,
+    };
   }
 
   if (text === "/back" || text === "/prev") {
@@ -526,7 +556,12 @@ export function advanceWizard(
   if (!currentStep) {
     // Review step
     if (text === "/yes" || text === "/confirm" || text === "/submit") {
-      return { state: { ...state, step: -1, prompt: "" }, done: true, cancelled: false, goBack: false };
+      return {
+        state: { ...state, step: -1, prompt: "" },
+        done: true,
+        cancelled: false,
+        goBack: false,
+      };
     }
     // /edit <number> or /edit <fieldname>
     const editMatch = text.match(/^\/edit\s+(\d+|\w+)$/i);
@@ -540,21 +575,31 @@ export function advanceWizard(
       }
       if (targetStep >= 0 && targetStep < steps.length) {
         return {
-          state: { ...state, step: targetStep, prompt: getPrompt(state.type, targetStep, state.data) },
+          state: {
+            ...state,
+            step: targetStep,
+            prompt: getPrompt(state.type, targetStep, state.data),
+          },
           done: false,
           cancelled: false,
           goBack: false,
         };
       }
       return {
-        state: { ...state, prompt: `❌ Invalid step. ${getEditHint(steps)}\n\n${getPrompt(state.type, state.step, state.data)}` },
+        state: {
+          ...state,
+          prompt: `❌ Invalid step. ${getEditHint(steps)}\n\n${getPrompt(state.type, state.step, state.data)}`,
+        },
         done: false,
         cancelled: false,
         goBack: false,
       };
     }
     return {
-      state: { ...state, prompt: `Type /yes to confirm, /edit <number> to change a field, /back to go back, or /cancel to abort.` },
+      state: {
+        ...state,
+        prompt: `Type /yes to confirm, /edit <number> to change a field, /back to go back, or /cancel to abort.`,
+      },
       done: false,
       cancelled: false,
       goBack: false,
@@ -570,7 +615,12 @@ export function advanceWizard(
       newData[currentStep.field] = undefined;
     }
     return {
-      state: { ...state, step: nextStep, data: newData, prompt: getPrompt(state.type, nextStep, newData) },
+      state: {
+        ...state,
+        step: nextStep,
+        data: newData,
+        prompt: getPrompt(state.type, nextStep, newData),
+      },
       done: nextStep >= steps.length,
       cancelled: false,
       goBack: false,
@@ -582,7 +632,10 @@ export function advanceWizard(
     const error = currentStep.validate(text, state.data);
     if (error) {
       return {
-        state: { ...state, prompt: `❌ ${error}\n\n${getPrompt(state.type, state.step, state.data)}` },
+        state: {
+          ...state,
+          prompt: `❌ ${error}\n\n${getPrompt(state.type, state.step, state.data)}`,
+        },
         done: false,
         cancelled: false,
         goBack: false,
@@ -597,7 +650,12 @@ export function advanceWizard(
 
   const nextStep = state.step + 1;
   return {
-    state: { ...state, step: nextStep, data: newData, prompt: getPrompt(state.type, nextStep, newData) },
+    state: {
+      ...state,
+      step: nextStep,
+      data: newData,
+      prompt: getPrompt(state.type, nextStep, newData),
+    },
     done: nextStep >= steps.length,
     cancelled: false,
     goBack: false,
@@ -607,9 +665,7 @@ export function advanceWizard(
 // ─── Review Builders ─────────────────────────────────────────
 
 function getEditHint(steps: WizardStep[]): string {
-  const editable = steps
-    .map((s, i) => `    /edit ${i + 1}  → ${s.field}`)
-    .join("\n");
+  const editable = steps.map((s, i) => `    /edit ${i + 1}  → ${s.field}`).join("\n");
   return `Edit any field:\n${editable}`;
 }
 
@@ -707,9 +763,7 @@ export function createEditNeedWizard(need: any): WizardState {
 export function createReviewWizard(choices: { value: string; label: string }[]): WizardState {
   const validValues = choices.map((c) => c.value);
   const steps = REVIEW_WIZARD_STEPS.map((s) =>
-    s.field === "targetId"
-      ? { ...s, choices, validate: choiceValidator(validValues) }
-      : s
+    s.field === "targetId" ? { ...s, choices, validate: choiceValidator(validValues) } : s
   );
   const state: WizardState = {
     type: "review",

@@ -1,14 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
+
 import { useRouter } from "next/navigation";
+
+import { Check, X, Eye, EyeOff, Loader2 } from "lucide-react";
+
+import { TerminalCursor } from "@/components/effects/terminal-cursor";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/client";
-import { TerminalCursor } from "@/components/effects/terminal-cursor";
 import { validatePassword, getPasswordStrength } from "@/lib/security/password";
-import { Check, X, Eye, EyeOff, Loader2 } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
@@ -99,11 +102,10 @@ export default function ResetPasswordPage() {
         <div className="w-full max-w-sm">
           <p className="text-xs text-[#7a6b5a] mb-8">$ passwd --new</p>
           <h1 className="heading-display text-2xl text-[#e8d5a3] mb-2">
-            new_password<TerminalCursor />
+            new_password
+            <TerminalCursor />
           </h1>
-          <p className="text-sm text-[#b8a078] mb-12">
-            set a new password for your account
-          </p>
+          <p className="text-sm text-[#b8a078] mb-12">set a new password for your account</p>
 
           {success ? (
             <div className="border border-[#2a2420] bg-[#12100e] p-5">
@@ -111,9 +113,7 @@ export default function ResetPasswordPage() {
                 <Loader2 className="h-4 w-4 text-[#00e676] animate-spin" />
                 <p className="text-sm text-[#00e676]">password updated.</p>
               </div>
-              <p className="text-xs text-[#7a6b5a]">
-                redirecting to login in {countdown}s...
-              </p>
+              <p className="text-xs text-[#7a6b5a]">redirecting to login in {countdown}s...</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -134,11 +134,7 @@ export default function ResetPasswordPage() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-[#7a6b5a] hover:text-[#e8d5a3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f5a623] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0806] rounded-sm"
                   >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
 
@@ -146,16 +142,12 @@ export default function ResetPasswordPage() {
                   <div className="space-y-2 mt-3">
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-[#7a6b5a]">strength</span>
-                      <span
-                        className={`text-xs font-medium ${strengthColor}`}
-                      >
+                      <span className={`text-xs font-medium ${strengthColor}`}>
                         {strength.replace("-", " ")}
                       </span>
                     </div>
                     <div className="h-1.5 bg-[#12100e]">
-                      <div
-                        className={`h-full transition-all duration-300 ${strengthBar}`}
-                      />
+                      <div className={`h-full transition-all duration-300 ${strengthBar}`} />
                     </div>
                     <div className="space-y-1">
                       {[
@@ -177,10 +169,7 @@ export default function ResetPasswordPage() {
                           test: /[^A-Za-z0-9]/.test(password),
                         },
                       ].map((req) => (
-                        <div
-                          key={req.label}
-                          className="flex items-center gap-2 text-xs"
-                        >
+                        <div key={req.label} className="flex items-center gap-2 text-xs">
                           {req.test ? (
                             <Check className="h-3 w-3 text-[#00e676]" />
                           ) : (
@@ -208,9 +197,7 @@ export default function ResetPasswordPage() {
                   />
                   <button
                     type="button"
-                    onClick={() =>
-                      setShowConfirmPassword(!showConfirmPassword)
-                    }
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-[#7a6b5a] hover:text-[#e8d5a3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f5a623] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0806] rounded-sm"
                   >
                     {showConfirmPassword ? (
@@ -222,9 +209,7 @@ export default function ResetPasswordPage() {
                 </div>
               </div>
 
-              {error && (
-                <p className="text-sm text-[#ff5252]">error: {error}</p>
-              )}
+              {error && <p className="text-sm text-[#ff5252]">error: {error}</p>}
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "updating..." : "update_password"}
               </Button>

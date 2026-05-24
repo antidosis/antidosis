@@ -1,7 +1,7 @@
-import { Navbar } from "@/components/layout/navbar";
-import { Footer } from "@/components/layout/footer";
 import { ScanLines } from "@/components/effects/scanlines";
 import { LaunchBanner } from "@/components/launch-countdown";
+import { Footer } from "@/components/layout/footer";
+import { Navbar } from "@/components/layout/navbar";
 import { NotificationRealtime } from "@/components/layout/notification-realtime";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {

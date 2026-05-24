@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
+
 import { Check, ArrowRight, X } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 
 export default function SuccessContent() {
   const searchParams = useSearchParams();
@@ -26,11 +29,14 @@ export default function SuccessContent() {
           setStatus("success");
         } else {
           setStatus("error");
-          res.json().then((data) => {
-            setErrorMsg(data.error || "payment verification failed");
-          }).catch(() => {
-            setErrorMsg("payment verification failed");
-          });
+          res
+            .json()
+            .then((data) => {
+              setErrorMsg(data.error || "payment verification failed");
+            })
+            .catch(() => {
+              setErrorMsg("payment verification failed");
+            });
         }
       })
       .catch(() => {
@@ -69,8 +75,8 @@ export default function SuccessContent() {
       </div>
       <h1 className="text-2xl font-bold mb-4">welcome to pro</h1>
       <p className="text-[13px] text-[#7a6b5a] mb-8">
-        your subscription is active. you are now covered by our dispute
-        resolution and loss protection.
+        your subscription is active. you are now covered by our dispute resolution and loss
+        protection.
       </p>
       <Button className="w-full" asChild>
         <Link href="/needs">

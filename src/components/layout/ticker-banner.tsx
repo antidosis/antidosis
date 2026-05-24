@@ -1,16 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import {
-  Zap,
-  ShieldCheck,
-  Globe,
-  Repeat,
-  Lock,
-  Star,
-  MapPin,
-  Sparkles,
-} from "lucide-react";
+import { useRef, useState } from "react";
+
+import { Zap, ShieldCheck, Globe, Repeat, Lock, Star, MapPin, Sparkles } from "lucide-react";
 
 const TICKER_ITEMS = [
   {
@@ -116,14 +108,8 @@ function TickerItem({
 }) {
   return (
     <div className="flex items-center gap-3 px-6 md:px-8 shrink-0 whitespace-nowrap">
-      <Icon
-        className="h-3.5 w-3.5 md:h-4 md:w-4 shrink-0"
-        style={{ color: accent }}
-      />
-      <span
-        className="text-xs md:text-sm font-medium tracking-wide"
-        style={{ color: accent }}
-      >
+      <Icon className="h-3.5 w-3.5 md:h-4 md:w-4 shrink-0" style={{ color: accent }} />
+      <span className="text-xs md:text-sm font-medium tracking-wide" style={{ color: accent }}>
         {text}
       </span>
       <span className="text-[#2a2420] text-lg leading-none select-none">|</span>

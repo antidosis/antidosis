@@ -26,9 +26,7 @@ const SCENES = [
   },
   {
     command: "/dm @sarah Need a hand with your garden this weekend?",
-    response: [
-      "Message sent to Sarah",
-    ],
+    response: ["Message sent to Sarah"],
   },
   {
     command: "/users carpenter",
@@ -100,10 +98,7 @@ export function TerminalPreview({ className = "" }: { className?: string }) {
 
       {/* Terminal body */}
       <div className="p-4 font-mono text-xs min-h-[200px] md:min-h-[220px]">
-        <div
-          className="transition-opacity duration-300"
-          style={{ opacity: clearing ? 0 : 1 }}
-        >
+        <div className="transition-opacity duration-300" style={{ opacity: clearing ? 0 : 1 }}>
           {/* Command line */}
           <div className="flex items-start gap-2 mb-2">
             <span className="text-[#f5a623] shrink-0">$</span>
@@ -157,7 +152,6 @@ export function TerminalPreview({ className = "" }: { className?: string }) {
             "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.3) 2px, rgba(0,0,0,0.3) 4px)",
         }}
       />
-
     </div>
   );
 }

@@ -1,10 +1,12 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Navbar } from "@/components/layout/navbar";
-import { Footer } from "@/components/layout/footer";
-import { blogPosts, getPostBySlug } from "@/lib/blog";
+import { notFound } from "next/navigation";
+
 import { ArrowLeft, Clock, Calendar, Tag } from "lucide-react";
+import type { Metadata } from "next";
+
+import { Footer } from "@/components/layout/footer";
+import { Navbar } from "@/components/layout/navbar";
+import { blogPosts, getPostBySlug } from "@/lib/blog";
 
 const siteUrl = "https://antidosis.com";
 
@@ -141,10 +143,7 @@ function renderTable(rows: string[], startKey: number): [React.ReactNode, number
             return (
               <tr key={ri} className="border-b border-[#2a2420] last:border-0">
                 {cells.map((cell, ci) => (
-                  <td
-                    key={ci}
-                    className="px-4 py-3 text-sm text-[#b8a078] leading-relaxed"
-                  >
+                  <td key={ci} className="px-4 py-3 text-sm text-[#b8a078] leading-relaxed">
                     {parseInlineMarkdown(cell)}
                   </td>
                 ))}
@@ -293,8 +292,7 @@ export default function BlogPostPage({ params }: Props) {
             href="/blog"
             className="inline-flex items-center text-[13px] text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors mb-8"
           >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            $ cd ../blog
+            <ArrowLeft className="mr-2 h-4 w-4" />$ cd ../blog
           </Link>
 
           {/* Meta */}
@@ -310,9 +308,7 @@ export default function BlogPostPage({ params }: Props) {
           </div>
 
           {/* Title */}
-          <h1 className="heading-display text-3xl md:text-5xl text-[#e8d5a3] mb-6">
-            {post.title}
-          </h1>
+          <h1 className="heading-display text-3xl md:text-5xl text-[#e8d5a3] mb-6">{post.title}</h1>
 
           {/* Author / date */}
           <div className="flex items-center gap-4 text-xs text-[#7a6b5a] mb-12 pb-8 border-b border-[#2a2420]">

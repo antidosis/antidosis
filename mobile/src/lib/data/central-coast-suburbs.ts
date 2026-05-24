@@ -1,0 +1,184 @@
+export interface Suburb {
+  name: string;
+  postcode: string;
+  formatted: string; // snake_case with postcode: "norah_head_2263"
+}
+
+export const CENTRAL_COAST_SUBURBS: Suburb[] = [
+  // Northern Central Coast
+  { name: "Alison", postcode: "2259", formatted: "alison_2259" },
+  { name: "Bateau Bay", postcode: "2261", formatted: "bateau_bay_2261" },
+  { name: "Berkeley Vale", postcode: "2261", formatted: "berkeley_vale_2261" },
+  { name: "Blue Bay", postcode: "2261", formatted: "blue_bay_2261" },
+  { name: "Blue Haven", postcode: "2262", formatted: "blue_haven_2262" },
+  { name: "Bonnells Bay", postcode: "2264", formatted: "bonnells_bay_2264" },
+  { name: "Budgewoi", postcode: "2262", formatted: "budgewoi_2262" },
+  { name: "Buff Point", postcode: "2262", formatted: "buff_point_2262" },
+  { name: "Bushells Ridge", postcode: "2259", formatted: "bushells_ridge_2259" },
+  { name: "Canton Beach", postcode: "2263", formatted: "canton_beach_2263" },
+  { name: "Central Mangrove", postcode: "2250", formatted: "central_mangrove_2250" },
+  { name: "Chain Valley Bay", postcode: "2259", formatted: "chain_valley_bay_2259" },
+  { name: "Charmhaven", postcode: "2263", formatted: "charmhaven_2263" },
+  { name: "Chittaway Bay", postcode: "2261", formatted: "chittaway_bay_2261" },
+  { name: "Colongra", postcode: "2262", formatted: "colongra_2262" },
+  { name: "Cooranbong", postcode: "2265", formatted: "cooranbong_2265" },
+  { name: "Crangan Bay", postcode: "2259", formatted: "crangan_bay_2259" },
+  { name: "Doyalson", postcode: "2262", formatted: "doyalson_2262" },
+  { name: "Doyalson North", postcode: "2262", formatted: "doyalson_north_2262" },
+  { name: "Dooralong", postcode: "2259", formatted: "dooralong_2259" },
+  { name: "Frazer Park", postcode: "2259", formatted: "frazer_park_2259" },
+  { name: "Gorokan", postcode: "2263", formatted: "gorokan_2263" },
+  { name: "Gwandalan", postcode: "2259", formatted: "gwandalan_2259" },
+  { name: "Halekulani", postcode: "2262", formatted: "halekulani_2262" },
+  { name: "Hamlyn Terrace", postcode: "2259", formatted: "hamlyn_terrace_2259" },
+  { name: "Jilliby", postcode: "2259", formatted: "jilliby_2259" },
+  { name: "Kanwal", postcode: "2259", formatted: "kanwal_2259" },
+  { name: "Kiar", postcode: "2259", formatted: "kiar_2259" },
+  { name: "Killarney Vale", postcode: "2261", formatted: "killarney_vale_2261" },
+  { name: "Kulnura", postcode: "2250", formatted: "kulnura_2250" },
+  { name: "Lake Haven", postcode: "2263", formatted: "lake_haven_2263" },
+  { name: "Lake Munmorah", postcode: "2259", formatted: "lake_munmorah_2259" },
+  { name: "Lemon Tree", postcode: "2259", formatted: "lemon_tree_2259" },
+  { name: "Mannering Park", postcode: "2259", formatted: "mannering_park_2259" },
+  { name: "Mardi", postcode: "2259", formatted: "mardi_2259" },
+  { name: "Martinsville", postcode: "2265", formatted: "martinsville_2265" },
+  { name: "Moonee", postcode: "2259", formatted: "moonee_2259" },
+  { name: "Morisset", postcode: "2264", formatted: "morisset_2264" },
+  { name: "Morisset Park", postcode: "2264", formatted: "morisset_park_2264" },
+  { name: "Mount Elliot", postcode: "2250", formatted: "mount_elliot_2250" },
+  { name: "Munmorah", postcode: "2259", formatted: "munmorah_2259" },
+  { name: "Myuna Bay", postcode: "2264", formatted: "myuna_bay_2264" },
+  { name: "Nords Wharf", postcode: "2259", formatted: "nords_wharf_2259" },
+  { name: "Norah Head", postcode: "2263", formatted: "norah_head_2263" },
+  { name: "Noraville", postcode: "2263", formatted: "noraville_2263" },
+  { name: "Peats Ridge", postcode: "2250", formatted: "peats_ridge_2250" },
+  { name: "Point Wolstoncroft", postcode: "2259", formatted: "point_wolstoncroft_2259" },
+  { name: "Ravensdale", postcode: "2259", formatted: "ravensdale_2259" },
+  { name: "San Remo", postcode: "2262", formatted: "san_remo_2262" },
+  { name: "Silverwater", postcode: "2264", formatted: "silverwater_2264" },
+  { name: "Summerland Point", postcode: "2259", formatted: "summerland_point_2259" },
+  { name: "Sunshine", postcode: "2264", formatted: "sunshine_2264" },
+  { name: "Tacoma", postcode: "2259", formatted: "tacoma_2259" },
+  { name: "Tacoma South", postcode: "2259", formatted: "tacoma_south_2259" },
+  { name: "Toukley", postcode: "2263", formatted: "toukley_2263" },
+  { name: "Tuggerah", postcode: "2259", formatted: "tuggerah_2259" },
+  { name: "Tuggerawong", postcode: "2259", formatted: "tuggerawong_2259" },
+  { name: "Tumbi Umbi", postcode: "2261", formatted: "tumbi_umbi_2261" },
+  { name: "Wadalba", postcode: "2259", formatted: "wadalba_2259" },
+  { name: "Wallarah", postcode: "2259", formatted: "wallarah_2259" },
+  { name: "Warnervale", postcode: "2259", formatted: "warnervale_2259" },
+  { name: "Watanobbi", postcode: "2259", formatted: "watanobbi_2259" },
+  { name: "Woongarrah", postcode: "2259", formatted: "woongarrah_2259" },
+  { name: "Wyong", postcode: "2259", formatted: "wyong_2259" },
+  { name: "Wyong Creek", postcode: "2259", formatted: "wyong_creek_2259" },
+  { name: "Wyongah", postcode: "2259", formatted: "wyongah_2259" },
+  { name: "Yarramalong", postcode: "2259", formatted: "yarramalong_2259" },
+
+  // Central Central Coast
+  { name: "Avoca Beach", postcode: "2251", formatted: "avoca_beach_2251" },
+  { name: "Bensville", postcode: "2251", formatted: "bensville_2251" },
+  { name: "Blackwall", postcode: "2256", formatted: "blackwall_2256" },
+  { name: "Booker Bay", postcode: "2257", formatted: "booker_bay_2257" },
+  { name: "Bouddi", postcode: "2251", formatted: "bouddi_2251" },
+  { name: "Box Head", postcode: "2257", formatted: "box_head_2257" },
+  { name: "Brisbane Water", postcode: "2256", formatted: "brisbane_water_2256" },
+  { name: "Copacabana", postcode: "2251", formatted: "copacabana_2251" },
+  { name: "Daleys Point", postcode: "2257", formatted: "daleys_point_2257" },
+  { name: "Davistown", postcode: "2251", formatted: "davistown_2251" },
+  { name: "Empire Bay", postcode: "2257", formatted: "empire_bay_2257" },
+  { name: "Erina", postcode: "2250", formatted: "erina_2250" },
+  { name: "Erina Fair", postcode: "2250", formatted: "erina_fair_2250" },
+  { name: "Erina Heights", postcode: "2260", formatted: "erina_heights_2260" },
+  { name: "Ettalong Beach", postcode: "2257", formatted: "ettalong_beach_2257" },
+  { name: "Forresters Beach", postcode: "2260", formatted: "forresters_beach_2260" },
+  { name: "Glenning Valley", postcode: "2261", formatted: "glenning_valley_2261" },
+  { name: "Gosford", postcode: "2250", formatted: "gosford_2250" },
+  { name: "Green Point", postcode: "2251", formatted: "green_point_2251" },
+  { name: "Hardys Bay", postcode: "2257", formatted: "hardys_bay_2257" },
+  { name: "Holgate", postcode: "2250", formatted: "holgate_2250" },
+  { name: "Kincumber", postcode: "2251", formatted: "kincumber_2251" },
+  { name: "Kincumber South", postcode: "2251", formatted: "kincumber_south_2251" },
+  { name: "Koolewong", postcode: "2256", formatted: "koolewong_2256" },
+  { name: "Lisarow", postcode: "2250", formatted: "lisarow_2250" },
+  { name: "Long Jetty", postcode: "2261", formatted: "long_jetty_2261" },
+  { name: "Macmasters Beach", postcode: "2251", formatted: "macmasters_beach_2251" },
+  { name: "Matcham", postcode: "2250", formatted: "matcham_2250" },
+  { name: "Mount Pleasant", postcode: "2250", formatted: "mount_pleasant_2250" },
+  { name: "Narara", postcode: "2250", formatted: "narara_2250" },
+  { name: "Niagara Park", postcode: "2250", formatted: "niagara_park_2250" },
+  { name: "North Avoca", postcode: "2260", formatted: "north_avoca_2260" },
+  { name: "North Gosford", postcode: "2250", formatted: "north_gosford_2250" },
+  { name: "Picketts Valley", postcode: "2251", formatted: "picketts_valley_2251" },
+  { name: "Point Clare", postcode: "2250", formatted: "point_clare_2250" },
+  { name: "Saratoga", postcode: "2251", formatted: "saratoga_2251" },
+  { name: "Shelly Beach", postcode: "2261", formatted: "shelly_beach_2261" },
+  { name: "Somersby", postcode: "2250", formatted: "somersby_2250" },
+  { name: "Spencer", postcode: "2775", formatted: "spencer_2775" },
+  { name: "Springfield", postcode: "2250", formatted: "springfield_2250" },
+  { name: "St Huberts Island", postcode: "2257", formatted: "st_huberts_island_2257" },
+  { name: "Tascott", postcode: "2250", formatted: "tascott_2250" },
+  { name: "Terrigal", postcode: "2260", formatted: "terrigal_2260" },
+  { name: "The Entrance", postcode: "2261", formatted: "the_entrance_2261" },
+  { name: "The Entrance North", postcode: "2261", formatted: "the_entrance_north_2261" },
+  { name: "Toowoon Bay", postcode: "2261", formatted: "toowoon_bay_2261" },
+  { name: "Umina Beach", postcode: "2257", formatted: "umina_beach_2257" },
+  { name: "Wamberal", postcode: "2260", formatted: "wamberal_2260" },
+  { name: "Wendoree Park", postcode: "2250", formatted: "wendoree_park_2250" },
+  { name: "West Gosford", postcode: "2250", formatted: "west_gosford_2250" },
+  { name: "Wondabyne", postcode: "2256", formatted: "wondabyne_2256" },
+  { name: "Woy Woy", postcode: "2256", formatted: "woy_woy_2256" },
+  { name: "Woy Woy Bay", postcode: "2256", formatted: "woy_woy_bay_2256" },
+  { name: "Wyoming", postcode: "2250", formatted: "wyoming_2250" },
+  { name: "Yattalunga", postcode: "2251", formatted: "yattalunga_2251" },
+
+  // Southern Central Coast
+  { name: "Bar Point", postcode: "2083", formatted: "bar_point_2083" },
+  { name: "Brooklyn", postcode: "2083", formatted: "brooklyn_2083" },
+  { name: "Cheero Point", postcode: "2083", formatted: "cheero_point_2083" },
+  { name: "Cogra Bay", postcode: "2083", formatted: "cogra_bay_2083" },
+  { name: "Milsons Passage", postcode: "2083", formatted: "milsons_passage_2083" },
+
+  // Inland / Hinterland
+  { name: "Bucketty", postcode: "2250", formatted: "bucketty_2250" },
+  { name: "Calga", postcode: "2250", formatted: "calga_2250" },
+  { name: "Cedar Brush Creek", postcode: "2259", formatted: "cedar_brush_creek_2259" },
+  { name: "Gunderman", postcode: "2775", formatted: "gunderman_2775" },
+  { name: "Kangy Angy", postcode: "2258", formatted: "kangy_angy_2258" },
+  { name: "Kingfisher Shores", postcode: "2259", formatted: "kingfisher_shores_2259" },
+  { name: "Little Jilliby", postcode: "2259", formatted: "little_jilliby_2259" },
+  { name: "Lower Mangrove", postcode: "2250", formatted: "lower_mangrove_2250" },
+  { name: "Mangrove Creek", postcode: "2250", formatted: "mangrove_creek_2250" },
+  { name: "Mangrove Mountain", postcode: "2250", formatted: "mangrove_mountain_2250" },
+  { name: "Marlow", postcode: "2775", formatted: "marlow_2775" },
+  { name: "Mount White", postcode: "2250", formatted: "mount_white_2250" },
+  { name: "Ourimbah", postcode: "2258", formatted: "ourimbah_2258" },
+  { name: "Palm Grove", postcode: "2250", formatted: "palm_grove_2250" },
+  { name: "Palmdale", postcode: "2258", formatted: "palmdale_2258" },
+  { name: "Phegans Bay", postcode: "2256", formatted: "phegans_bay_2256" },
+  { name: "Ten Mile Hollow", postcode: "2250", formatted: "ten_mile_hollow_2250" },
+  { name: "Upper Mangrove", postcode: "2250", formatted: "upper_mangrove_2250" },
+  { name: "Wisemans Ferry", postcode: "2775", formatted: "wisemans_ferry_2775" },
+];
+
+export function formatLocation(name: string, postcode?: string): string {
+  const clean = name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, "")
+    .replace(/\s+/g, "_");
+  return postcode ? `${clean}_${postcode}` : clean;
+}
+
+export function findSuburb(query: string): Suburb[] {
+  const q = query.toLowerCase().trim();
+  if (!q) return [];
+  return CENTRAL_COAST_SUBURBS.filter(
+    (s) =>
+      s.name.toLowerCase().includes(q) ||
+      s.postcode.includes(q) ||
+      s.formatted.includes(q.replace(/\s/g, "_"))
+  ).slice(0, 8);
+}
+
+export function isValidCentralCoastSuburb(formatted: string): boolean {
+  return CENTRAL_COAST_SUBURBS.some((s) => s.formatted === formatted);
+}

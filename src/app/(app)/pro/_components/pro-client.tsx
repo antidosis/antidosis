@@ -1,16 +1,34 @@
 "use client";
 
 import { useState, useEffect } from "react";
+
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+
+import {
+  Shield,
+  Star,
+  Phone,
+  Users,
+  ArrowUpRight,
+  Zap,
+  Globe,
+  AlertTriangle,
+  Lock,
+  Smartphone,
+  Crown,
+  Mail,
+  Clock,
+  Infinity,
+  MessageCircle,
+  Send,
+  CheckCircle2,
+  Sparkles,
+} from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import { useApi } from "@/lib/swr-config";
-import {
-  Shield, Star, Phone, Users, Check, ArrowUpRight, Zap, Globe,
-  Eye, EyeOff, AlertTriangle, Lock, Smartphone, Crown, Mail,
-  Clock, Infinity, MessageCircle, Send, CheckCircle2, Sparkles,
-} from "lucide-react";
 
 type ProfileData = {
   isPro: boolean;
@@ -71,7 +89,9 @@ export default function ProPage() {
       body: JSON.stringify({ showInDirectory: newValue }),
     });
     if (res.ok) {
-      mutateProfile((p: any) => (p ? { ...p, showInDirectory: newValue } : p), { revalidate: false });
+      mutateProfile((p: any) => (p ? { ...p, showInDirectory: newValue } : p), {
+        revalidate: false,
+      });
     }
     setTogglingDir(false);
   }
@@ -87,9 +107,7 @@ export default function ProPage() {
 
   if (!authChecked) {
     return (
-      <div className="max-w-3xl mx-auto py-24 text-center text-sm text-[#7a6b5a]">
-        loading...
-      </div>
+      <div className="max-w-3xl mx-auto py-24 text-center text-sm text-[#7a6b5a]">loading...</div>
     );
   }
 
@@ -97,11 +115,31 @@ export default function ProPage() {
 
   // ─── PRO DASHBOARD ───
   if (profileData?.isPro) {
-    return <ProDashboard profile={profileData} user={user} toggleDirectory={toggleDirectory} togglingDir={togglingDir} supportMsg={supportMsg} setSupportMsg={setSupportMsg} supportSent={supportSent} sendSupport={sendSupport} />;
+    return (
+      <ProDashboard
+        profile={profileData}
+        user={user}
+        toggleDirectory={toggleDirectory}
+        togglingDir={togglingDir}
+        supportMsg={supportMsg}
+        setSupportMsg={setSupportMsg}
+        supportSent={supportSent}
+        sendSupport={sendSupport}
+      />
+    );
   }
 
   // ─── MARKETING / CLAIM FLOW ───
-  return <ProMarketing user={user} profile={profileData} claimPro={claimPro} claiming={claiming} claimMsg={claimMsg} claimError={claimError} />;
+  return (
+    <ProMarketing
+      user={user}
+      profile={profileData}
+      claimPro={claimPro}
+      claiming={claiming}
+      claimMsg={claimMsg}
+      claimError={claimError}
+    />
+  );
 }
 
 /* ───────────────────────────────────────── */
@@ -126,7 +164,11 @@ function ProDashboard({
   sendSupport: (e: React.FormEvent) => void;
 }) {
   const activated = profile.proActivatedAt
-    ? new Date(profile.proActivatedAt).toLocaleDateString("en-AU", { day: "numeric", month: "long", year: "numeric" })
+    ? new Date(profile.proActivatedAt).toLocaleDateString("en-AU", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
     : null;
 
   const isFree = profile.proSource === "free_verified";
@@ -134,10 +176,26 @@ function ProDashboard({
   const isPaid = profile.proSource?.startsWith("paid") || isPlayStore || !!profile.proExpiresAt;
 
   const benefits = [
-    { icon: <Star className="h-4 w-4" />, label: "Enhanced Visibility", desc: "Pro badge on profile & posts. Seen first by need posters." },
-    { icon: <Phone className="h-4 w-4" />, label: "Emergency Support", desc: "Priority access for urgent disputes, fraud, or safety issues." },
-    { icon: <Users className="h-4 w-4" />, label: "Public Directory", desc: "Opt-in to the pro directory. Get discovered by new users." },
-    { icon: <Shield className="h-4 w-4" />, label: "Trust Signal", desc: "The pro badge signals commitment. Higher acceptance rates." },
+    {
+      icon: <Star className="h-4 w-4" />,
+      label: "Enhanced Visibility",
+      desc: "Pro badge on profile & posts. Seen first by need posters.",
+    },
+    {
+      icon: <Phone className="h-4 w-4" />,
+      label: "Emergency Support",
+      desc: "Priority access for urgent disputes, fraud, or safety issues.",
+    },
+    {
+      icon: <Users className="h-4 w-4" />,
+      label: "Public Directory",
+      desc: "Opt-in to the pro directory. Get discovered by new users.",
+    },
+    {
+      icon: <Shield className="h-4 w-4" />,
+      label: "Trust Signal",
+      desc: "The pro badge signals commitment. Higher acceptance rates.",
+    },
   ];
 
   return (
@@ -172,9 +230,7 @@ function ProDashboard({
               <Clock className="h-3 w-3 mr-1" /> active subscription
             </Badge>
           )}
-          {activated && (
-            <span className="text-xs text-[#7a6b5a]">since {activated}</span>
-          )}
+          {activated && <span className="text-xs text-[#7a6b5a]">since {activated}</span>}
         </div>
       </div>
 
@@ -206,7 +262,8 @@ function ProDashboard({
           </div>
         </div>
         <p className="text-xs text-[#7a6b5a] mb-4">
-          urgent contract dispute? fraud concern? safety issue? as a pro member, your message jumps to the front of the queue.
+          urgent contract dispute? fraud concern? safety issue? as a pro member, your message jumps
+          to the front of the queue.
         </p>
 
         {supportSent ? (
@@ -263,11 +320,23 @@ function ProDashboard({
             )}
             <div className="flex justify-between">
               <span>plan</span>
-              <span className="text-[#f0cc33]">{isFree ? "free for life" : isPlayStore ? "google play" : isPaid ? "subscription" : "pro"}</span>
+              <span className="text-[#f0cc33]">
+                {isFree
+                  ? "free for life"
+                  : isPlayStore
+                    ? "google play"
+                    : isPaid
+                      ? "subscription"
+                      : "pro"}
+              </span>
             </div>
             <div className="flex justify-between">
               <span>expires</span>
-              <span className="text-[#00e676]">{profile.proExpiresAt ? new Date(profile.proExpiresAt).toLocaleDateString() : "never"}</span>
+              <span className="text-[#00e676]">
+                {profile.proExpiresAt
+                  ? new Date(profile.proExpiresAt).toLocaleDateString()
+                  : "never"}
+              </span>
             </div>
             <div className="flex justify-between">
               <span>source</span>
@@ -298,7 +367,11 @@ function ProDashboard({
                 : "text-[#00e676] border-[#00e676]/30 hover:border-[#00e676]/40 hover:bg-[#00e676]/5 hover:text-[#00e676]"
             }
           >
-            {togglingDir ? "saving..." : profile.showInDirectory ? "hide from directory" : "show in directory"}
+            {togglingDir
+              ? "saving..."
+              : profile.showInDirectory
+                ? "hide from directory"
+                : "show in directory"}
           </Button>
         </div>
       </div>
@@ -358,7 +431,8 @@ function ProMarketing({
           <span className="font-semibold text-lg">free for trial region members</span>
         </div>
         <p className="text-sm text-[#7a6b5a]">
-          the Central Coast is the first trial region. verify your identity and mobile number to claim free Pro for life. no credit card. no expiry.
+          the Central Coast is the first trial region. verify your identity and mobile number to
+          claim free Pro for life. no credit card. no expiry.
         </p>
       </div>
 
@@ -412,7 +486,8 @@ function ProMarketing({
                   <span className="text-sm font-medium">verification required</span>
                 </div>
                 <p className="text-xs text-[#7a6b5a]">
-                  upload a government-issued ID in dashboard → credentials tab, then wait for admin approval
+                  upload a government-issued ID in dashboard → credentials tab, then wait for admin
+                  approval
                 </p>
               </div>
             )
@@ -434,14 +509,20 @@ function ProMarketing({
             </p>
             <div className="flex flex-wrap gap-3">
               {missingIdentity && (
-                <Link href="/dashboard" className="inline-flex items-center gap-2 text-xs bg-[#1a1714] border border-[#2a2420] text-[#e8d5a3] px-3 py-2 rounded hover:border-[#f5a623]/40 transition-colors">
+                <Link
+                  href="/dashboard"
+                  className="inline-flex items-center gap-2 text-xs bg-[#1a1714] border border-[#2a2420] text-[#e8d5a3] px-3 py-2 rounded hover:border-[#f5a623]/40 transition-colors"
+                >
                   <Lock className="h-3.5 w-3.5 text-[#f5a623]" />
                   upload ID in dashboard → credentials tab
                   <ArrowUpRight className="h-3 w-3" />
                 </Link>
               )}
               {missingMobile && (
-                <Link href="/dashboard" className="inline-flex items-center gap-2 text-xs bg-[#1a1714] border border-[#2a2420] text-[#e8d5a3] px-3 py-2 rounded hover:border-[#f5a623]/40 transition-colors">
+                <Link
+                  href="/dashboard"
+                  className="inline-flex items-center gap-2 text-xs bg-[#1a1714] border border-[#2a2420] text-[#e8d5a3] px-3 py-2 rounded hover:border-[#f5a623]/40 transition-colors"
+                >
                   <Smartphone className="h-3.5 w-3.5 text-[#f5a623]" />
                   verify mobile number in dashboard
                   <ArrowUpRight className="h-3 w-3" />
@@ -466,12 +547,18 @@ function ProMarketing({
   );
 }
 
-function FeatureItem({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
+function FeatureItem({
+  icon,
+  title,
+  description,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}) {
   return (
     <div className="vessel p-5">
-      <div className="mb-4 inline-flex bg-[#1a1714] p-3 rounded-md text-[#f5a623]">
-        {icon}
-      </div>
+      <div className="mb-4 inline-flex bg-[#1a1714] p-3 rounded-md text-[#f5a623]">{icon}</div>
       <h3 className="text-base font-bold text-[#e8d5a3] mb-2">{title}</h3>
       <p className="text-sm text-[#7a6b5a] leading-relaxed">{description}</p>
     </div>

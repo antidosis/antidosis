@@ -32,7 +32,10 @@ export function ParticleField() {
     }
     resize();
 
-    const particleCount = Math.min(Math.floor((window.innerWidth * window.innerHeight) / 12000), 120);
+    const particleCount = Math.min(
+      Math.floor((window.innerWidth * window.innerHeight) / 12000),
+      120
+    );
     const particles: Particle[] = [];
     for (let i = 0; i < particleCount; i++) {
       particles.push({

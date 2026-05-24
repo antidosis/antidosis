@@ -1,28 +1,31 @@
 "use client";
 
 import { useState, useEffect } from "react";
+
 import Link from "next/link";
-import { Navbar } from "@/components/layout/navbar";
-import { Footer } from "@/components/layout/footer";
-import { Button } from "@/components/ui/button";
+
+import { ArrowRight, ShieldCheck, Star, MessageSquare, ScrollText } from "lucide-react";
+
 import { BootSequence } from "@/components/effects/boot-sequence";
-import { ScanLines } from "@/components/effects/scanlines";
 import { ParticleField } from "@/components/effects/particle-field";
+import { ScanLines } from "@/components/effects/scanlines";
 import { TerminalCursor } from "@/components/effects/terminal-cursor";
-import { ExchangeIllustration } from "@/components/visuals/exchange-illustration";
-import { IdentityIllustration } from "@/components/visuals/identity-illustration";
+import { LaunchCountdown, LaunchBanner } from "@/components/launch-countdown";
+import { Footer } from "@/components/layout/footer";
+import { Navbar } from "@/components/layout/navbar";
+import { TickerBanner } from "@/components/layout/ticker-banner";
+import { LiveBadge } from "@/components/live-badge";
+import { TerminalPreview } from "@/components/terminal-preview";
+import { Button } from "@/components/ui/button";
 import { ContractIllustration } from "@/components/visuals/contract-illustration";
-import { ReputationIllustration } from "@/components/visuals/reputation-illustration";
+import { ExchangeIllustration } from "@/components/visuals/exchange-illustration";
+import { HandshakeIllustration } from "@/components/visuals/handshake-illustration";
+import { IdentityIllustration } from "@/components/visuals/identity-illustration";
 import { PostIllustration } from "@/components/visuals/post-illustration";
 import { ReceiveIllustration } from "@/components/visuals/receive-illustration";
-import { HandshakeIllustration } from "@/components/visuals/handshake-illustration";
-import { TerminalPreview } from "@/components/terminal-preview";
-import { LiveBadge } from "@/components/live-badge";
-import { TickerBanner } from "@/components/layout/ticker-banner";
-import { LaunchCountdown, LaunchBanner } from "@/components/launch-countdown";
+import { ReputationIllustration } from "@/components/visuals/reputation-illustration";
 import { useInView } from "@/hooks/use-in-view";
 import { cn } from "@/lib/utils";
-import { ArrowRight, ShieldCheck, Star, MessageSquare, Zap, ScrollText } from "lucide-react";
 
 function Reveal({
   children,
@@ -85,9 +88,7 @@ export default function HomePage() {
             >
               <div className="grid md:grid-cols-2 gap-12 items-center">
                 <div>
-                  <p className="text-xs text-[#7a6b5a] mb-8 font-mono">
-                    $ cat /etc/antidosis/motd
-                  </p>
+                  <p className="text-xs text-[#7a6b5a] mb-8 font-mono">$ cat /etc/antidosis/motd</p>
                   <h1 className="heading-display text-5xl md:text-7xl text-[#e8d5a3] mb-8">
                     exchange
                     <br />
@@ -95,14 +96,12 @@ export default function HomePage() {
                     <TerminalCursor />
                   </h1>
                   <p className="text-base text-[#7a6b5a] max-w-md leading-relaxed mb-6">
-                    A marketplace for reciprocal exchange. Post what you need.
-                    Say what you&apos;ll give back. Connect with people you can
-                    trust.
+                    A marketplace for reciprocal exchange. Post what you need. Say what you&apos;ll
+                    give back. Connect with people you can trust.
                   </p>
                   <p className="text-sm text-[#7a6b5a]/70 max-w-md leading-relaxed mb-10">
-                    Contracts are optional — use them when you want binding
-                    terms, skip them when you don&apos;t. No middlemen. No hidden
-                    fees.
+                    Contracts are optional — use them when you want binding terms, skip them when
+                    you don&apos;t. No middlemen. No hidden fees.
                   </p>
                   <div className="flex flex-wrap items-center gap-3">
                     <Button asChild size="lg">
@@ -136,9 +135,7 @@ export default function HomePage() {
         <section className="py-20 md:py-28 border-t border-[#2a2420]">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
-              <p className="text-xs text-[#7a6b5a] mb-12 font-mono">
-                $ cat docs/quickstart.md
-              </p>
+              <p className="text-xs text-[#7a6b5a] mb-12 font-mono">$ cat docs/quickstart.md</p>
             </Reveal>
             <div className="grid md:grid-cols-3 gap-8">
               <Reveal delay={0}>
@@ -190,9 +187,7 @@ export default function HomePage() {
             <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-20">
               <div className="grid md:grid-cols-12 gap-8 items-center">
                 <div className="md:col-span-2">
-                  <span className="text-6xl md:text-7xl font-bold text-[#f5a623]/15">
-                    01
-                  </span>
+                  <span className="text-6xl md:text-7xl font-bold text-[#f5a623]/15">01</span>
                 </div>
                 <div className="md:col-span-6">
                   <Reveal>
@@ -200,8 +195,8 @@ export default function HomePage() {
                       Verified Identities
                     </h3>
                     <p className="text-sm text-[#7a6b5a] leading-relaxed max-w-md">
-                      Email verification, social proof, skill credentials. Know
-                      who you&apos;re dealing with before you commit.
+                      Email verification, social proof, skill credentials. Know who you&apos;re
+                      dealing with before you commit.
                     </p>
                   </Reveal>
                 </div>
@@ -219,9 +214,7 @@ export default function HomePage() {
             <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-20">
               <div className="grid md:grid-cols-12 gap-8 items-center">
                 <div className="md:col-span-2">
-                  <span className="text-6xl md:text-7xl font-bold text-[#00e5ff]/15">
-                    02
-                  </span>
+                  <span className="text-6xl md:text-7xl font-bold text-[#00e5ff]/15">02</span>
                 </div>
                 <div className="md:col-span-6">
                   <Reveal>
@@ -229,8 +222,8 @@ export default function HomePage() {
                       Optional Contracts
                     </h3>
                     <p className="text-sm text-[#7a6b5a] leading-relaxed max-w-md">
-                      Use binding contracts for security, or exchange freely
-                      with a handshake agreement. You choose what fits.
+                      Use binding contracts for security, or exchange freely with a handshake
+                      agreement. You choose what fits.
                     </p>
                   </Reveal>
                 </div>
@@ -248,9 +241,7 @@ export default function HomePage() {
             <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-20">
               <div className="grid md:grid-cols-12 gap-8 items-center">
                 <div className="md:col-span-2">
-                  <span className="text-6xl md:text-7xl font-bold text-[#b24bf5]/15">
-                    03
-                  </span>
+                  <span className="text-6xl md:text-7xl font-bold text-[#b24bf5]/15">03</span>
                 </div>
                 <div className="md:col-span-6">
                   <Reveal>
@@ -258,9 +249,8 @@ export default function HomePage() {
                       Reputation Engine
                     </h3>
                     <p className="text-sm text-[#7a6b5a] leading-relaxed max-w-md">
-                      Bilateral 1-10 reviews with default excellence. Your
-                      history becomes your passport. Every exchange builds
-                      trust.
+                      Bilateral 1-10 reviews with default excellence. Your history becomes your
+                      passport. Every exchange builds trust.
                     </p>
                   </Reveal>
                 </div>
@@ -278,9 +268,7 @@ export default function HomePage() {
             <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-20">
               <div className="grid md:grid-cols-12 gap-8 items-center">
                 <div className="md:col-span-2">
-                  <span className="text-6xl md:text-7xl font-bold text-[#f5a623]/15">
-                    04
-                  </span>
+                  <span className="text-6xl md:text-7xl font-bold text-[#f5a623]/15">04</span>
                 </div>
                 <div className="md:col-span-6">
                   <Reveal>
@@ -288,9 +276,8 @@ export default function HomePage() {
                       Built-in Messaging
                     </h3>
                     <p className="text-sm text-[#7a6b5a] leading-relaxed max-w-md">
-                      Negotiate inside every exchange. DM anyone in the community
-                      Terminal. No external apps needed. Full message history
-                      stays with the contract.
+                      Negotiate inside every exchange. DM anyone in the community Terminal. No
+                      external apps needed. Full message history stays with the contract.
                     </p>
                   </Reveal>
                 </div>
@@ -308,9 +295,7 @@ export default function HomePage() {
             <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-20">
               <div className="grid md:grid-cols-12 gap-8 items-center">
                 <div className="md:col-span-2">
-                  <span className="text-6xl md:text-7xl font-bold text-[#00e5ff]/15">
-                    05
-                  </span>
+                  <span className="text-6xl md:text-7xl font-bold text-[#00e5ff]/15">05</span>
                 </div>
                 <div className="md:col-span-5">
                   <Reveal>
@@ -321,9 +306,9 @@ export default function HomePage() {
                       <LiveBadge />
                     </div>
                     <p className="text-sm text-[#7a6b5a] leading-relaxed max-w-md mb-4">
-                      Join real-time channels like #general, #trades, and #help.
-                      Message anyone directly with /dm. Get notified when
-                      someone mentions you. The community lives here.
+                      Join real-time channels like #general, #trades, and #help. Message anyone
+                      directly with /dm. Get notified when someone mentions you. The community lives
+                      here.
                     </p>
                     <Button asChild variant="secondary" size="sm">
                       <Link href="/terminal">
@@ -348,9 +333,7 @@ export default function HomePage() {
         <section className="py-20 md:py-28 border-t border-[#2a2420]">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
-              <p className="text-xs text-[#7a6b5a] mb-8 font-mono">
-                $ cat docs/pillars.md
-              </p>
+              <p className="text-xs text-[#7a6b5a] mb-8 font-mono">$ cat docs/pillars.md</p>
               <h2 className="heading-display text-3xl md:text-4xl text-[#e8d5a3] mb-12">
                 Built for <span className="text-[#00e676]">Trust.</span>
               </h2>
@@ -405,8 +388,8 @@ export default function HomePage() {
                 <span className="text-[#f5a623]">Your Reputation.</span>
               </h2>
               <p className="text-base text-[#7a6b5a] max-w-md mb-10 leading-relaxed">
-                Join the Central Coast trial. Verify your identity, get Pro for
-                free, and help shape the future of exchange.
+                Join the Central Coast trial. Verify your identity, get Pro for free, and help shape
+                the future of exchange.
               </p>
               <div className="flex flex-wrap items-center gap-3">
                 <Button asChild size="lg">

@@ -108,18 +108,21 @@ export function redactDescription(text: string | null | undefined): string {
  * Redact a credential object, returning a new object with sensitive data masked.
  * Used for public API responses.
  */
-export function redactCredential<T extends { documentNumber?: string | null; description?: string | null; fileUrl?: string | null; backFileUrl?: string | null }>(
-  credential: T
-): Omit<T, "fileUrl" | "backFileUrl"> {
+export function redactCredential<
+  T extends {
+    documentNumber?: string | null;
+    description?: string | null;
+    fileUrl?: string | null;
+    backFileUrl?: string | null;
+  },
+>(credential: T): Omit<T, "fileUrl" | "backFileUrl"> {
   const { fileUrl, backFileUrl, ...rest } = credential as any;
   return {
     ...rest,
     documentNumber: rest.documentNumber
       ? redactDocumentNumber(rest.documentNumber)
       : rest.documentNumber,
-    description: rest.description
-      ? redactDescription(rest.description)
-      : rest.description,
+    description: rest.description ? redactDescription(rest.description) : rest.description,
   };
 }
 

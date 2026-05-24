@@ -1,18 +1,49 @@
 "use client";
 
 import { useState } from "react";
+
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Navbar } from "@/components/layout/navbar";
-import { Footer } from "@/components/layout/footer";
+
 import {
-  Wrench, Package, CircleDollarSign, MapPin, ArrowRight,
-  Shuffle, Heart, TreePine, Coffee, Music, Camera,
-  BookOpen, Bike, Waves, ChefHat, Paintbrush, Code,
-  Dog, Baby, Car, Hammer, Leaf, Dumbbell,
-  Clapperboard, Gamepad2, Shirt, Guitar, Flower2, Tent,
-  Backpack, Bus, Bed, ShowerHead, Globe, Sun,
+  Wrench,
+  Package,
+  CircleDollarSign,
+  MapPin,
+  ArrowRight,
+  Shuffle,
+  Heart,
+  TreePine,
+  Coffee,
+  Music,
+  Camera,
+  BookOpen,
+  Bike,
+  Waves,
+  ChefHat,
+  Paintbrush,
+  Code,
+  Dog,
+  Baby,
+  Car,
+  Hammer,
+  Leaf,
+  Dumbbell,
+  Clapperboard,
+  Gamepad2,
+  Shirt,
+  Guitar,
+  Flower2,
+  Tent,
+  Bus,
+  Bed,
+  ShowerHead,
+  Globe,
+  Sun,
 } from "lucide-react";
+
+import { Footer } from "@/components/layout/footer";
+import { Navbar } from "@/components/layout/navbar";
+import { Button } from "@/components/ui/button";
 import { EXCHANGE_MODES, getExchangeMode } from "@/lib/categories";
 
 type ExampleCategory =
@@ -42,7 +73,8 @@ const examples: Example[] = [
   {
     id: 1,
     needTitle: "Lemons — want to trade for oranges",
-    needDescription: "My lemon tree is going absolutely nuts. I have about 3kg of fresh lemons every fortnight. Looking to swap with someone whose orange or mandarin tree is doing the same.",
+    needDescription:
+      "My lemon tree is going absolutely nuts. I have about 3kg of fresh lemons every fortnight. Looking to swap with someone whose orange or mandarin tree is doing the same.",
     offerType: "item",
     offerDescription: "3kg of homegrown lemons, unwaxed, tree-ripened",
     location: "Macmasters Beach",
@@ -52,7 +84,8 @@ const examples: Example[] = [
   {
     id: 2,
     needTitle: "Surplus tomatoes and basil",
-    needDescription: "Garden exploded this season. Picking 2-3kg of mixed tomatoes and a huge bunch of basil weekly. Happy to swap for anything I don't grow.",
+    needDescription:
+      "Garden exploded this season. Picking 2-3kg of mixed tomatoes and a huge bunch of basil weekly. Happy to swap for anything I don't grow.",
     offerType: "item",
     offerDescription: "Mixed heirloom tomatoes + fresh basil (weekly swap)",
     location: "Kincumber",
@@ -62,7 +95,8 @@ const examples: Example[] = [
   {
     id: 3,
     needTitle: "Swap my skateboard for a surfboard",
-    needDescription: "Santa Cruz complete, 8.25 inch deck, barely skated — I've accepted I'm too old for stairs. Looking for a foamie or soft-top surfboard, any condition.",
+    needDescription:
+      "Santa Cruz complete, 8.25 inch deck, barely skated — I've accepted I'm too old for stairs. Looking for a foamie or soft-top surfboard, any condition.",
     offerType: "item",
     offerDescription: "Santa Cruz skateboard complete (retail $180)",
     location: "Terrigal",
@@ -72,7 +106,8 @@ const examples: Example[] = [
   {
     id: 4,
     needTitle: "Vinyl records — looking to trade",
-    needDescription: "Clearing out ~40 records — mostly 70s rock, some jazz and soul. Looking to swap for different genres or books. Come dig through the crate.",
+    needDescription:
+      "Clearing out ~40 records — mostly 70s rock, some jazz and soul. Looking to swap for different genres or books. Come dig through the crate.",
     offerType: "item",
     offerDescription: "Crate of vinyl (rock, jazz, soul) — pick what you want",
     location: "Woy Woy",
@@ -82,7 +117,8 @@ const examples: Example[] = [
   {
     id: 5,
     needTitle: "Firewood for fresh fish",
-    needDescription: "Split a cord of hardwood last month. Way more than I need. Would love to trade a wheelbarrow-load for some freshly caught fish.",
+    needDescription:
+      "Split a cord of hardwood last month. Way more than I need. Would love to trade a wheelbarrow-load for some freshly caught fish.",
     offerType: "item",
     offerDescription: "Split hardwood firewood (wheelbarrow load)",
     location: "Macmasters Beach",
@@ -92,7 +128,8 @@ const examples: Example[] = [
   {
     id: 6,
     needTitle: "Homemade sourdough for honey or eggs",
-    needDescription: "I bake 4 loaves every Sunday. Always have extras. Swap for backyard eggs, local honey, or whatever you've got.",
+    needDescription:
+      "I bake 4 loaves every Sunday. Always have extras. Swap for backyard eggs, local honey, or whatever you've got.",
     offerType: "item",
     offerDescription: "Fresh sourdough loaf (baked Sunday mornings)",
     location: "Avoca Beach",
@@ -102,7 +139,8 @@ const examples: Example[] = [
   {
     id: 7,
     needTitle: "Kids' clothes — sizes 4-6 — swap for toys",
-    needDescription: "Two boxes of clean, good-condition kids clothes (boys and girls). My youngest outgrew everything. Swap for LEGO, board games, or outdoor toys.",
+    needDescription:
+      "Two boxes of clean, good-condition kids clothes (boys and girls). My youngest outgrew everything. Swap for LEGO, board games, or outdoor toys.",
     offerType: "item",
     offerDescription: "Two boxes of kids clothes, sizes 4-6",
     location: "Erina",
@@ -114,7 +152,8 @@ const examples: Example[] = [
   {
     id: 8,
     needTitle: "Teach me to surf — I'll teach you to skate",
-    needDescription: "I've skated for 15 years — can teach ollies, kickflips, bowl riding, whatever. Never surfed. Looking for someone patient who wants to trade skills.",
+    needDescription:
+      "I've skated for 15 years — can teach ollies, kickflips, bowl riding, whatever. Never surfed. Looking for someone patient who wants to trade skills.",
     offerType: "service",
     offerDescription: "Skateboarding lessons — beginner to intermediate",
     location: "Terrigal → Macmasters",
@@ -124,7 +163,8 @@ const examples: Example[] = [
   {
     id: 9,
     needTitle: "Guitar lessons wanted — I can teach you code",
-    needDescription: "Software dev by trade. Want to learn acoustic guitar (absolute beginner). Happy to teach Python, web dev, or how to automate boring stuff in return.",
+    needDescription:
+      "Software dev by trade. Want to learn acoustic guitar (absolute beginner). Happy to teach Python, web dev, or how to automate boring stuff in return.",
     offerType: "service",
     offerDescription: "Coding tutoring — Python, JavaScript, or automation",
     location: "Gosford",
@@ -134,7 +174,8 @@ const examples: Example[] = [
   {
     id: 10,
     needTitle: "Spanish conversation — I'll teach you French",
-    needDescription: "Native French speaker, fluent English. Want to get conversational in Spanish. Happy to meet weekly for a language exchange over coffee.",
+    needDescription:
+      "Native French speaker, fluent English. Want to get conversational in Spanish. Happy to meet weekly for a language exchange over coffee.",
     offerType: "service",
     offerDescription: "French lessons or conversation practice",
     location: "Copacabana",
@@ -144,7 +185,8 @@ const examples: Example[] = [
   {
     id: 11,
     needTitle: "Yoga instruction — I'll teach you photography",
-    needDescription: "Professional photographer. Bad back, terrible posture. Want 1-2 yoga sessions a week. I'll teach you composition, Lightroom, or how to use your camera properly.",
+    needDescription:
+      "Professional photographer. Bad back, terrible posture. Want 1-2 yoga sessions a week. I'll teach you composition, Lightroom, or how to use your camera properly.",
     offerType: "service",
     offerDescription: "Photography lessons — camera basics to editing",
     location: "Avoca Beach",
@@ -154,7 +196,8 @@ const examples: Example[] = [
   {
     id: 12,
     needTitle: "Maths tutor for my teen — I'll teach you to cook",
-    needDescription: "Year 11 student needs help with advanced maths, 1 hour a week. I'm a chef — I'll teach you proper knife skills, pasta from scratch, or how to break down a chicken.",
+    needDescription:
+      "Year 11 student needs help with advanced maths, 1 hour a week. I'm a chef — I'll teach you proper knife skills, pasta from scratch, or how to break down a chicken.",
     offerType: "service",
     offerDescription: "Professional cooking lessons — your choice of cuisine",
     location: "Kincumber",
@@ -164,7 +207,8 @@ const examples: Example[] = [
   {
     id: 13,
     needTitle: "Dance partner — salsa or bachata",
-    needDescription: "Intermediate lead looking for a follow to practice with weekly. In return I can teach you to drive manual, fix bikes, or basic carpentry.",
+    needDescription:
+      "Intermediate lead looking for a follow to practice with weekly. In return I can teach you to drive manual, fix bikes, or basic carpentry.",
     offerType: "service",
     offerDescription: "Manual driving lessons, bike repair, or carpentry basics",
     location: "Wamberal",
@@ -176,7 +220,8 @@ const examples: Example[] = [
   {
     id: 14,
     needTitle: "Fix my fence — I've got tools and a Weber BBQ",
-    needDescription: "About 8 metres of colourbond fence needs straightening and a few posts replaced. I have tools but not the know-how. Happy to trade my Weber kettle.",
+    needDescription:
+      "About 8 metres of colourbond fence needs straightening and a few posts replaced. I have tools but not the know-how. Happy to trade my Weber kettle.",
     offerType: "item",
     offerDescription: "Weber kettle BBQ — good condition, all accessories",
     location: "Umina Beach",
@@ -186,7 +231,8 @@ const examples: Example[] = [
   {
     id: 15,
     needTitle: "Mow my lawn — take home fresh eggs",
-    needDescription: "Small backyard, takes about 30 mins. My chooks lay 6-8 eggs a day — way more than we eat. Weekly mow in exchange for a dozen eggs each time.",
+    needDescription:
+      "Small backyard, takes about 30 mins. My chooks lay 6-8 eggs a day — way more than we eat. Weekly mow in exchange for a dozen eggs each time.",
     offerType: "item",
     offerDescription: "Dozen backyard eggs (proper free range, mixed colours)",
     location: "Woy Woy",
@@ -196,7 +242,8 @@ const examples: Example[] = [
   {
     id: 16,
     needTitle: "Assemble IKEA furniture — I've got an espresso machine",
-    needDescription: "BILLY bookcase, MALM bed, and two side tables. Should take 2-3 hours max. I'll supply tools and coffee. Trade: my Breville Duo Temp.",
+    needDescription:
+      "BILLY bookcase, MALM bed, and two side tables. Should take 2-3 hours max. I'll supply tools and coffee. Trade: my Breville Duo Temp.",
     offerType: "item",
     offerDescription: "Breville espresso machine — works perfectly",
     location: "Gosford",
@@ -206,7 +253,8 @@ const examples: Example[] = [
   {
     id: 17,
     needTitle: "Walk my dog 3x/week — I'll cook your dinners",
-    needDescription: "Labrador, friendly, 45 mins each walk Mon/Wed/Fri. In return I'll meal-prep you 5 healthy dinners every Sunday. I used to be a chef.",
+    needDescription:
+      "Labrador, friendly, 45 mins each walk Mon/Wed/Fri. In return I'll meal-prep you 5 healthy dinners every Sunday. I used to be a chef.",
     offerType: "service",
     offerDescription: "5 home-cooked meals prepped every Sunday",
     location: "Avoca Beach",
@@ -216,7 +264,8 @@ const examples: Example[] = [
   {
     id: 18,
     needTitle: "Help me move — take my old kayak",
-    needDescription: "Moving from a 2-bed unit to a house. One trip, maybe 3 hours total. Everything is boxed. Trade: my 2.7m sit-on-top kayak with paddle.",
+    needDescription:
+      "Moving from a 2-bed unit to a house. One trip, maybe 3 hours total. Everything is boxed. Trade: my 2.7m sit-on-top kayak with paddle.",
     offerType: "item",
     offerDescription: "2.7m sit-on-top kayak + paddle",
     location: "Terrigal → Wamberal",
@@ -226,7 +275,8 @@ const examples: Example[] = [
   {
     id: 19,
     needTitle: "Babysit my toddler — take home preserves",
-    needDescription: "Need a reliable person for 3 hours on Thursday afternoons while I work from home (I'll be in the office). Toddler is 2, easy. Trade: jars of my homemade preserves.",
+    needDescription:
+      "Need a reliable person for 3 hours on Thursday afternoons while I work from home (I'll be in the office). Toddler is 2, easy. Trade: jars of my homemade preserves.",
     offerType: "item",
     offerDescription: "Homemade jams, chutneys, and pickled veg (your pick)",
     location: "Erina",
@@ -238,7 +288,8 @@ const examples: Example[] = [
   {
     id: 20,
     needTitle: "Someone to teach me Excel — I'll give you my old tools",
-    needDescription: "Need to learn pivot tables, VLOOKUP, and basic macros for a new job. Complete beginner. I have a full set of old but quality hand tools to trade.",
+    needDescription:
+      "Need to learn pivot tables, VLOOKUP, and basic macros for a new job. Complete beginner. I have a full set of old but quality hand tools to trade.",
     offerType: "item",
     offerDescription: "Full set of quality hand tools — Stanley, Bahco, etc.",
     location: "Kincumber",
@@ -248,7 +299,8 @@ const examples: Example[] = [
   {
     id: 21,
     needTitle: "Haircut at home — I'll give you my vintage jacket",
-    needDescription: "Just need a simple trim, nothing fancy. Happy to come to you or you come to me. Trade: my vintage leather jacket, size M, genuine 80s.",
+    needDescription:
+      "Just need a simple trim, nothing fancy. Happy to come to you or you come to me. Trade: my vintage leather jacket, size M, genuine 80s.",
     offerType: "item",
     offerDescription: "Vintage leather jacket — genuine 80s, size M",
     location: "Copacabana",
@@ -258,7 +310,8 @@ const examples: Example[] = [
   {
     id: 22,
     needTitle: "Help setting up my home studio — take my synth",
-    needDescription: "Need someone who knows audio interfaces, mic placement, and acoustic treatment. 2-3 hour session. Trade: my Korg Volca Keys (analog synth, great condition).",
+    needDescription:
+      "Need someone who knows audio interfaces, mic placement, and acoustic treatment. 2-3 hour session. Trade: my Korg Volca Keys (analog synth, great condition).",
     offerType: "item",
     offerDescription: "Korg Volca Keys analog synthesizer",
     location: "Macmasters Beach",
@@ -268,7 +321,8 @@ const examples: Example[] = [
   {
     id: 23,
     needTitle: "Teach me to prune fruit trees — I've got a BBQ smoker",
-    needDescription: "Three mature fruit trees that haven't been pruned in years. Need someone who knows what they're doing to show me. Trade: my Weber Smokey Mountain smoker.",
+    needDescription:
+      "Three mature fruit trees that haven't been pruned in years. Need someone who knows what they're doing to show me. Trade: my Weber Smokey Mountain smoker.",
     offerType: "item",
     offerDescription: "Weber Smokey Mountain smoker — 18.5 inch",
     location: "Wamberal",
@@ -280,7 +334,8 @@ const examples: Example[] = [
   {
     id: 24,
     needTitle: "Leaking kitchen tap",
-    needDescription: "Dripping constantly for a week. Pretty sure it's just the washer. Parts supplied, just need someone who knows what they're doing.",
+    needDescription:
+      "Dripping constantly for a week. Pretty sure it's just the washer. Parts supplied, just need someone who knows what they're doing.",
     offerType: "money",
     offerDescription: "$80 cash on completion",
     location: "Umina Beach",
@@ -290,7 +345,8 @@ const examples: Example[] = [
   {
     id: 25,
     needTitle: "Piano tuner needed",
-    needDescription: "Upright piano hasn't been tuned in 3 years. Looking for a proper piano tuner, not just someone with an app.",
+    needDescription:
+      "Upright piano hasn't been tuned in 3 years. Looking for a proper piano tuner, not just someone with an app.",
     offerType: "money",
     offerDescription: "$150 — negotiable",
     location: "Gosford",
@@ -300,7 +356,8 @@ const examples: Example[] = [
   {
     id: 26,
     needTitle: "Website for my landscaping business",
-    needDescription: "Simple 5-page site: home, services, gallery, about, contact. I have all the photos and copy ready. Just need someone to build it properly.",
+    needDescription:
+      "Simple 5-page site: home, services, gallery, about, contact. I have all the photos and copy ready. Just need someone to build it properly.",
     offerType: "money",
     offerDescription: "$1,200 or open to trade",
     location: "Copacabana",
@@ -310,7 +367,8 @@ const examples: Example[] = [
   {
     id: 27,
     needTitle: "Someone to detail my car interior",
-    needDescription: "Family wagon, 3 kids. Interior needs a proper deep clean — seats, carpets, vents, the works. I'll supply products or you bring your own (I'll pay extra).",
+    needDescription:
+      "Family wagon, 3 kids. Interior needs a proper deep clean — seats, carpets, vents, the works. I'll supply products or you bring your own (I'll pay extra).",
     offerType: "money",
     offerDescription: "$120 + supply products",
     location: "Erina",
@@ -320,7 +378,8 @@ const examples: Example[] = [
   {
     id: 28,
     needTitle: "Regular dog walker — paid weekly",
-    needDescription: "Medium staffy, super friendly. Needs 45-min walks Mon/Wed/Fri. Ongoing arrangement preferred. Must be comfortable with strong dogs.",
+    needDescription:
+      "Medium staffy, super friendly. Needs 45-min walks Mon/Wed/Fri. Ongoing arrangement preferred. Must be comfortable with strong dogs.",
     offerType: "money",
     offerDescription: "$20 per walk, $60/week ongoing",
     location: "Avoca Beach",
@@ -332,7 +391,8 @@ const examples: Example[] = [
   {
     id: 29,
     needTitle: "Ride to Gosford Hospital — Tuesdays",
-    needDescription: "Elderly mum needs a lift to weekly physio at Gosford Hospital, 10am Tuesday. There and back. She's mobile, just can't drive. Happy to pay fuel or cook you dinner.",
+    needDescription:
+      "Elderly mum needs a lift to weekly physio at Gosford Hospital, 10am Tuesday. There and back. She's mobile, just can't drive. Happy to pay fuel or cook you dinner.",
     offerType: "service",
     offerDescription: "Home-cooked dinner every week or fuel money",
     location: "Kincumber → Gosford",
@@ -342,7 +402,8 @@ const examples: Example[] = [
   {
     id: 30,
     needTitle: "Check on my dad — I'll bake you a cake",
-    needDescription: "Dad lives alone in Woy Woy, early dementia. I live in Sydney and can't visit weekly. Need someone to pop in for 30 mins, make a cuppa, check he's okay. Weekly.",
+    needDescription:
+      "Dad lives alone in Woy Woy, early dementia. I live in Sydney and can't visit weekly. Need someone to pop in for 30 mins, make a cuppa, check he's okay. Weekly.",
     offerType: "service",
     offerDescription: "A freshly baked cake every fortnight (your choice)",
     location: "Woy Woy",
@@ -352,7 +413,8 @@ const examples: Example[] = [
   {
     id: 31,
     needTitle: "Emergency babysitter — date nights",
-    needDescription: "Need a reliable sitter for occasional Friday/Saturday evenings. Two kids, 5 and 7, asleep by 8pm usually. We rarely get out. Happy to return the favour or pay.",
+    needDescription:
+      "Need a reliable sitter for occasional Friday/Saturday evenings. Two kids, 5 and 7, asleep by 8pm usually. We rarely get out. Happy to return the favour or pay.",
     offerType: "service",
     offerDescription: "We'll babysit your kids in return (qualified teacher)",
     location: "Terrigal",
@@ -362,7 +424,8 @@ const examples: Example[] = [
   {
     id: 32,
     needTitle: "Help clearing a deceased estate garden",
-    needDescription: "My nan's house is being sold. The garden is overgrown — 40 years of growth. Need strong arms and kind hearts. Tea, sandwiches, and genuine gratitude provided.",
+    needDescription:
+      "My nan's house is being sold. The garden is overgrown — 40 years of growth. Need strong arms and kind hearts. Tea, sandwiches, and genuine gratitude provided.",
     offerType: "service",
     offerDescription: "Lunch, endless cups of tea, and my eternal gratitude",
     location: "Macmasters Beach",
@@ -374,7 +437,8 @@ const examples: Example[] = [
   {
     id: 33,
     needTitle: "Tattoo design — I'll give you a massage",
-    needDescription: "Want a custom piece designed for my forearm — botanical/nature theme. Need someone with illustrative skills. Trade: I'm a qualified remedial massage therapist.",
+    needDescription:
+      "Want a custom piece designed for my forearm — botanical/nature theme. Need someone with illustrative skills. Trade: I'm a qualified remedial massage therapist.",
     offerType: "service",
     offerDescription: "1-hour remedial massage (qualified therapist)",
     location: "Wamberal",
@@ -384,7 +448,8 @@ const examples: Example[] = [
   {
     id: 34,
     needTitle: "Mix my band's demo — I'll design your logo",
-    needDescription: "3-track garage rock demo. Needs EQ, compression, and a basic mix. In return I'll design you a professional logo or album artwork.",
+    needDescription:
+      "3-track garage rock demo. Needs EQ, compression, and a basic mix. In return I'll design you a professional logo or album artwork.",
     offerType: "service",
     offerDescription: "Professional logo or album artwork design",
     location: "Gosford",
@@ -394,7 +459,8 @@ const examples: Example[] = [
   {
     id: 35,
     needTitle: "Headshots for LinkedIn — I'll write your resume",
-    needDescription: "Need professional-looking headshots for job hunting. Have a decent camera but no lighting or skill. Trade: 10 years of resume/CV writing experience.",
+    needDescription:
+      "Need professional-looking headshots for job hunting. Have a decent camera but no lighting or skill. Trade: 10 years of resume/CV writing experience.",
     offerType: "service",
     offerDescription: "Professional resume/CV rewrite + cover letter",
     location: "Copacabana",
@@ -404,7 +470,8 @@ const examples: Example[] = [
   {
     id: 36,
     needTitle: "Paint a mural on my garage — I'll teach you pottery",
-    needDescription: "Plain concrete garage wall, 4m x 2.5m. Want something colourful and beachy. I'm a potter — happy to teach you wheel throwing or hand building in return.",
+    needDescription:
+      "Plain concrete garage wall, 4m x 2.5m. Want something colourful and beachy. I'm a potter — happy to teach you wheel throwing or hand building in return.",
     offerType: "service",
     offerDescription: "Pottery lessons — wheel throwing or hand building",
     location: "Macmasters Beach",
@@ -416,7 +483,8 @@ const examples: Example[] = [
   {
     id: 37,
     needTitle: "Take me rock climbing outdoors",
-    needDescription: "Indoor climber for 2 years, never been outdoors. Need someone experienced with gear and local crag knowledge. I'll cook you an epic post-climb feast.",
+    needDescription:
+      "Indoor climber for 2 years, never been outdoors. Need someone experienced with gear and local crag knowledge. I'll cook you an epic post-climb feast.",
     offerType: "service",
     offerDescription: "3-course home-cooked dinner (dietary requirements catered)",
     location: "Somersby / local crags",
@@ -426,7 +494,8 @@ const examples: Example[] = [
   {
     id: 38,
     needTitle: "Show me the secret surf spots",
-    needDescription: "New to the coast, intermediate surfer. Want someone to show me the less-crowded local breaks and explain the rips. Trade: my old 3/2 wetsuit (size L, good nick).",
+    needDescription:
+      "New to the coast, intermediate surfer. Want someone to show me the less-crowded local breaks and explain the rips. Trade: my old 3/2 wetsuit (size L, good nick).",
     offerType: "item",
     offerDescription: "3/2mm wetsuit, size L — Rip Curl, good condition",
     location: "Macmasters / Copacabana",
@@ -436,7 +505,8 @@ const examples: Example[] = [
   {
     id: 39,
     needTitle: "Teach me to fish off the rocks",
-    needDescription: "Complete beginner. Bought gear, watched YouTube, caught nothing. Need someone patient to show me rigs, bait, spots, and technique. I'll bring the beers and build you a fire pit.",
+    needDescription:
+      "Complete beginner. Bought gear, watched YouTube, caught nothing. Need someone patient to show me rigs, bait, spots, and technique. I'll bring the beers and build you a fire pit.",
     offerType: "service",
     offerDescription: "Custom-built fire pit + cold beers on the day",
     location: "Avoca / Macmasters",
@@ -446,7 +516,8 @@ const examples: Example[] = [
   {
     id: 40,
     needTitle: "Take me camping — first timer",
-    needDescription: "36 years old, never camped. Want someone experienced to take me on an easy overnight trip — show me how to set up, cook, stay safe. I'll bring all the food and gear.",
+    needDescription:
+      "36 years old, never camped. Want someone experienced to take me on an easy overnight trip — show me how to set up, cook, stay safe. I'll bring all the food and gear.",
     offerType: "service",
     offerDescription: "All food and drinks for the trip (your preferences)",
     location: "Bouddi National Park",
@@ -456,7 +527,8 @@ const examples: Example[] = [
   {
     id: 41,
     needTitle: "Need a DM for D&D campaign",
-    needDescription: "Group of 4 adults, played a few one-shots, want a regular campaign. fortnightly, 3-4 hours. We have dice, books, snacks. Host at my place. Happy to pay or trade.",
+    needDescription:
+      "Group of 4 adults, played a few one-shots, want a regular campaign. fortnightly, 3-4 hours. We have dice, books, snacks. Host at my place. Happy to pay or trade.",
     offerType: "service",
     offerDescription: "I'll host, feed you, and pay $50/session or trade",
     location: "Kincumber",
@@ -466,7 +538,8 @@ const examples: Example[] = [
   {
     id: 42,
     needTitle: "Film a short video for my business",
-    needDescription: "Need a 90-second promo video for my gardening business. Just me talking to camera + some B-roll of gardens. Half day shoot. Trade: I'll completely landscape your front yard.",
+    needDescription:
+      "Need a 90-second promo video for my gardening business. Just me talking to camera + some B-roll of gardens. Half day shoot. Trade: I'll completely landscape your front yard.",
     offerType: "service",
     offerDescription: "Full front yard landscaping (plants, mulch, design)",
     location: "Woy Woy",
@@ -478,7 +551,8 @@ const examples: Example[] = [
   {
     id: 43,
     needTitle: "A bed for a week — I'll work 3 hours a day",
-    needDescription: "Travelling the coast in a van, need a break from camping. Happy to do gardening, cleaning, painting, or admin work for a local. 3 hours a day, 5 days, in exchange for a room or even a garage with a mattress.",
+    needDescription:
+      "Travelling the coast in a van, need a break from camping. Happy to do gardening, cleaning, painting, or admin work for a local. 3 hours a day, 5 days, in exchange for a room or even a garage with a mattress.",
     offerType: "service",
     offerDescription: "3 hours labour daily — gardening, cleaning, painting, or admin",
     location: "Anywhere on the Coast",
@@ -488,7 +562,8 @@ const examples: Example[] = [
   {
     id: 44,
     needTitle: "Fruit picking work — want accommodation + meals",
-    needDescription: "Two backpackers, fit and hard-working. Looking for a farm or orchard that needs seasonal pickers. In exchange for a place to pitch our tent or a room, plus dinner. Can stay 2-4 weeks.",
+    needDescription:
+      "Two backpackers, fit and hard-working. Looking for a farm or orchard that needs seasonal pickers. In exchange for a place to pitch our tent or a room, plus dinner. Can stay 2-4 weeks.",
     offerType: "service",
     offerDescription: "Full-time fruit picking labour — 2 reliable workers",
     location: "Central Coast surrounds",
@@ -498,7 +573,8 @@ const examples: Example[] = [
   {
     id: 45,
     needTitle: "Hostel needs a social media person — free dorm bed",
-    needDescription: "Small hostel near the beach needs someone to run Instagram and TikTok, 2 hours a day. Content is easy — just film the sunsets, the guests, the vibe. Free dorm bed and breakfast included.",
+    needDescription:
+      "Small hostel near the beach needs someone to run Instagram and TikTok, 2 hours a day. Content is easy — just film the sunsets, the guests, the vibe. Free dorm bed and breakfast included.",
     offerType: "service",
     offerDescription: "Free dorm bed + breakfast for 2 hours social media daily",
     location: "Terrigal",
@@ -508,7 +584,8 @@ const examples: Example[] = [
   {
     id: 46,
     needTitle: "House-sit while you're away — I'll look after everything",
-    needDescription: "Responsible traveller, non-smoker, clean. Will look after your house, plants, pets, and mail while you're on holiday. References available. Just need a place to stay for the duration.",
+    needDescription:
+      "Responsible traveller, non-smoker, clean. Will look after your house, plants, pets, and mail while you're on holiday. References available. Just need a place to stay for the duration.",
     offerType: "service",
     offerDescription: "Complete house and pet care — references available",
     location: "Anywhere on the Coast",
@@ -518,7 +595,8 @@ const examples: Example[] = [
   {
     id: 47,
     needTitle: "Need a shower and laundry — I'll cook dinner",
-    needDescription: "Living in a van, everything is great except showers and laundry get expensive. Looking for a local who'd let me use their shower and washing machine once a week. I'll cook you a proper dinner in return.",
+    needDescription:
+      "Living in a van, everything is great except showers and laundry get expensive. Looking for a local who'd let me use their shower and washing machine once a week. I'll cook you a proper dinner in return.",
     offerType: "service",
     offerDescription: "Home-cooked dinner for 2 — your choice of cuisine",
     location: "Anywhere on the Coast",
@@ -528,7 +606,8 @@ const examples: Example[] = [
   {
     id: 48,
     needTitle: "Teach English to your kids — stay in your spare room",
-    needDescription: "Native English speaker from Canada, travelling for 6 months. Want to base myself somewhere for 2-3 weeks. Happy to tutor your kids (or you) in English conversation, 1 hour a day. Just need a room.",
+    needDescription:
+      "Native English speaker from Canada, travelling for 6 months. Want to base myself somewhere for 2-3 weeks. Happy to tutor your kids (or you) in English conversation, 1 hour a day. Just need a room.",
     offerType: "service",
     offerDescription: "Daily English tutoring/conversation practice",
     location: "Anywhere on the Coast",
@@ -538,7 +617,8 @@ const examples: Example[] = [
   {
     id: 49,
     needTitle: "Carpool to Sydney — I'll split fuel",
-    needDescription: "Need to get to Sydney every Tuesday and Thursday for a course. Looking for someone who commutes regularly and wants to split fuel costs. I'm quiet, bring snacks, and can drive if needed.",
+    needDescription:
+      "Need to get to Sydney every Tuesday and Thursday for a course. Looking for someone who commutes regularly and wants to split fuel costs. I'm quiet, bring snacks, and can drive if needed.",
     offerType: "money",
     offerDescription: "Half the fuel cost + I'll drive your share of the way",
     location: "Gosford → Sydney",
@@ -548,7 +628,8 @@ const examples: Example[] = [
   {
     id: 50,
     needTitle: "Farmstay — work for room and board",
-    needDescription: "Experienced with animals, fencing, and general farm maintenance. Want to learn about Australian agriculture. Happy to work 4-5 hours a day in exchange for accommodation and meals. Can stay 1-2 months.",
+    needDescription:
+      "Experienced with animals, fencing, and general farm maintenance. Want to learn about Australian agriculture. Happy to work 4-5 hours a day in exchange for accommodation and meals. Can stay 1-2 months.",
     offerType: "service",
     offerDescription: "4-5 hours daily farm labour — fencing, animals, maintenance",
     location: "Central Coast hinterland",
@@ -558,7 +639,8 @@ const examples: Example[] = [
   {
     id: 51,
     needTitle: "Pet-sit for a weekend — free accommodation",
-    needDescription: "Love dogs, can't have one while travelling. Looking for locals who need a reliable pet-sitter for weekends away. I'll stay at your place, walk the dog, water plants, collect mail. Free for me, peace of mind for you.",
+    needDescription:
+      "Love dogs, can't have one while travelling. Looking for locals who need a reliable pet-sitter for weekends away. I'll stay at your place, walk the dog, water plants, collect mail. Free for me, peace of mind for you.",
     offerType: "service",
     offerDescription: "Weekend house and pet sitting — dog walks included",
     location: "Anywhere on the Coast",
@@ -568,7 +650,8 @@ const examples: Example[] = [
   {
     id: 52,
     needTitle: "Cafe needs a barista — meals + $15/hr",
-    needDescription: "Small beachside cafe needs a casual barista for 3-4 shifts a week. Can train you if you're keen. Perks: free coffee, staff meals, and $15/hr cash. Perfect for a traveller who wants to settle in for a month.",
+    needDescription:
+      "Small beachside cafe needs a casual barista for 3-4 shifts a week. Can train you if you're keen. Perks: free coffee, staff meals, and $15/hr cash. Perfect for a traveller who wants to settle in for a month.",
     offerType: "money",
     offerDescription: "$15/hr + free meals + all the coffee you can drink",
     location: "Avoca Beach",
@@ -578,7 +661,8 @@ const examples: Example[] = [
   {
     id: 53,
     needTitle: "Need a lift to Byron — I'll pay fuel and tell stories",
-    needDescription: "Heading north to Byron Bay next week. Looking for a ride-share. I'll pay all the fuel, buy lunch, and I play guitar — can keep us entertained for the 8-hour drive. Flexible on dates.",
+    needDescription:
+      "Heading north to Byron Bay next week. Looking for a ride-share. I'll pay all the fuel, buy lunch, and I play guitar — can keep us entertained for the 8-hour drive. Flexible on dates.",
     offerType: "money",
     offerDescription: "All fuel + lunch + live acoustic entertainment",
     location: "Central Coast → Byron Bay",
@@ -588,7 +672,8 @@ const examples: Example[] = [
   {
     id: 54,
     needTitle: "Backyard camping spot — I'll fix your fence",
-    needDescription: "Van life traveller looking for a safe, quiet place to park for a few nights. Happy to do odd jobs in return — fix fences, chop wood, paint, garden. Just need access to a tap and maybe a power point.",
+    needDescription:
+      "Van life traveller looking for a safe, quiet place to park for a few nights. Happy to do odd jobs in return — fix fences, chop wood, paint, garden. Just need access to a tap and maybe a power point.",
     offerType: "service",
     offerDescription: "Odd jobs — fencing, gardening, painting, wood chopping",
     location: "Anywhere on the Coast",
@@ -598,7 +683,8 @@ const examples: Example[] = [
   {
     id: 55,
     needTitle: "Help build a tiny cabin — learn carpentry + stay free",
-    needDescription: "Building an off-grid tiny cabin on my property. Need enthusiastic helpers, no experience necessary — I'll teach you carpentry, framing, and basic building. Free camping, meals, and skills in exchange for labour.",
+    needDescription:
+      "Building an off-grid tiny cabin on my property. Need enthusiastic helpers, no experience necessary — I'll teach you carpentry, framing, and basic building. Free camping, meals, and skills in exchange for labour.",
     offerType: "service",
     offerDescription: "Free camping + all meals + learn real carpentry skills",
     location: "Somersby area",
@@ -608,7 +694,8 @@ const examples: Example[] = [
   {
     id: 56,
     needTitle: "Tour guide for a day — show me the hidden spots",
-    needDescription: "New to the Central Coast, want a local to show me the secret beaches, best lookouts, and where to get a feed that isn't touristy. In exchange I'll take professional photos of you and your mates.",
+    needDescription:
+      "New to the Central Coast, want a local to show me the secret beaches, best lookouts, and where to get a feed that isn't touristy. In exchange I'll take professional photos of you and your mates.",
     offerType: "service",
     offerDescription: "Professional portrait session — digital files included",
     location: "Anywhere on the Coast",
@@ -618,7 +705,8 @@ const examples: Example[] = [
   {
     id: 57,
     needTitle: "Need a van mechanic — trade surf lessons",
-    needDescription: "My van's making a weird noise and the check engine light is on. Need someone who knows their way around a Toyota HiAce. I'll teach you to surf in return — proper technique, ocean safety, reading waves.",
+    needDescription:
+      "My van's making a weird noise and the check engine light is on. Need someone who knows their way around a Toyota HiAce. I'll teach you to surf in return — proper technique, ocean safety, reading waves.",
     offerType: "service",
     offerDescription: "Surf lessons — beginner to intermediate, board included",
     location: "Macmasters Beach",
@@ -628,7 +716,8 @@ const examples: Example[] = [
   {
     id: 58,
     needTitle: "Cook for a share house — eat for free",
-    needDescription: "Travelling chef, 8 years experience. Looking for a share house that wants a house cook. I'll do the shopping, cooking, and kitchen clean-up for 5 dinners a week. In exchange I just need a room and to eat with you.",
+    needDescription:
+      "Travelling chef, 8 years experience. Looking for a share house that wants a house cook. I'll do the shopping, cooking, and kitchen clean-up for 5 dinners a week. In exchange I just need a room and to eat with you.",
     offerType: "service",
     offerDescription: "5 restaurant-quality dinners a week + kitchen spotless",
     location: "Anywhere on the Coast",
@@ -638,7 +727,8 @@ const examples: Example[] = [
   {
     id: 59,
     needTitle: "Language exchange partner — meet at the beach",
-    needDescription: "German backpacker, fluent English, want to keep my Spanish and Japanese sharp. Looking for native speakers who want to chat for an hour a week at the beach. I'll bring the beer or coffee.",
+    needDescription:
+      "German backpacker, fluent English, want to keep my Spanish and Japanese sharp. Looking for native speakers who want to chat for an hour a week at the beach. I'll bring the beer or coffee.",
     offerType: "service",
     offerDescription: "German lessons or conversation + beer/coffee on me",
     location: "Terrigal / Avoca",
@@ -648,7 +738,8 @@ const examples: Example[] = [
   {
     id: 60,
     needTitle: "Boat needs a deckhand — learn to sail",
-    needDescription: "35ft yacht, need a reliable deckhand for weekend sails. No experience needed — I'll teach you knots, navigation, and sailing basics. Trade: an unforgettable weekend on the water and real sailing skills.",
+    needDescription:
+      "35ft yacht, need a reliable deckhand for weekend sails. No experience needed — I'll teach you knots, navigation, and sailing basics. Trade: an unforgettable weekend on the water and real sailing skills.",
     offerType: "service",
     offerDescription: "Learn to sail — navigation, knots, helming, the full experience",
     location: "Gosford / Brisbane Water",
@@ -658,7 +749,8 @@ const examples: Example[] = [
   {
     id: 61,
     needTitle: "Help at a market stall — keep the profit share",
-    needDescription: "Run a weekend market stall selling handmade candles and soaps. Need someone friendly to help set up, sell, and pack down. You keep 20% of the day's sales. Great for travellers who want cash and local interaction.",
+    needDescription:
+      "Run a weekend market stall selling handmade candles and soaps. Need someone friendly to help set up, sell, and pack down. You keep 20% of the day's sales. Great for travellers who want cash and local interaction.",
     offerType: "money",
     offerDescription: "20% of daily sales + free candles to take home",
     location: "Various markets",
@@ -668,7 +760,8 @@ const examples: Example[] = [
   {
     id: 62,
     needTitle: "Need a yoga teacher for our hostel — free stay",
-    needDescription: "Backpackers' hostel wants to offer sunrise yoga on the deck. Need a qualified or experienced teacher for 3 morning classes a week. Free private room, breakfast, and laundry in exchange.",
+    needDescription:
+      "Backpackers' hostel wants to offer sunrise yoga on the deck. Need a qualified or experienced teacher for 3 morning classes a week. Free private room, breakfast, and laundry in exchange.",
     offerType: "service",
     offerDescription: "Free private room + breakfast + laundry",
     location: "Copacabana",
@@ -678,7 +771,8 @@ const examples: Example[] = [
   {
     id: 63,
     needTitle: "Babysit in the evenings — I'll clean your house",
-    needDescription: "Former nanny, travelling Australia. Need accommodation for 2-3 weeks. Offering evening babysitting (so parents can go out) plus general house cleaning. Happy to do meal prep too. References from 3 families.",
+    needDescription:
+      "Former nanny, travelling Australia. Need accommodation for 2-3 weeks. Offering evening babysitting (so parents can go out) plus general house cleaning. Happy to do meal prep too. References from 3 families.",
     offerType: "service",
     offerDescription: "Evening babysitting + house cleaning + meal prep",
     location: "Anywhere on the Coast",
@@ -688,7 +782,8 @@ const examples: Example[] = [
   {
     id: 64,
     needTitle: "Hostel needs a handyman — free dorm + $20/hr",
-    needDescription: "Old hostel needs fixing up — leaky taps, broken screens, painting touch-ups, furniture repair. 3-4 hours a day, flexible timing. Free dorm bed and $20/hr cash. Perfect for a tradie on holiday.",
+    needDescription:
+      "Old hostel needs fixing up — leaky taps, broken screens, painting touch-ups, furniture repair. 3-4 hours a day, flexible timing. Free dorm bed and $20/hr cash. Perfect for a tradie on holiday.",
     offerType: "money",
     offerDescription: "$20/hr cash + free dorm bed + free breakfast",
     location: "Terrigal",
@@ -698,7 +793,8 @@ const examples: Example[] = [
   {
     id: 65,
     needTitle: "Swap my ukulele for a guitar",
-    needDescription: "Bought a ukulele for the trip, realised I'm more of a guitar person. Kala concert uke, barely played, comes with case and tuner. Looking for any playable acoustic guitar, condition negotiable.",
+    needDescription:
+      "Bought a ukulele for the trip, realised I'm more of a guitar person. Kala concert uke, barely played, comes with case and tuner. Looking for any playable acoustic guitar, condition negotiable.",
     offerType: "item",
     offerDescription: "Kala concert ukulele + case + tuner",
     location: "Woy Woy",
@@ -708,7 +804,8 @@ const examples: Example[] = [
   {
     id: 66,
     needTitle: "Need a camping stove — trade my portable speaker",
-    needDescription: "My camp stove died and I'm 3 weeks into a 2-month trip. Looking for a working gas camping stove. Trade: my JBL Flip 6 portable speaker — loud, waterproof, great battery.",
+    needDescription:
+      "My camp stove died and I'm 3 weeks into a 2-month trip. Looking for a working gas camping stove. Trade: my JBL Flip 6 portable speaker — loud, waterproof, great battery.",
     offerType: "item",
     offerDescription: "JBL Flip 6 portable speaker — waterproof, great condition",
     location: "Anywhere on the Coast",
@@ -718,7 +815,8 @@ const examples: Example[] = [
   {
     id: 67,
     needTitle: "Travelling musician — gig for a meal and a bed",
-    needDescription: "Singer-songwriter on the road with my guitar. Looking for cafes, bars, or hostels that want live music for an evening. Happy to play 2 sets (originals + covers). Just need a meal and somewhere to sleep.",
+    needDescription:
+      "Singer-songwriter on the road with my guitar. Looking for cafes, bars, or hostels that want live music for an evening. Happy to play 2 sets (originals + covers). Just need a meal and somewhere to sleep.",
     offerType: "service",
     offerDescription: "2 sets of live acoustic music — originals and covers",
     location: "Anywhere on the Coast",
@@ -728,7 +826,8 @@ const examples: Example[] = [
   {
     id: 68,
     needTitle: "Need a power inverter for my van — cash or trade",
-    needDescription: "Living in a van, need a 12V to 240V power inverter (at least 1000W) to run my laptop and small appliances. Happy to pay cash or trade — I have a decent portable solar panel I'm not using.",
+    needDescription:
+      "Living in a van, need a 12V to 240V power inverter (at least 1000W) to run my laptop and small appliances. Happy to pay cash or trade — I have a decent portable solar panel I'm not using.",
     offerType: "item",
     offerDescription: "100W portable solar panel + cash if needed",
     location: "Anywhere on the Coast",
@@ -752,9 +851,7 @@ export default function ExamplesPage() {
   const [categoryFilter, setCategoryFilter] = useState("all");
 
   const filtered =
-    categoryFilter === "all"
-      ? examples
-      : examples.filter((e) => e.category === categoryFilter);
+    categoryFilter === "all" ? examples : examples.filter((e) => e.category === categoryFilter);
 
   return (
     <div className="min-h-screen bg-[#0a0806] text-[#e8d5a3] flex flex-col">
@@ -772,9 +869,8 @@ export default function ExamplesPage() {
               <span className="text-[#f5a623]">Exchange?</span>
             </h1>
             <p className="text-base text-[#7a6b5a] max-w-xl leading-relaxed mb-6">
-              Antidosis is built on a simple idea: everyone has something worth
-              trading. A skill. An item. Time. A favour. Here are real ways
-              people are using it right now.
+              Antidosis is built on a simple idea: everyone has something worth trading. A skill. An
+              item. Time. A favour. Here are real ways people are using it right now.
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <Button asChild size="lg">
@@ -797,40 +893,32 @@ export default function ExamplesPage() {
                 <div className="inline-flex bg-[#1a1714] p-3 rounded-md text-[#f5a623] mb-4">
                   <Shuffle className="h-5 w-5" />
                 </div>
-                <h3 className="text-sm font-bold text-[#e8d5a3] mb-2">
-                  Swap Anything
-                </h3>
+                <h3 className="text-sm font-bold text-[#e8d5a3] mb-2">Swap Anything</h3>
                 <p className="text-xs text-[#7a6b5a] leading-relaxed">
-                  Goods for goods. Skills for skills. Services for items. Cash
-                  for anything. There is no fixed formula — if both parties
-                  agree, the exchange works.
+                  Goods for goods. Skills for skills. Services for items. Cash for anything. There
+                  is no fixed formula — if both parties agree, the exchange works.
                 </p>
               </div>
               <div className="vessel p-5">
                 <div className="inline-flex bg-[#1a1714] p-3 rounded-md text-[#00e5ff] mb-4">
                   <MapPin className="h-5 w-5" />
                 </div>
-                <h3 className="text-sm font-bold text-[#e8d5a3] mb-2">
-                  Start Local
-                </h3>
+                <h3 className="text-sm font-bold text-[#e8d5a3] mb-2">Start Local</h3>
                 <p className="text-xs text-[#7a6b5a] leading-relaxed">
-                  All these examples are from the Central Coast. Trade with
-                  people nearby — walk over with your lemons, meet at the beach
-                  for the lesson, or drop off the tools on your way past.
+                  All these examples are from the Central Coast. Trade with people nearby — walk
+                  over with your lemons, meet at the beach for the lesson, or drop off the tools on
+                  your way past.
                 </p>
               </div>
               <div className="vessel p-5">
                 <div className="inline-flex bg-[#1a1714] p-3 rounded-md text-[#00e676] mb-4">
                   <Heart className="h-5 w-5" />
                 </div>
-                <h3 className="text-sm font-bold text-[#e8d5a3] mb-2">
-                  Build Trust
-                </h3>
+                <h3 className="text-sm font-bold text-[#e8d5a3] mb-2">Build Trust</h3>
                 <p className="text-xs text-[#7a6b5a] leading-relaxed">
-                  The best trades come from clear communication. Describe what
-                  you need honestly. State what you are offering upfront. Use
-                  the contract system when money or valuable items are
-                  involved.
+                  The best trades come from clear communication. Describe what you need honestly.
+                  State what you are offering upfront. Use the contract system when money or
+                  valuable items are involved.
                 </p>
               </div>
             </div>
@@ -842,9 +930,7 @@ export default function ExamplesPage() {
         {/* Filters */}
         <section className="py-8">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
-            <p className="text-xs text-[#7a6b5a] mb-4 font-mono">
-              $ ls /examples/ | sort
-            </p>
+            <p className="text-xs text-[#7a6b5a] mb-4 font-mono">$ ls /examples/ | sort</p>
             <div className="flex flex-wrap gap-2">
               {categoryFilters.map((cat) => (
                 <Button
@@ -910,9 +996,7 @@ export default function ExamplesPage() {
                           {offerIcons[example.offerType]}
                         </div>
                         <div>
-                          <p className="text-sm text-[#b8a078]">
-                            {example.offerDescription}
-                          </p>
+                          <p className="text-sm text-[#b8a078]">{example.offerDescription}</p>
                           <span className="text-[10px] text-[#7a6b5a] uppercase tracking-wide mt-0.5 inline-block">
                             {example.offerType}
                           </span>
@@ -926,9 +1010,7 @@ export default function ExamplesPage() {
 
             {filtered.length === 0 && (
               <div className="py-24 text-center">
-                <p className="text-sm text-[#7a6b5a]">
-                  No examples in this category yet.
-                </p>
+                <p className="text-sm text-[#7a6b5a]">No examples in this category yet.</p>
               </div>
             )}
           </div>
@@ -980,12 +1062,8 @@ export default function ExamplesPage() {
                 },
               ].map((item, i) => (
                 <div key={i} className="vessel p-5">
-                  <p className="text-sm font-medium text-[#e8d5a3] mb-3">
-                    &ldquo;{item.q}&rdquo;
-                  </p>
-                  <p className="text-xs text-[#7a6b5a] leading-relaxed">
-                    {item.a}
-                  </p>
+                  <p className="text-sm font-medium text-[#e8d5a3] mb-3">&ldquo;{item.q}&rdquo;</p>
+                  <p className="text-xs text-[#7a6b5a] leading-relaxed">{item.a}</p>
                 </div>
               ))}
             </div>
@@ -997,18 +1075,15 @@ export default function ExamplesPage() {
         {/* CTA */}
         <section className="py-20 md:py-28">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
-            <p className="text-xs text-[#7a6b5a] mb-8 font-mono">
-              $ ./post_need.sh
-            </p>
+            <p className="text-xs text-[#7a6b5a] mb-8 font-mono">$ ./post_need.sh</p>
             <h2 className="heading-display text-3xl md:text-5xl text-[#e8d5a3] mb-6">
               Your Need Is
               <br />
               <span className="text-[#f5a623]">Someone Else&apos;s Want.</span>
             </h2>
             <p className="text-base text-[#7a6b5a] max-w-md mb-10 leading-relaxed">
-              These are just sparks. The real magic happens when you post
-              something only you can offer. Be specific. Be honest. See who
-              shows up.
+              These are just sparks. The real magic happens when you post something only you can
+              offer. Be specific. Be honest. See who shows up.
             </p>
             <Button asChild size="lg">
               <Link href="/needs/new">

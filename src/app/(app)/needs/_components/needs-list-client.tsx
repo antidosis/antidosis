@@ -1,15 +1,31 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
+
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+
+import {
+  ArrowRight,
+  CircleDollarSign,
+  Wrench,
+  Package,
+  Search,
+  Loader2,
+  X,
+  Info,
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
+  Zap,
+} from "lucide-react";
+
 import { Avatar } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Input } from "@/components/ui/input";
+import { EXCHANGE_MODES, INCOMPATIBLE_EXCHANGE_MODES, getExchangeMode } from "@/lib/categories";
 import { searchSkills } from "@/lib/skills-taxonomy";
 import { useApi } from "@/lib/swr-config";
-import { MapPin, ArrowRight, CircleDollarSign, Wrench, Package, Search, Loader2, X, Info, ChevronLeft, ChevronRight, Sparkles, Zap } from "lucide-react";
-import { EXCHANGE_MODES, INCOMPATIBLE_EXCHANGE_MODES, getExchangeMode } from "@/lib/categories";
 
 type NeedItem = {
   id: string;
@@ -114,9 +130,7 @@ export default function NeedsPage() {
     if (skillInput.trim()) {
       const matches = searchSkills(skillInput);
       setSkillSuggestions(
-        skillsPool.length > 0
-          ? matches.filter((s) => skillsPool.includes(s))
-          : matches
+        skillsPool.length > 0 ? matches.filter((s) => skillsPool.includes(s)) : matches
       );
       setShowSkillDropdown(true);
     } else {
@@ -139,12 +153,9 @@ export default function NeedsPage() {
   const startItem = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
   const endItem = Math.min(page * PAGE_SIZE, total);
 
-  const activeFiltersCount = [
-    debouncedQuery,
-    typeFilter,
-    categoryFilter,
-    skillFilter,
-  ].filter(Boolean).length;
+  const activeFiltersCount = [debouncedQuery, typeFilter, categoryFilter, skillFilter].filter(
+    Boolean
+  ).length;
 
   return (
     <div className="max-w-5xl mx-auto px-4 md:px-8">
@@ -152,10 +163,14 @@ export default function NeedsPage() {
         <div>
           <h1 className="heading-display text-2xl text-[#e8d5a3]">Browse Needs</h1>
           <p className="text-xs text-[#7a6b5a] mt-3">$ ls ~/needs/</p>
-          <p className="text-sm text-[#b8a078] mt-2">find needs you can fulfill — for services, items, or money in return</p>
+          <p className="text-sm text-[#b8a078] mt-2">
+            find needs you can fulfill — for services, items, or money in return
+          </p>
         </div>
         <Button asChild variant="default">
-          <Link href="/needs/new">Post Need <ArrowRight className="ml-1 h-4 w-4" /></Link>
+          <Link href="/needs/new">
+            Post Need <ArrowRight className="ml-1 h-4 w-4" />
+          </Link>
         </Button>
       </div>
 
@@ -164,7 +179,10 @@ export default function NeedsPage() {
           <Info className="h-4 w-4 text-[#00e5ff] mt-0.5 flex-shrink-0" />
           <div>
             <p className="text-sm text-[#e8d5a3] font-medium">Central Coast NSW pilot</p>
-            <p className="text-xs text-[#7a6b5a] mt-1">all needs are local to the Central Coast region during the trial. remote exchanges will be available soon.</p>
+            <p className="text-xs text-[#7a6b5a] mt-1">
+              all needs are local to the Central Coast region during the trial. remote exchanges
+              will be available soon.
+            </p>
           </div>
         </div>
       </div>
@@ -193,9 +211,7 @@ export default function NeedsPage() {
                       <h3 className="text-sm font-medium text-[#e8d5a3] group-hover:text-[#f5a623] transition-colors line-clamp-1">
                         {need.title}
                       </h3>
-                      <p className="text-xs text-[#b8a078] mt-1 line-clamp-1">
-                        {need.description}
-                      </p>
+                      <p className="text-xs text-[#b8a078] mt-1 line-clamp-1">{need.description}</p>
                       {match && match.matchingSkillNames.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 mt-2">
                           {match.matchingSkillNames.map((name) => (
@@ -235,9 +251,19 @@ export default function NeedsPage() {
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#7a6b5a]" />
-            <Input placeholder="search_needs..." value={query} onChange={(e) => setQuery(e.target.value)} className="pl-9" />
+            <Input
+              placeholder="search_needs..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="pl-9"
+            />
             {query && (
-              <Button variant="ghost" size="icon" onClick={() => setQuery("")} className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-[#7a6b5a] hover:text-[#e8d5a3]">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setQuery("")}
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-[#7a6b5a] hover:text-[#e8d5a3]"
+              >
                 <X className="h-4 w-4" />
               </Button>
             )}
@@ -256,12 +282,17 @@ export default function NeedsPage() {
                   setShowSkillDropdown(false);
                 }
               }}
-              onFocus={() => { if (skillSuggestions.length > 0) setShowSkillDropdown(true); }}
+              onFocus={() => {
+                if (skillSuggestions.length > 0) setShowSkillDropdown(true);
+              }}
               className="pl-9"
             />
             {skillFilter && (
               <button
-                onClick={() => { setSkillFilter(""); setSkillInput(""); }}
+                onClick={() => {
+                  setSkillFilter("");
+                  setSkillInput("");
+                }}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-[#7a6b5a] hover:text-[#ff5252] uppercase tracking-wider"
               >
                 clear
@@ -305,34 +336,66 @@ export default function NeedsPage() {
         {/* Active filters bar */}
         {activeFiltersCount > 0 && (
           <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-[#2a2420]">
-            <span className="text-[10px] uppercase tracking-wider text-[#7a6b5a]">active filters:</span>
+            <span className="text-[10px] uppercase tracking-wider text-[#7a6b5a]">
+              active filters:
+            </span>
             {debouncedQuery && (
               <span className="inline-flex items-center gap-1 text-xs text-[#e8d5a3] bg-[#1a1714] border border-[#2a2420] rounded px-2 py-0.5">
                 search: {debouncedQuery}
-                <button onClick={() => setQuery("")} className="text-[#7a6b5a] hover:text-[#ff5252]"><X className="h-3 w-3" /></button>
+                <button
+                  onClick={() => setQuery("")}
+                  className="text-[#7a6b5a] hover:text-[#ff5252]"
+                >
+                  <X className="h-3 w-3" />
+                </button>
               </span>
             )}
             {skillFilter && (
               <span className="inline-flex items-center gap-1 text-xs text-[#f5a623] bg-[#1a1714] border border-[#f5a623]/30 rounded px-2 py-0.5">
                 <Sparkles className="h-3 w-3" />
                 {skillFilter}
-                <button onClick={() => { setSkillFilter(""); setSkillInput(""); }} className="text-[#7a6b5a] hover:text-[#ff5252]"><X className="h-3 w-3" /></button>
+                <button
+                  onClick={() => {
+                    setSkillFilter("");
+                    setSkillInput("");
+                  }}
+                  className="text-[#7a6b5a] hover:text-[#ff5252]"
+                >
+                  <X className="h-3 w-3" />
+                </button>
               </span>
             )}
             {typeFilter && (
               <span className="inline-flex items-center gap-1 text-xs text-[#e8d5a3] bg-[#1a1714] border border-[#2a2420] rounded px-2 py-0.5">
                 type: {typeFilter}
-                <button onClick={() => setTypeFilter("")} className="text-[#7a6b5a] hover:text-[#ff5252]"><X className="h-3 w-3" /></button>
+                <button
+                  onClick={() => setTypeFilter("")}
+                  className="text-[#7a6b5a] hover:text-[#ff5252]"
+                >
+                  <X className="h-3 w-3" />
+                </button>
               </span>
             )}
             {categoryFilter && (
               <span className="inline-flex items-center gap-1 text-xs text-[#e8d5a3] bg-[#1a1714] border border-[#2a2420] rounded px-2 py-0.5">
                 category: {categoryFilter}
-                <button onClick={() => setCategoryFilter("")} className="text-[#7a6b5a] hover:text-[#ff5252]"><X className="h-3 w-3" /></button>
+                <button
+                  onClick={() => setCategoryFilter("")}
+                  className="text-[#7a6b5a] hover:text-[#ff5252]"
+                >
+                  <X className="h-3 w-3" />
+                </button>
               </span>
             )}
             <button
-              onClick={() => { setQuery(""); setDebouncedQuery(""); setTypeFilter(""); setCategoryFilter(""); setSkillFilter(""); setSkillInput(""); }}
+              onClick={() => {
+                setQuery("");
+                setDebouncedQuery("");
+                setTypeFilter("");
+                setCategoryFilter("");
+                setSkillFilter("");
+                setSkillInput("");
+              }}
               className="text-[10px] uppercase tracking-wider text-[#7a6b5a] hover:text-[#ff5252] ml-1"
             >
               clear all
@@ -369,14 +432,24 @@ export default function NeedsPage() {
       </div>
 
       {loading && !needsData ? (
-        <div className="py-24 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto text-[#7a6b5a]" /></div>
+        <div className="py-24 text-center">
+          <Loader2 className="h-6 w-6 animate-spin mx-auto text-[#7a6b5a]" />
+        </div>
       ) : needs.length === 0 ? (
         <EmptyState
           title="No needs found"
-          description={activeFiltersCount > 0 ? "try adjusting your filters." : "be the first to create an exchange."}
-          action={activeFiltersCount === 0 ? (
-            <Button asChild variant="default"><Link href="/needs/new">Post Need</Link></Button>
-          ) : undefined}
+          description={
+            activeFiltersCount > 0
+              ? "try adjusting your filters."
+              : "be the first to create an exchange."
+          }
+          action={
+            activeFiltersCount === 0 ? (
+              <Button asChild variant="default">
+                <Link href="/needs/new">Post Need</Link>
+              </Button>
+            ) : undefined
+          }
         />
       ) : (
         <div>
@@ -391,32 +464,52 @@ export default function NeedsPage() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <h3 className="text-base font-medium text-[#e8d5a3] group-hover:text-[#f5a623] transition-colors">{need.title}</h3>
-                      {need.needCategory && (() => {
-                        const mode = getExchangeMode(need.needCategory);
-                        if (!mode) return null;
-                        return (
-                          <span className={`shrink-0 text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border ${mode.twText} ${mode.twBorder} ${mode.twBg}`}>
-                            {mode.label}
-                          </span>
-                        );
-                      })()}
+                      <h3 className="text-base font-medium text-[#e8d5a3] group-hover:text-[#f5a623] transition-colors">
+                        {need.title}
+                      </h3>
+                      {need.needCategory &&
+                        (() => {
+                          const mode = getExchangeMode(need.needCategory);
+                          if (!mode) return null;
+                          return (
+                            <span
+                              className={`shrink-0 text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border ${mode.twText} ${mode.twBorder} ${mode.twBg}`}
+                            >
+                              {mode.label}
+                            </span>
+                          );
+                        })()}
                     </div>
                     <p className="text-sm text-[#b8a078] mt-1 line-clamp-2">{need.description}</p>
                     <div className="flex flex-wrap items-center gap-2 mt-3">
                       {need.requiredSkills.map((skill) => (
-                        <span key={skill.id} className="px-2 py-0.5 text-xs text-[#7a6b5a] bg-[#1a1714] border border-[#2a2420] rounded">{skill.name}</span>
+                        <span
+                          key={skill.id}
+                          className="px-2 py-0.5 text-xs text-[#7a6b5a] bg-[#1a1714] border border-[#2a2420] rounded"
+                        >
+                          {skill.name}
+                        </span>
                       ))}
                     </div>
                   </div>
-                  <span className="shrink-0 text-xs text-[#7a6b5a] uppercase tracking-wide ml-2">{need._count.acceptances} interested</span>
+                  <span className="shrink-0 text-xs text-[#7a6b5a] uppercase tracking-wide ml-2">
+                    {need._count.acceptances} interested
+                  </span>
                 </div>
                 <div className="flex items-center justify-between mt-4 pt-3 border-t border-[#2a2420]">
-                  <Link href={`/profile/${need.poster.id}`} className="flex items-center gap-3 group" onClick={(e) => e.stopPropagation()}>
+                  <Link
+                    href={`/profile/${need.poster.id}`}
+                    className="flex items-center gap-3 group"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <Avatar src={need.poster.avatarUrl} name={need.poster.fullName} size="sm" />
                     <div className="text-sm text-[#b8a078]">
-                      <span className="text-[#e8d5a3] group-hover:text-[#f5a623] transition-colors">{need.poster.fullName || "anonymous"}</span>
-                      {need.poster.ratingCount > 0 && <span className="ml-2">{need.poster.ratingAvg.toFixed(1)}</span>}
+                      <span className="text-[#e8d5a3] group-hover:text-[#f5a623] transition-colors">
+                        {need.poster.fullName || "anonymous"}
+                      </span>
+                      {need.poster.ratingCount > 0 && (
+                        <span className="ml-2">{need.poster.ratingAvg.toFixed(1)}</span>
+                      )}
                     </div>
                   </Link>
                   <div className="flex items-center gap-1.5 text-xs text-[#7a6b5a]">

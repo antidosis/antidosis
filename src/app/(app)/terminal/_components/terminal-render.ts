@@ -5,7 +5,7 @@
  * color-coded tables, inline image grids, and visual status indicators.
  */
 
-import { EXCHANGE_MODES, getExchangeMode } from "@/lib/categories";
+import { getExchangeMode } from "@/lib/categories";
 
 // ─── Theme System ────────────────────────────────────────────
 
@@ -123,22 +123,29 @@ export function contractPipeline(
 ): string {
   const stages = ["DRAFT", "TERMS", "ACTIVE", "DONE"];
   const currentIndex =
-    status === "draft" ? 0
-    : status === "pending_terms" ? 1
-    : status === "active" || status === "pending_completion" ? 2
-    : status === "completed" ? 3
-    : -1;
+    status === "draft"
+      ? 0
+      : status === "pending_terms"
+        ? 1
+        : status === "active" || status === "pending_completion"
+          ? 2
+          : status === "completed"
+            ? 3
+            : -1;
 
   let pipeline = "  Lifecycle:\n";
   pipeline += "  ┌─────────┐     ┌─────────┐     ┌─────────┐     ┌─────────┐\n";
   pipeline +=
     "  │  " +
-    stages.map((s, i) => {
-      const isCurrent = i === currentIndex;
-      const isPast = i < currentIndex;
-      const marker = isCurrent ? "🔄" : isPast ? "✅" : "  ";
-      return `${s.padEnd(5)} ${marker}  │`;
-    }).join(" ──→ ") + "\n";
+    stages
+      .map((s, i) => {
+        const isCurrent = i === currentIndex;
+        const isPast = i < currentIndex;
+        const marker = isCurrent ? "🔄" : isPast ? "✅" : "  ";
+        return `${s.padEnd(5)} ${marker}  │`;
+      })
+      .join(" ──→ ") +
+    "\n";
   pipeline += "  └─────────┘     └─────────┘     └─────────┘     └─────────┘\n";
 
   if (currentIndex >= 0) {
@@ -173,21 +180,21 @@ export function fmtTable(
     return Math.max(...widths);
   });
 
-  const pad = (s: string | number | null, i: number) =>
-    String(s ?? "").padEnd(cols[i] + 2);
+  const pad = (s: string | number | null, i: number) => String(s ?? "").padEnd(cols[i] + 2);
 
   const sep = "+" + cols.map((w) => "-".repeat(w + 2)).join("+") + "+";
   const head = "| " + headers.map((h, i) => h.padEnd(cols[i])).join(" | ") + " |";
   const body = rows
-    .map((r, ri) =>
-      "| " +
-      r
-        .map((cell, ci) => {
-          const val = pad(cell, ci).trimEnd();
-          return options?.colorize ? options.colorize(ri, ci, val) : val;
-        })
-        .join(" | ") +
-      " |"
+    .map(
+      (r, ri) =>
+        "| " +
+        r
+          .map((cell, ci) => {
+            const val = pad(cell, ci).trimEnd();
+            return options?.colorize ? options.colorize(ri, ci, val) : val;
+          })
+          .join(" | ") +
+        " |"
     )
     .join("\n");
 
@@ -203,10 +210,10 @@ export function fmtStatus(status: string): string {
     completed: "✅ completed",
     archived: "⚪ archived",
     draft: "⚪ draft",
-    "pending_terms": "🟡 pending terms",
+    pending_terms: "🟡 pending terms",
     active: "🟢 active",
-    "pending_completion": "🟡 pending completion",
-    "pending_cancellation": "🔴 pending cancellation",
+    pending_completion: "🟡 pending completion",
+    pending_cancellation: "🔴 pending cancellation",
     cancelled: "❌ cancelled",
     pending: "🟡 pending",
     declined: "🔴 declined",
@@ -259,7 +266,12 @@ export function shortId(id: string): string {
 
 export function formatTime(iso: string): string {
   const d = new Date(iso);
-  return d.toLocaleTimeString("en-AU", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  return d.toLocaleTimeString("en-AU", {
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
 }
 
 // ─── Image Grid ──────────────────────────────────────────────

@@ -1,15 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
-import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
-import { createNotification } from "@/lib/notifications";
-import { z } from "zod";
+import { type NextRequest, NextResponse } from "next/server";
 
-const sendSchema = z.object({
-  userId: z.string().uuid(),
-  content: z.string().min(1).max(2000),
-  attachments: z.array(z.object({ url: z.string(), type: z.string(), name: z.string() })).optional(),
-});
+import { createNotification } from "@/lib/notifications";
+import { prisma } from "@/lib/prisma";
+import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
+import { sendDirectMessageSchema } from "@/lib/schemas";
+import { createClient } from "@/lib/supabase/server";
 
 const MENTION_REGEX = /@([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/gi;
 
@@ -55,7 +50,9 @@ async function getOrCreateThread(myProfileId: string, otherProfileId: string) {
 export async function GET(req: NextRequest) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -109,7 +106,10 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Thread not found" }, { status: 404 });
     }
 
-    const take = Math.max(1, Math.min(parseInt(req.nextUrl.searchParams.get("limit") || "100", 10) || 100, 200));
+    const take = Math.max(
+      1,
+      Math.min(parseInt(req.nextUrl.searchParams.get("limit") || "100", 10) || 100, 200)
+    );
     const skip = Math.max(0, parseInt(req.nextUrl.searchParams.get("skip") || "0", 10) || 0);
 
     const messages = await prisma.directMessage.findMany({
@@ -159,7 +159,9 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -181,9 +183,12 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const parsed = sendSchema.safeParse(body);
+    const parsed = sendDirectMessageSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid request", details: parsed.error.flatten() }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid request", details: parsed.error.flatten() },
+        { status: 400 }
+      );
     }
 
     const { userId: otherUserId, content, attachments } = parsed.data;
@@ -257,7 +262,12 @@ export async function POST(req: NextRequest) {
       type: "dm_message",
       title: `New message from ${profile.fullName || "Someone"}`,
       body: content.length > 120 ? content.slice(0, 120) + "..." : content,
-      data: { threadId: thread.id, messageId: message.id, senderId: profile.id, senderName: profile.fullName },
+      data: {
+        threadId: thread.id,
+        messageId: message.id,
+        senderId: profile.id,
+        senderName: profile.fullName,
+      },
     }).catch(() => {});
 
     // Handle mentions (separate notification for explicit @mentions)
@@ -269,7 +279,12 @@ export async function POST(req: NextRequest) {
           type: "mention",
           title: "You were mentioned in a DM",
           body: `${profile.fullName || "Someone"} mentioned you in a direct message`,
-          data: { threadId: thread.id, messageId: message.id, senderId: profile.id, senderName: profile.fullName },
+          data: {
+            threadId: thread.id,
+            messageId: message.id,
+            senderId: profile.id,
+            senderName: profile.fullName,
+          },
         }).catch(() => {});
       }
     }

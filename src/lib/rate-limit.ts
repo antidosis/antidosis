@@ -40,10 +40,7 @@ export interface RateLimitResult {
   resetAt: number;
 }
 
-async function redisRateLimit(
-  key: string,
-  options: RateLimitOptions
-): Promise<RateLimitResult> {
+async function redisRateLimit(key: string, options: RateLimitOptions): Promise<RateLimitResult> {
   const windowSeconds = Math.ceil(options.windowMs / 1000);
   const now = Date.now();
 
@@ -60,10 +57,7 @@ async function redisRateLimit(
   return { allowed, remaining, resetAt };
 }
 
-function memoryRateLimit(
-  key: string,
-  options: RateLimitOptions
-): RateLimitResult {
+function memoryRateLimit(key: string, options: RateLimitOptions): RateLimitResult {
   const now = Date.now();
   const entry = memoryStore.get(key);
 
@@ -113,10 +107,7 @@ export async function rateLimit(
  * Extract a rate-limit identifier from a request.
  * Prefers authenticated user ID, falls back to IP address.
  */
-export function getRateLimitIdentifier(
-  req: Request,
-  userId?: string | null
-): string {
+export function getRateLimitIdentifier(req: Request, userId?: string | null): string {
   if (userId) return `user:${userId}`;
 
   const forwarded = req.headers.get("x-forwarded-for");

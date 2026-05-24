@@ -1,10 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
-import { prisma } from "@/lib/prisma";
+import { type NextRequest, NextResponse } from "next/server";
+
 import { isAdminEmail } from "@/lib/admin";
+import { prisma } from "@/lib/prisma";
+import { createClient } from "@/lib/supabase/server";
 
 async function requireAdmin(supabase: any) {
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return null;
   if (!isAdminEmail(user.email || "")) return null;
   const profile = await prisma.profile.findUnique({ where: { userId: user.id } });
@@ -34,9 +37,16 @@ export async function GET(req: NextRequest) {
       take: limit,
       orderBy: { createdAt: "desc" },
       select: {
-        id: true, fullName: true, email: true, locationName: true,
-        isVerified: true, isPro: true, ratingAvg: true, ratingCount: true,
-        jobsCompleted: true, createdAt: true,
+        id: true,
+        fullName: true,
+        email: true,
+        locationName: true,
+        isVerified: true,
+        isPro: true,
+        ratingAvg: true,
+        ratingCount: true,
+        jobsCompleted: true,
+        createdAt: true,
       },
     });
 

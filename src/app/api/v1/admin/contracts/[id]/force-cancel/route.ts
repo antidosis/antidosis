@@ -1,16 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { type NextRequest, NextResponse } from "next/server";
+
 import { requireAdmin } from "@/lib/admin";
-import { logger } from "@/lib/logger";
 import { auditLog, getClientInfo } from "@/lib/audit";
+import { logger } from "@/lib/logger";
 import { createNotification } from "@/lib/notifications";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const auth = await requireAdmin();
     if (!auth.authorized) {
@@ -31,10 +29,7 @@ export async function POST(
     }
 
     if (contract.status === "cancelled") {
-      return NextResponse.json(
-        { error: "Contract is already cancelled." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Contract is already cancelled." }, { status: 400 });
     }
 
     const updatedContract = await prisma.$transaction(async (tx) => {
@@ -105,9 +100,6 @@ export async function POST(
     return NextResponse.json({ contract: updatedContract });
   } catch (error) {
     logger.error("Admin force cancel error:", error instanceof Error ? error : undefined);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

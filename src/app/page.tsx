@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+
 import HomeClient from "./_components/home-client";
 
 const siteUrl = "https://antidosis.com";

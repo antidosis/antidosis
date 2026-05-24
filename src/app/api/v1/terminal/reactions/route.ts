@@ -1,9 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
-import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
-import { isAdminEmail } from "@/lib/admin";
+import { type NextRequest, NextResponse } from "next/server";
+
 import { z } from "zod";
+
+import { isAdminEmail } from "@/lib/admin";
+import { prisma } from "@/lib/prisma";
+import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
+import { createClient } from "@/lib/supabase/server";
 
 const schema = z.object({
   messageId: z.string().uuid(),
@@ -13,7 +15,9 @@ const schema = z.object({
 export async function POST(req: NextRequest) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

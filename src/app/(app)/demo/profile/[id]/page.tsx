@@ -1,18 +1,13 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
+import { useParams, useRouter } from "next/navigation";
+
+import { MapPin, Star, Briefcase, Shield, ArrowLeft, Loader2 } from "lucide-react";
+
 import { Avatar } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  MapPin,
-  Star,
-  Briefcase,
-  Shield,
-  ArrowLeft,
-  Loader2,
-} from "lucide-react";
 
 /* ─── Shared mock data (must match contract-flow/page.tsx) ─── */
 const PARTY_A = {
@@ -93,8 +88,7 @@ export default function DemoProfilePage() {
 
   if (!profile) return null;
 
-  const username =
-    profile.fullName?.toLowerCase().replace(/\s/g, "_") || "user";
+  const username = profile.fullName?.toLowerCase().replace(/\s/g, "_") || "user";
 
   return (
     <div className="max-w-3xl mx-auto px-4 md:px-8 space-y-10 pb-12">
@@ -122,16 +116,13 @@ export default function DemoProfilePage() {
               <h1 className="heading-display text-2xl text-[#e8d5a3]">
                 {profile.fullName || "anonymous"}
               </h1>
-              {profile.isVerified && (
-                <Shield className="h-5 w-5 text-[#00e676]" />
-              )}
+              {profile.isVerified && <Shield className="h-5 w-5 text-[#00e676]" />}
             </div>
             <div className="flex flex-wrap items-center gap-4 text-sm text-[#b8a078] mt-2">
               {(profile.ratingCount ?? 0) > 0 && (
                 <span className="flex items-center gap-1 text-[#f5a623] glow-gold">
                   <Star className="h-4 w-4 fill-current" />
-                  {(profile.ratingAvg ?? 0).toFixed(1)} ({profile.ratingCount}{" "}
-                  reviews)
+                  {(profile.ratingAvg ?? 0).toFixed(1)} ({profile.ratingCount} reviews)
                 </span>
               )}
               {(profile.jobsCompleted ?? 0) > 0 && (
@@ -148,9 +139,7 @@ export default function DemoProfilePage() {
               )}
             </div>
             {profile.bio && (
-              <p className="text-sm text-[#b8a078] mt-4 leading-relaxed">
-                {profile.bio}
-              </p>
+              <p className="text-sm text-[#b8a078] mt-4 leading-relaxed">{profile.bio}</p>
             )}
             {profile.skills.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-5">
@@ -160,9 +149,7 @@ export default function DemoProfilePage() {
                     className="text-xs text-[#b8a078] bg-[#1a1714] border border-[#2a2420] rounded px-2 py-0.5"
                   >
                     {skill.name}
-                    {skill.isVerified && (
-                      <span className="ml-1 text-[#00e676]">✓</span>
-                    )}
+                    {skill.isVerified && <span className="ml-1 text-[#00e676]">✓</span>}
                   </span>
                 ))}
               </div>
@@ -174,18 +161,11 @@ export default function DemoProfilePage() {
       {/* Demo notice */}
       <div className="vessel-lit p-5">
         <p className="text-sm text-[#b8a078]">
-          This is a demo profile. In the real app, you would also see active
-          needs, credentials, and reviews from completed exchanges.
+          This is a demo profile. In the real app, you would also see active needs, credentials, and
+          reviews from completed exchanges.
         </p>
-        <Button
-          variant="secondary"
-          size="sm"
-          className="mt-3"
-          asChild
-        >
-          <Link href="/demo/contract-flow">
-            Return to Contract Flow Demo
-          </Link>
+        <Button variant="secondary" size="sm" className="mt-3" asChild>
+          <Link href="/demo/contract-flow">Return to Contract Flow Demo</Link>
         </Button>
       </div>
     </div>

@@ -1,11 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Navbar } from "@/components/layout/navbar";
-import { Footer } from "@/components/layout/footer";
-import { useInView } from "@/hooks/use-in-view";
-import { cn } from "@/lib/utils";
+
 import {
   UserPlus,
   ShieldCheck,
@@ -19,10 +15,15 @@ import {
   ScrollText,
   PenTool,
   ArrowRight,
-  ArrowDown,
   GitFork,
   Package,
 } from "lucide-react";
+
+import { Footer } from "@/components/layout/footer";
+import { Navbar } from "@/components/layout/navbar";
+import { Button } from "@/components/ui/button";
+import { useInView } from "@/hooks/use-in-view";
+import { cn } from "@/lib/utils";
 
 function Reveal({
   children,
@@ -139,9 +140,7 @@ export default function HowItWorksPage() {
         <section className="pt-32 pb-20 md:pt-44 md:pb-28 overflow-hidden">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
-              <p className="text-xs text-[#7a6b5a] mb-8 font-mono">
-                $ cat docs/how-it-works.md
-              </p>
+              <p className="text-xs text-[#7a6b5a] mb-8 font-mono">$ cat docs/how-it-works.md</p>
             </Reveal>
             <Reveal delay={100}>
               <h1 className="heading-display text-5xl md:text-7xl text-[#e8d5a3] mb-6">
@@ -152,9 +151,8 @@ export default function HowItWorksPage() {
             </Reveal>
             <Reveal delay={200}>
               <p className="text-base text-[#7a6b5a] max-w-lg leading-relaxed mb-10">
-                Post what you need. Offer what you have. Connect with people you
-                can trust. Contracts are optional — use them when you want extra
-                security.
+                Post what you need. Offer what you have. Connect with people you can trust.
+                Contracts are optional — use them when you want extra security.
               </p>
             </Reveal>
             <Reveal delay={300}>
@@ -189,8 +187,8 @@ export default function HowItWorksPage() {
                 Two Ways to Exchange
               </h2>
               <p className="text-sm text-[#7a6b5a] max-w-md mb-14">
-                Every need can be fulfilled with or without a binding contract.
-                Choose what feels right for the exchange.
+                Every need can be fulfilled with or without a binding contract. Choose what feels
+                right for the exchange.
               </p>
             </Reveal>
 
@@ -239,8 +237,7 @@ export default function HowItWorksPage() {
                 The Journey
               </h2>
               <p className="text-sm text-[#7a6b5a] max-w-md mb-16">
-                From account creation to review. Three phases. Ten minutes to
-                start.
+                From account creation to review. Three phases. Ten minutes to start.
               </p>
             </Reveal>
 
@@ -249,30 +246,18 @@ export default function HowItWorksPage() {
               <div className="mb-16">
                 <div className="flex items-center gap-3 mb-8">
                   <div className="h-px flex-1 bg-[#2a2420]" />
-                  <span className="text-xs font-mono text-[#7a6b5a]">
-                    PHASE 01 — SETUP
-                  </span>
+                  <span className="text-xs font-mono text-[#7a6b5a]">PHASE 01 — SETUP</span>
                   <div className="h-px flex-1 bg-[#2a2420]" />
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                  <JourneyStep
-                    icon={UserPlus}
-                    title="Create Account"
-                    color="#f5a623"
-                    delay={0}
-                  />
+                  <JourneyStep icon={UserPlus} title="Create Account" color="#f5a623" delay={0} />
                   <JourneyStep
                     icon={ShieldCheck}
                     title="Get Verified"
                     color="#00e5ff"
                     delay={100}
                   />
-                  <JourneyStep
-                    icon={FileText}
-                    title="Post a Need"
-                    color="#f5a623"
-                    delay={200}
-                  />
+                  <JourneyStep icon={FileText} title="Post a Need" color="#f5a623" delay={200} />
                   <JourneyStep
                     icon={PenTool}
                     title="Optional Contract"
@@ -288,36 +273,14 @@ export default function HowItWorksPage() {
               <div className="mb-16">
                 <div className="flex items-center gap-3 mb-8">
                   <div className="h-px flex-1 bg-[#2a2420]" />
-                  <span className="text-xs font-mono text-[#7a6b5a]">
-                    PHASE 02 — CONNECT
-                  </span>
+                  <span className="text-xs font-mono text-[#7a6b5a]">PHASE 02 — CONNECT</span>
                   <div className="h-px flex-1 bg-[#2a2420]" />
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                  <JourneyStep
-                    icon={Search}
-                    title="Browse & Find"
-                    color="#00e5ff"
-                    delay={0}
-                  />
-                  <JourneyStep
-                    icon={Hand}
-                    title="Express Interest"
-                    color="#00e5ff"
-                    delay={100}
-                  />
-                  <JourneyStep
-                    icon={MessageSquare}
-                    title="Message"
-                    color="#b24bf5"
-                    delay={200}
-                  />
-                  <JourneyStep
-                    icon={CheckCircle}
-                    title="Accept"
-                    color="#f5a623"
-                    delay={300}
-                  />
+                  <JourneyStep icon={Search} title="Browse & Find" color="#00e5ff" delay={0} />
+                  <JourneyStep icon={Hand} title="Express Interest" color="#00e5ff" delay={100} />
+                  <JourneyStep icon={MessageSquare} title="Message" color="#b24bf5" delay={200} />
+                  <JourneyStep icon={CheckCircle} title="Accept" color="#f5a623" delay={300} />
                 </div>
               </div>
             </Reveal>
@@ -327,30 +290,18 @@ export default function HowItWorksPage() {
               <div>
                 <div className="flex items-center gap-3 mb-8">
                   <div className="h-px flex-1 bg-[#2a2420]" />
-                  <span className="text-xs font-mono text-[#7a6b5a]">
-                    PHASE 03 — COMPLETE
-                  </span>
+                  <span className="text-xs font-mono text-[#7a6b5a]">PHASE 03 — COMPLETE</span>
                   <div className="h-px flex-1 bg-[#2a2420]" />
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                  <JourneyStep
-                    icon={Package}
-                    title="Do the Exchange"
-                    color="#e8d5a3"
-                    delay={0}
-                  />
+                  <JourneyStep icon={Package} title="Do the Exchange" color="#e8d5a3" delay={0} />
                   <JourneyStep
                     icon={CheckCircle}
                     title="Mark Complete"
                     color="#00e676"
                     delay={100}
                   />
-                  <JourneyStep
-                    icon={Star}
-                    title="Rate 1-10"
-                    color="#f5a623"
-                    delay={200}
-                  />
+                  <JourneyStep icon={Star} title="Rate 1-10" color="#f5a623" delay={200} />
                   <JourneyStep
                     icon={ShieldCheck}
                     title="Build Reputation"
@@ -371,9 +322,7 @@ export default function HowItWorksPage() {
             <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
               <div>
                 <Reveal>
-                  <p className="text-xs text-[#7a6b5a] mb-6 font-mono">
-                    $ cat docs/trust.md
-                  </p>
+                  <p className="text-xs text-[#7a6b5a] mb-6 font-mono">$ cat docs/trust.md</p>
                   <h2 className="heading-display text-3xl md:text-4xl text-[#e8d5a3] mb-6">
                     Trust by
                     <br />
@@ -391,7 +340,8 @@ export default function HowItWorksPage() {
                           Verified Identities
                         </p>
                         <p className="text-xs text-[#7a6b5a]">
-                          Email, mobile, and credential verification. Know who you&apos;re dealing with.
+                          Email, mobile, and credential verification. Know who you&apos;re dealing
+                          with.
                         </p>
                       </div>
                     </div>
@@ -400,11 +350,10 @@ export default function HowItWorksPage() {
                         <Star className="h-4 w-4 text-[#f5a623]" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-[#e8d5a3] mb-1">
-                          Bilateral Reviews
-                        </p>
+                        <p className="text-sm font-medium text-[#e8d5a3] mb-1">Bilateral Reviews</p>
                         <p className="text-xs text-[#7a6b5a]">
-                          Both parties rate each other 1-10. Default is excellence — you consciously mark down.
+                          Both parties rate each other 1-10. Default is excellence — you consciously
+                          mark down.
                         </p>
                       </div>
                     </div>
@@ -417,7 +366,8 @@ export default function HowItWorksPage() {
                           Built-in Messaging
                         </p>
                         <p className="text-xs text-[#7a6b5a]">
-                          No external apps. Every exchange has its own message thread with full history.
+                          No external apps. Every exchange has its own message thread with full
+                          history.
                         </p>
                       </div>
                     </div>
@@ -430,7 +380,8 @@ export default function HowItWorksPage() {
                           Optional Contracts
                         </p>
                         <p className="text-xs text-[#7a6b5a]">
-                          Use binding contracts when you want formal terms. Skip them when you don&apos;t.
+                          Use binding contracts when you want formal terms. Skip them when you
+                          don&apos;t.
                         </p>
                       </div>
                     </div>
@@ -452,13 +403,22 @@ export default function HowItWorksPage() {
                     </div>
                   </div>
                   {/* Orbiting dots */}
-                  <div className="absolute inset-0 animate-spin" style={{ animationDuration: "20s" }}>
+                  <div
+                    className="absolute inset-0 animate-spin"
+                    style={{ animationDuration: "20s" }}
+                  >
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-[#f5a623]" />
                   </div>
-                  <div className="absolute inset-0 animate-spin" style={{ animationDuration: "30s", animationDirection: "reverse" }}>
+                  <div
+                    className="absolute inset-0 animate-spin"
+                    style={{ animationDuration: "30s", animationDirection: "reverse" }}
+                  >
                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#00e5ff]" />
                   </div>
-                  <div className="absolute inset-0 animate-spin" style={{ animationDuration: "25s" }}>
+                  <div
+                    className="absolute inset-0 animate-spin"
+                    style={{ animationDuration: "25s" }}
+                  >
                     <div className="absolute top-1/2 right-0 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#b24bf5]" />
                   </div>
                 </div>
@@ -480,8 +440,8 @@ export default function HowItWorksPage() {
                 <span className="text-[#f5a623]">Start?</span>
               </h2>
               <p className="text-base text-[#7a6b5a] max-w-md mb-10 leading-relaxed">
-                Join the Central Coast trial. Verify your identity, get Pro for
-                free, and help shape the future of exchange.
+                Join the Central Coast trial. Verify your identity, get Pro for free, and help shape
+                the future of exchange.
               </p>
               <div className="flex flex-wrap items-center gap-3">
                 <Button asChild size="lg">

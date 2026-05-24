@@ -1,5 +1,5 @@
-import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
+import { prisma } from "@/lib/prisma";
 
 export type AuditEvent =
   | "LOGIN_SUCCESS"
@@ -49,16 +49,7 @@ interface AuditOptions {
  * Never throws — failures are silently logged to console.
  */
 export async function auditLog(options: AuditOptions): Promise<void> {
-  const {
-    event,
-    userId,
-    email,
-    ip,
-    userAgent,
-    path,
-    metadata,
-    severity = "info",
-  } = options;
+  const { event, userId, email, ip, userAgent, path, metadata, severity = "info" } = options;
 
   const logPayload = {
     event,

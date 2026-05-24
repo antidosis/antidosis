@@ -1,14 +1,33 @@
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+
+import { logger } from "@/lib/logger";
+import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
-import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
-import { logger } from "@/lib/logger";
 
 const ALLOWED_TYPES = [
-  "image/jpeg", "image/png", "image/webp", "image/gif",
-  "audio/webm", "audio/ogg", "audio/wav", "audio/mpeg", "audio/mp3",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "audio/webm",
+  "audio/ogg",
+  "audio/wav",
+  "audio/mpeg",
+  "audio/mp3",
 ];
-const ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "gif", "webm", "ogg", "wav", "mp3", "mpeg"];
+const ALLOWED_EXTENSIONS = [
+  "jpg",
+  "jpeg",
+  "png",
+  "webp",
+  "gif",
+  "webm",
+  "ogg",
+  "wav",
+  "mp3",
+  "mpeg",
+];
 const MAX_SIZE = 10 * 1024 * 1024; // 10MB
 
 function sanitizeFolder(input: string): string {
@@ -31,8 +50,14 @@ function detectTypeFromBuffer(buffer: Buffer): { type: string; ext: string } | n
   }
   // WebP: RIFF....WEBP
   if (
-    buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46 &&
-    buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50
+    buffer[0] === 0x52 &&
+    buffer[1] === 0x49 &&
+    buffer[2] === 0x46 &&
+    buffer[3] === 0x46 &&
+    buffer[8] === 0x57 &&
+    buffer[9] === 0x45 &&
+    buffer[10] === 0x42 &&
+    buffer[11] === 0x50
   ) {
     return { type: "image/webp", ext: "webp" };
   }
@@ -46,8 +71,14 @@ function detectTypeFromBuffer(buffer: Buffer): { type: string; ext: string } | n
   }
   // WAV: RIFF....WAVE (distinguish from WebP by checking bytes 8-11)
   if (
-    buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46 &&
-    buffer[8] === 0x57 && buffer[9] === 0x41 && buffer[10] === 0x56 && buffer[11] === 0x45
+    buffer[0] === 0x52 &&
+    buffer[1] === 0x49 &&
+    buffer[2] === 0x46 &&
+    buffer[3] === 0x46 &&
+    buffer[8] === 0x57 &&
+    buffer[9] === 0x41 &&
+    buffer[10] === 0x56 &&
+    buffer[11] === 0x45
   ) {
     return { type: "audio/wav", ext: "wav" };
   }
@@ -66,7 +97,9 @@ export const dynamic = "force-dynamic";
 export async function POST(req: NextRequest) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -83,10 +116,7 @@ export async function POST(req: NextRequest) {
       maxRequests: 10,
     });
     if (!limit.allowed) {
-      return NextResponse.json(
-        { error: "Rate limit exceeded. Try again later." },
-        { status: 429 }
-      );
+      return NextResponse.json({ error: "Rate limit exceeded. Try again later." }, { status: 429 });
     }
 
     const formData = await req.formData();
@@ -98,10 +128,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (file.size > MAX_SIZE) {
-      return NextResponse.json(
-        { error: "File too large. Max 10MB." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "File too large. Max 10MB." }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();
@@ -110,7 +137,10 @@ export async function POST(req: NextRequest) {
     const detected = detectTypeFromBuffer(buffer);
     if (!detected) {
       return NextResponse.json(
-        { error: "Invalid file type. Only images (JPEG, PNG, WebP, GIF) and audio (WebM, OGG, WAV, MP3) are allowed." },
+        {
+          error:
+            "Invalid file type. Only images (JPEG, PNG, WebP, GIF) and audio (WebM, OGG, WAV, MP3) are allowed.",
+        },
         { status: 400 }
       );
     }
@@ -121,19 +151,14 @@ export async function POST(req: NextRequest) {
     // Use service role client to bypass RLS on storage bucket
     const serviceClient = createServiceClient();
 
-    const { data, error } = await serviceClient.storage
-      .from("uploads")
-      .upload(key, buffer, {
-        contentType: detected.type,
-        upsert: false, // prevent overwrites
-      });
+    const { data, error } = await serviceClient.storage.from("uploads").upload(key, buffer, {
+      contentType: detected.type,
+      upsert: false, // prevent overwrites
+    });
 
     if (error) {
       logger.error("Upload error:", error instanceof Error ? error : undefined);
-      return NextResponse.json(
-        { error: "Upload failed. Please try again." },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Upload failed. Please try again." }, { status: 500 });
     }
 
     const {
@@ -143,9 +168,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ url: publicUrl, path: data.path });
   } catch (error) {
     logger.error("Upload failed", error instanceof Error ? error : undefined);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

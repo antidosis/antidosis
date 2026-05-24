@@ -1,12 +1,8 @@
 "use client";
 
-import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import { Avatar } from "@/components/ui/avatar";
-import { EmptyState } from "@/components/ui/empty-state";
-import { ProfileActions } from "@/components/ui/profile-actions";
-import { useApi } from "@/lib/swr-config";
+import { useParams } from "next/navigation";
+
 import {
   MapPin,
   Star,
@@ -22,6 +18,12 @@ import {
   MessageSquareText,
   Loader2,
 } from "lucide-react";
+
+import { Avatar } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ProfileActions } from "@/components/ui/profile-actions";
+import { useApi } from "@/lib/swr-config";
 
 interface Skill {
   id: string;
@@ -89,9 +91,11 @@ export default function ProfilePage() {
   const params = useParams();
   const id = params.id as string;
 
-  const { data: profile, isLoading, error } = useApi<ProfileData>(
-    id ? `/api/v1/profiles/${id}` : null
-  );
+  const {
+    data: profile,
+    isLoading,
+    error,
+  } = useApi<ProfileData>(id ? `/api/v1/profiles/${id}` : null);
 
   if (isLoading) {
     return (
@@ -113,8 +117,7 @@ export default function ProfilePage() {
 
   if (!profile) return null;
 
-  const username =
-    profile.fullName?.toLowerCase().replace(/\s/g, "_") || "user";
+  const username = profile.fullName?.toLowerCase().replace(/\s/g, "_") || "user";
 
   return (
     <div className="max-w-3xl mx-auto px-4 md:px-8 space-y-10 pb-12">
@@ -123,8 +126,7 @@ export default function ProfilePage() {
           href="/needs"
           className="inline-flex items-center text-sm text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors"
         >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          $ cd ~/needs/
+          <ArrowLeft className="mr-2 h-4 w-4" />$ cd ~/needs/
         </Link>
         <ProfileActions url={`https://antidosis.com/profile/${id}`} />
       </div>
@@ -140,9 +142,7 @@ export default function ProfilePage() {
               <h1 className="heading-display text-2xl text-[#e8d5a3]">
                 {profile.fullName || "anonymous"}
               </h1>
-              {profile.isVerified && (
-                <Shield className="h-5 w-5 text-[#00e676]" />
-              )}
+              {profile.isVerified && <Shield className="h-5 w-5 text-[#00e676]" />}
               {profile.isPro && <Badge variant="default">pro</Badge>}
             </div>
             <div className="flex flex-wrap items-center gap-4 text-sm text-[#b8a078] mt-2">
@@ -166,9 +166,7 @@ export default function ProfilePage() {
               )}
             </div>
             {profile.bio && (
-              <p className="text-sm text-[#b8a078] mt-4 leading-relaxed">
-                {profile.bio}
-              </p>
+              <p className="text-sm text-[#b8a078] mt-4 leading-relaxed">{profile.bio}</p>
             )}
             {profile.skills.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-5">
@@ -178,9 +176,7 @@ export default function ProfilePage() {
                     className="text-xs text-[#b8a078] bg-[#1a1714] border border-[#2a2420] rounded px-2 py-0.5"
                   >
                     {skill.name}
-                    {skill.isVerified && (
-                      <span className="ml-1 text-[#00e676]">✓</span>
-                    )}
+                    {skill.isVerified && <span className="ml-1 text-[#00e676]">✓</span>}
                   </span>
                 ))}
               </div>
@@ -223,19 +219,13 @@ export default function ProfilePage() {
         ) : (
           <div className="space-y-4">
             {profile.needsPosted.map((need) => (
-              <Link
-                key={need.id}
-                href={`/needs/${need.id}`}
-                className="block vessel p-5 group"
-              >
+              <Link key={need.id} href={`/needs/${need.id}`} className="block vessel p-5 group">
                 <div className="flex items-center justify-between">
                   <div className="min-w-0">
                     <h3 className="text-sm font-medium text-[#e8d5a3] group-hover:text-[#f5a623] transition-colors">
                       {need.title}
                     </h3>
-                    <p className="text-sm text-[#b8a078] mt-1 line-clamp-1">
-                      {need.description}
-                    </p>
+                    <p className="text-sm text-[#b8a078] mt-1 line-clamp-1">{need.description}</p>
                     <div className="flex flex-wrap gap-2 mt-2">
                       {need.requiredSkills.map((skill) => (
                         <span
@@ -273,22 +263,16 @@ export default function ProfilePage() {
               <div key={cred.id} className="vessel p-5">
                 <div className="flex items-center gap-2 flex-wrap mb-2">
                   <Award className="h-4 w-4 text-[#f5a623]" />
-                  <span className="text-sm font-medium text-[#e8d5a3]">
-                    {cred.title}
-                  </span>
+                  <span className="text-sm font-medium text-[#e8d5a3]">{cred.title}</span>
                   <span className="px-2 py-0.5 text-xs uppercase tracking-wide border border-[#2a2420] text-[#7a6b5a]">
                     {cred.type}
                   </span>
-                  {cred.isVerified && (
-                    <Shield className="h-3.5 w-3.5 text-[#00e676]" />
-                  )}
+                  {cred.isVerified && <Shield className="h-3.5 w-3.5 text-[#00e676]" />}
                 </div>
                 <div className="text-sm text-[#b8a078] space-y-1">
                   {cred.documentNumber && (
                     <p>
-                      {"*".repeat(
-                        Math.max(0, cred.documentNumber.length - 4)
-                      )}
+                      {"*".repeat(Math.max(0, cred.documentNumber.length - 4))}
                       {cred.documentNumber.slice(-4)}
                     </p>
                   )}
@@ -330,33 +314,23 @@ export default function ProfilePage() {
               <div key={review.id} className="vessel p-5">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <Avatar
-                      src={review.giver.avatarUrl}
-                      name={review.giver.fullName}
-                      size="sm"
-                    />
+                    <Avatar src={review.giver.avatarUrl} name={review.giver.fullName} size="sm" />
                     <div>
                       <p className="text-sm font-medium text-[#e8d5a3]">
                         {review.giver.fullName || "anonymous"}
                       </p>
                       {review.contract?.need?.title && (
-                        <p className="text-xs text-[#7a6b5a]">
-                          {review.contract.need.title}
-                        </p>
+                        <p className="text-xs text-[#7a6b5a]">{review.contract.need.title}</p>
                       )}
                     </div>
                   </div>
                   <div className="flex items-center gap-1 text-[#f5a623] glow-gold">
                     <Star className="h-4 w-4 fill-current" />
-                    <span className="text-sm font-bold">
-                      {review.rating}/10
-                    </span>
+                    <span className="text-sm font-bold">{review.rating}/10</span>
                   </div>
                 </div>
                 {review.comment && (
-                  <p className="text-sm text-[#b8a078] mt-4 leading-relaxed">
-                    {review.comment}
-                  </p>
+                  <p className="text-sm text-[#b8a078] mt-4 leading-relaxed">{review.comment}</p>
                 )}
               </div>
             ))}

@@ -1,20 +1,20 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase/server";
-import { logger } from "@/lib/logger";
-import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
+import { type NextRequest, NextResponse } from "next/server";
+
 import { auditLog, getClientInfo } from "@/lib/audit";
+import { logger } from "@/lib/logger";
 import { createNotification } from "@/lib/notifications";
+import { prisma } from "@/lib/prisma";
+import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
+import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -65,7 +65,10 @@ export async function POST(
 
     if (contract.cancelResponse !== "declined") {
       return NextResponse.json(
-        { error: "You can only escalate after the other party has declined your cancellation request." },
+        {
+          error:
+            "You can only escalate after the other party has declined your cancellation request.",
+        },
         { status: 400 }
       );
     }
@@ -108,9 +111,6 @@ export async function POST(
     return NextResponse.json({ contract: updatedContract });
   } catch (error) {
     logger.error("Escalate cancel error:", error instanceof Error ? error : undefined);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

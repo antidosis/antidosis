@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
+
 import {
   X,
   Menu,
@@ -15,27 +15,26 @@ import {
   ImageIcon,
   Mic,
   MicOff,
-  Square,
   Reply,
   CornerDownRight,
 } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/client";
+
 import { COMMANDS, findClosestCommand } from "./terminal-commands";
 import { dispatchCommand } from "./terminal-handlers";
+import { formatTime, getThemeColors } from "./terminal-render";
 import {
   loadSession,
   saveSession,
-  getLevel,
   addXp,
-  checkBadges,
   resolveAlias,
   resolveMacro,
   type TerminalSession,
   type WizardState,
 } from "./terminal-session";
-import { parseIntent, generateAgentResponse } from "./terminal-agent";
 import { advanceWizard, getSteps } from "./terminal-wizard";
-import { formatTime, getThemeColors, type ThemeColors } from "./terminal-render";
 
 // Types
 
@@ -237,7 +236,10 @@ export default function TerminalClient() {
   // Data
   const [channels, setChannels] = useState<Channel[]>([]);
   const [dmThreads, setDmThreads] = useState<Thread[]>([]);
-  const [activeContext, setActiveContext] = useState<ActiveContext>({ type: "console", name: "Console" });
+  const [activeContext, setActiveContext] = useState<ActiveContext>({
+    type: "console",
+    name: "Console",
+  });
   const [dismissedPublicWarning, setDismissedPublicWarning] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [sysMessages, setSysMessages] = useState<SysMsg[]>([]);
@@ -312,8 +314,10 @@ export default function TerminalClient() {
   const [channelUnread, setChannelUnread] = useState<Record<string, number>>({});
 
   // Swipe gestures
-  useSwipeGesture(() => setSidebarOpen(true), () => setSidebarOpen(false));
-
+  useSwipeGesture(
+    () => setSidebarOpen(true),
+    () => setSidebarOpen(false)
+  );
 
   // ─── Effects ───────────────────────────────────────────────
 
@@ -321,7 +325,9 @@ export default function TerminalClient() {
   useEffect(() => {
     let cancelled = false;
     async function init() {
-      const { data: { user: u } } = await supabase.auth.getUser();
+      const {
+        data: { user: u },
+      } = await supabase.auth.getUser();
       if (cancelled) return;
       if (!u) {
         router.push("/login");
@@ -343,7 +349,9 @@ export default function TerminalClient() {
       setAuthChecked(true);
     }
     init();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [router, supabase]);
 
   // Session load
@@ -458,10 +466,17 @@ export default function TerminalClient() {
     if (session && activeContext) {
       const key = activeContext.type === "channel" ? activeContext.id : activeContext.threadId;
       if (key) {
-        const updated = { ...session, lastReadAt: { ...session.lastReadAt, [key]: new Date().toISOString() } };
+        const updated = {
+          ...session,
+          lastReadAt: { ...session.lastReadAt, [key]: new Date().toISOString() },
+        };
         setSession(updated);
         if (activeContext.type === "channel") {
-          setChannelUnread((prev) => { const n = { ...prev }; delete n[key]; return n; });
+          setChannelUnread((prev) => {
+            const n = { ...prev };
+            delete n[key];
+            return n;
+          });
         }
       }
     }
@@ -548,7 +563,10 @@ export default function TerminalClient() {
           } else if (activeContext.type !== "channel" || msg.channelId !== activeContext.id) {
             // Message in another channel - increment unread
             if (msg.channelId) {
-              setChannelUnread((prev) => ({ ...prev, [msg.channelId]: (prev[msg.channelId] || 0) + 1 }));
+              setChannelUnread((prev) => ({
+                ...prev,
+                [msg.channelId]: (prev[msg.channelId] || 0) + 1,
+              }));
               if (document.hidden && notifyMentionRef.current) {
                 playNotifySound();
               }
@@ -565,10 +583,7 @@ export default function TerminalClient() {
         { event: "INSERT", schema: "public", table: "DirectMessage" },
         (payload) => {
           const msg = payload.new as any;
-          if (
-            activeContext.type === "dm" &&
-            msg.threadId === activeContext.threadId
-          ) {
+          if (activeContext.type === "dm" && msg.threadId === activeContext.threadId) {
             fetch("/api/v1/terminal/dm/messages?threadId=" + activeContext.threadId + "&limit=1")
               .then((r) => r.json())
               .then((data) => {
@@ -629,7 +644,9 @@ export default function TerminalClient() {
         }, 3000);
       }
     }).subscribe();
-    return () => { ch.unsubscribe(); };
+    return () => {
+      ch.unsubscribe();
+    };
   }, [user, activeContext, supabase]);
 
   const sendTyping = useCallback(() => {
@@ -673,9 +690,12 @@ export default function TerminalClient() {
 
     // Diagnostic: log current mic permission state
     if (navigator.permissions) {
-      navigator.permissions.query({ name: "microphone" as any }).then(() => {
-        // mic permission checked silently
-      }).catch(() => {});
+      navigator.permissions
+        .query({ name: "microphone" as any })
+        .then(() => {
+          // mic permission checked silently
+        })
+        .catch(() => {});
     }
 
     // Create a fresh recognition object for each session
@@ -764,41 +784,44 @@ export default function TerminalClient() {
 
   // Voice message recording
   function startRecording() {
-    navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
-      recordingStreamRef.current = stream;
-      const recorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = recorder;
-      recordingChunksRef.current = [];
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
+      .then((stream) => {
+        recordingStreamRef.current = stream;
+        const recorder = new MediaRecorder(stream);
+        mediaRecorderRef.current = recorder;
+        recordingChunksRef.current = [];
 
-      recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) recordingChunksRef.current.push(e.data);
-      };
+        recorder.ondataavailable = (e) => {
+          if (e.data.size > 0) recordingChunksRef.current.push(e.data);
+        };
 
-      recorder.onstop = () => {
-        const blob = new Blob(recordingChunksRef.current, { type: "audio/webm" });
-        sendVoiceMessage(blob);
-        stream.getTracks().forEach((t) => t.stop());
-      };
+        recorder.onstop = () => {
+          const blob = new Blob(recordingChunksRef.current, { type: "audio/webm" });
+          sendVoiceMessage(blob);
+          stream.getTracks().forEach((t) => t.stop());
+        };
 
-      recorder.onerror = () => {
-        setIsRecording(false);
-        isRecordingRef.current = false;
-        if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
-        stream.getTracks().forEach((t) => t.stop());
-        addSys("Recording failed.", "error");
-      };
+        recorder.onerror = () => {
+          setIsRecording(false);
+          isRecordingRef.current = false;
+          if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+          stream.getTracks().forEach((t) => t.stop());
+          addSys("Recording failed.", "error");
+        };
 
-      recorder.start();
-      isRecordingRef.current = true;
-      setIsRecording(true);
-      setRecordingDuration(0);
-      recordStartTimeRef.current = Date.now();
-      recordingTimerRef.current = setInterval(() => {
-        setRecordingDuration(Math.floor((Date.now() - recordStartTimeRef.current) / 1000));
-      }, 1000);
-    }).catch((err: any) => {
-      addSys("Could not access microphone: " + (err?.message || ""), "error");
-    });
+        recorder.start();
+        isRecordingRef.current = true;
+        setIsRecording(true);
+        setRecordingDuration(0);
+        recordStartTimeRef.current = Date.now();
+        recordingTimerRef.current = setInterval(() => {
+          setRecordingDuration(Math.floor((Date.now() - recordStartTimeRef.current) / 1000));
+        }, 1000);
+      })
+      .catch((err: any) => {
+        addSys("Could not access microphone: " + (err?.message || ""), "error");
+      });
   }
 
   function stopRecording() {
@@ -884,10 +907,7 @@ export default function TerminalClient() {
   // ─── Helpers ─────────────────────────────────────────────────
 
   function addSys(text: string, type: SysMsg["type"] = "info") {
-    setSysMessages((prev) => [
-      ...prev,
-      { id: uuid(), text, type, timestamp: Date.now() },
-    ]);
+    setSysMessages((prev) => [...prev, { id: uuid(), text, type, timestamp: Date.now() }]);
   }
 
   async function uploadFile(file: File): Promise<Attachment | null> {
@@ -983,10 +1003,46 @@ export default function TerminalClient() {
     let safety = 0;
 
     const patterns = [
-      { regex: /\*\*(.+?)\*\*/, el: (t: string, k: string) => <strong key={k} style={{ color: "var(--term-accent)" }}>{t}</strong> },
-      { regex: /__(.+?)__/, el: (t: string, k: string) => <strong key={k} style={{ color: "var(--term-accent)" }}>{t}</strong> },
-      { regex: /~~(.+?)~~/, el: (t: string, k: string) => <del key={k} style={{ color: "var(--term-muted)" }}>{t}</del> },
-      { regex: /`(.+?)`/, el: (t: string, k: string) => <code key={k} style={{ background: "var(--term-border)", padding: "0 4px", borderRadius: 2, fontSize: "12px" }}>{t}</code> },
+      {
+        regex: /\*\*(.+?)\*\*/,
+        el: (t: string, k: string) => (
+          <strong key={k} style={{ color: "var(--term-accent)" }}>
+            {t}
+          </strong>
+        ),
+      },
+      {
+        regex: /__(.+?)__/,
+        el: (t: string, k: string) => (
+          <strong key={k} style={{ color: "var(--term-accent)" }}>
+            {t}
+          </strong>
+        ),
+      },
+      {
+        regex: /~~(.+?)~~/,
+        el: (t: string, k: string) => (
+          <del key={k} style={{ color: "var(--term-muted)" }}>
+            {t}
+          </del>
+        ),
+      },
+      {
+        regex: /`(.+?)`/,
+        el: (t: string, k: string) => (
+          <code
+            key={k}
+            style={{
+              background: "var(--term-border)",
+              padding: "0 4px",
+              borderRadius: 2,
+              fontSize: "12px",
+            }}
+          >
+            {t}
+          </code>
+        ),
+      },
       { regex: /\*(.+?)\*/, el: (t: string, k: string) => <em key={k}>{t}</em> },
     ];
 
@@ -1028,7 +1084,10 @@ export default function TerminalClient() {
     while ((match = mentionRegex.exec(text)) !== null) {
       parts.push(<span key={keyPrefix + "-m" + count++}>{text.slice(lastIdx, match.index)}</span>);
       parts.push(
-        <span key={keyPrefix + "-m" + count++} style={{ color: "var(--term-accent)", fontWeight: 600 }}>
+        <span
+          key={keyPrefix + "-m" + count++}
+          style={{ color: "var(--term-accent)", fontWeight: 600 }}
+        >
           @{match[1].slice(0, 8)}
         </span>
       );
@@ -1077,15 +1136,18 @@ export default function TerminalClient() {
 
     return (
       <>
-        <div className="mb-1 border-l-2 pl-2 text-[11px] italic" style={{ borderColor: "var(--term-muted)", color: "var(--term-muted)" }}>
+        <div
+          className="mb-1 border-l-2 pl-2 text-[11px] italic"
+          style={{ borderColor: "var(--term-muted)", color: "var(--term-muted)" }}
+        >
           <CornerDownRight className="mr-1 inline h-3 w-3" />
-          {replyMatch[2]}: {replyMatch[3].length > 60 ? replyMatch[3].slice(0, 60) + "…" : replyMatch[3]}
+          {replyMatch[2]}:{" "}
+          {replyMatch[3].length > 60 ? replyMatch[3].slice(0, 60) + "…" : replyMatch[3]}
         </div>
         {rendered}
       </>
     );
   }
-
 
   async function submitWizard(type: WizardState["type"], data: Record<string, any>) {
     try {
@@ -1159,18 +1221,30 @@ export default function TerminalClient() {
           fetch("/api/v1/contracts/mine").then((r) => r.json()),
           fetch("/api/v1/acceptances/mine").then((r) => r.json()),
         ]);
-        const contracts = Array.isArray(contractsData) ? contractsData : contractsData.contracts || [];
-        const acceptances = Array.isArray(acceptancesData) ? acceptancesData : acceptancesData.acceptances || [];
+        const contracts = Array.isArray(contractsData)
+          ? contractsData
+          : contractsData.contracts || [];
+        const acceptances = Array.isArray(acceptancesData)
+          ? acceptancesData
+          : acceptancesData.acceptances || [];
         const targetId = data.targetId;
         let receiverId: string | undefined;
-        const payload: any = { rating: data.rating, comment: data.comment, privateFeedback: data.privateFeedback };
+        const payload: any = {
+          rating: data.rating,
+          comment: data.comment,
+          privateFeedback: data.privateFeedback,
+        };
         if (contracts.find((c: any) => c.id === targetId || c.id.startsWith(targetId))) {
-          const contract = contracts.find((c: any) => c.id === targetId || c.id.startsWith(targetId));
+          const contract = contracts.find(
+            (c: any) => c.id === targetId || c.id.startsWith(targetId)
+          );
           const isPartyA = contract.partyAId === myProfile?.id;
           receiverId = isPartyA ? contract.partyBId : contract.partyAId;
           payload.contractId = contract.id;
         } else {
-          const acceptance = acceptances.find((a: any) => a.id === targetId || a.id.startsWith(targetId));
+          const acceptance = acceptances.find(
+            (a: any) => a.id === targetId || a.id.startsWith(targetId)
+          );
           if (acceptance) {
             const needRes = await fetch("/api/v1/needs/" + (acceptance.need?.id || targetId));
             const needData = await needRes.json();
@@ -1222,19 +1296,47 @@ export default function TerminalClient() {
       // Allow safe commands to run without breaking the wizard
       if (text.startsWith("/")) {
         const safeCommands = new Set([
-          "help", "h", "?", "hlep", "hepl", "hellp", "hlpe",
-          "clear", "cls", "reset", "claer",
-          "commands", "cmds", "cmdlist",
-          "whatis", "explain", "man", "info",
-          "tips", "hint", "idea",
-          "theme", "colortheme",
-          "voice", "speech", "mic",
+          "help",
+          "h",
+          "?",
+          "hlep",
+          "hepl",
+          "hellp",
+          "hlpe",
+          "clear",
+          "cls",
+          "reset",
+          "claer",
+          "commands",
+          "cmds",
+          "cmdlist",
+          "whatis",
+          "explain",
+          "man",
+          "info",
+          "tips",
+          "hint",
+          "idea",
+          "theme",
+          "colortheme",
+          "voice",
+          "speech",
+          "mic",
           "settings",
-          "status", "xp", "level",
-          "whoami", "iam", "aboutme",
-          "id", "myid", "userid", "ident",
-          "history", "past",
-          "exit", "leave",
+          "status",
+          "xp",
+          "level",
+          "whoami",
+          "iam",
+          "aboutme",
+          "id",
+          "myid",
+          "userid",
+          "ident",
+          "history",
+          "past",
+          "exit",
+          "leave",
         ]);
         const cmd = text.slice(1).split(/\s+/)[0].toLowerCase();
         if (safeCommands.has(cmd)) {
@@ -1354,7 +1456,11 @@ export default function TerminalClient() {
       if (!result.handled) {
         const closest = findClosestCommand(cmd);
         addSys(
-          "Unknown command: /" + cmd + "." + (closest ? " Did you mean /" + closest + "?" : "") + " Type /help for available commands.",
+          "Unknown command: /" +
+            cmd +
+            "." +
+            (closest ? " Did you mean /" + closest + "?" : "") +
+            " Type /help for available commands.",
           "error"
         );
       }
@@ -1363,7 +1469,10 @@ export default function TerminalClient() {
 
     // Normal message
     if (activeContext?.type === "console") {
-      addSys("Console mode: only /commands work here. Select a channel or DM to send messages.", "info");
+      addSys(
+        "Console mode: only /commands work here. Select a channel or DM to send messages.",
+        "info"
+      );
       return;
     }
     if (!activeContext) {
@@ -1374,7 +1483,15 @@ export default function TerminalClient() {
     let content = text;
     if (replyingTo) {
       const preview = replyingTo.content.replace(/\n/g, " ");
-      content = ">reply:" + replyingTo.id + ":" + (replyingTo.senderName || "User") + ":" + preview + "\n" + text;
+      content =
+        ">reply:" +
+        replyingTo.id +
+        ":" +
+        (replyingTo.senderName || "User") +
+        ":" +
+        preview +
+        "\n" +
+        text;
     }
 
     setIsLoading(true);
@@ -1502,43 +1619,71 @@ export default function TerminalClient() {
     }
   }
 
-
   // ─── Render ────────────────────────────────────────────────
   return (
-    <div className="flex h-[85dvh] font-mono" style={{ ...themeVars, background: "var(--term-bg)", color: "var(--term-text)" }}>
+    <div
+      className="flex h-[85dvh] font-mono"
+      style={{ ...themeVars, background: "var(--term-bg)", color: "var(--term-text)" }}
+    >
       {/* Sidebar */}
       <div
         className={`${sidebarOpen ? "translate-x-0" : "-translate-x-full"} fixed inset-y-0 left-0 z-50 flex w-[220px] flex-col overflow-y-auto border-r transition-transform duration-200 md:static md:translate-x-0`}
         style={{ borderColor: "var(--term-border)", background: "var(--term-sidebar-bg)" }}
       >
         <div className="flex justify-end p-2 md:hidden">
-          <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(false)} className="h-8 w-8" style={{ color: "var(--term-muted)" }}>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setSidebarOpen(false)}
+            className="h-8 w-8"
+            style={{ color: "var(--term-muted)" }}
+          >
             <X className="h-4 w-4" />
           </Button>
         </div>
 
         <div className="px-3 pt-3">
-          <div className="mb-1.5 text-[10px] uppercase tracking-widest" style={{ color: "var(--term-muted)" }}>Console</div>
+          <div
+            className="mb-1.5 text-[10px] uppercase tracking-widest"
+            style={{ color: "var(--term-muted)" }}
+          >
+            Console
+          </div>
           <button
-            onClick={() => { setActiveContext({ type: "console", name: "Console" }); setSidebarOpen(false); }}
+            onClick={() => {
+              setActiveContext({ type: "console", name: "Console" });
+              setSidebarOpen(false);
+            }}
             className="flex w-full items-center gap-1.5 py-[3px] text-[13px] transition-colors focus:outline-none"
             style={{
-              color: activeContext?.type === "console" ? "var(--term-success)" : "var(--term-muted)",
-              borderLeft: activeContext?.type === "console" ? "2px solid var(--term-success)" : "2px solid transparent",
+              color:
+                activeContext?.type === "console" ? "var(--term-success)" : "var(--term-muted)",
+              borderLeft:
+                activeContext?.type === "console"
+                  ? "2px solid var(--term-success)"
+                  : "2px solid transparent",
               paddingLeft: activeContext?.type === "console" ? "6px" : "8px",
             }}
           >
             <span style={{ color: "var(--term-muted)" }}>&gt;</span>
             <span className="truncate">Console</span>
           </button>
-          <div className="mb-1.5 mt-3 text-[10px] uppercase tracking-widest" style={{ color: "var(--term-muted)" }}>Channels</div>
+          <div
+            className="mb-1.5 mt-3 text-[10px] uppercase tracking-widest"
+            style={{ color: "var(--term-muted)" }}
+          >
+            Channels
+          </div>
           {channels.map((ch) => {
             const isActive = activeContext?.type === "channel" && activeContext.id === ch.id;
             const unread = channelUnread[ch.id] || 0;
             return (
               <button
                 key={ch.id}
-                onClick={() => { setActiveContext({ type: "channel", id: ch.id, name: ch.name }); setSidebarOpen(false); }}
+                onClick={() => {
+                  setActiveContext({ type: "channel", id: ch.id, name: ch.name });
+                  setSidebarOpen(false);
+                }}
                 className="flex w-full items-center gap-1.5 py-[3px] text-[13px] transition-colors focus:outline-none"
                 style={{
                   color: isActive ? "var(--term-accent)" : "var(--term-muted)",
@@ -1549,24 +1694,47 @@ export default function TerminalClient() {
                 <span style={{ color: "var(--term-muted)" }}>#</span>
                 <span className="truncate">{ch.name.replace(/^#/, "")}</span>
                 {unread > 0 && (
-                  <span className="ml-auto flex h-4 min-w-[16px] items-center justify-center px-1 text-[9px] font-bold" style={{ background: "var(--term-accent)", color: "var(--term-bg)" }}>
+                  <span
+                    className="ml-auto flex h-4 min-w-[16px] items-center justify-center px-1 text-[9px] font-bold"
+                    style={{ background: "var(--term-accent)", color: "var(--term-bg)" }}
+                  >
                     {unread > 99 ? "99+" : unread}
                   </span>
                 )}
-                {ch.type === "staff" && <span className="ml-auto text-[9px] uppercase tracking-wider" style={{ color: "var(--term-accent)" }}>Staff</span>}
+                {ch.type === "staff" && (
+                  <span
+                    className="ml-auto text-[9px] uppercase tracking-wider"
+                    style={{ color: "var(--term-accent)" }}
+                  >
+                    Staff
+                  </span>
+                )}
               </button>
             );
           })}
         </div>
         {dmThreads.length > 0 && (
           <div className="mt-4 border-t px-3 pt-3" style={{ borderColor: "var(--term-border)" }}>
-            <div className="mb-1.5 text-[10px] uppercase tracking-widest" style={{ color: "var(--term-muted)" }}>Direct Messages</div>
+            <div
+              className="mb-1.5 text-[10px] uppercase tracking-widest"
+              style={{ color: "var(--term-muted)" }}
+            >
+              Direct Messages
+            </div>
             {dmThreads.map((thread) => {
               const isActive = activeContext?.type === "dm" && activeContext.threadId === thread.id;
               return (
                 <button
                   key={thread.id}
-                  onClick={() => { setActiveContext({ type: "dm", threadId: thread.id, otherUserId: thread.otherUser.id, otherUserName: thread.otherUser.fullName || "User" }); setSidebarOpen(false); }}
+                  onClick={() => {
+                    setActiveContext({
+                      type: "dm",
+                      threadId: thread.id,
+                      otherUserId: thread.otherUser.id,
+                      otherUserName: thread.otherUser.fullName || "User",
+                    });
+                    setSidebarOpen(false);
+                  }}
                   className="flex w-full items-center gap-2 py-[3px] text-[13px] transition-colors focus:outline-none"
                   style={{
                     color: isActive ? "var(--term-accent)" : "var(--term-muted)",
@@ -1574,12 +1742,18 @@ export default function TerminalClient() {
                     paddingLeft: isActive ? "6px" : "8px",
                   }}
                 >
-                  <div className="flex h-[18px] w-[18px] shrink-0 items-center justify-center text-[9px]" style={{ background: "var(--term-border)", color: "var(--term-muted)" }}>
+                  <div
+                    className="flex h-[18px] w-[18px] shrink-0 items-center justify-center text-[9px]"
+                    style={{ background: "var(--term-border)", color: "var(--term-muted)" }}
+                  >
                     {getInitials(thread.otherUser.fullName)}
                   </div>
                   <span className="truncate">{thread.otherUser.fullName || "User"}</span>
                   {thread.unreadCount > 0 && (
-                    <span className="ml-auto flex h-4 min-w-[16px] items-center justify-center px-1 text-[9px] font-bold" style={{ background: "var(--term-accent)", color: "var(--term-bg)" }}>
+                    <span
+                      className="ml-auto flex h-4 min-w-[16px] items-center justify-center px-1 text-[9px] font-bold"
+                      style={{ background: "var(--term-accent)", color: "var(--term-bg)" }}
+                    >
                       {thread.unreadCount}
                     </span>
                   )}
@@ -1589,22 +1763,49 @@ export default function TerminalClient() {
           </div>
         )}
         <div className="mt-auto border-t px-3 py-3" style={{ borderColor: "var(--term-border)" }}>
-          <div className="mb-1.5 text-[10px] uppercase tracking-widest" style={{ color: "var(--term-muted)" }}>Online Now</div>
-          {onlineUsers.length > 0 ? onlineUsers.map((u) => (
-            <div key={u.id} className="flex items-center gap-2 py-[2px] text-[13px]" style={{ color: "var(--term-muted)" }}>
-              <div className="h-[6px] w-[6px] shrink-0" style={{ background: "var(--term-success)" }} />
-              <span className="truncate">{u.fullName || "User"}</span>
+          <div
+            className="mb-1.5 text-[10px] uppercase tracking-widest"
+            style={{ color: "var(--term-muted)" }}
+          >
+            Online Now
+          </div>
+          {onlineUsers.length > 0 ? (
+            onlineUsers.map((u) => (
+              <div
+                key={u.id}
+                className="flex items-center gap-2 py-[2px] text-[13px]"
+                style={{ color: "var(--term-muted)" }}
+              >
+                <div
+                  className="h-[6px] w-[6px] shrink-0"
+                  style={{ background: "var(--term-success)" }}
+                />
+                <span className="truncate">{u.fullName || "User"}</span>
+              </div>
+            ))
+          ) : (
+            <div className="py-[2px] text-[13px] italic" style={{ color: "var(--term-muted)" }}>
+              No one online
             </div>
-          )) : <div className="py-[2px] text-[13px] italic" style={{ color: "var(--term-muted)" }}>No one online</div>}
+          )}
         </div>
       </div>
 
       {/* Main */}
       <div className="flex min-w-0 flex-1 flex-col" style={{ background: "var(--term-bg)" }}>
         {/* Header */}
-        <div className="flex shrink-0 items-center justify-between px-4 py-1.5 text-[12px]" style={{ borderBottom: "1px solid var(--term-border)" }}>
+        <div
+          className="flex shrink-0 items-center justify-between px-4 py-1.5 text-[12px]"
+          style={{ borderBottom: "1px solid var(--term-border)" }}
+        >
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" className="h-6 w-6 md:hidden" style={{ color: "var(--term-muted)" }} onClick={() => setSidebarOpen(true)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 md:hidden"
+              style={{ color: "var(--term-muted)" }}
+              onClick={() => setSidebarOpen(true)}
+            >
               <Menu className="h-4 w-4" />
             </Button>
             <span style={{ color: "var(--term-muted)" }}>antidosis-terminal v2.0.0</span>
@@ -1627,83 +1828,133 @@ export default function TerminalClient() {
 
         {/* Public channel warning */}
         {activeContext?.type === "channel" && !dismissedPublicWarning && (
-          <div className="flex items-center justify-between px-4 py-1 text-[11px]" style={{ background: "var(--term-border)", color: "var(--term-text)" }}>
+          <div
+            className="flex items-center justify-between px-4 py-1 text-[11px]"
+            style={{ background: "var(--term-border)", color: "var(--term-text)" }}
+          >
             <span>Public channel — all messages here are visible to other users.</span>
-            <button onClick={() => setDismissedPublicWarning(true)} className="text-[11px] underline" style={{ color: "var(--term-muted)" }}>Dismiss</button>
+            <button
+              onClick={() => setDismissedPublicWarning(true)}
+              className="text-[11px] underline"
+              style={{ color: "var(--term-muted)" }}
+            >
+              Dismiss
+            </button>
           </div>
         )}
 
         {/* Messages */}
-        <div ref={scrollRef} onScroll={onScroll} className="relative flex-1 min-h-0 overflow-y-auto px-4 py-2">
+        <div
+          ref={scrollRef}
+          onScroll={onScroll}
+          className="relative flex-1 min-h-0 overflow-y-auto px-4 py-2"
+        >
           {isLoading ? (
             <div className="flex h-full items-center justify-center">
               <Loader2 className="h-6 w-6 animate-spin" style={{ color: "var(--term-accent)" }} />
             </div>
           ) : (
             <div className="space-y-2">
-              {activeContext?.type === "channel" && !messages.length && !sysMessages.length && !wizard && !pendingChoices && (
-                <div className="mb-4">
-                  <p className="text-[13px]" style={{ color: "var(--term-muted)" }}>
-                    <span style={{ color: "var(--term-accent)" }}>#</span>{" "}
-                    <span style={{ color: "var(--term-accent)" }}>{activeContext.name}</span>
-                    {" - "}
-                    {channels.find((c) => c.id === activeContext.id)?.description || "General discussion"}
-                  </p>
-                  <p className="mt-2 text-[13px]">
-                    Welcome to <span style={{ color: "var(--term-accent)" }}>#{activeContext.name}</span>!
-                  </p>
-                  <p className="mt-1 text-[13px]" style={{ color: "var(--term-muted)" }}>
-                    No messages here yet. Be the first to say something — just type below and hit enter.
-                  </p>
-                </div>
-              )}
+              {activeContext?.type === "channel" &&
+                !messages.length &&
+                !sysMessages.length &&
+                !wizard &&
+                !pendingChoices && (
+                  <div className="mb-4">
+                    <p className="text-[13px]" style={{ color: "var(--term-muted)" }}>
+                      <span style={{ color: "var(--term-accent)" }}>#</span>{" "}
+                      <span style={{ color: "var(--term-accent)" }}>{activeContext.name}</span>
+                      {" - "}
+                      {channels.find((c) => c.id === activeContext.id)?.description ||
+                        "General discussion"}
+                    </p>
+                    <p className="mt-2 text-[13px]">
+                      Welcome to{" "}
+                      <span style={{ color: "var(--term-accent)" }}>#{activeContext.name}</span>!
+                    </p>
+                    <p className="mt-1 text-[13px]" style={{ color: "var(--term-muted)" }}>
+                      No messages here yet. Be the first to say something — just type below and hit
+                      enter.
+                    </p>
+                  </div>
+                )}
 
-              {activeContext?.type === "console" && !sysMessages.length && !wizard && !pendingChoices && (
-                <div className="mb-4">
-                  <p className="text-[13px]" style={{ color: "var(--term-success)" }}>
-                    &gt; Console
-                  </p>
-                  <p className="mt-2 text-[13px]">
-                    This is your private space. Only you can see what you type here.
-                  </p>
-                  <p className="mt-1 text-[13px]" style={{ color: "var(--term-muted)" }}>
-                    Try <span style={{ color: "var(--term-accent)" }}>/help</span> to see commands, or select a channel to chat with others.
-                  </p>
-                </div>
-              )}
+              {activeContext?.type === "console" &&
+                !sysMessages.length &&
+                !wizard &&
+                !pendingChoices && (
+                  <div className="mb-4">
+                    <p className="text-[13px]" style={{ color: "var(--term-success)" }}>
+                      &gt; Console
+                    </p>
+                    <p className="mt-2 text-[13px]">
+                      This is your private space. Only you can see what you type here.
+                    </p>
+                    <p className="mt-1 text-[13px]" style={{ color: "var(--term-muted)" }}>
+                      Try <span style={{ color: "var(--term-accent)" }}>/help</span> to see
+                      commands, or select a channel to chat with others.
+                    </p>
+                  </div>
+                )}
 
               {sysMessages.map((sys) => (
-                <div key={sys.id} className="text-[13px]" style={{
-                  color: sys.type === "error" ? "var(--term-error)" : sys.type === "success" ? "var(--term-success)" : sys.type === "command" ? "var(--term-accent)" : "var(--term-muted)",
-                }}>
+                <div
+                  key={sys.id}
+                  className="text-[13px]"
+                  style={{
+                    color:
+                      sys.type === "error"
+                        ? "var(--term-error)"
+                        : sys.type === "success"
+                          ? "var(--term-success)"
+                          : sys.type === "command"
+                            ? "var(--term-accent)"
+                            : "var(--term-muted)",
+                  }}
+                >
                   <pre className="whitespace-pre-wrap font-mono">{sys.text}</pre>
                 </div>
               ))}
 
               {wizard && (
                 <div className="border-l-2 pl-3" style={{ borderColor: "var(--term-accent)" }}>
-                  <p className="text-[11px] font-semibold" style={{ color: "var(--term-accent)" }}>Wizard</p>
+                  <p className="text-[11px] font-semibold" style={{ color: "var(--term-accent)" }}>
+                    Wizard
+                  </p>
                   <pre className="whitespace-pre-wrap text-[13px]">{wizard.prompt}</pre>
-                  <p className="mt-1 text-[11px]" style={{ color: "var(--term-muted)" }}>Type your response or /cancel to quit</p>
+                  <p className="mt-1 text-[11px]" style={{ color: "var(--term-muted)" }}>
+                    Type your response or /cancel to quit
+                  </p>
                 </div>
               )}
 
               {pendingChoices && (
                 <div className="border-l-2 pl-3" style={{ borderColor: "var(--term-accent)" }}>
-                  <p className="text-[11px] font-semibold" style={{ color: "var(--term-accent)" }}>Choose an option:</p>
+                  <p className="text-[11px] font-semibold" style={{ color: "var(--term-accent)" }}>
+                    Choose an option:
+                  </p>
                   {pendingChoices.options.map((opt, i) => (
-                    <p key={opt.id} className="text-[13px]">{i + 1}. {opt.fullName || "Unknown"} ({opt.locationName || "No location"})</p>
+                    <p key={opt.id} className="text-[13px]">
+                      {i + 1}. {opt.fullName || "Unknown"} ({opt.locationName || "No location"})
+                    </p>
                   ))}
                 </div>
               )}
 
               {/* Typing indicator */}
               {Object.keys(typingUsers).length > 0 && (
-                <div className="flex items-center gap-2 py-1 text-[11px] italic" style={{ color: "var(--term-muted)" }}>
+                <div
+                  className="flex items-center gap-2 py-1 text-[11px] italic"
+                  style={{ color: "var(--term-muted)" }}
+                >
                   <span className="flex gap-0.5">
                     <span className="animate-bounce">•</span>
-                    <span className="animate-bounce" style={{ animationDelay: "0.1s" }}>•</span>
-                    <span className="animate-bounce" style={{ animationDelay: "0.2s" }}>•</span>
+                    <span className="animate-bounce" style={{ animationDelay: "0.1s" }}>
+                      •
+                    </span>
+                    <span className="animate-bounce" style={{ animationDelay: "0.2s" }}>
+                      •
+                    </span>
                   </span>
                   {Object.keys(typingUsers).join(", ")} typing...
                 </div>
@@ -1711,22 +1962,42 @@ export default function TerminalClient() {
 
               {messages.map((msg, idx) => {
                 const prev = messages[idx - 1];
-                const isGrouped = prev && prev.sender.id === msg.sender.id && (new Date(msg.createdAt).getTime() - new Date(prev.createdAt).getTime()) < 5 * 60 * 1000;
+                const isGrouped =
+                  prev &&
+                  prev.sender.id === msg.sender.id &&
+                  new Date(msg.createdAt).getTime() - new Date(prev.createdAt).getTime() <
+                    5 * 60 * 1000;
                 return (
                   <div key={msg.id} className="group">
                     {!isGrouped && (
                       <div className="flex items-baseline gap-2">
-                        <span className="text-[11px] shrink-0" style={{ color: "var(--term-muted)" }}>{formatTime(msg.createdAt)}</span>
-                        <span className="text-[13px] font-semibold" style={{ color: "var(--term-accent)" }}>{msg.sender.fullName || "User"}</span>
+                        <span
+                          className="text-[11px] shrink-0"
+                          style={{ color: "var(--term-muted)" }}
+                        >
+                          {formatTime(msg.createdAt)}
+                        </span>
+                        <span
+                          className="text-[13px] font-semibold"
+                          style={{ color: "var(--term-accent)" }}
+                        >
+                          {msg.sender.fullName || "User"}
+                        </span>
                         <button
                           onClick={() => navigator.clipboard.writeText(msg.content).catch(() => {})}
                           className="opacity-0 transition-opacity group-hover:opacity-100"
                           title="Copy text"
                         >
-                          <span className="text-[10px]" style={{ color: "var(--term-muted)" }}>copy</span>
+                          <span className="text-[10px]" style={{ color: "var(--term-muted)" }}>
+                            copy
+                          </span>
                         </button>
                         {(msg.sender.id === myProfile?.id || isAdmin) && (
-                          <button onClick={() => deleteMessage(msg.id)} className="opacity-0 transition-opacity group-hover:opacity-100" title="Delete">
+                          <button
+                            onClick={() => deleteMessage(msg.id)}
+                            className="opacity-0 transition-opacity group-hover:opacity-100"
+                            title="Delete"
+                          >
                             <Trash2 className="h-3 w-3" style={{ color: "var(--term-muted)" }} />
                           </button>
                         )}
@@ -1735,7 +2006,7 @@ export default function TerminalClient() {
                     <div className="pl-[52px] text-[13px]">{renderContent(msg.content)}</div>
                     {msg.attachments.length > 0 && (
                       <div className="mt-1 flex flex-wrap gap-2 pl-[52px]">
-                        {msg.attachments.map((att, i) => (
+                        {msg.attachments.map((att, i) =>
                           att.type.startsWith("audio/") ? (
                             <audio
                               key={i}
@@ -1755,26 +2026,52 @@ export default function TerminalClient() {
                                 }
                               }}
                               className="flex items-center gap-1 px-2 py-0.5 text-[11px]"
-                              style={{ background: "var(--term-border)", color: "var(--term-accent)" }}
+                              style={{
+                                background: "var(--term-border)",
+                                color: "var(--term-accent)",
+                              }}
                             >
-                              {att.type.startsWith("image/") ? <ImageIcon className="h-3 w-3" /> : <Paperclip className="h-3 w-3" />}
+                              {att.type.startsWith("image/") ? (
+                                <ImageIcon className="h-3 w-3" />
+                              ) : (
+                                <Paperclip className="h-3 w-3" />
+                              )}
                               {att.name}
                             </button>
                           )
-                        ))}
+                        )}
                       </div>
                     )}
                     {msg.reactions.length > 0 && (
                       <div className="mt-1 flex flex-wrap gap-1 pl-[52px]">
                         {msg.reactions.map((r) => (
-                          <button key={r.id} onClick={() => toggleReaction(msg.id, r.emoji)} className="px-1 py-0 text-[11px]" style={{ background: "var(--term-border)" }}>{r.emoji}</button>
+                          <button
+                            key={r.id}
+                            onClick={() => toggleReaction(msg.id, r.emoji)}
+                            className="px-1 py-0 text-[11px]"
+                            style={{ background: "var(--term-border)" }}
+                          >
+                            {r.emoji}
+                          </button>
                         ))}
                       </div>
                     )}
                     <div className="mt-0.5 flex gap-2 pl-[52px] opacity-0 transition-opacity group-hover:opacity-100">
-                      <button onClick={() => setShowEmojiPicker(msg.id)} className="text-[11px]" style={{ color: "var(--term-muted)" }}>+ react</button>
                       <button
-                        onClick={() => setReplyingTo({ id: msg.id, content: msg.content, senderName: msg.sender.fullName })}
+                        onClick={() => setShowEmojiPicker(msg.id)}
+                        className="text-[11px]"
+                        style={{ color: "var(--term-muted)" }}
+                      >
+                        + react
+                      </button>
+                      <button
+                        onClick={() =>
+                          setReplyingTo({
+                            id: msg.id,
+                            content: msg.content,
+                            senderName: msg.sender.fullName,
+                          })
+                        }
                         className="flex items-center gap-0.5 text-[11px]"
                         style={{ color: "var(--term-muted)" }}
                       >
@@ -1782,11 +2079,29 @@ export default function TerminalClient() {
                       </button>
                     </div>
                     {showEmojiPicker === msg.id && (
-                      <div className="mt-1 flex flex-wrap gap-1 pl-[52px] p-1.5" style={{ background: "var(--term-border)" }}>
+                      <div
+                        className="mt-1 flex flex-wrap gap-1 pl-[52px] p-1.5"
+                        style={{ background: "var(--term-border)" }}
+                      >
                         {COMMON_EMOJIS.map((emoji) => (
-                          <button key={emoji} onClick={() => { toggleReaction(msg.id, emoji); setShowEmojiPicker(null); }} className="p-0.5 text-sm hover:opacity-80">{emoji}</button>
+                          <button
+                            key={emoji}
+                            onClick={() => {
+                              toggleReaction(msg.id, emoji);
+                              setShowEmojiPicker(null);
+                            }}
+                            className="p-0.5 text-sm hover:opacity-80"
+                          >
+                            {emoji}
+                          </button>
                         ))}
-                        <button onClick={() => setShowEmojiPicker(null)} className="ml-1 text-[11px]" style={{ color: "var(--term-muted)" }}>cancel</button>
+                        <button
+                          onClick={() => setShowEmojiPicker(null)}
+                          className="ml-1 text-[11px]"
+                          style={{ color: "var(--term-muted)" }}
+                        >
+                          cancel
+                        </button>
                       </div>
                     )}
                   </div>
@@ -1804,7 +2119,11 @@ export default function TerminalClient() {
                 }
               }}
               className="absolute bottom-3 right-4 flex h-7 w-7 items-center justify-center rounded-full text-[11px]"
-              style={{ background: "var(--term-border)", color: "var(--term-accent)", border: "1px solid var(--term-accent)" }}
+              style={{
+                background: "var(--term-border)",
+                color: "var(--term-accent)",
+                border: "1px solid var(--term-accent)",
+              }}
             >
               ↓
             </button>
@@ -1814,10 +2133,17 @@ export default function TerminalClient() {
         {/* Input */}
         <div className="shrink-0 px-4 py-1.5" style={{ borderTop: "1px solid var(--term-border)" }}>
           {replyingTo && (
-            <div className="mb-2 flex items-center gap-2 border-l-2 pl-2 text-[11px]" style={{ borderColor: "var(--term-accent)", color: "var(--term-muted)" }}>
+            <div
+              className="mb-2 flex items-center gap-2 border-l-2 pl-2 text-[11px]"
+              style={{ borderColor: "var(--term-accent)", color: "var(--term-muted)" }}
+            >
               <Reply className="h-3 w-3" />
               Replying to {replyingTo.senderName || "User"}
-              <button onClick={() => setReplyingTo(null)} className="ml-auto" style={{ color: "var(--term-muted)" }}>
+              <button
+                onClick={() => setReplyingTo(null)}
+                className="ml-auto"
+                style={{ color: "var(--term-muted)" }}
+              >
                 <X className="h-3 w-3" />
               </button>
             </div>
@@ -1825,10 +2151,19 @@ export default function TerminalClient() {
           {pendingAttachments.length > 0 && (
             <div className="mb-2 flex flex-wrap gap-2">
               {pendingAttachments.map((att, i) => (
-                <div key={i} className="flex items-center gap-1 px-2 py-0.5 text-[11px]" style={{ background: "var(--term-border)" }}>
+                <div
+                  key={i}
+                  className="flex items-center gap-1 px-2 py-0.5 text-[11px]"
+                  style={{ background: "var(--term-border)" }}
+                >
                   <Paperclip className="h-3 w-3" style={{ color: "var(--term-accent)" }} />
                   {att.name}
-                  <button onClick={() => setPendingAttachments((prev) => prev.filter((_, idx) => idx !== i))} style={{ color: "var(--term-muted)" }}>
+                  <button
+                    onClick={() =>
+                      setPendingAttachments((prev) => prev.filter((_, idx) => idx !== i))
+                    }
+                    style={{ color: "var(--term-muted)" }}
+                  >
                     <X className="h-3 w-3" />
                   </button>
                 </div>
@@ -1837,20 +2172,47 @@ export default function TerminalClient() {
           )}
           {isRecording ? (
             <div className="flex items-center gap-2">
-              <span className="inline-block h-2 w-2 animate-pulse rounded-full" style={{ background: "var(--term-error)" }} />
+              <span
+                className="inline-block h-2 w-2 animate-pulse rounded-full"
+                style={{ background: "var(--term-error)" }}
+              />
               <span className="text-[13px]" style={{ color: "var(--term-text)" }}>
-                Recording {Math.floor(recordingDuration / 60)}:{String(recordingDuration % 60).padStart(2, "0")}
+                Recording {Math.floor(recordingDuration / 60)}:
+                {String(recordingDuration % 60).padStart(2, "0")}
               </span>
-              <span className="text-[11px]" style={{ color: "var(--term-muted)" }}>(release to send)</span>
-              <button type="button" onClick={cancelRecording} className="ml-auto text-[11px]" style={{ color: "var(--term-muted)" }}>
+              <span className="text-[11px]" style={{ color: "var(--term-muted)" }}>
+                (release to send)
+              </span>
+              <button
+                type="button"
+                onClick={cancelRecording}
+                className="ml-auto text-[11px]"
+                style={{ color: "var(--term-muted)" }}
+              >
                 Cancel
               </button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="flex items-center gap-2">
-              <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileSelect} accept="image/*,.pdf,.doc,.docx" />
-              <button type="button" onClick={() => fileInputRef.current?.click()} disabled={uploading} className="disabled:opacity-50" style={{ color: "var(--term-muted)" }}>
-                {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Paperclip className="h-4 w-4" />}
+              <input
+                ref={fileInputRef}
+                type="file"
+                className="hidden"
+                onChange={handleFileSelect}
+                accept="image/*,.pdf,.doc,.docx"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="disabled:opacity-50"
+                style={{ color: "var(--term-muted)" }}
+              >
+                {uploading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Paperclip className="h-4 w-4" />
+                )}
               </button>
               <span style={{ color: "var(--term-accent)" }}>$</span>
               <input
@@ -1864,12 +2226,21 @@ export default function TerminalClient() {
                 }}
                 onKeyDown={onKeyDown}
                 placeholder={
-                  isListening ? "Listening... speak now"
-                    : wizard ? "Type your response..."
-                    : pendingChoices ? "Enter a number..."
-                    : activeContext?.type === "console" ? "Type a /command..."
-                    : activeContext ? "Message " + (activeContext.type === "channel" ? activeContext.name : "@" + activeContext.otherUserName) + "..."
-                    : "Select a channel first..."
+                  isListening
+                    ? "Listening... speak now"
+                    : wizard
+                      ? "Type your response..."
+                      : pendingChoices
+                        ? "Enter a number..."
+                        : activeContext?.type === "console"
+                          ? "Type a /command..."
+                          : activeContext
+                            ? "Message " +
+                              (activeContext.type === "channel"
+                                ? activeContext.name
+                                : "@" + activeContext.otherUserName) +
+                              "..."
+                            : "Select a channel first..."
                 }
                 disabled={uploading}
                 className="flex-1 bg-transparent py-1 text-[13px] outline-none"
@@ -1878,9 +2249,13 @@ export default function TerminalClient() {
               <button
                 type="button"
                 disabled={!!wizard || !!pendingChoices || uploading}
-                className={(isListening ? "animate-pulse " : "") + "disabled:opacity-30 select-none"}
+                className={
+                  (isListening ? "animate-pulse " : "") + "disabled:opacity-30 select-none"
+                }
                 style={{ color: isListening ? "var(--term-error)" : "var(--term-muted)" }}
-                title={isListening ? "Stop listening" : "Hold for voice message, tap for speech-to-text"}
+                title={
+                  isListening ? "Stop listening" : "Hold for voice message, tap for speech-to-text"
+                }
                 onMouseDown={() => {
                   isHoldingRef.current = true;
                   holdTimerRef.current = setTimeout(() => {
@@ -1940,45 +2315,93 @@ export default function TerminalClient() {
                 {isListening ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
               </button>
               <div className="relative">
-                <button type="button" onClick={() => setShowInputEmojiPicker((v) => !v)} style={{ color: "var(--term-muted)" }}>
+                <button
+                  type="button"
+                  onClick={() => setShowInputEmojiPicker((v) => !v)}
+                  style={{ color: "var(--term-muted)" }}
+                >
                   <Smile className="h-4 w-4" />
                 </button>
                 {showInputEmojiPicker && (
-                  <div className="absolute bottom-8 right-0 flex flex-wrap gap-1 p-1.5 w-[200px]" style={{ background: "var(--term-border)", border: "1px solid var(--term-border)" }}>
+                  <div
+                    className="absolute bottom-8 right-0 flex flex-wrap gap-1 p-1.5 w-[200px]"
+                    style={{
+                      background: "var(--term-border)",
+                      border: "1px solid var(--term-border)",
+                    }}
+                  >
                     {COMMON_EMOJIS.map((emoji) => (
-                      <button key={emoji} onClick={() => { setInput((prev) => prev + emoji); setShowInputEmojiPicker(false); inputRef.current?.focus(); }} className="p-0.5 text-sm hover:opacity-80">{emoji}</button>
+                      <button
+                        key={emoji}
+                        onClick={() => {
+                          setInput((prev) => prev + emoji);
+                          setShowInputEmojiPicker(false);
+                          inputRef.current?.focus();
+                        }}
+                        className="p-0.5 text-sm hover:opacity-80"
+                      >
+                        {emoji}
+                      </button>
                     ))}
-                    <button onClick={() => setShowInputEmojiPicker(false)} className="ml-1 text-[11px]" style={{ color: "var(--term-muted)" }}>close</button>
+                    <button
+                      onClick={() => setShowInputEmojiPicker(false)}
+                      className="ml-1 text-[11px]"
+                      style={{ color: "var(--term-muted)" }}
+                    >
+                      close
+                    </button>
                   </div>
                 )}
               </div>
-              <button type="submit" disabled={(!input.trim() && pendingAttachments.length === 0 && !wizard && !pendingChoices) || uploading} style={{ color: "var(--term-accent)" }} className="disabled:opacity-30">
+              <button
+                type="submit"
+                disabled={
+                  (!input.trim() &&
+                    pendingAttachments.length === 0 &&
+                    !wizard &&
+                    !pendingChoices) ||
+                  uploading
+                }
+                style={{ color: "var(--term-accent)" }}
+                className="disabled:opacity-30"
+              >
                 <Send className="h-4 w-4" />
               </button>
             </form>
           )}
           <p className="mt-1 text-[11px]" style={{ color: "var(--term-muted)" }}>
-            {activeContext?.type === "channel" ? "in #" + activeContext.name + " - /help for commands, hold mic for voice"
-              : activeContext?.type === "dm" ? "in DM with " + activeContext.otherUserName + " - /help for commands, hold mic for voice"
-              : activeContext?.type === "console" ? "Console mode - commands are private"
-              : ""}
+            {activeContext?.type === "channel"
+              ? "in #" + activeContext.name + " - /help for commands, hold mic for voice"
+              : activeContext?.type === "dm"
+                ? "in DM with " +
+                  activeContext.otherUserName +
+                  " - /help for commands, hold mic for voice"
+                : activeContext?.type === "console"
+                  ? "Console mode - commands are private"
+                  : ""}
           </p>
           {input.startsWith("/") && input.length > 1 && !wizard && !pendingChoices && (
             <div className="mt-1 flex flex-wrap gap-1">
-              {COMMANDS.filter((c) => c.name.startsWith(input.slice(1)) || c.aliases?.some((a) => a.startsWith(input.slice(1)))).slice(0, 5).map((c) => (
-                <button
-                  key={c.name}
-                  onClick={async () => {
-                    setInput("");
-                    const ctx = buildHandlerContext();
-                    await dispatchCommand(c.name, [], ctx);
-                  }}
-                  className="px-1.5 py-0.5 text-[11px]"
-                  style={{ background: "var(--term-border)", color: "var(--term-accent)" }}
-                >
-                  /{c.name}
-                </button>
-              ))}
+              {COMMANDS.filter(
+                (c) =>
+                  c.name.startsWith(input.slice(1)) ||
+                  c.aliases?.some((a) => a.startsWith(input.slice(1)))
+              )
+                .slice(0, 5)
+                .map((c) => (
+                  <button
+                    key={c.name}
+                    onClick={async () => {
+                      setInput("");
+                      const ctx = buildHandlerContext();
+                      await dispatchCommand(c.name, [], ctx);
+                    }}
+                    className="px-1.5 py-0.5 text-[11px]"
+                    style={{ background: "var(--term-border)", color: "var(--term-accent)" }}
+                  >
+                    /{c.name}
+                  </button>
+                ))}
             </div>
           )}
         </div>

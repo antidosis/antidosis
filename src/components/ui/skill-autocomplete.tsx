@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { searchSkills, getSkillCategory, getCategoryLabel, SKILL_TAXONOMY } from "@/lib/skills-taxonomy";
+
 import { Plus, X, Search, Sparkles } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { searchSkills, getSkillCategory, getCategoryLabel } from "@/lib/skills-taxonomy";
 import { cn } from "@/lib/utils";
 
 interface SkillAutocompleteProps {
@@ -29,9 +31,7 @@ export function SkillAutocomplete({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const suggestions = searchSkills(input, value);
-  const hasExactMatch = suggestions.some(
-    (s) => s.toLowerCase() === input.trim().toLowerCase()
-  );
+  const hasExactMatch = suggestions.some((s) => s.toLowerCase() === input.trim().toLowerCase());
   const showCustomOption = input.trim() && !hasExactMatch;
   const totalOptions = suggestions.length + (showCustomOption ? 1 : 0);
 
@@ -244,9 +244,7 @@ export function SkillAutocomplete({
       )}
 
       {value.length >= maxSkills && (
-        <p className="text-[10px] text-[#7a6b5a] mt-1.5">
-          Maximum {maxSkills} skills allowed.
-        </p>
+        <p className="text-[10px] text-[#7a6b5a] mt-1.5">Maximum {maxSkills} skills allowed.</p>
       )}
     </div>
   );
