@@ -12,48 +12,39 @@ import {
   Wrench,
   Package,
   Star,
-  Shield,
-  Briefcase,
-  Globe,
   Check,
   X,
   Camera,
-  Send,
   Pencil,
   Trash2,
   Calendar,
   Clock,
   MessageSquare,
-  FileText,
-  ExternalLink,
   Handshake,
-  ChevronDown,
-  ChevronUp,
   Lock,
-  Award,
-  FileCheck,
   Loader2,
   Info,
 } from "lucide-react";
 
-import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CopyLinkButton } from "@/components/ui/copy-link";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/toast";
 import { getExchangeMode } from "@/lib/categories";
 import { createClient } from "@/lib/supabase/client";
 
 import { ConfirmDialog } from "./confirm-dialog";
+import { InterestedList } from "./interested-list";
+import { MessageThread } from "./message-thread";
+import { PosterProfileCard } from "./poster-profile-card";
 import { ReviewForm } from "./review-form";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
 /* ------------------------------------------------------------------ */
 
-type Poster = {
+export type Poster = {
   id: string;
   fullName: string | null;
   avatarUrl: string | null;
@@ -68,7 +59,7 @@ type Poster = {
   socialLinks: { id: string; platform: string; url: string }[];
 };
 
-type NeedDetail = {
+export type NeedDetail = {
   id: string;
   title: string;
   description: string;
@@ -110,7 +101,7 @@ type NeedDetail = {
   contracts: { id: string; status: string }[];
 };
 
-type NeedMessage = {
+export type NeedMessage = {
   id: string;
   content: string;
   createdAt: string;
@@ -122,7 +113,7 @@ type NeedMessage = {
   };
 };
 
-type Credential = {
+export type Credential = {
   id: string;
   title: string;
   type: string;
@@ -670,198 +661,15 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
         </div>
 
         {/* ========== POSTER PROFILE (collapsible) ========== */}
-        <div className="vessel p-4 mb-6">
-          {/* Collapsed header */}
-          <div className="flex items-center gap-3">
-            <Avatar src={need.poster.avatarUrl} name={need.poster.fullName} size="md" />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-base font-medium text-[#e8d5a3]">
-                  {need.poster.fullName || "anonymous"}
-                </span>
-                {need.poster.isVerified && <Shield className="h-4 w-4 text-[#00e676]" />}
-                {profileId && need.poster.isPro && (
-                  <Badge variant="default" className="text-[10px]">
-                    pro
-                  </Badge>
-                )}
-              </div>
-              {profileId ? (
-                <div className="flex flex-wrap items-center gap-3 text-xs text-[#7a6b5a] mt-0.5">
-                  {need.poster.ratingCount > 0 && (
-                    <span className="flex items-center gap-1">
-                      <Star className="h-3 w-3 text-[#f5a623]" />
-                      {need.poster.ratingAvg.toFixed(1)}
-                      <span className="text-[#7a6b5a]/60">({need.poster.ratingCount})</span>
-                    </span>
-                  )}
-                  {need.poster.jobsCompleted > 0 && (
-                    <span className="flex items-center gap-1">
-                      <Briefcase className="h-3 w-3" />
-                      {need.poster.jobsCompleted}
-                    </span>
-                  )}
-                  {need.poster.locationName && (
-                    <span className="flex items-center gap-1">
-                      <MapPin className="h-3 w-3" />
-                      {need.poster.locationName}
-                    </span>
-                  )}
-                </div>
-              ) : (
-                <p className="text-xs text-[#7a6b5a] mt-0.5">log in to see full profile</p>
-              )}
-            </div>
-            {profileId && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 px-2 text-[#7a6b5a] hover:text-[#e8d5a3]"
-                onClick={() => setProfileExpanded(!profileExpanded)}
-              >
-                {profileExpanded ? (
-                  <ChevronUp className="h-4 w-4" />
-                ) : (
-                  <ChevronDown className="h-4 w-4" />
-                )}
-              </Button>
-            )}
-          </div>
-
-          {/* Expanded content */}
-          {profileId && profileExpanded && (
-            <div className="mt-4 pt-4 border-t border-[#2a2420] space-y-4">
-              {need.poster.bio && (
-                <p className="text-sm text-[#b8a078] leading-relaxed">{need.poster.bio}</p>
-              )}
-
-              {need.poster.skills.length > 0 && (
-                <div>
-                  <p className="text-[10px] text-[#7a6b5a] uppercase tracking-wider mb-2">skills</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {need.poster.skills.map((s) => (
-                      <span
-                        key={s.id}
-                        className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide border border-[#2a2420] text-[#7a6b5a] bg-[#1a1714] rounded"
-                      >
-                        {s.name}
-                        {s.isVerified && <span className="text-[#00e676] ml-0.5">✓</span>}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {need.poster.socialLinks.length > 0 && (
-                <div>
-                  <p className="text-[10px] text-[#7a6b5a] uppercase tracking-wider mb-2">links</p>
-                  <div className="flex flex-wrap gap-3">
-                    {need.poster.socialLinks.map((link) => (
-                      <a
-                        key={link.id}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-[#b8a078] hover:text-[#e8d5a3] transition-colors capitalize flex items-center gap-1"
-                      >
-                        <Globe className="h-3 w-3" />
-                        {link.platform}
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Credentials (lazy loaded) */}
-              <div>
-                <p className="text-[10px] text-[#7a6b5a] uppercase tracking-wider mb-2">
-                  credentials
-                </p>
-                {credLoading ? (
-                  <div className="flex items-center gap-2 text-xs text-[#7a6b5a]">
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                    loading...
-                  </div>
-                ) : credentials.length === 0 ? (
-                  <p className="text-xs text-[#7a6b5a]">no public credentials</p>
-                ) : (
-                  <div className="space-y-2">
-                    {credentials.map((cred) => (
-                      <div
-                        key={cred.id}
-                        className="bg-[#1a1714] border border-[#2a2420] p-3 rounded"
-                      >
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Award className="h-3.5 w-3.5 text-[#f5a623]" />
-                          <span className="text-sm font-medium text-[#e8d5a3]">{cred.title}</span>
-                          <span className="px-1.5 py-0 text-[9px] uppercase tracking-wide border border-[#2a2420] text-[#7a6b5a]">
-                            {cred.type}
-                          </span>
-                          {cred.isVerified && <Shield className="h-3 w-3 text-[#00e676]" />}
-                        </div>
-                        <div className="text-xs text-[#7a6b5a] mt-1 space-y-0.5">
-                          {cred.issuedBy && <p>issued by: {cred.issuedBy}</p>}
-                          {cred.expiresAt && (
-                            <p>
-                              expires:{" "}
-                              {new Date(cred.expiresAt).toLocaleDateString("en-AU", {
-                                day: "numeric",
-                                month: "short",
-                                year: "numeric",
-                              })}
-                            </p>
-                          )}
-                          {cred.isVerified && (
-                            <span className="text-[#00e676] text-xs inline-flex items-center gap-1">
-                              <FileCheck className="h-3 w-3" /> verified
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <Button size="sm" variant="secondary" asChild>
-                  <Link href={`/profile/${need.poster.id}`}>
-                    <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
-                    open full profile
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Guest lock */}
-          {!profileId && (
-            <div className="mt-3 bg-[#1a1714] border border-[#2a2420] p-3 rounded">
-              <div className="flex items-center gap-2 text-[#7a6b5a]">
-                <Lock className="h-3.5 w-3.5" />
-                <p className="text-xs">profile details are only visible to registered users</p>
-              </div>
-              <p className="text-xs text-[#b8a078] mt-1.5">
-                <Button
-                  variant="link"
-                  className="p-0 h-auto text-[#f5a623] hover:underline text-xs"
-                  onClick={() => handleAuthRequired(false)}
-                >
-                  log in
-                </Button>
-                {" or "}
-                <Button
-                  variant="link"
-                  className="p-0 h-auto text-[#f5a623] hover:underline text-xs"
-                  onClick={() => handleAuthRequired(true)}
-                >
-                  create an account
-                </Button>
-                {" to see the poster's full profile, skills, and qualifications."}
-              </p>
-            </div>
-          )}
-        </div>
+        <PosterProfileCard
+          poster={need.poster}
+          profileId={profileId}
+          profileExpanded={profileExpanded}
+          onToggleExpand={() => setProfileExpanded(!profileExpanded)}
+          credentials={credentials}
+          credLoading={credLoading}
+          onAuthRequired={handleAuthRequired}
+        />
 
         {/* ========== CONTRACT BANNERS ========== */}
         {need.contracts.length > 0 && (
@@ -1067,180 +875,23 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
             )}
 
             {/* Message thread */}
-            {profileId ? (
-              <div ref={messagesRef} className="vessel p-4">
-                <div className="flex items-center gap-2 mb-4">
-                  <MessageSquare className="h-3.5 w-3.5 text-[#7a6b5a]" />
-                  <span className="text-xs text-[#7a6b5a] uppercase tracking-wider">
-                    {isPoster && activeMessageThread
-                      ? "private messages"
-                      : hasOffered
-                        ? "messages"
-                        : "public messages"}
-                  </span>
-                </div>
-
-                {/* Thread tabs — poster only */}
-                {isPoster && (
-                  <div className="flex gap-1 mb-3 overflow-x-auto pb-1">
-                    <button
-                      onClick={() => setActiveMessageThread(null)}
-                      className={`px-3 py-1.5 text-xs rounded whitespace-nowrap transition-colors ${
-                        activeMessageThread === null
-                          ? "bg-[#f5a623] text-[#0a0806] font-medium"
-                          : "bg-[#1a1714] text-[#7a6b5a] hover:text-[#e8d5a3]"
-                      }`}
-                    >
-                      Public
-                    </button>
-                    {need.acceptances
-                      .filter((a) => a.status === "pending" || a.status === "accepted")
-                      .map((a) => (
-                        <button
-                          key={a.id}
-                          onClick={() => setActiveMessageThread(a.id)}
-                          className={`px-3 py-1.5 text-xs rounded whitespace-nowrap transition-colors ${
-                            activeMessageThread === a.id
-                              ? "bg-[#f5a623] text-[#0a0806] font-medium"
-                              : "bg-[#1a1714] text-[#7a6b5a] hover:text-[#e8d5a3]"
-                          }`}
-                        >
-                          {a.user.fullName || "anonymous"}
-                        </button>
-                      ))}
-                  </div>
-                )}
-
-                {/* Public thread label */}
-                {(!isPoster || !activeMessageThread) && (
-                  <div className="mb-2 px-2 py-1 bg-[#00e5ff]/10 border border-[#00e5ff]/20 rounded text-xs text-[#00e5ff]">
-                    {isPoster
-                      ? "Public — anyone viewing this need can see these messages"
-                      : hasOffered
-                        ? "Private thread — only you and the poster can see these messages"
-                        : "Only the poster can see your messages — other visitors cannot"}
-                  </div>
-                )}
-
-                {/* Thread label for private threads */}
-                {isPoster && activeMessageThread && (
-                  <div className="mb-2 px-2 py-1 bg-[#f5a623]/10 border border-[#f5a623]/20 rounded text-xs text-[#f5a623]">
-                    Private thread — only you and this fulfiller can see these messages
-                  </div>
-                )}
-
-                <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
-                  {(() => {
-                    const filtered =
-                      isPoster && activeMessageThread
-                        ? messages.filter((m) => m.acceptanceId === activeMessageThread)
-                        : isPoster
-                          ? messages.filter((m) => m.acceptanceId === null)
-                          : messages;
-                    return (
-                      <>
-                        {filtered.length === 0 && (
-                          <p className="text-xs text-[#7a6b5a] text-center py-4">
-                            {isPoster && activeMessageThread
-                              ? "no private messages yet. send one to reach out directly."
-                              : isPoster
-                                ? "no public messages yet. post something anyone can see."
-                                : hasOffered
-                                  ? "no messages yet. be the first to reach out."
-                                  : "no messages yet. send one to reach out to the poster."}
-                          </p>
-                        )}
-                        {filtered.map((msg) => (
-                          <div
-                            key={msg.id}
-                            className={`flex gap-2 ${
-                              msg.sender.id === profileId ? "flex-row-reverse" : ""
-                            }`}
-                          >
-                            <Avatar
-                              src={msg.sender.avatarUrl}
-                              name={msg.sender.fullName}
-                              size="sm"
-                            />
-                            <div
-                              className={`max-w-[75%] px-3 py-2 text-sm rounded ${
-                                msg.sender.id === profileId
-                                  ? "bg-[#1a1714] text-[#e8d5a3] border-l-2 border-[#f5a623]"
-                                  : "bg-[#12100e] text-[#b8a078] border border-[#2a2420]"
-                              }`}
-                            >
-                              <p className="text-[10px] text-[#7a6b5a] uppercase tracking-wider mb-1">
-                                {msg.sender.fullName || "anonymous"}
-                              </p>
-                              <p>{msg.content}</p>
-                              <p className="text-[10px] text-[#7a6b5a] mt-1">
-                                {new Date(msg.createdAt).toLocaleTimeString([], {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </>
-                    );
-                  })()}
-                  <div ref={messagesEndRef} />
-                </div>
-
-                <form onSubmit={sendMessage} className="mt-3 flex gap-2 items-center">
-                  <Input
-                    placeholder={
-                      isPoster && activeMessageThread
-                        ? "send a private message..."
-                        : hasOffered
-                          ? "send a message..."
-                          : need.status === "open"
-                            ? "message the poster..."
-                            : "messaging closed — need is no longer open"
-                    }
-                    value={messageInput}
-                    onChange={(e) => setMessageInput(e.target.value)}
-                    disabled={
-                      sendingMessage || (!isPoster && !hasOffered && need.status !== "open")
-                    }
-                    className="h-9 text-sm"
-                  />
-                  <Button
-                    type="submit"
-                    size="icon"
-                    disabled={
-                      sendingMessage || (!isPoster && !hasOffered && need.status !== "open")
-                    }
-                    className="h-9 w-9 shrink-0"
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
-                </form>
-              </div>
-            ) : (
-              <div className="bg-[#f5a623]/5 border border-[#f5a623]/20 p-4 rounded">
-                <p className="text-sm text-[#e8d5a3] mb-2">want to message the poster?</p>
-                <p className="text-xs text-[#b8a078]">
-                  <Button
-                    variant="link"
-                    className="p-0 h-auto text-[#f5a623] hover:underline text-xs"
-                    onClick={() => handleAuthRequired(false)}
-                  >
-                    log in
-                  </Button>
-                  {" or "}
-                  <Button
-                    variant="link"
-                    className="p-0 h-auto text-[#f5a623] hover:underline text-xs"
-                    onClick={() => handleAuthRequired(true)}
-                  >
-                    create an account
-                  </Button>
-                  {" to send messages and negotiate."}
-                </p>
-              </div>
-            )}
+            <MessageThread
+              messages={messages}
+              profileId={profileId}
+              isPoster={isPoster}
+              hasOffered={hasOffered}
+              needStatus={need.status}
+              acceptances={need.acceptances}
+              activeMessageThread={activeMessageThread}
+              onSetActiveThread={setActiveMessageThread}
+              messageInput={messageInput}
+              onMessageInputChange={setMessageInput}
+              sendingMessage={sendingMessage}
+              onSendMessage={sendMessage}
+              messagesRef={messagesRef}
+              messagesEndRef={messagesEndRef}
+              onAuthRequired={handleAuthRequired}
+            />
           </div>
         )}
 
@@ -1264,244 +915,37 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
         )}
 
         {/* Interested list — poster only */}
-        {(() => {
-          const visible = need.acceptances.filter(
-            (a) => a.status === "pending" || a.status === "accepted" || a.status === "declined"
-          );
-          return (
-            isPoster &&
-            (need.status === "open" || need.status === "negotiating" || need.status === "active") &&
-            visible.length > 0 && (
-              <div className="vessel p-4">
-                <h2 className="text-sm font-medium text-[#e8d5a3] mb-4">
-                  Interested ({visible.length})
-                </h2>
-                <div className="space-y-3">
-                  {visible.map((a) => (
-                    <div
-                      key={a.id}
-                      className={`p-3 rounded ${
-                        a.status === "accepted"
-                          ? "border border-[#00e676]/20 bg-[#00e676]/5"
-                          : "bg-[#1a1714] border border-[#2a2420]"
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-start gap-2.5 min-w-0">
-                          <Avatar src={a.user.avatarUrl} name={a.user.fullName} size="sm" />
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-1.5">
-                              <Link
-                                href={`/profile/${a.user.id}`}
-                                className="text-sm font-medium text-[#e8d5a3] truncate hover:underline"
-                              >
-                                {a.user.fullName || "anonymous"}
-                              </Link>
-                              {a.user.isVerified && (
-                                <span title="Verified">
-                                  <Shield className="h-3 w-3 text-[#00e676] shrink-0" />
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-[#7a6b5a]">
-                              {a.user.ratingAvg > 0 && (
-                                <span>
-                                  {a.user.ratingAvg.toFixed(1)} ★ ({a.user.ratingCount})
-                                </span>
-                              )}
-                              {a.user.jobsCompleted > 0 && (
-                                <span>{a.user.jobsCompleted} jobs done</span>
-                              )}
-                              {a.user.locationName && <span>{a.user.locationName}</span>}
-                            </div>
-                            {a.user.bio && (
-                              <p className="text-[10px] text-[#b8a078] mt-0.5 line-clamp-1">
-                                {a.user.bio}
-                              </p>
-                            )}
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {a.user.skills.slice(0, 4).map((s) => (
-                                <span
-                                  key={s.id}
-                                  className="px-1.5 py-0.5 text-[9px] uppercase tracking-wider border border-[#2a2420] text-[#7a6b5a]"
-                                >
-                                  {s.name}
-                                </span>
-                              ))}
-                              {a.user.credentials.length > 0 && (
-                                <span className="px-1.5 py-0.5 text-[9px] uppercase tracking-wider border border-[#00e676]/30 text-[#00e676]">
-                                  {a.user.credentials.filter((c) => c.isVerified).length}/
-                                  {a.user.credentials.length} credentials
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex flex-wrap gap-1.5 shrink-0">
-                          {a.status === "pending" && (
-                            <>
-                              <Button
-                                size="sm"
-                                variant="default"
-                                className="h-7 text-xs px-2"
-                                onClick={() => handleAcceptance(a.id, "accepted")}
-                              >
-                                <Check className="h-3 w-3 mr-1" />
-                                accept
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="secondary"
-                                className="h-7 text-xs px-2"
-                                onClick={() => handleAcceptance(a.id, "declined")}
-                              >
-                                <X className="h-3 w-3 mr-1" />
-                                decline
-                              </Button>
-                            </>
-                          )}
-                          {a.status === "accepted" && need.requiresContract && (
-                            <>
-                              <Button
-                                size="sm"
-                                variant="default"
-                                className="h-7 text-xs px-2"
-                                onClick={() =>
-                                  setConfirmDialog({
-                                    type: "contract",
-                                    acceptanceId: a.id,
-                                    userName: a.user.fullName || "this user",
-                                  })
-                                }
-                                disabled={confirmingContract === a.id}
-                              >
-                                <FileText className="h-3 w-3 mr-1" />
-                                {confirmingContract === a.id ? "..." : "contract"}
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="secondary"
-                                className="h-7 text-xs px-2"
-                                onClick={() => handleAcceptance(a.id, "declined")}
-                              >
-                                <X className="h-3 w-3 mr-1" />
-                                decline
-                              </Button>
-                            </>
-                          )}
-                          {a.status === "accepted" &&
-                            !need.requiresContract &&
-                            need.status === "active" && (
-                              <div className="flex flex-col gap-1.5 items-end">
-                                <span className="text-xs text-[#00e676] flex items-center gap-1">
-                                  <Check className="h-3 w-3" />
-                                  deal confirmed
-                                </span>
-                                <div className="flex items-center gap-1.5">
-                                  {!a.posterMarkedComplete ? (
-                                    <Button
-                                      size="sm"
-                                      variant="default"
-                                      className="h-6 text-[10px] px-2"
-                                      onClick={() => handleMarkComplete(a.id)}
-                                      disabled={markingComplete}
-                                    >
-                                      {markingComplete ? (
-                                        <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                                      ) : (
-                                        <Check className="h-3 w-3 mr-1" />
-                                      )}
-                                      Mark complete
-                                    </Button>
-                                  ) : (
-                                    <span className="text-[10px] text-[#00e676]">
-                                      you marked complete
-                                    </span>
-                                  )}
-                                  {a.fulfillerMarkedComplete && (
-                                    <span className="text-[10px] text-[#00e676]">
-                                      fulfiller marked complete
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            )}
-                          {a.status === "completed" && !need.requiresContract && (
-                            <div className="flex flex-col gap-1.5 items-end">
-                              <span className="text-xs text-[#00e676] flex items-center gap-1">
-                                <Check className="h-3 w-3" />
-                                deal completed
-                              </span>
-                              <Button
-                                size="sm"
-                                variant="secondary"
-                                className="h-6 text-[10px] px-2"
-                                onClick={() => {
-                                  setPosterReviewAcceptanceId(a.id);
-                                  setReviewRating(10);
-                                  setReviewComment("");
-                                  setReviewPrivateFeedback("");
-                                }}
-                              >
-                                <Star className="h-3 w-3 mr-1" />
-                                Review
-                              </Button>
-                            </div>
-                          )}
-                          {a.status === "declined" && (
-                            <span className="text-xs text-[#ff5252] flex items-center gap-1">
-                              <X className="h-3 w-3" />
-                              declined
-                            </span>
-                          )}
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-7 text-xs px-2 text-[#ff5252] hover:text-[#ff5252]"
-                            onClick={() => {
-                              if (
-                                window.confirm(
-                                  `Remove ${a.user.fullName || "this user"}? They won't be able to express interest again.`
-                                )
-                              ) {
-                                handleAcceptance(a.id, "removed");
-                              }
-                            }}
-                          >
-                            <Trash2 className="h-3 w-3 mr-1" />
-                            remove
-                          </Button>
-                        </div>
-                      </div>
-                      {a.message && (
-                        <p className="text-xs text-[#b8a078] mt-2 bg-[#0f0c0a] p-2.5 rounded">
-                          {a.message}
-                        </p>
-                      )}
-                      {/* Poster review form inline */}
-                      {posterReviewAcceptanceId === a.id && (
-                        <div className="mt-3">
-                          <ReviewForm
-                            title={`Leave a review for ${a.user.fullName || "this fulfiller"}`}
-                            rating={reviewRating}
-                            comment={reviewComment}
-                            privateFeedback={reviewPrivateFeedback}
-                            submitting={submittingReview}
-                            onRatingChange={setReviewRating}
-                            onCommentChange={setReviewComment}
-                            onPrivateFeedbackChange={setReviewPrivateFeedback}
-                            onSubmit={() => submitReview(a.id, a.user.id)}
-                            onCancel={() => setPosterReviewAcceptanceId(null)}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )
-          );
-        })()}
+        {isPoster &&
+          (need.status === "open" || need.status === "negotiating" || need.status === "active") && (
+            <InterestedList
+              acceptances={need.acceptances}
+              needStatus={need.status}
+              needRequiresContract={need.requiresContract}
+              confirmingContract={confirmingContract}
+              markingComplete={markingComplete}
+              posterReviewAcceptanceId={posterReviewAcceptanceId}
+              reviewRating={reviewRating}
+              reviewComment={reviewComment}
+              reviewPrivateFeedback={reviewPrivateFeedback}
+              submittingReview={submittingReview}
+              onAcceptance={handleAcceptance}
+              onMarkComplete={handleMarkComplete}
+              onSetConfirmDialog={(dialog) =>
+                dialog
+                  ? setConfirmDialog({
+                      type: dialog.type,
+                      acceptanceId: dialog.acceptanceId,
+                      userName: dialog.userName,
+                    })
+                  : setConfirmDialog(null)
+              }
+              onSetPosterReview={setPosterReviewAcceptanceId}
+              onSetReviewRating={setReviewRating}
+              onSetReviewComment={setReviewComment}
+              onSetReviewPrivateFeedback={setReviewPrivateFeedback}
+              onSubmitReview={submitReview}
+            />
+          )}
       </div>
 
       {/* ========== CONFIRM DIALOG ========== */}
