@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import type { Metadata } from "next";
 
 import "./globals.css";
+import { ErrorReporterInit } from "@/components/error-reporter-init";
 import { ToastProvider } from "@/components/ui/toast";
 
 const inter = Inter({
@@ -220,6 +221,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} antialiased bg-[#0a0806] text-[#e8d5a3]`}
       >
+        <ErrorReporterInit />
         <ToastProvider>{children}</ToastProvider>
       </body>
     </html>

@@ -14,7 +14,17 @@ export default function ErrorPage({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error(error);
+    // Structured error logging to console (captured by Vercel/Railway log aggregators)
+    const errorInfo = {
+      type: "client_error_boundary",
+      message: error.message,
+      stack: error.stack,
+      digest: error.digest,
+      url: typeof window !== "undefined" ? window.location.href : undefined,
+      userAgent: typeof navigator !== "undefined" ? navigator.userAgent : undefined,
+      timestamp: new Date().toISOString(),
+    };
+    console.error(JSON.stringify(errorInfo));
   }, [error]);
 
   return (
