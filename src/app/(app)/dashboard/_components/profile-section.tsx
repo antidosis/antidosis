@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import Link from "next/link";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Pencil,
   CheckCircle2,
@@ -24,6 +25,8 @@ import {
   Shield,
   Crown,
 } from "lucide-react";
+import { useForm, Controller, useFieldArray } from "react-hook-form";
+import type { z } from "zod";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -32,7 +35,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LocationAutocomplete } from "@/components/ui/location-autocomplete";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/components/ui/toast";
+import { updateProfileSchema } from "@/lib/schemas";
 
 const PLATFORMS = ["instagram", "facebook", "linkedin", "twitter", "website", "github", "other"];
 
@@ -46,7 +49,15 @@ const PLATFORM_COLORS: Record<string, string> = {
   other: "#7a6b5a",
 };
 
-type CredentialData = { id: string; title: string; isPublic: boolean; isVerified: boolean };
+type FormData = z.input<typeof updateProfileSchema>;
+
+type CredentialData = {
+  id: string;
+  title: string;
+  isPublic: boolean;
+  isVerified: boolean;
+};
+
 type SocialLink = { platform: string; url: string; isPublic: boolean };
 
 interface ProfileSectionProps {
@@ -65,54 +76,62 @@ interface ProfileSectionProps {
     socialLinks: SocialLink[];
   };
   credentials: CredentialData[];
-  onUpdate: (updated: any) => void;
+  onUpdate: (updated: unknown) => void;
 }
 
 export function ProfileSection({ initialProfile, credentials, onUpdate }: ProfileSectionProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [publicPanelOpen, setPublicPanelOpen] = useState(false);
   const [privatePanelOpen, setPrivatePanelOpen] = useState(false);
 
-  const { toast } = useToast();
-  const [editForm, setEditForm] = useState({
-    fullName: initialProfile.fullName || "",
-    bio: initialProfile.bio || "",
-    locationName: initialProfile.locationName || "",
-    avatarUrl: initialProfile.avatarUrl || "",
-    publicPhone: initialProfile.publicPhone || "",
-    privatePhone: initialProfile.privatePhone || "",
-    mobile: initialProfile.mobile || "",
-    publicSocialLinks: initialProfile.socialLinks.filter((l) => l.isPublic),
-    privateSocialLinks: initialProfile.socialLinks.filter((l) => !l.isPublic),
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    setValue,
+    reset,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<FormData>({
+    resolver: zodResolver(updateProfileSchema),
+    defaultValues: {
+      fullName: initialProfile.fullName || undefined,
+      bio: initialProfile.bio || undefined,
+      avatarUrl: initialProfile.avatarUrl || undefined,
+      locationName: initialProfile.locationName || undefined,
+      publicPhone: initialProfile.publicPhone || undefined,
+      privatePhone: initialProfile.privatePhone || undefined,
+      mobile: initialProfile.mobile || undefined,
+      socialLinks: initialProfile.socialLinks || [],
+    },
   });
 
-  const [newPublicLinkPlatform, setNewPublicLinkPlatform] = useState("instagram");
-  const [newPublicLinkUrl, setNewPublicLinkUrl] = useState("");
-  const [newPrivateLinkPlatform, setNewPrivateLinkPlatform] = useState("instagram");
-  const [newPrivateLinkUrl, setNewPrivateLinkUrl] = useState("");
+  const socialLinksField = useFieldArray({ control, name: "socialLinks" });
 
-  async function saveProfile(e: React.FormEvent) {
-    e.preventDefault();
-    setSaving(true);
+  const avatarUrl = watch("avatarUrl");
+  const fullName = watch("fullName");
+  const bio = watch("bio");
+  const locationName = watch("locationName");
+  const mobile = watch("mobile");
+  const publicPhone = watch("publicPhone");
+  const privatePhone = watch("privatePhone");
+  const allSocialLinks = watch("socialLinks") || [];
+
+  const publicSocialLinks = allSocialLinks.filter((l) => l.isPublic);
+  const privateSocialLinks = allSocialLinks.filter((l) => !l.isPublic);
+
+  const hasPublicContact = !!(publicPhone || publicSocialLinks.length > 0);
+  const hasPrivateContact = !!(privatePhone || privateSocialLinks.length > 0);
+  const publicCreds = credentials.filter((c) => c.isPublic).length;
+
+  async function onSubmit(data: FormData) {
     try {
       const res = await fetch("/api/v1/profiles/me", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fullName: editForm.fullName,
-          bio: editForm.bio,
-          locationName: editForm.locationName,
-          avatarUrl: editForm.avatarUrl,
-          publicPhone: editForm.publicPhone,
-          privatePhone: editForm.privatePhone,
-          mobile: editForm.mobile,
-          socialLinks: [
-            ...editForm.publicSocialLinks.map((l) => ({ ...l, isPublic: true })),
-            ...editForm.privateSocialLinks.map((l) => ({ ...l, isPublic: false })),
-          ],
-        }),
+        body: JSON.stringify(data),
       });
       if (res.ok) {
         const updated = await res.json();
@@ -122,59 +141,67 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
         setTimeout(() => setSaveSuccess(false), 4000);
       } else {
         const err = await res.json().catch(() => ({ error: "Unknown error" }));
-        toast("Save failed: " + (err.error || JSON.stringify(err)), "error");
+        const msg =
+          typeof err.error === "string"
+            ? err.error
+            : Array.isArray(err.error)
+              ? err.error.map((e: { message?: string }) => e.message).join(", ")
+              : JSON.stringify(err.error);
+        setError("root", { message: "Save failed: " + msg });
       }
-    } catch (err) {
-      toast("Network error. Please try again.", "error");
+    } catch {
+      setError("root", { message: "Network error. Please try again." });
     }
-    setSaving(false);
   }
+
+  const [newPublicLinkPlatform, setNewPublicLinkPlatform] = useState("instagram");
+  const [newPublicLinkUrl, setNewPublicLinkUrl] = useState("");
+  const [newPrivateLinkPlatform, setNewPrivateLinkPlatform] = useState("instagram");
+  const [newPrivateLinkUrl, setNewPrivateLinkUrl] = useState("");
 
   function addPublicLink() {
     if (newPublicLinkUrl.trim()) {
-      setEditForm({
-        ...editForm,
-        publicSocialLinks: [
-          ...editForm.publicSocialLinks,
-          { platform: newPublicLinkPlatform, url: newPublicLinkUrl.trim(), isPublic: true },
-        ],
+      socialLinksField.append({
+        platform: newPublicLinkPlatform,
+        url: newPublicLinkUrl.trim(),
+        isPublic: true,
       });
       setNewPublicLinkUrl("");
     }
   }
 
-  function removePublicLink(i: number) {
-    setEditForm({
-      ...editForm,
-      publicSocialLinks: editForm.publicSocialLinks.filter((_, idx) => idx !== i),
-    });
+  function removePublicLink(filteredIndex: number) {
+    const originalIndex = allSocialLinks.findIndex(
+      (l) =>
+        l.isPublic &&
+        publicSocialLinks[filteredIndex]?.url === l.url &&
+        publicSocialLinks[filteredIndex]?.platform === l.platform
+    );
+    if (originalIndex >= 0) socialLinksField.remove(originalIndex);
   }
 
   function addPrivateLink() {
     if (newPrivateLinkUrl.trim()) {
-      setEditForm({
-        ...editForm,
-        privateSocialLinks: [
-          ...editForm.privateSocialLinks,
-          { platform: newPrivateLinkPlatform, url: newPrivateLinkUrl.trim(), isPublic: false },
-        ],
+      socialLinksField.append({
+        platform: newPrivateLinkPlatform,
+        url: newPrivateLinkUrl.trim(),
+        isPublic: false,
       });
       setNewPrivateLinkUrl("");
     }
   }
 
-  function removePrivateLink(i: number) {
-    setEditForm({
-      ...editForm,
-      privateSocialLinks: editForm.privateSocialLinks.filter((_, idx) => idx !== i),
-    });
+  function removePrivateLink(filteredIndex: number) {
+    const originalIndex = allSocialLinks.findIndex(
+      (l) =>
+        !l.isPublic &&
+        privateSocialLinks[filteredIndex]?.url === l.url &&
+        privateSocialLinks[filteredIndex]?.platform === l.platform
+    );
+    if (originalIndex >= 0) socialLinksField.remove(originalIndex);
   }
 
-  // ─── Derived display data ───
-  const hasPublicContact = !!(editForm.publicPhone || editForm.publicSocialLinks.length > 0);
-  const hasPrivateContact = !!(editForm.privatePhone || editForm.privateSocialLinks.length > 0);
-  const hasCredentials = credentials.length > 0;
-  const publicCreds = credentials.filter((c) => c.isPublic).length;
+  const rootError = errors.root?.message;
 
   return (
     <section className="vessel p-5 sm:p-6">
@@ -191,19 +218,19 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-4">
               <Avatar
-                src={editForm.avatarUrl}
-                name={editForm.fullName}
+                src={avatarUrl || null}
+                name={fullName || null}
                 size="lg"
                 className="h-14 w-14 sm:h-16 sm:w-16 shrink-0"
               />
               <div className="min-w-0">
                 <h2 className="heading-display text-xl sm:text-2xl text-[#e8d5a3]">
-                  {editForm.fullName || "Your Name"}
+                  {fullName || "Your Name"}
                 </h2>
-                {editForm.locationName && (
+                {locationName && (
                   <p className="flex items-center gap-1.5 text-sm text-[#7a6b5a] mt-1">
                     <MapPin className="h-3.5 w-3.5" />
-                    {editForm.locationName}
+                    {locationName}
                   </p>
                 )}
                 <div className="flex items-center gap-2 flex-wrap mt-2">
@@ -228,7 +255,19 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
             <Button
               size="sm"
               variant="ghost"
-              onClick={() => setIsEditing(true)}
+              onClick={() => {
+                reset({
+                  fullName: initialProfile.fullName || undefined,
+                  bio: initialProfile.bio || undefined,
+                  avatarUrl: initialProfile.avatarUrl || undefined,
+                  locationName: initialProfile.locationName || undefined,
+                  publicPhone: initialProfile.publicPhone || undefined,
+                  privatePhone: initialProfile.privatePhone || undefined,
+                  mobile: initialProfile.mobile || undefined,
+                  socialLinks: initialProfile.socialLinks || [],
+                });
+                setIsEditing(true);
+              }}
               className="shrink-0 text-[#7a6b5a] hover:text-[#e8d5a3]"
             >
               <Pencil className="h-3.5 w-3.5 mr-1.5" /> Edit
@@ -236,18 +275,18 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
           </div>
 
           {/* ─── Bio ─── */}
-          {editForm.bio && (
+          {bio && (
             <div className="mt-5 pt-5 border-t border-[#2a2420]/40">
-              <p className="text-sm text-[#b8a078] leading-relaxed">{editForm.bio}</p>
+              <p className="text-sm text-[#b8a078] leading-relaxed">{bio}</p>
             </div>
           )}
 
-          {/* ─── Mobile (account security number) ─── */}
-          {editForm.mobile && (
+          {/* ─── Mobile ─── */}
+          {mobile && (
             <div className="mt-5 pt-5 border-t border-[#2a2420]/40">
               <div className="flex items-center gap-2 text-sm">
                 <Smartphone className="h-4 w-4 text-[#7a6b5a]" />
-                <span className="text-[#b8a078] font-mono text-xs">{editForm.mobile}</span>
+                <span className="text-[#b8a078] font-mono text-xs">{mobile}</span>
                 {initialProfile.mobileVerified ? (
                   <span className="inline-flex items-center gap-1 text-xs text-[#00e676]">
                     <CheckCircle2 className="h-3 w-3" /> verified
@@ -279,17 +318,17 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                       </span>
                     </div>
                     <div className="space-y-2.5">
-                      {editForm.publicPhone && (
+                      {publicPhone && (
                         <div className="flex items-center gap-2 text-sm">
                           <Phone className="h-3.5 w-3.5 text-[#7a6b5a]" />
-                          <span className="text-[#b8a078]">{editForm.publicPhone}</span>
+                          <span className="text-[#b8a078]">{publicPhone}</span>
                         </div>
                       )}
-                      {editForm.publicSocialLinks.length > 0 && (
+                      {publicSocialLinks.length > 0 && (
                         <div className="flex flex-wrap gap-1.5">
-                          {editForm.publicSocialLinks.map((l) => (
+                          {publicSocialLinks.map((l, i) => (
                             <a
-                              key={l.url}
+                              key={`${l.platform}-${i}`}
                               href={l.url}
                               target="_blank"
                               rel="noopener noreferrer"
@@ -318,17 +357,17 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                       </span>
                     </div>
                     <div className="space-y-2.5">
-                      {editForm.privatePhone && (
+                      {privatePhone && (
                         <div className="flex items-center gap-2 text-sm">
                           <Phone className="h-3.5 w-3.5 text-[#7a6b5a]" />
-                          <span className="text-[#b8a078]">{editForm.privatePhone}</span>
+                          <span className="text-[#b8a078]">{privatePhone}</span>
                         </div>
                       )}
-                      {editForm.privateSocialLinks.length > 0 && (
+                      {privateSocialLinks.length > 0 && (
                         <div className="flex flex-wrap gap-1.5">
-                          {editForm.privateSocialLinks.map((l) => (
+                          {privateSocialLinks.map((l, i) => (
                             <a
-                              key={l.url}
+                              key={`${l.platform}-${i}`}
                               href={l.url}
                               target="_blank"
                               rel="noopener noreferrer"
@@ -352,7 +391,7 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
           )}
 
           {/* ─── Credentials summary ─── */}
-          {hasCredentials && (
+          {credentials.length > 0 && (
             <div className="mt-5 pt-5 border-t border-[#2a2420]/40">
               <div className="flex items-center gap-2 text-sm text-[#b8a078]">
                 <Award className="h-4 w-4 text-[#f5a623]" />
@@ -365,34 +404,38 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
           )}
         </div>
       ) : (
-        <form onSubmit={saveProfile} className="space-y-6 max-w-lg">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-lg">
           <div className="flex items-center gap-4">
             <Avatar
-              src={editForm.avatarUrl}
-              name={editForm.fullName}
+              src={avatarUrl || null}
+              name={fullName || null}
               size="lg"
               className="h-14 w-14"
             />
             <FileUpload
               folder="avatars"
-              onUpload={(url) => setEditForm({ ...editForm, avatarUrl: url })}
+              onUpload={(url) => setValue("avatarUrl", url, { shouldDirty: true })}
             >
               Change Avatar
             </FileUpload>
           </div>
           <div className="space-y-2">
             <Label>Full Name</Label>
-            <Input
-              value={editForm.fullName}
-              onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })}
-            />
+            <Input {...register("fullName")} />
+            {errors.fullName && <p className="text-xs text-[#ff5252]">{errors.fullName.message}</p>}
           </div>
           <div className="space-y-2">
             <Label>Location</Label>
-            <LocationAutocomplete
-              value={editForm.locationName}
-              onChange={(formatted) => setEditForm({ ...editForm, locationName: formatted })}
-              placeholder="Search suburb..."
+            <Controller
+              name="locationName"
+              control={control}
+              render={({ field }) => (
+                <LocationAutocomplete
+                  value={field.value || ""}
+                  onChange={field.onChange}
+                  placeholder="Search suburb..."
+                />
+              )}
             />
             <div className="bg-[#00e5ff]/10 border border-[#00e5ff]/30 p-3 mt-2">
               <div className="flex items-start gap-2">
@@ -406,29 +449,23 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
           </div>
           <div className="space-y-2">
             <Label>Bio</Label>
-            <Textarea
-              value={editForm.bio}
-              onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
-              placeholder="Tell us about yourself..."
-              rows={4}
-            />
+            <Textarea {...register("bio")} placeholder="Tell us about yourself..." rows={4} />
+            {errors.bio && <p className="text-xs text-[#ff5252]">{errors.bio.message}</p>}
           </div>
           <div className="space-y-2">
             <Label>Mobile Number</Label>
             <div className="flex items-center gap-2">
               <Smartphone className="h-3.5 w-3.5 text-[#7a6b5a]" />
-              <Input
-                value={editForm.mobile}
-                onChange={(e) => setEditForm({ ...editForm, mobile: e.target.value })}
-                placeholder="+61 412 345 678"
-              />
+              <Input {...register("mobile")} placeholder="+61 412 345 678" />
             </div>
+            {errors.mobile && <p className="text-xs text-[#ff5252]">{errors.mobile.message}</p>}
             <p className="text-xs text-[#7a6b5a]">
               Used for account security. Australian format only.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Public panel */}
             <div className="vessel">
               <button
                 type="button"
@@ -454,18 +491,17 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                     <Label>Phone</Label>
                     <div className="flex items-center gap-2">
                       <Phone className="h-3.5 w-3.5 text-[#7a6b5a]" />
-                      <Input
-                        value={editForm.publicPhone}
-                        onChange={(e) => setEditForm({ ...editForm, publicPhone: e.target.value })}
-                        placeholder="Public contact number"
-                      />
+                      <Input {...register("publicPhone")} placeholder="Public contact number" />
                     </div>
+                    {errors.publicPhone && (
+                      <p className="text-xs text-[#ff5252]">{errors.publicPhone.message}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label>Social Links</Label>
                     <div className="space-y-2">
-                      {editForm.publicSocialLinks.map((link, i) => (
-                        <div key={i} className="flex items-center gap-2">
+                      {publicSocialLinks.map((link, i) => (
+                        <div key={`${link.platform}-${i}`} className="flex items-center gap-2">
                           <span className="text-xs text-[#f5a623] w-16 uppercase">
                             {link.platform}
                           </span>
@@ -513,6 +549,7 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
               )}
             </div>
 
+            {/* Private panel */}
             <div className="vessel">
               <button
                 type="button"
@@ -538,18 +575,17 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                     <Label>Phone</Label>
                     <div className="flex items-center gap-2">
                       <Phone className="h-3.5 w-3.5 text-[#7a6b5a]" />
-                      <Input
-                        value={editForm.privatePhone}
-                        onChange={(e) => setEditForm({ ...editForm, privatePhone: e.target.value })}
-                        placeholder="Private contact number"
-                      />
+                      <Input {...register("privatePhone")} placeholder="Private contact number" />
                     </div>
+                    {errors.privatePhone && (
+                      <p className="text-xs text-[#ff5252]">{errors.privatePhone.message}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label>Social Links</Label>
                     <div className="space-y-2">
-                      {editForm.privateSocialLinks.map((link, i) => (
-                        <div key={i} className="flex items-center gap-2">
+                      {privateSocialLinks.map((link, i) => (
+                        <div key={`${link.platform}-${i}`} className="flex items-center gap-2">
                           <span className="text-xs text-[#f5a623] w-16 uppercase">
                             {link.platform}
                           </span>
@@ -598,11 +634,20 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
             </div>
           </div>
 
+          {rootError && <p className="text-sm text-[#ff5252]">{rootError}</p>}
+
           <div className="flex items-center gap-3">
-            <Button type="submit" disabled={saving}>
-              {saving ? "Saving..." : "Save Profile"}
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Saving..." : "Save Profile"}
             </Button>
-            <Button type="button" variant="ghost" onClick={() => setIsEditing(false)}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => {
+                setIsEditing(false);
+                reset();
+              }}
+            >
               Cancel
             </Button>
           </div>
