@@ -1420,7 +1420,10 @@ export function fmtList(items: string[]): string {
   return items.map((item, i) => `  ${(i + 1).toString().padStart(2)}. ${item}`).join("\n");
 }
 
-export function fmtRating(rating: number | null, count: number | null): string {
+export function fmtRating(
+  rating: number | null | undefined,
+  count: number | null | undefined
+): string {
   if (rating == null) return "No ratings yet";
   const stars = "★".repeat(Math.round(rating / 2)) + "☆".repeat(5 - Math.round(rating / 2));
   return `${stars} ${rating.toFixed(1)}/10${count ? ` (${count} reviews)` : ""}`;
