@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { z } from "zod";
 
-import { logger } from "@/lib/logger";
+import { withApiHandler } from "@/lib/api-handler";
 import { createNotification } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
@@ -57,8 +57,8 @@ async function getAuthorizedProfile(userId: string, needId: string) {
   };
 }
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  try {
+export const GET = withApiHandler(
+  async (req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
     const supabase = createClient();
     const {
       data: { user },
@@ -168,21 +168,16 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     });
 
     return NextResponse.json({ messages });
-  } catch (error) {
-    logger.error("Get need messages failed", error instanceof Error ? error : undefined, {
-      needId: params.id,
-    });
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
 const postSchema = z.object({
   content: z.string().min(1).max(2000),
   acceptanceId: z.string().optional(),
 });
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  try {
+export const POST = withApiHandler(
+  async (req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
     const supabase = createClient();
     const {
       data: { user },
@@ -313,10 +308,5 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     }
 
     return NextResponse.json({ message }, { status: 201 });
-  } catch (error) {
-    logger.error("Create need message failed", error instanceof Error ? error : undefined, {
-      needId: params.id,
-    });
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-}
+);

@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { z } from "zod";
 
+import { withApiHandler } from "@/lib/api-handler";
 import { createContractFromAcceptance } from "@/lib/contract-formation";
 import { sendInterestAcceptedEmail } from "@/lib/email";
 import { logger } from "@/lib/logger";
@@ -13,8 +14,8 @@ const updateSchema = z.object({
   status: z.enum(["accepted", "declined", "withdrawn", "selected", "removed"]),
 });
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-  try {
+export const PATCH = withApiHandler(
+  async (req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
     const supabase = createClient();
     const {
       data: { user },
@@ -31,7 +32,11 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     }
 
     const body = await req.json();
-    const { status } = updateSchema.parse(body);
+    const parseResult = updateSchema.safeParse(body);
+    if (!parseResult.success) {
+      return NextResponse.json({ error: parseResult.error.errors }, { status: 400 });
+    }
+    const { status } = parseResult.data;
 
     const acceptance = await prisma.acceptance.findUnique({
       where: { id: params.id },
@@ -187,14 +192,5 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     });
 
     return NextResponse.json({ acceptance: updated });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors }, { status: 400 });
-    }
-    if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
-    logger.error("Update acceptance error:", error instanceof Error ? error : undefined);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-}
+);

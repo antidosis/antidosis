@@ -1,17 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { z } from "zod";
-
+import { withApiHandler } from "@/lib/api-handler";
 import { isValidCentralCoastSuburb } from "@/lib/data/central-coast-suburbs";
-import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { updateNeedSchema } from "@/lib/schemas";
 import { sanitizePlainText } from "@/lib/security/sanitize";
 import { sanitizeUrlArray } from "@/lib/security/url";
 import { createClient } from "@/lib/supabase/server";
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  try {
+export const GET = withApiHandler(
+  async (req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
     const supabase = createClient();
     const {
       data: { user },
@@ -156,14 +154,11 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     }
 
     return NextResponse.json({ need });
-  } catch (error) {
-    logger.error("Get need error:", error instanceof Error ? error : undefined);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-  try {
+export const PATCH = withApiHandler(
+  async (req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
     const supabase = createClient();
     const {
       data: { user },
@@ -195,7 +190,12 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     }
 
     const body = await req.json();
-    const data = updateNeedSchema.parse(body);
+    const parseResult = updateNeedSchema.safeParse(body);
+    if (!parseResult.success) {
+      const messages = parseResult.error.errors.map((e) => `${e.path.join(".")}: ${e.message}`);
+      return NextResponse.json({ error: messages.join("; ") }, { status: 400 });
+    }
+    const data = parseResult.data;
 
     // Trial restriction: Central Coast NSW only
     const isLocal = data.isLocal ?? existingNeed.isLocal ?? true;
@@ -276,18 +276,11 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     }
 
     return NextResponse.json({ need });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      const messages = error.errors.map((e) => `${e.path.join(".")}: ${e.message}`);
-      return NextResponse.json({ error: messages.join("; ") }, { status: 400 });
-    }
-    logger.error("Update need failed", error instanceof Error ? error : undefined);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-}
+);
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
-  try {
+export const DELETE = withApiHandler(
+  async (req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
     const supabase = createClient();
     const {
       data: { user },
@@ -321,8 +314,5 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     await prisma.need.delete({ where: { id: params.id } });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    logger.error("Delete need failed", error instanceof Error ? error : undefined);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-}
+);

@@ -11,10 +11,10 @@ function generateRequestId(): string {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-export type ApiHandler = (
+export type ApiHandler<TArgs extends unknown[] = unknown[]> = (
   req: NextRequest,
   ctx: ApiContext,
-  ...args: unknown[]
+  ...args: TArgs
 ) => Promise<Response>;
 
 /**
@@ -26,10 +26,10 @@ export type ApiHandler = (
  * Usage:
  *   export const GET = withApiHandler(async (req, ctx, { params }) => { ... });
  */
-export function withApiHandler(
-  handler: ApiHandler
-): (req: NextRequest, ...args: unknown[]) => Promise<Response> {
-  return async (req: NextRequest, ...args: unknown[]) => {
+export function withApiHandler<TArgs extends unknown[]>(
+  handler: ApiHandler<TArgs>
+): (req: NextRequest, ...args: TArgs) => Promise<Response> {
+  return async (req: NextRequest, ...args: TArgs) => {
     const requestId = generateRequestId();
     const startTime = Date.now();
     const method = req.method;
@@ -42,7 +42,7 @@ export function withApiHandler(
     });
 
     try {
-      const response = await handler(req, { requestId, startTime }, ...args);
+      const response = await (handler as any)(req, { requestId, startTime }, ...args);
       const latencyMs = Date.now() - startTime;
       const status = response.status;
 
