@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+import { withApiHandler } from "@/lib/api-handler";
 import { logger } from "@/lib/logger";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
@@ -94,80 +95,75 @@ function detectTypeFromBuffer(buffer: Buffer): { type: string; ext: string } | n
 
 export const dynamic = "force-dynamic";
 
-export async function POST(req: NextRequest) {
-  try {
-    const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    if (!user.email_confirmed_at) {
-      return NextResponse.json(
-        { error: "Email verification required", code: "EMAIL_NOT_VERIFIED" },
-        { status: 403 }
-      );
-    }
-
-    const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
-      windowMs: 5 * 60_000,
-      maxRequests: 10,
-    });
-    if (!limit.allowed) {
-      return NextResponse.json({ error: "Rate limit exceeded. Try again later." }, { status: 429 });
-    }
-
-    const formData = await req.formData();
-    const file = formData.get("file") as File | null;
-    const folder = sanitizeFolder((formData.get("folder") as string) || "general");
-
-    if (!file) {
-      return NextResponse.json({ error: "No file provided" }, { status: 400 });
-    }
-
-    if (file.size > MAX_SIZE) {
-      return NextResponse.json({ error: "File too large. Max 10MB." }, { status: 400 });
-    }
-
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    const detected = detectTypeFromBuffer(buffer);
-    if (!detected) {
-      return NextResponse.json(
-        {
-          error:
-            "Invalid file type. Only images (JPEG, PNG, WebP, GIF) and audio (WebM, OGG, WAV, MP3) are allowed.",
-        },
-        { status: 400 }
-      );
-    }
-
-    const ext = detected.ext;
-    const key = `${folder}/${user.id}/${crypto.randomUUID()}.${ext}`;
-
-    // Use service role client to bypass RLS on storage bucket
-    const serviceClient = createServiceClient();
-
-    const { data, error } = await serviceClient.storage.from("uploads").upload(key, buffer, {
-      contentType: detected.type,
-      upsert: false, // prevent overwrites
-    });
-
-    if (error) {
-      logger.error("Upload error:", error instanceof Error ? error : undefined);
-      return NextResponse.json({ error: "Upload failed. Please try again." }, { status: 500 });
-    }
-
-    const {
-      data: { publicUrl },
-    } = serviceClient.storage.from("uploads").getPublicUrl(data.path);
-
-    return NextResponse.json({ url: publicUrl, path: data.path });
-  } catch (error) {
-    logger.error("Upload failed", error instanceof Error ? error : undefined);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+export const POST = withApiHandler(async (req: NextRequest) => {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-}
+
+  if (!user.email_confirmed_at) {
+    return NextResponse.json(
+      { error: "Email verification required", code: "EMAIL_NOT_VERIFIED" },
+      { status: 403 }
+    );
+  }
+
+  const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
+    windowMs: 5 * 60_000,
+    maxRequests: 10,
+  });
+  if (!limit.allowed) {
+    return NextResponse.json({ error: "Rate limit exceeded. Try again later." }, { status: 429 });
+  }
+
+  const formData = await req.formData();
+  const file = formData.get("file") as File | null;
+  const folder = sanitizeFolder((formData.get("folder") as string) || "general");
+
+  if (!file) {
+    return NextResponse.json({ error: "No file provided" }, { status: 400 });
+  }
+
+  if (file.size > MAX_SIZE) {
+    return NextResponse.json({ error: "File too large. Max 10MB." }, { status: 400 });
+  }
+
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
+
+  const detected = detectTypeFromBuffer(buffer);
+  if (!detected) {
+    return NextResponse.json(
+      {
+        error:
+          "Invalid file type. Only images (JPEG, PNG, WebP, GIF) and audio (WebM, OGG, WAV, MP3) are allowed.",
+      },
+      { status: 400 }
+    );
+  }
+
+  const ext = detected.ext;
+  const key = `${folder}/${user.id}/${crypto.randomUUID()}.${ext}`;
+
+  // Use service role client to bypass RLS on storage bucket
+  const serviceClient = createServiceClient();
+
+  const { data, error } = await serviceClient.storage.from("uploads").upload(key, buffer, {
+    contentType: detected.type,
+    upsert: false, // prevent overwrites
+  });
+
+  if (error) {
+    logger.error("Upload error:", error instanceof Error ? error : undefined);
+    return NextResponse.json({ error: "Upload failed. Please try again." }, { status: 500 });
+  }
+
+  const {
+    data: { publicUrl },
+  } = serviceClient.storage.from("uploads").getPublicUrl(data.path);
+
+  return NextResponse.json({ url: publicUrl, path: data.path });
+});

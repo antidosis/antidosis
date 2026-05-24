@@ -1,17 +1,17 @@
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 import { requireAdmin } from "@/lib/admin";
+import { withApiHandler } from "@/lib/api-handler";
 import { auditLog, getClientInfo } from "@/lib/audit";
-import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
-  const auth = await requireAdmin();
-  if (!auth.authorized) return auth.response;
+export const POST = withApiHandler(
+  async (req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
+    const auth = await requireAdmin();
+    if (!auth.authorized) return auth.response;
 
-  try {
     const credential = await prisma.credential.update({
       where: { id: params.id },
       data: { isVerified: true },
@@ -45,8 +45,5 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     });
 
     return NextResponse.json({ credential });
-  } catch (error) {
-    logger.error("Admin verify credential error:", error instanceof Error ? error : undefined);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-}
+);

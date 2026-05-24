@@ -9,7 +9,7 @@ import { createCredentialSchema } from "@/lib/schemas";
 import { sanitizeUrl } from "@/lib/security/url";
 import { createClient } from "@/lib/supabase/server";
 
-export const GET = withApiHandler(async (req: NextRequest) => {
+export const GET = withApiHandler(async (_req: NextRequest) => {
   const supabase = createClient();
   const {
     data: { user },

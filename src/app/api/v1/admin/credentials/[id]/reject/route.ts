@@ -1,20 +1,20 @@
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 import { z } from "zod";
 
 import { requireAdmin } from "@/lib/admin";
+import { withApiHandler } from "@/lib/api-handler";
 import { auditLog, getClientInfo } from "@/lib/audit";
-import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { sanitizePlainText } from "@/lib/security/sanitize";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
-  const auth = await requireAdmin();
-  if (!auth.authorized) return auth.response;
+export const POST = withApiHandler(
+  async (req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
+    const auth = await requireAdmin();
+    if (!auth.authorized) return auth.response;
 
-  try {
     let rejectionReason: string | undefined;
     try {
       const body = await req.json();
@@ -59,8 +59,5 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     });
 
     return NextResponse.json({ credential });
-  } catch (error) {
-    logger.error("Admin reject credential error:", error instanceof Error ? error : undefined);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-}
+);
