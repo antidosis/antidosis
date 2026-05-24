@@ -5,40 +5,19 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import {
-  MapPin,
-  ArrowLeft,
-  CircleDollarSign,
-  Wrench,
-  Package,
-  Star,
-  Check,
-  X,
-  Camera,
-  Pencil,
-  Trash2,
-  Calendar,
-  Clock,
-  MessageSquare,
-  Handshake,
-  Lock,
-  Loader2,
-  Info,
-} from "lucide-react";
+import { Pencil, Trash2, Loader2 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CopyLinkButton } from "@/components/ui/copy-link";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/toast";
-import { getExchangeMode } from "@/lib/categories";
 import { createClient } from "@/lib/supabase/client";
 
 import { ConfirmDialog } from "./confirm-dialog";
+import { InterestSection } from "./interest-section";
 import { InterestedList } from "./interested-list";
 import { MessageThread } from "./message-thread";
+import { NeedContent } from "./need-content";
 import { PosterProfileCard } from "./poster-profile-card";
-import { ReviewForm } from "./review-form";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -488,177 +467,14 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
   const canMessage = isPoster || hasOffered || need.status === "open";
   const canExpressInterest = need.status === "open" && !isPoster;
 
-  const offerIcon =
-    need.offerType === "money" ? (
-      <CircleDollarSign className="h-4 w-4 text-[#f5a623]" />
-    ) : need.offerType === "item" ? (
-      <Package className="h-4 w-4 text-[#00e5ff]" />
-    ) : (
-      <Wrench className="h-4 w-4 text-[#00e676]" />
-    );
-
-  const descTooLong = need.description.length > 500;
-  const displayDesc =
-    descTooLong && !descExpanded ? need.description.slice(0, 500) + "..." : need.description;
-
   return (
     <>
       <div className="max-w-3xl mx-auto px-4 md:px-8 pb-16">
-        {/* ========== HEADER ========== */}
-        <div className="pt-6 pb-2 flex items-center justify-between">
-          <Link
-            href="/needs"
-            className="inline-flex items-center text-xs text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors"
-          >
-            <ArrowLeft className="mr-1.5 h-3.5 w-3.5" />
-            browse needs
-          </Link>
-          <CopyLinkButton
-            url={`${typeof window !== "undefined" ? window.location.origin : ""}/needs/${need.id}`}
-            label="Copy link"
-          />
-        </div>
-
-        <div className="flex flex-wrap items-start gap-3 mb-3">
-          <h1 className="heading-display text-2xl md:text-3xl text-[#e8d5a3]">{need.title}</h1>
-          {need.status !== "open" && (
-            <Badge
-              variant={
-                need.status === "completed"
-                  ? "success"
-                  : need.status === "cancelled"
-                    ? "destructive"
-                    : "warning"
-              }
-              className="mt-1.5 capitalize"
-            >
-              {need.status}
-            </Badge>
-          )}
-          <Badge
-            variant={need.requiresContract ? "quintessence" : "outline"}
-            className="mt-1.5 text-[10px]"
-          >
-            {need.requiresContract ? "contract required" : "free form"}
-          </Badge>
-        </div>
-
-        {/* ========== META STRIP ========== */}
-        <div className="flex flex-wrap items-center gap-2 mb-6">
-          {need.requiredSkills.map((s) => (
-            <span
-              key={s.id}
-              className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-[#2a2420] text-[#7a6b5a] bg-[#1a1714] rounded"
-            >
-              {s.name}
-            </span>
-          ))}
-          {need.needCategory &&
-            (() => {
-              const mode = getExchangeMode(need.needCategory);
-              if (!mode) return null;
-              return (
-                <span
-                  className={`px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border rounded flex items-center gap-1 ${mode.twText} ${mode.twBorder} ${mode.twBg}`}
-                >
-                  {mode.label}
-                </span>
-              );
-            })()}
-          <span className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-[#2a2420] text-[#7a6b5a] bg-[#1a1714] rounded flex items-center gap-1">
-            <MapPin className="h-3 w-3" /> local
-          </span>
-          {need.deadline && (
-            <span className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-[#2a2420] text-[#7a6b5a] bg-[#1a1714] rounded flex items-center gap-1">
-              <Calendar className="h-3 w-3" />
-              {new Date(need.deadline).toLocaleDateString("en-AU", {
-                day: "numeric",
-                month: "short",
-              })}
-            </span>
-          )}
-          {need.timeRange && (
-            <span className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-[#2a2420] text-[#7a6b5a] bg-[#1a1714] rounded flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {need.timeRange}
-            </span>
-          )}
-        </div>
-
-        {/* ========== DESCRIPTION ========== */}
-        <div className="mb-6">
-          <p className="text-sm text-[#b8a078] leading-relaxed whitespace-pre-line">
-            {displayDesc}
-          </p>
-          {descTooLong && (
-            <button
-              onClick={() => setDescExpanded(!descExpanded)}
-              className="text-xs text-[#f5a623] hover:underline mt-2"
-            >
-              {descExpanded ? "show less" : "show more"}
-            </button>
-          )}
-        </div>
-
-        {/* ========== TRIAL NOTICE ========== */}
-        <div className="bg-[#00e5ff]/10 border border-[#00e5ff]/30 p-3 mb-6">
-          <div className="flex items-start gap-2">
-            <Info className="h-3.5 w-3.5 text-[#00e5ff] mt-0.5 flex-shrink-0" />
-            <p className="text-xs text-[#7a6b5a]">
-              Central Coast NSW trial region — all needs are local during the pilot.
-            </p>
-          </div>
-        </div>
-
-        {/* ========== IMAGES ========== */}
-        {need.images.length > 0 && (
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-2">
-              <Camera className="h-3.5 w-3.5 text-[#7a6b5a]" />
-              <span className="text-xs text-[#7a6b5a] uppercase tracking-wider">need images</span>
-            </div>
-            <div className="flex gap-2 overflow-x-auto pb-2 snap-x">
-              {need.images.map((url, i) => (
-                <img
-                  key={i}
-                  src={url}
-                  alt=""
-                  className="h-28 w-28 md:h-32 md:w-32 object-cover border border-[#2a2420] hover:border-[#f5a623] transition-colors cursor-pointer shrink-0 snap-start"
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ========== EXCHANGE (compact) ========== */}
-        <div className="vessel p-4 mb-6">
-          <div className="flex items-center gap-2 mb-2">
-            {offerIcon}
-            <span className="text-xs text-[#7a6b5a] uppercase tracking-wider">
-              offering in exchange
-            </span>
-          </div>
-          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <p className="text-sm font-medium text-[#e8d5a3]">{need.offerDescription}</p>
-            {need.offerValue && (
-              <span className="text-xs text-[#b8a078]">
-                est. ${need.offerValue.toLocaleString()}
-              </span>
-            )}
-          </div>
-          {need.offerImages.length > 0 && (
-            <div className="flex gap-2 overflow-x-auto mt-3 pb-1 snap-x">
-              {need.offerImages.map((url, i) => (
-                <img
-                  key={i}
-                  src={url}
-                  alt=""
-                  className="h-20 w-20 object-cover border border-[#2a2420] hover:border-[#f5a623] transition-colors cursor-pointer shrink-0 snap-start"
-                />
-              ))}
-            </div>
-          )}
-        </div>
+        <NeedContent
+          need={need}
+          descExpanded={descExpanded}
+          onToggleDesc={() => setDescExpanded(!descExpanded)}
+        />
 
         {/* ========== POSTER PROFILE (collapsible) ========== */}
         <PosterProfileCard
@@ -696,183 +512,36 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
         {/* ========== ACTIONS ========== */}
         {(canMessage || canExpressInterest || messages.length > 0 || isPoster) && (
           <div className="space-y-4 mb-6">
-            {/* Action bar — non-poster only */}
-            {canExpressInterest && !hasOffered && (
-              <div className="flex flex-wrap gap-2">
-                {profileId ? (
-                  <>
-                    <Button
-                      variant="default"
-                      size="sm"
-                      onClick={() => setShowInterestForm(!showInterestForm)}
-                    >
-                      <Handshake className="h-4 w-4 mr-1.5" />
-                      {showInterestForm ? "Cancel" : "Express Interest"}
-                    </Button>
-                    <Button variant="secondary" size="sm" onClick={scrollToMessages}>
-                      <MessageSquare className="h-4 w-4 mr-1.5" />
-                      Message
-                    </Button>
-                  </>
-                ) : (
-                  <Button variant="default" size="sm" onClick={() => handleAuthRequired(false)}>
-                    <Lock className="h-4 w-4 mr-1.5" />
-                    Log in to Interact
-                  </Button>
-                )}
-              </div>
-            )}
-
-            {/* Interest form — non-poster only */}
-            {canExpressInterest && showInterestForm && profileId && !hasOffered && (
-              <div className="vessel p-4">
-                <p className="text-xs text-[#7a6b5a] mb-3">
-                  tell the poster why you are a good fit. you can also message them below to ask
-                  questions first.
-                </p>
-                <form onSubmit={submitOffer} className="space-y-3">
-                  <div>
-                    <Textarea
-                      placeholder="introduce yourself..."
-                      value={offerMessage}
-                      onChange={(e) => setOfferMessage(e.target.value)}
-                      rows={3}
-                      className="text-sm"
-                      maxLength={1000}
-                    />
-                    <p className="text-xs text-[#7a6b5a] mt-1 text-right">
-                      {offerMessage.length}/1000
-                    </p>
-                  </div>
-                  <Button type="submit" variant="default" size="sm" disabled={submittingOffer}>
-                    {submittingOffer ? (
-                      <>
-                        <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-                        submitting...
-                      </>
-                    ) : (
-                      "Submit Interest"
-                    )}
-                  </Button>
-                </form>
-              </div>
-            )}
-
-            {/* Interest status — non-poster only */}
-            {!isPoster && myAcceptance && (
-              <div
-                className={`p-3 rounded border ${
-                  myAcceptance.status === "accepted"
-                    ? "bg-[#00e676]/5 border-[#00e676]/30"
-                    : myAcceptance.status === "declined"
-                      ? "bg-[#ff5252]/5 border-[#ff5252]/30"
-                      : "bg-[#1a1714] border-[#2a2420]"
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  {myAcceptance.status === "pending" && (
-                    <Clock className="h-4 w-4 text-[#7a6b5a]" />
-                  )}
-                  {myAcceptance.status === "accepted" && (
-                    <Check className="h-4 w-4 text-[#00e676]" />
-                  )}
-                  {myAcceptance.status === "declined" && <X className="h-4 w-4 text-[#ff5252]" />}
-                  <p
-                    className={`text-sm ${
-                      myAcceptance.status === "accepted"
-                        ? "text-[#00e676]"
-                        : myAcceptance.status === "declined"
-                          ? "text-[#ff5252]"
-                          : "text-[#7a6b5a]"
-                    }`}
-                  >
-                    {myAcceptance.status === "pending" && "your interest is pending review"}
-                    {myAcceptance.status === "accepted" &&
-                      (need.requiresContract
-                        ? "poster accepted — ready to form contract"
-                        : need.status === "completed"
-                          ? "deal completed"
-                          : myAcceptance.posterMarkedComplete &&
-                              !myAcceptance.fulfillerMarkedComplete
-                            ? "poster marked complete — waiting for you"
-                            : !myAcceptance.posterMarkedComplete &&
-                                myAcceptance.fulfillerMarkedComplete
-                              ? "you marked complete — waiting for poster"
-                              : "poster accepted — deal confirmed")}
-                    {myAcceptance.status === "declined" && "your interest was declined"}
-                    {myAcceptance.status === "completed" && "deal completed — thank you!"}
-                  </p>
-                </div>
-                {myAcceptance.message && (
-                  <div className="mt-2 bg-[#0f0c0a] p-2.5 rounded text-xs text-[#b8a078]">
-                    <span className="text-[#7a6b5a] uppercase tracking-wider text-[9px]">
-                      your intro:{" "}
-                    </span>
-                    {myAcceptance.message}
-                  </div>
-                )}
-                {/* Free-form mark complete — non-poster */}
-                {myAcceptance.status === "accepted" &&
-                  !need.requiresContract &&
-                  need.status === "active" && (
-                    <div className="mt-3">
-                      {!myAcceptance.fulfillerMarkedComplete ? (
-                        <Button
-                          size="sm"
-                          variant="default"
-                          className="h-7 text-xs"
-                          onClick={() => handleMarkComplete(myAcceptance.id)}
-                          disabled={markingComplete}
-                        >
-                          {markingComplete ? (
-                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                          ) : (
-                            <Check className="h-3 w-3 mr-1" />
-                          )}
-                          Mark as complete
-                        </Button>
-                      ) : (
-                        <span className="text-xs text-[#00e676] flex items-center gap-1">
-                          <Check className="h-3 w-3" /> you marked complete
-                        </span>
-                      )}
-                      {myAcceptance.posterMarkedComplete && (
-                        <span className="text-xs text-[#00e676] flex items-center gap-1 ml-3">
-                          <Check className="h-3 w-3" /> poster marked complete
-                        </span>
-                      )}
-                    </div>
-                  )}
-                {/* Free-form review — non-poster */}
-                {myAcceptance.status === "completed" && !need.requiresContract && (
-                  <div className="mt-3">
-                    {showReviewForm ? (
-                      <ReviewForm
-                        rating={reviewRating}
-                        comment={reviewComment}
-                        privateFeedback={reviewPrivateFeedback}
-                        submitting={submittingReview}
-                        onRatingChange={setReviewRating}
-                        onCommentChange={setReviewComment}
-                        onPrivateFeedbackChange={setReviewPrivateFeedback}
-                        onSubmit={() => submitReview(myAcceptance.id, need.poster.id)}
-                        onCancel={() => setShowReviewForm(false)}
-                      />
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="h-7 text-xs"
-                        onClick={() => setShowReviewForm(true)}
-                      >
-                        <Star className="h-3 w-3 mr-1" />
-                        Leave a review
-                      </Button>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
+            <InterestSection
+              canExpressInterest={canExpressInterest}
+              hasOffered={hasOffered}
+              profileId={profileId}
+              myAcceptance={myAcceptance}
+              needStatus={need.status}
+              needRequiresContract={need.requiresContract}
+              posterId={need.poster.id}
+              showInterestForm={showInterestForm}
+              onToggleInterestForm={() => setShowInterestForm(!showInterestForm)}
+              offerMessage={offerMessage}
+              onOfferMessageChange={setOfferMessage}
+              submittingOffer={submittingOffer}
+              onSubmitOffer={submitOffer}
+              markingComplete={markingComplete}
+              onMarkComplete={handleMarkComplete}
+              showReviewForm={showReviewForm}
+              onShowReviewForm={() => setShowReviewForm(true)}
+              onHideReviewForm={() => setShowReviewForm(false)}
+              reviewRating={reviewRating}
+              reviewComment={reviewComment}
+              reviewPrivateFeedback={reviewPrivateFeedback}
+              submittingReview={submittingReview}
+              onReviewRatingChange={setReviewRating}
+              onReviewCommentChange={setReviewComment}
+              onReviewPrivateFeedbackChange={setReviewPrivateFeedback}
+              onSubmitReview={submitReview}
+              onScrollToMessages={scrollToMessages}
+              onAuthRequired={handleAuthRequired}
+            />
 
             {/* Message thread */}
             <MessageThread
