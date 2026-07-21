@@ -12,11 +12,13 @@ import {
   Calendar,
   Clock,
   Info,
+  ShieldAlert,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { CopyLinkButton } from "@/components/ui/copy-link";
 import { getExchangeMode } from "@/lib/categories";
+import { detectRegulatedTrade, detectBuildingWork } from "@/lib/regulated-trades";
 
 interface NeedContentProps {
   need: {
@@ -135,6 +137,43 @@ export function NeedContent({ need, descExpanded, onToggleDesc }: NeedContentPro
           </span>
         )}
       </div>
+
+      {/* ========== LICENSED-WORK NOTICE (NSW) ========== */}
+      {(() => {
+        const trade = detectRegulatedTrade({
+          title: need.title,
+          skills: need.requiredSkills.map((s) => s.name),
+        });
+        if (trade) {
+          return (
+            <div className="bg-[#ffb300]/10 border border-[#ffb300]/30 p-3 mb-6">
+              <div className="flex items-start gap-2">
+                <ShieldAlert className="h-3.5 w-3.5 text-[#ffb300] mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-[#b8a078]">
+                  Licensed trade work (NSW) — this need involves {trade.label}. It can only be
+                  fulfilled by a member holding a verified {trade.licenceLabel}.
+                </p>
+              </div>
+            </div>
+          );
+        }
+        if (
+          detectBuildingWork({ title: need.title, skills: need.requiredSkills.map((s) => s.name) })
+        ) {
+          return (
+            <div className="bg-[#00e5ff]/10 border border-[#00e5ff]/30 p-3 mb-6">
+              <div className="flex items-start gap-2">
+                <Info className="h-3.5 w-3.5 text-[#00e5ff] mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-[#b8a078]">
+                  Building work note: in NSW, residential building work over $5,000 (labour +
+                  materials incl. GST) must be done by a licensed contractor.
+                </p>
+              </div>
+            </div>
+          );
+        }
+        return null;
+      })()}
 
       {/* ========== DESCRIPTION ========== */}
       <div className="mb-6">

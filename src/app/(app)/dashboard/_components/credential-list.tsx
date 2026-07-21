@@ -17,6 +17,8 @@ export interface CredentialData {
   expiresAt: string | null;
   fileUrl: string | null;
   backFileUrl: string | null;
+  signedUrl?: string | null;
+  signedBackUrl?: string | null;
   isPublic: boolean;
   isVerified: boolean;
 }
@@ -101,7 +103,7 @@ export function CredentialList({
                 {cred.description && <p className="text-[#7a6b5a]">{cred.description}</p>}
                 {cred.fileUrl && (
                   <a
-                    href={cred.fileUrl}
+                    href={cred.signedUrl ?? cred.fileUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[#f5a623] hover:underline inline-flex items-center gap-1"
@@ -111,7 +113,7 @@ export function CredentialList({
                 )}
                 {cred.backFileUrl && (
                   <a
-                    href={cred.backFileUrl}
+                    href={cred.signedBackUrl ?? cred.backFileUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[#f5a623] hover:underline inline-flex items-center gap-1 ml-3"

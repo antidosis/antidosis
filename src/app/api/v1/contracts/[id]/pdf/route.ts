@@ -5,6 +5,7 @@ import { logger } from "@/lib/logger";
 import { generateContractPdf } from "@/lib/pdf-contract";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
+import { createSignedUrlOrFallback, PRIVATE_BUCKET } from "@/lib/storage";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 
@@ -127,11 +128,11 @@ export const POST = withApiHandler(
       partyBUseMessageTerms: contract.partyBUseMessageTerms,
     });
 
-    // Upload PDF to Supabase Storage
+    // Upload PDF to the private storage bucket
     const serviceClient = createServiceClient();
     const fileName = `contracts/${contract.id}.pdf`;
     const { data: uploadData, error: uploadError } = await serviceClient.storage
-      .from("uploads")
+      .from(PRIVATE_BUCKET)
       .upload(fileName, pdfBytes, {
         contentType: "application/pdf",
         upsert: true,
@@ -142,7 +143,7 @@ export const POST = withApiHandler(
       return NextResponse.json({ error: "Failed to store PDF" }, { status: 500 });
     }
 
-    const { data: urlData } = serviceClient.storage.from("uploads").getPublicUrl(fileName);
+    const { data: urlData } = serviceClient.storage.from(PRIVATE_BUCKET).getPublicUrl(fileName);
 
     // Save PDF URL to contract
     await prisma.contract.update({
@@ -150,6 +151,7 @@ export const POST = withApiHandler(
       data: { pdfUrl: urlData.publicUrl },
     });
 
-    return NextResponse.json({ pdfUrl: urlData.publicUrl });
+    // Respond with a short-lived signed URL for immediate download
+    return NextResponse.json({ pdfUrl: await createSignedUrlOrFallback(urlData.publicUrl) });
   }
 );

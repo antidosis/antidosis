@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { withApiHandler } from "@/lib/api-handler";
 import { logger } from "@/lib/logger";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
+import { bucketForPath } from "@/lib/storage";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 
@@ -147,11 +148,14 @@ export const POST = withApiHandler(async (req: NextRequest) => {
 
   const ext = detected.ext;
   const key = `${folder}/${user.id}/${crypto.randomUUID()}.${ext}`;
+  // Identity documents and contract files go to the private bucket; listing
+  // images/audio stay in the public one.
+  const bucket = bucketForPath(`${folder}/`);
 
   // Use service role client to bypass RLS on storage bucket
   const serviceClient = createServiceClient();
 
-  const { data, error } = await serviceClient.storage.from("uploads").upload(key, buffer, {
+  const { data, error } = await serviceClient.storage.from(bucket).upload(key, buffer, {
     contentType: detected.type,
     upsert: false, // prevent overwrites
   });
@@ -163,7 +167,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
 
   const {
     data: { publicUrl },
-  } = serviceClient.storage.from("uploads").getPublicUrl(data.path);
+  } = serviceClient.storage.from(bucket).getPublicUrl(data.path);
 
   return NextResponse.json({ url: publicUrl, path: data.path });
 });

@@ -24,6 +24,7 @@ import {
   Award,
   Shield,
   Crown,
+  FileText,
 } from "lucide-react";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import type { z } from "zod";
@@ -70,6 +71,7 @@ interface ProfileSectionProps {
     publicPhone: string | null;
     privatePhone: string | null;
     mobile: string | null;
+    abn: string | null;
     mobileVerified: boolean;
     isVerified: boolean;
     isPro: boolean;
@@ -104,6 +106,7 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
       publicPhone: initialProfile.publicPhone || undefined,
       privatePhone: initialProfile.privatePhone || undefined,
       mobile: initialProfile.mobile || undefined,
+      abn: initialProfile.abn || undefined,
       socialLinks: initialProfile.socialLinks || [],
     },
   });
@@ -264,6 +267,7 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                   publicPhone: initialProfile.publicPhone || undefined,
                   privatePhone: initialProfile.privatePhone || undefined,
                   mobile: initialProfile.mobile || undefined,
+                  abn: initialProfile.abn || undefined,
                   socialLinks: initialProfile.socialLinks || [],
                 });
                 setIsEditing(true);
@@ -461,6 +465,18 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
             {errors.mobile && <p className="text-xs text-[#ff5252]">{errors.mobile.message}</p>}
             <p className="text-xs text-[#7a6b5a]">
               Used for account security. Australian format only.
+            </p>
+          </div>
+          <div className="space-y-2">
+            <Label>ABN (optional)</Label>
+            <div className="flex items-center gap-2">
+              <FileText className="h-3.5 w-3.5 text-[#7a6b5a]" />
+              <Input {...register("abn")} placeholder="12 345 678 901" />
+            </div>
+            {errors.abn && <p className="text-xs text-[#ff5252]">{errors.abn.message}</p>}
+            <p className="text-xs text-[#7a6b5a]">
+              11 digits. Only needed if you earn through exchanges — it appears on ATO
+              sharing-economy (SERR) reports.
             </p>
           </div>
 

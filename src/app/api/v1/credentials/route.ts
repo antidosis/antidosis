@@ -7,6 +7,7 @@ import { auditLog, getClientInfo } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
 import { createCredentialSchema } from "@/lib/schemas";
 import { sanitizeUrl } from "@/lib/security/url";
+import { createCredentialSignedUrls } from "@/lib/storage";
 import { createClient } from "@/lib/supabase/server";
 
 export const GET = withApiHandler(async (_req: NextRequest) => {
@@ -32,7 +33,16 @@ export const GET = withApiHandler(async (_req: NextRequest) => {
     orderBy: { createdAt: "desc" },
   });
 
-  return NextResponse.json({ credentials });
+  // Attach short-lived signed URLs so document files can be served from the
+  // private bucket (falls back to the stored URL for pre-migration objects).
+  const withSignedUrls = await Promise.all(
+    credentials.map(async (c) => {
+      const { signedUrl, signedBackUrl } = await createCredentialSignedUrls(c);
+      return { ...c, signedUrl, signedBackUrl };
+    })
+  );
+
+  return NextResponse.json({ credentials: withSignedUrls });
 });
 
 export const POST = withApiHandler(async (req: NextRequest) => {

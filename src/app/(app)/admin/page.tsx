@@ -28,6 +28,8 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { createClient } from "@/lib/supabase/client";
 
+import { SerrSection } from "./_components/serr-section";
+
 type Stats = {
   totalUsers: number;
   totalNeeds: number;
@@ -500,6 +502,8 @@ export default function AdminPage() {
           </div>
         )}
       </section>
+
+      <SerrSection />
     </div>
   );
 }

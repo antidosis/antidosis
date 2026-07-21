@@ -27,6 +27,12 @@ export const updateProfileSchema = z.object({
   publicPhone: z.string().max(50).optional().nullable(),
   privatePhone: z.string().max(50).optional().nullable(),
   mobile: z.string().max(20).optional().nullable(),
+  abn: z
+    .string()
+    .max(20)
+    .regex(/^[\d ]*$/, "ABN must contain only digits and spaces")
+    .optional()
+    .nullable(),
   socialLinks: z.array(socialLinkSchema).optional(),
 });
 

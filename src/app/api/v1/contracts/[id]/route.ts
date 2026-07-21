@@ -6,6 +6,7 @@ import { generateContractPdf } from "@/lib/pdf-contract";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { patchContractSchema } from "@/lib/schemas";
+import { createSignedUrlOrFallback, PRIVATE_BUCKET } from "@/lib/storage";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 
@@ -118,7 +119,11 @@ export const GET = withApiHandler(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    return NextResponse.json({ contract });
+    // Contract PDFs live in the private bucket: serve a short-lived signed
+    // URL (falls back to the stored URL for pre-migration objects).
+    return NextResponse.json({
+      contract: { ...contract, pdfUrl: await createSignedUrlOrFallback(contract.pdfUrl) },
+    });
   }
 );
 
@@ -406,14 +411,16 @@ export const PATCH = withApiHandler(
           const serviceClient = createServiceClient();
           const fileName = `contracts/${contract.id}.pdf`;
           const { error: uploadError } = await serviceClient.storage
-            .from("uploads")
+            .from(PRIVATE_BUCKET)
             .upload(fileName, pdfBytes, {
               contentType: "application/pdf",
               upsert: true,
             });
 
           if (!uploadError) {
-            const { data: urlData } = serviceClient.storage.from("uploads").getPublicUrl(fileName);
+            const { data: urlData } = serviceClient.storage
+              .from(PRIVATE_BUCKET)
+              .getPublicUrl(fileName);
 
             finalContract = await prisma.contract.update({
               where: { id: params.id },
@@ -425,9 +432,15 @@ export const PATCH = withApiHandler(
         }
       }
 
-      return NextResponse.json({ contract: finalContract });
+      return NextResponse.json({
+        contract: finalContract
+          ? { ...finalContract, pdfUrl: await createSignedUrlOrFallback(finalContract.pdfUrl) }
+          : finalContract,
+      });
     }
 
-    return NextResponse.json({ contract });
+    return NextResponse.json({
+      contract: { ...contract, pdfUrl: await createSignedUrlOrFallback(contract.pdfUrl) },
+    });
   }
 );

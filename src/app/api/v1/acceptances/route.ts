@@ -9,6 +9,7 @@ import { logger } from "@/lib/logger";
 import { createNotification } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
+import { detectRegulatedTrade, hasVerifiedLicence } from "@/lib/regulated-trades";
 import { createClient } from "@/lib/supabase/server";
 
 const createSchema = z.object({
@@ -54,7 +55,12 @@ export const POST = withApiHandler(async (req: NextRequest) => {
   // Verify need exists and is open
   const need = await prisma.need.findUnique({
     where: { id: needId },
-    select: { status: true, posterId: true, title: true },
+    select: {
+      status: true,
+      posterId: true,
+      title: true,
+      requiredSkills: { select: { name: true } },
+    },
   });
 
   if (!need) {
@@ -76,6 +82,29 @@ export const POST = withApiHandler(async (req: NextRequest) => {
 
   if (need.posterId === profile.id) {
     return NextResponse.json({ error: "Cannot accept your own need" }, { status: 400 });
+  }
+
+  // NSW licensed-work gating: needs naming a regulated trade may only be
+  // fulfilled by users holding a matching verified licence credential.
+  const regulatedTrade = detectRegulatedTrade({
+    title: need.title,
+    skills: need.requiredSkills.map((s) => s.name),
+  });
+  if (regulatedTrade) {
+    const licences = await prisma.credential.findMany({
+      where: { profileId: profile.id, type: "license", isVerified: true },
+      select: { type: true, title: true, isVerified: true },
+    });
+    if (!hasVerifiedLicence(licences, regulatedTrade)) {
+      return NextResponse.json(
+        {
+          error: `This need involves ${regulatedTrade.label} work, which NSW law requires to be carried out by a licensed tradesperson. Add a verified ${regulatedTrade.licenceLabel} to your credentials to fulfil it.`,
+          code: "LICENCE_REQUIRED",
+          trade: regulatedTrade.id,
+        },
+        { status: 403 }
+      );
+    }
   }
 
   // Check for existing acceptance

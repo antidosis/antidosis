@@ -17,6 +17,8 @@ import {
   Calendar,
   Clock,
   Info,
+  Handshake,
+  Shield,
 } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import type { z } from "zod";
@@ -29,6 +31,7 @@ import { LocationAutocomplete } from "@/components/ui/location-autocomplete";
 import { SkillAutocomplete } from "@/components/ui/skill-autocomplete";
 import { Textarea } from "@/components/ui/textarea";
 import { EXCHANGE_MODES, INCOMPATIBLE_EXCHANGE_MODES } from "@/lib/categories";
+import { detectRegulatedTrade } from "@/lib/regulated-trades";
 import { updateNeedSchema } from "@/lib/schemas";
 import { createClient } from "@/lib/supabase/client";
 
@@ -64,6 +67,9 @@ export default function EditNeedPage() {
 
   const offerType = watch("offerType");
   const exchangeMode = watch("needCategory");
+  const watchedTitle = watch("title") ?? "";
+  const watchedSkills = watch("requiredSkills") ?? [];
+  const regulatedTrade = detectRegulatedTrade({ title: watchedTitle, skills: watchedSkills });
 
   // Clear exchange mode if incompatible
   useEffect(() => {
@@ -242,6 +248,13 @@ export default function EditNeedPage() {
                     />
                   )}
                 />
+                {regulatedTrade && (
+                  <p className="text-xs text-[#ffb300] flex items-center gap-1.5">
+                    <Shield className="h-3.5 w-3.5 flex-shrink-0" />
+                    This looks like licensed {regulatedTrade.label} work — only members with a
+                    verified {regulatedTrade.licenceLabel} will be able to fulfil it (NSW).
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <div className="flex items-center gap-2 mb-2">
@@ -363,29 +376,80 @@ export default function EditNeedPage() {
           </section>
         </div>
 
-        <section className="p-4 rounded border border-[#00e676]/30 bg-[#00e676]/5">
-          <p className="text-xs text-[#00e676] uppercase tracking-wide font-medium mb-4">
-            [deal type]
-          </p>
-          <div className="flex items-start gap-6">
-            <div className="pt-1">
-              <label className="flex items-start gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  {...register("requiresContract")}
-                  className="mt-1 accent-[#f5a623]"
-                />
-                <div>
-                  <p className="text-sm font-medium text-[#e8d5a3]">Require a formal contract</p>
-                  <p className="text-xs text-[#7a6b5a] mt-1.5 max-w-2xl">
-                    If checked, both parties must agree to terms and digitally sign a binding
-                    contract before the exchange begins. If unchecked, the deal proceeds in free
-                    form — you simply accept an interest and arrange the exchange directly.
+        <section className="space-y-3">
+          <p className="text-xs text-[#7a6b5a] uppercase tracking-wide font-medium">[deal type]</p>
+          <p className="text-xs text-[#7a6b5a]">choose how you want to structure this exchange</p>
+          <Controller
+            name="requiresContract"
+            control={control}
+            render={({ field }) => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button
+                  type="button"
+                  onClick={() => field.onChange(false)}
+                  className={`text-left p-5 rounded border transition-all ${
+                    !field.value
+                      ? "border-[#00e676] bg-[#00e676]/5"
+                      : "border-[#2a2420] bg-[#0f0c0a] hover:border-[#3a342e]"
+                  }`}
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <div
+                      className={`p-2 rounded ${!field.value ? "bg-[#00e676]/10" : "bg-[#1a1714]"}`}
+                    >
+                      <Handshake
+                        className={`h-5 w-5 ${!field.value ? "text-[#00e676]" : "text-[#7a6b5a]"}`}
+                      />
+                    </div>
+                    <div>
+                      <p
+                        className={`text-sm font-medium ${!field.value ? "text-[#00e676]" : "text-[#e8d5a3]"}`}
+                      >
+                        Free Form
+                      </p>
+                      <p className="text-[10px] text-[#7a6b5a]">handshake deal</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-[#8f7f6e]">
+                    Trust-based exchange with no formal contract. Best for smaller jobs or when you
+                    already know the person.
                   </p>
-                </div>
-              </label>
-            </div>
-          </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => field.onChange(true)}
+                  className={`text-left p-5 rounded border transition-all ${
+                    field.value
+                      ? "border-[#f5a623] bg-[#f5a623]/5"
+                      : "border-[#2a2420] bg-[#0f0c0a] hover:border-[#3a342e]"
+                  }`}
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <div
+                      className={`p-2 rounded ${field.value ? "bg-[#f5a623]/10" : "bg-[#1a1714]"}`}
+                    >
+                      <Shield
+                        className={`h-5 w-5 ${field.value ? "text-[#f5a623]" : "text-[#7a6b5a]"}`}
+                      />
+                    </div>
+                    <div>
+                      <p
+                        className={`text-sm font-medium ${field.value ? "text-[#f5a623]" : "text-[#e8d5a3]"}`}
+                      >
+                        Formal Contract
+                      </p>
+                      <p className="text-[10px] text-[#7a6b5a]">structured terms</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-[#8f7f6e]">
+                    Written terms, digital signatures, and built-in dispute resolution. Recommended
+                    for larger or more complex exchanges.
+                  </p>
+                </button>
+              </div>
+            )}
+          />
         </section>
 
         <section className="p-4 rounded border border-[#ff5252]/30 bg-[#ff5252]/5">

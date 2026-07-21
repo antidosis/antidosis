@@ -48,6 +48,7 @@ type ProfileData = {
   publicPhone: string | null;
   privatePhone: string | null;
   mobile: string | null;
+  abn: string | null;
   mobileVerified: boolean;
   isVerified: boolean;
   isPro: boolean;
