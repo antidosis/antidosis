@@ -1,5 +1,6 @@
 "use client";
 
+import { parseStructuredQuery, buildQueryUrl } from "../terminal-input-engine";
 import {
   contractPipeline,
   fmtTable,
@@ -11,20 +12,39 @@ import {
   getTrophyArt,
   getCelebrationBanner,
 } from "../terminal-render";
+import { refreshBadges } from "../terminal-session";
 import { createWizard, createEditNeedWizard, createReviewWizard } from "../terminal-wizard";
 import type { HandlerContext, HandlerResult } from "./types";
 import { apiGet, apiPost, apiPatch, apiDelete, friendlyError } from "./utils";
 
 export async function handleNeeds(ctx: HandlerContext): Promise<HandlerResult> {
   try {
-    const data = await apiGet("/api/v1/needs");
+    let url = "/api/v1/needs";
+    const queryText = ctx.args.join(" ");
+
+    // Structured query language support
+    if (queryText) {
+      const structured = parseStructuredQuery(queryText);
+      if (structured) {
+        url = buildQueryUrl("/api/v1/needs", structured);
+      } else if (queryText.toLowerCase() === "mine") {
+        url = "/api/v1/needs/mine";
+      }
+    }
+
+    const data = await apiGet(url);
     const needs = data.needs || [];
     if (!needs.length) {
-      ctx.addSys("No needs posted yet. Be the first! Use /post to create one.", "info");
+      ctx.addSys(
+        queryText
+          ? `No needs match "${queryText}". Try broadening your search.`
+          : "No needs posted yet. Be the first! Use /post to create one.",
+        "info"
+      );
       return { handled: true };
     }
     ctx.addSys(
-      `📋 Needs (${needs.length})\n` +
+      `📋 Needs${queryText ? ` matching "${queryText}"` : ""} (${needs.length})\n` +
         fmtTable(
           ["ID", "Title", "Type", "Status"],
           needs
@@ -36,7 +56,10 @@ export async function handleNeeds(ctx: HandlerContext): Promise<HandlerResult> {
               fmtStatus(n.status),
             ])
         ) +
-        `\n\n💡 /need <id> for details  |  /accept <id> to express interest`,
+        `\n\n💡 /need <id> for details  |  /accept <id> to express interest` +
+        (queryText
+          ? `\n   Query syntax: status:open skill:gardening location:"Woy Woy" recent`
+          : ""),
       "info"
     );
   } catch (err) {
@@ -46,13 +69,32 @@ export async function handleNeeds(ctx: HandlerContext): Promise<HandlerResult> {
 }
 
 export async function handleNeed(ctx: HandlerContext): Promise<HandlerResult> {
-  const id = ctx.args[0];
+  let id = ctx.args[0];
   if (!id) {
-    ctx.addSys("Usage: /need <id>", "error");
+    const last = ctx.session.lastViewed?.needId;
+    if (last) {
+      id = last;
+      ctx.addSys(`📎 Re-opening last viewed need (${shortId(id)})...`, "info");
+    } else {
+      ctx.addSys(
+        `Usage: /need <id>\n\n` +
+          `💡 Browse needs first with /needs, then just type /need to re-open the last one you viewed.`,
+        "error"
+      );
+      return { handled: true };
+    }
+  }
+  if (!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(id)) {
+    ctx.addSys(
+      `Invalid need ID format. Need IDs look like: a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d\n` +
+        `💡 Use /needs to browse, or /need with no argument to re-open the last one you viewed.`,
+      "error"
+    );
     return { handled: true };
   }
   ctx.router.push(`/needs/${id}`);
-  ctx.addSys(`Opening need ${id}...`, "info");
+  ctx.setSession({ ...ctx.session, lastViewed: { ...ctx.session.lastViewed, needId: id } });
+  ctx.addSys(`Opening need ${shortId(id)}...`, "info");
   return { handled: true };
 }
 
@@ -285,10 +327,21 @@ export async function handleNeedDelete(ctx: HandlerContext): Promise<HandlerResu
 
 export async function handleContracts(ctx: HandlerContext): Promise<HandlerResult> {
   try {
-    const data = await apiGet("/api/v1/contracts/mine");
+    let url = "/api/v1/contracts/mine";
+    const filter = ctx.args[0]?.toLowerCase();
+
+    // Legacy filter support
+    if (filter && ["pending", "active", "completed", "cancelled"].includes(filter)) {
+      url += `?status=${filter}`;
+    }
+
+    const data = await apiGet(url);
     const contracts = Array.isArray(data) ? data : data.contracts || [];
     if (!contracts.length) {
-      ctx.addSys("No contracts yet. Accept a need to start one!", "info");
+      ctx.addSys(
+        filter ? `No ${filter} contracts found.` : "No contracts yet. Accept a need to start one!",
+        "info"
+      );
       return { handled: true };
     }
     const rows = contracts
@@ -301,7 +354,7 @@ export async function handleContracts(ctx: HandlerContext): Promise<HandlerResul
         c.partyB?.fullName || "—",
       ]);
     ctx.addSys(
-      `📜 Your Contracts (${contracts.length})\n` +
+      `📜 Your Contracts${filter ? ` (${filter})` : ""} (${contracts.length})\n` +
         fmtTable(["ID", "Need", "Status", "Party A", "Party B"], rows) +
         `\n\n💡 /contract <id> for details  |  /sign <id>  |  /complete <id>`,
       "info"
@@ -313,13 +366,32 @@ export async function handleContracts(ctx: HandlerContext): Promise<HandlerResul
 }
 
 export async function handleContract(ctx: HandlerContext): Promise<HandlerResult> {
-  const id = ctx.args[0];
+  let id = ctx.args[0];
   if (!id) {
-    ctx.addSys("Usage: /contract <id>", "error");
+    const last = ctx.session.lastViewed?.contractId;
+    if (last) {
+      id = last;
+      ctx.addSys(`📎 Re-opening last viewed contract (${shortId(id)})...`, "info");
+    } else {
+      ctx.addSys(
+        `Usage: /contract <id>\n\n` +
+          `💡 List your contracts with /contracts, then just type /contract to re-open the last one you viewed.`,
+        "error"
+      );
+      return { handled: true };
+    }
+  }
+  if (!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(id)) {
+    ctx.addSys(
+      `Invalid contract ID format. Contract IDs look like: a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d\n` +
+        `💡 Use /contracts to browse, or /contract with no argument to re-open the last one you viewed.`,
+      "error"
+    );
     return { handled: true };
   }
   ctx.router.push(`/contracts/${id}`);
-  ctx.addSys(`Opening contract ${id}...`, "info");
+  ctx.setSession({ ...ctx.session, lastViewed: { ...ctx.session.lastViewed, contractId: id } });
+  ctx.addSys(`Opening contract ${shortId(id)}...`, "info");
   return { handled: true };
 }
 
@@ -385,7 +457,18 @@ export async function handleComplete(ctx: HandlerContext): Promise<HandlerResult
       "success"
     );
     const newXp = ctx.session.xp + 50;
-    ctx.setSession({ ...ctx.session, xp: newXp });
+    const tempSession = { ...ctx.session, xp: newXp };
+    ctx.setSession(tempSession);
+
+    // Check and award badges
+    const { session: updatedSession, newBadges } = await refreshBadges(tempSession, ctx.myProfile);
+    if (newBadges.length > 0) {
+      ctx.setSession(updatedSession);
+      ctx.addSys(
+        `🏅 New badge${newBadges.length > 1 ? "s" : ""} earned: ${newBadges.join(" ")}`,
+        "success"
+      );
+    }
   } catch (err) {
     ctx.addSys(friendlyError(err, "Failed to complete contract."), "error");
   }
@@ -441,7 +524,7 @@ export async function handleRespondCancel(ctx: HandlerContext): Promise<HandlerR
   }
   try {
     await apiPost(`/api/v1/contracts/${id}/respond-cancel`, { action });
-    ctx.addSys(`✅ Cancellation ${action}d.`, "success");
+    ctx.addSys(`✅ Cancellation ${action === "approve" ? "approved" : "rejected"}.`, "success");
   } catch (err) {
     ctx.addSys(friendlyError(err, "Failed to respond."), "error");
   }

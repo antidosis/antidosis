@@ -1,6 +1,6 @@
 "use client";
 
-import { handleNeeds, handleContracts, handleNeed, handleContract } from "./marketplace";
+import { handleNeeds, handleContracts } from "./marketplace";
 import type { HandlerContext, HandlerResult } from "./types";
 
 export async function handleLs(ctx: HandlerContext): Promise<HandlerResult> {
@@ -54,17 +54,10 @@ export async function handleCat(ctx: HandlerContext): Promise<HandlerResult> {
     ctx.addSys("Usage: /cat <path-or-id>", "error");
     return { handled: true };
   }
-  if (/^[a-f0-9]{8}$/i.test(path)) {
-    try {
-      return await handleNeed({ ...ctx, args: [path] });
-    } catch {
-      try {
-        return await handleContract({ ...ctx, args: [path] });
-      } catch {
-        ctx.addSys(`No item found with ID "${path}".`, "error");
-        return { handled: true };
-      }
-    }
+  if (/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(path)) {
+    ctx.router.push(`/needs/${path}`);
+    ctx.addSys(`Opening need ${path}...`, "info");
+    return { handled: true };
   }
   ctx.addSys(`📄 ${path}\n  (use /need <id> or /contract <id> for details)`, "info");
   return { handled: true };

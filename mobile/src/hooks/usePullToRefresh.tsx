@@ -1,4 +1,5 @@
 import { useRef, useCallback, useState } from "react";
+import { hapticImpact } from "@mobile/lib/native";
 
 /* ═══════════════════════════════════════════════════════════════
    PULL TO REFRESH
@@ -59,6 +60,7 @@ export function usePullToRefresh({
     setPulling(false);
 
     if (pullDistance >= threshold && !refreshing) {
+      hapticImpact("light");
       setRefreshing(true);
       setPullDistance(threshold);
       try {

@@ -127,6 +127,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en-AU" suppressHydrationWarning>
       <head>
+        <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
         {/* Structured Data: WebSite */}
         <script
           type="application/ld+json"

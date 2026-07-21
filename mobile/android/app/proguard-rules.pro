@@ -1,21 +1,80 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# ── Capacitor / Cordova ──────────────────────────────────────────────
+# Keep Capacitor bridge and plugin classes
+-keep public class com.capacitorjs.plugins.** { *; }
+-keep public class com.getcapacitor.** { *; }
+-keep public class * extends com.getcapacitor.Plugin { *; }
+-keep @com.getcapacitor.annotation.CapacitorPlugin public class * { *; }
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Capawesome Firebase plugins (loaded via reflection)
+-keep public class io.capawesome.capacitor.firebase.** { *; }
+-keep public class io.capawesome.capacitor.** { *; }
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Cordova plugins (loaded via reflection)
+-keep public class * extends org.apache.cordova.CordovaPlugin { *; }
+-keep public class com.android.billingclient.** { *; }
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Keep native methods
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
+
+# Keep JavascriptInterface for WebView bridge
+-keepattributes JavascriptInterface
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}
+
+# ── Firebase ─────────────────────────────────────────────────────────
+-keep class com.google.firebase.** { *; }
+-keep class com.google.android.gms.** { *; }
+-dontwarn com.google.firebase.**
+-dontwarn com.google.android.gms.**
+
+# Firebase Crashlytics needs these
+-keepattributes *Annotation*
+-keepattributes SourceFile,LineNumberTable
+-keep public class * extends java.lang.Exception
+-keep class com.google.firebase.crashlytics.** { *; }
+
+# Firebase Sessions uses androidx.datastore — R8 strips this without explicit keep
+-keep class androidx.datastore.** { *; }
+-keep class androidx.datastore.core.** { *; }
+-keep class androidx.datastore.preferences.** { *; }
+-dontwarn androidx.datastore.**
+
+# Kotlin coroutines (used by Firebase)
+-keep class kotlinx.coroutines.** { *; }
+-dontwarn kotlinx.coroutines.**
+
+# ── General Android ──────────────────────────────────────────────────
+# Keep line numbers for debugging stack traces
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
+
+# Keep annotations
+-keepattributes *Annotation*
+
+# Keep Serializable/Parcelable
+-keepclassmembers class * implements java.io.Serializable {
+    static final long serialVersionUID;
+    private static final java.io.ObjectStreamField[] serialPersistentFields;
+    private void writeObject(java.io.ObjectOutputStream);
+    private void readObject(java.io.ObjectInputStream);
+    java.lang.Object writeReplace();
+    java.lang.Object readResolve();
+}
+-keepclassmembers class * implements android.os.Parcelable {
+    public static final android.os.Parcelable$Creator CREATOR;
+}
+
+# ── WebView ──────────────────────────────────────────────────────────
+-keepclassmembers class fqcn.of.javascript.interface.for.webview {
+   public *;
+}
+
+# ── R8 / Reflection safety ───────────────────────────────────────────
+# Don't warn about missing classes from optional dependencies
+-dontwarn java.lang.invoke.StringConcatFactory
+-dontwarn org.bouncycastle.**
+-dontwarn org.conscrypt.**
+-dontwarn org.openjsse.**

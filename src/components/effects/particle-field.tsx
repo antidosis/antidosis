@@ -23,6 +23,8 @@ export function ParticleField() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    const isMobile = window.matchMedia("(pointer: coarse)").matches;
+
     function resize() {
       if (!canvas) return;
       const dpr = Math.min(window.devicePixelRatio, 2);
@@ -34,7 +36,7 @@ export function ParticleField() {
 
     const particleCount = Math.min(
       Math.floor((window.innerWidth * window.innerHeight) / 12000),
-      120
+      isMobile ? 30 : 120
     );
     const particles: Particle[] = [];
     for (let i = 0; i < particleCount; i++) {
@@ -92,28 +94,28 @@ export function ParticleField() {
         ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity * 0.4})`;
         ctx.fill();
 
-        // Draw connections
-        for (let j = i + 1; j < particles.length; j++) {
-          const p2 = particles[j];
-          const ddx = p.x - p2.x;
-          const ddy = p.y - p2.y;
-          const dist = Math.sqrt(ddx * ddx + ddy * ddy);
-          if (dist < connectDistance) {
-            const alpha = (1 - dist / connectDistance) * 0.15;
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(124, 92, 255, ${alpha})`;
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
+        // Draw connections (skipped on mobile to save CPU)
+        if (!isMobile) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const p2 = particles[j];
+            const ddx = p.x - p2.x;
+            const ddy = p.y - p2.y;
+            const dist = Math.sqrt(ddx * ddx + ddy * ddy);
+            if (dist < connectDistance) {
+              const alpha = (1 - dist / connectDistance) * 0.15;
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.strokeStyle = `rgba(124, 92, 255, ${alpha})`;
+              ctx.lineWidth = 0.5;
+              ctx.stroke();
+            }
           }
         }
       }
 
       rafRef.current = requestAnimationFrame(draw);
     }
-
-    draw();
 
     const onMouseMove = (e: MouseEvent) => {
       mouseRef.current = { x: e.clientX, y: e.clientY };
@@ -125,7 +127,16 @@ export function ParticleField() {
     window.addEventListener("mouseleave", onMouseLeave);
     window.addEventListener("resize", resize);
 
+    // Defer animation start on mobile to let paint happen first
+    let startTimer: ReturnType<typeof setTimeout> | undefined;
+    if (isMobile) {
+      startTimer = setTimeout(() => draw(), 150);
+    } else {
+      draw();
+    }
+
     return () => {
+      if (startTimer) clearTimeout(startTimer);
       cancelAnimationFrame(rafRef.current);
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseleave", onMouseLeave);

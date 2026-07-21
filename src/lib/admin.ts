@@ -2,12 +2,15 @@ import { NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
 
-const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "")
-  .split(",")
-  .map((e) => e.trim().toLowerCase())
-  .filter(Boolean);
+function getAdminEmails(): string[] {
+  return (process.env.ADMIN_EMAILS || "")
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+}
 
 export async function requireAdmin() {
+  const ADMIN_EMAILS = getAdminEmails();
   const supabase = createClient();
   const {
     data: { user },
@@ -32,5 +35,5 @@ export async function requireAdmin() {
 }
 
 export function isAdminEmail(email: string): boolean {
-  return ADMIN_EMAILS.includes(email.toLowerCase());
+  return getAdminEmails().includes(email.toLowerCase());
 }

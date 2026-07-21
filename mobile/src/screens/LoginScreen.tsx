@@ -104,7 +104,7 @@ export function LoginScreen() {
           </div>
         )}
 
-        <Button type="submit" className="w-full" disabled={loading}>
+        <Button type="submit" className="w-full" disabled={loading} haptic={false}>
           {loading ? "$ authenticating..." : isRegistering ? "Create Account" : "Sign In"}
         </Button>
 

@@ -66,10 +66,22 @@ export function TerminalMessageList({
 }: TerminalMessageListProps) {
   const handleAttachmentClick = useCallback(
     (att: Attachment) => {
+      const isSafeUrl = (url: string): boolean => {
+        try {
+          const u = new URL(url);
+          return u.protocol === "http:" || u.protocol === "https:";
+        } catch {
+          return false;
+        }
+      };
       if (att.type.startsWith("image/")) {
-        onLightbox(att.url);
+        if (isSafeUrl(att.url)) {
+          onLightbox(att.url);
+        }
       } else {
-        window.open(att.url, "_blank");
+        if (isSafeUrl(att.url)) {
+          window.open(att.url, "_blank");
+        }
       }
     },
     [onLightbox]

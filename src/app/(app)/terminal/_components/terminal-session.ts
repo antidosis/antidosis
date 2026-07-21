@@ -259,6 +259,45 @@ export function checkBadges(
   return newBadges;
 }
 
+interface BadgeProfile {
+  jobsCompleted: number;
+  ratingAvg: number | null;
+  isVerified: boolean;
+  isPro: boolean;
+}
+
+export async function refreshBadges(
+  session: TerminalSession,
+  profile: BadgeProfile | null
+): Promise<{ session: TerminalSession; newBadges: string[] }> {
+  const [needsRes, reviewsRes] = await Promise.all([
+    fetch("/api/v1/needs/mine").then((r) => (r.ok ? r.json() : { needs: [] })),
+    fetch("/api/v1/reviews").then((r) => (r.ok ? r.json() : { reviews: [] })),
+  ]);
+  const needs = Array.isArray(needsRes) ? needsRes : needsRes.needs || [];
+  const reviews = Array.isArray(reviewsRes) ? reviewsRes : reviewsRes.reviews || [];
+
+  const stats = {
+    needsPosted: needs.length,
+    dealsCompleted: profile?.jobsCompleted || 0,
+    messagesSent: 0,
+    reviewsGiven: reviews.length,
+    ratingAvg: profile?.ratingAvg ?? null,
+    isVerified: profile?.isVerified || false,
+    isPro: profile?.isPro || false,
+  };
+
+  const newBadges = checkBadges(session, stats);
+  if (newBadges.length === 0) return { session, newBadges: [] };
+
+  const updatedSession = {
+    ...session,
+    badges: [...session.badges, ...newBadges],
+  };
+
+  return { session: updatedSession, newBadges };
+}
+
 // ─── Alias Resolution ────────────────────────────────────────
 
 const MAX_ALIAS_DEPTH = 10;

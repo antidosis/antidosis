@@ -7,8 +7,15 @@ import type {
   Notification,
   NotificationsResponse,
   Acceptance,
-  CreateNeedInput,
 } from "@mobile/types/api";
+import type { CreateNeedInput } from "@/lib/schemas/needs";
+import type { UpdateProfileInput } from "@/lib/schemas/profiles";
+import type {
+  SendTerminalMessageInput,
+  SendDirectMessageInput,
+  TerminalReactionInput,
+  DmReactionInput,
+} from "@/lib/schemas/terminal";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
@@ -76,6 +83,31 @@ async function fetchApi<T>(path: string, options: RequestInit = {}): Promise<T> 
 
 export function getProfile() {
   return fetchApi<Profile>("/profiles/me");
+}
+
+// ── Need Messages ────────────────────────────────────────────────────
+
+export interface NeedMessage {
+  id: string;
+  content: string;
+  createdAt: string;
+  acceptanceId: string | null;
+  sender: {
+    id: string;
+    fullName: string | null;
+    avatarUrl: string | null;
+  };
+}
+
+export function getNeedMessages(id: string) {
+  return fetchApi<{ messages: NeedMessage[] }>(`/needs/${id}/messages`);
+}
+
+export function sendNeedMessage(id: string, content: string, acceptanceId?: string) {
+  return fetchApi<{ message: NeedMessage }>(`/needs/${id}/messages`, {
+    method: "POST",
+    body: JSON.stringify({ content, acceptanceId }),
+  });
 }
 
 // ── Needs ────────────────────────────────────────────────────────────
@@ -165,18 +197,20 @@ export function getTerminalMessages(channelId: string, skip = 0, limit = 100) {
 export function postTerminalMessage(
   channelId: string,
   content: string,
-  attachments?: { url: string; type: string; name: string }[]
+  attachments?: SendTerminalMessageInput["attachments"]
 ) {
+  const body: SendTerminalMessageInput = { channelId, content, attachments };
   return fetchApi<{ message: import("@mobile/types/api").TerminalMessage }>("/terminal/messages", {
     method: "POST",
-    body: JSON.stringify({ channelId, content, attachments }),
+    body: JSON.stringify(body),
   });
 }
 
 export function postTerminalReaction(messageId: string, emoji: string) {
+  const body: TerminalReactionInput = { messageId, emoji };
   return fetchApi<import("@mobile/types/api").ReactionResponse>("/terminal/reactions", {
     method: "POST",
-    body: JSON.stringify({ messageId, emoji }),
+    body: JSON.stringify(body),
   });
 }
 
@@ -204,21 +238,23 @@ export function getDmMessages(threadId?: string, userId?: string, skip = 0, limi
 export function postDmMessage(
   userId: string,
   content: string,
-  attachments?: { url: string; type: string; name: string }[]
+  attachments?: SendDirectMessageInput["attachments"]
 ) {
+  const body: SendDirectMessageInput = { userId, content, attachments };
   return fetchApi<{
     message: import("@mobile/types/api").DirectMessage;
     threadId: string;
   }>("/terminal/dm/messages", {
     method: "POST",
-    body: JSON.stringify({ userId, content, attachments }),
+    body: JSON.stringify(body),
   });
 }
 
 export function postDmReaction(messageId: string, emoji: string) {
+  const body: DmReactionInput = { messageId, emoji };
   return fetchApi<import("@mobile/types/api").ReactionResponse>("/terminal/dm/reactions", {
     method: "POST",
-    body: JSON.stringify({ messageId, emoji }),
+    body: JSON.stringify(body),
   });
 }
 
@@ -295,7 +331,7 @@ export function getPublicProfile(id: string) {
   return fetchApi<import("@mobile/types/api").PublicProfile>(`/profiles/${id}`);
 }
 
-export function updateProfile(data: import("@mobile/types/api").UpdateProfileInput) {
+export function updateProfile(data: UpdateProfileInput) {
   return fetchApi<import("@mobile/types/api").Profile>("/profiles/me", {
     method: "PATCH",
     body: JSON.stringify(data),
@@ -317,10 +353,26 @@ export function addSkill(name: string, category?: string) {
   });
 }
 
-export function removeSkill(skillId: string) {
-  return fetchApi<{ success: boolean }>(`/profiles/me/skills/${skillId}`, {
+export function removeSkill(name: string) {
+  return fetchApi<{ success: boolean }>(`/profiles/me/skills?name=${encodeURIComponent(name)}`, {
     method: "DELETE",
   });
+}
+
+// ── Acceptances ──────────────────────────────────────────────────────
+
+export function updateAcceptance(id: string, status: string) {
+  return fetchApi<{
+    acceptance: import("@mobile/types/api").Acceptance;
+    contract?: import("@mobile/types/api").ContractSummary;
+  }>(`/acceptances/${id}`, { method: "PATCH", body: JSON.stringify({ status }) });
+}
+
+export function markAcceptanceComplete(id: string) {
+  return fetchApi<{ acceptance: import("@mobile/types/api").Acceptance; bothComplete: boolean }>(
+    `/acceptances/${id}/complete`,
+    { method: "POST" }
+  );
 }
 
 // ── Reviews ──────────────────────────────────────────────────────────
@@ -328,6 +380,27 @@ export function removeSkill(skillId: string) {
 export function createReview(data: import("@mobile/types/api").ReviewInput) {
   return fetchApi<{ review: { id: string } }>("/reviews", {
     method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+// ── Contracts ────────────────────────────────────────────────────────
+
+export function updateContract(
+  id: string,
+  data: {
+    terms?: string;
+    agree?: boolean;
+    submitTerms?: boolean;
+    updatedAt?: string;
+    partyATerms?: string | null;
+    partyBTerms?: string | null;
+    partyAUseMessageTerms?: boolean;
+    partyBUseMessageTerms?: boolean;
+  }
+) {
+  return fetchApi<import("@mobile/types/api").ContractDetail>(`/contracts/${id}`, {
+    method: "PATCH",
     body: JSON.stringify(data),
   });
 }
@@ -364,7 +437,7 @@ export function escalateContractCancel(id: string, reason: string) {
 
 // ── Needs Management ─────────────────────────────────────────────────
 
-export function updateNeed(id: string, data: Partial<import("@mobile/types/api").CreateNeedInput>) {
+export function updateNeed(id: string, data: Partial<CreateNeedInput>) {
   return fetchApi<{ need: import("@mobile/types/api").Need }>(`/needs/${id}`, {
     method: "PATCH",
     body: JSON.stringify(data),

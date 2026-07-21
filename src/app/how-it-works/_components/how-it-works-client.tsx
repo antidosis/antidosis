@@ -164,8 +164,8 @@ export default function HowItWorksPage() {
                   <Link href="/needs">Browse Needs</Link>
                 </Button>
                 <Button asChild variant="ghost" size="lg">
-                  <Link href="/demo/contract-flow">
-                    See Contract Demo <ArrowRight className="ml-2 h-4 w-4" />
+                  <Link href="/demo">
+                    See Demo <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
               </div>

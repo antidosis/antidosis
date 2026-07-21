@@ -118,7 +118,7 @@ describe("redactCredential", () => {
   });
 
   it("handles credential with no sensitive data", () => {
-    const cred = { id: "2", title: "Qualification" };
+    const cred = { id: "2", title: "Qualification", documentNumber: null };
     const result = redactCredential(cred);
     expect(result.id).toBe("2");
     expect(result.title).toBe("Qualification");

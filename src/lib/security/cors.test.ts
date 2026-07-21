@@ -1,13 +1,13 @@
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 import { describe, it, expect, vi } from "vitest";
 
 import { withCors } from "./cors";
 
-function makeRequest(method: string, origin?: string): Request {
+function makeRequest(method: string, origin?: string): NextRequest {
   const headers = new Headers();
   if (origin) headers.set("origin", origin);
-  return new Request("http://localhost/api/test", { method, headers }) as Request;
+  return new Request("http://localhost/api/test", { method, headers }) as unknown as NextRequest;
 }
 
 describe("withCors", () => {

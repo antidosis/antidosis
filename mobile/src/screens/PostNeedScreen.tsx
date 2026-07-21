@@ -15,11 +15,13 @@ import {
   FileText,
   ToggleLeft,
   ToggleRight,
+  Tag,
 } from "lucide-react";
 import { hapticImpact } from "@mobile/lib/native";
 import { Input, Textarea, Button, Vessel, Badge } from "@mobile/components/ui";
 import { SkillAutocomplete } from "@mobile/components/SkillAutocomplete";
 import { LocationAutocomplete } from "@mobile/components/LocationAutocomplete";
+import { EXCHANGE_MODES, INCOMPATIBLE_EXCHANGE_MODES } from "@/lib/categories";
 
 /* ═══════════════════════════════════════════════════════════════
    POST NEED SCREEN — Terminal Wizard (v2)
@@ -57,6 +59,7 @@ export function PostNeedScreen() {
     locationName: "",
     requiredSkills: [] as string[],
     requiresContract: false,
+    needCategory: "" as string,
   });
   const [images, setImages] = useState<string[]>([]);
   const [offerImages, setOfferImages] = useState<string[]>([]);
@@ -125,6 +128,7 @@ export function PostNeedScreen() {
         images,
         offerImages,
         requiresContract: form.requiresContract,
+        needCategory: form.needCategory || null,
       });
       if (result.need) {
         success();
@@ -272,7 +276,13 @@ export function PostNeedScreen() {
                     key={t.key}
                     onClick={() => {
                       hapticImpact("light");
-                      setForm((f) => ({ ...f, offerType: t.key }));
+                      setForm((f) => {
+                        const incompatible = INCOMPATIBLE_EXCHANGE_MODES[t.key] ?? [];
+                        const newCategory = incompatible.includes(f.needCategory)
+                          ? ""
+                          : f.needCategory;
+                        return { ...f, offerType: t.key, needCategory: newCategory };
+                      });
                     }}
                     className={`flex-1 py-2.5 rounded-md font-mono text-xs font-medium uppercase tracking-wider border tap-highlight-none transition-all ${
                       form.offerType === t.key
@@ -288,6 +298,43 @@ export function PostNeedScreen() {
                 ))}
               </div>
             </div>
+            {/* Category */}
+            <div>
+              <label className="block font-mono text-[10px] text-[var(--leather)] uppercase tracking-wider mb-2">
+                <span className="inline-flex items-center gap-1">
+                  <Tag size={12} />
+                  Category
+                </span>
+              </label>
+              <div className="flex flex-wrap gap-1.5">
+                {EXCHANGE_MODES.filter((m) => {
+                  const incompatible = INCOMPATIBLE_EXCHANGE_MODES[form.offerType] ?? [];
+                  return !incompatible.includes(m.value);
+                }).map((mode) => (
+                  <button
+                    key={mode.value}
+                    onClick={() => {
+                      hapticImpact("light");
+                      setForm((f) => ({
+                        ...f,
+                        needCategory: f.needCategory === mode.value ? "" : mode.value,
+                      }));
+                    }}
+                    className={`px-2.5 py-1.5 rounded-md font-mono text-[10px] font-medium uppercase tracking-wide border tap-highlight-none transition-all ${
+                      form.needCategory === mode.value
+                        ? `${mode.twBg} ${mode.twBorder} ${mode.twText} border-opacity-100`
+                        : "bg-transparent border-[var(--bronze)] text-[var(--leather)] hover:border-[var(--bronze-hover)]"
+                    }`}
+                  >
+                    {mode.label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[10px] text-[var(--leather)] mt-1.5">
+                Select a category that best describes your exchange.
+              </p>
+            </div>
+
             <Textarea
               label="What are you offering?"
               value={form.offerDescription}
@@ -362,6 +409,13 @@ export function PostNeedScreen() {
               <p className="text-sm font-medium text-[var(--gold)]">{form.title || "(no title)"}</p>
               <p className="font-mono text-xs text-[var(--parchment)] mt-1">
                 {form.locationName || "(no location)"} · {form.offerType}
+                {form.needCategory && (
+                  <span className="ml-1">
+                    ·{" "}
+                    {EXCHANGE_MODES.find((m) => m.value === form.needCategory)?.label ??
+                      form.needCategory}
+                  </span>
+                )}
               </p>
               {form.requiredSkills.length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-2">
@@ -427,6 +481,7 @@ export function PostNeedScreen() {
               className="flex-1"
               onClick={handleSubmit}
               disabled={!canProceed() || isMutating || uploading}
+              haptic={false}
             >
               {isMutating || uploading ? "Posting..." : "Post Need"}
             </Button>

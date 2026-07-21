@@ -24,20 +24,24 @@ export const createNeedSchema = z.object({
     .string()
     .min(3, "Offer description must be at least 3 characters")
     .max(2000, "Offer description must be under 2000 characters"),
-  offerValue: z.number().min(0).optional(),
+  offerValue: z.number().min(0).optional().nullable(),
   isLocal: z.boolean().default(true),
-  locationName: z.string().optional(),
-  latitude: z.number().optional(),
-  longitude: z.number().optional(),
-  deadline: z.string().optional(),
-  timeRange: z.string().max(100, "Time estimate must be under 100 characters").optional(),
+  locationName: z.string().optional().nullable(),
+  latitude: z.number().optional().nullable(),
+  longitude: z.number().optional().nullable(),
+  deadline: z.string().optional().nullable(),
+  timeRange: z
+    .string()
+    .max(100, "Time estimate must be under 100 characters")
+    .optional()
+    .nullable(),
   requiredSkills: z.array(z.string()).default([]),
   images: z.array(z.string()).default([]),
   offerImages: z.array(z.string()).default([]),
   requiresContract: z.boolean().optional().default(false),
 });
 
-export type CreateNeedInput = z.infer<typeof createNeedSchema>;
+export type CreateNeedInput = z.input<typeof createNeedSchema>;
 
 export const updateNeedSchema = z.object({
   title: z
@@ -75,7 +79,7 @@ export const updateNeedSchema = z.object({
   status: z.enum(["open", "archived"]).optional(),
 });
 
-export type UpdateNeedInput = z.infer<typeof updateNeedSchema>;
+export type UpdateNeedInput = z.input<typeof updateNeedSchema>;
 
 export const postNeedMessageSchema = z.object({
   content: z.string().min(1).max(2000),

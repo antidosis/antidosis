@@ -58,7 +58,7 @@ export function Navbar() {
     { href: "/needs/new", label: "post" },
     { href: "/pros", label: "pros" },
     { href: "/blog", label: "blog" },
-    { href: "/demo/contract-flow", label: "demo" },
+    { href: "/demo", label: "demo" },
     ...(user ? [{ href: "/terminal", label: "terminal", isTerminal: true as const }] : []),
     ...(user ? [{ href: "/dashboard", label: "dashboard" }] : []),
   ];
@@ -69,11 +69,12 @@ export function Navbar() {
         <div className="flex items-center justify-between h-20 px-4 md:px-8 text-sm">
           <Link href="/" className="flex items-center gap-3 group">
             <img
-              src="/images/logo.png"
+              src="/images/logo.webp"
               alt="antidosis"
-              width={160}
-              height={64}
-              className="h-14 w-auto opacity-80 group-hover:opacity-100 transition-opacity"
+              width={138}
+              height={56}
+              fetchPriority="high"
+              className="opacity-80 group-hover:opacity-100 transition-opacity"
             />
           </Link>
 
@@ -96,7 +97,7 @@ export function Navbar() {
                         ? "px-3 py-1.5 rounded border border-[#00e5ff]/30 text-[#00e5ff] hover:bg-[#00e5ff]/10 hover:text-[#00e5ff]"
                         : isActive
                           ? "text-[#f5a623] glow-gold-subtle"
-                          : "text-[#7a6b5a] hover:text-[#e8d5a3]"
+                          : "text-[#8f7f6e] hover:text-[#e8d5a3]"
                   )}
                 >
                   {isTerminal && <Terminal className="h-3 w-3" />}
@@ -116,7 +117,7 @@ export function Navbar() {
               <>
                 <Link
                   href="/login"
-                  className="text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors text-sm"
+                  className="text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors text-sm"
                 >
                   login
                 </Link>
@@ -128,7 +129,7 @@ export function Navbar() {
               <button
                 type="button"
                 onClick={() => supabase.auth.signOut().then(() => (window.location.href = "/"))}
-                className="text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors text-sm"
+                className="text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors text-sm"
               >
                 logout
               </button>
@@ -141,7 +142,7 @@ export function Navbar() {
             <button
               type="button"
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="p-2 text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors"
+              className="p-2 text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
               aria-label="Toggle menu"
               aria-expanded={mobileOpen}
             >
@@ -172,7 +173,7 @@ export function Navbar() {
                         ? "text-[#00e5ff] font-medium"
                         : isActive
                           ? "text-[#f5a623] glow-gold-subtle"
-                          : "text-[#7a6b5a] hover:text-[#e8d5a3]"
+                          : "text-[#8f7f6e] hover:text-[#e8d5a3]"
                   )}
                 >
                   {isTerminal && <Terminal className="h-4 w-4" />}
@@ -185,7 +186,7 @@ export function Navbar() {
                 <>
                   <Link
                     href="/login"
-                    className="py-3 text-base text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors border-b border-[#2a2420]/50"
+                    className="py-3 text-base text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors border-b border-[#2a2420]/50"
                   >
                     login
                   </Link>
@@ -197,7 +198,7 @@ export function Navbar() {
                 <button
                   type="button"
                   onClick={() => supabase.auth.signOut().then(() => (window.location.href = "/"))}
-                  className="py-3 text-base text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors text-left"
+                  className="py-3 text-base text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors text-left"
                 >
                   logout
                 </button>

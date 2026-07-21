@@ -76,7 +76,6 @@ describe("getPasswordStrength", () => {
   });
 
   it("considers length >= 12 for extra point", () => {
-    const short = getPasswordStrength("Abc123!");
     const long = getPasswordStrength("Abcdefgh123!");
     expect(long).not.toBe("weak");
   });

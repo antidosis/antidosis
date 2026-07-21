@@ -166,23 +166,44 @@ export async function handleUsers(ctx: HandlerContext): Promise<HandlerResult> {
 }
 
 export async function handleProfileView(ctx: HandlerContext): Promise<HandlerResult> {
-  if (!ctx.args[0]) {
-    ctx.addSys("Usage: /profile <name-or-id>", "error");
+  const target = ctx.args[0];
+  if (!target) {
+    // Show own profile
+    if (ctx.myProfile?.id) {
+      ctx.router.push(`/profile/${ctx.myProfile.id}`);
+      ctx.addSys("Opening your profile...", "info");
+    } else {
+      ctx.addSys(
+        `Usage: /profile <name-or-id>\n\n` +
+          `💡 Type /profile with no argument to view your own profile.`,
+        "error"
+      );
+    }
     return { handled: true };
   }
-  const target = ctx.args[0];
   if (/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(target)) {
     ctx.router.push(`/profile/${target}`);
+    ctx.setSession({ ...ctx.session, lastViewed: { ...ctx.session.lastViewed, userId: target } });
+    ctx.addSys("Opening profile...", "info");
     return { handled: true };
   }
   try {
     const data = await apiGet(`/api/v1/terminal/users/search?q=${encodeURIComponent(target)}`);
     if (!data.users?.length) {
-      ctx.addSys(`No one found matching "${target}".`, "error");
+      ctx.addSys(
+        `No one found matching "${target}".\n` +
+          `💡 Try /users <name> to search more broadly, or /who to see who's online.`,
+        "error"
+      );
       return { handled: true };
     }
     if (data.users.length === 1) {
       ctx.router.push(`/profile/${data.users[0].id}`);
+      ctx.setSession({
+        ...ctx.session,
+        lastViewed: { ...ctx.session.lastViewed, userId: data.users[0].id },
+      });
+      ctx.addSys(`Opening profile for ${data.users[0].fullName || "User"}...`, "info");
       return { handled: true };
     }
     ctx.addSys(

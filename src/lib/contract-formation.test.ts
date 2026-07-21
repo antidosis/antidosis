@@ -22,7 +22,7 @@ const mockTransaction = vi.fn((cb) => cb(mockTx));
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    $transaction: (...args: unknown[]) => mockTransaction(...args),
+    $transaction: (cb: any) => mockTransaction(cb),
   },
 }));
 

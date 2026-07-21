@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@mobile/lib/supabase";
+import { setCrashlyticsUserId } from "@mobile/lib/crash-reporter";
 
 type AuthState = {
   user: User | null;
@@ -26,7 +27,9 @@ supabase.auth
   });
 
 supabase.auth.onAuthStateChange((_event, session) => {
-  setGlobalState({ user: session?.user ?? null, loading: false });
+  const user = session?.user ?? null;
+  setGlobalState({ user, loading: false });
+  setCrashlyticsUserId(user?.id ?? "");
 });
 
 export { supabase };

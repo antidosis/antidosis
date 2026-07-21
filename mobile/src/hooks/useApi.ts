@@ -15,7 +15,8 @@ import {
   claimFreePro,
   type NeedsQuery,
 } from "@mobile/lib/api";
-import type { CreateNeedInput } from "@mobile/types/api";
+import type { CreateNeedInput } from "@/lib/schemas/needs";
+import type { UpdateProfileInput } from "@/lib/schemas/profiles";
 
 // ── Profile ──────────────────────────────────────────────────────────
 
@@ -27,11 +28,11 @@ export function useProfile() {
 
 export function useNeeds(query: NeedsQuery = {}) {
   const key = ["needs", query] as const;
-  return useSWR(key, () => getNeeds(query), { keepPreviousData: true });
+  return useSWR(key, () => getNeeds(query), { keepPreviousData: true, revalidateOnFocus: false });
 }
 
 export function useNeed(id: string | undefined) {
-  return useSWR(id ? ["need", id] : null, () => getNeed(id!));
+  return useSWR(id ? ["need", id] : null, () => getNeed(id!), { revalidateOnFocus: false });
 }
 
 export function useMyNeeds() {
@@ -78,6 +79,7 @@ export function useCreateAcceptance() {
 export function useNotifications(unreadOnly = false) {
   return useSWR(["notifications", unreadOnly], () => getNotifications(unreadOnly), {
     refreshInterval: 30_000,
+    revalidateOnFocus: false,
   });
 }
 
@@ -115,14 +117,14 @@ import {
 } from "@mobile/lib/api";
 
 export function useTerminalChannels() {
-  return useSWR("terminal-channels", getTerminalChannels);
+  return useSWR("terminal-channels", getTerminalChannels, { revalidateOnFocus: false });
 }
 
 export function useTerminalMessages(channelId: string | undefined) {
   return useSWR(
     channelId ? ["terminal-messages", channelId] : null,
     () => getTerminalMessages(channelId!),
-    { refreshInterval: 30_000 } // Fallback: realtime handles instant updates
+    { refreshInterval: 30_000, revalidateOnFocus: false }
   );
 }
 
@@ -152,7 +154,7 @@ export function useSendTerminalMessage() {
 // ── Direct Messages ──────────────────────────────────────────────────
 
 export function useDmThreads() {
-  return useSWR("dm-threads", getDmThreads);
+  return useSWR("dm-threads", getDmThreads, { revalidateOnFocus: false });
 }
 
 export function useDmMessages(threadId: string | undefined, userId?: string | undefined) {
@@ -161,11 +163,10 @@ export function useDmMessages(threadId: string | undefined, userId?: string | un
     : userId
       ? ["dm-messages", "user", userId]
       : null;
-  return useSWR(
-    key,
-    () => getDmMessages(threadId, userId),
-    { refreshInterval: 30_000 } // Fallback: realtime handles instant updates
-  );
+  return useSWR(key, () => getDmMessages(threadId, userId), {
+    refreshInterval: 30_000,
+    revalidateOnFocus: false,
+  });
 }
 
 export function useSendDmMessage() {
@@ -213,12 +214,16 @@ export function useReactToDmMessage() {
 import { getPros, searchAll } from "@mobile/lib/api";
 
 export function usePros(q?: string) {
-  return useSWR(["pros", q], () => getPros(q), { keepPreviousData: true });
+  return useSWR(["pros", q], () => getPros(q), {
+    keepPreviousData: true,
+    revalidateOnFocus: false,
+  });
 }
 
 export function useSearch(query: string) {
   return useSWR(query && query.length >= 2 ? ["search", query] : null, () => searchAll(query), {
     keepPreviousData: true,
+    revalidateOnFocus: false,
   });
 }
 
@@ -239,7 +244,7 @@ export function useMyContracts() {
 }
 
 export function useContract(id: string | undefined) {
-  return useSWR(id ? ["contract", id] : null, () => getContract(id!));
+  return useSWR(id ? ["contract", id] : null, () => getContract(id!), { revalidateOnFocus: false });
 }
 
 export function useSignContract() {
@@ -314,6 +319,11 @@ import {
   addSkill,
   removeSkill,
   createReview,
+  markAcceptanceComplete,
+  updateAcceptance,
+  updateContract,
+  getNeedMessages,
+  sendNeedMessage,
   cancelContract,
   requestContractCancel,
   respondContractCancel,
@@ -327,8 +337,7 @@ import {
 export function useUpdateProfile() {
   return useSWRMutation(
     "profile",
-    (_key: string, { arg }: { arg: import("@mobile/types/api").UpdateProfileInput }) =>
-      updateProfile(arg),
+    (_key: string, { arg }: { arg: UpdateProfileInput }) => updateProfile(arg),
     {
       onSuccess: () => {
         swrMutate("profile");
@@ -378,6 +387,88 @@ export function useCreateReview() {
   return useSWRMutation(
     "reviews",
     (_key: string, { arg }: { arg: import("@mobile/types/api").ReviewInput }) => createReview(arg)
+  );
+}
+
+export function useMarkAcceptanceComplete() {
+  return useSWRMutation(
+    "acceptance-complete",
+    (_key: string, { arg }: { arg: string }) => markAcceptanceComplete(arg),
+    {
+      onSuccess: () => {
+        swrMutate((key) => Array.isArray(key) && key[0] === "need");
+        swrMutate("my-acceptances");
+        swrMutate("my-needs");
+      },
+    }
+  );
+}
+
+export function useUpdateAcceptance() {
+  return useSWRMutation(
+    "acceptance-update",
+    (_key: string, { arg }: { arg: { id: string; status: string } }) =>
+      updateAcceptance(arg.id, arg.status),
+    {
+      onSuccess: () => {
+        swrMutate((key) => Array.isArray(key) && key[0] === "need");
+        swrMutate("my-acceptances");
+        swrMutate("my-needs");
+        swrMutate("my-contracts");
+      },
+    }
+  );
+}
+
+export function useUpdateContract() {
+  return useSWRMutation(
+    "contract-update",
+    (
+      _key: string,
+      {
+        arg,
+      }: {
+        arg: {
+          id: string;
+          data: Parameters<typeof updateContract>[1];
+        };
+      }
+    ) => updateContract(arg.id, arg.data),
+    {
+      onSuccess: () => {
+        swrMutate((key) => Array.isArray(key) && key[0] === "contract");
+        swrMutate("my-contracts");
+      },
+    }
+  );
+}
+
+export function useNeedMessages(needId: string | undefined) {
+  return useSWR(needId ? ["need-messages", needId] : null, () => getNeedMessages(needId!), {
+    revalidateOnFocus: false,
+  });
+}
+
+export function useSendNeedMessage() {
+  return useSWRMutation(
+    "need-messages",
+    (
+      _key: string,
+      {
+        arg,
+      }: {
+        arg: {
+          needId: string;
+          content: string;
+          acceptanceId?: string;
+        };
+      }
+    ) => sendNeedMessage(arg.needId, arg.content, arg.acceptanceId),
+    {
+      onSuccess: () => {
+        swrMutate((key) => Array.isArray(key) && key[0] === "need-messages");
+      },
+    }
   );
 }
 
@@ -440,10 +531,8 @@ export function useEscalateContractCancel() {
 export function useUpdateNeed() {
   return useSWRMutation(
     "update-need",
-    (
-      _key: string,
-      { arg }: { arg: { id: string; data: Partial<import("@mobile/types/api").CreateNeedInput> } }
-    ) => updateNeed(arg.id, arg.data),
+    (_key: string, { arg }: { arg: { id: string; data: Partial<CreateNeedInput> } }) =>
+      updateNeed(arg.id, arg.data),
     {
       onSuccess: () => {
         swrMutate((key) => Array.isArray(key) && key[0] === "need");

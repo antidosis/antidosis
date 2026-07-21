@@ -39,10 +39,10 @@ const SCENES = [
   },
 ];
 
-const TYPING_SPEED = 35; // ms per char
-const RESPONSE_DELAY = 400; // ms after command before response shows
-const HOLD_DURATION = 2500; // ms to hold before clearing
-const CLEAR_DURATION = 300; // ms for clear animation
+const TYPING_SPEED = 55; // ms per char
+const RESPONSE_DELAY = 350; // ms after command before response shows
+const HOLD_DURATION = 2000; // ms to hold before clearing
+const CLEAR_DURATION = 250; // ms for clear animation
 
 export function TerminalPreview({ className = "" }: { className?: string }) {
   const [sceneIndex, setSceneIndex] = useState(0);
@@ -91,7 +91,7 @@ export function TerminalPreview({ className = "" }: { className?: string }) {
           <span className="h-2.5 w-2.5 rounded-full bg-[#f5a623]/60" />
           <span className="h-2.5 w-2.5 rounded-full bg-[#00e676]/60" />
         </div>
-        <span className="ml-2 text-[10px] text-[#7a6b5a] font-mono tracking-wide">
+        <span className="ml-2 text-[10px] text-[#8f7f6e] font-mono tracking-wide">
           antidosis-terminal — community
         </span>
       </div>

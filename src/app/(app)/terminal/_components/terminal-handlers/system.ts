@@ -1,12 +1,18 @@
 "use client";
 
 import { generateHelpText, generateCommandsText, generateWhatisText } from "../terminal-commands";
+import { popUndo, peekUndo, formatUndoDescription } from "../terminal-undo";
 import type { HandlerContext, HandlerResult } from "./types";
-import { apiPost, sanitizePath } from "./utils";
+import { apiPost, apiGet, sanitizePath } from "./utils";
 
 export async function handleHelp(ctx: HandlerContext): Promise<HandlerResult> {
-  const advanced = ctx.args[0]?.toLowerCase() === "advanced";
-  ctx.addSys(generateHelpText(ctx.isAdmin, ctx.myProfile?.fullName || "User", advanced), "info");
+  const arg = ctx.args[0]?.toLowerCase();
+  const advanced = arg === "advanced";
+  const category = arg && arg !== "advanced" ? arg : undefined;
+  ctx.addSys(
+    generateHelpText(ctx.isAdmin, ctx.myProfile?.fullName || "User", advanced, category),
+    "info"
+  );
   return { handled: true };
 }
 
@@ -125,5 +131,74 @@ export async function handleMe(ctx: HandlerContext): Promise<HandlerResult> {
   } else {
     ctx.addSys(`* ${ctx.myProfile?.fullName || "You"} ${text}`, "info");
   }
+  return { handled: true };
+}
+
+export async function handleUndo(ctx: HandlerContext): Promise<HandlerResult> {
+  const action = popUndo();
+  if (!action) {
+    const next = peekUndo();
+    if (next) {
+      ctx.addSys(
+        `⏰ Can't undo ${formatUndoDescription(next)} — too much time has passed.\n` +
+          `   Undo is available for 5 minutes after the action.`,
+        "error"
+      );
+    } else {
+      ctx.addSys(
+        `Nothing to undo.\n` + `💡 Destructive actions like /clear can be undone for 5 minutes.`,
+        "info"
+      );
+    }
+    return { handled: true };
+  }
+
+  switch (action.type) {
+    case "clear_messages": {
+      if (action.payload.sysMessages) {
+        ctx.setSysMessages(action.payload.sysMessages);
+      }
+      if (action.payload.messages) {
+        ctx.setMessages(action.payload.messages);
+      }
+      ctx.addSys(`↩️ Undid: ${action.description}. Messages restored.`, "success");
+      break;
+    }
+    default:
+      ctx.addSys(`↩️ Undid: ${action.description}.`, "success");
+  }
+  return { handled: true };
+}
+
+export async function handleBenchmark(ctx: HandlerContext): Promise<HandlerResult> {
+  const endpoints = ["/api/v1/health", "/api/v1/needs?limit=1", "/api/v1/profiles/me"];
+  const iterations = Math.min(parseInt(ctx.args[0] || "3", 10), 10);
+  const results: { endpoint: string; times: number[]; avg: number; min: number; max: number }[] =
+    [];
+
+  ctx.addSys(`⏱ Benchmarking ${iterations} iteration(s)...`, "command");
+
+  for (const endpoint of endpoints) {
+    const times: number[] = [];
+    for (let i = 0; i < iterations; i++) {
+      const start = performance.now();
+      try {
+        await apiGet(endpoint);
+      } catch {
+        // continue
+      }
+      times.push(Math.round(performance.now() - start));
+    }
+    const avg = Math.round(times.reduce((a, b) => a + b, 0) / times.length);
+    results.push({ endpoint, times, avg, min: Math.min(...times), max: Math.max(...times) });
+  }
+
+  let out = "📊 Benchmark Results\n";
+  out += "  Endpoint                    Avg   Min   Max   Runs\n";
+  out += "  ─────────────────────────────────────────────────\n";
+  for (const r of results) {
+    out += `  ${r.endpoint.padEnd(26)} ${String(r.avg).padStart(4)}ms ${String(r.min).padStart(4)}ms ${String(r.max).padStart(4)}ms  ${r.times.length}\n`;
+  }
+  ctx.addSys(out, "info");
   return { handled: true };
 }

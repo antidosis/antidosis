@@ -174,7 +174,7 @@ describe("POST /api/v1/admin/credentials/[id]/verify", () => {
     });
 
     const prismaError = new Error("Record not found");
-    (prismaError as Record<string, unknown>).code = "P2025";
+    (prismaError as unknown as Record<string, unknown>).code = "P2025";
     mockCredentialUpdate.mockRejectedValueOnce(prismaError);
 
     const res = await POST(

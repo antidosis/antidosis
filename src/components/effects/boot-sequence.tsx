@@ -7,14 +7,14 @@ import { ShieldCheck, Lock, Users } from "lucide-react";
 import { TerminalCursor } from "./terminal-cursor";
 
 const BOOT_LINES = [
-  { text: "initializing antidosis marketplace...", delay: 200 },
-  { text: "", delay: 350 },
-  { text: "[OK] verifying network integrity", delay: 500 },
-  { text: "[OK] loading trust protocol v2.1", delay: 650 },
-  { text: "[OK] establishing secure exchange channels", delay: 800 },
-  { text: "[OK] connecting to trial region node", delay: 950 },
-  { text: "", delay: 1100 },
-  { text: "ready.", delay: 1300 },
+  { text: "initializing antidosis marketplace...", delay: 100 },
+  { text: "", delay: 180 },
+  { text: "[OK] verifying network integrity", delay: 260 },
+  { text: "[OK] loading trust protocol v2.1", delay: 340 },
+  { text: "[OK] establishing secure exchange channels", delay: 420 },
+  { text: "[OK] connecting to trial region node", delay: 500 },
+  { text: "", delay: 580 },
+  { text: "ready.", delay: 660 },
 ];
 
 const TRUST_SIGNALS = [
@@ -32,10 +32,10 @@ export function BootSequence({ onComplete }: { onComplete: () => void }) {
 
   useEffect(() => {
     // Logo fade in immediately
-    const logoTimer = setTimeout(() => setLogoVisible(true), 200);
+    const logoTimer = setTimeout(() => setLogoVisible(true), 100);
 
     // Trust signals fade in after logo
-    const signalsTimer = setTimeout(() => setSignalsVisible(true), 600);
+    const signalsTimer = setTimeout(() => setSignalsVisible(true), 300);
 
     const timeouts: ReturnType<typeof setTimeout>[] = [];
 
@@ -47,9 +47,9 @@ export function BootSequence({ onComplete }: { onComplete: () => void }) {
             setShowCursor(false);
             setTimeout(() => {
               setDone(true);
-              setTimeout(onComplete, 500);
-            }, 400);
-          }, 700);
+              setTimeout(onComplete, 250);
+            }, 200);
+          }, 350);
         }
       }, line.delay);
       timeouts.push(t);
@@ -65,7 +65,7 @@ export function BootSequence({ onComplete }: { onComplete: () => void }) {
   if (done) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-[#0a0806] flex flex-col items-center justify-center p-6">
+    <div className="fixed inset-0 z-40 bg-[#0a0806] flex flex-col items-center justify-center p-6">
       {/* Logo + Brand */}
       <div
         className={`flex flex-col items-center transition-all duration-700 ${
@@ -73,16 +73,17 @@ export function BootSequence({ onComplete }: { onComplete: () => void }) {
         }`}
       >
         <img
-          src="/images/logo.png"
+          src="/images/logo.webp"
           alt="Antidosis"
-          width={120}
-          height={48}
-          className="h-12 w-auto opacity-80 mb-4"
+          width={160}
+          height={65}
+          className="opacity-80 mb-4"
+          fetchPriority="high"
         />
         <h1 className="heading-display text-2xl md:text-3xl text-[#e8d5a3] tracking-tight">
           antidosis
         </h1>
-        <p className="text-xs text-[#7a6b5a] mt-2 tracking-widest uppercase">
+        <p className="text-xs text-[#8f7f6e] mt-2 tracking-widest uppercase">
           exchange anything, build trust.
         </p>
       </div>
@@ -96,7 +97,7 @@ export function BootSequence({ onComplete }: { onComplete: () => void }) {
         {TRUST_SIGNALS.map((signal, i) => (
           <div key={i} className="flex items-center gap-2">
             <signal.icon className="h-3.5 w-3.5 text-[#f5a623]" />
-            <span className="text-[10px] md:text-xs text-[#7a6b5a] uppercase tracking-wider">
+            <span className="text-[10px] md:text-xs text-[#8f7f6e] uppercase tracking-wider">
               {signal.label}
             </span>
           </div>
@@ -119,7 +120,7 @@ export function BootSequence({ onComplete }: { onComplete: () => void }) {
                     ? "text-[#00e676]"
                     : line.text === "ready."
                       ? "text-[#f5a623] font-semibold"
-                      : "text-[#7a6b5a]"
+                      : "text-[#8f7f6e]"
                 }`}
               >
                 {line.text || "\u00A0"}
@@ -136,7 +137,7 @@ export function BootSequence({ onComplete }: { onComplete: () => void }) {
 
       {/* Bottom hint */}
       <p
-        className={`text-[10px] text-[#7a6b5a]/50 mt-6 transition-opacity duration-1000 ${
+        className={`text-[10px] text-[#8f7f6e]/50 mt-6 transition-opacity duration-1000 ${
           logoVisible ? "opacity-100" : "opacity-0"
         }`}
       >

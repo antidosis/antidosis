@@ -9,14 +9,17 @@ import { X, Menu, Loader2, Paperclip, Send, Smile, Mic, MicOff, Reply } from "lu
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 
-import { COMMANDS, findClosestCommand } from "./terminal-commands";
+import { parseIntent } from "./terminal-agent";
+import { COMMANDS, findClosestCommands } from "./terminal-commands";
 import { dispatchCommand } from "./terminal-handlers/index";
 import { useThemeStyles, useNotificationSound, useSwipeGesture } from "./terminal-hooks";
+import { parsePipeline, reverseISearch, type SearchMatch } from "./terminal-input-engine";
 import { TerminalMessageList } from "./terminal-message-list";
 import {
   loadSession,
   saveSession,
   addXp,
+  refreshBadges,
   resolveAlias,
   resolveMacro,
   type TerminalSession,
@@ -34,6 +37,7 @@ import type {
   ReplyTarget,
   Attachment,
 } from "./terminal-types";
+import { pushUndo } from "./terminal-undo";
 import { advanceWizard, getSteps } from "./terminal-wizard";
 
 // Constants
@@ -76,6 +80,20 @@ export default function TerminalClient() {
   const [cmdHistory, setCmdHistory] = useState<string[]>([]);
   const [historyIdx, setHistoryIdx] = useState(-1);
   const [isLoading, setIsLoading] = useState(false);
+  const [tabSuggestions, setTabSuggestions] = useState<{ name: string; description: string }[]>([]);
+  const [tabIndex, setTabIndex] = useState(0);
+
+  // Reverse-i-search
+  const [reverseSearchMode, setReverseSearchMode] = useState(false);
+  const [reverseSearchQuery, setReverseSearchQuery] = useState("");
+  const [reverseSearchMatch, setReverseSearchMatch] = useState<SearchMatch | null>(null);
+  const [reverseSearchIndex, setReverseSearchIndex] = useState(-1);
+
+  // Argument autocomplete
+  const [argSuggestions, setArgSuggestions] = useState<{ label: string; value: string }[]>([]);
+
+  // Performance
+  const [lastCommandTime, setLastCommandTime] = useState<number | null>(null);
 
   // UI
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -369,11 +387,19 @@ export default function TerminalClient() {
   useEffect(() => {
     if (!user || !activeContext || activeContext.type === "console") return;
 
+    const channelIds = channels.map((c) => c.id).join(",");
+    const threadIds = dmThreads.map((t) => t.id).join(",");
+
     const channelSub = supabase
       .channel("terminal-messages")
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "TerminalMessage" },
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "TerminalMessage",
+          filter: channelIds ? `channelId=in.(${channelIds})` : undefined,
+        },
         (payload) => {
           const msg = payload.new as any;
           if (activeContext.type === "channel" && msg.channelId === activeContext.id) {
@@ -409,7 +435,12 @@ export default function TerminalClient() {
       .channel("terminal-dms")
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "DirectMessage" },
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "DirectMessage",
+          filter: threadIds ? `threadId=in.(${threadIds})` : undefined,
+        },
         (payload) => {
           const msg = payload.new as any;
           if (activeContext.type === "dm" && msg.threadId === activeContext.threadId) {
@@ -449,7 +480,7 @@ export default function TerminalClient() {
       channelSub.unsubscribe();
       dmSub.unsubscribe();
     };
-  }, [user, activeContext, supabase, playNotifySound]);
+  }, [user, activeContext, channels, dmThreads, supabase, playNotifySound]);
 
   // Typing indicator
   const typingChannelRef = useRef<any>(null);
@@ -868,7 +899,21 @@ export default function TerminalClient() {
           const result = await res.json();
           if (res.ok) {
             addSys("Need posted successfully! +50 XP", "success");
-            if (session) setSession(addXp(session, "post_need"));
+            if (session) {
+              const xpSession = addXp(session, "post_need");
+              setSession(xpSession);
+              refreshBadges(xpSession, myProfile)
+                .then(({ session: badgeSession, newBadges }) => {
+                  if (newBadges.length > 0) {
+                    setSession(badgeSession);
+                    addSys(
+                      `🏅 New badge${newBadges.length > 1 ? "s" : ""} earned: ${newBadges.join(" ")}`,
+                      "success"
+                    );
+                  }
+                })
+                .catch(() => {});
+            }
           } else {
             addSys(result.error || "Failed to post need.", "error");
           }
@@ -946,7 +991,21 @@ export default function TerminalClient() {
         const result = await res.json();
         if (res.ok) {
           addSys("Review submitted! +30 XP", "success");
-          if (session) setSession(addXp(session, "leave_review"));
+          if (session) {
+            const xpSession = addXp(session, "leave_review");
+            setSession(xpSession);
+            refreshBadges(xpSession, myProfile)
+              .then(({ session: badgeSession, newBadges }) => {
+                if (newBadges.length > 0) {
+                  setSession(badgeSession);
+                  addSys(
+                    `🏅 New badge${newBadges.length > 1 ? "s" : ""} earned: ${newBadges.join(" ")}`,
+                    "success"
+                  );
+                }
+              })
+              .catch(() => {});
+          }
         } else {
           addSys(result.error || "Failed to submit review.", "error");
         }
@@ -1089,15 +1148,34 @@ export default function TerminalClient() {
 
     // Command parsing
     if (text.startsWith("/")) {
-      const cmdText = text.slice(1);
-      const parts = cmdText.split(/\s+/);
-      const cmd = parts[0].toLowerCase();
-      const args = parts.slice(1);
-
+      const startTime = performance.now();
       setCmdHistory((prev) => [...prev, text]);
       setHistoryIdx(-1);
       setInput("");
       setReplyingTo(null);
+      setArgSuggestions([]);
+
+      // Pipeline support
+      const pipeline = parsePipeline(text);
+      if (pipeline && pipeline.length >= 2) {
+        addSys(`⏱ Running pipeline: ${pipeline.map((s) => "/" + s.cmd).join(" → ")}`, "command");
+        for (const stage of pipeline) {
+          const ctx = buildHandlerContext();
+          const result = await dispatchCommand(stage.cmd, stage.args, ctx);
+          if (!result.handled) {
+            addSys(`Pipeline halted: /${stage.cmd} not found.`, "error");
+            break;
+          }
+        }
+        const elapsed = Math.round(performance.now() - startTime);
+        setLastCommandTime(elapsed);
+        return;
+      }
+
+      const cmdText = text.slice(1);
+      const parts = cmdText.split(/\s+/);
+      const cmd = parts[0].toLowerCase();
+      const args = parts.slice(1);
 
       if (session) {
         const macro = resolveMacro(session, text);
@@ -1110,6 +1188,8 @@ export default function TerminalClient() {
             const ctx = buildHandlerContext();
             await dispatchCommand(mCmd, mArgs, ctx);
           }
+          const elapsed = Math.round(performance.now() - startTime);
+          setLastCommandTime(elapsed);
           return;
         }
       }
@@ -1128,31 +1208,70 @@ export default function TerminalClient() {
         if (!result.handled) {
           addSys("Unknown command: /" + cmd + ". Type /help for available commands.", "error");
         }
+        const elapsed = Math.round(performance.now() - startTime);
+        setLastCommandTime(elapsed);
         return;
+      }
+
+      // Track destructive commands for undo
+      const destructiveCommands = new Set(["clear", "cls", "reset", "claer"]);
+      if (destructiveCommands.has(cmd)) {
+        pushUndo({
+          type: "clear_messages",
+          description: "Cleared terminal messages",
+          payload: { sysMessages: [...sysMessages], messages: [...messages] },
+        });
       }
 
       const ctx = buildHandlerContext();
       const result = await dispatchCommand(cmd, args, ctx);
       if (!result.handled) {
-        const closest = findClosestCommand(cmd);
-        addSys(
-          "Unknown command: /" +
-            cmd +
-            "." +
-            (closest ? " Did you mean /" + closest + "?" : "") +
-            " Type /help for available commands.",
-          "error"
-        );
+        const suggestions = findClosestCommands(cmd, 3);
+        if (suggestions.length === 1 && suggestions[0].score >= 0.75) {
+          addSys(
+            `🤔 Did you mean /${suggestions[0].name}? (${suggestions[0].description})\n` +
+              `   Run it now: /${suggestions[0].name}`,
+            "info"
+          );
+        } else if (suggestions.length > 0) {
+          const list = suggestions
+            .map((s) => `  /${s.name.padEnd(14)} — ${s.description}`)
+            .join("\n");
+          addSys(
+            `❓ Unknown command: /${cmd}\n\n` +
+              `Did you mean one of these?\n${list}\n\n` +
+              `Type /help for all commands, or /whatis <command> for details.`,
+            "error"
+          );
+        } else {
+          addSys(
+            `❓ Unknown command: /${cmd}\n\n` +
+              `Type /help to see available commands, /commands for a quick list, or /ask <question> for help.`,
+            "error"
+          );
+        }
       }
+      const elapsed = Math.round(performance.now() - startTime);
+      setLastCommandTime(elapsed);
       return;
     }
 
-    // Normal message
+    // Console natural language fallback
     if (activeContext?.type === "console") {
-      addSys(
-        "Console mode: only /commands work here. Select a channel or DM to send messages.",
-        "info"
-      );
+      const parsed = parseIntent(text);
+      if (parsed.confidence >= 0.5 && parsed.intent !== "UNKNOWN") {
+        addSys(
+          `💡 That sounds like a question! Try: /ask ${text}\n` +
+            `   Or use /commands to see what you can do here.`,
+          "info"
+        );
+      } else {
+        addSys(
+          `Console mode: only /commands work here.\n` +
+            `💡 Try /ask ${text} to ask the agent, or select a channel/DM to chat.`,
+          "info"
+        );
+      }
       return;
     }
     if (!activeContext) {
@@ -1262,7 +1381,94 @@ export default function TerminalClient() {
     };
   }
 
+  function getArgSuggestions(
+    cmd: string,
+    argIndex: number,
+    prefix: string
+  ): { label: string; value: string }[] {
+    const lowerPrefix = prefix.toLowerCase();
+    if (
+      cmd === "dm" ||
+      cmd === "msg" ||
+      cmd === "message" ||
+      cmd === "profile" ||
+      cmd === "friend" ||
+      cmd === "block"
+    ) {
+      const users = new Map<string, string>();
+      onlineUsers.forEach((u) => {
+        if ((u.fullName || u.id).toLowerCase().includes(lowerPrefix)) {
+          users.set(u.id, u.fullName || u.id);
+        }
+      });
+      dmThreads.forEach((t) => {
+        if ((t.otherUser.fullName || t.otherUser.id).toLowerCase().includes(lowerPrefix)) {
+          users.set(t.otherUser.id, t.otherUser.fullName || t.otherUser.id);
+        }
+      });
+      return Array.from(users.entries()).map(([, name]) => ({ label: name, value: name }));
+    }
+    if (cmd === "chat" || cmd === "channel") {
+      return channels
+        .filter((c) => c.name.toLowerCase().includes(lowerPrefix))
+        .map((c) => ({ label: `#${c.name}`, value: c.name }));
+    }
+    return [];
+  }
+
   function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    // Reverse-i-search mode
+    if (reverseSearchMode) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setReverseSearchMode(false);
+        setReverseSearchQuery("");
+        setReverseSearchMatch(null);
+        setInput("");
+        return;
+      }
+      if (e.key === "Enter" && reverseSearchMatch) {
+        e.preventDefault();
+        setReverseSearchMode(false);
+        setReverseSearchQuery("");
+        setInput(reverseSearchMatch.command);
+        setReverseSearchMatch(null);
+        return;
+      }
+      if (e.key === "Backspace") {
+        e.preventDefault();
+        const newQuery = reverseSearchQuery.slice(0, -1);
+        setReverseSearchQuery(newQuery);
+        if (newQuery) {
+          const result = reverseISearch(cmdHistory, newQuery, cmdHistory.length - 1);
+          setReverseSearchMatch(result.match);
+          setReverseSearchIndex(result.newIndex);
+        } else {
+          setReverseSearchMatch(null);
+        }
+        return;
+      }
+      if (e.key === "r" && e.ctrlKey) {
+        e.preventDefault();
+        if (reverseSearchQuery) {
+          const result = reverseISearch(cmdHistory, reverseSearchQuery, reverseSearchIndex);
+          setReverseSearchMatch(result.match);
+          setReverseSearchIndex(result.newIndex);
+        }
+        return;
+      }
+      if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        const newQuery = reverseSearchQuery + e.key;
+        setReverseSearchQuery(newQuery);
+        const result = reverseISearch(cmdHistory, newQuery, cmdHistory.length - 1);
+        setReverseSearchMatch(result.match);
+        setReverseSearchIndex(result.newIndex);
+        return;
+      }
+      return;
+    }
+
     if (e.key === "ArrowUp") {
       e.preventDefault();
       if (cmdHistory.length === 0) return;
@@ -1284,13 +1490,50 @@ export default function TerminalClient() {
       e.preventDefault();
       if (!input.startsWith("/")) return;
       const prefix = input.slice(1).toLowerCase();
+      const parts = input.slice(1).split(/\s+/);
+      const cmd = parts[0].toLowerCase();
+      const args = parts.slice(1);
+      const lastArg = args[args.length - 1] || "";
+
+      // Argument-level autocomplete
+      if (parts.length > 1 && lastArg.length >= 1) {
+        const suggestions = getArgSuggestions(cmd, args.length - 1, lastArg);
+        if (suggestions.length > 0) {
+          setArgSuggestions(suggestions);
+          if (suggestions.length === 1) {
+            const newInput =
+              "/" + cmd + " " + args.slice(0, -1).concat(suggestions[0].value).join(" ") + " ";
+            setInput(newInput);
+            setArgSuggestions([]);
+          }
+          return;
+        }
+      }
+
       const matches = COMMANDS.filter(
         (c) => c.name.startsWith(prefix) || c.aliases.some((a) => a.startsWith(prefix))
       );
       if (matches.length === 1) {
+        setTabSuggestions([]);
         setInput("/" + matches[0].name + " ");
+      } else if (matches.length > 1) {
+        const newIdx = (tabIndex + 1) % matches.length;
+        setTabIndex(newIdx);
+        setTabSuggestions(matches.map((c) => ({ name: c.name, description: c.description })));
+        setInput("/" + matches[newIdx].name + " ");
+      }
+    } else if (e.key === "r" && e.ctrlKey) {
+      e.preventDefault();
+      if (cmdHistory.length > 0) {
+        setReverseSearchMode(true);
+        setReverseSearchQuery("");
+        setReverseSearchMatch(null);
+        setReverseSearchIndex(cmdHistory.length - 1);
       }
     } else if (e.key === "Escape") {
+      setTabSuggestions([]);
+      setTabIndex(0);
+      setArgSuggestions([]);
       setSidebarOpen(false);
       setShowEmojiPicker(null);
       setShowInputEmojiPicker(false);
@@ -1502,6 +1745,8 @@ export default function TerminalClient() {
                 value={input}
                 onChange={(e) => {
                   setInput(e.target.value);
+                  setTabSuggestions([]);
+                  setTabIndex(0);
                   if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
                   typingTimeoutRef.current = setTimeout(() => sendTyping(), 300);
                 }}
@@ -1661,28 +1906,104 @@ export default function TerminalClient() {
                   ? "Console mode - commands are private"
                   : ""}
           </p>
+          {/* Reverse-i-search overlay */}
+          {reverseSearchMode && (
+            <div
+              className="mb-1 flex items-center gap-2 text-[12px]"
+              style={{ color: "var(--term-accent)" }}
+            >
+              <span className="font-bold">(reverse-i-search)`{reverseSearchQuery}`:</span>
+              {reverseSearchMatch ? (
+                <span>
+                  {reverseSearchMatch.command.slice(0, reverseSearchMatch.highlightIndex)}
+                  <span className="font-bold underline" style={{ color: "var(--term-text)" }}>
+                    {reverseSearchMatch.command.slice(
+                      reverseSearchMatch.highlightIndex,
+                      reverseSearchMatch.highlightIndex + reverseSearchMatch.matchLength
+                    )}
+                  </span>
+                  {reverseSearchMatch.command.slice(
+                    reverseSearchMatch.highlightIndex + reverseSearchMatch.matchLength
+                  )}
+                </span>
+              ) : (
+                <span style={{ color: "var(--term-muted)" }}>no matches</span>
+              )}
+              <span className="ml-auto text-[10px]" style={{ color: "var(--term-muted)" }}>
+                Ctrl+R: next · Enter: accept · Esc: cancel
+              </span>
+            </div>
+          )}
+
+          {/* Argument autocomplete dropdown */}
+          {argSuggestions.length > 1 && !reverseSearchMode && (
+            <div className="mb-1 flex flex-wrap gap-1">
+              {argSuggestions.slice(0, 6).map((s) => (
+                <button
+                  key={s.value}
+                  onClick={() => {
+                    const parts = input.slice(1).split(/\s+/);
+                    const cmd = parts[0];
+                    const args = parts.slice(1);
+                    const newInput =
+                      "/" + cmd + " " + args.slice(0, -1).concat(s.value).join(" ") + " ";
+                    setInput(newInput);
+                    setArgSuggestions([]);
+                    inputRef.current?.focus();
+                  }}
+                  className="px-1.5 py-0.5 text-[11px]"
+                  style={{ background: "var(--term-border)", color: "var(--term-accent)" }}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Command timing indicator */}
+          {lastCommandTime !== null && (
+            <div className="mb-1 text-[10px]" style={{ color: "var(--term-muted)" }}>
+              Last command: {lastCommandTime}ms
+            </div>
+          )}
+
           {input.startsWith("/") && input.length > 1 && !wizard && !pendingChoices && (
             <div className="mt-1 flex flex-wrap gap-1">
-              {COMMANDS.filter(
-                (c) =>
-                  c.name.startsWith(input.slice(1)) ||
-                  c.aliases?.some((a) => a.startsWith(input.slice(1)))
-              )
-                .slice(0, 5)
-                .map((c) => (
-                  <button
-                    key={c.name}
-                    onClick={async () => {
-                      setInput("");
-                      const ctx = buildHandlerContext();
-                      await dispatchCommand(c.name, [], ctx);
-                    }}
-                    className="px-1.5 py-0.5 text-[11px]"
-                    style={{ background: "var(--term-border)", color: "var(--term-accent)" }}
-                  >
-                    /{c.name}
-                  </button>
-                ))}
+              {(tabSuggestions.length > 0
+                ? tabSuggestions.map((s) => ({ name: s.name, description: s.description }))
+                : COMMANDS.filter(
+                    (c) =>
+                      c.name.startsWith(input.slice(1)) ||
+                      c.aliases?.some((a) => a.startsWith(input.slice(1)))
+                  )
+                    .slice(0, 5)
+                    .map((c) => ({ name: c.name, description: c.description }))
+              ).map((c, i) => (
+                <button
+                  key={c.name}
+                  onClick={async () => {
+                    setInput("");
+                    setTabSuggestions([]);
+                    setTabIndex(0);
+                    const ctx = buildHandlerContext();
+                    await dispatchCommand(c.name, [], ctx);
+                  }}
+                  className="px-1.5 py-0.5 text-[11px]"
+                  style={{
+                    background:
+                      i === tabIndex && tabSuggestions.length > 0
+                        ? "var(--term-accent)"
+                        : "var(--term-border)",
+                    color:
+                      i === tabIndex && tabSuggestions.length > 0
+                        ? "var(--term-bg)"
+                        : "var(--term-accent)",
+                  }}
+                  title={c.description}
+                >
+                  /{c.name}
+                </button>
+              ))}
             </div>
           )}
         </div>

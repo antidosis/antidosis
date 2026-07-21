@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 
 import { ArrowRight, ShieldCheck, Star, MessageSquare, ScrollText } from "lucide-react";
@@ -11,21 +12,55 @@ import { ParticleField } from "@/components/effects/particle-field";
 import { ScanLines } from "@/components/effects/scanlines";
 import { TerminalCursor } from "@/components/effects/terminal-cursor";
 import { LaunchCountdown, LaunchBanner } from "@/components/launch-countdown";
-import { Footer } from "@/components/layout/footer";
 import { Navbar } from "@/components/layout/navbar";
 import { TickerBanner } from "@/components/layout/ticker-banner";
 import { LiveBadge } from "@/components/live-badge";
-import { TerminalPreview } from "@/components/terminal-preview";
 import { Button } from "@/components/ui/button";
-import { ContractIllustration } from "@/components/visuals/contract-illustration";
-import { ExchangeIllustration } from "@/components/visuals/exchange-illustration";
-import { HandshakeIllustration } from "@/components/visuals/handshake-illustration";
-import { IdentityIllustration } from "@/components/visuals/identity-illustration";
-import { PostIllustration } from "@/components/visuals/post-illustration";
-import { ReceiveIllustration } from "@/components/visuals/receive-illustration";
-import { ReputationIllustration } from "@/components/visuals/reputation-illustration";
 import { useInView } from "@/hooks/use-in-view";
 import { cn } from "@/lib/utils";
+
+// Lazy-load below-the-fold components to reduce initial JS bundle
+const TerminalPreview = dynamic(() =>
+  import("@/components/terminal-preview").then((mod) => ({ default: mod.TerminalPreview }))
+);
+const Footer = dynamic(() =>
+  import("@/components/layout/footer").then((mod) => ({ default: mod.Footer }))
+);
+const ExchangeIllustration = dynamic(() =>
+  import("@/components/visuals/exchange-illustration").then((mod) => ({
+    default: mod.ExchangeIllustration,
+  }))
+);
+const ContractIllustration = dynamic(() =>
+  import("@/components/visuals/contract-illustration").then((mod) => ({
+    default: mod.ContractIllustration,
+  }))
+);
+const HandshakeIllustration = dynamic(() =>
+  import("@/components/visuals/handshake-illustration").then((mod) => ({
+    default: mod.HandshakeIllustration,
+  }))
+);
+const IdentityIllustration = dynamic(() =>
+  import("@/components/visuals/identity-illustration").then((mod) => ({
+    default: mod.IdentityIllustration,
+  }))
+);
+const PostIllustration = dynamic(() =>
+  import("@/components/visuals/post-illustration").then((mod) => ({
+    default: mod.PostIllustration,
+  }))
+);
+const ReceiveIllustration = dynamic(() =>
+  import("@/components/visuals/receive-illustration").then((mod) => ({
+    default: mod.ReceiveIllustration,
+  }))
+);
+const ReputationIllustration = dynamic(() =>
+  import("@/components/visuals/reputation-illustration").then((mod) => ({
+    default: mod.ReputationIllustration,
+  }))
+);
 
 function Reveal({
   children,
@@ -53,20 +88,18 @@ function Reveal({
 }
 
 export default function HomePage() {
-  const [booted, setBooted] = useState(false);
   const [hasBooted, setHasBooted] = useState(false);
 
   useEffect(() => {
     const bootedBefore = sessionStorage.getItem("antidosis-booted");
-    if (bootedBefore) {
+    const isMobile = window.matchMedia("(pointer: coarse)").matches;
+    if (bootedBefore || isMobile) {
       setHasBooted(true);
-      setBooted(true);
     }
   }, []);
 
   function handleBootComplete() {
     sessionStorage.setItem("antidosis-booted", "true");
-    setBooted(true);
   }
 
   return (
@@ -81,45 +114,39 @@ export default function HomePage() {
         <section className="relative pt-32 pb-24 md:pt-40 md:pb-32 overflow-hidden">
           <ParticleField />
           <div className="relative max-w-6xl mx-auto px-4 md:px-8">
-            <div
-              className={`transition-all duration-700 ${
-                booted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-              }`}
-            >
-              <div className="grid md:grid-cols-2 gap-12 items-center">
-                <div>
-                  <p className="text-xs text-[#7a6b5a] mb-8 font-mono">$ cat /etc/antidosis/motd</p>
-                  <h1 className="heading-display text-5xl md:text-7xl text-[#e8d5a3] mb-8">
-                    exchange
-                    <br />
-                    <span className="text-[#f5a623]">everything.</span>
-                    <TerminalCursor />
-                  </h1>
-                  <p className="text-base text-[#7a6b5a] max-w-md leading-relaxed mb-6">
-                    A marketplace for reciprocal exchange. Post what you need. Say what you&apos;ll
-                    give back. Connect with people you can trust.
-                  </p>
-                  <p className="text-sm text-[#7a6b5a]/70 max-w-md leading-relaxed mb-10">
-                    Contracts are optional — use them when you want binding terms, skip them when
-                    you don&apos;t. No middlemen. No hidden fees.
-                  </p>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <Button asChild size="lg">
-                      <Link href="/needs">Browse Needs</Link>
-                    </Button>
-                    <Button asChild variant="secondary" size="lg">
-                      <Link href="/needs/new">Post a Need</Link>
-                    </Button>
-                    <Button asChild variant="ghost" size="lg">
-                      <Link href="/how-it-works">
-                        How It Works <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </div>
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div>
+                <p className="text-xs text-[#8f7f6e] mb-8 font-mono">$ cat /etc/antidosis/motd</p>
+                <h1 className="heading-display text-5xl md:text-7xl text-[#e8d5a3] mb-8">
+                  exchange
+                  <br />
+                  <span className="text-[#f5a623]">everything.</span>
+                  <TerminalCursor />
+                </h1>
+                <p className="text-base text-[#8f7f6e] max-w-md leading-relaxed mb-6">
+                  A marketplace for reciprocal exchange. Post what you need. Say what you&apos;ll
+                  give back. Connect with people you can trust.
+                </p>
+                <p className="text-sm text-[#8f7f6e]/90 max-w-md leading-relaxed mb-10">
+                  Contracts are optional — use them when you want binding terms, skip them when you
+                  don&apos;t. No middlemen. No hidden fees.
+                </p>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Button asChild size="lg">
+                    <Link href="/needs">Browse Needs</Link>
+                  </Button>
+                  <Button asChild variant="secondary" size="lg">
+                    <Link href="/needs/new">Post a Need</Link>
+                  </Button>
+                  <Button asChild variant="ghost" size="lg">
+                    <Link href="/how-it-works">
+                      How It Works <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
                 </div>
-                <div className="hidden md:flex justify-center items-center">
-                  <ExchangeIllustration className="w-full max-w-[320px] text-[#e8d5a3] opacity-70" />
-                </div>
+              </div>
+              <div className="hidden md:flex justify-center items-center">
+                <ExchangeIllustration className="w-full max-w-[320px] text-[#e8d5a3] opacity-70" />
               </div>
             </div>
           </div>
@@ -135,7 +162,7 @@ export default function HomePage() {
         <section className="py-20 md:py-28 border-t border-[#2a2420]">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
-              <p className="text-xs text-[#7a6b5a] mb-12 font-mono">$ cat docs/quickstart.md</p>
+              <p className="text-xs text-[#8f7f6e] mb-12 font-mono">$ cat docs/quickstart.md</p>
             </Reveal>
             <div className="grid md:grid-cols-3 gap-8">
               <Reveal delay={0}>
@@ -178,7 +205,7 @@ export default function HomePage() {
         <section>
           <div className="max-w-6xl mx-auto px-4 md:px-8 py-12">
             <Reveal>
-              <p className="text-xs text-[#7a6b5a] mb-4 font-mono">$ ls features/</p>
+              <p className="text-xs text-[#8f7f6e] mb-4 font-mono">$ ls features/</p>
             </Reveal>
           </div>
 
@@ -194,7 +221,7 @@ export default function HomePage() {
                     <h3 className="heading-display text-xl md:text-2xl text-[#f5a623] mb-3">
                       Verified Identities
                     </h3>
-                    <p className="text-sm text-[#7a6b5a] leading-relaxed max-w-md">
+                    <p className="text-sm text-[#8f7f6e] leading-relaxed max-w-md">
                       Email verification, social proof, skill credentials. Know who you&apos;re
                       dealing with before you commit.
                     </p>
@@ -221,7 +248,7 @@ export default function HomePage() {
                     <h3 className="heading-display text-xl md:text-2xl text-[#00e5ff] mb-3">
                       Optional Contracts
                     </h3>
-                    <p className="text-sm text-[#7a6b5a] leading-relaxed max-w-md">
+                    <p className="text-sm text-[#8f7f6e] leading-relaxed max-w-md">
                       Use binding contracts for security, or exchange freely with a handshake
                       agreement. You choose what fits.
                     </p>
@@ -248,7 +275,7 @@ export default function HomePage() {
                     <h3 className="heading-display text-xl md:text-2xl text-[#b24bf5] mb-3">
                       Reputation Engine
                     </h3>
-                    <p className="text-sm text-[#7a6b5a] leading-relaxed max-w-md">
+                    <p className="text-sm text-[#8f7f6e] leading-relaxed max-w-md">
                       Bilateral 1-10 reviews with default excellence. Your history becomes your
                       passport. Every exchange builds trust.
                     </p>
@@ -275,7 +302,7 @@ export default function HomePage() {
                     <h3 className="heading-display text-xl md:text-2xl text-[#f5a623] mb-3">
                       Built-in Messaging
                     </h3>
-                    <p className="text-sm text-[#7a6b5a] leading-relaxed max-w-md">
+                    <p className="text-sm text-[#8f7f6e] leading-relaxed max-w-md">
                       Negotiate inside every exchange. DM anyone in the community Terminal. No
                       external apps needed. Full message history stays with the contract.
                     </p>
@@ -305,7 +332,7 @@ export default function HomePage() {
                       </h3>
                       <LiveBadge />
                     </div>
-                    <p className="text-sm text-[#7a6b5a] leading-relaxed max-w-md mb-4">
+                    <p className="text-sm text-[#8f7f6e] leading-relaxed max-w-md mb-4">
                       Join real-time channels like #general, #trades, and #help. Message anyone
                       directly with /dm. Get notified when someone mentions you. The community lives
                       here.
@@ -333,7 +360,7 @@ export default function HomePage() {
         <section className="py-20 md:py-28 border-t border-[#2a2420]">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
-              <p className="text-xs text-[#7a6b5a] mb-8 font-mono">$ cat docs/pillars.md</p>
+              <p className="text-xs text-[#8f7f6e] mb-8 font-mono">$ cat docs/pillars.md</p>
               <h2 className="heading-display text-3xl md:text-4xl text-[#e8d5a3] mb-12">
                 Built for <span className="text-[#00e676]">Trust.</span>
               </h2>
@@ -381,13 +408,13 @@ export default function HomePage() {
         <section className="py-20 md:py-28 border-t border-[#2a2420]">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
-              <p className="text-xs text-[#7a6b5a] mb-8 font-mono">$ ./join_network.sh</p>
+              <p className="text-xs text-[#8f7f6e] mb-8 font-mono">$ ./join_network.sh</p>
               <h2 className="heading-display text-3xl md:text-5xl text-[#e8d5a3] mb-6">
                 Start Building
                 <br />
                 <span className="text-[#f5a623]">Your Reputation.</span>
               </h2>
-              <p className="text-base text-[#7a6b5a] max-w-md mb-10 leading-relaxed">
+              <p className="text-base text-[#8f7f6e] max-w-md mb-10 leading-relaxed">
                 Join the Central Coast trial. Verify your identity, get Pro for free, and help shape
                 the future of exchange.
               </p>
@@ -399,8 +426,8 @@ export default function HomePage() {
                   <Link href="/needs">Browse Needs</Link>
                 </Button>
                 <Button asChild variant="ghost" size="lg">
-                  <Link href="/demo/contract-flow">
-                    Try Contract Demo <ArrowRight className="ml-2 h-4 w-4" />
+                  <Link href="/demo">
+                    Try Demo <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
               </div>
@@ -428,11 +455,11 @@ function StepCard({
   return (
     <div className="bg-[#12100e] border border-[#2a2420] p-8 hover:border-[#f5a623]/30 transition-colors group">
       <div className="flex items-center justify-between mb-6">
-        <span className="text-4xl font-bold text-[#7a6b5a]">{num}</span>
+        <span className="text-4xl font-bold text-[#8f7f6e]">{num}</span>
         {illustration}
       </div>
       <h3 className="heading-display text-xl md:text-2xl mb-3">{title}</h3>
-      <p className="text-sm text-[#7a6b5a] leading-relaxed">{desc}</p>
+      <p className="text-sm text-[#8f7f6e] leading-relaxed">{desc}</p>
     </div>
   );
 }
@@ -460,7 +487,7 @@ function PillarCard({
         <Icon className="h-5 w-5" style={{ color }} />
       </div>
       <p className="text-sm font-medium text-[#e8d5a3] mb-1">{title}</p>
-      <p className="text-xs text-[#7a6b5a]">{desc}</p>
+      <p className="text-xs text-[#8f7f6e]">{desc}</p>
     </div>
   );
 }

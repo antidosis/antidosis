@@ -116,6 +116,7 @@ export interface NeedPoster {
   jobsCompleted: number;
   skills: Skill[];
   socialLinks: SocialLink[];
+  credentials?: Credential[];
 }
 
 export interface NeedSkill {
@@ -195,25 +196,6 @@ export interface NeedDetailResponse {
 export interface NotificationsResponse {
   notifications: Notification[];
   unreadCount: number;
-}
-
-export interface CreateNeedInput {
-  title: string;
-  description: string;
-  needCategory?: string | null;
-  offerType: "service" | "item" | "money";
-  offerDescription: string;
-  offerValue?: number | null;
-  isLocal?: boolean;
-  locationName?: string;
-  latitude?: number | null;
-  longitude?: number | null;
-  deadline?: string | null;
-  timeRange?: string | null;
-  requiredSkills?: string[];
-  images?: string[];
-  offerImages?: string[];
-  requiresContract?: boolean;
 }
 
 // ── Terminal Chat ────────────────────────────────────────────────────
@@ -400,14 +382,11 @@ export interface ContractDetail {
 
 export interface PublicProfile {
   id: string;
-  userId: string;
-  email: string;
   fullName: string | null;
   bio: string | null;
   avatarUrl: string | null;
   locationName: string | null;
   publicPhone: string | null;
-  mobile: string | null;
   mobileVerified: boolean;
   isVerified: boolean;
   isPro: boolean;
@@ -421,6 +400,7 @@ export interface PublicProfile {
   needsPosted: {
     id: string;
     title: string;
+    description: string | null;
     status: string;
     offerType: string;
     createdAt: string;
@@ -432,20 +412,6 @@ export interface PublicProfile {
     giver: { id: string; fullName: string | null; avatarUrl: string | null };
     createdAt: string;
   }[];
-}
-
-export interface UpdateProfileInput {
-  fullName?: string | null;
-  bio?: string | null;
-  avatarUrl?: string | null;
-  locationName?: string | null;
-  latitude?: number | null;
-  longitude?: number | null;
-  showInDirectory?: boolean | null;
-  publicPhone?: string | null;
-  privatePhone?: string | null;
-  mobile?: string | null;
-  socialLinks?: { platform: string; url: string; isPublic?: boolean }[];
 }
 
 // ── Reviews ──────────────────────────────────────────────────────────

@@ -1,5 +1,6 @@
 import { Home, ClipboardList, Terminal, Search, User } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { hapticImpact } from "@mobile/lib/native";
 
 const tabs = [
   { path: "/home", label: "Home", icon: Home },
@@ -23,7 +24,10 @@ export function BottomTabs() {
           return (
             <button
               key={tab.path}
-              onClick={() => navigate(tab.path)}
+              onClick={() => {
+                hapticImpact("light");
+                navigate(tab.path);
+              }}
               className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full tap-highlight-none touch-manipulation"
               aria-label={tab.label}
             >

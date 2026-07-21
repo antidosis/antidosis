@@ -51,3 +51,9 @@ supabase/.temp
 supabase/.env
 
 .vercel
+
+# Coverage artifacts
+coverage/
+coverage*.json
+coverage*.txt
+crypto-test.ts

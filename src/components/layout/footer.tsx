@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 const linkGroups = [
@@ -8,7 +9,7 @@ const linkGroups = [
       { href: "/needs/new", label: "Post a Need", external: false },
       { href: "/how-it-works", label: "How It Works", external: false },
       { href: "/examples", label: "Examples", external: false },
-      { href: "/demo/contract-flow", label: "Contract Demo", external: false },
+      { href: "/demo", label: "Demo", external: false },
       { href: "/blog", label: "Blog", external: false },
     ],
   },
@@ -44,44 +45,44 @@ export function Footer() {
             {/* Brand column */}
             <div className="col-span-2 md:col-span-4">
               <Link href="/" className="inline-block mb-5">
-                <img
+                <Image
                   src="/images/logo.png"
                   alt="antidosis"
-                  width={280}
-                  height={96}
-                  className="h-20 w-auto opacity-80 hover:opacity-100 transition-opacity"
+                  width={197}
+                  height={80}
+                  className="opacity-80 hover:opacity-100 transition-opacity"
                 />
               </Link>
-              <p className="text-sm text-[#7a6b5a] leading-relaxed max-w-xs mb-6">
+              <p className="text-sm text-[#8f7f6e] leading-relaxed max-w-xs mb-6">
                 A marketplace for reciprocal exchange. Post what you need. Offer what you have.
                 Build trust through every transaction.
               </p>
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-[#00e676] animate-pulse" />
-                <span className="text-xs text-[#7a6b5a]">Central Coast NSW trial active</span>
+                <span className="text-xs text-[#8f7f6e]">Central Coast NSW trial active</span>
               </div>
             </div>
 
             {/* Link columns */}
             {linkGroups.map((group) => (
               <div key={group.title} className="md:col-span-2">
-                <h4 className="text-xs font-medium text-[#e8d5a3] uppercase tracking-wider mb-4">
+                <h2 className="text-xs font-medium text-[#e8d5a3] uppercase tracking-wider mb-4">
                   {group.title}
-                </h4>
+                </h2>
                 <ul className="space-y-2.5">
                   {group.links.map((link) => (
                     <li key={link.label}>
                       {link.external ? (
                         <a
                           href={link.href}
-                          className="text-sm text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors"
+                          className="text-sm text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
                         >
                           {link.label}
                         </a>
                       ) : (
                         <Link
                           href={link.href}
-                          className="text-sm text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors"
+                          className="text-sm text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
                         >
                           {link.label}
                         </Link>
@@ -97,8 +98,8 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="border-t border-[#2a2420] py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-xs text-[#7a6b5a]">&copy; {year} Antidosis. All rights reserved.</p>
-            <p className="text-xs text-[#7a6b5a]">
+            <p className="text-xs text-[#8f7f6e]">&copy; {year} Antidosis. All rights reserved.</p>
+            <p className="text-xs text-[#8f7f6e]">
               Crafted with intention on the Central Coast, NSW.
             </p>
           </div>

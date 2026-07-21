@@ -10,7 +10,18 @@ export default defineConfig({
     include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
     coverage: {
       reporter: ["text", "json", "html"],
-      exclude: ["node_modules/", "src/**/*.test.ts", "src/**/*.test.tsx", "mobile/"],
+      include: ["src/**/*"],
+      exclude: [
+        "node_modules/",
+        "src/**/*.test.ts",
+        "src/**/*.test.tsx",
+        "mobile/",
+        "scripts/",
+        "tests/",
+        ".next/",
+        "**/*.config.*",
+        "**/*.d.ts",
+      ],
     },
   },
   resolve: {

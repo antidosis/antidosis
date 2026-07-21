@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "959295548320",
+    "project_id": "antidosis-fea39",
+    "storage_bucket": "antidosis-fea39.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:959295548320:android:c7acfccec92fd6670c12c5",
+        "android_client_info": {
+          "package_name": "com.antidosis.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDpHLbjNLEyaZRgvy1p5X6tbWuenhn9Jpc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -76,7 +76,7 @@ export const GET = withApiHandler(async (req: NextRequest) => {
   const threadId = req.nextUrl.searchParams.get("threadId");
   const otherUserId = req.nextUrl.searchParams.get("userId");
 
-  let thread: { id: string } | null = null;
+  let thread: { id: string; userAId?: string; userBId?: string } | null = null;
 
   if (threadId) {
     thread = await prisma.directMessageThread.findFirst({
@@ -84,8 +84,22 @@ export const GET = withApiHandler(async (req: NextRequest) => {
         id: threadId,
         OR: [{ userAId: profile.id }, { userBId: profile.id }],
       },
-      select: { id: true },
+      select: { id: true, userAId: true, userBId: true },
     });
+    if (thread) {
+      const otherUserId = thread.userAId === profile.id ? thread.userBId : thread.userAId;
+      const isBlocked = await prisma.block.findFirst({
+        where: {
+          OR: [
+            { blockerId: profile.id, blockedId: otherUserId },
+            { blockerId: otherUserId, blockedId: profile.id },
+          ],
+        },
+      });
+      if (isBlocked) {
+        return NextResponse.json({ error: "You cannot access this thread" }, { status: 403 });
+      }
+    }
   } else if (otherUserId) {
     // Check for blocks before creating a thread
     const isBlocked = await prisma.block.findFirst({

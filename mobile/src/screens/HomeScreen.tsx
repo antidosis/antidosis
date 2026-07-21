@@ -104,7 +104,7 @@ export function HomeScreen() {
     return (
       <>
         <BootSequence onComplete={() => setBootDone(true)} />
-        <div className="min-h-full pb-6 px-4 pt-8 space-y-4">
+        <div className="min-h-full pb-6 px-4 pt-8 safe-top space-y-4">
           <Skeleton className="h-6 w-1/2 mb-2" />
           <Skeleton className="h-10 w-3/4 mb-6" />
           <Skeleton className="h-32 w-full mb-4" />
@@ -121,7 +121,7 @@ export function HomeScreen() {
   }
 
   return (
-    <div className="min-h-full pb-6">
+    <div className="min-h-full pb-6 safe-top">
       {/* ═══════════════════════════════════════════════════════
          HERO SECTION
          ═══════════════════════════════════════════════════════ */}

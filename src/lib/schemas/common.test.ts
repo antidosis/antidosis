@@ -132,8 +132,53 @@ describe("attachmentSchema", () => {
     expect(result.success).toBe(true);
   });
 
+  it("accepts HTTP URL", () => {
+    const result = attachmentSchema.safeParse({
+      url: "http://example.com/file.pdf",
+      type: "application/pdf",
+      name: "document.pdf",
+    });
+    expect(result.success).toBe(true);
+  });
+
   it("rejects missing fields", () => {
     const result = attachmentSchema.safeParse({ url: "https://example.com/file.pdf" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects javascript: URL", () => {
+    const result = attachmentSchema.safeParse({
+      url: "javascript:alert(1)",
+      type: "application/pdf",
+      name: "evil.pdf",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects data: URL", () => {
+    const result = attachmentSchema.safeParse({
+      url: "data:text/html,<script>alert(1)</script>",
+      type: "application/pdf",
+      name: "evil.pdf",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects ftp: URL", () => {
+    const result = attachmentSchema.safeParse({
+      url: "ftp://example.com/file.pdf",
+      type: "application/pdf",
+      name: "evil.pdf",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects invalid URL string", () => {
+    const result = attachmentSchema.safeParse({
+      url: "not-a-url",
+      type: "application/pdf",
+      name: "bad.pdf",
+    });
     expect(result.success).toBe(false);
   });
 });

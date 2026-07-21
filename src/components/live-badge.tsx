@@ -4,21 +4,31 @@ import { useState, useEffect } from "react";
 
 import { Users } from "lucide-react";
 
+import { createClient } from "@/lib/supabase/client";
+
 export function LiveBadge({ className = "" }: { className?: string }) {
   const [count, setCount] = useState<number | null>(null);
+  const supabase = createClient();
 
   useEffect(() => {
-    fetch("/api/v1/terminal/presence")
-      .then((r) => r.json())
-      .then((data) => {
-        if (typeof data.count === "number") {
-          setCount(data.count);
-        } else if (Array.isArray(data.users)) {
-          setCount(data.users.length);
-        }
-      })
-      .catch(() => {});
-  }, []);
+    async function fetchPresence() {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) return;
+      fetch("/api/v1/terminal/presence")
+        .then((r) => r.json())
+        .then((data) => {
+          if (typeof data.count === "number") {
+            setCount(data.count);
+          } else if (Array.isArray(data.users)) {
+            setCount(data.users.length);
+          }
+        })
+        .catch(() => {});
+    }
+    fetchPresence();
+  }, [supabase]);
 
   if (count === null) return null;
 

@@ -216,7 +216,13 @@ export function NeedsScreen() {
         </div>
 
         {hasMore && (
-          <Button variant="secondary" className="w-full" onClick={loadMore} disabled={isValidating}>
+          <Button
+            variant="secondary"
+            className="w-full"
+            onClick={loadMore}
+            disabled={isValidating}
+            haptic={false}
+          >
             {isValidating ? (
               <>
                 <span className="w-3 h-3 rounded-full border border-[var(--bronze)] border-t-[var(--sun)] animate-spin" />
@@ -238,7 +244,7 @@ export function NeedsScreen() {
           tap("medium");
           navigate("/needs/new");
         }}
-        className="fixed bottom-20 right-4 w-12 h-12 rounded-full bg-[var(--sun)] text-[var(--void)] flex items-center justify-center shadow-[0_0_20px_rgba(245,166,35,0.3)] tap-highlight-none active:scale-90 transition-transform z-40"
+        className="fixed bottom-24 right-4 w-12 h-12 rounded-full bg-[var(--sun)] text-[var(--void)] flex items-center justify-center shadow-[0_0_20px_rgba(245,166,35,0.3)] tap-highlight-none active:scale-90 transition-transform z-40"
         aria-label="Post new need"
       >
         <Plus size={20} strokeWidth={2.5} />
@@ -362,12 +368,22 @@ function NeedCard({
               </span>
             )}
           </div>
-          {need.locationName && (
-            <div className="flex items-center gap-1 text-[var(--leather)]">
-              <MapPin size={10} />
-              <span className="font-mono text-[10px]">{need.locationName}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            {need.offerValue && need.offerValue > 0 && (
+              <span className="font-mono text-[10px] text-[var(--gold)]">${need.offerValue}</span>
+            )}
+            {need._count && need._count.acceptances > 0 && (
+              <span className="font-mono text-[10px] text-[var(--leather)]">
+                {need._count.acceptances} interested
+              </span>
+            )}
+            {need.locationName && (
+              <div className="flex items-center gap-1 text-[var(--leather)]">
+                <MapPin size={10} />
+                <span className="font-mono text-[10px]">{need.locationName}</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </Vessel>

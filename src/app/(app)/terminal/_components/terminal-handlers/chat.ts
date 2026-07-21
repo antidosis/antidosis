@@ -3,7 +3,20 @@
 import type { HandlerContext, HandlerResult } from "./types";
 
 export async function handleChat(ctx: HandlerContext): Promise<HandlerResult> {
-  const channelName = ctx.args.join(" ") || "general";
+  const channelName = ctx.args.join(" ") || "";
+  if (!channelName) {
+    if (ctx.channels.length === 0) {
+      ctx.addSys("No channels available.", "info");
+      return { handled: true };
+    }
+    const list = ctx.channels.map((c: any) => `  #${c.name}`).join("\n");
+    ctx.addSys(
+      `Available channels:\n${list}\n\n` +
+        `💡 Type /chat <channel-name> to join one, or click it in the sidebar.`,
+      "info"
+    );
+    return { handled: true };
+  }
   const channel = ctx.channels.find(
     (c: any) => c.name?.toLowerCase() === channelName.toLowerCase()
   );
@@ -11,7 +24,18 @@ export async function handleChat(ctx: HandlerContext): Promise<HandlerResult> {
     ctx.setActiveContext({ type: "channel", id: channel.id, name: channel.name });
     ctx.addSys(`Switched to #${channel.name}`, "success");
   } else {
-    ctx.addSys(`Channel "${channelName}" not found.`, "error");
+    const closest = ctx.channels
+      .map((c: any) => ({
+        name: c.name,
+        score: c.name.toLowerCase().includes(channelName.toLowerCase()) ? 1 : 0,
+      }))
+      .sort((a: any, b: any) => b.score - a.score)[0];
+    ctx.addSys(
+      `Channel "${channelName}" not found.` +
+        (closest ? ` Did you mean #${closest.name}?` : "") +
+        `\n💡 Use /chat with no argument to see available channels.`,
+      "error"
+    );
   }
   return { handled: true };
 }
@@ -20,7 +44,28 @@ export async function handleDm(ctx: HandlerContext): Promise<HandlerResult> {
   const recipient = ctx.args[0];
   const message = ctx.args.slice(1).join(" ");
   if (!recipient) {
-    ctx.addSys("Usage: /dm <name-or-id> [message]", "info");
+    const lastUser = ctx.session.lastViewed?.userId;
+    if (lastUser) {
+      // Re-open last DM
+      const thread = ctx.dmThreads.find((t: any) => t.otherUser.id === lastUser);
+      if (thread) {
+        ctx.setActiveContext({
+          type: "dm",
+          threadId: thread.id,
+          otherUserId: thread.otherUser.id,
+          otherUserName: thread.otherUser.fullName || "User",
+        });
+        ctx.addSys(`📎 Re-opened DM with ${thread.otherUser.fullName || "User"}.`, "success");
+        return { handled: true };
+      }
+    }
+    const online = ctx.onlineUsers.slice(0, 5);
+    let hint = `Usage: /dm <name-or-id> [message]\n\n`;
+    if (online.length > 0) {
+      hint += `Online now:\n${online.map((u: any) => `  ${u.fullName || u.id}`).join("\n")}\n\n`;
+    }
+    hint += `💡 Type /dm <name> to start a conversation, or click a user in the sidebar.`;
+    ctx.addSys(hint, "info");
     return { handled: true };
   }
   if (message.length > 2000) {

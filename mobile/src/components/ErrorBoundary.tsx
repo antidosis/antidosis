@@ -1,6 +1,7 @@
 import { Component, type ReactNode } from "react";
 import { RotateCcw, AlertTriangle } from "lucide-react";
 import { hapticImpact } from "@mobile/lib/native";
+import { recordException } from "@mobile/lib/crash-reporter";
 
 /* ═══════════════════════════════════════════════════════════════
    ERROR BOUNDARY — Graceful crash recovery
@@ -27,8 +28,8 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  componentDidCatch(_error: Error, _errorInfo: React.ErrorInfo) {
-    /* errors are handled by the UI; no production logging */
+  componentDidCatch(error: Error, _errorInfo: React.ErrorInfo) {
+    recordException(error);
   }
 
   render() {

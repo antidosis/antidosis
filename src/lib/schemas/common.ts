@@ -17,7 +17,12 @@ export const coordinatesSchema = z.object({
 });
 
 export const attachmentSchema = z.object({
-  url: z.string(),
+  url: z
+    .string()
+    .url()
+    .refine((u) => u.startsWith("http://") || u.startsWith("https://"), {
+      message: "Attachment URL must be http or https",
+    }),
   type: z.string(),
   name: z.string(),
 });

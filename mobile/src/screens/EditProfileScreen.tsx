@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useProfile, useUpdateProfile, useAddSkill, useRemoveSkill } from "@mobile/hooks/useApi";
-import { ArrowLeft, Save, Plus, X, Globe, Award } from "lucide-react";
+import { useCamera } from "@mobile/hooks/useNative";
+import { uploadFile } from "@mobile/lib/api";
 import { hapticImpact } from "@mobile/lib/native";
-import { Input, Textarea, Button, Badge, Vessel } from "@mobile/components/ui";
+import { ArrowLeft, Save, Plus, X, Globe, Award, Camera, ImagePlus } from "lucide-react";
+import { Input, Textarea, Button, Badge, Vessel, Avatar } from "@mobile/components/ui";
 
 /* ═══════════════════════════════════════════════════════════════
    EDIT PROFILE SCREEN — Terminal Form (v2)
@@ -22,7 +24,11 @@ export function EditProfileScreen() {
     bio: "",
     locationName: "",
     publicPhone: "",
+    avatarUrl: "",
+    mobile: "",
+    showInDirectory: false,
   });
+  const [avatarUploading, setAvatarUploading] = useState(false);
   const [skillInput, setSkillInput] = useState("");
   const [linkPlatform, setLinkPlatform] = useState("");
   const [linkUrl, setLinkUrl] = useState("");
@@ -36,6 +42,9 @@ export function EditProfileScreen() {
         bio: profile.bio ?? "",
         locationName: profile.locationName ?? "",
         publicPhone: profile.publicPhone ?? "",
+        avatarUrl: profile.avatarUrl ?? "",
+        mobile: profile.mobile ?? "",
+        showInDirectory: profile.showInDirectory ?? false,
       });
     }
   }, [profile]);
@@ -52,10 +61,39 @@ export function EditProfileScreen() {
         bio: form.bio.trim() || null,
         locationName: form.locationName.trim() || null,
         publicPhone: form.publicPhone.trim() || null,
+        avatarUrl: form.avatarUrl.trim() || null,
+        mobile: form.mobile.trim() || null,
+        showInDirectory: form.showInDirectory,
+        socialLinks: profile?.socialLinks ?? [],
       });
       navigate("/profile");
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Failed to save profile");
+    }
+  };
+
+  const { takePhoto, pickPhotos } = useCamera();
+
+  const handleAvatarUpload = async (source: "camera" | "gallery") => {
+    hapticImpact("medium");
+    const photo = source === "camera" ? await takePhoto() : await pickPhotos();
+    if (!photo?.base64String) return;
+
+    setAvatarUploading(true);
+    try {
+      const byteChars = atob(photo.base64String);
+      const byteNumbers = new Array(byteChars.length);
+      for (let i = 0; i < byteChars.length; i++) {
+        byteNumbers[i] = byteChars.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: `image/${photo.format}` });
+      const result = await uploadFile(blob, "avatars");
+      setForm((f) => ({ ...f, avatarUrl: result.url }));
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "Failed to upload avatar");
+    } finally {
+      setAvatarUploading(false);
     }
   };
 
@@ -72,11 +110,11 @@ export function EditProfileScreen() {
     }
   };
 
-  const handleRemoveSkill = async (skillId: string) => {
+  const handleRemoveSkill = async (name: string) => {
     hapticImpact("light");
     setActionError(null);
     try {
-      await removeSkill(skillId);
+      await removeSkill(name);
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "Failed to remove skill");
     }
@@ -162,6 +200,37 @@ export function EditProfileScreen() {
           <p className="font-mono text-xs text-[var(--leather)] uppercase tracking-wider mb-3">
             Basic Info
           </p>
+
+          {/* Avatar */}
+          <div className="flex items-center gap-4 mb-4">
+            <Avatar
+              src={form.avatarUrl || profile?.avatarUrl}
+              alt={form.fullName || "User"}
+              size="xl"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleAvatarUpload("camera")}
+                disabled={avatarUploading}
+                className="px-3 py-2 rounded-md bg-[var(--void-raised)] border border-[var(--bronze)] text-[var(--leather)] text-xs font-mono flex items-center gap-1.5 tap-highlight-none active:scale-95 transition-transform disabled:opacity-50"
+              >
+                <Camera size={14} />
+                Camera
+              </button>
+              <button
+                onClick={() => handleAvatarUpload("gallery")}
+                disabled={avatarUploading}
+                className="px-3 py-2 rounded-md bg-[var(--void-raised)] border border-[var(--bronze)] text-[var(--leather)] text-xs font-mono flex items-center gap-1.5 tap-highlight-none active:scale-95 transition-transform disabled:opacity-50"
+              >
+                <ImagePlus size={14} />
+                Gallery
+              </button>
+            </div>
+          </div>
+          {avatarUploading && (
+            <p className="font-mono text-[10px] text-[var(--sun)] mb-3">Uploading avatar...</p>
+          )}
+
           <div className="space-y-3">
             <Input
               label="Full Name"
@@ -189,6 +258,36 @@ export function EditProfileScreen() {
               onChange={(e) => handleChange("publicPhone", e.target.value)}
               placeholder="04XX XXX XXX"
             />
+            <Input
+              label="Mobile"
+              type="tel"
+              value={form.mobile}
+              onChange={(e) => handleChange("mobile", e.target.value)}
+              placeholder="04XX XXX XXX"
+            />
+            <button
+              type="button"
+              onClick={() => setForm((f) => ({ ...f, showInDirectory: !f.showInDirectory }))}
+              className="w-full flex items-center justify-between p-3 rounded-md bg-[var(--void-raised)] border border-[var(--bronze)]/30 tap-highlight-none"
+            >
+              <div className="text-left">
+                <p className="text-xs font-medium text-[var(--mercury)]">Show in Pro Directory</p>
+                <p className="text-[10px] text-[var(--leather)]">
+                  Appear in the public pros directory
+                </p>
+              </div>
+              <div
+                className={`w-10 h-6 rounded-full relative transition-colors ${
+                  form.showInDirectory ? "bg-[var(--sun)]" : "bg-[var(--bronze)]"
+                }`}
+              >
+                <div
+                  className={`absolute top-1 w-4 h-4 rounded-full bg-[var(--void)] transition-transform ${
+                    form.showInDirectory ? "translate-x-5" : "translate-x-1"
+                  }`}
+                />
+              </div>
+            </button>
           </div>
         </Vessel>
 
@@ -235,7 +334,7 @@ export function EditProfileScreen() {
                   {skill.name}
                   <button
                     aria-label={`Remove skill ${skill.name}`}
-                    onClick={() => handleRemoveSkill(skill.id)}
+                    onClick={() => handleRemoveSkill(skill.name)}
                     className="ml-0.5 text-[var(--leather)] hover:text-[var(--ruby)]"
                   >
                     <X size={12} />

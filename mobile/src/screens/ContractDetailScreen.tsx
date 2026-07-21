@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { mutate as swrMutate } from "swr";
 import {
   useContract,
   useSignContract,
@@ -13,6 +14,7 @@ import {
   useRemindSign,
   useGenerateContractPdf,
   useSendContractMessage,
+  useUpdateContract,
 } from "@mobile/hooks/useApi";
 import { useHaptics } from "@mobile/hooks/useNative";
 import {
@@ -72,9 +74,14 @@ export function ContractDetailScreen() {
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [rating, setRating] = useState(10);
   const [reviewComment, setReviewComment] = useState("");
+  const [privateFeedback, setPrivateFeedback] = useState("");
 
   // Message input
   const [messageInput, setMessageInput] = useState("");
+
+  // Terms negotiation state
+  const [myTerms, setMyTerms] = useState("");
+  const [useMessageTerms, setUseMessageTerms] = useState(false);
 
   const { trigger: cancel, isMutating: cancelling } = useCancelContract();
   const { trigger: requestCancel, isMutating: requestingCancel } = useRequestContractCancel();
@@ -84,6 +91,7 @@ export function ContractDetailScreen() {
   const { trigger: remind, isMutating: reminding } = useRemindSign();
   const { trigger: generatePdf, isMutating: generatingPdf } = useGenerateContractPdf();
   const { trigger: sendMsg, isMutating: sendingMsg } = useSendContractMessage();
+  const { trigger: updateContract, isMutating: updatingContract } = useUpdateContract();
 
   const contract = data?.contract;
 
@@ -247,10 +255,12 @@ export function ContractDetailScreen() {
         receiverId,
         rating,
         comment: reviewComment.trim(),
+        privateFeedback: privateFeedback.trim() || undefined,
       });
       setShowReviewForm(false);
       setRating(10);
       setReviewComment("");
+      setPrivateFeedback("");
       success();
     } catch (e) {
       setActionError(e instanceof Error ? e.message : "Failed to submit review");
@@ -267,6 +277,62 @@ export function ContractDetailScreen() {
       setMessageInput("");
     } catch (e) {
       setActionError(e instanceof Error ? e.message : "Failed to send message");
+      hapticError();
+    }
+  };
+
+  const handleSaveTerms = async () => {
+    if (!id || !contract) return;
+    tap("medium");
+    setActionError("");
+    try {
+      const data = isPartyA
+        ? {
+            partyATerms: useMessageTerms ? null : myTerms.trim(),
+            partyAUseMessageTerms: useMessageTerms,
+          }
+        : {
+            partyBTerms: useMessageTerms ? null : myTerms.trim(),
+            partyBUseMessageTerms: useMessageTerms,
+          };
+      await updateContract({ id, data });
+      success();
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : "Failed to save terms");
+      hapticError();
+    }
+  };
+
+  const handleSubmitTerms = async () => {
+    if (!id || !contract) return;
+    tap("medium");
+    setActionError("");
+    try {
+      await updateContract({ id, data: { submitTerms: true } });
+      success();
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : "Failed to submit terms");
+      hapticError();
+    }
+  };
+
+  const handleAgree = async () => {
+    if (!id || !contract) return;
+    tap("medium");
+    setActionError("");
+    try {
+      await updateContract({
+        id,
+        data: { agree: true, updatedAt: contract.updatedAt },
+      });
+      success();
+    } catch (e) {
+      if (e instanceof Error && e.message.includes("409")) {
+        setActionError("Terms changed. Refreshing...");
+        swrMutate(["contract", id]);
+      } else {
+        setActionError(e instanceof Error ? e.message : "Failed to agree");
+      }
       hapticError();
     }
   };
@@ -528,7 +594,12 @@ export function ContractDetailScreen() {
                   <p className="text-xs text-[#8a7050]">
                     Terms are locked. Generate the contract document to proceed.
                   </p>
-                  <Button size="sm" onClick={handleGeneratePdf} disabled={generatingPdf}>
+                  <Button
+                    size="sm"
+                    onClick={handleGeneratePdf}
+                    disabled={generatingPdf}
+                    haptic={false}
+                  >
                     {generatingPdf ? "Generating..." : "Generate Contract PDF"}
                   </Button>
                 </div>
@@ -675,8 +746,15 @@ export function ContractDetailScreen() {
                   <textarea
                     value={reviewComment}
                     onChange={(e) => setReviewComment(e.target.value)}
-                    placeholder="Your review (optional)..."
+                    placeholder="What went well? (optional)"
                     rows={3}
+                    className="w-full px-3 py-2 bg-[#f5e6c8] border border-[#d4b896] text-[#2c1810] font-contract text-sm placeholder:text-[#8a7050] rounded-sm focus:outline-none focus:border-[#1a0f08] mb-3 resize-none"
+                  />
+                  <textarea
+                    value={privateFeedback}
+                    onChange={(e) => setPrivateFeedback(e.target.value)}
+                    placeholder="Private feedback — only visible to moderators (optional)"
+                    rows={2}
                     className="w-full px-3 py-2 bg-[#f5e6c8] border border-[#d4b896] text-[#2c1810] font-contract text-sm placeholder:text-[#8a7050] rounded-sm focus:outline-none focus:border-[#1a0f08] mb-3 resize-none"
                   />
                   <div className="flex gap-2">
@@ -689,7 +767,9 @@ export function ContractDetailScreen() {
                         setShowReviewForm(false);
                         setRating(10);
                         setReviewComment("");
+                        setPrivateFeedback("");
                       }}
+                      haptic={false}
                     >
                       Cancel
                     </Button>
@@ -698,6 +778,7 @@ export function ContractDetailScreen() {
                       className="flex-1"
                       onClick={handleSubmitReview}
                       disabled={submittingReview}
+                      haptic={false}
                     >
                       {submittingReview ? "Submitting..." : "Submit Review"}
                     </Button>
@@ -715,6 +796,7 @@ export function ContractDetailScreen() {
                       tap("medium");
                       setShowReviewForm(true);
                     }}
+                    haptic={false}
                   >
                     <Star size={16} />
                     Leave a Review
@@ -796,6 +878,7 @@ export function ContractDetailScreen() {
                       tap("light");
                       setShowRespondForm(true);
                     }}
+                    haptic={false}
                   >
                     Respond to Request
                   </Button>
@@ -864,6 +947,7 @@ export function ContractDetailScreen() {
                     setShowSignForm(false);
                     setSignature("");
                   }}
+                  haptic={false}
                 >
                   Cancel
                 </Button>
@@ -872,6 +956,7 @@ export function ContractDetailScreen() {
                   className="flex-1"
                   onClick={handleSign}
                   disabled={!signatureValid || signing}
+                  haptic={false}
                 >
                   {signing ? "Signing..." : "Sign Contract"}
                 </Button>
@@ -902,6 +987,7 @@ export function ContractDetailScreen() {
                     setShowCancelForm(false);
                     setCancelReason("");
                   }}
+                  haptic={false}
                 >
                   Back
                 </Button>
@@ -910,6 +996,7 @@ export function ContractDetailScreen() {
                   className="flex-1 bg-[#c41e1e] hover:bg-[#a31818]"
                   onClick={canSign ? handleCancel : handleRequestCancel}
                   disabled={(!canSign && !cancelReason.trim()) || cancelling || requestingCancel}
+                  haptic={false}
                 >
                   {cancelling || requestingCancel
                     ? "Processing..."
@@ -980,6 +1067,7 @@ export function ContractDetailScreen() {
                     setRespondAgree(null);
                     setRespondText("");
                   }}
+                  haptic={false}
                 >
                   Back
                 </Button>
@@ -988,6 +1076,7 @@ export function ContractDetailScreen() {
                   className="flex-1"
                   onClick={handleRespondCancel}
                   disabled={respondAgree === null || respondingCancel}
+                  haptic={false}
                 >
                   {respondingCancel ? "Submitting..." : "Submit Response"}
                 </Button>
@@ -998,13 +1087,136 @@ export function ContractDetailScreen() {
           {/* Actions */}
           {!showSignForm && !showCancelForm && !showRespondForm && (
             <div className="flex flex-wrap gap-2">
-              {/* Waiting for terms lock */}
+              {/* Terms Negotiation */}
               {(contract.status === "draft" || contract.status === "pending_terms") &&
                 !termsLocked && (
-                  <div className="w-full p-3 rounded-md bg-[#8a7050]/10 border border-[#8a7050]/30 text-center">
-                    <p className="font-mono text-xs text-[#5a4a3a]">
-                      Terms are being negotiated. Both parties must agree before signing.
-                    </p>
+                  <div className="w-full space-y-3">
+                    {/* Terms editing */}
+                    {!iSubmitted && (
+                      <div className="p-3 rounded-md bg-[#f0dfc0] border border-[#d4b896]">
+                        <p className="font-contract text-sm text-[#1a0f08] mb-2">Your Terms</p>
+                        <label className="flex items-center gap-2 mb-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={useMessageTerms}
+                            onChange={(e) => setUseMessageTerms(e.target.checked)}
+                            className="accent-[#f5a623]"
+                          />
+                          <span className="font-mono text-[10px] text-[#8a7050]">
+                            Use message thread as terms
+                          </span>
+                        </label>
+                        {!useMessageTerms && (
+                          <textarea
+                            value={myTerms}
+                            onChange={(e) => setMyTerms(e.target.value)}
+                            placeholder="Describe your terms, deliverables, timeline..."
+                            rows={4}
+                            className="w-full px-3 py-2 bg-[#f5e6c8] border border-[#d4b896] text-[#2c1810] font-contract text-sm placeholder:text-[#8a7050] rounded-sm focus:outline-none focus:border-[#1a0f08] mb-2 resize-none"
+                          />
+                        )}
+                        <div className="flex gap-2">
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            className="flex-1"
+                            onClick={handleSaveTerms}
+                            disabled={updatingContract || (!useMessageTerms && !myTerms.trim())}
+                            haptic={false}
+                          >
+                            Save Terms
+                          </Button>
+                          <Button
+                            size="sm"
+                            className="flex-1"
+                            onClick={handleSubmitTerms}
+                            disabled={updatingContract || (!useMessageTerms && !myTerms.trim())}
+                            haptic={false}
+                          >
+                            Submit Terms
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Both parties' terms display */}
+                    <div className="p-3 rounded-md bg-[#f0dfc0] border border-[#d4b896]">
+                      <p className="font-contract text-sm text-[#1a0f08] mb-2">Terms Overview</p>
+                      <div className="space-y-2">
+                        <div className="p-2 rounded-sm bg-[#f5e6c8] border border-[#d4b896]">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-mono text-[10px] text-[#8a7050]">
+                              {contract.partyA?.fullName ?? "Party A"}
+                            </span>
+                            {aSubmitted && (
+                              <span className="text-[10px] text-[#2e7d32]">✓ Submitted</span>
+                            )}
+                          </div>
+                          <p className="font-contract text-xs text-[#2c1810]">
+                            {contract.partyAUseMessageTerms
+                              ? "(Using message thread as terms)"
+                              : contract.partyATerms || "(No terms set)"}
+                          </p>
+                        </div>
+                        <div className="p-2 rounded-sm bg-[#f5e6c8] border border-[#d4b896]">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-mono text-[10px] text-[#8a7050]">
+                              {contract.partyB?.fullName ?? "Party B"}
+                            </span>
+                            {bSubmitted && (
+                              <span className="text-[10px] text-[#2e7d32]">✓ Submitted</span>
+                            )}
+                          </div>
+                          <p className="font-contract text-xs text-[#2c1810]">
+                            {contract.partyBUseMessageTerms
+                              ? "(Using message thread as terms)"
+                              : contract.partyBTerms || "(No terms set)"}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Agreement status */}
+                      {bothSubmitted && (
+                        <div className="mt-2 space-y-2">
+                          <div className="flex items-center justify-between p-2 rounded-sm bg-[#f5e6c8] border border-[#d4b896]">
+                            <span className="font-mono text-[10px] text-[#8a7050]">
+                              {contract.partyA?.fullName ?? "Party A"}
+                            </span>
+                            {aAgreed ? (
+                              <span className="text-[10px] text-[#2e7d32]">✓ Agreed</span>
+                            ) : (
+                              <span className="text-[10px] text-[#8a7050]">Pending</span>
+                            )}
+                          </div>
+                          <div className="flex items-center justify-between p-2 rounded-sm bg-[#f5e6c8] border border-[#d4b896]">
+                            <span className="font-mono text-[10px] text-[#8a7050]">
+                              {contract.partyB?.fullName ?? "Party B"}
+                            </span>
+                            {bAgreed ? (
+                              <span className="text-[10px] text-[#2e7d32]">✓ Agreed</span>
+                            ) : (
+                              <span className="text-[10px] text-[#8a7050]">Pending</span>
+                            )}
+                          </div>
+                          {!iAgreed && bothSubmitted && (
+                            <Button
+                              className="w-full"
+                              onClick={handleAgree}
+                              disabled={updatingContract}
+                              haptic={false}
+                            >
+                              <CheckCircle size={14} className="mr-1" />
+                              {updatingContract ? "Agreeing..." : "Agree to Terms"}
+                            </Button>
+                          )}
+                          {iAgreed && !termsLocked && (
+                            <p className="font-mono text-[10px] text-[#2e7d32] text-center">
+                              ✓ You agreed. Waiting for the other party.
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               {canSign && !mySignedAt && (
@@ -1014,6 +1226,7 @@ export function ContractDetailScreen() {
                     tap("medium");
                     setShowSignForm(true);
                   }}
+                  haptic={false}
                 >
                   <FileText size={16} />
                   Sign Contract

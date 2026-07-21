@@ -21,6 +21,7 @@ import {
   Briefcase,
   User,
   ArrowRightLeft,
+  ChevronRight,
   X,
 } from "lucide-react";
 
@@ -295,6 +296,193 @@ function SignatureRow({
   );
 }
 
+/* ─── Flow Progress ─── */
+
+function FlowProgress({
+  acceptances,
+  contractFormed,
+  currentContract,
+  requiresContract,
+}: {
+  acceptances: Acceptance[];
+  contractFormed: boolean;
+  currentContract: DemoContract;
+  requiresContract: boolean;
+}) {
+  const accepted = acceptances.find((a) => a.status === "accepted" || a.status === "completed");
+  const hasInterest = acceptances.length > 0;
+  const bothSigned = !!currentContract.partyASignedAt && !!currentContract.partyBSignedAt;
+  const termsLocked = !!currentContract.termsLockedAt;
+  const bothSubmitted = !!currentContract.partyASubmittedAt && !!currentContract.partyBSubmittedAt;
+  const completed = currentContract.status === "completed";
+
+  const steps = requiresContract
+    ? [
+        { label: "Express Interest", done: hasInterest, active: !hasInterest },
+        { label: "Accept", done: !!accepted, active: hasInterest && !accepted },
+        { label: "Form Contract", done: contractFormed, active: !!accepted && !contractFormed },
+        { label: "Write Terms", done: bothSubmitted, active: contractFormed && !bothSubmitted },
+        { label: "Review Terms", done: termsLocked, active: bothSubmitted && !termsLocked },
+        { label: "Sign", done: bothSigned, active: termsLocked && !bothSigned },
+        { label: "Complete", done: completed, active: bothSigned && !completed },
+        { label: "Review", done: currentContract.reviews.length >= 2, active: completed },
+      ]
+    : [
+        { label: "Express Interest", done: hasInterest, active: !hasInterest },
+        { label: "Accept", done: !!accepted, active: hasInterest && !accepted },
+        { label: "Complete", done: completed, active: !!accepted && !completed },
+        { label: "Review", done: currentContract.reviews.length >= 2, active: completed },
+      ];
+
+  return (
+    <div className="flex items-center gap-1 overflow-x-auto pb-2">
+      {steps.map((step, i) => (
+        <div key={step.label} className="flex items-center gap-1 shrink-0">
+          <div
+            className={`px-2 py-1 rounded text-[10px] uppercase tracking-wider whitespace-nowrap border ${
+              step.done
+                ? "bg-[#00e676]/10 text-[#00e676] border-[#00e676]/30"
+                : step.active
+                  ? "bg-[#f5a623]/10 text-[#f5a623] border-[#f5a623]/30"
+                  : "bg-[#1a1714] text-[#7a6b5a] border-[#2a2420]"
+            }`}
+          >
+            {step.done && <Check className="h-2.5 w-2.5 inline mr-1" />}
+            {step.label}
+          </div>
+          {i < steps.length - 1 && (
+            <ChevronRight
+              className="h-3 w-3 shrink-0"
+              style={{ color: step.done ? "#00e676" : "#2a2420" }}
+            />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ─── Step Guide ─── */
+
+function StepGuide({
+  isPartyA,
+  isPartyB,
+  acceptances,
+  contractFormed,
+  currentContract,
+  requiresContract,
+  profileId,
+}: {
+  isPartyA: boolean;
+  isPartyB: boolean;
+  acceptances: Acceptance[];
+  contractFormed: boolean;
+  currentContract: DemoContract;
+  requiresContract: boolean;
+  profileId: string;
+}) {
+  const [dismissed, setDismissed] = useState(false);
+  if (dismissed) return null;
+
+  const myAcceptance = acceptances.find((a) => a.userId === profileId);
+  const accepted = acceptances.find((a) => a.status === "accepted" || a.status === "completed");
+  const bothSigned = !!currentContract.partyASignedAt && !!currentContract.partyBSignedAt;
+  const termsLocked = !!currentContract.termsLockedAt;
+  const bothSubmitted = !!currentContract.partyASubmittedAt && !!currentContract.partyBSubmittedAt;
+  const iSubmitted = isPartyA
+    ? !!currentContract.partyASubmittedAt
+    : !!currentContract.partyBSubmittedAt;
+  const iAgreed = isPartyA ? !!currentContract.partyAAgreedAt : !!currentContract.partyBAgreedAt;
+  const iSigned = isPartyA ? !!currentContract.partyASignedAt : !!currentContract.partyBSignedAt;
+  const completed = currentContract.status === "completed";
+  const hasReviewed = currentContract.reviews.some((r) => r.giverId === profileId);
+
+  let title = "";
+  let text = "";
+
+  if (!acceptances.length) {
+    if (isPartyA) {
+      title = "Waiting for interest";
+      text =
+        "Your need is live. Switch to Marcus (the fulfiller) to express interest, or wait here to see incoming interest.";
+    } else if (isPartyB) {
+      title = "Step 1: Express Interest";
+      text =
+        "Write a short message introducing yourself and click 'Express Interest'. The poster will review your profile and message.";
+    } else {
+      title = "Not selected";
+      text =
+        "Switch to Sarah (poster) or Marcus (selected fulfiller) to see the main contract flow.";
+    }
+  } else if (!accepted) {
+    if (isPartyA) {
+      title = "Step 2: Review & Accept";
+      text =
+        "Review the fulfiller's profile, message, and skills. Click Accept to proceed or Decline to pass. You control who you work with.";
+    } else {
+      title = "Interest pending";
+      text =
+        "Your interest has been sent. The poster is reviewing it now. Switch to Sarah to accept or decline.";
+    }
+  } else if (requiresContract && !contractFormed) {
+    if (isPartyA) {
+      title = "Step 3: Form Contract";
+      text =
+        "Click 'Contract' to create a binding agreement. Both parties will write terms, review them, and digitally sign.";
+    } else {
+      title = "Waiting for contract";
+      text =
+        "The poster is forming a contract. Switch to Sarah to create it, then come back to write your terms.";
+    }
+  } else if (requiresContract && !bothSubmitted) {
+    title = "Step 4: Write Your Terms";
+    text = iSubmitted
+      ? "Your terms are submitted. Wait for the other party to submit theirs before review can begin."
+      : "Describe your terms clearly. You can use the message thread as terms or write your own. Click 'Submit for Review' when ready.";
+  } else if (requiresContract && !termsLocked) {
+    title = "Step 5: Review & Accept Terms";
+    text = iAgreed
+      ? "You have accepted. Waiting for the other party to accept before terms are locked."
+      : "Both parties have submitted terms. Review them carefully and click 'I Accept These Terms' to proceed to signing.";
+  } else if (requiresContract && !bothSigned) {
+    title = "Step 6: Sign the Contract";
+    text = iSigned
+      ? "You have signed. Waiting for the other party to sign. Once both sign, the contract becomes active."
+      : "Terms are locked. Type your full name as a digital signature and click 'Sign Contract'. This creates a legally binding agreement.";
+  } else if (!completed) {
+    title = "Step 7: Mark Complete";
+    text =
+      "The contract is active. Do the work, then both parties must mark the exchange as complete.";
+  } else if (!hasReviewed) {
+    title = "Step 8: Leave a Review";
+    text =
+      "The exchange is finished. Leave a 1–10 rating and comment. Your review builds trust and helps others choose reliable partners.";
+  } else {
+    title = "All done!";
+    text =
+      "You have completed this exchange and left a review. Switch to the other party to see their side.";
+  }
+
+  if (!title) return null;
+
+  return (
+    <div className="rounded border border-[#00e5ff]/20 bg-[#00e5ff]/5 p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-medium text-[#00e5ff]">{title}</p>
+          <p className="text-xs text-[#b8a078] mt-1 leading-relaxed">{text}</p>
+        </div>
+        <button
+          onClick={() => setDismissed(true)}
+          className="text-[10px] text-[#7a6b5a] hover:text-[#e8d5a3] shrink-0"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function ContractFlowDemoPage() {
   /* ─── View mode ─── */
   const [currentUser, setCurrentUser] = useState<"A" | "B" | "C">("A");
@@ -307,6 +495,7 @@ export default function ContractFlowDemoPage() {
   /* ─── Post settings ─── */
   const [requiresContract, setRequiresContract] = useState(false);
 
+  /* ─── Default seed data ─── */
   /* ─── Flow state ─── */
   const [acceptances, setAcceptances] = useState<Acceptance[]>([]);
   const [interestMessage, setInterestMessage] = useState("");
@@ -350,7 +539,7 @@ export default function ContractFlowDemoPage() {
   const [cancelReasonDraft, setCancelReasonDraft] = useState("");
 
   /* ─── Persistence ─── */
-  const STORAGE_KEY = "antidosis-demo-contract-flow";
+  const STORAGE_KEY = "antidosis-demo-contract-flow-v2";
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -902,6 +1091,68 @@ export default function ContractFlowDemoPage() {
         </div>
       </div>
 
+      {/* Perspective Banner */}
+      <div className="max-w-3xl mx-auto px-4 md:px-8 pt-6">
+        <div
+          className="rounded border p-4 flex flex-col sm:flex-row sm:items-center gap-3"
+          style={{
+            borderColor: isPartyA ? "#f5a62340" : isPartyB ? "#00e5ff40" : "#b24bf540",
+            backgroundColor: isPartyA ? "#f5a62310" : isPartyB ? "#00e5ff10" : "#b24bf510",
+          }}
+        >
+          <Avatar src={currentParty.avatarUrl} name={currentParty.fullName} size="md" />
+          <div className="flex-1">
+            <p
+              className="text-sm font-medium"
+              style={{ color: isPartyA ? "#f5a623" : isPartyB ? "#00e5ff" : "#b24bf5" }}
+            >
+              You are {currentParty.fullName}
+            </p>
+            <p className="text-xs text-[#b8a078]">
+              {isPartyA
+                ? "You are the poster who created this need. You choose who to work with, negotiate terms, and manage the contract."
+                : myAcceptance?.status === "accepted" || myAcceptance?.status === "completed"
+                  ? "You are the selected fulfiller. Negotiate terms, do the work, and leave a review."
+                  : myAcceptance?.status === "declined"
+                    ? "You are another fulfiller who was not selected. Switch to Sarah or Marcus to see the main flow."
+                    : "You are a fulfiller. Express interest to start the exchange."}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <span
+              className="text-[10px] uppercase tracking-wider px-2 py-1 rounded border"
+              style={{
+                color: isPartyA ? "#f5a623" : isPartyB ? "#00e5ff" : "#b24bf5",
+                borderColor: isPartyA ? "#f5a62340" : isPartyB ? "#00e5ff40" : "#b24bf540",
+              }}
+            >
+              {isPartyA
+                ? "Poster"
+                : myAcceptance?.status === "accepted" || myAcceptance?.status === "completed"
+                  ? "Selected Fulfiller"
+                  : myAcceptance?.status === "declined"
+                    ? "Declined Fulfiller"
+                    : "Fulfiller"}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Flow Progress */}
+      <div className="max-w-3xl mx-auto px-4 md:px-8 pt-4 pb-6">
+        <FlowProgress
+          acceptances={acceptances}
+          contractFormed={contractFormed}
+          currentContract={currentContract}
+          requiresContract={requiresContract}
+        />
+      </div>
+
+      {/* Divider between meta header and interactive content */}
+      <div className="max-w-3xl mx-auto px-4 md:px-8">
+        <div className="border-t border-[#2a2420]" />
+      </div>
+
       <div className="max-w-3xl mx-auto px-4 md:px-8 py-8 space-y-8">
         {/* Post Settings */}
         <div className="vessel p-5 print-hidden">
@@ -936,6 +1187,17 @@ export default function ContractFlowDemoPage() {
             </div>
           </div>
         </div>
+
+        {/* Step Guide */}
+        <StepGuide
+          isPartyA={isPartyA}
+          isPartyB={isPartyB}
+          acceptances={acceptances}
+          contractFormed={contractFormed}
+          currentContract={currentContract}
+          requiresContract={requiresContract}
+          profileId={profileId}
+        />
 
         {/* ─── NEED POST VIEW ─── */}
         {!canViewContract && (

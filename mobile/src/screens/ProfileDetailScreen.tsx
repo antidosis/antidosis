@@ -76,7 +76,7 @@ export function ProfileDetailScreen() {
   const publicCredentials = profile.credentials?.filter((c) => c.isPublic) ?? [];
 
   return (
-    <div className="min-h-full pb-6">
+    <div className="min-h-full pb-6 safe-top">
       {/* Header */}
       <div className="sticky top-0 z-20 bg-[var(--void)]/90 backdrop-blur-md border-b border-[var(--bronze)]/20 px-4 py-3 flex items-center gap-3">
         <button
@@ -95,7 +95,7 @@ export function ProfileDetailScreen() {
         <button
           onClick={() => {
             tap();
-            navigate(`/chat/dm/${profile.userId}`);
+            navigate(`/chat/dm/${profile.id}`);
           }}
           className="p-2 rounded-md bg-[var(--void-raised)] border border-[var(--bronze)]/30 active:scale-95 transition-transform"
         >
