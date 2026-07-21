@@ -1,26 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { GoogleAuth } from "google-auth-library";
-
 import { logger } from "@/lib/logger";
+import { fetchPlaySubscription, isSubscriptionEntitled } from "@/lib/play-store";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
-
-const PACKAGE_NAME = process.env.GOOGLE_PLAY_PACKAGE_NAME || "com.antidosis.app";
-const SERVICE_ACCOUNT_KEY_PATH = process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_KEY_PATH;
-
-async function getAuthClient() {
-  if (!SERVICE_ACCOUNT_KEY_PATH) {
-    throw new Error("GOOGLE_PLAY_SERVICE_ACCOUNT_KEY_PATH not configured");
-  }
-
-  const auth = new GoogleAuth({
-    keyFile: SERVICE_ACCOUNT_KEY_PATH,
-    scopes: ["https://www.googleapis.com/auth/androidpublisher"],
-  });
-
-  return auth.getClient();
-}
 
 /**
  * Verify a Play Store subscription purchase token.
@@ -54,32 +37,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
-    // Verify with Google Play Developer API
-    const authClient = await getAuthClient();
-    const url = `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${encodeURIComponent(PACKAGE_NAME)}/purchases/subscriptionsv2/tokens/${encodeURIComponent(purchaseToken)}`;
-
-    const response = await authClient.request({ url, method: "GET" });
-    const subscription = response.data as {
-      lineItems?: Array<{
-        productId: string;
-        expiryTime?: string;
-        autoRenewingPlan?: { autoRenewEnabled?: boolean };
-      }>;
-      subscriptionState?: string;
-      linkedPurchaseToken?: string;
-    };
-
-    // subscriptionState: 0 = pending, 1 = active, 2 = paused, 3 = expired, 4 = on hold, 5 = in grace period
-    const state = parseInt(subscription.subscriptionState || "0", 10);
-    const isActive = state === 1 || state === 5; // active or in grace period
-
-    if (!isActive) {
-      return NextResponse.json({ error: "Subscription not active", state }, { status: 402 });
-    }
+    // Verify with the Google Play Developer API (authoritative state)
+    const subscription = await fetchPlaySubscription(purchaseToken);
+    const state = subscription.subscriptionState ?? "SUBSCRIPTION_STATE_UNSPECIFIED";
 
     const lineItem = subscription.lineItems?.find((li) => li.productId === productId);
     const expiresAt = lineItem?.expiryTime ? new Date(lineItem.expiryTime) : null;
     const autoRenewing = lineItem?.autoRenewingPlan?.autoRenewEnabled ?? null;
+    const isActive = isSubscriptionEntitled(state, expiresAt);
+
+    if (!isActive) {
+      return NextResponse.json({ error: "Subscription not active", state }, { status: 402 });
+    }
 
     // Upsert Pro status
     await prisma.profile.update({

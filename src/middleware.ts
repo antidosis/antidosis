@@ -28,8 +28,8 @@ const PROTECTED_API_PREFIXES = [
   "/api/v1/terminal",
 ];
 
-// API routes that bypass auth entirely
-const PUBLIC_API_ROUTES = ["/api/v1/billing/webhook"];
+// API routes that bypass auth entirely (webhooks authenticate themselves)
+const PUBLIC_API_ROUTES = ["/api/v1/billing/webhook", "/api/v1/billing/play-store/webhook"];
 
 export async function middleware(request: NextRequest) {
   // Redirect www to non-www

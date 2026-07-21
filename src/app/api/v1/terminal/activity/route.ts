@@ -66,9 +66,12 @@ export const GET = withApiHandler(async (req: NextRequest) => {
     },
   });
 
-  // 3. Mentions in DMs
+  // 3. Mentions in DMs (restricted to threads the user participates in)
   const dmMentions = await prisma.directMessage.findMany({
     where: {
+      thread: {
+        OR: [{ userAId: profile.id }, { userBId: profile.id }],
+      },
       content: { contains: mentionPattern, mode: "insensitive" },
       senderId: { not: profile.id },
       deletedAt: null,

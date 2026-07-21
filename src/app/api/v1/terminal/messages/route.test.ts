@@ -100,6 +100,7 @@ describe("GET /api/v1/terminal/messages", () => {
       remaining: 10,
       resetAt: Date.now() + 60_000,
     });
+    mockTerminalChannelFindUnique.mockResolvedValue({ id: validChannelId, type: "public" });
   });
 
   it("returns 401 when unauthenticated", async () => {
@@ -227,6 +228,57 @@ describe("GET /api/v1/terminal/messages", () => {
 
     const call = mockTerminalMessageFindMany.mock.calls[0][0];
     expect(call.where.deletedAt).toBeNull();
+  });
+
+  it("returns 404 when channel does not exist", async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: makeAuthUser() },
+      error: null,
+    });
+    mockTerminalChannelFindUnique.mockResolvedValue(null);
+
+    const res = await GET(
+      makeRequest(`http://localhost/api/v1/terminal/messages?channelId=${validChannelId}`)
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(404);
+    expect(body.error).toBe("Channel not found");
+  });
+
+  it("returns 403 for staff channels when not admin", async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: makeAuthUser() },
+      error: null,
+    });
+    mockTerminalChannelFindUnique.mockResolvedValue({ id: validChannelId, type: "staff" });
+    mockIsAdminEmail.mockReturnValue(false);
+
+    const res = await GET(
+      makeRequest(`http://localhost/api/v1/terminal/messages?channelId=${validChannelId}`)
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(body.error).toContain("staff channel");
+    expect(mockTerminalMessageFindMany).not.toHaveBeenCalled();
+  });
+
+  it("returns 200 for staff channels when admin", async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: makeAuthUser({ email: "admin@example.com" }) },
+      error: null,
+    });
+    mockTerminalChannelFindUnique.mockResolvedValue({ id: validChannelId, type: "staff" });
+    mockIsAdminEmail.mockReturnValue(true);
+    mockTerminalMessageFindMany.mockResolvedValue([]);
+
+    const res = await GET(
+      makeRequest(`http://localhost/api/v1/terminal/messages?channelId=${validChannelId}`)
+    );
+
+    expect(res.status).toBe(200);
+    expect(mockTerminalMessageFindMany).toHaveBeenCalled();
   });
 
   it("includes x-request-id header", async () => {

@@ -128,6 +128,8 @@ import {
   handleId,
   handleExit,
   handleMe,
+  handleUndo,
+  handleBenchmark,
 } from "./system";
 import type { HandlerContext, HandlerResult } from "./types";
 
@@ -189,6 +191,14 @@ export async function dispatchCommand(
     case "reset":
     case "claer":
       return handleClear(fullCtx);
+    case "undo":
+    case "revert":
+    case "back":
+      return handleUndo(fullCtx);
+    case "benchmark":
+    case "bench":
+    case "speedtest":
+      return handleBenchmark(fullCtx);
     case "id":
     case "myid":
     case "userid":
@@ -248,7 +258,6 @@ export async function dispatchCommand(
     case "setphone":
       return handlePhone(fullCtx);
     case "directory":
-    case "dir":
       return handleDirectory(fullCtx);
     case "link":
     case "sociallink":
@@ -454,7 +463,6 @@ export async function dispatchCommand(
     case "proinfo":
       return handleProStatus(fullCtx);
     case "subscribe":
-    case "renew":
     case "pro-renew":
       return handleSubscribe(fullCtx);
 
@@ -533,7 +541,6 @@ export async function dispatchCommand(
 
     // Shell
     case "ls":
-    case "list":
     case "dir":
       return handleLs(fullCtx);
     case "cd":
@@ -541,7 +548,6 @@ export async function dispatchCommand(
       return handleCd(fullCtx);
     case "cat":
     case "show":
-    case "view":
       return handleCat(fullCtx);
     case "pwd":
     case "cwd":

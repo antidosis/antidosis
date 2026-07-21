@@ -32,6 +32,17 @@ export const GET = withApiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: "channelId required" }, { status: 400 });
   }
 
+  const channel = await prisma.terminalChannel.findUnique({
+    where: { id: channelId },
+    select: { id: true, type: true },
+  });
+  if (!channel) {
+    return NextResponse.json({ error: "Channel not found" }, { status: 404 });
+  }
+  if (channel.type === "staff" && !isAdminEmail(user.email || "")) {
+    return NextResponse.json({ error: "Forbidden: staff channel is admin-only" }, { status: 403 });
+  }
+
   const take = Math.max(
     1,
     Math.min(parseInt(req.nextUrl.searchParams.get("limit") || "100", 10) || 100, 200)

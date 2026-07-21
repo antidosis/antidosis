@@ -133,7 +133,7 @@ describe("POST /api/v1/billing/play-store/verify", () => {
     mockProfileFindUnique.mockResolvedValue({ id: "profile-1", userId: "user-1" });
     mockRequest.mockResolvedValue({
       data: {
-        subscriptionState: "3",
+        subscriptionState: "SUBSCRIPTION_STATE_EXPIRED",
         lineItems: [{ productId: "prod", expiryTime: "2025-06-01T00:00:00Z" }],
       },
     });
@@ -143,7 +143,7 @@ describe("POST /api/v1/billing/play-store/verify", () => {
 
     expect(res.status).toBe(402);
     expect(body.error).toBe("Subscription not active");
-    expect(body.state).toBe(3);
+    expect(body.state).toBe("SUBSCRIPTION_STATE_EXPIRED");
   });
 
   it("returns 200 and updates profile with Pro status on success", async () => {
@@ -158,7 +158,7 @@ describe("POST /api/v1/billing/play-store/verify", () => {
     });
     mockRequest.mockResolvedValue({
       data: {
-        subscriptionState: "1",
+        subscriptionState: "SUBSCRIPTION_STATE_ACTIVE",
         lineItems: [
           {
             productId: "prod",
@@ -176,7 +176,7 @@ describe("POST /api/v1/billing/play-store/verify", () => {
     expect(res.status).toBe(200);
     expect(body.success).toBe(true);
     expect(body.productId).toBe("prod");
-    expect(body.state).toBe(1);
+    expect(body.state).toBe("SUBSCRIPTION_STATE_ACTIVE");
     expect(body.expiresAt).toBe("2025-12-31T23:59:59.000Z");
     expect(body.autoRenewing).toBe(true);
 
@@ -208,7 +208,7 @@ describe("POST /api/v1/billing/play-store/verify", () => {
       expect.objectContaining({
         userId: "user-1",
         productId: "prod",
-        state: 1,
+        state: "SUBSCRIPTION_STATE_ACTIVE",
         expiresAt: "2025-12-31T23:59:59.000Z",
       })
     );
@@ -228,7 +228,7 @@ describe("POST /api/v1/billing/play-store/verify", () => {
     });
     mockRequest.mockResolvedValue({
       data: {
-        subscriptionState: "5",
+        subscriptionState: "SUBSCRIPTION_STATE_IN_GRACE_PERIOD",
         lineItems: [
           {
             productId: "prod",
@@ -245,7 +245,7 @@ describe("POST /api/v1/billing/play-store/verify", () => {
 
     expect(res.status).toBe(200);
     expect(body.success).toBe(true);
-    expect(body.state).toBe(5);
+    expect(body.state).toBe("SUBSCRIPTION_STATE_IN_GRACE_PERIOD");
     expect(body.autoRenewing).toBe(false);
 
     expect(mockProfileUpdate).toHaveBeenCalledWith({

@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { withApiHandler } from "@/lib/api-handler";
 import { prisma } from "@/lib/prisma";
+import { redactCredential } from "@/lib/redaction";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -33,11 +34,29 @@ export const GET = withApiHandler(
       }
     }
 
+    // Public-safe projection only — never serialize contact details, auth
+    // identifiers, billing tokens, or precise location on a public route.
     const profile = await prisma.profile.findUnique({
       where: { id: params.id },
-      include: {
-        skills: true,
-        socialLinks: { where: { isPublic: true } },
+      select: {
+        id: true,
+        fullName: true,
+        avatarUrl: true,
+        bio: true,
+        locationName: true,
+        publicPhone: true,
+        mobileVerified: true,
+        isVerified: true,
+        isPro: true,
+        ratingAvg: true,
+        ratingCount: true,
+        jobsCompleted: true,
+        createdAt: true,
+        skills: { select: { id: true, name: true, isVerified: true } },
+        socialLinks: {
+          where: { isPublic: true },
+          select: { id: true, platform: true, url: true, isPublic: true },
+        },
         credentials: {
           where: { isPublic: true },
           select: {
@@ -57,16 +76,26 @@ export const GET = withApiHandler(
         needsPosted: {
           where: { status: "open" },
           orderBy: { createdAt: "desc" },
-          include: {
-            requiredSkills: true,
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            status: true,
+            offerType: true,
+            createdAt: true,
+            requiredSkills: { select: { id: true, name: true } },
             _count: { select: { acceptances: true } },
           },
           take: 10,
         },
         reviewsReceived: {
           orderBy: { createdAt: "desc" },
-          include: {
-            giver: { select: { fullName: true, avatarUrl: true } },
+          select: {
+            id: true,
+            rating: true,
+            comment: true,
+            createdAt: true,
+            giver: { select: { id: true, fullName: true, avatarUrl: true } },
             contract: { select: { need: { select: { title: true } } } },
           },
           take: 10,
@@ -78,9 +107,17 @@ export const GET = withApiHandler(
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
-    return NextResponse.json(profile, {
+    const safeProfile = {
+      ...profile,
+      credentials: profile.credentials.map(redactCredential),
+    };
+
+    return NextResponse.json(safeProfile, {
       headers: {
-        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+        // Block-checked responses are viewer-specific: never store them in shared caches
+        "Cache-Control": user
+          ? "private, no-store"
+          : "public, s-maxage=60, stale-while-revalidate=300",
       },
     });
   }
