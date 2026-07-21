@@ -8,6 +8,8 @@ Antidosis is a local needs-exchange platform ("help your neighbour" marketplace)
 
 **Current phase**: Central Coast NSW pilot.
 
+**Monetization**: Pro membership is **free** — gated on identity + mobile verification, not payment (since 2026-07-22). The paid billing stack (`src/app/api/v1/billing/` — Stripe checkout, Play Store verify/RTDN webhook, `src/lib/play-store.ts`) is **parked**: routes stay live and secured for legacy accounts and possible future paid tiers, but nothing links to them. Do not wire them back up without a product decision.
+
 ## 2. Tech Stack
 
 | Layer         | Technology                                                     |
@@ -17,7 +19,7 @@ Antidosis is a local needs-exchange platform ("help your neighbour" marketplace)
 | Styling       | Tailwind CSS 3.4                                               |
 | UI Components | Custom (shadcn/ui-inspired, in `@/components/ui/`)             |
 | Database      | PostgreSQL via Prisma ORM                                      |
-| Auth          | Supabase Auth (email + OAuth)                                  |
+| Auth          | Supabase Auth (email/password)                                 |
 | Mobile        | Capacitor 6 (iOS + Android)                                    |
 | Testing       | Vitest + @testing-library/react + Playwright E2E               |
 | Lint/Format   | ESLint (import/order, unused-imports) + Prettier 3.8.3 + Husky |
@@ -143,17 +145,7 @@ Examples: `needs/new`, `needs/[id]/edit`, `dashboard/_components/profile-section
 
 Run: `npm test`
 
-| File                        | Tests | Domain                 |
-| --------------------------- | ----- | ---------------------- |
-| `terminal-agent.test.ts`    | 11    | Terminal NLP parser    |
-| `terminal-commands.test.ts` | 7     | Command registry       |
-| `terminal-render.test.ts`   | 14    | ASCII/formatting utils |
-| `utils.test.ts`             | 5     | General utilities      |
-| `api-client.test.ts`        | 7     | API client wrapper     |
-| `needs.test.ts`             | 11    | Zod schema validation  |
-| `health/route.test.ts`      | 3     | Health endpoint        |
-
-**Total: 58 tests**
+**130 test files · 1,740 tests.** Every API route directory under `src/app/api/` has an adjacent `route.test.ts`; strong suites cover terminal handlers/commands, `lib/schemas`, `lib/security`, and `components/ui`. Page components, `src/middleware.ts`, `src/lib/supabase/*`, and `src/lib/pdf-contract.ts` have no direct coverage.
 
 ### E2E Tests (Playwright)
 

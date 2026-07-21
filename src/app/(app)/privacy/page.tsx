@@ -165,15 +165,13 @@ export default function PrivacyPage() {
             2.4 Payment Information
           </h3>
           <p className="mb-3">
-            For Pro subscriptions, we use <strong>Stripe</strong> to process payments. We do not
-            collect or store your credit card details, banking information, or other payment method
-            details. Stripe provides us with:
+            Antidosis Pro membership is currently <strong>free</strong> — we do not collect or store
+            your credit card details, banking information, or other payment method details. If paid
+            features are introduced in future, payments will be processed by a third-party payment
+            processor and this policy will be updated beforehand. If you previously held a paid
+            subscription (processed by Stripe), we retain only the processor&apos;s customer and
+            subscription identifiers, and subscription status, for audit purposes.
           </p>
-          <ul className="list-disc pl-5 space-y-1 mb-4">
-            <li>Stripe customer ID</li>
-            <li>Stripe subscription ID</li>
-            <li>Subscription status (active, cancelled, expired)</li>
-          </ul>
 
           <h3 className="text-base font-medium text-[#e8d5a3]/90 mb-2 mt-4">
             2.5 Automatically Collected Information

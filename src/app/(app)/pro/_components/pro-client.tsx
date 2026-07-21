@@ -424,15 +424,15 @@ function ProMarketing({
         </p>
       </div>
 
-      {/* Trial banner */}
+      {/* Free banner */}
       <div className="bg-[#00e676]/10 border border-[#00e676]/30 p-6 mb-12 text-center">
         <div className="flex items-center justify-center gap-2 text-[#00e676] mb-2">
           <Zap className="h-5 w-5" />
-          <span className="font-semibold text-lg">free for trial region members</span>
+          <span className="font-semibold text-lg">pro is free — always</span>
         </div>
         <p className="text-sm text-[#7a6b5a]">
-          the Central Coast is the first trial region. verify your identity and mobile number to
-          claim free Pro for life. no credit card. no expiry.
+          no subscription, no credit card, no expiry. verify your identity and mobile number to
+          claim Pro — the badge is earned with trust, not bought.
         </p>
       </div>
 
@@ -465,11 +465,11 @@ function ProMarketing({
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-2 text-center md:text-left">
             <div className="flex items-center gap-3 justify-center md:justify-start">
-              <h2 className="text-2xl font-bold text-[#e8d5a3]">$4.99/month</h2>
-              <Badge variant="default">free now</Badge>
+              <h2 className="text-2xl font-bold text-[#e8d5a3]">free</h2>
+              <Badge variant="default">with verification</Badge>
             </div>
             <p className="text-sm text-[#7a6b5a]">
-              cancel anytime. no credit card required during trial.
+              no credit card. no subscription. just a verified identity.
             </p>
           </div>
 

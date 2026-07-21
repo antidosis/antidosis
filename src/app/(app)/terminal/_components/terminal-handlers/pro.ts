@@ -1,7 +1,7 @@
 "use client";
 
 import type { HandlerContext, HandlerResult } from "./types";
-import { apiPost, friendlyError, isSafeUrl } from "./utils";
+import { apiPost, friendlyError } from "./utils";
 
 export async function handleProClaim(ctx: HandlerContext): Promise<HandlerResult> {
   try {
@@ -39,20 +39,22 @@ export async function handleProStatus(ctx: HandlerContext): Promise<HandlerResul
 }
 
 export async function handleSubscribe(ctx: HandlerContext): Promise<HandlerResult> {
-  try {
-    const data = await apiPost("/api/v1/billing/checkout");
-    if (data.url) {
-      if (!isSafeUrl(data.url)) {
-        ctx.addSys("❌ Checkout URL is invalid. Please use the web interface.", "error");
-        return { handled: true };
-      }
-      window.open(data.url, "_blank");
-      ctx.addSys("💳 Opening checkout...", "success");
-    } else {
-      ctx.addSys("Couldn't start checkout.", "error");
-    }
-  } catch (err) {
-    ctx.addSys(friendlyError(err, "Billing service unavailable."), "error");
+  const p = ctx.myProfile;
+  if (p?.isPro) {
+    ctx.addSys(
+      `⭐ Pro is active on your account — and it's free, forever. No billing needed.`,
+      "info"
+    );
+    return { handled: true };
   }
+  ctx.addSys(
+    `⭐ Pro is now FREE — no subscription, no credit card.\n\n` +
+      `To claim it:\n` +
+      `  1. Verify your identity (/credential add → upload ID, await approval)\n` +
+      `  2. Verify your mobile number (/phone)\n` +
+      `  3. Run /pro claim\n\n` +
+      `The badge is earned with trust, not bought.`,
+    "info"
+  );
   return { handled: true };
 }

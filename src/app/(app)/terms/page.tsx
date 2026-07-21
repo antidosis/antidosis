@@ -266,8 +266,8 @@ export default function TermsPage() {
             <strong>Cancellation and disputes:</strong> The Service provides mechanisms for contract
             cancellation, including mutual agreement, requested cancellation with response, and
             escalation to admin review. However, we are under no obligation to intervene in disputes
-            between users. Pro subscribers may receive enhanced dispute resolution support at our
-            sole discretion.
+            between users. Pro members may receive enhanced dispute resolution support at our sole
+            discretion.
           </p>
         </section>
 
@@ -299,47 +299,35 @@ export default function TermsPage() {
           </p>
         </section>
 
-        {/* ── 9. Pro Subscriptions ── */}
+        {/* ── 9. Pro Membership ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">
-            9. Pro Subscriptions and Billing
-          </h2>
+          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">9. Pro Membership (Free)</h2>
           <p className="mb-3">
-            Antidosis offers optional &quot;Pro&quot; subscriptions with enhanced features. Pro
-            subscriptions are billed through <strong>Stripe</strong>, our third-party payment
-            processor.
+            Antidosis offers an optional &quot;Pro&quot; membership tier with enhanced features
+            (badge, directory listing, priority support). Pro is <strong>free</strong>: there are no
+            fees, subscriptions, recurring billing, or payment details collected for it.
           </p>
           <ul className="list-disc pl-5 space-y-1 mb-3">
             <li>
-              <strong>Payment processing</strong> — all payment transactions are processed by
-              Stripe. We do not store your credit card details or other payment method information
+              <strong>Eligibility</strong> — Pro is granted to users who complete identity
+              verification (a government-issued ID reviewed by our team) and mobile-number
+              verification
             </li>
             <li>
-              <strong>Recurring billing</strong> — Pro subscriptions may be billed on a recurring
-              basis (e.g., monthly or annually) until cancelled
+              <strong>Revocation</strong> — we may revoke Pro status, without refund liability (as
+              no payment is taken), if verification documents are found to be false or misleading,
+              or for abuse of the Service
             </li>
             <li>
-              <strong>Cancellation</strong> — you may cancel your Pro subscription at any time
-              through your account settings. Cancellation takes effect at the end of the current
-              billing period
+              <strong>No charge, ever</strong> — because Pro is free, no cancellation, refund, or
+              price-change terms apply to it
             </li>
             <li>
-              <strong>Refunds</strong> — refunds are handled on a case-by-case basis at our sole
-              discretion. Please contact us at{" "}
-              <a href="mailto:support@antidosis.com" className="text-[#e8d5a3] hover:underline">
-                support@antidosis.com
-              </a>{" "}
-              for refund requests
-            </li>
-            <li>
-              <strong>Price changes</strong> — we reserve the right to modify subscription fees. You
-              will be notified of any price changes before they take effect
+              <strong>Future paid features</strong> — if Antidosis introduces paid features in
+              future, these Terms will be updated and reasonable notice provided before any charge
+              applies
             </li>
           </ul>
-          <p>
-            Failure to pay subscription fees may result in downgrade to a standard account and loss
-            of Pro features.
-          </p>
         </section>
 
         {/* ── 10. Intellectual Property ── */}

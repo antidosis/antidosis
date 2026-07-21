@@ -614,6 +614,26 @@ export const COMMANDS: TerminalCommand[] = [
     implemented: true,
   },
   {
+    name: "undo",
+    aliases: ["revert", "back"],
+    description: "Undo the last destructive action (within 5 minutes)",
+    usage: "/undo",
+    example: "/undo",
+    category: "misc",
+    adminOnly: false,
+    implemented: true,
+  },
+  {
+    name: "benchmark",
+    aliases: ["bench", "speedtest"],
+    description: "Benchmark API endpoint latency",
+    usage: "/benchmark [iterations]",
+    example: "/benchmark 5",
+    category: "misc",
+    adminOnly: false,
+    implemented: true,
+  },
+  {
     name: "tutorial",
     aliases: ["start", "beginner", "guide"],
     description: "Start the interactive beginner tutorial",
@@ -844,7 +864,7 @@ export const COMMANDS: TerminalCommand[] = [
   {
     name: "subscribe",
     aliases: ["pro-renew"],
-    description: "Subscribe or renew Pro membership",
+    description: "Pro is free — how to claim it (no billing)",
     usage: "/subscribe",
     example: "/subscribe",
     category: "pro",
@@ -1217,29 +1237,96 @@ export function resolveCommand(input: string): TerminalCommand | undefined {
   return COMMANDS.find((c) => c.name === normalized || c.aliases.some((a) => a === normalized));
 }
 
+function levenshteinDistance(a: string, b: string): number {
+  const matrix: number[][] = [];
+  for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      matrix[i][j] =
+        b[i - 1] === a[j - 1]
+          ? matrix[i - 1][j - 1]
+          : Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
+    }
+  }
+  return matrix[b.length][a.length];
+}
+
+function similarityScore(a: string, b: string): number {
+  const maxLen = Math.max(a.length, b.length);
+  if (maxLen === 0) return 1;
+  const dist = levenshteinDistance(a, b);
+  return 1 - dist / maxLen;
+}
+
 export function findClosestCommand(input: string): string | null {
+  const results = findClosestCommands(input, 1);
+  return results.length > 0 ? results[0].name : null;
+}
+
+export function findClosestCommands(
+  input: string,
+  limit = 3
+): { name: string; description: string; score: number }[] {
   const resolved = resolveCommand(input);
-  if (resolved) return resolved.name;
+  if (resolved) return [{ name: resolved.name, description: resolved.description, score: 1 }];
 
   const known = getAllCommandTokens();
-  let best: string | null = null;
-  let bestScore = 0;
+  const scored: { name: string; description: string; score: number }[] = [];
 
   for (const cmd of known) {
     if (input.length < 2) continue;
-    const common = Array.from(input).filter((c) => cmd.includes(c)).length;
-    const score = common / Math.max(input.length, cmd.length);
-    if (score > 0.5 && score > bestScore) {
-      best = cmd;
-      bestScore = score;
+    const score = similarityScore(input.toLowerCase(), cmd.toLowerCase());
+    if (score > 0.4) {
+      const fullCmd = resolveCommand(cmd);
+      if (fullCmd) {
+        scored.push({ name: fullCmd.name, description: fullCmd.description, score });
+      }
     }
   }
-  return best;
+
+  // Deduplicate by name and sort by score descending
+  const seen = new Set<string>();
+  return scored
+    .filter((s) => {
+      if (seen.has(s.name)) return false;
+      seen.add(s.name);
+      return true;
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit);
+}
+
+export function getBeginnerCommands(): TerminalCommand[] {
+  const essentials = [
+    "help",
+    "tutorial",
+    "whoami",
+    "needs",
+    "post",
+    "dm",
+    "contracts",
+    "notifications",
+    "status",
+    "ask",
+    "search",
+    "who",
+    "profile",
+    "exit",
+  ];
+  return essentials
+    .map((name) => COMMANDS.find((c) => c.name === name))
+    .filter(Boolean) as TerminalCommand[];
 }
 
 // ─── Help Text Generators ────────────────────────────────────
 
-export function generateHelpText(isAdmin: boolean, userName: string, advanced = false): string {
+export function generateHelpText(
+  isAdmin: boolean,
+  userName: string,
+  advanced = false,
+  category?: string
+): string {
   const exName = userName || "you";
   const implemented = COMMANDS.filter((c) => c.implemented && !c.adminOnly);
 
@@ -1258,27 +1345,86 @@ export function generateHelpText(isAdmin: boolean, userName: string, advanced = 
         .join("\n")
     : "";
 
+  // Category-specific help
+  const catMap: Record<string, CommandCategory> = {
+    profile: "profile",
+    editing: "editing",
+    needs: "needs",
+    contracts: "contracts",
+    reviews: "reviews",
+    notifications: "notifications",
+    discovery: "discovery",
+    social: "social",
+    chat: "chat",
+    credentials: "credentials",
+    pro: "pro",
+    lab: "lab",
+    shell: "shell",
+    misc: "misc",
+    admin: "admin",
+  };
+
+  if (category && catMap[category.toLowerCase()]) {
+    const cat = catMap[category.toLowerCase()];
+    const cmds = implemented.filter((c) => c.category === cat);
+    if (!cmds.length && cat !== "admin") {
+      return `No commands found in category "${category}".`;
+    }
+    const catEmoji: Record<CommandCategory, string> = {
+      profile: "👤",
+      editing: "✏️",
+      needs: "📋",
+      contracts: "📄",
+      reviews: "⭐",
+      notifications: "🔔",
+      discovery: "🔍",
+      social: "👥",
+      chat: "💬",
+      lab: "🧪",
+      misc: "🛠️",
+      admin: "🛡️",
+      credentials: "🛡️",
+      pro: "💎",
+      shell: "📁",
+    };
+    let out = `${catEmoji[cat]} ${cat.charAt(0).toUpperCase() + cat.slice(1)} Commands\n\n`;
+    for (const c of cmds) {
+      const names =
+        c.aliases.length > 0 ? `${c.name}, ${c.aliases.slice(0, 2).join(", ")}` : c.name;
+      out += `  /${names.padEnd(24)} → ${c.description}\n`;
+    }
+    if (cat === "admin" && isAdmin && adminCmds) {
+      out += `\n  🛡️ Admin:\n${adminCmds}\n`;
+    }
+    out += `\n💡 Type /whatis <command> for usage and examples.`;
+    return out;
+  }
+
   if (!advanced) {
+    const beginner = getBeginnerCommands();
     return (
-      `👋 Welcome to the Terminal! Here's what you can do:\n\n` +
+      `👋 Welcome to the Terminal, ${exName}!\n\n` +
       `  🖥️  Console (private):\n` +
-      `     When you first open the terminal, you're in your private Console.\n` +
-      `     All /commands you type here are local-only — no one else can see them.\n` +
-      `     Select a channel below only when you're ready to chat publicly.\n\n` +
-      `  💬 Chatting:\n` +
-      `     Just type and hit enter to send a message in a channel or DM.\n` +
-      `     Channels are public — everyone can see your messages.\n\n` +
-      `  📨 Direct Messages:\n` +
-      `     /dm ${exName} hey        → start a DM from anywhere\n` +
-      `     /users ${exName}         → find someone's exact ID\n\n` +
-      `  👤 Profile:\n${byCategory("profile")}\n\n` +
-      `  📋 Needs:\n${byCategory("needs")}\n\n` +
-      `  🔍 Discovery:\n${byCategory("discovery")}\n\n` +
-      `  👥 People:\n${byCategory("social")}\n\n` +
-      `  🤖 Essentials:\n${byCategory("misc")}\n` +
-      (adminCmds ? `\n  🛡️  Admin only:\n${adminCmds}\n` : "") +
-      `\n💡 Type /help advanced for technical commands (contracts, lab, shell, etc.).\n` +
-      `   Type /commands for a quick list, or /whatis <command> for details.`
+      `     You're in your private Console. All /commands here are local-only.\n` +
+      `     Select a channel below when you're ready to chat publicly.\n\n` +
+      `  🚀 Quick Start — the commands you'll use most:\n` +
+      beginner
+        .map((c) => {
+          const names = [c.name, ...c.aliases.slice(0, 1)].join("|");
+          return `     /${names.padEnd(18)} → ${c.description}`;
+        })
+        .join("\n") +
+      `\n\n` +
+      `  📨 Messaging:\n` +
+      `     /dm <name> [msg]       → start a DM from anywhere\n` +
+      `     /users <name>          → find someone's exact ID\n` +
+      `     /who                   → see who's online right now\n\n` +
+      `  💡 Tips:\n` +
+      `     • Press Tab to auto-complete commands\n` +
+      `     • Type /tutorial for an interactive walkthrough\n` +
+      `     • Made a typo? We'll suggest the right command automatically\n` +
+      `     • Type /help advanced for power-user commands\n` +
+      `     • Type /help <category> for focused help (e.g. /help contracts)`
     );
   }
 

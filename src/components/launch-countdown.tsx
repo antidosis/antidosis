@@ -75,7 +75,7 @@ export function LaunchCountdown() {
 
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-14 md:py-20">
         {/* Terminal prompt */}
-        <p className="text-xs text-[#7a6b5a] mb-8 font-mono">$ ./regional_launch --countdown</p>
+        <p className="text-xs text-[#8f7f6e] mb-8 font-mono">$ ./regional_launch --countdown</p>
 
         {/* Header */}
         <div className="mb-10 md:mb-14">
@@ -95,7 +95,7 @@ export function LaunchCountdown() {
             <span className="text-[#f5a623] glow-gold-subtle">Regional Begins.</span>
           </h2>
 
-          <p className="text-sm md:text-base text-[#7a6b5a] max-w-lg leading-relaxed">
+          <p className="text-sm md:text-base text-[#8f7f6e] max-w-lg leading-relaxed">
             The Central Coast is just the beginning. On{" "}
             <span className="text-[#e8d5a3]">
               {REGIONAL_LAUNCH_DATE.toLocaleDateString("en-AU", {
@@ -154,9 +154,8 @@ export function LaunchCountdown() {
         </div>
 
         {/* Footer note */}
-        <p className="mt-6 text-xs text-[#7a6b5a]/60">
-          Central Coast members verified before launch receive Pro at no cost, permanently. No
-          credit card required.
+        <p className="mt-6 text-xs text-[#8f7f6e]/90">
+          Pro is free for every verified member, permanently. No credit card required.
         </p>
       </div>
 
@@ -178,7 +177,7 @@ function CountdownBox({ value, label, accent }: { value: string; label: string; 
       >
         {value}
       </div>
-      <div className="text-[10px] md:text-xs text-[#7a6b5a] uppercase tracking-widest">{label}</div>
+      <div className="text-[10px] md:text-xs text-[#8f7f6e] uppercase tracking-widest">{label}</div>
       {/* Subtle accent glow on hover */}
       <div
         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
@@ -250,7 +249,7 @@ export function LaunchBanner() {
           </span>
 
           {/* Message */}
-          <span className="text-xs text-[#7a6b5a] truncate hidden sm:inline">
+          <span className="text-xs text-[#8f7f6e] truncate hidden sm:inline">
             Central Coast trial active.
           </span>
 
@@ -266,7 +265,7 @@ export function LaunchBanner() {
             )}
           </span>
 
-          <span className="text-xs text-[#7a6b5a] truncate hidden md:inline">
+          <span className="text-xs text-[#8f7f6e] truncate hidden md:inline">
             until regional launch.
           </span>
         </div>
