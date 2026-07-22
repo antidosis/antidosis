@@ -324,8 +324,36 @@ describe("POST /api/v1/needs/[id]/messages", () => {
     expect(body.code).toBe("EMAIL_NOT_VERIFIED");
   });
 
+  it("returns 403 when mobile is not verified (participation gate)", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: false,
+      bannedAt: null,
+    });
+
+    const res = await POST(
+      makeRequest("http://localhost/api/v1/needs/need-1/messages", {
+        method: "POST",
+        body: JSON.stringify({ content: "Hi" }),
+      }),
+      { params: { id: "need-1" } }
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(body.code).toBe("MOBILE_NOT_VERIFIED");
+    expect(mockNeedFindUnique).not.toHaveBeenCalled();
+    expect(mockNeedMessageCreate).not.toHaveBeenCalled();
+  });
+
   it("returns 429 when rate limited", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockRateLimit.mockResolvedValue({ allowed: false, remaining: 0, resetAt: Date.now() + 60_000 });
 
     const res = await POST(
@@ -343,7 +371,11 @@ describe("POST /api/v1/needs/[id]/messages", () => {
 
   it("returns 403 when not involved in need", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-3" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-3",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue({ posterId: "poster-profile", status: "completed" });
     mockAcceptanceFindFirst.mockResolvedValue(null);
 
@@ -362,7 +394,11 @@ describe("POST /api/v1/needs/[id]/messages", () => {
 
   it("returns 404 when need not found", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "poster-profile" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "poster-profile",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValueOnce({ posterId: "poster-profile", status: "open" });
     mockNeedFindUnique.mockResolvedValueOnce(null);
 
@@ -381,7 +417,11 @@ describe("POST /api/v1/needs/[id]/messages", () => {
 
   it("returns 400 when need is not open for new visitor", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-3" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-3",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique
       .mockResolvedValueOnce({ posterId: "poster-profile", status: "open" }) // getAuthorizedProfile
       .mockResolvedValueOnce({ status: "completed", posterId: "poster-profile" }); // main handler
@@ -402,7 +442,11 @@ describe("POST /api/v1/needs/[id]/messages", () => {
 
   it("returns 400 for invalid input", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "poster-profile" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "poster-profile",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue({ posterId: "poster-profile", status: "open" });
 
     const res = await POST(
@@ -420,7 +464,11 @@ describe("POST /api/v1/needs/[id]/messages", () => {
 
   it("returns 400 when poster sends to non-existent acceptance", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "poster-profile" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "poster-profile",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue({ posterId: "poster-profile", status: "open" });
     mockAcceptanceFindFirst.mockResolvedValue(null);
 
@@ -439,7 +487,11 @@ describe("POST /api/v1/needs/[id]/messages", () => {
 
   it("returns 403 when non-poster sends to another fulfiller's thread", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-2" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-2",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue({ posterId: "poster-profile", status: "open" });
     mockAcceptanceFindFirst.mockResolvedValue({ id: "acc-1", status: "accepted" });
 
@@ -458,7 +510,11 @@ describe("POST /api/v1/needs/[id]/messages", () => {
 
   it("creates public message as poster without notification", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "poster-profile" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "poster-profile",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue({ posterId: "poster-profile", status: "open" });
     mockNeedMessageCreate.mockResolvedValue({
       id: "msg-1",
@@ -482,7 +538,11 @@ describe("POST /api/v1/needs/[id]/messages", () => {
 
   it("creates private message as poster and notifies fulfiller", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "poster-profile" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "poster-profile",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue({ posterId: "poster-profile", status: "open" });
     mockAcceptanceFindFirst.mockResolvedValue({ id: "acc-1", userId: "fulfiller-profile" });
     mockNeedMessageCreate.mockResolvedValue({
@@ -510,7 +570,11 @@ describe("POST /api/v1/needs/[id]/messages", () => {
 
   it("creates message as fulfiller and notifies poster", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-2" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-2",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue({ posterId: "poster-profile", status: "open" });
     mockAcceptanceFindFirst.mockResolvedValue({ id: "acc-1", status: "accepted" });
     mockNeedMessageCreate.mockResolvedValue({
@@ -541,7 +605,11 @@ describe("POST /api/v1/needs/[id]/messages", () => {
 
   it("creates message as visitor and notifies poster", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-3" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-3",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue({ posterId: "poster-profile", status: "open" });
     mockAcceptanceFindFirst.mockResolvedValue(null);
     mockNeedMessageCreate.mockResolvedValue({
@@ -572,7 +640,11 @@ describe("POST /api/v1/needs/[id]/messages", () => {
 
   it("includes x-request-id header", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "poster-profile" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "poster-profile",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue({ posterId: "poster-profile", status: "open" });
     mockNeedMessageCreate.mockResolvedValue({
       id: "msg-1",

@@ -1,5 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+import { randomInt } from "crypto";
+
 import twilio from "twilio";
 
 import { withApiHandler } from "@/lib/api-handler";
@@ -62,7 +64,19 @@ export const POST = withApiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: "Mobile number already verified" }, { status: 409 });
   }
 
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  // Ban-sticking: a mobile banned on ANY account can never be verified again
+  const bannedWithMobile = await prisma.profile.findFirst({
+    where: { mobile: normalizedMobile, bannedAt: { not: null } },
+    select: { id: true },
+  });
+  if (bannedWithMobile) {
+    return NextResponse.json(
+      { error: "This mobile number cannot be verified on Antidosis.", code: "MOBILE_BANNED" },
+      { status: 403 }
+    );
+  }
+
+  const code = randomInt(100000, 1000000).toString();
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
   await prisma.$transaction(async (tx) => {
@@ -103,6 +117,11 @@ export const POST = withApiHandler(async (req: NextRequest) => {
       return NextResponse.json({ error: `SMS delivery failed: ${twilioMessage}` }, { status: 502 });
     }
   } else {
+    // Fail closed in production — never leak codes to logs outside development
+    if (process.env.NODE_ENV === "production") {
+      logger.error("Twilio is not configured in production; OTP not sent");
+      return NextResponse.json({ error: "SMS service unavailable" }, { status: 503 });
+    }
     // Dev fallback — log to console when Twilio is not configured
     console.log(`[DEV OTP] Mobile: ${normalizedMobile}, Code: ${code}`);
   }

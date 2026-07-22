@@ -79,7 +79,20 @@ export const POST = withApiHandler(async (req: NextRequest) => {
     );
   }
 
+  if (verificationCode.attempts >= 5) {
+    return NextResponse.json(
+      { error: "Too many incorrect attempts. Please request a new code." },
+      { status: 429 }
+    );
+  }
+
   if (verificationCode.code !== code) {
+    // Persistent attempt counting — brute-force protection that survives
+    // serverless cold starts and multi-instance deployments
+    await prisma.mobileVerificationCode.update({
+      where: { id: verificationCode.id },
+      data: { attempts: { increment: 1 } },
+    });
     return NextResponse.json({ error: "Invalid verification code" }, { status: 400 });
   }
 

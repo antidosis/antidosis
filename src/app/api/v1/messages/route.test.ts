@@ -312,8 +312,30 @@ describe("POST /api/v1/messages", () => {
     expect(body.code).toBe("EMAIL_NOT_VERIFIED");
   });
 
+  it("returns 403 when mobile is not verified (participation gate)", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: false,
+      bannedAt: null,
+    });
+
+    const res = await POST(makePostRequest({ contractId: validContractId, content: "Hello" }));
+    const body = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(body.code).toBe("MOBILE_NOT_VERIFIED");
+    expect(mockContractFindUnique).not.toHaveBeenCalled();
+    expect(mockMessageCreate).not.toHaveBeenCalled();
+  });
+
   it("returns 429 when rate limited", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockRateLimit.mockResolvedValue({ allowed: false, remaining: 0, resetAt: Date.now() + 60_000 });
 
     const res = await POST(makePostRequest({ contractId: validContractId, content: "Hello" }));
@@ -325,6 +347,11 @@ describe("POST /api/v1/messages", () => {
 
   it("returns 400 for invalid body (ZodError)", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
 
     const res = await POST(makePostRequest({ contractId: "not-a-uuid", content: "" }));
     const body = await res.json();
@@ -335,7 +362,10 @@ describe("POST /api/v1/messages", () => {
 
   it("returns 404 when profile not found", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue(null);
+    // First call passes the participation gate; second is the route's own lookup.
+    mockProfileFindUnique
+      .mockResolvedValueOnce({ id: "profile-1", mobileVerified: true, bannedAt: null })
+      .mockResolvedValueOnce(null);
 
     const res = await POST(makePostRequest({ contractId: validContractId, content: "Hello" }));
     const body = await res.json();
@@ -346,7 +376,11 @@ describe("POST /api/v1/messages", () => {
 
   it("returns 404 when contract not found", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockContractFindUnique.mockResolvedValue(null);
 
     const res = await POST(makePostRequest({ contractId: validContractId, content: "Hello" }));
@@ -358,7 +392,11 @@ describe("POST /api/v1/messages", () => {
 
   it("returns 400 when contract is completed", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockContractFindUnique.mockResolvedValue({
       partyAId: "profile-1",
       partyBId: "profile-2",
@@ -374,7 +412,11 @@ describe("POST /api/v1/messages", () => {
 
   it("returns 403 when user is not a party to the contract", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-3" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-3",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockContractFindUnique.mockResolvedValue({
       partyAId: "profile-1",
       partyBId: "profile-2",
@@ -390,7 +432,11 @@ describe("POST /api/v1/messages", () => {
 
   it("returns 201 and creates message on success", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockContractFindUnique.mockResolvedValue({
       partyAId: "profile-1",
       partyBId: "profile-2",
@@ -424,7 +470,11 @@ describe("POST /api/v1/messages", () => {
 
   it("creates notification for the other party", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockContractFindUnique.mockResolvedValue({
       partyAId: "profile-1",
       partyBId: "profile-2",
@@ -453,7 +503,11 @@ describe("POST /api/v1/messages", () => {
 
   it("handles transcript append failure gracefully", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockContractFindUnique.mockResolvedValue({
       partyAId: "profile-1",
       partyBId: "profile-2",
@@ -476,7 +530,11 @@ describe("POST /api/v1/messages", () => {
 
   it("includes x-request-id header", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockContractFindUnique.mockResolvedValue({
       partyAId: "profile-1",
       partyBId: "profile-2",

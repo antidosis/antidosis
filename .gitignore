@@ -57,3 +57,6 @@ coverage/
 coverage*.json
 coverage*.txt
 crypto-test.ts
+
+# Test artifacts
+test-results/

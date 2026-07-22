@@ -228,6 +228,7 @@ Run `npx prisma migrate dev` for local changes. Never modify applied migrations.
 - Server-side: `createClient()` from `@/lib/supabase/server` validates JWT
 - Client-side: `createClient()` from `@/lib/supabase/client` for auth state
 - Email verification required for certain actions (posting needs, accepting)
+- **Mobile verification required for participation**: posting needs, expressing interest, and messaging (need messages, contract messages, terminal channels, DMs) all pass `requireVerifiedParticipation()` (`src/lib/participation.ts`) — 403 `MOBILE_NOT_VERIFIED` / `ACCOUNT_SUSPENDED`. Bans (`POST/DELETE /api/v1/admin/users/[id]/ban`) also block the banned mobile from re-verifying (send-otp route), so banned users cannot re-enter with a fresh email.
 
 ## 11. Real-Time
 

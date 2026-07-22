@@ -36,6 +36,8 @@ model Profile {
   ratingCount   Int      @default(0) @map("rating_count")
   jobsCompleted Int      @default(0) @map("jobs_completed")
   abn           String?
+  bannedAt      DateTime? @map("banned_at")
+  bannedReason  String?   @map("banned_reason")
   lastSeenAt    DateTime? @map("last_seen_at")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
@@ -321,6 +323,7 @@ model MobileVerificationCode {
   profileId String   @map("profile_id")
   expiresAt DateTime @map("expires_at")
   used      Boolean  @default(false)
+  attempts  Int      @default(0)
   createdAt DateTime @default(now()) @map("created_at")
 
   @@index([mobile])

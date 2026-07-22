@@ -6,6 +6,7 @@ import { POST } from "./route";
 
 // ─── Prisma mocks ───
 const mockProfileFindUnique = vi.fn();
+const mockProfileFindFirst = vi.fn();
 const mockDeleteMany = vi.fn();
 const mockCreate = vi.fn();
 const mockTransaction = vi.fn();
@@ -14,6 +15,7 @@ vi.mock("@/lib/prisma", () => ({
   prisma: {
     profile: {
       findUnique: (...args: unknown[]) => mockProfileFindUnique(...args),
+      findFirst: (...args: unknown[]) => mockProfileFindFirst(...args),
     },
     mobileVerificationCode: {
       deleteMany: (...args: unknown[]) => mockDeleteMany(...args),
@@ -96,6 +98,7 @@ describe("POST /api/v1/auth/send-otp", () => {
       mobile: "+61400123456",
       mobileVerified: false,
     });
+    mockProfileFindFirst.mockResolvedValue(null);
     // Ensure Twilio is not configured by default
     delete process.env.TWILIO_ACCOUNT_SID;
     delete process.env.TWILIO_AUTH_TOKEN;
@@ -255,5 +258,35 @@ describe("POST /api/v1/auth/send-otp", () => {
     const res = await POST(makeRequest({ mobile: "0400123456" }));
 
     expect(res.headers.get("x-request-id")).toMatch(/^\w+-\w+$/);
+  });
+
+  it("returns 403 MOBILE_BANNED when the number is banned on any account", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindFirst.mockResolvedValue({ id: "banned-profile-9" });
+
+    const res = await POST(makeRequest({ mobile: "0400123456" }));
+    const body = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(body.code).toBe("MOBILE_BANNED");
+    expect(mockCreate).not.toHaveBeenCalled();
+    expect(mockProfileFindFirst).toHaveBeenCalledWith({
+      where: { mobile: "+61400123456", bannedAt: { not: null } },
+      select: { id: true },
+    });
+  });
+
+  it("fails closed with 503 in production when Twilio is not configured", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    vi.stubEnv("NODE_ENV", "production");
+    try {
+      const res = await POST(makeRequest({ mobile: "0400123456" }));
+      const body = await res.json();
+
+      expect(res.status).toBe(503);
+      expect(body.error).toBe("SMS service unavailable");
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 });

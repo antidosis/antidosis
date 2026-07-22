@@ -29,7 +29,9 @@ export type AuditEvent =
   | "SUSPICIOUS_ACTIVITY"
   | "CREDENTIAL_CREATED"
   | "CREDENTIAL_UPDATED"
-  | "CREDENTIAL_DELETED";
+  | "CREDENTIAL_DELETED"
+  | "USER_BANNED"
+  | "USER_UNBANNED";
 
 export type AuditSeverity = "info" | "warning" | "critical";
 

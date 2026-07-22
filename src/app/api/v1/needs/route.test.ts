@@ -2,11 +2,12 @@ import { type NextRequest } from "next/server";
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-import { GET } from "./route";
+import { GET, POST } from "./route";
 
 const mockFindMany = vi.fn();
 const mockCount = vi.fn();
 const mockQueryRaw = vi.fn();
+const mockProfileFindUnique = vi.fn();
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
@@ -14,8 +15,26 @@ vi.mock("@/lib/prisma", () => ({
       findMany: (...args: unknown[]) => mockFindMany(...args),
       count: (...args: unknown[]) => mockCount(...args),
     },
+    profile: {
+      findUnique: (...args: unknown[]) => mockProfileFindUnique(...args),
+    },
     $queryRaw: (...args: unknown[]) => mockQueryRaw(...args),
   },
+}));
+
+const mockGetUser = vi.fn();
+
+vi.mock("@/lib/supabase/server", () => ({
+  createClient: () => ({
+    auth: { getUser: () => mockGetUser() },
+  }),
+}));
+
+const mockRateLimit = vi.fn();
+
+vi.mock("@/lib/rate-limit", () => ({
+  rateLimit: (...args: unknown[]) => mockRateLimit(...args),
+  getRateLimitIdentifier: () => "test-id",
 }));
 
 function makeRequest(url: string): NextRequest {
@@ -146,5 +165,56 @@ describe("GET /api/v1/needs", () => {
     const res = await GET(makeRequest("http://localhost/api/v1/needs"));
 
     expect(res.headers.get("x-request-id")).toMatch(/^\w+-\w+$/);
+  });
+});
+
+describe("POST /api/v1/needs (participation gate)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGetUser.mockResolvedValue({
+      data: {
+        user: { id: "user-1", email: "test@example.com", email_confirmed_at: "2024-01-01" },
+      },
+      error: null,
+    });
+  });
+
+  function makePost(body?: Record<string, unknown>): NextRequest {
+    return new Request("http://localhost/api/v1/needs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: body ? JSON.stringify(body) : undefined,
+    }) as NextRequest;
+  }
+
+  it("returns 403 MOBILE_NOT_VERIFIED when the poster has no verified mobile", async () => {
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: false,
+      bannedAt: null,
+    });
+
+    const res = await POST(makePost({ title: "x" }));
+    const body = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(body.code).toBe("MOBILE_NOT_VERIFIED");
+    expect(mockRateLimit).not.toHaveBeenCalled();
+    expect(mockFindMany).not.toHaveBeenCalled();
+  });
+
+  it("returns 403 ACCOUNT_SUSPENDED for banned profiles", async () => {
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: new Date("2026-01-01"),
+    });
+
+    const res = await POST(makePost({ title: "x" }));
+    const body = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(body.code).toBe("ACCOUNT_SUSPENDED");
+    expect(mockRateLimit).not.toHaveBeenCalled();
   });
 });

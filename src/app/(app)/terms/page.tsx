@@ -132,6 +132,12 @@ export default function TermsPage() {
             <li>Notify us immediately of any unauthorized access to or use of your account</li>
             <li>Accept responsibility for all activities that occur under your account</li>
           </ul>
+          <p className="mb-3">
+            <strong>Mobile verification:</strong> posting needs, expressing interest in needs, and
+            messaging other users requires a verified Australian mobile number. This is an anti-scam
+            measure — accounts suspended for violations cannot re-enter with a new email address
+            using the same phone number.
+          </p>
           <p>
             We reserve the right to suspend or terminate your account if any information provided
             during registration or thereafter proves to be inaccurate, false, or misleading.

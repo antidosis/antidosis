@@ -4,6 +4,7 @@ import { withApiHandler } from "@/lib/api-handler";
 import { auditLog, getClientInfo } from "@/lib/audit";
 import { EXCHANGE_MODE_VALUES } from "@/lib/categories";
 import { isValidCentralCoastSuburb } from "@/lib/data/central-coast-suburbs";
+import { requireVerifiedParticipation } from "@/lib/participation";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { createNeedSchema } from "@/lib/schemas";
@@ -131,6 +132,9 @@ export const POST = withApiHandler(async (req: NextRequest) => {
       { status: 403 }
     );
   }
+
+  const participation = await requireVerifiedParticipation(user.id);
+  if (!participation.ok) return participation.response;
 
   // Rate limit: 5 needs per hour per user
   const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {

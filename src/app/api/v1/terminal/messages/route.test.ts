@@ -328,10 +328,35 @@ describe("POST /api/v1/terminal/messages", () => {
     expect(body.error).toBe("Unauthorized");
   });
 
+  it("returns 403 when mobile is not verified (participation gate)", async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: makeAuthUser() },
+      error: null,
+    });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: false,
+      bannedAt: null,
+    });
+
+    const res = await POST(makePostRequest({ channelId: validChannelId, content: "Hello" }));
+    const body = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(body.code).toBe("MOBILE_NOT_VERIFIED");
+    expect(mockTerminalChannelFindUnique).not.toHaveBeenCalled();
+    expect(mockTerminalMessageCreate).not.toHaveBeenCalled();
+  });
+
   it("returns 429 when rate limited", async () => {
     mockGetUser.mockResolvedValue({
       data: { user: makeAuthUser() },
       error: null,
+    });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
     });
     mockRateLimit.mockResolvedValue({
       allowed: false,
@@ -351,7 +376,10 @@ describe("POST /api/v1/terminal/messages", () => {
       data: { user: makeAuthUser() },
       error: null,
     });
-    mockProfileFindUnique.mockResolvedValue(null);
+    // First call passes the participation gate; second is the route's own lookup.
+    mockProfileFindUnique
+      .mockResolvedValueOnce({ id: "profile-1", mobileVerified: true, bannedAt: null })
+      .mockResolvedValueOnce(null);
 
     const res = await POST(makePostRequest({ channelId: validChannelId, content: "Hello" }));
     const body = await res.json();
@@ -368,6 +396,8 @@ describe("POST /api/v1/terminal/messages", () => {
     mockProfileFindUnique.mockResolvedValue({
       id: "profile-1",
       fullName: "Alice",
+      mobileVerified: true,
+      bannedAt: null,
     });
 
     const res = await POST(makePostRequest({ channelId: "not-a-uuid", content: "" }));
@@ -386,6 +416,8 @@ describe("POST /api/v1/terminal/messages", () => {
     mockProfileFindUnique.mockResolvedValue({
       id: "profile-1",
       fullName: "Alice",
+      mobileVerified: true,
+      bannedAt: null,
     });
     mockTerminalChannelFindUnique.mockResolvedValue(null);
 
@@ -404,6 +436,8 @@ describe("POST /api/v1/terminal/messages", () => {
     mockProfileFindUnique.mockResolvedValue({
       id: "profile-1",
       fullName: "Alice",
+      mobileVerified: true,
+      bannedAt: null,
     });
     mockTerminalChannelFindUnique.mockResolvedValue({
       id: validChannelId,
@@ -427,6 +461,8 @@ describe("POST /api/v1/terminal/messages", () => {
     mockProfileFindUnique.mockResolvedValue({
       id: "profile-1",
       fullName: "Alice",
+      mobileVerified: true,
+      bannedAt: null,
     });
     mockTerminalChannelFindUnique.mockResolvedValue({
       id: validChannelId,
@@ -467,6 +503,8 @@ describe("POST /api/v1/terminal/messages", () => {
     mockProfileFindUnique.mockResolvedValue({
       id: "profile-1",
       fullName: "Admin",
+      mobileVerified: true,
+      bannedAt: null,
     });
     mockTerminalChannelFindUnique.mockResolvedValue({
       id: validChannelId,
@@ -498,6 +536,8 @@ describe("POST /api/v1/terminal/messages", () => {
     mockProfileFindUnique.mockResolvedValue({
       id: "profile-1",
       fullName: "Alice",
+      mobileVerified: true,
+      bannedAt: null,
     });
     mockTerminalChannelFindUnique.mockResolvedValue({
       id: validChannelId,

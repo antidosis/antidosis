@@ -248,4 +248,43 @@ describe("POST /api/v1/auth/verify-otp", () => {
 
     expect(res.headers.get("x-request-id")).toMatch(/^\w+-\w+$/);
   });
+
+  it("increments the persistent attempt counter on a wrong code", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockFindFirst.mockResolvedValue({
+      id: "code-1",
+      code: "999999",
+      expiresAt: new Date(Date.now() + 5 * 60_000),
+      used: false,
+      attempts: 2,
+    });
+
+    const res = await POST(makeRequest({ mobile: "0400123456", code: "123456" }));
+
+    expect(res.status).toBe(400);
+    expect(mockUpdateCode).toHaveBeenCalledWith({
+      where: { id: "code-1" },
+      data: { attempts: { increment: 1 } },
+    });
+    expect(mockTransaction).not.toHaveBeenCalled();
+  });
+
+  it("returns 429 after 5 incorrect attempts and stops checking", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockFindFirst.mockResolvedValue({
+      id: "code-1",
+      code: "123456",
+      expiresAt: new Date(Date.now() + 5 * 60_000),
+      used: false,
+      attempts: 5,
+    });
+
+    const res = await POST(makeRequest({ mobile: "0400123456", code: "123456" }));
+    const body = await res.json();
+
+    expect(res.status).toBe(429);
+    expect(body.error).toContain("Too many incorrect attempts");
+    expect(mockUpdateCode).not.toHaveBeenCalled();
+    expect(mockTransaction).not.toHaveBeenCalled();
+  });
 });

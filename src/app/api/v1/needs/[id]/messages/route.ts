@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { withApiHandler } from "@/lib/api-handler";
 import { createNotification } from "@/lib/notifications";
+import { requireVerifiedParticipation } from "@/lib/participation";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
@@ -192,6 +193,9 @@ export const POST = withApiHandler(
         { status: 403 }
       );
     }
+
+    const participation = await requireVerifiedParticipation(user.id);
+    if (!participation.ok) return participation.response;
 
     const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
       windowMs: 5 * 60_000,

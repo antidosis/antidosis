@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { withApiHandler } from "@/lib/api-handler";
 import { createNotification } from "@/lib/notifications";
+import { requireVerifiedParticipation } from "@/lib/participation";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { sendDirectMessageSchema } from "@/lib/schemas";
@@ -174,6 +175,9 @@ export const POST = withApiHandler(async (req: NextRequest) => {
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const participation = await requireVerifiedParticipation(user.id);
+  if (!participation.ok) return participation.response;
 
   const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
     windowMs: 5 * 60_000,

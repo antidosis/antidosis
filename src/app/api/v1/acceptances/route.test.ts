@@ -122,8 +122,30 @@ describe("POST /api/v1/acceptances", () => {
     expect(body.code).toBe("EMAIL_NOT_VERIFIED");
   });
 
+  it("returns 403 when mobile is not verified (participation gate)", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: false,
+      bannedAt: null,
+    });
+
+    const res = await POST(makeRequest({ needId: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" }));
+    const body = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(body.code).toBe("MOBILE_NOT_VERIFIED");
+    expect(mockNeedFindUnique).not.toHaveBeenCalled();
+    expect(mockAcceptanceCreate).not.toHaveBeenCalled();
+  });
+
   it("returns 429 when rate limited", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockRateLimit.mockResolvedValue({ allowed: false, remaining: 0, resetAt: Date.now() + 60_000 });
 
     const res = await POST(makeRequest({ needId: "need-1", message: "Interested" }));
@@ -135,6 +157,11 @@ describe("POST /api/v1/acceptances", () => {
 
   it("returns 400 for invalid body", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
 
     const res = await POST(makeRequest({ needId: "not-a-uuid" }));
     const body = await res.json();
@@ -145,6 +172,11 @@ describe("POST /api/v1/acceptances", () => {
 
   it("returns 404 when need not found", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue(null);
 
     const res = await POST(makeRequest({ needId: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" }));
@@ -156,6 +188,11 @@ describe("POST /api/v1/acceptances", () => {
 
   it("returns 400 when need is not open", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue({
       status: "completed",
       posterId: "profile-2",
@@ -177,7 +214,10 @@ describe("POST /api/v1/acceptances", () => {
       title: "Need",
       requiredSkills: [],
     });
-    mockProfileFindUnique.mockResolvedValue(null);
+    // First call passes the participation gate; second is the route's own lookup.
+    mockProfileFindUnique
+      .mockResolvedValueOnce({ id: "profile-1", mobileVerified: true, bannedAt: null })
+      .mockResolvedValueOnce(null);
 
     const res = await POST(makeRequest({ needId: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" }));
     const body = await res.json();
@@ -189,7 +229,12 @@ describe("POST /api/v1/acceptances", () => {
   it("returns 400 when trying to accept own need", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
     mockNeedFindUnique.mockResolvedValue({ status: "open", posterId: "profile-1", title: "Need" });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1", fullName: "Me" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      fullName: "Me",
+      mobileVerified: true,
+      bannedAt: null,
+    });
 
     const res = await POST(makeRequest({ needId: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" }));
     const body = await res.json();
@@ -206,7 +251,12 @@ describe("POST /api/v1/acceptances", () => {
       title: "Need",
       requiredSkills: [],
     });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1", fullName: "Me" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      fullName: "Me",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockAcceptanceFindFirst.mockResolvedValue({ id: "existing" });
 
     const res = await POST(makeRequest({ needId: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" }));
@@ -225,6 +275,7 @@ describe("POST /api/v1/acceptances", () => {
       requiredSkills: [],
     });
     mockProfileFindUnique
+      .mockResolvedValueOnce({ id: "profile-1", mobileVerified: true, bannedAt: null })
       .mockResolvedValueOnce({ id: "profile-1", fullName: "Me" })
       .mockResolvedValueOnce({ email: "poster@example.com", fullName: "Poster" });
     mockAcceptanceFindFirst.mockResolvedValue(null);
@@ -262,6 +313,7 @@ describe("POST /api/v1/acceptances", () => {
       requiredSkills: [],
     });
     mockProfileFindUnique
+      .mockResolvedValueOnce({ id: "profile-1", mobileVerified: true, bannedAt: null })
       .mockResolvedValueOnce({ id: "profile-1", fullName: "Me" })
       .mockResolvedValueOnce({ email: "poster@example.com", fullName: "Poster" });
     mockAcceptanceFindFirst.mockResolvedValue(null);
@@ -280,7 +332,12 @@ describe("POST /api/v1/acceptances", () => {
       title: "Rewire my shed",
       requiredSkills: [{ name: "Electrician" }],
     });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1", fullName: "Me" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      fullName: "Me",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockCredentialFindMany.mockResolvedValue([]);
 
     const res = await POST(makeRequest({ needId: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" }));
@@ -302,6 +359,7 @@ describe("POST /api/v1/acceptances", () => {
       requiredSkills: [{ name: "Electrician" }],
     });
     mockProfileFindUnique
+      .mockResolvedValueOnce({ id: "profile-1", mobileVerified: true, bannedAt: null })
       .mockResolvedValueOnce({ id: "profile-1", fullName: "Me" })
       .mockResolvedValueOnce({ email: "poster@example.com", fullName: "Poster" });
     mockCredentialFindMany.mockResolvedValue([
@@ -328,6 +386,7 @@ describe("POST /api/v1/acceptances", () => {
       requiredSkills: [{ name: "Lifting" }],
     });
     mockProfileFindUnique
+      .mockResolvedValueOnce({ id: "profile-1", mobileVerified: true, bannedAt: null })
       .mockResolvedValueOnce({ id: "profile-1", fullName: "Me" })
       .mockResolvedValueOnce({ email: "poster@example.com", fullName: "Poster" });
     mockAcceptanceFindFirst.mockResolvedValue(null);

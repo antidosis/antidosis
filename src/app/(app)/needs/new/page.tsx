@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -66,6 +66,18 @@ export default function CreateNeedPage() {
   const watchedTitle = watch("title") ?? "";
   const watchedSkills = watch("requiredSkills") ?? [];
   const regulatedTrade = detectRegulatedTrade({ title: watchedTitle, skills: watchedSkills });
+
+  // Participation gate notice: posting requires a verified mobile
+  const [mobileGate, setMobileGate] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/v1/profiles/me")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((p) => {
+        if (p && !p.mobileVerified) setMobileGate(true);
+      })
+      .catch(() => {});
+  }, []);
 
   // Clear exchange mode if it becomes incompatible with the selected offer type
   useEffect(() => {
@@ -134,6 +146,23 @@ export default function CreateNeedPage() {
           </div>
         </div>
       </div>
+
+      {mobileGate && (
+        <div className="bg-[#ffb300]/10 border border-[#ffb300]/30 p-4 mb-8">
+          <div className="flex items-start gap-3">
+            <Shield className="h-4 w-4 text-[#ffb300] mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-sm text-[#e8d5a3] font-medium">mobile verification required</p>
+              <p className="text-xs text-[#7a6b5a] mt-1">
+                anti-scam rule: you need a verified mobile number before posting or messaging.{" "}
+                <Link href="/verify-mobile" className="text-[#f5a623] hover:underline">
+                  verify now →
+                </Link>
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { withApiHandler } from "@/lib/api-handler";
 import { logger } from "@/lib/logger";
 import { createNotification } from "@/lib/notifications";
+import { requireVerifiedParticipation } from "@/lib/participation";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { sanitizePlainText } from "@/lib/security/sanitize";
@@ -113,6 +114,9 @@ export const POST = withApiHandler(async (req: NextRequest) => {
         { status: 403 }
       );
     }
+
+    const participation = await requireVerifiedParticipation(user.id);
+    if (!participation.ok) return participation.response;
 
     // Rate limit: 30 messages per 5 minutes per user
     const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {

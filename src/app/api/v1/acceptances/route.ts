@@ -7,6 +7,7 @@ import { auditLog, getClientInfo } from "@/lib/audit";
 import { sendInterestReceivedEmail } from "@/lib/email";
 import { logger } from "@/lib/logger";
 import { createNotification } from "@/lib/notifications";
+import { requireVerifiedParticipation } from "@/lib/participation";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { detectRegulatedTrade, hasVerifiedLicence } from "@/lib/regulated-trades";
@@ -32,6 +33,9 @@ export const POST = withApiHandler(async (req: NextRequest) => {
       { status: 403 }
     );
   }
+
+  const participation = await requireVerifiedParticipation(user.id);
+  if (!participation.ok) return participation.response;
 
   // Rate limit: 10 expressions of interest per hour per user
   const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
