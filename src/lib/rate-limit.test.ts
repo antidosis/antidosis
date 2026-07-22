@@ -1,6 +1,37 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 
 import { rateLimit, getRateLimitIdentifier } from "./rate-limit";
+
+describe("rateLimit (redis outage degrades to memory)", () => {
+  it("falls back to the memory store when Redis is unreachable", async () => {
+    process.env.UPSTASH_REDIS_REST_URL = "https://dead.upstash.io";
+    process.env.UPSTASH_REDIS_REST_TOKEN = "dead-token";
+    vi.resetModules();
+    vi.doMock("@upstash/redis", () => ({
+      Redis: class {
+        incr() {
+          throw new Error("getaddrinfo ENOTFOUND dead.upstash.io");
+        }
+        expire() {
+          return Promise.resolve();
+        }
+        ttl() {
+          return Promise.resolve(1);
+        }
+      },
+    }));
+
+    const { rateLimit: rl } = await import("./rate-limit");
+    const result = await rl("redis-dead-key", { windowMs: 1000, maxRequests: 1 });
+
+    expect(result.allowed).toBe(true);
+
+    vi.doUnmock("@upstash/redis");
+    delete process.env.UPSTASH_REDIS_REST_URL;
+    delete process.env.UPSTASH_REDIS_REST_TOKEN;
+    vi.resetModules();
+  });
+});
 
 describe("rateLimit (memory fallback)", () => {
   const options = { windowMs: 1000, maxRequests: 3 };

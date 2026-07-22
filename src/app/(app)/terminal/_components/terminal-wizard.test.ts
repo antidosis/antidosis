@@ -354,13 +354,62 @@ describe("terminal-wizard", () => {
         wizard = advanceWizard(wizard, input).state;
       }
       expect(wizard.step).toBe(12);
-      // Step 12 is the _review dummy step; advancing past it reaches step 13 (done)
-      let result = advanceWizard(wizard, "/yes");
+      expect(wizard.prompt).toContain("Ready to Post?");
+      // /yes at the review step completes immediately
+      const result = advanceWizard(wizard, "/yes");
       expect(result.done).toBe(true);
-      expect(result.state.step).toBe(13);
-      // At step 13 (out of bounds), /yes triggers completion to -1
-      result = advanceWizard(result.state, "/yes");
       expect(result.state.step).toBe(-1);
+    });
+
+    it("does not submit arbitrary input at review step", () => {
+      let wizard = createWizard("post");
+      const inputs = [
+        "Fix roof",
+        "It's leaking",
+        "",
+        "",
+        "",
+        "service",
+        "1",
+        "$100",
+        "",
+        "",
+        "yes",
+        "Woy Woy",
+      ];
+      for (const input of inputs) {
+        wizard = advanceWizard(wizard, input).state;
+      }
+      const result = advanceWizard(wizard, "no wait typo");
+      expect(result.done).toBe(false);
+      expect(result.state.step).toBe(12);
+      expect(result.state.prompt).toContain("/yes to confirm");
+      expect(result.state.data._review).toBeUndefined();
+    });
+
+    it("maps numeric choices to their values", () => {
+      let wizard = createWizard("post");
+      const inputs = [
+        "Fix roof",
+        "It's leaking",
+        "",
+        "",
+        "",
+        "1", // offerType: first choice → "service"
+        "1", // needCategory: first compatible mode
+        "$100",
+        "",
+        "",
+        "1", // requiresContract: yes
+        "Woy Woy",
+      ];
+      for (const input of inputs) {
+        wizard = advanceWizard(wizard, input).state;
+      }
+      expect(wizard.data.offerType).toBe("service");
+      expect(typeof wizard.data.needCategory).toBe("string");
+      expect(wizard.data.needCategory).not.toBe("1");
+      expect(wizard.data.requiresContract).toBe(true);
     });
 
     it("completes on /confirm at review step", () => {
@@ -382,10 +431,8 @@ describe("terminal-wizard", () => {
       for (const input of inputs) {
         wizard = advanceWizard(wizard, input).state;
       }
-      let result = advanceWizard(wizard, "/confirm");
+      const result = advanceWizard(wizard, "/confirm");
       expect(result.done).toBe(true);
-      expect(result.state.step).toBe(13);
-      result = advanceWizard(result.state, "/confirm");
       expect(result.state.step).toBe(-1);
     });
 
@@ -569,11 +616,21 @@ describe("terminal-wizard", () => {
       const choices = [{ value: "c1", label: "Contract: Fix roof" }];
       const wizard = createReviewWizard(choices);
       const result = advanceWizard(wizard, "invalid");
-      // Note: createReviewWizard injects choices but advanceWizard uses getSteps()
-      // which returns the original REVIEW_WIZARD_STEPS. The original validate
-      // for targetId only checks for non-empty value, so "invalid" passes.
-      expect(result.state.step).toBe(1);
-      expect(result.state.data.targetId).toBe("invalid");
+      expect(result.state.step).toBe(0);
+      expect(result.state.prompt).toContain("Please choose a number between 1 and 1");
+      expect(result.state.data.targetId).toBeUndefined();
+    });
+
+    it("maps a numeric deal pick to the choice UUID", () => {
+      const choices = [
+        { value: "c1", label: "Contract: Fix roof" },
+        { value: "a1", label: "Acceptance: Paint fence" },
+      ];
+      let wizard = createReviewWizard(choices);
+      wizard = advanceWizard(wizard, "2").state;
+      expect(wizard.data.targetId).toBe("a1");
+      wizard = advanceWizard(wizard, "5").state;
+      expect(wizard.data.rating).toBe(5);
     });
   });
 

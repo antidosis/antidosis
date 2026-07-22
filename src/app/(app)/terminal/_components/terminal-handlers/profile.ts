@@ -199,15 +199,25 @@ export async function handleRemoveSkill(ctx: HandlerContext): Promise<HandlerRes
 
 export async function handlePhone(ctx: HandlerContext): Promise<HandlerResult> {
   const phone = ctx.args.join(" ") || "";
-  if (phone.length > 50) {
-    ctx.addSys("❌ Phone number must be under 50 characters.", "error");
+  if (!phone) {
+    ctx.addSys(
+      "Usage: /phone <australian mobile>\n\nSaves your mobile number. You still need to verify it with an OTP code (web dashboard → /verify-mobile) — verification is required before posting or messaging.",
+      "info"
+    );
+    return { handled: true };
+  }
+  if (phone.length > 20) {
+    ctx.addSys("❌ Mobile number must be under 20 characters.", "error");
     return { handled: true };
   }
   try {
-    await apiPatch("/api/v1/profiles/me", { phoneNumber: phone });
-    ctx.addSys(`✅ Phone updated to "${phone}".`, "success");
+    await apiPatch("/api/v1/profiles/me", { mobile: phone });
+    ctx.addSys(
+      `✅ Mobile saved as "${phone}".\n\n⚠️ Not verified yet — verify with an OTP code at /verify-mobile to unlock posting and messaging.`,
+      "success"
+    );
   } catch (err) {
-    ctx.addSys(friendlyError(err, "Failed to update phone."), "error");
+    ctx.addSys(friendlyError(err, "Failed to update mobile."), "error");
   }
   return { handled: true };
 }

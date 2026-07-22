@@ -169,6 +169,14 @@ const POST_WIZARD_STEPS: WizardStep[] = [
     prompt: "What are you offering in return?",
     choices: OFFER_TYPE_CHOICES,
     validate: choiceValidator(["1", "2", "3", "service", "item", "money"]),
+    transform: (value) => {
+      const v = value.trim();
+      const num = parseInt(v, 10);
+      if (!isNaN(num) && num >= 1 && num <= OFFER_TYPE_CHOICES.length) {
+        return OFFER_TYPE_CHOICES[num - 1].value;
+      }
+      return v;
+    },
   },
   {
     field: "needCategory",
@@ -183,6 +191,15 @@ const POST_WIZARD_STEPS: WizardStep[] = [
       if (!isNaN(num) && num >= 1 && num <= choices.length) return null;
       if ((valid as string[]).includes(value.trim())) return null;
       return "Please choose a valid category number or value.";
+    },
+    transform: (value, data) => {
+      const v = value.trim();
+      const choices = getNeedCategoryChoices(data.offerType);
+      const num = parseInt(v, 10);
+      if (!isNaN(num) && num >= 1 && num <= choices.length) {
+        return choices[num - 1].value;
+      }
+      return v;
     },
     optional: true,
   },
@@ -444,7 +461,7 @@ export function getPrompt(
 
   const steps = getSteps(type, data);
   const s = steps[step];
-  if (!s) {
+  if (!s || s.type === "review") {
     if (type === "post") return buildPostReview(data);
     if (type === "review") return buildReviewReview(data);
     if (type === "credential") return buildCredentialReview(data);
@@ -457,6 +474,14 @@ export function getPrompt(
     const choices = getNeedCategoryChoices(data.offerType);
     const choiceText = choices.map((c) => `   ${c.label}`).join("\n");
     return `${s.prompt}\n${choiceText}\n\n> `;
+  }
+
+  // Review wizard: show the numbered deal list persisted in wizard data
+  if (type === "review" && s.field === "targetId" && Array.isArray(data._dealChoices)) {
+    const list = (data._dealChoices as { value: string; label: string }[])
+      .map((c, i) => `   ${i + 1}. ${c.label}`)
+      .join("\n");
+    return `🧙 ${getWizardTitle(type)} (Step ${step + 1}/${getTotalSteps(type, data)})\n\n${s.prompt}\n${list}\n\n> `;
   }
 
   let prompt = `🧙 ${getWizardTitle(type)} (Step ${step + 1}/${getTotalSteps(type, data)})\n\n${s.prompt}`;
@@ -553,8 +578,9 @@ export function advanceWizard(
   const steps = getSteps(state.type, state.data);
   const currentStep = steps[state.step];
 
-  if (!currentStep) {
-    // Review step
+  if (!currentStep || currentStep.type === "review") {
+    // Review/confirm step: only /yes submits, /edit jumps back, anything else
+    // re-shows the hint — never store-and-submit arbitrary input.
     if (text === "/yes" || text === "/confirm" || text === "/submit") {
       return {
         state: { ...state, step: -1, prompt: "" },
@@ -606,13 +632,45 @@ export function advanceWizard(
     };
   }
 
+  // Review wizard: re-derive the deal choices persisted in wizard data so a
+  // numeric pick maps to the deal's UUID (never a raw "1").
+  let effectiveStep = currentStep;
+  if (
+    state.type === "review" &&
+    currentStep &&
+    currentStep.field === "targetId" &&
+    Array.isArray(state.data._dealChoices)
+  ) {
+    const dealChoices = state.data._dealChoices as { value: string; label: string }[];
+    effectiveStep = {
+      ...currentStep,
+      choices: dealChoices,
+      validate: (value: string) => {
+        const v = value.trim();
+        if (!v) return "Please select a completed deal to review.";
+        const num = parseInt(v, 10);
+        if (!isNaN(num) && num >= 1 && num <= dealChoices.length) return null;
+        if (dealChoices.some((c) => c.value === v)) return null;
+        return `Please choose a number between 1 and ${dealChoices.length}.`;
+      },
+      transform: (value: string) => {
+        const v = value.trim();
+        const num = parseInt(v, 10);
+        if (!isNaN(num) && num >= 1 && num <= dealChoices.length) {
+          return dealChoices[num - 1].value;
+        }
+        return v;
+      },
+    };
+  }
+
   // Skip optional fields
-  if (currentStep.optional && !text) {
+  if (effectiveStep.optional && !text) {
     const nextStep = state.step + 1;
     const newData = { ...state.data };
     // Only clear field if it wasn't pre-populated (e.g. attachments captured by client)
-    if (!(currentStep.field in newData)) {
-      newData[currentStep.field] = undefined;
+    if (!(effectiveStep.field in newData)) {
+      newData[effectiveStep.field] = undefined;
     }
     return {
       state: {
@@ -628,8 +686,8 @@ export function advanceWizard(
   }
 
   // Validation
-  if (currentStep.validate) {
-    const error = currentStep.validate(text, state.data);
+  if (effectiveStep.validate) {
+    const error = effectiveStep.validate(text, state.data);
     if (error) {
       return {
         state: {
@@ -645,8 +703,8 @@ export function advanceWizard(
 
   // Transform and store
   const rawValue = text.trim();
-  const value = currentStep.transform ? currentStep.transform(rawValue, state.data) : rawValue;
-  const newData = { ...state.data, [currentStep.field]: value };
+  const value = effectiveStep.transform ? effectiveStep.transform(rawValue, state.data) : rawValue;
+  const newData = { ...state.data, [effectiveStep.field]: value };
 
   const nextStep = state.step + 1;
   return {
@@ -680,17 +738,16 @@ function buildPostReview(data: Record<string, any>): string {
     `  │  2. Description  ${truncate(data.description || "—", 40)}\n` +
     `  │  3. Deadline     ${data.deadline || "—"}\n` +
     `  │  4. Time         ${data.timeRange || "—"}\n` +
-    `  │  5. Skills       ${(data.requiredSkills || []).join(", ") || "None"}\n` +
-    `  │  6. Need Photos  ${hasNeedImages ? data.images.length + " attached" : "None"}\n` +
+    `  │  5. Need Photos  ${hasNeedImages ? data.images.length + " attached" : "None"}\n` +
     `  │\n` +
-    `  │  7. Offer Type   ${data.offerType || "—"}\n` +
-    `  │  8. Category     ${mode?.label || "—"}\n` +
-    `  │  9. Offer Desc   ${truncate(data.offerDescription || "—", 40)}\n` +
-    `  │ 10. Value        ${data.offerValue ? "$" + data.offerValue : "—"}\n` +
-    `  │ 11. Offer Photos ${hasOfferImages ? data.offerImages.length + " attached" : "None"}\n` +
+    `  │  6. Offer Type   ${data.offerType || "—"}\n` +
+    `  │  7. Category     ${mode?.label || "—"}\n` +
+    `  │  8. Offer Desc   ${truncate(data.offerDescription || "—", 40)}\n` +
+    `  │  9. Value        ${data.offerValue ? "$" + data.offerValue : "—"}\n` +
+    `  │ 10. Offer Photos ${hasOfferImages ? data.offerImages.length + " attached" : "None"}\n` +
     `  │\n` +
-    `  │ 12. Contract     ${data.requiresContract ? "Required" : "Not required"}\n` +
-    `  │ 13. Location     ${data.locationName || "—"}\n` +
+    `  │ 11. Contract     ${data.requiresContract ? "Required" : "Not required"}\n` +
+    `  │ 12. Location     ${data.locationName || "—"}\n` +
     `  └─────────────────────────────────────────────────────────┘\n\n` +
     `  Post this need? /yes to confirm, /edit <number> to change, /cancel to abort.`
   );
@@ -768,7 +825,8 @@ export function createReviewWizard(choices: { value: string; label: string }[]):
   const state: WizardState = {
     type: "review",
     step: 0,
-    data: {},
+    // Persisted (serializable) so advanceWizard can map numeric picks to UUIDs
+    data: { _dealChoices: choices },
     prompt: getReviewPrompt(steps, 0, {}),
   };
   return state;

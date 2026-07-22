@@ -398,21 +398,41 @@ describe("profile handlers", () => {
   });
 
   describe("handlePhone", () => {
-    it("rejects phone over 50 chars", async () => {
-      const ctx = makeCtx({ args: ["x".repeat(51)] });
+    it("rejects phone over 20 chars", async () => {
+      const ctx = makeCtx({ args: ["x".repeat(21)] });
       await handlePhone(ctx);
       expect(ctx.addSys).toHaveBeenCalledWith(
-        expect.stringContaining("under 50 characters"),
+        expect.stringContaining("under 20 characters"),
         "error"
       );
     });
 
-    it("updates phone successfully", async () => {
+    it("shows usage when no number given", async () => {
+      const ctx = makeCtx({ args: [] });
+      await handlePhone(ctx);
+      expect(ctx.addSys).toHaveBeenCalledWith(
+        expect.stringContaining("/phone <australian mobile>"),
+        "info"
+      );
+    });
+
+    it("saves mobile and points to OTP verification", async () => {
       vi.mocked(global.fetch).mockResolvedValue({ ok: true, json: async () => ({}) } as Response);
       const ctx = makeCtx({ args: ["+61 400 000 000"] });
       await handlePhone(ctx);
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining("/api/v1/profiles/me"),
+        expect.objectContaining({
+          method: "PATCH",
+          body: JSON.stringify({ mobile: "+61 400 000 000" }),
+        })
+      );
       expect(ctx.addSys).toHaveBeenCalledWith(
-        expect.stringContaining('Phone updated to "+61 400 000 000"'),
+        expect.stringContaining('Mobile saved as "+61 400 000 000"'),
+        "success"
+      );
+      expect(ctx.addSys).toHaveBeenCalledWith(
+        expect.stringContaining("Not verified yet"),
         "success"
       );
     });
@@ -422,7 +442,7 @@ describe("profile handlers", () => {
       const ctx = makeCtx({ args: ["123"] });
       await handlePhone(ctx);
       expect(ctx.addSys).toHaveBeenCalledWith(
-        expect.stringContaining("Failed to update phone"),
+        expect.stringContaining("Failed to update mobile"),
         "error"
       );
     });

@@ -154,7 +154,14 @@ export const POST = withApiHandler(async (req: NextRequest) => {
   }
 
   const body = await req.json();
-  const data = createNeedSchema.parse(body);
+  const parsed = createNeedSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Invalid request", details: parsed.error.flatten() },
+      { status: 400 }
+    );
+  }
+  const data = parsed.data;
 
   // Trial restriction: Central Coast NSW only
   if (!data.isLocal || !data.locationName || !isValidCentralCoastSuburb(data.locationName)) {

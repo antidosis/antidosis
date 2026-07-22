@@ -97,7 +97,16 @@ export async function rateLimit(
   const key = `ratelimit:v1:${identifier}`;
 
   if (redis) {
-    return redisRateLimit(key, options);
+    try {
+      return await redisRateLimit(key, options);
+    } catch (error) {
+      // Never let a Redis outage take the API down — degrade to the
+      // per-instance memory limiter and log for alerting.
+      console.error(
+        "[rate-limit] Redis unreachable; falling back to memory store:",
+        error instanceof Error ? error.message : error
+      );
+    }
   }
 
   return memoryRateLimit(key, options);

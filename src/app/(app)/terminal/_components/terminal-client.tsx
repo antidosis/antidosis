@@ -780,11 +780,20 @@ export default function TerminalClient() {
       formData.append("file", file);
       formData.append("folder", "terminal");
       const res = await fetch("/api/v1/upload", { method: "POST", body: formData });
-      const data = await res.json();
       if (!res.ok) {
-        addSys(data.error || "Upload failed", "error");
+        const text = await res.text().catch(() => "");
+        let msg = `Upload failed (${res.status})`;
+        try {
+          const j = JSON.parse(text);
+          if (j.error) msg = j.error;
+        } catch {
+          // Non-JSON failure (e.g. platform body-size cap) — surface raw text
+          if (text) msg += `: ${text.slice(0, 120)}`;
+        }
+        addSys(msg, "error");
         return null;
       }
+      const data = await res.json();
       return { url: data.url, type: file.type, name: file.name };
     } catch {
       addSys("Upload failed", "error");
@@ -1079,6 +1088,20 @@ export default function TerminalClient() {
         ]);
         const cmd = text.slice(1).split(/\s+/)[0].toLowerCase();
         if (safeCommands.has(cmd)) {
+          // Tutorial steps expect the command itself as the answer — advance
+          // the wizard first so it can check and progress; run the command for
+          // real only when the answer was correct.
+          if (wizard.type === "tutorial") {
+            const prevStep = wizard.step;
+            const result = advanceWizard(wizard, text);
+            setWizard(result.state);
+            if (result.state.step !== prevStep || result.done) {
+              const ctx = buildHandlerContext();
+              await dispatchCommand(cmd, text.slice(1).split(/\s+/).slice(1), ctx);
+            }
+            setInput("");
+            return;
+          }
           const ctx = buildHandlerContext();
           await dispatchCommand(cmd, text.slice(1).split(/\s+/).slice(1), ctx);
           setInput("");
@@ -1095,7 +1118,10 @@ export default function TerminalClient() {
         }
         if (pendingAttachments.length > 0) {
           const urls = pendingAttachments.map((a) => a.url);
-          wizard.data[currentStep.field] = urls;
+          setWizard({
+            ...wizard,
+            data: { ...wizard.data, [currentStep.field]: urls },
+          });
           setPendingAttachments([]);
         }
       }
@@ -1723,7 +1749,7 @@ export default function TerminalClient() {
                 type="file"
                 className="hidden"
                 onChange={handleFileSelect}
-                accept="image/*,.pdf,.doc,.docx"
+                accept="image/*,audio/*"
               />
               <button
                 type="button"
