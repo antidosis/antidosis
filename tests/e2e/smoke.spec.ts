@@ -17,14 +17,14 @@ test.describe("Smoke tests", () => {
 
   test("terminal page requires auth", async ({ page }) => {
     await page.goto("/terminal");
-    // Should redirect to login or show auth gate
-    await expect(
-      page.locator("text=login").or(page.locator("text=Authentication required"))
-    ).toBeVisible();
+    // Should redirect to login
+    await expect(page).toHaveURL(/\/login/, { timeout: 10_000 });
   });
 
   test("needs page is accessible", async ({ page }) => {
     await page.goto("/needs");
-    await expect(page.locator("text=browse needs").or(page.locator("text=Needs"))).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Browse Needs" })).toBeVisible({
+      timeout: 10_000,
+    });
   });
 });
