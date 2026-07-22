@@ -54,7 +54,7 @@ export async function handleCat(ctx: HandlerContext): Promise<HandlerResult> {
     ctx.addSys("Usage: /cat <path-or-id>", "error");
     return { handled: true };
   }
-  if (/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(path)) {
+  if (/^[a-f0-9-]{4,36}$/i.test(path) && !path.includes("/")) {
     ctx.router.push(`/needs/${path}`);
     ctx.addSys(`Opening need ${path}...`, "info");
     return { handled: true };

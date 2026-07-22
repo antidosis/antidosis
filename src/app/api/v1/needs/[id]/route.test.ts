@@ -89,7 +89,7 @@ describe("GET /api/v1/needs/[id]", () => {
   it("returns need for unauthenticated guest with normalized poster fields", async () => {
     mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
     mockNeedFindUnique.mockResolvedValue({
-      id: "need-1",
+      id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       title: "Test Need",
       poster: { id: "poster-1", fullName: "Poster", avatarUrl: null, isVerified: true },
       requiredSkills: [],
@@ -98,7 +98,7 @@ describe("GET /api/v1/needs/[id]", () => {
     });
 
     const res = await GET(makeRequest("http://localhost/api/v1/needs/need-1"), {
-      params: { id: "need-1" },
+      params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
     });
     const body = await res.json();
 
@@ -116,7 +116,7 @@ describe("GET /api/v1/needs/[id]", () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
     mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
     mockNeedFindUnique.mockResolvedValueOnce({ posterId: "poster-profile" }).mockResolvedValueOnce({
-      id: "need-1",
+      id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       title: "Test Need",
       poster: {
         id: "poster-1",
@@ -138,7 +138,7 @@ describe("GET /api/v1/needs/[id]", () => {
     });
 
     const res = await GET(makeRequest("http://localhost/api/v1/needs/need-1"), {
-      params: { id: "need-1" },
+      params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
     });
     const body = await res.json();
 
@@ -150,7 +150,7 @@ describe("GET /api/v1/needs/[id]", () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
     mockProfileFindUnique.mockResolvedValue({ id: "poster-profile" });
     mockNeedFindUnique.mockResolvedValueOnce({ posterId: "poster-profile" }).mockResolvedValueOnce({
-      id: "need-1",
+      id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       title: "Test Need",
       poster: {
         id: "poster-1",
@@ -172,7 +172,7 @@ describe("GET /api/v1/needs/[id]", () => {
     });
 
     const res = await GET(makeRequest("http://localhost/api/v1/needs/need-1"), {
-      params: { id: "need-1" },
+      params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
     });
     const body = await res.json();
 
@@ -186,7 +186,7 @@ describe("GET /api/v1/needs/[id]", () => {
     mockNeedFindUnique.mockResolvedValue(null);
 
     const res = await GET(makeRequest("http://localhost/api/v1/needs/need-1"), {
-      params: { id: "need-1" },
+      params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
     });
     const body = await res.json();
 
@@ -197,7 +197,7 @@ describe("GET /api/v1/needs/[id]", () => {
   it("includes x-request-id header", async () => {
     mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
     mockNeedFindUnique.mockResolvedValue({
-      id: "need-1",
+      id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       title: "Test Need",
       poster: { id: "poster-1", fullName: "Poster", avatarUrl: null, isVerified: true },
       requiredSkills: [],
@@ -206,7 +206,7 @@ describe("GET /api/v1/needs/[id]", () => {
     });
 
     const res = await GET(makeRequest("http://localhost/api/v1/needs/need-1"), {
-      params: { id: "need-1" },
+      params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
     });
 
     expect(res.headers.get("x-request-id")).toMatch(/^\w+-\w+$/);
@@ -238,7 +238,7 @@ describe("PATCH /api/v1/needs/[id]", () => {
         method: "PATCH",
         body: JSON.stringify({}),
       }),
-      { params: { id: "need-1" } }
+      { params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
     const body = await res.json();
 
@@ -255,7 +255,7 @@ describe("PATCH /api/v1/needs/[id]", () => {
         method: "PATCH",
         body: JSON.stringify({ title: "Updated" }),
       }),
-      { params: { id: "need-1" } }
+      { params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
     const body = await res.json();
 
@@ -273,7 +273,7 @@ describe("PATCH /api/v1/needs/[id]", () => {
         method: "PATCH",
         body: JSON.stringify({ title: "Updated" }),
       }),
-      { params: { id: "need-1" } }
+      { params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
     const body = await res.json();
 
@@ -295,7 +295,7 @@ describe("PATCH /api/v1/needs/[id]", () => {
         method: "PATCH",
         body: JSON.stringify({ title: "Updated" }),
       }),
-      { params: { id: "need-1" } }
+      { params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
     const body = await res.json();
 
@@ -317,7 +317,7 @@ describe("PATCH /api/v1/needs/[id]", () => {
         method: "PATCH",
         body: JSON.stringify({ title: "Updated" }),
       }),
-      { params: { id: "need-1" } }
+      { params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
     const body = await res.json();
 
@@ -335,7 +335,7 @@ describe("PATCH /api/v1/needs/[id]", () => {
         method: "PATCH",
         body: JSON.stringify({ title: "ab" }),
       }),
-      { params: { id: "need-1" } }
+      { params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
     const body = await res.json();
 
@@ -353,7 +353,7 @@ describe("PATCH /api/v1/needs/[id]", () => {
         method: "PATCH",
         body: JSON.stringify({ title: "Valid Title", locationName: "Sydney" }),
       }),
-      { params: { id: "need-1" } }
+      { params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
     const body = await res.json();
 
@@ -366,7 +366,7 @@ describe("PATCH /api/v1/needs/[id]", () => {
     mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
     mockNeedFindUnique.mockResolvedValue({ posterId: "profile-1", status: "open", isLocal: true });
     mockNeedUpdate.mockResolvedValue({
-      id: "need-1",
+      id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       title: "Updated Title",
       poster: { id: "profile-1", fullName: "Test", avatarUrl: null },
       requiredSkills: [],
@@ -377,7 +377,7 @@ describe("PATCH /api/v1/needs/[id]", () => {
         method: "PATCH",
         body: JSON.stringify({ title: "Updated Title" }),
       }),
-      { params: { id: "need-1" } }
+      { params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
     const body = await res.json();
 
@@ -391,7 +391,7 @@ describe("PATCH /api/v1/needs/[id]", () => {
     mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
     mockNeedFindUnique.mockResolvedValue({ posterId: "profile-1", status: "open", isLocal: true });
     mockNeedUpdate.mockResolvedValue({
-      id: "need-1",
+      id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       title: "Updated Title",
       poster: { id: "profile-1", fullName: "Test", avatarUrl: null },
       requiredSkills: [{ id: "skill-1", name: "Plumbing" }],
@@ -406,14 +406,16 @@ describe("PATCH /api/v1/needs/[id]", () => {
           requiredSkills: ["Plumbing"],
         }),
       }),
-      { params: { id: "need-1" } }
+      { params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
     const body = await res.json();
 
     expect(res.status).toBe(200);
     expect(body.need.title).toBe("Updated Title");
     expect(mockTransaction).toHaveBeenCalled();
-    expect(mockNeedSkillDeleteMany).toHaveBeenCalledWith({ where: { needId: "need-1" } });
+    expect(mockNeedSkillDeleteMany).toHaveBeenCalledWith({
+      where: { needId: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
+    });
   });
 
   it("includes x-request-id header", async () => {
@@ -421,7 +423,7 @@ describe("PATCH /api/v1/needs/[id]", () => {
     mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
     mockNeedFindUnique.mockResolvedValue({ posterId: "profile-1", status: "open", isLocal: true });
     mockNeedUpdate.mockResolvedValue({
-      id: "need-1",
+      id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       title: "Updated",
       poster: { id: "profile-1", fullName: "Test", avatarUrl: null },
       requiredSkills: [],
@@ -432,7 +434,7 @@ describe("PATCH /api/v1/needs/[id]", () => {
         method: "PATCH",
         body: JSON.stringify({ title: "Updated" }),
       }),
-      { params: { id: "need-1" } }
+      { params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
 
     expect(res.headers.get("x-request-id")).toMatch(/^\w+-\w+$/);
@@ -452,7 +454,7 @@ describe("DELETE /api/v1/needs/[id]", () => {
 
     const res = await DELETE(
       makeRequest("http://localhost/api/v1/needs/need-1", { method: "DELETE" }),
-      { params: { id: "need-1" } }
+      { params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
     const body = await res.json();
 
@@ -466,7 +468,7 @@ describe("DELETE /api/v1/needs/[id]", () => {
 
     const res = await DELETE(
       makeRequest("http://localhost/api/v1/needs/need-1", { method: "DELETE" }),
-      { params: { id: "need-1" } }
+      { params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
     const body = await res.json();
 
@@ -481,7 +483,7 @@ describe("DELETE /api/v1/needs/[id]", () => {
 
     const res = await DELETE(
       makeRequest("http://localhost/api/v1/needs/need-1", { method: "DELETE" }),
-      { params: { id: "need-1" } }
+      { params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
     const body = await res.json();
 
@@ -496,7 +498,7 @@ describe("DELETE /api/v1/needs/[id]", () => {
 
     const res = await DELETE(
       makeRequest("http://localhost/api/v1/needs/need-1", { method: "DELETE" }),
-      { params: { id: "need-1" } }
+      { params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
     const body = await res.json();
 
@@ -511,7 +513,7 @@ describe("DELETE /api/v1/needs/[id]", () => {
 
     const res = await DELETE(
       makeRequest("http://localhost/api/v1/needs/need-1", { method: "DELETE" }),
-      { params: { id: "need-1" } }
+      { params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
     const body = await res.json();
 
@@ -523,17 +525,19 @@ describe("DELETE /api/v1/needs/[id]", () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
     mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
     mockNeedFindUnique.mockResolvedValue({ posterId: "profile-1", status: "open" });
-    mockNeedDelete.mockResolvedValue({ id: "need-1" });
+    mockNeedDelete.mockResolvedValue({ id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" });
 
     const res = await DELETE(
       makeRequest("http://localhost/api/v1/needs/need-1", { method: "DELETE" }),
-      { params: { id: "need-1" } }
+      { params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
     const body = await res.json();
 
     expect(res.status).toBe(200);
     expect(body.success).toBe(true);
-    expect(mockNeedDelete).toHaveBeenCalledWith({ where: { id: "need-1" } });
+    expect(mockNeedDelete).toHaveBeenCalledWith({
+      where: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
+    });
   });
 
   it("includes x-request-id header", async () => {
@@ -543,7 +547,7 @@ describe("DELETE /api/v1/needs/[id]", () => {
 
     const res = await DELETE(
       makeRequest("http://localhost/api/v1/needs/need-1", { method: "DELETE" }),
-      { params: { id: "need-1" } }
+      { params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
 
     expect(res.headers.get("x-request-id")).toMatch(/^\w+-\w+$/);

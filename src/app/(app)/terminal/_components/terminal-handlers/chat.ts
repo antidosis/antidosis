@@ -43,6 +43,28 @@ export async function handleChat(ctx: HandlerContext): Promise<HandlerResult> {
 export async function handleDm(ctx: HandlerContext): Promise<HandlerResult> {
   const recipient = ctx.args[0];
   const message = ctx.args.slice(1).join(" ");
+
+  // /dm threads — list all conversations
+  if (recipient?.toLowerCase() === "threads") {
+    const threads = ctx.dmThreads;
+    if (!threads.length) {
+      ctx.addSys("No conversations yet. Start one with /dm <name>.", "info");
+      return { handled: true };
+    }
+    const list = threads
+      .slice(0, 20)
+      .map(
+        (t: any) =>
+          `  ${t.otherUser.fullName || "User"}${t.unreadCount > 0 ? ` (${t.unreadCount} unread)` : ""} — ${(t.lastMessage?.content || "").slice(0, 40) || "no messages yet"}`
+      )
+      .join("\n");
+    ctx.addSys(
+      `💬 Your conversations (${threads.length})\n${list}\n\n💡 /dm <name> to message someone`,
+      "info"
+    );
+    return { handled: true };
+  }
+
   if (!recipient) {
     const lastUser = ctx.session.lastViewed?.userId;
     if (lastUser) {
@@ -104,10 +126,8 @@ export async function handleDm(ctx: HandlerContext): Promise<HandlerResult> {
           if (msgRes.ok) {
             ctx.addSys(`Sent DM to ${p.fullName || p.id}: ${message}`, "success");
           } else {
-            ctx.addSys(
-              `Started DM with ${p.fullName || p.id}. (Message failed to send)`,
-              "success"
-            );
+            const err = await msgRes.json().catch(() => ({}));
+            ctx.addSys(err.error || "Message failed to send", "error");
           }
         } else {
           ctx.addSys(`Started DM with ${p.fullName || p.id}.`, "success");

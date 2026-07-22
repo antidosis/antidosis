@@ -5,6 +5,7 @@ import { z } from "zod";
 import { withApiHandler } from "@/lib/api-handler";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
+import { isUuid, resolveEntityId } from "@/lib/resolve-id";
 import { createReviewSchema } from "@/lib/schemas";
 import { sanitizePlainText } from "@/lib/security/sanitize";
 import { createClient } from "@/lib/supabase/server";
@@ -35,6 +36,13 @@ export const POST = withApiHandler(async (req: NextRequest) => {
     }
 
     const body = await req.json();
+    // Accept unique id prefixes (as printed in terminal tables)
+    if (typeof body?.contractId === "string" && !isUuid(body.contractId)) {
+      body.contractId = await resolveEntityId("contract", body.contractId);
+    }
+    if (typeof body?.acceptanceId === "string" && !isUuid(body.acceptanceId)) {
+      body.acceptanceId = await resolveEntityId("acceptance", body.acceptanceId);
+    }
     const { contractId, acceptanceId, receiverId, rating, comment, privateFeedback } =
       createReviewSchema.parse(body);
 

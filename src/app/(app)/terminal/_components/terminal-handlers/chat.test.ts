@@ -201,10 +201,7 @@ describe("handleDm", () => {
       } as Response);
     const ctx = makeCtx({ args: ["Alice", "hello"] });
     await handleDm(ctx);
-    expect(ctx.addSys).toHaveBeenCalledWith(
-      expect.stringContaining("Started DM with Alice"),
-      "success"
-    );
+    expect(ctx.addSys).toHaveBeenCalledWith("blocked", "error");
   });
 
   it("handles thread creation failure", async () => {

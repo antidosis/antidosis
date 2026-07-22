@@ -3,7 +3,7 @@
 import { generateHelpText, generateCommandsText, generateWhatisText } from "../terminal-commands";
 import { popUndo, peekUndo, formatUndoDescription } from "../terminal-undo";
 import type { HandlerContext, HandlerResult } from "./types";
-import { apiPost, apiGet, sanitizePath } from "./utils";
+import { apiPost, apiGet, friendlyError, sanitizePath } from "./utils";
 
 export async function handleHelp(ctx: HandlerContext): Promise<HandlerResult> {
   const arg = ctx.args[0]?.toLowerCase();
@@ -116,8 +116,8 @@ export async function handleMe(ctx: HandlerContext): Promise<HandlerResult> {
         channelId: ctx.activeContext.id,
         content: `*${ctx.myProfile?.fullName || "Someone"} ${text}*`,
       });
-    } catch {
-      ctx.addSys(`* ${ctx.myProfile?.fullName || "You"} ${text}`, "info");
+    } catch (err) {
+      ctx.addSys(friendlyError(err, "Couldn't post that action."), "error");
     }
   } else if (ctx.activeContext?.type === "dm") {
     try {
@@ -125,8 +125,8 @@ export async function handleMe(ctx: HandlerContext): Promise<HandlerResult> {
         userId: ctx.activeContext.otherUserId,
         content: `*${ctx.myProfile?.fullName || "Someone"} ${text}*`,
       });
-    } catch {
-      ctx.addSys(`* ${ctx.myProfile?.fullName || "You"} ${text}`, "info");
+    } catch (err) {
+      ctx.addSys(friendlyError(err, "Couldn't post that action."), "error");
     }
   } else {
     ctx.addSys(`* ${ctx.myProfile?.fullName || "You"} ${text}`, "info");

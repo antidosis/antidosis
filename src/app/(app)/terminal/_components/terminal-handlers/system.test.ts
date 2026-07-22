@@ -294,17 +294,17 @@ describe("system handlers", () => {
       );
     });
 
-    it("falls back to local display on channel post failure", async () => {
+    it("shows an error on channel post failure", async () => {
       vi.mocked(global.fetch).mockRejectedValue(new Error(""));
       const ctx = makeCtx({
         args: ["waves"],
         activeContext: { type: "channel", id: "ch1", name: "general" },
       });
       await handleMe(ctx);
-      expect(ctx.addSys).toHaveBeenCalledWith(expect.stringContaining("waves"), "info");
+      expect(ctx.addSys).toHaveBeenCalledWith("Couldn't post that action.", "error");
     });
 
-    it("falls back to local display on dm post failure", async () => {
+    it("shows an error on dm post failure", async () => {
       vi.mocked(global.fetch).mockRejectedValue(new Error(""));
       const ctx = makeCtx({
         args: ["waves"],
@@ -316,7 +316,7 @@ describe("system handlers", () => {
         },
       });
       await handleMe(ctx);
-      expect(ctx.addSys).toHaveBeenCalledWith(expect.stringContaining("waves"), "info");
+      expect(ctx.addSys).toHaveBeenCalledWith("Couldn't post that action.", "error");
     });
 
     it("displays locally when no context", async () => {

@@ -11,6 +11,7 @@ import { requireVerifiedParticipation } from "@/lib/participation";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { detectRegulatedTrade, hasVerifiedLicence } from "@/lib/regulated-trades";
+import { isIdPrefixLike, isUuid, resolveEntityId } from "@/lib/resolve-id";
 import { createClient } from "@/lib/supabase/server";
 
 const createSchema = z.object({
@@ -50,6 +51,20 @@ export const POST = withApiHandler(async (req: NextRequest) => {
   }
 
   const body = await req.json();
+  // Accept unique id prefixes (as printed in terminal tables) for needId;
+  // leave clearly malformed ids to schema validation (400)
+  if (
+    body?.needId &&
+    typeof body.needId === "string" &&
+    !isUuid(body.needId) &&
+    isIdPrefixLike(body.needId)
+  ) {
+    const resolved = await resolveEntityId("need", body.needId);
+    if (!resolved) {
+      return NextResponse.json({ error: "Need not found" }, { status: 404 });
+    }
+    body.needId = resolved;
+  }
   const parseResult = createSchema.safeParse(body);
   if (!parseResult.success) {
     return NextResponse.json({ error: parseResult.error.errors }, { status: 400 });

@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 
 import { Upload, X, Loader2 } from "lucide-react";
 
+import { compressImage } from "@/lib/image-compress";
 import { cn } from "@/lib/utils";
 
 import { Button } from "./button";
@@ -37,8 +38,10 @@ export function FileUpload({
 
     setUploading(true);
     try {
+      // Compress large photos client-side to stay under the platform body cap
+      const upload = await compressImage(file);
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", upload);
       formData.append("folder", folder);
 
       const res = await fetch("/api/v1/upload", { method: "POST", body: formData });

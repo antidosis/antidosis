@@ -120,7 +120,7 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
       method: "PATCH",
       body: JSON.stringify({ status: "accepted" }),
     });
-    const res = await PATCH(req, { params: { id: "abc" } });
+    const res = await PATCH(req, { params: { id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } });
     expect(res.status).toBe(401);
     const json = await res.json();
     expect(json.error).toBe("Unauthorized");
@@ -135,7 +135,7 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
       method: "PATCH",
       body: JSON.stringify({ status: "accepted" }),
     });
-    const res = await PATCH(req, { params: { id: "abc" } });
+    const res = await PATCH(req, { params: { id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } });
     expect(res.status).toBe(403);
     const json = await res.json();
     expect(json.code).toBe("EMAIL_NOT_VERIFIED");
@@ -147,7 +147,7 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
       method: "PATCH",
       body: JSON.stringify({ status: "invalid" }),
     });
-    const res = await PATCH(req, { params: { id: "abc" } });
+    const res = await PATCH(req, { params: { id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } });
     expect(res.status).toBe(400);
   });
 
@@ -158,7 +158,7 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
       method: "PATCH",
       body: JSON.stringify({ status: "accepted" }),
     });
-    const res = await PATCH(req, { params: { id: "abc" } });
+    const res = await PATCH(req, { params: { id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } });
     expect(res.status).toBe(404);
     const json = await res.json();
     expect(json.error).toBe("Acceptance not found");
@@ -167,7 +167,7 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
   it("returns 404 when profile not found", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
     mockAcceptanceFindUnique.mockResolvedValue({
-      id: "abc",
+      id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       need: { posterId: "p1" },
       userId: "u1",
       needId: "n1",
@@ -178,7 +178,7 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
       method: "PATCH",
       body: JSON.stringify({ status: "accepted" }),
     });
-    const res = await PATCH(req, { params: { id: "abc" } });
+    const res = await PATCH(req, { params: { id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } });
     expect(res.status).toBe(404);
     const json = await res.json();
     expect(json.error).toBe("Profile not found");
@@ -187,7 +187,7 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
   it("returns 403 when withdrawing as non-creator", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
     mockAcceptanceFindUnique.mockResolvedValue({
-      id: "abc",
+      id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       need: { posterId: "p1" },
       userId: "u2",
       needId: "n1",
@@ -198,7 +198,7 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
       method: "PATCH",
       body: JSON.stringify({ status: "withdrawn" }),
     });
-    const res = await PATCH(req, { params: { id: "abc" } });
+    const res = await PATCH(req, { params: { id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } });
     expect(res.status).toBe(403);
     const json = await res.json();
     expect(json.error).toBe("Forbidden");
@@ -207,7 +207,7 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
   it("returns 400 when withdrawing already selected acceptance", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
     mockAcceptanceFindUnique.mockResolvedValue({
-      id: "abc",
+      id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       need: { posterId: "p1" },
       userId: "prof-1",
       needId: "n1",
@@ -218,7 +218,7 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
       method: "PATCH",
       body: JSON.stringify({ status: "withdrawn" }),
     });
-    const res = await PATCH(req, { params: { id: "abc" } });
+    const res = await PATCH(req, { params: { id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } });
     expect(res.status).toBe(400);
     const json = await res.json();
     expect(json.error).toContain("Cannot withdraw");
@@ -227,7 +227,7 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
   it("returns 403 when non-poster tries accepted/declined/selected/removed", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
     mockAcceptanceFindUnique.mockResolvedValue({
-      id: "abc",
+      id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       need: { posterId: "p1" },
       userId: "u2",
       needId: "n1",
@@ -238,7 +238,7 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
       method: "PATCH",
       body: JSON.stringify({ status: "accepted" }),
     });
-    const res = await PATCH(req, { params: { id: "abc" } });
+    const res = await PATCH(req, { params: { id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } });
     expect(res.status).toBe(403);
     const json = await res.json();
     expect(json.error).toBe("Forbidden");
@@ -247,7 +247,7 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
   it("returns 400 when removing already selected acceptance", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
     mockAcceptanceFindUnique.mockResolvedValue({
-      id: "abc",
+      id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       need: { posterId: "prof-1" },
       userId: "u2",
       needId: "n1",
@@ -258,7 +258,7 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
       method: "PATCH",
       body: JSON.stringify({ status: "removed" }),
     });
-    const res = await PATCH(req, { params: { id: "abc" } });
+    const res = await PATCH(req, { params: { id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } });
     expect(res.status).toBe(400);
     const json = await res.json();
     expect(json.error).toContain("Cannot remove");
@@ -267,7 +267,7 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
   it("returns 400 when selecting acceptance that does not require contract", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
     mockAcceptanceFindUnique.mockResolvedValue({
-      id: "abc",
+      id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       need: { posterId: "prof-1", requiresContract: false },
       userId: "u2",
       needId: "n1",
@@ -278,7 +278,7 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
       method: "PATCH",
       body: JSON.stringify({ status: "selected" }),
     });
-    const res = await PATCH(req, { params: { id: "abc" } });
+    const res = await PATCH(req, { params: { id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } });
     expect(res.status).toBe(400);
     const json = await res.json();
     expect(json.error).toContain("does not require a formal contract");
@@ -287,7 +287,7 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
   it("returns 409 when selecting acceptance with existing non-cancelled contract", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
     mockAcceptanceFindUnique.mockResolvedValue({
-      id: "abc",
+      id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       need: { posterId: "prof-1", requiresContract: true },
       userId: "u2",
       needId: "n1",
@@ -299,7 +299,7 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
       method: "PATCH",
       body: JSON.stringify({ status: "selected" }),
     });
-    const res = await PATCH(req, { params: { id: "abc" } });
+    const res = await PATCH(req, { params: { id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } });
     expect(res.status).toBe(409);
     const json = await res.json();
     expect(json.error).toContain("already exists");
@@ -308,7 +308,7 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
   it("creates contract and returns 200 on select success", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
     mockAcceptanceFindUnique.mockResolvedValueOnce({
-      id: "abc",
+      id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       need: { posterId: "prof-1", requiresContract: true },
       userId: "u2",
       needId: "n1",
@@ -317,22 +317,28 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
     mockProfileFindUnique.mockResolvedValue({ id: "prof-1", fullName: "Test" });
     mockContractFindUnique.mockResolvedValue(null);
     mockCreateContractFromAcceptance.mockResolvedValue({ id: "contract-1" });
-    mockAcceptanceFindUnique.mockResolvedValueOnce({ id: "abc", status: "selected" });
+    mockAcceptanceFindUnique.mockResolvedValueOnce({
+      id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+      status: "selected",
+    });
     const req = makeRequest("http://localhost/api/v1/acceptances/abc", {
       method: "PATCH",
       body: JSON.stringify({ status: "selected" }),
     });
-    const res = await PATCH(req, { params: { id: "abc" } });
+    const res = await PATCH(req, { params: { id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } });
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.contract.id).toBe("contract-1");
-    expect(mockCreateContractFromAcceptance).toHaveBeenCalledWith("abc", "prof-1");
+    expect(mockCreateContractFromAcceptance).toHaveBeenCalledWith(
+      "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+      "prof-1"
+    );
   });
 
   it("accepts interest with contract required and notifies fulfiller", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
     mockAcceptanceFindUnique.mockResolvedValue({
-      id: "abc",
+      id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       need: { posterId: "prof-1", title: "Need title", requiresContract: true },
       userId: "u2",
       needId: "n1",
@@ -341,13 +347,16 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
     mockProfileFindUnique
       .mockResolvedValueOnce({ id: "prof-1", fullName: "Poster" })
       .mockResolvedValueOnce({ id: "u2", email: "fulfiller@example.com", fullName: "Fulfiller" });
-    mockAcceptanceUpdate.mockResolvedValue({ id: "abc", status: "accepted" });
+    mockAcceptanceUpdate.mockResolvedValue({
+      id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+      status: "accepted",
+    });
     mockNeedUpdate.mockResolvedValue({});
     const req = makeRequest("http://localhost/api/v1/acceptances/abc", {
       method: "PATCH",
       body: JSON.stringify({ status: "accepted" }),
     });
-    const res = await PATCH(req, { params: { id: "abc" } });
+    const res = await PATCH(req, { params: { id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } });
     await flushPromises();
     expect(res.status).toBe(200);
     const json = await res.json();
@@ -360,7 +369,7 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
   it("accepts free-form interest, activates need, declines others, and notifies", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
     mockAcceptanceFindUnique.mockResolvedValue({
-      id: "abc",
+      id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       need: { posterId: "prof-1", title: "Need title", requiresContract: false },
       userId: "u2",
       needId: "n1",
@@ -369,12 +378,15 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
     mockProfileFindUnique
       .mockResolvedValueOnce({ id: "prof-1", fullName: "Poster" })
       .mockResolvedValueOnce({ id: "u2", email: "fulfiller@example.com", fullName: "Fulfiller" });
-    mockAcceptanceUpdate.mockResolvedValue({ id: "abc", status: "accepted" });
+    mockAcceptanceUpdate.mockResolvedValue({
+      id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+      status: "accepted",
+    });
     const req = makeRequest("http://localhost/api/v1/acceptances/abc", {
       method: "PATCH",
       body: JSON.stringify({ status: "accepted" }),
     });
-    const res = await PATCH(req, { params: { id: "abc" } });
+    const res = await PATCH(req, { params: { id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } });
     await flushPromises();
     expect(res.status).toBe(200);
     expect(mockTx.need.update).toHaveBeenCalled();
@@ -385,19 +397,22 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
   it("updates status to declined", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
     mockAcceptanceFindUnique.mockResolvedValue({
-      id: "abc",
+      id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       need: { posterId: "prof-1" },
       userId: "u2",
       needId: "n1",
       status: "pending",
     });
     mockProfileFindUnique.mockResolvedValue({ id: "prof-1", fullName: "Poster" });
-    mockAcceptanceUpdate.mockResolvedValue({ id: "abc", status: "declined" });
+    mockAcceptanceUpdate.mockResolvedValue({
+      id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+      status: "declined",
+    });
     const req = makeRequest("http://localhost/api/v1/acceptances/abc", {
       method: "PATCH",
       body: JSON.stringify({ status: "declined" }),
     });
-    const res = await PATCH(req, { params: { id: "abc" } });
+    const res = await PATCH(req, { params: { id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } });
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.acceptance.status).toBe("declined");
@@ -406,19 +421,22 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
   it("withdraws as creator", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
     mockAcceptanceFindUnique.mockResolvedValue({
-      id: "abc",
+      id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       need: { posterId: "p1" },
       userId: "prof-1",
       needId: "n1",
       status: "pending",
     });
     mockProfileFindUnique.mockResolvedValue({ id: "prof-1", fullName: "Creator" });
-    mockAcceptanceUpdate.mockResolvedValue({ id: "abc", status: "withdrawn" });
+    mockAcceptanceUpdate.mockResolvedValue({
+      id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+      status: "withdrawn",
+    });
     const req = makeRequest("http://localhost/api/v1/acceptances/abc", {
       method: "PATCH",
       body: JSON.stringify({ status: "withdrawn" }),
     });
-    const res = await PATCH(req, { params: { id: "abc" } });
+    const res = await PATCH(req, { params: { id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } });
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.acceptance.status).toBe("withdrawn");

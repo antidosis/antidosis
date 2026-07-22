@@ -8,6 +8,7 @@ import { sendInterestAcceptedEmail } from "@/lib/email";
 import { logger } from "@/lib/logger";
 import { createNotification } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
+import { resolveEntityId } from "@/lib/resolve-id";
 import { createClient } from "@/lib/supabase/server";
 
 const updateSchema = z.object({
@@ -38,8 +39,14 @@ export const PATCH = withApiHandler(
     }
     const { status } = parseResult.data;
 
+    // Accept full UUIDs or unique id prefixes (as printed in terminal tables)
+    const acceptanceId = await resolveEntityId("acceptance", params.id);
+    if (!acceptanceId) {
+      return NextResponse.json({ error: "Acceptance not found" }, { status: 404 });
+    }
+
     const acceptance = await prisma.acceptance.findUnique({
-      where: { id: params.id },
+      where: { id: acceptanceId },
       include: { need: true },
     });
 
@@ -112,9 +119,9 @@ export const PATCH = withApiHandler(
         );
       }
 
-      const contract = await createContractFromAcceptance(params.id, profile.id);
+      const contract = await createContractFromAcceptance(acceptanceId, profile.id);
       const updated = await prisma.acceptance.findUnique({
-        where: { id: params.id },
+        where: { id: acceptanceId },
       });
       return NextResponse.json({ acceptance: updated, contract });
     }
@@ -122,7 +129,7 @@ export const PATCH = withApiHandler(
     // If accepted, just update status and notify
     if (status === "accepted") {
       const updated = await prisma.acceptance.update({
-        where: { id: params.id },
+        where: { id: acceptanceId },
         data: { status },
       });
 
@@ -187,7 +194,7 @@ export const PATCH = withApiHandler(
 
     // Declined or withdrawn
     const updated = await prisma.acceptance.update({
-      where: { id: params.id },
+      where: { id: acceptanceId },
       data: { status },
     });
 

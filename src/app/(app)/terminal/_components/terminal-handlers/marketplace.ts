@@ -84,9 +84,9 @@ export async function handleNeed(ctx: HandlerContext): Promise<HandlerResult> {
       return { handled: true };
     }
   }
-  if (!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(id)) {
+  if (!/^[a-f0-9-]{4,36}$/i.test(id)) {
     ctx.addSys(
-      `Invalid need ID format. Need IDs look like: a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d\n` +
+      `Invalid need ID. Use a full ID or the short prefix from /needs tables.\n` +
         `💡 Use /needs to browse, or /need with no argument to re-open the last one you viewed.`,
       "error"
     );
@@ -381,9 +381,9 @@ export async function handleContract(ctx: HandlerContext): Promise<HandlerResult
       return { handled: true };
     }
   }
-  if (!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(id)) {
+  if (!/^[a-f0-9-]{4,36}$/i.test(id)) {
     ctx.addSys(
-      `Invalid contract ID format. Contract IDs look like: a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d\n` +
+      `Invalid contract ID. Use a full ID or the short prefix from /contracts tables.\n` +
         `💡 Use /contracts to browse, or /contract with no argument to re-open the last one you viewed.`,
       "error"
     );
@@ -665,7 +665,12 @@ export async function handleReview(ctx: HandlerContext): Promise<HandlerResult> 
         Array.isArray(d) ? d : d.acceptances || []
       ),
     ]);
-    const contract = contracts.find((c: any) => c.id === id || c.id.startsWith(id));
+    const contract =
+      contracts.find((c: any) => c.id === id) ??
+      (() => {
+        const matches = contracts.filter((c: any) => c.id.startsWith(id));
+        return matches.length === 1 ? matches[0] : undefined;
+      })();
     if (contract) {
       const isPartyA = contract.partyAId === ctx.myProfile?.id;
       const receiverId = isPartyA ? contract.partyBId : contract.partyAId;
@@ -674,7 +679,12 @@ export async function handleReview(ctx: HandlerContext): Promise<HandlerResult> 
       ctx.setSession({ ...ctx.session, xp: ctx.session.xp + 10 });
       return { handled: true };
     }
-    const acceptance = acceptances.find((a: any) => a.id === id || a.id.startsWith(id));
+    const acceptance =
+      acceptances.find((a: any) => a.id === id) ??
+      (() => {
+        const matches = acceptances.filter((a: any) => a.id.startsWith(id));
+        return matches.length === 1 ? matches[0] : undefined;
+      })();
     if (acceptance) {
       const needData = await apiGet(`/api/v1/needs/${acceptance.need?.id || id}`);
       const need = needData.need || needData;

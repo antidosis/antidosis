@@ -119,7 +119,7 @@ function makeAuthUser(
 
 function makeContract(overrides?: Record<string, unknown>) {
   return {
-    id: "contract-1",
+    id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
     partyAId: "profile-a",
     partyBId: "profile-b",
     status: "draft",
@@ -180,7 +180,7 @@ describe("GET /api/v1/contracts/[id]", () => {
     mockGetUser.mockResolvedValue({ data: { user: null }, error: new Error("Auth error") });
 
     const res = await GET(makeRequest("http://localhost/api/v1/contracts/contract-1"), {
-      params: { id: "contract-1" },
+      params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
     });
 
     expect(res.status).toBe(401);
@@ -195,7 +195,7 @@ describe("GET /api/v1/contracts/[id]", () => {
     });
 
     const res = await GET(makeRequest("http://localhost/api/v1/contracts/contract-1"), {
-      params: { id: "contract-1" },
+      params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
     });
 
     expect(res.status).toBe(403);
@@ -208,7 +208,7 @@ describe("GET /api/v1/contracts/[id]", () => {
     mockProfileFindUnique.mockResolvedValue(null);
 
     const res = await GET(makeRequest("http://localhost/api/v1/contracts/contract-1"), {
-      params: { id: "contract-1" },
+      params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
     });
 
     expect(res.status).toBe(404);
@@ -222,7 +222,7 @@ describe("GET /api/v1/contracts/[id]", () => {
     mockContractFindUnique.mockResolvedValue(null);
 
     const res = await GET(makeRequest("http://localhost/api/v1/contracts/contract-1"), {
-      params: { id: "contract-1" },
+      params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
     });
 
     expect(res.status).toBe(404);
@@ -236,7 +236,7 @@ describe("GET /api/v1/contracts/[id]", () => {
     mockContractFindUnique.mockResolvedValue(makeContract());
 
     const res = await GET(makeRequest("http://localhost/api/v1/contracts/contract-1"), {
-      params: { id: "contract-1" },
+      params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
     });
 
     expect(res.status).toBe(403);
@@ -250,13 +250,13 @@ describe("GET /api/v1/contracts/[id]", () => {
     mockContractFindUnique.mockResolvedValue(makeContract());
 
     const res = await GET(makeRequest("http://localhost/api/v1/contracts/contract-1"), {
-      params: { id: "contract-1" },
+      params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
     });
 
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.contract).toBeDefined();
-    expect(body.contract.id).toBe("contract-1");
+    expect(body.contract.id).toBe("c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d");
   });
 
   it("returns 200 with contract for party B", async () => {
@@ -265,12 +265,12 @@ describe("GET /api/v1/contracts/[id]", () => {
     mockContractFindUnique.mockResolvedValue(makeContract());
 
     const res = await GET(makeRequest("http://localhost/api/v1/contracts/contract-1"), {
-      params: { id: "contract-1" },
+      params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
     });
 
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.contract.id).toBe("contract-1");
+    expect(body.contract.id).toBe("c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d");
   });
 
   it("respects messagesLimit and messagesSkip query params", async () => {
@@ -280,7 +280,7 @@ describe("GET /api/v1/contracts/[id]", () => {
 
     await GET(
       makeRequest("http://localhost/api/v1/contracts/contract-1?messagesLimit=10&messagesSkip=5"),
-      { params: { id: "contract-1" } }
+      { params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
 
     const call = mockContractFindUnique.mock.calls[0][0];
@@ -294,7 +294,7 @@ describe("GET /api/v1/contracts/[id]", () => {
     mockContractFindUnique.mockResolvedValue(makeContract());
 
     const res = await GET(makeRequest("http://localhost/api/v1/contracts/contract-1"), {
-      params: { id: "contract-1" },
+      params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
     });
 
     expect(res.headers.get("x-request-id")).toMatch(/^\w+-\w+$/);
@@ -312,7 +312,7 @@ describe("PATCH /api/v1/contracts/[id]", () => {
     mockGetUser.mockResolvedValue({ data: { user: null }, error: new Error("Auth error") });
 
     const res = await PATCH(makeRequest("http://localhost/api/v1/contracts/contract-1"), {
-      params: { id: "contract-1" },
+      params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
     });
 
     expect(res.status).toBe(401);
@@ -325,7 +325,7 @@ describe("PATCH /api/v1/contracts/[id]", () => {
     });
 
     const res = await PATCH(makeRequest("http://localhost/api/v1/contracts/contract-1"), {
-      params: { id: "contract-1" },
+      params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
     });
 
     expect(res.status).toBe(403);
@@ -336,7 +336,7 @@ describe("PATCH /api/v1/contracts/[id]", () => {
     mockProfileFindUnique.mockResolvedValue(null);
 
     const res = await PATCH(makeRequest("http://localhost/api/v1/contracts/contract-1"), {
-      params: { id: "contract-1" },
+      params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
     });
 
     expect(res.status).toBe(404);
@@ -348,7 +348,7 @@ describe("PATCH /api/v1/contracts/[id]", () => {
     mockRateLimit.mockResolvedValue({ allowed: false, remaining: 0, resetAt: Date.now() + 60_000 });
 
     const res = await PATCH(makeRequest("http://localhost/api/v1/contracts/contract-1"), {
-      params: { id: "contract-1" },
+      params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
     });
 
     expect(res.status).toBe(429);
@@ -366,7 +366,7 @@ describe("PATCH /api/v1/contracts/[id]", () => {
         method: "PATCH",
         body: JSON.stringify({ terms: "new terms" }),
       }),
-      { params: { id: "contract-1" } }
+      { params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
 
     expect(res.status).toBe(404);
@@ -382,7 +382,7 @@ describe("PATCH /api/v1/contracts/[id]", () => {
         method: "PATCH",
         body: JSON.stringify({ terms: "new terms" }),
       }),
-      { params: { id: "contract-1" } }
+      { params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
 
     expect(res.status).toBe(403);
@@ -398,7 +398,7 @@ describe("PATCH /api/v1/contracts/[id]", () => {
         method: "PATCH",
         body: JSON.stringify({ terms: "new terms" }),
       }),
-      { params: { id: "contract-1" } }
+      { params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
 
     expect(res.status).toBe(400);
@@ -416,7 +416,7 @@ describe("PATCH /api/v1/contracts/[id]", () => {
         method: "PATCH",
         body: JSON.stringify({ terms: 123 }),
       }),
-      { params: { id: "contract-1" } }
+      { params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
 
     expect(res.status).toBe(400);
@@ -435,7 +435,7 @@ describe("PATCH /api/v1/contracts/[id]", () => {
         method: "PATCH",
         body: JSON.stringify({ terms: "new terms" }),
       }),
-      { params: { id: "contract-1" } }
+      { params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
 
     expect(res.status).toBe(200);
@@ -459,7 +459,7 @@ describe("PATCH /api/v1/contracts/[id]", () => {
         method: "PATCH",
         body: JSON.stringify({ terms: "new terms" }),
       }),
-      { params: { id: "contract-1" } }
+      { params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
 
     expect(res.status).toBe(400);
@@ -478,7 +478,7 @@ describe("PATCH /api/v1/contracts/[id]", () => {
         method: "PATCH",
         body: JSON.stringify({ submitTerms: true }),
       }),
-      { params: { id: "contract-1" } }
+      { params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
 
     expect(res.status).toBe(200);
@@ -496,7 +496,7 @@ describe("PATCH /api/v1/contracts/[id]", () => {
         method: "PATCH",
         body: JSON.stringify({ submitTerms: true }),
       }),
-      { params: { id: "contract-1" } }
+      { params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
 
     expect(res.status).toBe(400);
@@ -526,7 +526,7 @@ describe("PATCH /api/v1/contracts/[id]", () => {
         method: "PATCH",
         body: JSON.stringify({ agree: true }),
       }),
-      { params: { id: "contract-1" } }
+      { params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
 
     expect(res.status).toBe(200);
@@ -549,7 +549,7 @@ describe("PATCH /api/v1/contracts/[id]", () => {
         method: "PATCH",
         body: JSON.stringify({ agree: true, updatedAt: "2024-01-14T00:00:00Z" }),
       }),
-      { params: { id: "contract-1" } }
+      { params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
 
     expect(res.status).toBe(409);
@@ -569,7 +569,7 @@ describe("PATCH /api/v1/contracts/[id]", () => {
         method: "PATCH",
         body: JSON.stringify({ agree: true }),
       }),
-      { params: { id: "contract-1" } }
+      { params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
 
     expect(res.status).toBe(400);
@@ -614,7 +614,7 @@ describe("PATCH /api/v1/contracts/[id]", () => {
         method: "PATCH",
         body: JSON.stringify({ agree: true }),
       }),
-      { params: { id: "contract-1" } }
+      { params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
 
     expect(res.status).toBe(200);
@@ -640,7 +640,7 @@ describe("PATCH /api/v1/contracts/[id]", () => {
         method: "PATCH",
         body: JSON.stringify({ agree: true }),
       }),
-      { params: { id: "contract-1" } }
+      { params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
 
     expect(res.status).toBe(400);
@@ -659,7 +659,7 @@ describe("PATCH /api/v1/contracts/[id]", () => {
         method: "PATCH",
         body: JSON.stringify({ terms: "new terms" }),
       }),
-      { params: { id: "contract-1" } }
+      { params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
     );
 
     expect(res.headers.get("x-request-id")).toMatch(/^\w+-\w+$/);

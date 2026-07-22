@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 import { prisma } from "@/lib/prisma";
+import { resolveEntityId } from "@/lib/resolve-id";
 
 import NeedDetailClient from "./_components/need-detail-client";
 
@@ -11,25 +12,28 @@ type Props = {
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const need = await prisma.need.findUnique({
-    where: { id: params.id },
-    select: {
-      id: true,
-      title: true,
-      description: true,
-      needCategory: true,
-      offerType: true,
-      offerDescription: true,
-      isLocal: true,
-      locationName: true,
-      poster: {
+  const needId = await resolveEntityId("need", params.id);
+  const need = needId
+    ? await prisma.need.findUnique({
+        where: { id: needId },
         select: {
-          fullName: true,
+          id: true,
+          title: true,
+          description: true,
+          needCategory: true,
+          offerType: true,
+          offerDescription: true,
+          isLocal: true,
           locationName: true,
+          poster: {
+            select: {
+              fullName: true,
+              locationName: true,
+            },
+          },
         },
-      },
-    },
-  });
+      })
+    : null;
 
   if (!need) {
     return {
@@ -84,14 +88,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function NeedDetailPage({ params }: Props) {
-  const needExists = await prisma.need.findUnique({
-    where: { id: params.id },
-    select: { id: true },
-  });
+  const needId = await resolveEntityId("need", params.id);
+  const needExists = needId
+    ? await prisma.need.findUnique({
+        where: { id: needId },
+        select: { id: true },
+      })
+    : null;
 
   if (!needExists) {
     notFound();
   }
 
-  return <NeedDetailClient needId={params.id} />;
+  return <NeedDetailClient needId={needExists.id} />;
 }

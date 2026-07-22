@@ -53,7 +53,7 @@ describe("GET /api/v1/profiles/[id]", () => {
     mockProfileFindUnique.mockResolvedValue(null);
 
     const res = await GET(makeRequest("http://localhost/api/v1/profiles/profile-1"), {
-      params: { id: "profile-1" },
+      params: { id: "d1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
     });
     const body = await res.json();
 
@@ -69,7 +69,7 @@ describe("GET /api/v1/profiles/[id]", () => {
     mockBlockFindFirst.mockResolvedValue({ id: "block-1" });
 
     const res = await GET(makeRequest("http://localhost/api/v1/profiles/profile-1"), {
-      params: { id: "profile-1" },
+      params: { id: "d1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
     });
     const body = await res.json();
 
@@ -80,7 +80,7 @@ describe("GET /api/v1/profiles/[id]", () => {
   it("returns 200 with profile for unauthenticated viewer", async () => {
     mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
     mockProfileFindUnique.mockResolvedValue({
-      id: "profile-1",
+      id: "d1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       fullName: "Test User",
       skills: [],
       socialLinks: [],
@@ -90,7 +90,7 @@ describe("GET /api/v1/profiles/[id]", () => {
     });
 
     const res = await GET(makeRequest("http://localhost/api/v1/profiles/profile-1"), {
-      params: { id: "profile-1" },
+      params: { id: "d1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
     });
     const body = await res.json();
 
@@ -103,7 +103,7 @@ describe("GET /api/v1/profiles/[id]", () => {
     mockProfileFindUnique
       .mockResolvedValueOnce({ id: "viewer-profile" }) // viewer
       .mockResolvedValueOnce({
-        id: "profile-1",
+        id: "d1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
         fullName: "Test User",
         skills: [],
         socialLinks: [],
@@ -114,7 +114,7 @@ describe("GET /api/v1/profiles/[id]", () => {
     mockBlockFindFirst.mockResolvedValue(null);
 
     const res = await GET(makeRequest("http://localhost/api/v1/profiles/profile-1"), {
-      params: { id: "profile-1" },
+      params: { id: "d1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
     });
     const body = await res.json();
 
@@ -125,7 +125,7 @@ describe("GET /api/v1/profiles/[id]", () => {
   it("sets cache headers", async () => {
     mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
     mockProfileFindUnique.mockResolvedValue({
-      id: "profile-1",
+      id: "d1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       fullName: "Test User",
       skills: [],
       socialLinks: [],
@@ -135,7 +135,7 @@ describe("GET /api/v1/profiles/[id]", () => {
     });
 
     const res = await GET(makeRequest("http://localhost/api/v1/profiles/profile-1"), {
-      params: { id: "profile-1" },
+      params: { id: "d1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
     });
 
     expect(res.headers.get("Cache-Control")).toBe(
@@ -146,7 +146,7 @@ describe("GET /api/v1/profiles/[id]", () => {
   it("includes x-request-id header", async () => {
     mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
     mockProfileFindUnique.mockResolvedValue({
-      id: "profile-1",
+      id: "d1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       fullName: "Test User",
       skills: [],
       socialLinks: [],
@@ -156,7 +156,7 @@ describe("GET /api/v1/profiles/[id]", () => {
     });
 
     const res = await GET(makeRequest("http://localhost/api/v1/profiles/profile-1"), {
-      params: { id: "profile-1" },
+      params: { id: "d1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
     });
 
     expect(res.headers.get("x-request-id")).toMatch(/^\w+-\w+$/);

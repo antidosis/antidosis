@@ -3,12 +3,19 @@ import { type NextRequest, NextResponse } from "next/server";
 import { withApiHandler } from "@/lib/api-handler";
 import { prisma } from "@/lib/prisma";
 import { redactCredential } from "@/lib/redaction";
+import { resolveEntityId } from "@/lib/resolve-id";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
 export const GET = withApiHandler(
   async (req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
+    // Accept full UUIDs or unique id prefixes (as printed in terminal tables)
+    const profileId = await resolveEntityId("profile", params.id);
+    if (!profileId) {
+      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    }
+
     // Check for blocks if viewer is authenticated
     const supabase = createClient();
     const {
@@ -23,8 +30,8 @@ export const GET = withApiHandler(
         const isBlocked = await prisma.block.findFirst({
           where: {
             OR: [
-              { blockerId: viewer.id, blockedId: params.id },
-              { blockerId: params.id, blockedId: viewer.id },
+              { blockerId: viewer.id, blockedId: profileId },
+              { blockerId: profileId, blockedId: viewer.id },
             ],
           },
         });
@@ -37,7 +44,7 @@ export const GET = withApiHandler(
     // Public-safe projection only — never serialize contact details, auth
     // identifiers, billing tokens, or precise location on a public route.
     const profile = await prisma.profile.findUnique({
-      where: { id: params.id },
+      where: { id: profileId },
       select: {
         id: true,
         fullName: true,

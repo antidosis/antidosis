@@ -5,6 +5,7 @@ import { logger } from "@/lib/logger";
 import { generateContractPdf } from "@/lib/pdf-contract";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
+import { resolveEntityId } from "@/lib/resolve-id";
 import { patchContractSchema } from "@/lib/schemas";
 import { createSignedUrlOrFallback, PRIVATE_BUCKET } from "@/lib/storage";
 import { createClient } from "@/lib/supabase/server";
@@ -45,8 +46,13 @@ export const GET = withApiHandler(
       parseInt(req.nextUrl.searchParams.get("messagesSkip") || "0", 10) || 0
     );
 
+    const contractId = await resolveEntityId("contract", params.id);
+    if (!contractId) {
+      return NextResponse.json({ error: "Contract not found" }, { status: 404 });
+    }
+
     const contract = await prisma.contract.findUnique({
-      where: { id: params.id },
+      where: { id: contractId },
       include: {
         need: {
           include: {

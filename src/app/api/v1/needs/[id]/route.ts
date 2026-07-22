@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { withApiHandler } from "@/lib/api-handler";
 import { isValidCentralCoastSuburb } from "@/lib/data/central-coast-suburbs";
 import { prisma } from "@/lib/prisma";
+import { resolveEntityId } from "@/lib/resolve-id";
 import { updateNeedSchema } from "@/lib/schemas";
 import { sanitizePlainText } from "@/lib/security/sanitize";
 import { sanitizeUrlArray } from "@/lib/security/url";
@@ -10,6 +11,12 @@ import { createClient } from "@/lib/supabase/server";
 
 export const GET = withApiHandler(
   async (req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
+    // Accept full UUIDs or unique id prefixes (as printed in terminal tables)
+    const needId = await resolveEntityId("need", params.id);
+    if (!needId) {
+      return NextResponse.json({ error: "Need not found" }, { status: 404 });
+    }
+
     const supabase = createClient();
     const {
       data: { user },
@@ -27,7 +34,7 @@ export const GET = withApiHandler(
       if (profile) {
         profileId = profile.id;
         const needPoster = await prisma.need.findUnique({
-          where: { id: params.id },
+          where: { id: needId },
           select: { posterId: true },
         });
         isPoster = needPoster?.posterId === profile.id;
@@ -35,7 +42,7 @@ export const GET = withApiHandler(
     }
 
     const need = await prisma.need.findUnique({
-      where: { id: params.id },
+      where: { id: needId },
       include: {
         poster: isAuthenticated
           ? {
@@ -175,8 +182,13 @@ export const PATCH = withApiHandler(
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
+    const needId = await resolveEntityId("need", params.id);
+    if (!needId) {
+      return NextResponse.json({ error: "Need not found" }, { status: 404 });
+    }
+
     const existingNeed = await prisma.need.findUnique({
-      where: { id: params.id },
+      where: { id: needId },
       select: { posterId: true, status: true, isLocal: true },
     });
     if (!existingNeed) {
@@ -235,9 +247,9 @@ export const PATCH = withApiHandler(
     let need;
     if (data.requiredSkills !== undefined) {
       need = await prisma.$transaction(async (tx) => {
-        await tx.needSkill.deleteMany({ where: { needId: params.id } });
+        await tx.needSkill.deleteMany({ where: { needId } });
         return tx.need.update({
-          where: { id: params.id },
+          where: { id: needId },
           data: {
             ...updateData,
             requiredSkills: {
@@ -260,7 +272,7 @@ export const PATCH = withApiHandler(
       });
     } else {
       need = await prisma.need.update({
-        where: { id: params.id },
+        where: { id: needId },
         data: updateData,
         include: {
           requiredSkills: true,
@@ -297,8 +309,13 @@ export const DELETE = withApiHandler(
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
+    const needId = await resolveEntityId("need", params.id);
+    if (!needId) {
+      return NextResponse.json({ error: "Need not found" }, { status: 404 });
+    }
+
     const existingNeed = await prisma.need.findUnique({
-      where: { id: params.id },
+      where: { id: needId },
       select: { posterId: true, status: true },
     });
     if (!existingNeed) {
@@ -311,7 +328,7 @@ export const DELETE = withApiHandler(
       return NextResponse.json({ error: "Can only delete open needs" }, { status: 400 });
     }
 
-    await prisma.need.delete({ where: { id: params.id } });
+    await prisma.need.delete({ where: { id: needId } });
 
     return NextResponse.json({ success: true });
   }

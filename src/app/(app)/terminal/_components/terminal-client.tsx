@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { X, Menu, Loader2, Paperclip, Send, Smile, Mic, MicOff, Reply } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { compressImage } from "@/lib/image-compress";
 import { createClient } from "@/lib/supabase/client";
 
 import { parseIntent } from "./terminal-agent";
@@ -384,6 +385,48 @@ export default function TerminalClient() {
   }, []);
 
   // Realtime subscriptions
+  const senderCacheRef = useRef<
+    Map<string, { id: string; fullName: string | null; avatarUrl: string | null }>
+  >(new Map());
+
+  // Hydrate realtime payloads directly (payload.new is the full row) instead of
+  // fetching "latest" — the fetch-latest approach drops messages when two land
+  // in the same fetch window.
+  function appendRealtimeMessage(msg: {
+    id: string;
+    senderId: string;
+    content: string;
+    createdAt: string;
+    attachments?: unknown;
+    reactions?: unknown;
+  }) {
+    const append = (sender: { id: string; fullName: string | null; avatarUrl: string | null }) =>
+      setMessages((prev) => {
+        if (prev.find((m) => m.id === msg.id)) return prev;
+        return [...prev, { ...msg, sender, reactions: msg.reactions ?? [] } as any];
+      });
+
+    if (myProfile && msg.senderId === myProfile.id) {
+      append({ id: myProfile.id, fullName: myProfile.fullName, avatarUrl: myProfile.avatarUrl });
+      return;
+    }
+    const cached = senderCacheRef.current.get(msg.senderId);
+    if (cached) {
+      append(cached);
+      return;
+    }
+    fetch(`/api/v1/profiles/${msg.senderId}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((p) => {
+        const s = p
+          ? { id: p.id as string, fullName: p.fullName, avatarUrl: p.avatarUrl }
+          : { id: msg.senderId, fullName: null, avatarUrl: null };
+        senderCacheRef.current.set(msg.senderId, s);
+        append(s);
+      })
+      .catch(() => {});
+  }
+
   useEffect(() => {
     if (!user || !activeContext || activeContext.type === "console") return;
 
@@ -403,18 +446,7 @@ export default function TerminalClient() {
         (payload) => {
           const msg = payload.new as any;
           if (activeContext.type === "channel" && msg.channelId === activeContext.id) {
-            fetch("/api/v1/terminal/messages?channelId=" + activeContext.id + "&limit=1")
-              .then((r) => r.json())
-              .then((data) => {
-                if (data.messages?.length) {
-                  const newMsg = data.messages[data.messages.length - 1];
-                  setMessages((prev) => {
-                    if (prev.find((m) => m.id === newMsg.id)) return prev;
-                    return [...prev, newMsg];
-                  });
-                }
-              })
-              .catch(() => {});
+            appendRealtimeMessage(msg);
           } else if (activeContext.type !== "channel" || msg.channelId !== activeContext.id) {
             // Message in another channel - increment unread
             if (msg.channelId) {
@@ -444,18 +476,7 @@ export default function TerminalClient() {
         (payload) => {
           const msg = payload.new as any;
           if (activeContext.type === "dm" && msg.threadId === activeContext.threadId) {
-            fetch("/api/v1/terminal/dm/messages?threadId=" + activeContext.threadId + "&limit=1")
-              .then((r) => r.json())
-              .then((data) => {
-                if (data.messages?.length) {
-                  const newMsg = data.messages[data.messages.length - 1];
-                  setMessages((prev) => {
-                    if (prev.find((m) => m.id === newMsg.id)) return prev;
-                    return [...prev, newMsg];
-                  });
-                }
-              })
-              .catch(() => {});
+            appendRealtimeMessage(msg);
             if (document.hidden) {
               playNotifySound();
             }
@@ -776,8 +797,10 @@ export default function TerminalClient() {
   async function uploadFile(file: File): Promise<Attachment | null> {
     setUploading(true);
     try {
+      // Compress large photos client-side to stay under the platform body cap
+      const upload = await compressImage(file);
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", upload);
       formData.append("folder", "terminal");
       const res = await fetch("/api/v1/upload", { method: "POST", body: formData });
       if (!res.ok) {
@@ -1028,6 +1051,7 @@ export default function TerminalClient() {
 
   async function handleSubmit(e?: React.FormEvent, voiceText?: string) {
     e?.preventDefault();
+    if (isLoading) return; // re-entry guard: never double-send
     const text = (voiceText ?? input).trim();
     // Allow empty input through to wizards (for optional skip) and pending choices
     const allowEmpty = !!wizard || !!pendingChoices;
@@ -1320,23 +1344,28 @@ export default function TerminalClient() {
     }
 
     setIsLoading(true);
+    // Capture context at send time — if the user switches channel/DM while the
+    // request is in flight, don't append the response into the new context.
+    const sendContext = activeContext;
     try {
-      if (activeContext.type === "channel") {
+      if (sendContext.type === "channel") {
         const res = await fetch("/api/v1/terminal/messages", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            channelId: activeContext.id,
+            channelId: sendContext.id,
             content,
             attachments: pendingAttachments,
           }),
         });
         const data = await res.json();
         if (res.ok && data.message) {
-          setMessages((prev) => {
-            if (prev.find((m) => m.id === data.message.id)) return prev;
-            return [...prev, data.message];
-          });
+          if (activeContext.type === "channel" && activeContext.id === sendContext.id) {
+            setMessages((prev) => {
+              if (prev.find((m) => m.id === data.message.id)) return prev;
+              return [...prev, data.message];
+            });
+          }
           setInput("");
           setPendingAttachments([]);
           setReplyingTo(null);
@@ -1349,22 +1378,31 @@ export default function TerminalClient() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            userId: activeContext.otherUserId,
+            userId: sendContext.otherUserId,
             content,
             attachments: pendingAttachments,
           }),
         });
         const data = await res.json();
         if (res.ok && data.message) {
-          setMessages((prev) => {
-            if (prev.find((m) => m.id === data.message.id)) return prev;
-            return [...prev, data.message];
-          });
+          if (
+            activeContext.type === "dm" &&
+            activeContext.otherUserId === sendContext.otherUserId
+          ) {
+            setMessages((prev) => {
+              if (prev.find((m) => m.id === data.message.id)) return prev;
+              return [...prev, data.message];
+            });
+          }
           setInput("");
           setPendingAttachments([]);
           setReplyingTo(null);
           if (session) setSession(addXp(session, "send_message"));
-          if (data.threadId && data.threadId !== activeContext.threadId) {
+          if (
+            data.threadId &&
+            activeContext.type === "dm" &&
+            data.threadId !== activeContext.threadId
+          ) {
             setActiveContext({ ...activeContext, threadId: data.threadId });
           }
         } else {
