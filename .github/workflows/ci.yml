@@ -53,6 +53,10 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     needs: [lint-and-type, test]
+    env:
+      # Public-by-design client values; placeholders are enough to build/prerender.
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
     steps:
       - uses: actions/checkout@v4
 
@@ -72,6 +76,12 @@ jobs:
     name: E2E Tests
     runs-on: ubuntu-latest
     needs: [build]
+    env:
+      # Public-by-design client values; placeholders let the dev server boot.
+      NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
+      # For DB-backed and authenticated specs, add these as repo secrets:
+      # DATABASE_URL, SUPABASE_SERVICE_ROLE_KEY, E2E_TEST_EMAIL, E2E_TEST_PASSWORD
     steps:
       - uses: actions/checkout@v4
 

@@ -184,8 +184,8 @@ export const DELETE = withApiHandler(async () => {
   // Cancel Stripe subscription if active
   if (profile.stripeSubscriptionId) {
     try {
-      const { stripe } = await import("@/lib/stripe");
-      await stripe.subscriptions.cancel(profile.stripeSubscriptionId);
+      const { getStripe } = await import("@/lib/stripe");
+      await getStripe().subscriptions.cancel(profile.stripeSubscriptionId);
     } catch {
       /* ignore stripe errors during deletion */
     }

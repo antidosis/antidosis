@@ -7,13 +7,13 @@ import { GET } from "./route";
 const mockCheckoutSessionsRetrieve = vi.fn();
 
 vi.mock("@/lib/stripe", () => ({
-  stripe: {
+  getStripe: () => ({
     checkout: {
       sessions: {
         retrieve: (...args: unknown[]) => mockCheckoutSessionsRetrieve(...args),
       },
     },
-  },
+  }),
 }));
 
 const mockLoggerInfo = vi.fn();

@@ -20,11 +20,11 @@ vi.mock("@/lib/prisma", () => ({
 const mockConstructEvent = vi.fn();
 
 vi.mock("@/lib/stripe", () => ({
-  stripe: {
+  getStripe: () => ({
     webhooks: {
       constructEvent: (...args: unknown[]) => mockConstructEvent(...args),
     },
-  },
+  }),
 }));
 
 const mockLoggerInfo = vi.fn();

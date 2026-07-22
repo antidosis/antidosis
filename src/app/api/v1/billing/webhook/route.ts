@@ -4,7 +4,7 @@ import type Stripe from "stripe";
 
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
 
     let event: Stripe.Event;
     try {
-      event = stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+      event = getStripe().webhooks.constructEvent(payload, signature, webhookSecret);
     } catch (err: any) {
       logger.error("Webhook signature verification failed", err instanceof Error ? err : undefined);
       return NextResponse.json({ error: "Invalid signature" }, { status: 400 });

@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
     // Get or create Stripe customer
     let customerId = profile.stripeCustomerId;
     if (!customerId) {
-      const customer = await stripe.customers.create({
+      const customer = await getStripe().customers.create({
         email: profile.email,
         name: profile.fullName || undefined,
         metadata: {
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
 
     const origin = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripe().checkout.sessions.create({
       customer: customerId,
       line_items: [
         {

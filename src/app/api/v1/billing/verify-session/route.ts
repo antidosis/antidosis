@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 
 export const dynamic = "force-dynamic";
 import { logger } from "@/lib/logger";
@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Verify the session exists and was paid with Stripe
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    const session = await getStripe().checkout.sessions.retrieve(sessionId);
 
     if (session.payment_status !== "paid") {
       return NextResponse.json(

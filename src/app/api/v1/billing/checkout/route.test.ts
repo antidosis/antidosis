@@ -39,7 +39,7 @@ const mockCustomersCreate = vi.fn();
 const mockCheckoutSessionsCreate = vi.fn();
 
 vi.mock("@/lib/stripe", () => ({
-  stripe: {
+  getStripe: () => ({
     customers: {
       create: (...args: unknown[]) => mockCustomersCreate(...args),
     },
@@ -48,7 +48,7 @@ vi.mock("@/lib/stripe", () => ({
         create: (...args: unknown[]) => mockCheckoutSessionsCreate(...args),
       },
     },
-  },
+  }),
 }));
 
 const mockLoggerInfo = vi.fn();
