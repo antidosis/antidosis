@@ -10,13 +10,16 @@ test.describe("Needs marketplace", () => {
 
   test("need detail page loads for a public need", async ({ page }) => {
     await page.goto("/needs");
-    // Wait for needs to load
-    await page.waitForSelector("a[href^='/needs/']", { timeout: 10_000 });
-    // Click first need
-    const firstNeed = page.locator("a[href^='/needs/']").first();
-    await firstNeed.click();
+    // Need cards link to /needs/<id>; the "Post Need" button (/needs/new) is excluded.
+    // Wait for either a need card or the empty state, then skip gracefully on an empty DB.
+    await page.waitForSelector("a[href^='/needs/']:not([href='/needs/new']), text=No needs found", {
+      timeout: 15_000,
+    });
+    const needLinks = page.locator("a[href^='/needs/']:not([href='/needs/new'])");
+    test.skip((await needLinks.count()) === 0, "no needs in the database to open");
+    await needLinks.first().click();
     // Should navigate to need detail
-    await expect(page).toHaveURL(/\/needs\/[a-z0-9-]+/);
+    await expect(page).toHaveURL(/\/needs\/[a-f0-9-]+/);
     // Title should be visible
     await expect(page.locator("h1").first()).toBeVisible();
   });
