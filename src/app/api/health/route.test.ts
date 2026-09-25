@@ -45,7 +45,9 @@ describe("GET /api/health", () => {
     const body = await res.json();
     expect(body.status).toBe("error");
     expect(body.checks.database.status).toBe("error");
-    expect(body.checks.database.message).toBe("DB down");
+    // Error details must not leak to anonymous callers — logs only
+    expect(body.checks.database.message).toBeUndefined();
+    expect(JSON.stringify(body)).not.toContain("DB down");
     expect(body.checks.supabase.status).toBe("ok");
   });
 

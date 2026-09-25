@@ -5,9 +5,16 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const mockRequireAdmin = vi.fn();
 const mockProfileFindUnique = vi.fn();
 const mockProfileUpdate = vi.fn();
+const mockRecordBannedMobile = vi.fn();
+const mockClearBannedMobile = vi.fn();
 
 vi.mock("@/lib/admin", () => ({
   requireAdmin: () => mockRequireAdmin(),
+}));
+
+vi.mock("@/lib/bans", () => ({
+  recordBannedMobile: (...args: unknown[]) => mockRecordBannedMobile(...args),
+  clearBannedMobile: (...args: unknown[]) => mockClearBannedMobile(...args),
 }));
 
 vi.mock("@/lib/prisma", () => ({
@@ -40,7 +47,12 @@ describe("POST /api/v1/admin/users/[id]/ban", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockRequireAdmin.mockResolvedValue({ authorized: true });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1", bannedAt: null, userId: "user-1" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      bannedAt: null,
+      userId: "user-1",
+      mobile: "+61400123456",
+    });
     mockProfileUpdate.mockResolvedValue({
       id: "profile-1",
       fullName: "Sam",
@@ -70,6 +82,17 @@ describe("POST /api/v1/admin/users/[id]/ban", () => {
       where: { id: "profile-1" },
       data: { bannedAt: expect.any(Date), bannedReason: "scam reports" },
       select: { id: true, fullName: true, bannedAt: true, bannedReason: true },
+    });
+  });
+
+  it("persists the mobile to BannedMobile so the ban survives account deletion", async () => {
+    const res = await POST(makeRequest({ reason: "scam reports" }), params);
+
+    expect(res.status).toBe(200);
+    expect(mockRecordBannedMobile).toHaveBeenCalledWith({
+      id: "profile-1",
+      mobile: "+61400123456",
+      bannedReason: "scam reports",
     });
   });
 
@@ -105,7 +128,7 @@ describe("DELETE /api/v1/admin/users/[id]/ban", () => {
     mockProfileUpdate.mockResolvedValue({ id: "profile-1", fullName: "Sam", bannedAt: null });
   });
 
-  it("lifts a ban", async () => {
+  it("lifts a ban and clears the persisted mobile ban", async () => {
     const res = await DELETE(makeRequest(), params);
     const body = await res.json();
 
@@ -116,6 +139,7 @@ describe("DELETE /api/v1/admin/users/[id]/ban", () => {
       data: { bannedAt: null, bannedReason: null },
       select: { id: true, fullName: true, bannedAt: true },
     });
+    expect(mockClearBannedMobile).toHaveBeenCalledWith("profile-1");
   });
 
   it("returns 409 when the profile is not banned", async () => {

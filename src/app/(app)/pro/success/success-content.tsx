@@ -47,7 +47,7 @@ export default function SuccessContent() {
 
   if (status === "loading") {
     return (
-      <div className="max-w-md mx-auto py-24 text-center text-[#7a6b5a]">
+      <div className="max-w-md mx-auto py-24 text-center text-[#8f7f6e]">
         confirming subscription with stripe...
       </div>
     );
@@ -60,7 +60,7 @@ export default function SuccessContent() {
           <X className="h-8 w-8" />
         </div>
         <h1 className="text-2xl font-bold mb-4">verification failed</h1>
-        <p className="text-[13px] text-[#7a6b5a] mb-8">{errorMsg}</p>
+        <p className="text-[13px] text-[#8f7f6e] mb-8">{errorMsg}</p>
         <Button className="w-full" asChild>
           <Link href="/pro">Back to Pro</Link>
         </Button>
@@ -74,7 +74,7 @@ export default function SuccessContent() {
         <Check className="h-8 w-8" />
       </div>
       <h1 className="text-2xl font-bold mb-4">welcome to pro</h1>
-      <p className="text-[13px] text-[#7a6b5a] mb-8">
+      <p className="text-[13px] text-[#8f7f6e] mb-8">
         your subscription is active. you are now covered by our dispute resolution and loss
         protection.
       </p>

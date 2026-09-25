@@ -4,6 +4,7 @@ import { useAuth } from "@mobile/hooks/useAuth";
 import { useHaptics } from "@mobile/hooks/useNative";
 import { ArrowLeft, Mail, CheckCircle } from "lucide-react";
 import { hapticImpact } from "@mobile/lib/native";
+import { WEB_ORIGIN } from "@mobile/lib/api";
 import { Button } from "@mobile/components/ui";
 
 /* ═══════════════════════════════════════════════════════════════
@@ -27,7 +28,9 @@ export function ForgotPasswordScreen() {
     tap("medium");
 
     const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      // window.location.origin is capacitor://localhost on native — the reset
+      // link must point at the production web app.
+      redirectTo: `${WEB_ORIGIN}/reset-password`,
     });
 
     if (err) {

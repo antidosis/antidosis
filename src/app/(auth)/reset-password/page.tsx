@@ -100,7 +100,7 @@ export default function ResetPasswordPage() {
 
       <div className="flex-1 flex items-center justify-center px-4">
         <div className="w-full max-w-sm">
-          <p className="text-xs text-[#7a6b5a] mb-8">$ passwd --new</p>
+          <p className="text-xs text-[#8f7f6e] mb-8">$ passwd --new</p>
           <h1 className="heading-display text-2xl text-[#e8d5a3] mb-2">
             new_password
             <TerminalCursor />
@@ -113,7 +113,7 @@ export default function ResetPasswordPage() {
                 <Loader2 className="h-4 w-4 text-[#00e676] animate-spin" />
                 <p className="text-sm text-[#00e676]">password updated.</p>
               </div>
-              <p className="text-xs text-[#7a6b5a]">redirecting to login in {countdown}s...</p>
+              <p className="text-xs text-[#8f7f6e]">redirecting to login in {countdown}s...</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -132,7 +132,7 @@ export default function ResetPasswordPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#7a6b5a] hover:text-[#e8d5a3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f5a623] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0806] rounded-sm"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8f7f6e] hover:text-[#e8d5a3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f5a623] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0806] rounded-sm"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -141,7 +141,7 @@ export default function ResetPasswordPage() {
                 {password.length > 0 && (
                   <div className="space-y-2 mt-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-[#7a6b5a]">strength</span>
+                      <span className="text-xs text-[#8f7f6e]">strength</span>
                       <span className={`text-xs font-medium ${strengthColor}`}>
                         {strength.replace("-", " ")}
                       </span>
@@ -175,7 +175,7 @@ export default function ResetPasswordPage() {
                           ) : (
                             <X className="h-3 w-3 text-[#ff5252]" />
                           )}
-                          <span className="text-xs text-[#7a6b5a]">{req.label}</span>
+                          <span className="text-xs text-[#8f7f6e]">{req.label}</span>
                         </div>
                       ))}
                     </div>
@@ -198,7 +198,7 @@ export default function ResetPasswordPage() {
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#7a6b5a] hover:text-[#e8d5a3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f5a623] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0806] rounded-sm"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8f7f6e] hover:text-[#e8d5a3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f5a623] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0806] rounded-sm"
                   >
                     {showConfirmPassword ? (
                       <EyeOff className="h-4 w-4" />

@@ -150,32 +150,6 @@ export default function DashboardPage() {
   const { data: contracts } = useApi<ContractItem[]>(authChecked ? "/api/v1/contracts/mine" : null);
   const { data: offers } = useApi<OfferItem[]>(authChecked ? "/api/v1/acceptances/mine" : null);
 
-  // Debug: log why cancel might not show
-  useEffect(() => {
-    if (contracts && profile) {
-      contracts.forEach((c) => {
-        const posterId = c.partyAId ?? c.partyA?.id;
-        const isPoster = profile.id === posterId;
-        const fulfillerSigned = !!c.partyBSignedAt;
-        const cancellable = ["draft", "pending_terms", "active"].includes(c.status);
-        if (!isPoster || fulfillerSigned || !cancellable) {
-          console.log(
-            "[dashboard] contract",
-            c.id,
-            "— isPoster:",
-            isPoster,
-            "fulfillerSigned:",
-            fulfillerSigned,
-            "status:",
-            c.status,
-            "canCancel:",
-            isPoster && !fulfillerSigned && cancellable
-          );
-        }
-      });
-    }
-  }, [contracts, profile]);
-
   const [cancellingContractId, setCancellingContractId] = useState<string | null>(null);
 
   async function handleCancelContract(contractId: string) {
@@ -242,7 +216,7 @@ export default function DashboardPage() {
     return (
       <div className="py-24 text-center">
         <Loader2 className="h-6 w-6 animate-spin mx-auto mb-4 text-[#b8a078]" />
-        <p className="text-sm text-[#7a6b5a]">loading...</p>
+        <p className="text-sm text-[#8f7f6e]">loading...</p>
       </div>
     );
 
@@ -252,7 +226,7 @@ export default function DashboardPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 md:px-8">
       <h1 className="heading-display text-2xl text-[#e8d5a3] mb-2">Dashboard</h1>
-      <p className="text-xs text-[#7a6b5a] mb-8">$ whoami</p>
+      <p className="text-xs text-[#8f7f6e] mb-8">$ whoami</p>
 
       <DashboardHeader
         profile={profile}
@@ -275,7 +249,7 @@ export default function DashboardPage() {
               <p className="text-sm font-medium text-[#e8d5a3] group-hover:text-[#f5a623] transition-colors">
                 Post a Need
               </p>
-              <p className="text-[11px] text-[#7a6b5a]">Start a new exchange</p>
+              <p className="text-[11px] text-[#8f7f6e]">Start a new exchange</p>
             </div>
           </div>
         </Link>
@@ -291,7 +265,7 @@ export default function DashboardPage() {
               <p className="text-sm font-medium text-[#e8d5a3] group-hover:text-[#35c2f0] transition-colors">
                 Browse Needs
               </p>
-              <p className="text-[11px] text-[#7a6b5a]">Find opportunities</p>
+              <p className="text-[11px] text-[#8f7f6e]">Find opportunities</p>
             </div>
           </div>
         </Link>
@@ -304,7 +278,7 @@ export default function DashboardPage() {
               <p className="text-sm font-medium text-[#e8d5a3] group-hover:text-[#f0cc33] transition-colors">
                 Pro Status
               </p>
-              <p className="text-[11px] text-[#7a6b5a]">
+              <p className="text-[11px] text-[#8f7f6e]">
                 {profile.isPro ? "Active for life" : "Claim free Pro"}
               </p>
             </div>
@@ -322,7 +296,7 @@ export default function DashboardPage() {
                 "flex items-center gap-2 px-4 py-2 rounded transition-colors whitespace-nowrap",
                 activeTab === tab.id
                   ? "bg-[#1a1714] text-[#f5a623] shadow-[0_0_20px_rgba(245,166,35,0.1)]"
-                  : "text-[#7a6b5a] hover:text-[#e8d5a3]"
+                  : "text-[#8f7f6e] hover:text-[#e8d5a3]"
               )}
             >
               <tab.icon className="h-4 w-4" />
@@ -362,7 +336,7 @@ export default function DashboardPage() {
           {/* Skills */}
           {profile.skills.length > 0 && (
             <section className="vessel p-5">
-              <p className="text-xs text-[#7a6b5a] mb-4">$ cat ~/.skills</p>
+              <p className="text-xs text-[#8f7f6e] mb-4">$ cat ~/.skills</p>
               <div className="flex flex-wrap gap-2">
                 {profile.skills.map((skill) => (
                   <span
@@ -383,7 +357,7 @@ export default function DashboardPage() {
 
           {/* Delete Account */}
           <section className="vessel p-5 border-[#ff5252]/20">
-            <p className="text-xs text-[#7a6b5a] mb-4">$ rm -rf ~/</p>
+            <p className="text-xs text-[#8f7f6e] mb-4">$ rm -rf ~/</p>
             {!showDeleteConfirm ? (
               <button
                 onClick={() => setShowDeleteConfirm(true)}
@@ -398,7 +372,7 @@ export default function DashboardPage() {
                   <AlertTriangle className="h-5 w-5 text-[#ff5252] shrink-0 mt-0.5" />
                   <div>
                     <p className="text-sm font-medium text-[#e8d5a3]">Delete your account?</p>
-                    <p className="text-xs text-[#7a6b5a] mt-1">
+                    <p className="text-xs text-[#8f7f6e] mt-1">
                       This will permanently delete your profile, needs, contracts, messages, and all
                       associated data. This cannot be undone.
                     </p>
@@ -448,7 +422,7 @@ export default function DashboardPage() {
         <div>
           {!needs || needs.length === 0 ? (
             <>
-              <p className="text-xs text-[#7a6b5a] mb-4">$ ls ~/needs/</p>
+              <p className="text-xs text-[#8f7f6e] mb-4">$ ls ~/needs/</p>
               <EmptyState
                 title="No Needs Posted"
                 description="Post your first need to start exchanging."
@@ -467,7 +441,7 @@ export default function DashboardPage() {
                 const archivedNeeds = needs.filter((n) => n.status === "archived");
                 return (
                   <>
-                    <p className="text-xs text-[#7a6b5a] mb-4">$ ls ~/needs/</p>
+                    <p className="text-xs text-[#8f7f6e] mb-4">$ ls ~/needs/</p>
                     {activeNeeds.length === 0 ? (
                       <EmptyState
                         title="No Active Needs"
@@ -493,7 +467,7 @@ export default function DashboardPage() {
                                 >
                                   {need.title}
                                 </Link>
-                                <div className="flex items-center gap-3 text-xs text-[#7a6b5a] mt-1 flex-wrap">
+                                <div className="flex items-center gap-3 text-xs text-[#8f7f6e] mt-1 flex-wrap">
                                   <Badge variant={statusBadgeVariant(need.status)}>
                                     {need.status}
                                   </Badge>
@@ -519,7 +493,7 @@ export default function DashboardPage() {
                     {/* Archived needs */}
                     {archivedNeeds.length > 0 && (
                       <>
-                        <p className="text-xs text-[#7a6b5a] mb-4">$ ls ~/needs/archive/</p>
+                        <p className="text-xs text-[#8f7f6e] mb-4">$ ls ~/needs/archive/</p>
                         <div className="space-y-3">
                           {archivedNeeds.map((need) => (
                             <div
@@ -531,7 +505,7 @@ export default function DashboardPage() {
                                   <p className="text-base font-medium text-[#b8a078] truncate">
                                     {need.title}
                                   </p>
-                                  <div className="flex items-center gap-3 text-xs text-[#7a6b5a] mt-1 flex-wrap">
+                                  <div className="flex items-center gap-3 text-xs text-[#8f7f6e] mt-1 flex-wrap">
                                     <Badge variant="outline">archived</Badge>
                                     <span>cancelled contract</span>
                                   </div>
@@ -572,7 +546,7 @@ export default function DashboardPage() {
 
       {activeTab === "contracts" && (
         <div>
-          <p className="text-xs text-[#7a6b5a] mb-4">$ ls ~/contracts/</p>
+          <p className="text-xs text-[#8f7f6e] mb-4">$ ls ~/contracts/</p>
           {!contracts || contracts.length === 0 ? (
             <EmptyState
               title="No Contracts Yet"
@@ -606,7 +580,7 @@ export default function DashboardPage() {
                         <p className="text-base font-medium text-[#e8d5a3] truncate">
                           {contract.need?.title || "contract"}
                         </p>
-                        <div className="flex items-center gap-2 text-xs text-[#7a6b5a] mt-1 flex-wrap">
+                        <div className="flex items-center gap-2 text-xs text-[#8f7f6e] mt-1 flex-wrap">
                           <Badge variant={statusBadgeVariant(contract.status)}>
                             {contract.status}
                           </Badge>
@@ -650,7 +624,7 @@ export default function DashboardPage() {
 
       {activeTab === "offers" && (
         <div>
-          <p className="text-xs text-[#7a6b5a] mb-4">$ ls ~/interests/</p>
+          <p className="text-xs text-[#8f7f6e] mb-4">$ ls ~/interests/</p>
           {!offers || offers.length === 0 ? (
             <EmptyState
               title="No Interests Expressed"
@@ -682,7 +656,7 @@ export default function DashboardPage() {
                       >
                         {offer.need?.title}
                       </Link>
-                      <div className="text-xs text-[#7a6b5a] mt-1 flex items-center gap-2 flex-wrap">
+                      <div className="text-xs text-[#8f7f6e] mt-1 flex items-center gap-2 flex-wrap">
                         <Badge variant={statusBadgeVariant(offer.status)}>{offer.status}</Badge>
                         {offer.status === "accepted" && (
                           <span className="text-[#00e676]">poster accepted — contract pending</span>
@@ -723,7 +697,7 @@ export default function DashboardPage() {
 
       {activeTab === "community" && (
         <div className="space-y-6">
-          <p className="text-xs text-[#7a6b5a] mb-4">$ tail -f ~/community.log</p>
+          <p className="text-xs text-[#8f7f6e] mb-4">$ tail -f ~/community.log</p>
           <SocialSection />
           <TerminalActivityFeed />
         </div>

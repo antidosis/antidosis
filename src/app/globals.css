@@ -93,7 +93,7 @@
 }
 
 @layer components {
-  /* The Terminal Soul */
+  /* The Relay Soul */
   .cursor-blink {
     display: inline-block;
     width: 8px;

@@ -48,7 +48,7 @@ export function GuideBar({
               <p className="text-xs font-medium" style={{ color: user.color }}>
                 You are {user.name}
               </p>
-              <p className="text-[10px] text-[#7a6b5a] uppercase tracking-wider">
+              <p className="text-[10px] text-[#8f7f6e] uppercase tracking-wider">
                 {persona === "sarah" ? "Poster" : "Fulfiller"}
               </p>
             </div>
@@ -100,7 +100,7 @@ export function GuideBar({
               size="sm"
               variant="ghost"
               onClick={onReset}
-              className="h-8 w-8 p-0 text-[#7a6b5a]"
+              className="h-8 w-8 p-0 text-[#8f7f6e]"
             >
               <RotateCcw className="h-3.5 w-3.5" />
             </Button>

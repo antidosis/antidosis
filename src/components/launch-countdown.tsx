@@ -75,7 +75,9 @@ export function LaunchCountdown() {
 
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-14 md:py-20">
         {/* Terminal prompt */}
-        <p className="text-xs text-[#8f7f6e] mb-8 font-mono">$ ./regional_launch --countdown</p>
+        <p className="text-xs text-[#8f7f6e] mb-8 font-mono">
+          » NEW NODES COMING ONLINE — COUNTDOWN
+        </p>
 
         {/* Header */}
         <div className="mb-10 md:mb-14">
@@ -92,11 +94,11 @@ export function LaunchCountdown() {
           <h2 className="heading-display text-3xl md:text-5xl text-[#e8d5a3] mb-4">
             The Trial Ends.
             <br />
-            <span className="text-[#f5a623] glow-gold-subtle">Regional Begins.</span>
+            <span className="text-[#f5a623] glow-gold-subtle">The Network Grows.</span>
           </h2>
 
           <p className="text-sm md:text-base text-[#8f7f6e] max-w-lg leading-relaxed">
-            The Central Coast is just the beginning. On{" "}
+            The Central Coast is just the first node. On{" "}
             <span className="text-[#e8d5a3]">
               {REGIONAL_LAUNCH_DATE.toLocaleDateString("en-AU", {
                 day: "numeric",
@@ -104,8 +106,8 @@ export function LaunchCountdown() {
                 year: "numeric",
               })}
             </span>
-            , Antidosis unlocks for Wollongong, Newcastle, and the Gold Coast. Verify now and keep
-            Pro for life — no matter how far we expand.
+            , Wollongong, Newcastle, and the Gold Coast join the network. Verify now — Pro is free
+            for every verified member, no matter how far the signal reaches.
           </p>
         </div>
 
@@ -155,7 +157,8 @@ export function LaunchCountdown() {
 
         {/* Footer note */}
         <p className="mt-6 text-xs text-[#8f7f6e]/90">
-          Pro is free for every verified member, permanently. No credit card required.
+          Pro is free for every verified member — yours to keep as long as the network runs. No
+          credit card required.
         </p>
       </div>
 

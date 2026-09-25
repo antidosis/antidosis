@@ -117,8 +117,8 @@ export function TerminalMessageList({
                   <span style={{ color: "var(--term-accent)" }}>#{activeContext.name}</span>!
                 </p>
                 <p className="mt-1 text-[13px]" style={{ color: "var(--term-muted)" }}>
-                  No messages here yet. Be the first to say something — just type below and hit
-                  enter.
+                  No transmissions on this channel yet. Be the first to broadcast — just type below
+                  and hit enter.
                 </p>
               </div>
             )}
@@ -136,7 +136,7 @@ export function TerminalMessageList({
                 </p>
                 <p className="mt-1 text-[13px]" style={{ color: "var(--term-muted)" }}>
                   Try <span style={{ color: "var(--term-accent)" }}>/help</span> to see commands, or
-                  select a channel to chat with others.
+                  tune into a channel to chat with others.
                 </p>
               </div>
             )}

@@ -81,7 +81,7 @@ export async function handleTips(ctx: HandlerContext): Promise<HandlerResult> {
 export async function handleClear(ctx: HandlerContext): Promise<HandlerResult> {
   ctx.setSysMessages([]);
   ctx.setMessages([]);
-  ctx.addSys("Terminal cleared.", "success");
+  ctx.addSys("Relay screen cleared.", "success");
   return { handled: true };
 }
 

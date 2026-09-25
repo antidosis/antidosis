@@ -396,7 +396,7 @@ const CREDENTIAL_WIZARD_STEPS: WizardStep[] = [
 const TUTORIAL_STEPS: { prompt: string; check?: string; hint?: string }[] = [
   {
     prompt:
-      "👋 Welcome! I'm your Terminal guide. Let's get you started.\n\nFirst, let's see who you are. Type /whoami and press Enter.",
+      "👋 Welcome! I'm your Relay guide. Let's get you started.\n\nFirst, let's see who you are. Type /whoami and press Enter.",
     check: "whoami",
     hint: "Type /whoami and press Enter.",
   },
@@ -430,7 +430,7 @@ const TUTORIAL_STEPS: { prompt: string; check?: string; hint?: string }[] = [
   },
   {
     prompt:
-      "🎉 Tutorial complete! You're ready to use the Terminal.\n\nPro tip: Type /tips anytime for random advice, and /help advanced when you want to see everything.\n\nWelcome to the community!",
+      "🎉 Tutorial complete! You're ready to use the Relay.\n\nPro tip: Type /tips anytime for random advice, and /help advanced when you want to see everything.\n\nWelcome to the community!",
   },
 ];
 

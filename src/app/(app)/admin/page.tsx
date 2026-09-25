@@ -28,6 +28,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { createClient } from "@/lib/supabase/client";
 
+import { ReportsSection } from "./_components/reports-section";
 import { SerrSection } from "./_components/serr-section";
 import { UserManagementSection } from "./_components/user-management-section";
 
@@ -172,7 +173,7 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <div className="py-24 text-center text-sm text-[#7a6b5a]">
+      <div className="py-24 text-center text-sm text-[#8f7f6e]">
         <Loader2 className="h-6 w-6 animate-spin mx-auto mb-4" />
         loading admin...
       </div>
@@ -181,7 +182,7 @@ export default function AdminPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 md:px-8">
-      <p className="text-xs text-[#7a6b5a] mb-6">$ sudo su</p>
+      <p className="text-xs text-[#8f7f6e] mb-6">$ sudo su</p>
       <h1 className="text-2xl heading-display text-[#e8d5a3] mb-8">admin dashboard</h1>
 
       {/* Stats */}
@@ -207,7 +208,7 @@ export default function AdminPage() {
 
       {/* Pending Verifications */}
       <section>
-        <p className="text-xs text-[#7a6b5a] mb-6">
+        <p className="text-xs text-[#8f7f6e] mb-6">
           $ ls ~/pending_verifications/ ({pending.length})
         </p>
 
@@ -237,7 +238,7 @@ export default function AdminPage() {
                           <p className="text-sm font-medium text-[#e8d5a3]">
                             {cred.profile.fullName || "unnamed user"}
                           </p>
-                          <p className="text-xs text-[#7a6b5a]">{cred.profile.email}</p>
+                          <p className="text-xs text-[#8f7f6e]">{cred.profile.email}</p>
                         </div>
                       </div>
 
@@ -256,7 +257,7 @@ export default function AdminPage() {
                       </div>
 
                       {/* Quick details (always visible) */}
-                      <div className="text-xs text-[#7a6b5a] space-y-1">
+                      <div className="text-xs text-[#8f7f6e] space-y-1">
                         {cred.documentNumber && (
                           <p>
                             number: {"*".repeat(Math.max(0, cred.documentNumber.length - 4))}
@@ -300,7 +301,7 @@ export default function AdminPage() {
                         )}
                         <button
                           onClick={() => setExpandedId(isExpanded ? null : cred.id)}
-                          className="inline-flex items-center gap-1 text-xs text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors"
+                          className="inline-flex items-center gap-1 text-xs text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
                         >
                           {isExpanded ? (
                             <ChevronUp className="h-3 w-3" />
@@ -313,7 +314,7 @@ export default function AdminPage() {
 
                       {/* Expanded details */}
                       {isExpanded && (
-                        <div className="mt-3 pt-3 border-t border-[#2a2420]/40 text-xs text-[#7a6b5a] space-y-1">
+                        <div className="mt-3 pt-3 border-t border-[#2a2420]/40 text-xs text-[#8f7f6e] space-y-1">
                           {cred.profile.mobile && (
                             <p className="flex items-center gap-1">
                               <Smartphone className="h-3 w-3" />
@@ -331,7 +332,7 @@ export default function AdminPage() {
                             </p>
                           )}
                           {cred.description && (
-                            <p className="text-[#7a6b5a]/70">{cred.description}</p>
+                            <p className="text-[#8f7f6e]/70">{cred.description}</p>
                           )}
                           <p>
                             uploaded:{" "}
@@ -431,7 +432,7 @@ export default function AdminPage() {
 
       {/* Pending Contract Cancellations */}
       <section>
-        <p className="text-xs text-[#7a6b5a] mb-6">
+        <p className="text-xs text-[#8f7f6e] mb-6">
           $ ls ~/pending_contract_cancellations/ ({pendingCancellations.length})
         </p>
 
@@ -451,12 +452,12 @@ export default function AdminPage() {
                       <FileText className="h-4 w-4 text-[#f5a623]" />
                       <p className="text-sm font-medium text-[#e8d5a3]">{c.need.title}</p>
                     </div>
-                    <div className="flex items-center gap-3 text-xs text-[#7a6b5a] mb-2">
+                    <div className="flex items-center gap-3 text-xs text-[#8f7f6e] mb-2">
                       <span>{c.partyA.fullName || "Unknown"}</span>
                       <span>vs</span>
                       <span>{c.partyB.fullName || "Unknown"}</span>
                     </div>
-                    <div className="text-xs text-[#7a6b5a] space-y-1">
+                    <div className="text-xs text-[#8f7f6e] space-y-1">
                       <p>
                         Requested:{" "}
                         {new Date(c.cancelRequestedAt).toLocaleDateString("en-AU", {
@@ -506,6 +507,8 @@ export default function AdminPage() {
 
       <SerrSection />
 
+      <ReportsSection />
+
       <UserManagementSection />
     </div>
   );
@@ -525,8 +528,8 @@ function StatCard({
   return (
     <div className={accent ? "vessel-lit p-5" : "vessel p-5"}>
       <div className="flex items-center gap-2 mb-2">
-        <Icon className={`h-4 w-4 ${accent ? "text-[#f5a623]" : "text-[#7a6b5a]"}`} />
-        <span className="text-xs text-[#7a6b5a] uppercase tracking-wide">{label}</span>
+        <Icon className={`h-4 w-4 ${accent ? "text-[#f5a623]" : "text-[#8f7f6e]"}`} />
+        <span className="text-xs text-[#8f7f6e] uppercase tracking-wide">{label}</span>
       </div>
       <p className={`text-2xl font-bold ${accent ? "text-[#f5a623]" : "text-[#e8d5a3]"}`}>
         {value}

@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
-import { useEffect, Suspense, lazy } from "react";
+import { useCallback, useEffect, Suspense, lazy } from "react";
 import { App as CapacitorApp } from "@capacitor/app";
+import { Capacitor } from "@capacitor/core";
 import { useAuth } from "@mobile/hooks/useAuth";
 import { MobileShell } from "@mobile/components/MobileShell";
 import { HomeScreen } from "@mobile/screens/HomeScreen";
@@ -8,7 +9,8 @@ import { LoginScreen } from "@mobile/screens/LoginScreen";
 import { NeedsScreen } from "@mobile/screens/NeedsScreen";
 import { ChatScreen } from "@mobile/screens/ChatScreen";
 import { ProfileScreen } from "@mobile/screens/ProfileScreen";
-import { useStatusBar } from "@mobile/hooks/useNative";
+import { usePushNotifications, useStatusBar } from "@mobile/hooks/useNative";
+import { registerDeviceToken } from "@mobile/lib/api";
 import { EffectsLayer } from "@mobile/components/ui";
 import { ToastProvider } from "@mobile/components/ToastProvider";
 import { PageTransition } from "@mobile/components/PageTransition";
@@ -40,6 +42,9 @@ const ContractsScreen = lazy(() =>
 );
 const ContractDetailScreen = lazy(() =>
   import("@mobile/screens/ContractDetailScreen").then((m) => ({ default: m.ContractDetailScreen }))
+);
+const VerifyMobileScreen = lazy(() =>
+  import("@mobile/screens/VerifyMobileScreen").then((m) => ({ default: m.VerifyMobileScreen }))
 );
 
 function FullscreenLoader() {
@@ -82,91 +87,119 @@ function AppRoutes() {
   }
 
   return (
-    <PageTransition key={location.pathname}>
-      <Routes location={location}>
-        <Route element={<MobileShell />}>
-          <Route path="/home" element={<HomeScreen />} />
-          <Route path="/needs" element={<NeedsScreen />} />
-          <Route
-            path="/needs/:id"
-            element={
-              <Suspense fallback={<FullscreenLoader />}>
-                <NeedDetailScreen />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/needs/new"
-            element={
-              <Suspense fallback={<FullscreenLoader />}>
-                <PostNeedScreen />
-              </Suspense>
-            }
-          />
-          <Route path="/chat" element={<ChatScreen />} />
-          <Route
-            path="/chat/channel/:id"
-            element={
-              <Suspense fallback={<FullscreenLoader />}>
-                <ChatRoomScreen />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/chat/dm/:id"
-            element={
-              <Suspense fallback={<FullscreenLoader />}>
-                <ChatRoomScreen />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/discover"
-            element={
-              <Suspense fallback={<FullscreenLoader />}>
-                <DiscoverScreen />
-              </Suspense>
-            }
-          />
-          <Route path="/profile" element={<ProfileScreen />} />
-          <Route
-            path="/profile/:id"
-            element={
-              <Suspense fallback={<FullscreenLoader />}>
-                <ProfileDetailScreen />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/profile/edit"
-            element={
-              <Suspense fallback={<FullscreenLoader />}>
-                <EditProfileScreen />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/contracts"
-            element={
-              <Suspense fallback={<FullscreenLoader />}>
-                <ContractsScreen />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/contracts/:id"
-            element={
-              <Suspense fallback={<FullscreenLoader />}>
-                <ContractDetailScreen />
-              </Suspense>
-            }
-          />
-          <Route path="/" element={<Navigate to="/home" replace />} />
-          <Route path="*" element={<Navigate to="/home" replace />} />
-        </Route>
-      </Routes>
-    </PageTransition>
+    <>
+      <PushRegistration />
+      <PageTransition key={location.pathname}>
+        <Routes location={location}>
+          <Route element={<MobileShell />}>
+            <Route path="/home" element={<HomeScreen />} />
+            <Route path="/needs" element={<NeedsScreen />} />
+            <Route
+              path="/needs/:id"
+              element={
+                <Suspense fallback={<FullscreenLoader />}>
+                  <NeedDetailScreen />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/needs/new"
+              element={
+                <Suspense fallback={<FullscreenLoader />}>
+                  <PostNeedScreen />
+                </Suspense>
+              }
+            />
+            <Route path="/chat" element={<ChatScreen />} />
+            <Route
+              path="/chat/channel/:id"
+              element={
+                <Suspense fallback={<FullscreenLoader />}>
+                  <ChatRoomScreen />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/chat/dm/:id"
+              element={
+                <Suspense fallback={<FullscreenLoader />}>
+                  <ChatRoomScreen />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/discover"
+              element={
+                <Suspense fallback={<FullscreenLoader />}>
+                  <DiscoverScreen />
+                </Suspense>
+              }
+            />
+            <Route path="/profile" element={<ProfileScreen />} />
+            <Route
+              path="/verify-mobile"
+              element={
+                <Suspense fallback={<FullscreenLoader />}>
+                  <VerifyMobileScreen />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/profile/:id"
+              element={
+                <Suspense fallback={<FullscreenLoader />}>
+                  <ProfileDetailScreen />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/profile/edit"
+              element={
+                <Suspense fallback={<FullscreenLoader />}>
+                  <EditProfileScreen />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/contracts"
+              element={
+                <Suspense fallback={<FullscreenLoader />}>
+                  <ContractsScreen />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/contracts/:id"
+              element={
+                <Suspense fallback={<FullscreenLoader />}>
+                  <ContractDetailScreen />
+                </Suspense>
+              }
+            />
+            <Route path="/" element={<Navigate to="/home" replace />} />
+            <Route path="*" element={<Navigate to="/home" replace />} />
+          </Route>
+        </Routes>
+      </PageTransition>
+    </>
   );
+}
+
+// Registers the device's push token with the backend once the OS grants one.
+// Only mounted for authenticated users (AppRoutes renders it post-login).
+function PushRegistration() {
+  const onToken = useCallback((token: string) => {
+    const platform = Capacitor.getPlatform();
+    if (platform === "ios" || platform === "android") {
+      registerDeviceToken(token, platform).catch(() => {
+        // Best-effort — the token is re-delivered on the next app launch.
+      });
+    }
+  }, []);
+
+  usePushNotifications(onToken);
+
+  return null;
 }
 
 function DeepLinkHandler() {
@@ -175,7 +208,13 @@ function DeepLinkHandler() {
   useEffect(() => {
     const listener = CapacitorApp.addListener("appUrlOpen", (event) => {
       const url = new URL(event.url);
-      const path = url.pathname + url.search;
+      // For the custom scheme, the first path segment lands in `host`
+      // (antidosis://needs/123 → host "needs", pathname "/123").
+      // Normalise to a real path so the route matching below works.
+      const path =
+        url.protocol === "antidosis:"
+          ? `/${url.host}${url.pathname}${url.search}`
+          : url.pathname + url.search;
 
       if (path.startsWith("/needs/")) {
         navigate(path);
@@ -198,6 +237,20 @@ function DeepLinkHandler() {
   return null;
 }
 
+// Global 403 MOBILE_NOT_VERIFIED responses (posting needs, messaging, etc.)
+// funnel the user straight to the OTP flow instead of a dead-end error toast.
+function MobileVerificationRedirect() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handler = () => navigate("/verify-mobile");
+    window.addEventListener("auth:mobile-verification-required", handler);
+    return () => window.removeEventListener("auth:mobile-verification-required", handler);
+  }, [navigate]);
+
+  return null;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -205,6 +258,7 @@ export default function App() {
         <ToastProvider>
           <EffectsLayer grain />
           <DeepLinkHandler />
+          <MobileVerificationRedirect />
           <AppRoutes />
         </ToastProvider>
       </ErrorBoundary>

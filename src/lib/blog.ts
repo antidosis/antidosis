@@ -546,6 +546,16 @@ What *does* change:
 - Local event integration (markets, festivals, community days)
 - Language support if needed
 
+## The Longer Horizon: An Exchange Network That Works When Nothing Else Does
+
+The internet is the medium today. It's fast, cheap, and everywhere. But Coasties know what happens when the grid goes down — bushfires, floods, storms that knock out towers and fibre for days at a time. Exactly when a community most needs to coordinate, its tools go silent.
+
+The long-term vision for antidosis is an exchange network that keeps working in those moments: needs broadcast node to node, relayed across a decentralised radio mesh, no central infrastructure required. Post a need from a blacked-out suburb and have it relayed, hand to hand, until it reaches someone who can help.
+
+To be clear: **that hardware doesn't exist yet.** Today antidosis is a web and mobile marketplace running on the internet, like anything else. But every design decision — needs-first posts, local density, reputation as currency, optional contracts — is made so the network could survive losing its wires. We're building the social layer now so the resilient layer has something worth carrying later.
+
+**Today it runs on the internet. The design is built for a future where it doesn't have to.**
+
 ## The Honest Truth About Timing
 
 We could rush expansion. Raise money. Blast ads. Launch in ten cities tomorrow.

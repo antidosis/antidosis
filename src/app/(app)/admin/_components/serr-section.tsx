@@ -67,9 +67,9 @@ export function SerrSection() {
   return (
     <section>
       <div className="divider mb-8" />
-      <p className="text-xs text-[#7a6b5a] mb-2">$ ls ~/serr_reporting/</p>
+      <p className="text-xs text-[#8f7f6e] mb-2">$ ls ~/serr_reporting/</p>
       <h2 className="text-lg heading-display text-[#e8d5a3] mb-2">SERR reporting (ATO)</h2>
-      <p className="text-xs text-[#7a6b5a] mb-6 max-w-2xl">
+      <p className="text-xs text-[#8f7f6e] mb-6 max-w-2xl">
         Sharing Economy Reporting Regime: per-seller transaction totals for completed exchanges.
         Leave dates blank for the most recent statutory half-year period (Jan–Jun due 31 Jul,
         Jul–Dec due 31 Jan). Lodge the CSV via ATO Online services for business.
@@ -78,7 +78,7 @@ export function SerrSection() {
       <div className="vessel p-5 mb-6">
         <div className="flex flex-wrap items-end gap-4">
           <div className="space-y-1">
-            <label className="text-xs text-[#7a6b5a] uppercase tracking-wide">from</label>
+            <label className="text-xs text-[#8f7f6e] uppercase tracking-wide">from</label>
             <input
               type="date"
               value={from}
@@ -87,7 +87,7 @@ export function SerrSection() {
             />
           </div>
           <div className="space-y-1">
-            <label className="text-xs text-[#7a6b5a] uppercase tracking-wide">to</label>
+            <label className="text-xs text-[#8f7f6e] uppercase tracking-wide">to</label>
             <input
               type="date"
               value={to}
@@ -120,15 +120,15 @@ export function SerrSection() {
         <>
           <div className="grid grid-cols-3 gap-4 mb-6">
             <div className="vessel p-4">
-              <p className="text-xs text-[#7a6b5a] uppercase tracking-wide mb-1">sellers</p>
+              <p className="text-xs text-[#8f7f6e] uppercase tracking-wide mb-1">sellers</p>
               <p className="text-xl font-bold text-[#e8d5a3]">{report.totals.sellers}</p>
             </div>
             <div className="vessel p-4">
-              <p className="text-xs text-[#7a6b5a] uppercase tracking-wide mb-1">transactions</p>
+              <p className="text-xs text-[#8f7f6e] uppercase tracking-wide mb-1">transactions</p>
               <p className="text-xl font-bold text-[#e8d5a3]">{report.totals.transactions}</p>
             </div>
             <div className="vessel p-4">
-              <p className="text-xs text-[#7a6b5a] uppercase tracking-wide mb-1">
+              <p className="text-xs text-[#8f7f6e] uppercase tracking-wide mb-1">
                 gross cash (AUD)
               </p>
               <p className="text-xl font-bold text-[#f5a623]">
@@ -138,14 +138,14 @@ export function SerrSection() {
           </div>
 
           {report.sellers.length === 0 ? (
-            <p className="text-sm text-[#7a6b5a]">
+            <p className="text-sm text-[#8f7f6e]">
               No completed exchanges in this period — a nil report is not required.
             </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left text-xs text-[#7a6b5a] uppercase tracking-wide border-b border-[#2a2420]">
+                  <tr className="text-left text-xs text-[#8f7f6e] uppercase tracking-wide border-b border-[#2a2420]">
                     <th className="py-2 pr-4">seller</th>
                     <th className="py-2 pr-4">ABN</th>
                     <th className="py-2 pr-4">location</th>
@@ -159,7 +159,7 @@ export function SerrSection() {
                     <tr key={s.profileId} className="border-b border-[#2a2420]/50">
                       <td className="py-2 pr-4">
                         <p className="text-[#e8d5a3]">{s.fullName || "—"}</p>
-                        <p className="text-xs text-[#7a6b5a]">{s.email}</p>
+                        <p className="text-xs text-[#8f7f6e]">{s.email}</p>
                       </td>
                       <td className="py-2 pr-4 text-[#b8a078]">{s.abn || "—"}</td>
                       <td className="py-2 pr-4 text-[#b8a078]">{s.locationName || "—"}</td>
@@ -179,7 +179,7 @@ export function SerrSection() {
 
           <ul className="mt-4 space-y-1">
             {report.notes.map((note) => (
-              <li key={note} className="text-xs text-[#7a6b5a]">
+              <li key={note} className="text-xs text-[#8f7f6e]">
                 · {note}
               </li>
             ))}

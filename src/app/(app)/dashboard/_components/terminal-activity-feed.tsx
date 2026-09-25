@@ -79,7 +79,7 @@ export function TerminalActivityFeed() {
     return (
       <div className="vessel p-8 text-center">
         <Loader2 className="h-5 w-5 animate-spin mx-auto mb-3 text-[#b8a078]" />
-        <p className="text-xs text-[#7a6b5a]">loading community activity...</p>
+        <p className="text-xs text-[#8f7f6e]">loading community activity...</p>
       </div>
     );
   }
@@ -87,12 +87,12 @@ export function TerminalActivityFeed() {
   if (items.length === 0) {
     return (
       <div className="vessel p-8 text-center">
-        <MessageSquare className="h-6 w-6 mx-auto mb-3 text-[#7a6b5a]" />
+        <MessageSquare className="h-6 w-6 mx-auto mb-3 text-[#8f7f6e]" />
         <p className="text-sm text-[#b8a078] mb-1">No activity yet</p>
-        <p className="text-xs text-[#7a6b5a]">
+        <p className="text-xs text-[#8f7f6e]">
           Join the{" "}
           <Link href="/terminal" className="text-[#f5a623] hover:underline">
-            Terminal
+            Relay
           </Link>{" "}
           to start chatting with the community.
         </p>
@@ -105,13 +105,13 @@ export function TerminalActivityFeed() {
       <div className="px-5 py-4 border-b border-[#2a2420]/60 flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-[#e8d5a3]">Community Activity</p>
-          <p className="text-[11px] text-[#7a6b5a]">Recent messages, DMs, and mentions</p>
+          <p className="text-[11px] text-[#8f7f6e]">Recent messages, DMs, and mentions</p>
         </div>
         <Link
           href="/terminal"
           className="text-xs text-[#f5a623] hover:text-[#e8d5a3] transition-colors"
         >
-          Open Terminal →
+          Open Relay →
         </Link>
       </div>
       <div className="divide-y divide-[#2a2420]/40">
@@ -132,7 +132,7 @@ export function TerminalActivityFeed() {
                     {item.sender.fullName || "User"}
                   </span>
                   <ContextBadge item={item} />
-                  <span className="text-[10px] text-[#7a6b5a]">{timeAgo(item.createdAt)}</span>
+                  <span className="text-[10px] text-[#8f7f6e]">{timeAgo(item.createdAt)}</span>
                 </div>
                 <p className="text-xs text-[#b8a078] line-clamp-2 group-hover:text-[#e8d5a3] transition-colors">
                   {item.content}

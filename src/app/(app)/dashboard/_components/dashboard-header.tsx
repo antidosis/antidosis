@@ -97,7 +97,7 @@ export function DashboardHeader({
                 </span>
               )}
             </div>
-            <p className="text-xs text-[#7a6b5a] mt-1.5">
+            <p className="text-xs text-[#8f7f6e] mt-1.5">
               {profile.jobsCompleted} job{profile.jobsCompleted !== 1 ? "s" : ""} completed
             </p>
           </div>
@@ -120,7 +120,7 @@ export function DashboardHeader({
                 <p className="text-sm font-semibold" style={{ color: stat.color }}>
                   {stat.value}
                 </p>
-                <p className="text-[10px] text-[#7a6b5a] uppercase tracking-wider">{stat.sub}</p>
+                <p className="text-[10px] text-[#8f7f6e] uppercase tracking-wider">{stat.sub}</p>
               </div>
             </div>
           ))}

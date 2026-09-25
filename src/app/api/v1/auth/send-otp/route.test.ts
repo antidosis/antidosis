@@ -34,6 +34,13 @@ vi.mock("@/lib/supabase/server", () => ({
   }),
 }));
 
+// ─── Bans mock ───
+const mockIsMobileBanned = vi.fn();
+
+vi.mock("@/lib/bans", () => ({
+  isMobileBanned: (...args: unknown[]) => mockIsMobileBanned(...args),
+}));
+
 // ─── Rate limit mocks ───
 const mockRateLimit = vi.fn();
 
@@ -53,12 +60,16 @@ vi.mock("@/lib/logger", () => ({
 }));
 
 // ─── Twilio mock ───
-const mockMessagesCreate = vi.fn();
+const mockVerificationsCreate = vi.fn();
 
 vi.mock("twilio", () => ({
   default: () => ({
-    messages: {
-      create: (...args: unknown[]) => mockMessagesCreate(...args),
+    verify: {
+      v2: {
+        services: () => ({
+          verifications: { create: (...args: unknown[]) => mockVerificationsCreate(...args) },
+        }),
+      },
     },
   }),
 }));
@@ -99,10 +110,12 @@ describe("POST /api/v1/auth/send-otp", () => {
       mobileVerified: false,
     });
     mockProfileFindFirst.mockResolvedValue(null);
+    mockIsMobileBanned.mockResolvedValue(false);
     // Ensure Twilio is not configured by default
     delete process.env.TWILIO_ACCOUNT_SID;
     delete process.env.TWILIO_AUTH_TOKEN;
     delete process.env.TWILIO_PHONE_NUMBER;
+    delete process.env.TWILIO_VERIFY_SERVICE_SID;
   });
 
   it("returns 401 when unauthenticated", async () => {
@@ -187,40 +200,25 @@ describe("POST /api/v1/auth/send-otp", () => {
     expect(body.error).toBe("Mobile number already verified");
   });
 
-  it("returns 200 and sends via Twilio when configured", async () => {
+  it("returns 200 and sends via Twilio Verify when configured", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
     process.env.TWILIO_ACCOUNT_SID = "test-sid";
     process.env.TWILIO_AUTH_TOKEN = "test-token";
-    process.env.TWILIO_PHONE_NUMBER = "+61400000000";
-    mockMessagesCreate.mockResolvedValue({ sid: "msg-1" });
+    process.env.TWILIO_VERIFY_SERVICE_SID = "VA-test-service";
+    mockVerificationsCreate.mockResolvedValue({ sid: "VE-1", status: "pending" });
 
     const res = await POST(makeRequest({ mobile: "0400123456" }));
     const body = await res.json();
 
     expect(res.status).toBe(200);
     expect(body.success).toBe(true);
-    expect(mockDeleteMany).toHaveBeenCalledWith({
-      where: { profileId: "profile-1", used: false },
+    expect(mockVerificationsCreate).toHaveBeenCalledWith({
+      to: "+61400123456",
+      channel: "sms",
     });
-    expect(mockCreate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({
-          mobile: "+61400123456",
-          code: expect.stringMatching(/^\d{6}$/),
-          profileId: "profile-1",
-          expiresAt: expect.any(Date),
-        }),
-      })
-    );
-    expect(mockMessagesCreate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        body: expect.stringMatching(
-          /Your Antidosis verification code is: \d{6}\. Valid for 10 minutes\./
-        ),
-        from: "+61400000000",
-        to: "+61400123456",
-      })
-    );
+    // Verify owns the code — nothing is stored locally
+    expect(mockCreate).not.toHaveBeenCalled();
+    expect(mockDeleteMany).not.toHaveBeenCalled();
   });
 
   it("returns 200 and logs to console in dev fallback when Twilio not configured", async () => {
@@ -234,6 +232,17 @@ describe("POST /api/v1/auth/send-otp", () => {
     expect(body.success).toBe(true);
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("[DEV OTP]"));
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("+61400123456"));
+    // Dev fallback stores a hashed code locally (verify-otp compares hashes)
+    expect(mockCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          mobile: "+61400123456",
+          code: expect.stringMatching(/^[0-9a-f]{64}$/),
+          profileId: "profile-1",
+          expiresAt: expect.any(Date),
+        }),
+      })
+    );
 
     consoleSpy.mockRestore();
   });
@@ -242,8 +251,8 @@ describe("POST /api/v1/auth/send-otp", () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
     process.env.TWILIO_ACCOUNT_SID = "test-sid";
     process.env.TWILIO_AUTH_TOKEN = "test-token";
-    process.env.TWILIO_PHONE_NUMBER = "+61400000000";
-    mockMessagesCreate.mockRejectedValue(new Error("Twilio error"));
+    process.env.TWILIO_VERIFY_SERVICE_SID = "VA-test-service";
+    mockVerificationsCreate.mockRejectedValue(new Error("Twilio error"));
 
     const res = await POST(makeRequest({ mobile: "0400123456" }));
     const body = await res.json();
@@ -274,6 +283,21 @@ describe("POST /api/v1/auth/send-otp", () => {
       where: { mobile: "+61400123456", bannedAt: { not: null } },
       select: { id: true },
     });
+  });
+
+  it("returns 403 MOBILE_BANNED when the number is in BannedMobile with no matching profile", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    // No banned profile holds the mobile (e.g. the banned account self-deleted)
+    mockProfileFindFirst.mockResolvedValue(null);
+    mockIsMobileBanned.mockResolvedValue(true);
+
+    const res = await POST(makeRequest({ mobile: "0400123456" }));
+    const body = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(body.code).toBe("MOBILE_BANNED");
+    expect(mockIsMobileBanned).toHaveBeenCalledWith("+61400123456");
+    expect(mockCreate).not.toHaveBeenCalled();
   });
 
   it("fails closed with 503 in production when Twilio is not configured", async () => {

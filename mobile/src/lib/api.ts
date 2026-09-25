@@ -4,7 +4,6 @@ import type {
   Need,
   NeedsListResponse,
   NeedDetailResponse,
-  Notification,
   NotificationsResponse,
   Acceptance,
 } from "@mobile/types/api";
@@ -18,6 +17,31 @@ import type {
 } from "@/lib/schemas/terminal";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
+
+// Web origin derived from the API base (e.g. "https://app.com/api/v1" → "https://app.com").
+// Used for links that must open on the public web (password reset, etc.) — on native,
+// window.location.origin is capacitor://localhost, which is useless outside the app.
+export const WEB_ORIGIN = (() => {
+  try {
+    return new URL(API_BASE).origin;
+  } catch {
+    return window.location.origin;
+  }
+})();
+
+// Error thrown by fetchApi. Carries the HTTP status and the API's `code` field
+// (e.g. "MOBILE_NOT_VERIFIED", "ACCOUNT_SUSPENDED") so callers can react to
+// specific failure modes instead of parsing message strings.
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+    public readonly code?: string
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
 
 async function getToken(): Promise<string | undefined> {
   try {
@@ -67,13 +91,19 @@ async function fetchApi<T>(path: string, options: RequestInit = {}): Promise<T> 
 
   if (!res.ok) {
     let message = `HTTP ${res.status}`;
+    let code: string | undefined;
     try {
       const body = await res.json();
       message = typeof body.error === "string" ? body.error : JSON.stringify(body.error ?? body);
+      if (typeof body.code === "string") code = body.code;
     } catch {
       /* ignore */
     }
-    throw new Error(message);
+    // Participation gate hit — send the user to mobile verification
+    if (res.status === 403 && code === "MOBILE_NOT_VERIFIED") {
+      window.dispatchEvent(new CustomEvent("auth:mobile-verification-required"));
+    }
+    throw new ApiError(message, res.status, code);
   }
 
   return res.json() as Promise<T>;
@@ -83,6 +113,40 @@ async function fetchApi<T>(path: string, options: RequestInit = {}): Promise<T> 
 
 export function getProfile() {
   return fetchApi<Profile>("/profiles/me");
+}
+
+// ── Mobile Verification (OTP) ────────────────────────────────────────
+// The web requires profile.mobile to already match the number being
+// verified — updateProfile({ mobile }) first if the user entered a new one.
+
+export function sendOtp(mobile: string) {
+  return fetchApi<{ success: boolean }>("/auth/send-otp", {
+    method: "POST",
+    body: JSON.stringify({ mobile }),
+  });
+}
+
+export function verifyOtp(mobile: string, code: string) {
+  return fetchApi<{ success: boolean }>("/auth/verify-otp", {
+    method: "POST",
+    body: JSON.stringify({ mobile, code }),
+  });
+}
+
+// ── Push Notifications ───────────────────────────────────────────────
+
+export function registerDeviceToken(token: string, platform: "ios" | "android" | "web") {
+  return fetchApi<{ success: boolean }>("/devices", {
+    method: "POST",
+    body: JSON.stringify({ token, platform }),
+  });
+}
+
+export function unregisterDeviceToken(token: string) {
+  return fetchApi<{ success: boolean }>("/devices", {
+    method: "DELETE",
+    body: JSON.stringify({ token }),
+  });
 }
 
 // ── Need Messages ────────────────────────────────────────────────────
@@ -169,7 +233,7 @@ export function getNotifications(unreadOnly = false) {
 }
 
 export function markNotificationRead(id: string) {
-  return fetchApi<Notification>(`/notifications/${id}/read`, {
+  return fetchApi<{ success: boolean }>(`/notifications/${id}/read`, {
     method: "PATCH",
   });
 }
@@ -299,16 +363,13 @@ export function completeContract(id: string) {
 }
 
 export function remindSign(id: string) {
-  return fetchApi<{ message: string }>(`/contracts/${id}/remind-sign`, {
+  return fetchApi<{ success: boolean }>(`/contracts/${id}/remind-sign`, {
     method: "POST",
   });
 }
 
 export function generateContractPdf(id: string) {
-  return fetchApi<{ contract: import("@mobile/types/api").ContractDetail }>(
-    `/contracts/${id}/pdf`,
-    { method: "POST" }
-  );
+  return fetchApi<{ pdfUrl: string }>(`/contracts/${id}/pdf`, { method: "POST" });
 }
 
 export function sendContractMessage(contractId: string, content: string) {
@@ -347,7 +408,7 @@ export function deleteAccount() {
 // ── Skills ───────────────────────────────────────────────────────────
 
 export function addSkill(name: string, category?: string) {
-  return fetchApi<import("@mobile/types/api").Skill>("/profiles/me/skills", {
+  return fetchApi<{ skill: import("@mobile/types/api").Skill }>("/profiles/me/skills", {
     method: "POST",
     body: JSON.stringify({ name, category }),
   });
@@ -399,7 +460,7 @@ export function updateContract(
     partyBUseMessageTerms?: boolean;
   }
 ) {
-  return fetchApi<import("@mobile/types/api").ContractDetail>(`/contracts/${id}`, {
+  return fetchApi<{ contract: import("@mobile/types/api").ContractDetail }>(`/contracts/${id}`, {
     method: "PATCH",
     body: JSON.stringify(data),
   });

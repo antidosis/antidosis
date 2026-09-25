@@ -1,7 +1,7 @@
 import { ImageResponse } from "@vercel/og";
 
 export const runtime = "edge";
-export const alt = "antidosis — exchange anything, build trust.";
+export const alt = "antidosis — the exchange network.";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -110,7 +110,7 @@ export default async function Image() {
           maxWidth: 800,
         }}
       >
-        exchange anything, build trust.
+        the exchange network — built to keep working when everything else doesn&apos;t.
       </p>
 
       {/* Location badge */}
@@ -141,7 +141,7 @@ export default async function Image() {
             fontFamily: "monospace",
           }}
         >
-          Central Coast, NSW — Trial Active
+          Central Coast, NSW — On Air
         </span>
       </div>
     </div>,

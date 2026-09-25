@@ -255,7 +255,7 @@ export default function UserExperienceDemoClient() {
                 <p className="text-xs font-medium" style={{ color: user.color }}>
                   You are {user.name}
                 </p>
-                <p className="text-[10px] text-[#7a6b5a] uppercase tracking-wider">
+                <p className="text-[10px] text-[#8f7f6e] uppercase tracking-wider">
                   {step.persona === "sarah" ? "Poster" : "Fulfiller"}
                 </p>
               </div>
@@ -308,7 +308,7 @@ export default function UserExperienceDemoClient() {
                 size="sm"
                 variant="ghost"
                 onClick={reset}
-                className="h-8 w-8 p-0 text-[#7a6b5a]"
+                className="h-8 w-8 p-0 text-[#8f7f6e]"
               >
                 <RotateCcw className="h-3.5 w-3.5" />
               </Button>
@@ -366,12 +366,12 @@ function ScenePostNeed({
     <div className="space-y-8">
       <div>
         <div className="py-2">
-          <span className="inline-flex items-center text-sm text-[#7a6b5a]">
+          <span className="inline-flex items-center text-sm text-[#8f7f6e]">
             <ArrowLeft className="mr-2 h-4 w-4" />$ cd ~/needs/
           </span>
         </div>
         <h1 className="heading-display text-2xl text-[#e8d5a3]">Post Need</h1>
-        <p className="text-xs text-[#7a6b5a] mt-3">$ nano new_need.conf</p>
+        <p className="text-xs text-[#8f7f6e] mt-3">$ nano new_need.conf</p>
         <p className="text-sm text-[#b8a078] mb-2">
           describe what you need and what you are offering in exchange
         </p>
@@ -384,7 +384,7 @@ function ScenePostNeed({
             <p className="text-sm text-[#e8d5a3] font-medium">
               posts with images get 3x more responses
             </p>
-            <p className="text-xs text-[#7a6b5a] mt-1">
+            <p className="text-xs text-[#8f7f6e] mt-1">
               add photos of what you need and what you are offering. it builds instant trust.
             </p>
           </div>
@@ -396,7 +396,7 @@ function ScenePostNeed({
           <p className="text-xs text-[#35c2f0] uppercase tracking-wide font-medium mb-1">
             [what you need]
           </p>
-          <p className="text-xs text-[#7a6b5a] mb-5">what are you seeking from the community?</p>
+          <p className="text-xs text-[#8f7f6e] mb-5">what are you seeking from the community?</p>
           <div className="space-y-5">
             <div className="space-y-2">
               <Label>Title</Label>
@@ -414,7 +414,7 @@ function ScenePostNeed({
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <div className="flex items-center gap-2 mb-1">
-                  <Calendar className="h-4 w-4 text-[#7a6b5a]" />
+                  <Calendar className="h-4 w-4 text-[#8f7f6e]" />
                   <Label>Deadline</Label>
                 </div>
                 <Input
@@ -425,7 +425,7 @@ function ScenePostNeed({
               </div>
               <div className="space-y-2">
                 <div className="flex items-center gap-2 mb-1">
-                  <Clock className="h-4 w-4 text-[#7a6b5a]" />
+                  <Clock className="h-4 w-4 text-[#8f7f6e]" />
                   <Label>Time Estimate</Label>
                 </div>
                 <Input
@@ -455,7 +455,7 @@ function ScenePostNeed({
           <p className="text-xs text-[#f5a623] uppercase tracking-wide font-medium mb-1">
             [what you are offering]
           </p>
-          <p className="text-xs text-[#7a6b5a] mb-5">what will you give in exchange?</p>
+          <p className="text-xs text-[#8f7f6e] mb-5">what will you give in exchange?</p>
           <div className="space-y-5">
             <div className="grid grid-cols-3 gap-2">
               {[
@@ -465,7 +465,7 @@ function ScenePostNeed({
               ].map(({ type, icon: Icon, active }) => (
                 <div
                   key={type}
-                  className={`flex flex-col items-center gap-2 py-3 px-2 rounded border ${active ? "border-[#f5a623] bg-[#f5a623]/5 text-[#e8d5a3]" : "border-[#2a2420] bg-[#0f0c0a] text-[#7a6b5a]"}`}
+                  className={`flex flex-col items-center gap-2 py-3 px-2 rounded border ${active ? "border-[#f5a623] bg-[#f5a623]/5 text-[#e8d5a3]" : "border-[#2a2420] bg-[#0f0c0a] text-[#8f7f6e]"}`}
                 >
                   <Icon className="h-5 w-5" />
                   <span className="text-sm font-medium capitalize">{type}</span>
@@ -475,7 +475,7 @@ function ScenePostNeed({
 
             {/* Sub-category */}
             <div className="space-y-2">
-              <Label className="text-xs text-[#7a6b5a]">Sub-category</Label>
+              <Label className="text-xs text-[#8f7f6e]">Sub-category</Label>
               {(() => {
                 const mode = getExchangeMode(DEMO_NEED.needCategory);
                 if (!mode) return null;
@@ -486,7 +486,7 @@ function ScenePostNeed({
                     >
                       {mode.label}
                     </span>
-                    <span className="text-xs text-[#7a6b5a]">
+                    <span className="text-xs text-[#8f7f6e]">
                       —{" "}
                       {DEMO_NEED.offerType === "service"
                         ? "offering a service"
@@ -522,9 +522,9 @@ function ScenePostNeed({
 
       <div className="border border-[#ff5252]/30 bg-[#ff5252]/5 p-5">
         <p className="text-xs text-[#ff5252] uppercase tracking-wide font-medium mb-1">[where]</p>
-        <p className="text-xs text-[#7a6b5a] mb-3">where is this need located?</p>
+        <p className="text-xs text-[#8f7f6e] mb-3">where is this need located?</p>
         <div className="flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-[#7a6b5a]" />
+          <MapPin className="h-4 w-4 text-[#8f7f6e]" />
           <Input
             value={DEMO_NEED.location}
             readOnly
@@ -536,10 +536,10 @@ function ScenePostNeed({
       {/* Deal Type Selection */}
       <div className="space-y-3">
         <div className="flex items-center gap-2">
-          <p className="text-xs text-[#7a6b5a] uppercase tracking-wide font-medium">[deal type]</p>
+          <p className="text-xs text-[#8f7f6e] uppercase tracking-wide font-medium">[deal type]</p>
           <span className="text-[10px] text-[#f5a623]">click a card to switch</span>
         </div>
-        <p className="text-xs text-[#7a6b5a]">choose how you want to structure this exchange</p>
+        <p className="text-xs text-[#8f7f6e]">choose how you want to structure this exchange</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <button
             onClick={() => useContract && onToggleContract()}
@@ -552,7 +552,7 @@ function ScenePostNeed({
             <div className="flex items-center gap-3 mb-2">
               <div className={`p-2 rounded ${!useContract ? "bg-[#00e676]/10" : "bg-[#1a1714]"}`}>
                 <Handshake
-                  className={`h-5 w-5 ${!useContract ? "text-[#00e676]" : "text-[#7a6b5a]"}`}
+                  className={`h-5 w-5 ${!useContract ? "text-[#00e676]" : "text-[#8f7f6e]"}`}
                 />
               </div>
               <div>
@@ -561,7 +561,7 @@ function ScenePostNeed({
                 >
                   Free Form
                 </p>
-                <p className="text-[10px] text-[#7a6b5a]">handshake deal</p>
+                <p className="text-[10px] text-[#8f7f6e]">handshake deal</p>
               </div>
             </div>
             <p className="text-xs text-[#8f7f6e]">
@@ -581,7 +581,7 @@ function ScenePostNeed({
             <div className="flex items-center gap-3 mb-2">
               <div className={`p-2 rounded ${useContract ? "bg-[#f5a623]/10" : "bg-[#1a1714]"}`}>
                 <Shield
-                  className={`h-5 w-5 ${useContract ? "text-[#f5a623]" : "text-[#7a6b5a]"}`}
+                  className={`h-5 w-5 ${useContract ? "text-[#f5a623]" : "text-[#8f7f6e]"}`}
                 />
               </div>
               <div>
@@ -590,7 +590,7 @@ function ScenePostNeed({
                 >
                   Formal Contract
                 </p>
-                <p className="text-[10px] text-[#7a6b5a]">structured terms</p>
+                <p className="text-[10px] text-[#8f7f6e]">structured terms</p>
               </div>
             </div>
             <p className="text-xs text-[#8f7f6e]">
@@ -651,7 +651,7 @@ function MockNeedDetail({ need, onBack }: { need: any; onBack: () => void }) {
       <div className="py-2">
         <button
           onClick={onBack}
-          className="inline-flex items-center text-sm text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors"
+          className="inline-flex items-center text-sm text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
         >
           <ArrowLeft className="mr-2 h-4 w-4" /> browse needs
         </button>
@@ -687,12 +687,12 @@ function MockNeedDetail({ need, onBack }: { need: any; onBack: () => void }) {
               {(need.requiredSkills as string[]).map((s: string) => (
                 <span
                   key={s}
-                  className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-[#2a2420] text-[#7a6b5a] bg-[#1a1714] rounded"
+                  className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-[#2a2420] text-[#8f7f6e] bg-[#1a1714] rounded"
                 >
                   {s}
                 </span>
               ))}
-              <span className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-[#2a2420] text-[#7a6b5a] bg-[#1a1714] rounded flex items-center gap-1">
+              <span className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-[#2a2420] text-[#8f7f6e] bg-[#1a1714] rounded flex items-center gap-1">
                 <MapPin className="h-3 w-3" /> {need.location}
               </span>
             </div>
@@ -703,7 +703,7 @@ function MockNeedDetail({ need, onBack }: { need: any; onBack: () => void }) {
 
           <div className="vessel p-4">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs text-[#7a6b5a] uppercase tracking-wider">
+              <span className="text-xs text-[#8f7f6e] uppercase tracking-wider">
                 offering in exchange
               </span>
             </div>
@@ -720,7 +720,7 @@ function MockNeedDetail({ need, onBack }: { need: any; onBack: () => void }) {
 
         <div className="space-y-4">
           <div className="vessel p-4">
-            <p className="text-[10px] text-[#7a6b5a] uppercase tracking-wider mb-3">Posted by</p>
+            <p className="text-[10px] text-[#8f7f6e] uppercase tracking-wider mb-3">Posted by</p>
             <div className="flex items-center gap-3 mb-3">
               <Avatar name={need.poster.name} size="md" />
               <div>
@@ -777,13 +777,13 @@ function MockProfile({ user, onBack }: { user: any; onBack: () => void }) {
       <div className="py-6 flex items-center justify-between">
         <button
           onClick={onBack}
-          className="inline-flex items-center text-sm text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors"
+          className="inline-flex items-center text-sm text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />$ cd ~/needs/
         </button>
       </div>
 
-      <p className="text-xs text-[#7a6b5a] mb-4">
+      <p className="text-xs text-[#8f7f6e] mb-4">
         $ finger {user.name.toLowerCase().replace(/\s/g, "_")}
       </p>
 
@@ -866,7 +866,7 @@ function SceneBrowse({ useContract }: { useContract: boolean }) {
         <p className="text-sm text-[#00e5ff]">
           antidosis is currently in pilot on the Central Coast, NSW
         </p>
-        <p className="text-xs text-[#7a6b5a] mt-1">
+        <p className="text-xs text-[#8f7f6e] mt-1">
           help us grow by inviting neighbours and leaving reviews after exchanges.
         </p>
       </div>
@@ -925,7 +925,7 @@ function SceneBrowse({ useContract }: { useContract: boolean }) {
                   )}
                 </div>
                 <p className="text-sm text-[#b8a078] mt-1 line-clamp-2">{need.description}</p>
-                <div className="flex flex-wrap items-center gap-2 mt-3 text-[10px] text-[#7a6b5a]">
+                <div className="flex flex-wrap items-center gap-2 mt-3 text-[10px] text-[#8f7f6e]">
                   <span className="flex items-center gap-1">
                     <MapPin className="h-3 w-3" /> {need.location}
                   </span>
@@ -935,7 +935,7 @@ function SceneBrowse({ useContract }: { useContract: boolean }) {
                   {need.requiredSkills.map((s) => (
                     <span
                       key={s}
-                      className="px-2 py-0.5 text-xs text-[#7a6b5a] bg-[#1a1714] border border-[#2a2420] rounded"
+                      className="px-2 py-0.5 text-xs text-[#8f7f6e] bg-[#1a1714] border border-[#2a2420] rounded"
                     >
                       {s}
                     </span>
@@ -958,7 +958,7 @@ function SceneBrowse({ useContract }: { useContract: boolean }) {
                 <Avatar name={need.poster.name} size="sm" />
                 <span className="text-xs text-[#8f7f6e]">{need.poster.name}</span>
                 {need.poster.verified && <Shield className="h-3 w-3 text-[#00e676]" />}
-                <span className="text-xs text-[#7a6b5a]">
+                <span className="text-xs text-[#8f7f6e]">
                   <Star className="h-3 w-3 text-[#f5a623] inline" /> {need.poster.rating}
                 </span>
               </button>
@@ -984,12 +984,12 @@ function SceneProfile() {
   return (
     <div className="max-w-3xl mx-auto space-y-10">
       <div className="py-6 flex items-center justify-between">
-        <span className="inline-flex items-center text-sm text-[#7a6b5a]">
+        <span className="inline-flex items-center text-sm text-[#8f7f6e]">
           <ArrowLeft className="mr-2 h-4 w-4" />$ cd ~/needs/
         </span>
       </div>
 
-      <p className="text-xs text-[#7a6b5a] mb-4">$ finger sarah_chen</p>
+      <p className="text-xs text-[#8f7f6e] mb-4">$ finger sarah_chen</p>
 
       {/* Profile Header */}
       <div className="vessel p-6">
@@ -1031,7 +1031,7 @@ function SceneProfile() {
 
       {/* Needs */}
       <div className="space-y-6">
-        <p className="text-xs text-[#7a6b5a]">$ ls ~sarah_chen/needs/</p>
+        <p className="text-xs text-[#8f7f6e]">$ ls ~sarah_chen/needs/</p>
         <div className="space-y-4">
           <div className="vessel p-5">
             <div className="flex items-center justify-between">
@@ -1042,14 +1042,14 @@ function SceneProfile() {
                   {DEMO_NEED.requiredSkills.map((s) => (
                     <span
                       key={s}
-                      className="px-2 py-0.5 text-xs font-medium uppercase tracking-wide border border-[#2a2420] text-[#7a6b5a]"
+                      className="px-2 py-0.5 text-xs font-medium uppercase tracking-wide border border-[#2a2420] text-[#8f7f6e]"
                     >
                       {s}
                     </span>
                   ))}
                 </div>
               </div>
-              <span className="shrink-0 text-xs text-[#7a6b5a] uppercase tracking-wide">
+              <span className="shrink-0 text-xs text-[#8f7f6e] uppercase tracking-wide">
                 0 offers
               </span>
             </div>
@@ -1059,7 +1059,7 @@ function SceneProfile() {
 
       {/* Reviews */}
       <div className="space-y-6">
-        <p className="text-xs text-[#7a6b5a]">$ cat ~sarah_chen/reviews.log</p>
+        <p className="text-xs text-[#8f7f6e]">$ cat ~sarah_chen/reviews.log</p>
         <div className="space-y-4">
           {DEMO_SARAH_PAST_REVIEWS.map((review) => (
             <div key={review.id} className="vessel p-5">
@@ -1068,7 +1068,7 @@ function SceneProfile() {
                   <Avatar name={review.giver.name} size="sm" />
                   <div>
                     <p className="text-sm font-medium text-[#e8d5a3]">{review.giver.name}</p>
-                    <p className="text-xs text-[#7a6b5a]">{review.needTitle}</p>
+                    <p className="text-xs text-[#8f7f6e]">{review.needTitle}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-1 text-[#f5a623]">
@@ -1099,7 +1099,7 @@ function SceneNeedDetailAndExpressInterest({
   return (
     <div className="space-y-6">
       <div className="py-2">
-        <span className="inline-flex items-center text-sm text-[#7a6b5a]">
+        <span className="inline-flex items-center text-sm text-[#8f7f6e]">
           <ArrowLeft className="mr-2 h-4 w-4" /> browse needs
         </span>
       </div>
@@ -1136,12 +1136,12 @@ function SceneNeedDetailAndExpressInterest({
               {DEMO_NEED.requiredSkills.map((s) => (
                 <span
                   key={s}
-                  className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-[#2a2420] text-[#7a6b5a] bg-[#1a1714] rounded"
+                  className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-[#2a2420] text-[#8f7f6e] bg-[#1a1714] rounded"
                 >
                   {s}
                 </span>
               ))}
-              <span className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-[#2a2420] text-[#7a6b5a] bg-[#1a1714] rounded flex items-center gap-1">
+              <span className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-[#2a2420] text-[#8f7f6e] bg-[#1a1714] rounded flex items-center gap-1">
                 <MapPin className="h-3 w-3" /> {DEMO_NEED.location}
               </span>
             </div>
@@ -1152,7 +1152,7 @@ function SceneNeedDetailAndExpressInterest({
 
           <div className="vessel p-4">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs text-[#7a6b5a] uppercase tracking-wider">
+              <span className="text-xs text-[#8f7f6e] uppercase tracking-wider">
                 offering in exchange
               </span>
             </div>
@@ -1176,14 +1176,14 @@ function SceneNeedDetailAndExpressInterest({
               <div className="space-y-3">
                 <label className="text-xs text-[#8f7f6e]">
                   Message to {DEMO_SARAH.name}{" "}
-                  <span className="text-[#7a6b5a]">(optional but recommended)</span>
+                  <span className="text-[#8f7f6e]">(optional but recommended)</span>
                 </label>
                 <Textarea rows={4} value={message} readOnly className="bg-[#0f0c0a]" />
                 <div className="flex items-center gap-3">
                   <Button disabled>
                     <Send className="h-4 w-4 mr-1.5" /> Sending...
                   </Button>
-                  <span className="text-xs text-[#7a6b5a]">
+                  <span className="text-xs text-[#8f7f6e]">
                     This notifies {DEMO_SARAH.name} immediately
                   </span>
                 </div>
@@ -1200,7 +1200,7 @@ function SceneNeedDetailAndExpressInterest({
         {/* Sidebar */}
         <div className="space-y-4">
           <div className="vessel p-4">
-            <p className="text-[10px] text-[#7a6b5a] uppercase tracking-wider mb-3">Posted by</p>
+            <p className="text-[10px] text-[#8f7f6e] uppercase tracking-wider mb-3">Posted by</p>
             <div className="flex items-center gap-3 mb-3">
               <Avatar name={DEMO_SARAH.name} size="md" />
               <div>
@@ -1251,7 +1251,7 @@ function ScenePosterView({ accepted, useContract }: { accepted: boolean; useCont
   return (
     <div className="space-y-6">
       <div className="py-2">
-        <span className="inline-flex items-center text-sm text-[#7a6b5a]">
+        <span className="inline-flex items-center text-sm text-[#8f7f6e]">
           <ArrowLeft className="mr-2 h-4 w-4" /> browse needs
         </span>
       </div>
@@ -1279,7 +1279,7 @@ function ScenePosterView({ accepted, useContract }: { accepted: boolean; useCont
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-xs text-[#7a6b5a] uppercase tracking-wider">Interested</h3>
+        <h3 className="text-xs text-[#8f7f6e] uppercase tracking-wider">Interested</h3>
         <div className="vessel p-4">
           <div className="flex items-start gap-3">
             <Avatar name={DEMO_MARCUS.name} size="md" />
@@ -1301,12 +1301,12 @@ function ScenePosterView({ accepted, useContract }: { accepted: boolean; useCont
                       </>
                     )}
                   </Button>
-                  <Button size="sm" variant="ghost" className="h-7 text-xs px-2 text-[#7a6b5a]">
+                  <Button size="sm" variant="ghost" className="h-7 text-xs px-2 text-[#8f7f6e]">
                     <X className="h-3 w-3 mr-1" /> Decline
                   </Button>
                 </div>
               </div>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-[#7a6b5a]">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-[#8f7f6e]">
                 <span className="flex items-center gap-1">
                   <Star className="h-3 w-3 text-[#f5a623]" /> {DEMO_MARCUS.rating} (
                   {DEMO_MARCUS.reviews})
@@ -1323,14 +1323,14 @@ function ScenePosterView({ accepted, useContract }: { accepted: boolean; useCont
                 {DEMO_MARCUS.skills.map((s) => (
                   <span
                     key={s}
-                    className="px-1.5 py-0.5 text-[10px] uppercase tracking-wide border border-[#2a2420] text-[#7a6b5a] rounded"
+                    className="px-1.5 py-0.5 text-[10px] uppercase tracking-wide border border-[#2a2420] text-[#8f7f6e] rounded"
                   >
                     {s}
                   </span>
                 ))}
               </div>
               <div className="mt-2 bg-[#0f0c0a] p-2.5 rounded text-xs text-[#b8a078]">
-                <span className="text-[#7a6b5a] uppercase tracking-wider text-[9px]">
+                <span className="text-[#8f7f6e] uppercase tracking-wider text-[9px]">
                   Message:{" "}
                 </span>
                 Hey Sarah! Saw your post — I can definitely help with the garden. I specialise in
@@ -1343,10 +1343,10 @@ function ScenePosterView({ accepted, useContract }: { accepted: boolean; useCont
 
       <div className="vessel p-4">
         <div className="flex items-center gap-2 mb-4">
-          <MessageSquare className="h-3.5 w-3.5 text-[#7a6b5a]" />
-          <span className="text-xs text-[#7a6b5a] uppercase tracking-wider">private messages</span>
+          <MessageSquare className="h-3.5 w-3.5 text-[#8f7f6e]" />
+          <span className="text-xs text-[#8f7f6e] uppercase tracking-wider">private messages</span>
         </div>
-        <p className="text-xs text-[#7a6b5a] text-center py-4">
+        <p className="text-xs text-[#8f7f6e] text-center py-4">
           no messages yet. be the first to reach out.
         </p>
       </div>
@@ -1366,7 +1366,7 @@ function SceneMessageThread({ revealed, useContract }: { revealed: number; useCo
         <span className="text-xs text-[#00e5ff] uppercase tracking-wide font-medium">
           {useContract ? "Negotiate" : "Coordinate"}
         </span>
-        <span className="text-xs text-[#7a6b5a] ml-2">Chat with {DEMO_MARCUS.name}</span>
+        <span className="text-xs text-[#8f7f6e] ml-2">Chat with {DEMO_MARCUS.name}</span>
         {useContract && (
           <Badge className="ml-2 text-[10px] bg-[#f5a623]/10 text-[#f5a623] border-[#f5a623]/30">
             <Shield className="h-3 w-3 mr-1" /> Contract
@@ -1374,7 +1374,7 @@ function SceneMessageThread({ revealed, useContract }: { revealed: number; useCo
         )}
       </div>
       <div className="vessel p-4 space-y-3 min-h-[200px]">
-        <p className="text-xs text-[#7a6b5a] mb-3 flex items-center gap-1.5">
+        <p className="text-xs text-[#8f7f6e] mb-3 flex items-center gap-1.5">
           <span className="inline-block w-1 h-1 rounded-full bg-[#00e676]" />
           Private thread — only you and {DEMO_MARCUS.name} can see these messages
         </p>
@@ -1387,7 +1387,7 @@ function SceneMessageThread({ revealed, useContract }: { revealed: number; useCo
               <div
                 className={`max-w-[75%] px-3 py-2 text-sm rounded ${isSarah ? "bg-[#1a1714] text-[#e8d5a3] border-l-2 border-[#f5a623]" : "bg-[#12100e] text-[#b8a078] border border-[#2a2420]"}`}
               >
-                <p className="text-[10px] text-[#7a6b5a] uppercase tracking-wider mb-1">
+                <p className="text-[10px] text-[#8f7f6e] uppercase tracking-wider mb-1">
                   {user.name}
                 </p>
                 <p>{msg.text}</p>
@@ -1396,7 +1396,7 @@ function SceneMessageThread({ revealed, useContract }: { revealed: number; useCo
           );
         })}
         {!allRevealed && (
-          <div className="flex items-center gap-2 text-[10px] text-[#7a6b5a]">
+          <div className="flex items-center gap-2 text-[10px] text-[#8f7f6e]">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#8f7f6e] animate-pulse" />
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#8f7f6e] animate-pulse delay-100" />
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#8f7f6e] animate-pulse delay-200" />
@@ -1474,7 +1474,7 @@ function SceneReviewPoster({ submitted }: { submitted: boolean }) {
         <p className="text-sm text-[#e8d5a3]">How was your experience with {DEMO_MARCUS.name}?</p>
         <div className="bg-[#1a1714] border border-[#2a2420] p-4 rounded space-y-4">
           <div>
-            <label className="text-xs text-[#7a6b5a] block mb-2">Rating (1–10)</label>
+            <label className="text-xs text-[#8f7f6e] block mb-2">Rating (1–10)</label>
             <div className="flex items-center gap-2">
               <div className="flex-1 h-2 rounded-full bg-[#2a2420] overflow-hidden">
                 <div
@@ -1486,7 +1486,7 @@ function SceneReviewPoster({ submitted }: { submitted: boolean }) {
             </div>
           </div>
           <div>
-            <label className="text-xs text-[#7a6b5a] block mb-2">Public Review</label>
+            <label className="text-xs text-[#8f7f6e] block mb-2">Public Review</label>
             <Textarea
               value={DEMO_REVIEWS.sarah.comment}
               readOnly
@@ -1526,7 +1526,7 @@ function SceneReviewFulfiller({ submitted }: { submitted: boolean }) {
         <p className="text-sm text-[#e8d5a3]">How was your experience with {DEMO_SARAH.name}?</p>
         <div className="bg-[#1a1714] border border-[#2a2420] p-4 rounded space-y-4">
           <div>
-            <label className="text-xs text-[#7a6b5a] block mb-2">Rating (1–10)</label>
+            <label className="text-xs text-[#8f7f6e] block mb-2">Rating (1–10)</label>
             <div className="flex items-center gap-2">
               <div className="flex-1 h-2 rounded-full bg-[#2a2420] overflow-hidden">
                 <div
@@ -1538,7 +1538,7 @@ function SceneReviewFulfiller({ submitted }: { submitted: boolean }) {
             </div>
           </div>
           <div>
-            <label className="text-xs text-[#7a6b5a] block mb-2">Public Review</label>
+            <label className="text-xs text-[#8f7f6e] block mb-2">Public Review</label>
             <Textarea
               value={DEMO_REVIEWS.marcus.comment}
               readOnly
@@ -1580,7 +1580,7 @@ function SceneSummary() {
       </div>
 
       <div className="vessel p-5 space-y-4">
-        <p className="text-xs text-[#7a6b5a] uppercase tracking-wider">What happened</p>
+        <p className="text-xs text-[#8f7f6e] uppercase tracking-wider">What happened</p>
         <div className="space-y-3">
           {[
             {
@@ -1624,7 +1624,7 @@ function SceneSummary() {
             <Avatar name={DEMO_SARAH.name} size="md" />
             <div>
               <p className="text-sm font-medium text-[#e8d5a3]">{DEMO_SARAH.name}</p>
-              <p className="text-xs text-[#7a6b5a]">Poster</p>
+              <p className="text-xs text-[#8f7f6e]">Poster</p>
             </div>
           </div>
           <div className="flex items-center gap-4 text-xs text-[#b8a078]">
@@ -1641,7 +1641,7 @@ function SceneSummary() {
             <Avatar name={DEMO_MARCUS.name} size="md" />
             <div>
               <p className="text-sm font-medium text-[#e8d5a3]">{DEMO_MARCUS.name}</p>
-              <p className="text-xs text-[#7a6b5a]">Fulfiller</p>
+              <p className="text-xs text-[#8f7f6e]">Fulfiller</p>
             </div>
           </div>
           <div className="flex items-center gap-4 text-xs text-[#b8a078]">
@@ -1656,7 +1656,7 @@ function SceneSummary() {
       </div>
 
       <div className="space-y-3">
-        <p className="text-xs text-[#7a6b5a] uppercase tracking-wider">Bilateral Reviews</p>
+        <p className="text-xs text-[#8f7f6e] uppercase tracking-wider">Bilateral Reviews</p>
         {[
           { user: DEMO_MARCUS, review: DEMO_REVIEWS.marcus },
           { user: DEMO_SARAH, review: DEMO_REVIEWS.sarah },

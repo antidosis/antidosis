@@ -14,10 +14,14 @@ export const GET = withApiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
-    windowMs: 60_000,
-    maxRequests: 30,
-  });
+  const limit = await rateLimit(
+    getRateLimitIdentifier(req, user.id),
+    {
+      windowMs: 60_000,
+      maxRequests: 30,
+    },
+    "user-search"
+  );
   if (!limit.allowed) {
     return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
   }

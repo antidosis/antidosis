@@ -281,7 +281,7 @@ export function CredentialForm({
                 : "Upload File"}
           </FileUpload>
           {credForm.fileUrl && (
-            <p className="text-xs text-[#7a6b5a] truncate">{credForm.fileUrl}</p>
+            <p className="text-xs text-[#8f7f6e] truncate">{credForm.fileUrl}</p>
           )}
         </div>
 
@@ -295,7 +295,7 @@ export function CredentialForm({
               {credForm.backFileUrl ? "Change File" : "Upload Back"}
             </FileUpload>
             {credForm.backFileUrl && (
-              <p className="text-xs text-[#7a6b5a] truncate">{credForm.backFileUrl}</p>
+              <p className="text-xs text-[#8f7f6e] truncate">{credForm.backFileUrl}</p>
             )}
           </div>
         )}
@@ -316,7 +316,7 @@ export function CredentialForm({
           </div>
         )}
         {config.forcePrivate && (
-          <p className="text-xs text-[#7a6b5a]">
+          <p className="text-xs text-[#8f7f6e]">
             This credential type is always kept private for your security.
           </p>
         )}

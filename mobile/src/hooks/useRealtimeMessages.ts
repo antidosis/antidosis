@@ -18,10 +18,10 @@ export function useRealtimeChannelMessages(channelId: string | undefined) {
       .channel(`mobile-terminal-${channelId}`)
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "TerminalMessage" },
+        { event: "INSERT", schema: "public", table: "terminal_messages" },
         (payload) => {
           const msg = payload.new as any;
-          if (msg.channelId === channelId) {
+          if (msg.channel_id === channelId) {
             mutate(["terminal-messages", channelId]);
           }
         }
@@ -47,10 +47,10 @@ export function useRealtimeDmMessages(threadId: string | undefined) {
       .channel(`mobile-dm-${threadId}`)
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "DirectMessage" },
+        { event: "INSERT", schema: "public", table: "direct_messages" },
         (payload) => {
           const msg = payload.new as any;
-          if (msg.threadId === threadId) {
+          if (msg.thread_id === threadId) {
             mutate(["dm-messages", threadId]);
           }
         }

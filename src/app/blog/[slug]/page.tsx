@@ -290,9 +290,10 @@ export default function BlogPostPage({ params }: Props) {
           {/* Back link */}
           <Link
             href="/blog"
-            className="inline-flex items-center text-[13px] text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors mb-8"
+            className="inline-flex items-center text-[13px] text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors mb-8"
           >
-            <ArrowLeft className="mr-2 h-4 w-4" />$ cd ../blog
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to the transmission log
           </Link>
 
           {/* Meta */}
@@ -311,7 +312,7 @@ export default function BlogPostPage({ params }: Props) {
           <h1 className="heading-display text-3xl md:text-5xl text-[#e8d5a3] mb-6">{post.title}</h1>
 
           {/* Author / date */}
-          <div className="flex items-center gap-4 text-xs text-[#7a6b5a] mb-12 pb-8 border-b border-[#2a2420]">
+          <div className="flex items-center gap-4 text-xs text-[#8f7f6e] mb-12 pb-8 border-b border-[#2a2420]">
             <span className="flex items-center gap-1.5">
               <Calendar className="h-3 w-3" />
               {new Date(post.publishedAt).toLocaleDateString("en-AU", {

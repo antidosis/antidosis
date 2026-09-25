@@ -48,6 +48,11 @@ export function useAuth() {
   // Listen for global 401 events from api.ts
   useEffect(() => {
     const handler = () => {
+      // Actually sign out — otherwise the stale session stays persisted and
+      // getSession() keeps resurrecting it on next launch.
+      supabase.auth.signOut().catch(() => {
+        /* best-effort; state is cleared regardless */
+      });
       setGlobalState({ user: null, loading: false });
     };
     window.addEventListener("auth:session-expired", handler);

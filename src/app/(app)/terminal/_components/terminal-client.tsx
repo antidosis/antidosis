@@ -216,7 +216,9 @@ export default function TerminalClient() {
     if (!hasWelcomed) {
       sessionStorage.setItem(welcomeId, "1");
       addSys(
-        "Welcome, " + (myProfile?.fullName || "Guest") + "! Type /help to get started.",
+        "📡 ANTIDOSIS RELAY — local exchange network online.\nWelcome, " +
+          (myProfile?.fullName || "Guest") +
+          "! Type /help to get started.",
         "info"
       );
     }
@@ -738,7 +740,7 @@ export default function TerminalClient() {
 
       const ctx = activeContextRef.current;
       if (!ctx || ctx.type === "console") {
-        addSys("Select a channel or DM to send voice messages.", "error");
+        addSys("Tune into a channel or open a Direct to send voice messages.", "error");
         return;
       }
 
@@ -1042,7 +1044,7 @@ export default function TerminalClient() {
           addSys(result.error || "Failed to submit review.", "error");
         }
       } else if (type === "tutorial") {
-        addSys("Tutorial complete! Welcome to the Terminal.", "success");
+        addSys("Tutorial complete! Welcome to the Relay.", "success");
       }
     } catch {
       addSys("Wizard submission failed.", "error");
@@ -1268,7 +1270,7 @@ export default function TerminalClient() {
       if (destructiveCommands.has(cmd)) {
         pushUndo({
           type: "clear_messages",
-          description: "Cleared terminal messages",
+          description: "Cleared relay messages",
           payload: { sysMessages: [...sysMessages], messages: [...messages] },
         });
       }
@@ -1325,7 +1327,7 @@ export default function TerminalClient() {
       return;
     }
     if (!activeContext) {
-      addSys("Select a channel or DM first.", "error");
+      addSys("Tune into a channel or open a Direct first.", "error");
       return;
     }
 
@@ -1655,7 +1657,7 @@ export default function TerminalClient() {
             >
               <Menu className="h-4 w-4" />
             </Button>
-            <span style={{ color: "var(--term-muted)" }}>antidosis-terminal v2.0.0</span>
+            <span style={{ color: "var(--term-muted)" }}>antidosis relay v2.0.0</span>
             <span style={{ color: "var(--term-border)" }}>|</span>
             {activeContext?.type === "channel" ? (
               <span style={{ color: "var(--term-accent)" }}>#{activeContext.name}</span>
@@ -1825,12 +1827,10 @@ export default function TerminalClient() {
                         : activeContext?.type === "console"
                           ? "Type a /command..."
                           : activeContext
-                            ? "Message " +
-                              (activeContext.type === "channel"
-                                ? activeContext.name
-                                : "@" + activeContext.otherUserName) +
-                              "..."
-                            : "Select a channel first..."
+                            ? activeContext.type === "channel"
+                              ? "Broadcast to " + activeContext.name + "..."
+                              : "Message @" + activeContext.otherUserName + "..."
+                            : "Tune into a channel first..."
                 }
                 disabled={uploading}
                 className="flex-1 bg-transparent py-1 text-[13px] outline-none"

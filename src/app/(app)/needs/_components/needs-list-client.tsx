@@ -161,7 +161,7 @@ export default function NeedsPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 py-10">
         <div>
           <h1 className="heading-display text-2xl text-[#e8d5a3]">Browse Needs</h1>
-          <p className="text-xs text-[#7a6b5a] mt-3">$ ls ~/needs/</p>
+          <p className="text-xs text-[#8f7f6e] mt-3">$ ls ~/needs/</p>
           <p className="text-sm text-[#b8a078] mt-2">
             find needs you can fulfill — for services, items, or money in return
           </p>
@@ -178,7 +178,7 @@ export default function NeedsPage() {
           <Info className="h-4 w-4 text-[#00e5ff] mt-0.5 flex-shrink-0" />
           <div>
             <p className="text-sm text-[#e8d5a3] font-medium">Central Coast NSW pilot</p>
-            <p className="text-xs text-[#7a6b5a] mt-1">
+            <p className="text-xs text-[#8f7f6e] mt-1">
               all needs are local to the Central Coast region during the trial. remote exchanges
               will be available soon.
             </p>
@@ -192,7 +192,7 @@ export default function NeedsPage() {
           <div className="flex items-center gap-2 mb-3">
             <Zap className="h-4 w-4 text-[#f5a623]" />
             <h2 className="text-sm font-medium text-[#e8d5a3]">Recommended for you</h2>
-            <span className="text-[10px] text-[#7a6b5a] uppercase tracking-wider">
+            <span className="text-[10px] text-[#8f7f6e] uppercase tracking-wider">
               based on your skills
             </span>
           </div>
@@ -224,7 +224,7 @@ export default function NeedsPage() {
                         </div>
                       )}
                     </div>
-                    <span className="shrink-0 text-[10px] text-[#7a6b5a] uppercase tracking-wide">
+                    <span className="shrink-0 text-[10px] text-[#8f7f6e] uppercase tracking-wide">
                       {need._count.acceptances} interested
                     </span>
                   </div>
@@ -233,7 +233,7 @@ export default function NeedsPage() {
                     <span className="text-xs text-[#b8a078]">
                       {need.poster.fullName || "anonymous"}
                     </span>
-                    <span className="text-[10px] text-[#7a6b5a] ml-auto flex items-center gap-1">
+                    <span className="text-[10px] text-[#8f7f6e] ml-auto flex items-center gap-1">
                       {offerIcons[need.offerType as keyof typeof offerIcons]}
                       {need.offerType}
                     </span>
@@ -249,7 +249,7 @@ export default function NeedsPage() {
         {/* Search + type + skill row */}
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#7a6b5a]" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8f7f6e]" />
             <Input
               placeholder="search_needs..."
               value={query}
@@ -261,7 +261,7 @@ export default function NeedsPage() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setQuery("")}
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-[#7a6b5a] hover:text-[#e8d5a3]"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-[#8f7f6e] hover:text-[#e8d5a3]"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -292,7 +292,7 @@ export default function NeedsPage() {
                   setSkillFilter("");
                   setSkillInput("");
                 }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-[#7a6b5a] hover:text-[#ff5252] uppercase tracking-wider"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-[#8f7f6e] hover:text-[#ff5252] uppercase tracking-wider"
               >
                 clear
               </button>
@@ -335,7 +335,7 @@ export default function NeedsPage() {
         {/* Active filters bar */}
         {activeFiltersCount > 0 && (
           <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-[#2a2420]">
-            <span className="text-[10px] uppercase tracking-wider text-[#7a6b5a]">
+            <span className="text-[10px] uppercase tracking-wider text-[#8f7f6e]">
               active filters:
             </span>
             {debouncedQuery && (
@@ -343,7 +343,7 @@ export default function NeedsPage() {
                 search: {debouncedQuery}
                 <button
                   onClick={() => setQuery("")}
-                  className="text-[#7a6b5a] hover:text-[#ff5252]"
+                  className="text-[#8f7f6e] hover:text-[#ff5252]"
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -358,7 +358,7 @@ export default function NeedsPage() {
                     setSkillFilter("");
                     setSkillInput("");
                   }}
-                  className="text-[#7a6b5a] hover:text-[#ff5252]"
+                  className="text-[#8f7f6e] hover:text-[#ff5252]"
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -369,7 +369,7 @@ export default function NeedsPage() {
                 type: {typeFilter}
                 <button
                   onClick={() => setTypeFilter("")}
-                  className="text-[#7a6b5a] hover:text-[#ff5252]"
+                  className="text-[#8f7f6e] hover:text-[#ff5252]"
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -380,7 +380,7 @@ export default function NeedsPage() {
                 category: {categoryFilter}
                 <button
                   onClick={() => setCategoryFilter("")}
-                  className="text-[#7a6b5a] hover:text-[#ff5252]"
+                  className="text-[#8f7f6e] hover:text-[#ff5252]"
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -395,7 +395,7 @@ export default function NeedsPage() {
                 setSkillFilter("");
                 setSkillInput("");
               }}
-              className="text-[10px] uppercase tracking-wider text-[#7a6b5a] hover:text-[#ff5252] ml-1"
+              className="text-[10px] uppercase tracking-wider text-[#8f7f6e] hover:text-[#ff5252] ml-1"
             >
               clear all
             </button>
@@ -432,7 +432,7 @@ export default function NeedsPage() {
 
       {loading && !needsData ? (
         <div className="py-24 text-center">
-          <Loader2 className="h-6 w-6 animate-spin mx-auto text-[#7a6b5a]" />
+          <Loader2 className="h-6 w-6 animate-spin mx-auto text-[#8f7f6e]" />
         </div>
       ) : needs.length === 0 ? (
         <EmptyState
@@ -453,7 +453,7 @@ export default function NeedsPage() {
       ) : (
         <div>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs text-[#7a6b5a]">
+            <p className="text-xs text-[#8f7f6e]">
               showing {startItem}–{endItem} of {total}
             </p>
           </div>
@@ -484,14 +484,14 @@ export default function NeedsPage() {
                       {need.requiredSkills.map((skill) => (
                         <span
                           key={skill.id}
-                          className="px-2 py-0.5 text-xs text-[#7a6b5a] bg-[#1a1714] border border-[#2a2420] rounded"
+                          className="px-2 py-0.5 text-xs text-[#8f7f6e] bg-[#1a1714] border border-[#2a2420] rounded"
                         >
                           {skill.name}
                         </span>
                       ))}
                     </div>
                   </div>
-                  <span className="shrink-0 text-xs text-[#7a6b5a] uppercase tracking-wide ml-2">
+                  <span className="shrink-0 text-xs text-[#8f7f6e] uppercase tracking-wide ml-2">
                     {need._count.acceptances} interested
                   </span>
                 </div>
@@ -511,7 +511,7 @@ export default function NeedsPage() {
                       )}
                     </div>
                   </Link>
-                  <div className="flex items-center gap-1.5 text-xs text-[#7a6b5a]">
+                  <div className="flex items-center gap-1.5 text-xs text-[#8f7f6e]">
                     {offerIcons[need.offerType as keyof typeof offerIcons]}
                     <span className="truncate max-w-xs">{need.offerDescription}</span>
                   </div>
@@ -532,7 +532,7 @@ export default function NeedsPage() {
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <span className="text-xs text-[#7a6b5a] px-2">
+              <span className="text-xs text-[#8f7f6e] px-2">
                 page {page} of {totalPages}
               </span>
               <Button

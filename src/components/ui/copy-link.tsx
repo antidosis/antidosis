@@ -27,7 +27,7 @@ export function CopyLinkButton({ url, label = "Copy link" }: { url: string; labe
       variant="ghost"
       size="sm"
       onClick={copy}
-      className="text-[#7a6b5a] hover:text-[#e8d5a3] h-8 px-2"
+      className="text-[#8f7f6e] hover:text-[#e8d5a3] h-8 px-2"
     >
       {copied ? (
         <Check className="h-3.5 w-3.5 mr-1.5 text-[#00e676]" />

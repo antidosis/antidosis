@@ -99,7 +99,7 @@ export const COMMANDS: TerminalCommand[] = [
   {
     name: "clear",
     aliases: ["cls", "reset", "claer"],
-    description: "Clear the terminal screen",
+    description: "Clear the relay screen",
     usage: "/clear",
     example: "/clear",
     category: "misc",
@@ -179,7 +179,7 @@ export const COMMANDS: TerminalCommand[] = [
   {
     name: "ban",
     aliases: [],
-    description: "Ban a user from the terminal (admin only)",
+    description: "Ban a user from the Relay (admin only)",
     usage: "/ban <userId>",
     example: "/ban a1b2c3d4",
     category: "admin",
@@ -500,7 +500,7 @@ export const COMMANDS: TerminalCommand[] = [
   {
     name: "activity",
     aliases: ["feed", "whatsup"],
-    description: "Show recent terminal activity",
+    description: "Show recent relay activity",
     usage: "/activity",
     example: "/activity",
     category: "notifications",
@@ -1182,7 +1182,7 @@ export const COMMANDS: TerminalCommand[] = [
   {
     name: "ask",
     aliases: ["agent", "question"],
-    description: "Ask the Terminal Agent for help or advice",
+    description: "Ask the Relay Agent for help or advice",
     usage: "/ask <question>",
     example: "/ask how do I post a need?",
     category: "misc",
@@ -1202,7 +1202,7 @@ export const COMMANDS: TerminalCommand[] = [
   {
     name: "theme",
     aliases: ["colortheme"],
-    description: "Change terminal visual theme",
+    description: "Change relay visual theme",
     usage: "/theme <name>",
     example: "/theme cyberpunk",
     category: "misc",
@@ -1403,10 +1403,10 @@ export function generateHelpText(
   if (!advanced) {
     const beginner = getBeginnerCommands();
     return (
-      `👋 Welcome to the Terminal, ${exName}!\n\n` +
+      `👋 Welcome to the Relay, ${exName}!\n\n` +
       `  🖥️  Console (private):\n` +
       `     You're in your private Console. All /commands here are local-only.\n` +
-      `     Select a channel below when you're ready to chat publicly.\n\n` +
+      `     Tune into a channel below when you're ready to chat publicly.\n\n` +
       `  🚀 Quick Start — the commands you'll use most:\n` +
       beginner
         .map((c) => {
@@ -1416,7 +1416,7 @@ export function generateHelpText(
         .join("\n") +
       `\n\n` +
       `  📨 Messaging:\n` +
-      `     /dm <name> [msg]       → start a DM from anywhere\n` +
+      `     /dm <name> [msg]       → start a Direct from anywhere\n` +
       `     /users <name>          → find someone's exact ID\n` +
       `     /who                   → see who's online right now\n\n` +
       `  💡 Tips:\n` +
@@ -1429,7 +1429,7 @@ export function generateHelpText(
   }
 
   return (
-    `🔧 Advanced Terminal Commands\n\n` +
+    `🔧 Advanced Relay Commands\n\n` +
     `  ✏️  Profile Editing:\n${byCategory("editing")}\n\n` +
     `  📄 Contracts:\n${byCategory("contracts")}\n\n` +
     `  ⭐ Reviews:\n${byCategory("reviews")}\n\n` +

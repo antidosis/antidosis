@@ -14,16 +14,16 @@ export default function PrivacyPage() {
       <div className="py-6">
         <Link
           href="/"
-          className="inline-flex items-center text-[13px] text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors"
+          className="inline-flex items-center text-[13px] text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />$ cd ~/
         </Link>
       </div>
 
-      <p className="text-[12px] text-[#7a6b5a] mb-4">$ cat /etc/antidosis/privacy-policy.md</p>
+      <p className="text-[12px] text-[#8f7f6e] mb-4">$ cat /etc/antidosis/privacy-policy.md</p>
       <h1 className="text-3xl font-bold mb-2 text-[#e8d5a3]">Privacy Policy</h1>
-      <p className="text-[13px] text-[#7a6b5a]/70 mb-10">
-        Last updated: 17 May 2026 &middot; Applies to the antidosis website and mobile application
+      <p className="text-[13px] text-[#8f7f6e]/70 mb-10">
+        Last updated: 22 July 2026 &middot; Applies to the antidosis website and mobile application
       </p>
 
       <article className="space-y-10 text-[15px] text-[#b8a078] leading-relaxed">
@@ -146,7 +146,7 @@ export default function PrivacyPage() {
             </li>
             <li>
               <strong>Messages</strong> — content of messages sent through need discussions,
-              contract discussions, terminal channels, and direct messages
+              contract discussions, relay channels, and direct messages
             </li>
             <li>
               <strong>Reviews and ratings</strong> — ratings (1-10), comments, and optional private
@@ -241,7 +241,8 @@ export default function PrivacyPage() {
               preserving records for legal proceedings, and meeting regulatory requirements
             </li>
             <li>
-              <strong>To process payments</strong> — managing Pro subscriptions through Stripe
+              <strong>Legacy payments</strong> — Stripe is retained for legacy paid accounts only;
+              Pro membership is currently free and no payment processing occurs
             </li>
           </ul>
         </section>
@@ -305,7 +306,7 @@ export default function PrivacyPage() {
             </li>
             <li>
               <strong>Messages</strong>: content of messages you send in need discussions, contract
-              discussions, terminal channels, and direct messages
+              discussions, relay channels, and direct messages
             </li>
             <li>
               <strong>Contract information</strong>: terms, signatures, and status shared between
@@ -331,8 +332,9 @@ export default function PrivacyPage() {
               stored on Supabase&apos;s infrastructure. Supabase is SOC 2 Type II compliant.
             </li>
             <li>
-              <strong>Stripe</strong> — payment processing for Pro subscriptions. Stripe handles all
-              payment card data. See{" "}
+              <strong>Stripe</strong> (legacy, inactive) — Stripe is retained for legacy paid
+              accounts only; Pro membership is currently free and no payment processing occurs. For
+              legacy accounts, Stripe handles all payment card data. See{" "}
               <Link
                 href="https://stripe.com/au/privacy"
                 className="text-[#e8d5a3] hover:underline"
@@ -617,7 +619,7 @@ export default function PrivacyPage() {
           </p>
         </section>
 
-        <p className="text-[13px] text-[#7a6b5a]/50 pt-6 border-t border-[#7a6b5a]/10">
+        <p className="text-[13px] text-[#8f7f6e]/50 pt-6 border-t border-[#7a6b5a]/10">
           Last updated: 17 May 2026
         </p>
       </article>

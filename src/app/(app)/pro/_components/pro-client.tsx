@@ -51,7 +51,6 @@ export default function ProPage() {
   const [claimError, setClaimError] = useState<string | null>(null);
   const [togglingDir, setTogglingDir] = useState(false);
   const [supportMsg, setSupportMsg] = useState("");
-  const [supportSent, setSupportSent] = useState(false);
 
   const { data: profile, mutate: mutateProfile } = useApi<ProfileData>(
     authChecked ? "/api/v1/profiles/me" : null
@@ -96,18 +95,19 @@ export default function ProPage() {
     setTogglingDir(false);
   }
 
-  async function sendSupport(e: React.FormEvent) {
+  function sendSupport(e: React.FormEvent) {
     e.preventDefault();
     if (!supportMsg.trim()) return;
-    // For now: just show confirmation. In future, POST to support API.
-    setSupportSent(true);
-    setSupportMsg("");
-    setTimeout(() => setSupportSent(false), 5000);
+    const subject = encodeURIComponent("URGENT: safety/dispute report — PRO");
+    const body = encodeURIComponent(
+      `${supportMsg.trim()}\n\n---\nAccount email: ${user?.email ?? "unknown"}`
+    );
+    window.location.href = `mailto:official.antidosis@gmail.com?subject=${subject}&body=${body}`;
   }
 
   if (!authChecked) {
     return (
-      <div className="max-w-3xl mx-auto py-24 text-center text-sm text-[#7a6b5a]">loading...</div>
+      <div className="max-w-3xl mx-auto py-24 text-center text-sm text-[#8f7f6e]">loading...</div>
     );
   }
 
@@ -123,7 +123,6 @@ export default function ProPage() {
         togglingDir={togglingDir}
         supportMsg={supportMsg}
         setSupportMsg={setSupportMsg}
-        supportSent={supportSent}
         sendSupport={sendSupport}
       />
     );
@@ -151,7 +150,6 @@ function ProDashboard({
   togglingDir,
   supportMsg,
   setSupportMsg,
-  supportSent,
   sendSupport,
 }: {
   profile: ProfileData;
@@ -160,7 +158,6 @@ function ProDashboard({
   togglingDir: boolean;
   supportMsg: string;
   setSupportMsg: (v: string) => void;
-  supportSent: boolean;
   sendSupport: (e: React.FormEvent) => void;
 }) {
   const activated = profile.proActivatedAt
@@ -208,7 +205,7 @@ function ProDashboard({
         <h1 className="heading-display text-3xl sm:text-4xl text-[#e8d5a3] mb-3">
           you are <span className="text-[#f0cc33]">pro</span>
         </h1>
-        <p className="text-sm text-[#7a6b5a] max-w-md mx-auto">
+        <p className="text-sm text-[#8f7f6e] max-w-md mx-auto">
           welcome to the inner circle. verified. trusted. first in line.
         </p>
         <div className="flex items-center justify-center gap-3 mt-5 flex-wrap">
@@ -217,7 +214,7 @@ function ProDashboard({
           </Badge>
           {isFree && (
             <Badge variant="outline" className="border-[#00e676]/30 text-[#00e676]">
-              <Infinity className="h-3 w-3 mr-1" /> free for life
+              <Infinity className="h-3 w-3 mr-1" /> free — verified member
             </Badge>
           )}
           {isPlayStore && (
@@ -230,7 +227,7 @@ function ProDashboard({
               <Clock className="h-3 w-3 mr-1" /> active subscription
             </Badge>
           )}
-          {activated && <span className="text-xs text-[#7a6b5a]">since {activated}</span>}
+          {activated && <span className="text-xs text-[#8f7f6e]">since {activated}</span>}
         </div>
       </div>
 
@@ -243,7 +240,7 @@ function ProDashboard({
             </div>
             <div>
               <p className="text-sm font-medium text-[#e8d5a3]">{b.label}</p>
-              <p className="text-xs text-[#7a6b5a] mt-0.5">{b.desc}</p>
+              <p className="text-xs text-[#8f7f6e] mt-0.5">{b.desc}</p>
             </div>
             <CheckCircle2 className="h-4 w-4 text-[#00e676] shrink-0 ml-auto" />
           </div>
@@ -258,40 +255,35 @@ function ProDashboard({
           </div>
           <div>
             <h3 className="text-sm font-bold text-[#e8d5a3]">Emergency Support</h3>
-            <p className="text-[10px] text-[#7a6b5a] uppercase tracking-wider">pro priority line</p>
+            <p className="text-[10px] text-[#8f7f6e] uppercase tracking-wider">pro priority line</p>
           </div>
         </div>
-        <p className="text-xs text-[#7a6b5a] mb-4">
-          urgent contract dispute? fraud concern? safety issue? as a pro member, your message jumps
-          to the front of the queue.
+        <p className="text-xs text-[#8f7f6e] mb-4">
+          urgent contract dispute? fraud concern? safety issue? reports go via email to
+          official.antidosis@gmail.com and are handled with priority.
         </p>
 
-        {supportSent ? (
-          <div className="flex items-center gap-2 text-[#00e676] text-sm py-3">
-            <CheckCircle2 className="h-4 w-4" />
-            message sent — we will respond within 2 hours
+        <form onSubmit={sendSupport} className="space-y-3">
+          <textarea
+            value={supportMsg}
+            onChange={(e) => setSupportMsg(e.target.value)}
+            placeholder="describe your urgent issue..."
+            className="w-full bg-[#0f0c0a] border border-[#2a2420] text-[#e8d5a3] text-sm px-3 py-2 outline-none focus:border-[#ff5252] rounded resize-none"
+            rows={3}
+            required
+          />
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] text-[#8f7f6e]">
+              opens your mail client — nothing is stored here
+            </p>
+            <Button type="submit" size="sm">
+              <Send className="h-3.5 w-3.5 mr-1.5" />
+              email priority report
+            </Button>
           </div>
-        ) : (
-          <form onSubmit={sendSupport} className="space-y-3">
-            <textarea
-              value={supportMsg}
-              onChange={(e) => setSupportMsg(e.target.value)}
-              placeholder="describe your urgent issue..."
-              className="w-full bg-[#0f0c0a] border border-[#2a2420] text-[#e8d5a3] text-sm px-3 py-2 outline-none focus:border-[#ff5252] rounded resize-none"
-              rows={3}
-              required
-            />
-            <div className="flex items-center justify-between">
-              <p className="text-[10px] text-[#7a6b5a]">response time: under 2 hours</p>
-              <Button type="submit" size="sm">
-                <Send className="h-3.5 w-3.5 mr-1.5" />
-                send priority message
-              </Button>
-            </div>
-          </form>
-        )}
+        </form>
 
-        <div className="mt-4 pt-4 border-t border-[#2a2420]/40 flex items-center gap-4 text-xs text-[#7a6b5a]">
+        <div className="mt-4 pt-4 border-t border-[#2a2420]/40 flex items-center gap-4 text-xs text-[#8f7f6e]">
           <span className="flex items-center gap-1.5">
             <Mail className="h-3 w-3" />
             official.antidosis@gmail.com
@@ -311,7 +303,7 @@ function ProDashboard({
             <Sparkles className="h-4 w-4 text-[#f5a623]" />
             <h3 className="text-sm font-bold text-[#e8d5a3]">Pro Status</h3>
           </div>
-          <div className="text-xs text-[#7a6b5a] space-y-2">
+          <div className="text-xs text-[#8f7f6e] space-y-2">
             {activated && (
               <div className="flex justify-between">
                 <span>activated</span>
@@ -322,7 +314,7 @@ function ProDashboard({
               <span>plan</span>
               <span className="text-[#f0cc33]">
                 {isFree
-                  ? "free for life"
+                  ? "free — verified"
                   : isPlayStore
                     ? "google play"
                     : isPaid
@@ -351,7 +343,7 @@ function ProDashboard({
             <Globe className="h-4 w-4 text-[#35c2f0]" />
             <h3 className="text-sm font-bold text-[#e8d5a3]">Public Directory</h3>
           </div>
-          <p className="text-xs text-[#7a6b5a] mb-4">
+          <p className="text-xs text-[#8f7f6e] mb-4">
             {profile.showInDirectory
               ? "your profile is visible on the pro directory. new users can discover you."
               : "your profile is hidden from the pro directory. toggle to get discovered."}
@@ -380,7 +372,7 @@ function ProDashboard({
       <div className="text-center">
         <Link
           href="/pros"
-          className="inline-flex items-center gap-2 text-sm text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
         >
           <Globe className="h-4 w-4" />
           browse the pro directory
@@ -415,11 +407,11 @@ function ProMarketing({
   return (
     <div className="max-w-3xl mx-auto px-4 md:px-8 pb-16">
       <div className="py-10 text-center">
-        <p className="text-xs text-[#7a6b5a] mb-4">$ man antidosis_pro</p>
+        <p className="text-xs text-[#8f7f6e] mb-4">$ man antidosis_pro</p>
         <h1 className="heading-display text-2xl text-[#e8d5a3]">
           antidosis <span className="text-[#f5a623]">pro</span>
         </h1>
-        <p className="text-sm text-[#7a6b5a] max-w-lg mx-auto mt-4">
+        <p className="text-sm text-[#8f7f6e] max-w-lg mx-auto mt-4">
           stand out. get selected. trade with confidence.
         </p>
       </div>
@@ -430,7 +422,7 @@ function ProMarketing({
           <Zap className="h-5 w-5" />
           <span className="font-semibold text-lg">pro is free — always</span>
         </div>
-        <p className="text-sm text-[#7a6b5a]">
+        <p className="text-sm text-[#8f7f6e]">
           no subscription, no credit card, no expiry. verify your identity and mobile number to
           claim Pro — the badge is earned with trust, not bought.
         </p>
@@ -468,7 +460,7 @@ function ProMarketing({
               <h2 className="text-2xl font-bold text-[#e8d5a3]">free</h2>
               <Badge variant="default">with verification</Badge>
             </div>
-            <p className="text-sm text-[#7a6b5a]">
+            <p className="text-sm text-[#8f7f6e]">
               no credit card. no subscription. just a verified identity.
             </p>
           </div>
@@ -485,7 +477,7 @@ function ProMarketing({
                   <AlertTriangle className="h-4 w-4" />
                   <span className="text-sm font-medium">verification required</span>
                 </div>
-                <p className="text-xs text-[#7a6b5a]">
+                <p className="text-xs text-[#8f7f6e]">
                   upload a government-issued ID in dashboard → credentials tab, then wait for admin
                   approval
                 </p>
@@ -560,7 +552,7 @@ function FeatureItem({
     <div className="vessel p-5">
       <div className="mb-4 inline-flex bg-[#1a1714] p-3 rounded-md text-[#f5a623]">{icon}</div>
       <h3 className="text-base font-bold text-[#e8d5a3] mb-2">{title}</h3>
-      <p className="text-sm text-[#7a6b5a] leading-relaxed">{description}</p>
+      <p className="text-sm text-[#8f7f6e] leading-relaxed">{description}</p>
     </div>
   );
 }

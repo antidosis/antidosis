@@ -92,7 +92,7 @@ export function TerminalPreview({ className = "" }: { className?: string }) {
           <span className="h-2.5 w-2.5 rounded-full bg-[#00e676]/60" />
         </div>
         <span className="ml-2 text-[10px] text-[#8f7f6e] font-mono tracking-wide">
-          antidosis-terminal — community
+          antidosis relay — community
         </span>
       </div>
 

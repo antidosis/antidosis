@@ -7,6 +7,7 @@ import { createContractFromAcceptance } from "@/lib/contract-formation";
 import { sendInterestAcceptedEmail } from "@/lib/email";
 import { logger } from "@/lib/logger";
 import { createNotification } from "@/lib/notifications";
+import { requireVerifiedParticipation } from "@/lib/participation";
 import { prisma } from "@/lib/prisma";
 import { resolveEntityId } from "@/lib/resolve-id";
 import { createClient } from "@/lib/supabase/server";
@@ -31,6 +32,9 @@ export const PATCH = withApiHandler(
         { status: 403 }
       );
     }
+
+    const participation = await requireVerifiedParticipation(user.id);
+    if (!participation.ok) return participation.response;
 
     const body = await req.json();
     const parseResult = updateSchema.safeParse(body);

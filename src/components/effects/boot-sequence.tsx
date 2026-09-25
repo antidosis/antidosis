@@ -7,14 +7,14 @@ import { ShieldCheck, Lock, Users } from "lucide-react";
 import { TerminalCursor } from "./terminal-cursor";
 
 const BOOT_LINES = [
-  { text: "initializing antidosis marketplace...", delay: 100 },
+  { text: "initializing antidosis relay network...", delay: 100 },
   { text: "", delay: 180 },
   { text: "[OK] verifying network integrity", delay: 260 },
   { text: "[OK] loading trust protocol v2.1", delay: 340 },
-  { text: "[OK] establishing secure exchange channels", delay: 420 },
-  { text: "[OK] connecting to trial region node", delay: 500 },
+  { text: "[OK] opening secure exchange channels", delay: 420 },
+  { text: "[OK] linking to local mesh node", delay: 500 },
   { text: "", delay: 580 },
-  { text: "ready.", delay: 660 },
+  { text: "on air.", delay: 660 },
 ];
 
 const TRUST_SIGNALS = [
@@ -84,7 +84,7 @@ export function BootSequence({ onComplete }: { onComplete: () => void }) {
           antidosis
         </h1>
         <p className="text-xs text-[#8f7f6e] mt-2 tracking-widest uppercase">
-          exchange anything, build trust.
+          the exchange network.
         </p>
       </div>
 
@@ -104,7 +104,7 @@ export function BootSequence({ onComplete }: { onComplete: () => void }) {
         ))}
       </div>
 
-      {/* Terminal Boot Lines */}
+      {/* Boot Lines */}
       <div
         className={`w-full max-w-md transition-opacity duration-500 ${
           visibleLines > 0 ? "opacity-100" : "opacity-0"
@@ -118,7 +118,7 @@ export function BootSequence({ onComplete }: { onComplete: () => void }) {
                 className={`${
                   line.text.startsWith("[OK]")
                     ? "text-[#00e676]"
-                    : line.text === "ready."
+                    : line.text === "on air."
                       ? "text-[#f5a623] font-semibold"
                       : "text-[#8f7f6e]"
                 }`}
@@ -141,7 +141,7 @@ export function BootSequence({ onComplete }: { onComplete: () => void }) {
           logoVisible ? "opacity-100" : "opacity-0"
         }`}
       >
-        initializing secure exchange environment
+        acquiring signal — secure exchange network
       </p>
     </div>
   );

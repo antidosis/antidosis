@@ -50,11 +50,11 @@ export default function BlogIndexPage() {
         <div className="max-w-4xl mx-auto px-4 md:px-8 py-16 md:py-24">
           {/* Header */}
           <div className="mb-16">
-            <p className="text-xs font-mono text-[#7a6b5a] mb-4">$ ls articles/</p>
+            <p className="text-xs font-mono text-[#8f7f6e] mb-4">» TRANSMISSION LOG</p>
             <h1 className="heading-display text-4xl md:text-5xl text-[#e8d5a3] mb-4">Blog</h1>
             <p className="text-[#b8a078] max-w-xl">
-              Guides, stories, and insights about barter, exchange, and building community on the
-              Central Coast.
+              Guides, stories, and insights about barter, exchange, and building a network that
+              keeps working — on the Central Coast.
             </p>
           </div>
 
@@ -80,7 +80,7 @@ export default function BlogIndexPage() {
                     {post.title}
                   </h2>
                   <p className="text-sm text-[#b8a078] leading-relaxed mb-4">{post.excerpt}</p>
-                  <div className="flex items-center gap-4 text-xs text-[#7a6b5a]">
+                  <div className="flex items-center gap-4 text-xs text-[#8f7f6e]">
                     <span className="flex items-center gap-1.5">
                       <Calendar className="h-3 w-3" />
                       {new Date(post.publishedAt).toLocaleDateString("en-AU", {
@@ -105,7 +105,7 @@ export default function BlogIndexPage() {
 
           {/* CTA */}
           <div className="mt-16 text-center">
-            <p className="text-sm text-[#7a6b5a] mb-4">Want to share your exchange story?</p>
+            <p className="text-sm text-[#8f7f6e] mb-4">Want to share your exchange story?</p>
             <a
               href="mailto:official.antidosis@gmail.com?subject=Blog%20Submission"
               className="inline-flex items-center gap-2 text-sm text-[#00e5ff] hover:underline"

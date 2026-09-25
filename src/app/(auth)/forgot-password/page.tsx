@@ -53,7 +53,7 @@ export default function ForgotPasswordPage() {
 
       <div className="flex-1 flex items-center justify-center px-4">
         <div className="w-full max-w-sm">
-          <p className="text-xs text-[#7a6b5a] mb-8">$ passwd --reset</p>
+          <p className="text-xs text-[#8f7f6e] mb-8">$ passwd --reset</p>
           <h1 className="heading-display text-2xl text-[#e8d5a3] mb-2">
             reset_password
             <TerminalCursor />
@@ -65,7 +65,7 @@ export default function ForgotPasswordPage() {
           {sent ? (
             <div className="border border-[#2a2420] bg-[#12100e] p-5">
               <p className="text-sm text-[#00e676] mb-2">reset link sent.</p>
-              <p className="text-xs text-[#7a6b5a]">
+              <p className="text-xs text-[#8f7f6e]">
                 check your inbox (and spam folder) for an email from us.
               </p>
               <div className="mt-6 text-center">
@@ -94,7 +94,7 @@ export default function ForgotPasswordPage() {
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "sending..." : "send_reset_link"}
               </Button>
-              <p className="text-sm text-[#7a6b5a] text-center">
+              <p className="text-sm text-[#8f7f6e] text-center">
                 <Button variant="link" size="sm" asChild>
                   <Link href="/login">back to login</Link>
                 </Button>

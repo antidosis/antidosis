@@ -137,10 +137,14 @@ export const POST = withApiHandler(async (req: NextRequest) => {
   if (!participation.ok) return participation.response;
 
   // Rate limit: 5 needs per hour per user
-  const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
-    windowMs: 60 * 60_000,
-    maxRequests: 5,
-  });
+  const limit = await rateLimit(
+    getRateLimitIdentifier(req, user.id),
+    {
+      windowMs: 60 * 60_000,
+      maxRequests: 5,
+    },
+    "needs-post"
+  );
   if (!limit.allowed) {
     return NextResponse.json({ error: "Too many posts. Please try again later." }, { status: 429 });
   }

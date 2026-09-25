@@ -82,7 +82,7 @@ export default function LoginPage() {
 
       <div className="flex-1 flex items-center justify-center px-4">
         <div className="w-full max-w-sm">
-          <p className="text-xs text-[#7a6b5a] mb-8">$ login --existing-user</p>
+          <p className="text-xs text-[#8f7f6e] mb-8">$ login --existing-user</p>
           <h1 className="heading-display text-2xl text-[#e8d5a3] mb-2">
             authenticate
             <TerminalCursor />
@@ -133,7 +133,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#7a6b5a] hover:text-[#e8d5a3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f5a623] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0806] rounded-sm"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8f7f6e] hover:text-[#e8d5a3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f5a623] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0806] rounded-sm"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -150,7 +150,7 @@ export default function LoginPage() {
             </p>
           </form>
 
-          <p className="mt-12 text-sm text-[#7a6b5a]">
+          <p className="mt-12 text-sm text-[#8f7f6e]">
             no account?{" "}
             <Button variant="link" size="sm" asChild>
               <Link href="/register">register</Link>

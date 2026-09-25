@@ -4,6 +4,17 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 import { POST } from "./route";
 
+// ─── Prisma mocks ───
+const mockProfileFindUnique = vi.fn();
+
+vi.mock("@/lib/prisma", () => ({
+  prisma: {
+    profile: {
+      findUnique: (...args: unknown[]) => mockProfileFindUnique(...args),
+    },
+  },
+}));
+
 // ─── Supabase mocks ───
 const mockGetUser = vi.fn();
 
@@ -101,6 +112,11 @@ describe("POST /api/v1/upload", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockRateLimit.mockResolvedValue({ allowed: true, remaining: 10, resetAt: Date.now() + 60_000 });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockUpload.mockResolvedValue({ data: { path: "general/user-1/test.png" }, error: null });
     mockGetPublicUrl.mockReturnValue({
       data: { publicUrl: "https://example.com/general/user-1/test.png" },
@@ -128,6 +144,36 @@ describe("POST /api/v1/upload", () => {
 
     expect(res.status).toBe(403);
     expect(body.code).toBe("EMAIL_NOT_VERIFIED");
+  });
+
+  it("returns 403 when account is suspended", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: new Date("2026-01-01T00:00:00Z"),
+    });
+
+    const res = await POST(makeFormRequest(makePngFile()));
+    const body = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(body.code).toBe("ACCOUNT_SUSPENDED");
+  });
+
+  it("returns 403 when mobile is not verified", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: false,
+      bannedAt: null,
+    });
+
+    const res = await POST(makeFormRequest(makePngFile()));
+    const body = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(body.code).toBe("MOBILE_NOT_VERIFIED");
   });
 
   it("returns 429 when rate limited", async () => {

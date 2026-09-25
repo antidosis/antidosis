@@ -121,14 +121,14 @@ export default function CreateNeedPage() {
       <div className="py-6">
         <Link
           href="/needs"
-          className="inline-flex items-center text-sm text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors"
+          className="inline-flex items-center text-sm text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />$ cd ~/needs/
         </Link>
       </div>
 
       <h1 className="heading-display text-2xl text-[#e8d5a3]">Post Need</h1>
-      <p className="text-xs text-[#7a6b5a] mt-3">$ nano new_need.conf</p>
+      <p className="text-xs text-[#8f7f6e] mt-3">$ nano new_need.conf</p>
       <p className="text-sm text-[#b8a078] mb-6">
         describe what you need and what you are offering in exchange
       </p>
@@ -140,7 +140,7 @@ export default function CreateNeedPage() {
             <p className="text-sm text-[#e8d5a3] font-medium">
               posts with images get 3x more responses
             </p>
-            <p className="text-xs text-[#7a6b5a] mt-1">
+            <p className="text-xs text-[#8f7f6e] mt-1">
               add photos of what you need and what you are offering. it builds instant trust.
             </p>
           </div>
@@ -153,7 +153,7 @@ export default function CreateNeedPage() {
             <Shield className="h-4 w-4 text-[#ffb300] mt-0.5 flex-shrink-0" />
             <div>
               <p className="text-sm text-[#e8d5a3] font-medium">mobile verification required</p>
-              <p className="text-xs text-[#7a6b5a] mt-1">
+              <p className="text-xs text-[#8f7f6e] mt-1">
                 anti-scam rule: you need a verified mobile number before posting or messaging.{" "}
                 <Link href="/verify-mobile" className="text-[#f5a623] hover:underline">
                   verify now →
@@ -170,13 +170,13 @@ export default function CreateNeedPage() {
             <p className="text-xs text-[#35c2f0] uppercase tracking-wide font-medium mb-1">
               [what you need]
             </p>
-            <p className="text-xs text-[#7a6b5a] mb-5">what are you seeking from the community?</p>
+            <p className="text-xs text-[#8f7f6e] mb-5">what are you seeking from the community?</p>
             <div className="space-y-5">
               <div className="space-y-2">
                 <Label>Title</Label>
                 <Input placeholder="e.g. electrical_work_1hr" {...register("title")} />
                 {errors.title && <p className="text-xs text-[#ff5252]">{errors.title.message}</p>}
-                <p className="text-xs text-[#7a6b5a]">
+                <p className="text-xs text-[#8f7f6e]">
                   be specific. &quot;fix_leaking_tap&quot; beats &quot;plumbing_help&quot;
                 </p>
               </div>
@@ -191,7 +191,7 @@ export default function CreateNeedPage() {
                 {errors.description && (
                   <p className="text-xs text-[#ff5252]">{errors.description.message}</p>
                 )}
-                <p className="text-xs text-[#7a6b5a]">
+                <p className="text-xs text-[#8f7f6e]">
                   include deadlines, access details, and any tools/materials provided
                 </p>
               </div>
@@ -199,25 +199,25 @@ export default function CreateNeedPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 mb-1">
-                    <Calendar className="h-4 w-4 text-[#7a6b5a]" />
+                    <Calendar className="h-4 w-4 text-[#8f7f6e]" />
                     <Label>Deadline (Optional)</Label>
                   </div>
                   <Input type="date" {...register("deadline")} />
-                  <p className="text-xs text-[#7a6b5a]">when does this need to be done by?</p>
+                  <p className="text-xs text-[#8f7f6e]">when does this need to be done by?</p>
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 mb-1">
-                    <Clock className="h-4 w-4 text-[#7a6b5a]" />
+                    <Clock className="h-4 w-4 text-[#8f7f6e]" />
                     <Label>Time Estimate (Optional)</Label>
                   </div>
                   <Input placeholder="e.g. 2-4 hours" {...register("timeRange")} />
-                  <p className="text-xs text-[#7a6b5a]">how long do you estimate this will take?</p>
+                  <p className="text-xs text-[#8f7f6e]">how long do you estimate this will take?</p>
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label>
-                  Required Skills <span className="text-[#7a6b5a] font-normal">(optional)</span>
+                  Required Skills <span className="text-[#8f7f6e] font-normal">(optional)</span>
                 </Label>
                 <Controller
                   name="requiredSkills"
@@ -231,7 +231,7 @@ export default function CreateNeedPage() {
                     />
                   )}
                 />
-                <p className="text-xs text-[#7a6b5a]">
+                <p className="text-xs text-[#8f7f6e]">
                   add skills to help the right people find your need. browse popular skills or type
                   your own.
                 </p>
@@ -246,7 +246,7 @@ export default function CreateNeedPage() {
 
               <div className="space-y-2">
                 <div className="flex items-center gap-2 mb-2">
-                  <Camera className="h-4 w-4 text-[#7a6b5a]" />
+                  <Camera className="h-4 w-4 text-[#8f7f6e]" />
                   <Label>Need Images (Optional)</Label>
                 </div>
                 <Controller
@@ -270,7 +270,7 @@ export default function CreateNeedPage() {
             <p className="text-xs text-[#f5a623] uppercase tracking-wide font-medium mb-1">
               [what you are offering]
             </p>
-            <p className="text-xs text-[#7a6b5a] mb-5">
+            <p className="text-xs text-[#8f7f6e] mb-5">
               this determines which exchange categories are available below
             </p>
             <div className="space-y-5">
@@ -284,7 +284,7 @@ export default function CreateNeedPage() {
                     className={`flex flex-col items-center gap-2 h-auto py-4 px-2 ${
                       offerType === type
                         ? "border-[#f5a623] bg-[#f5a623]/5 text-[#e8d5a3] hover:bg-[#f5a623]/10 hover:text-[#e8d5a3]"
-                        : "border-[#2a2420] bg-[#0f0c0a] text-[#7a6b5a] hover:text-[#e8d5a3] hover:bg-[#1a1714] hover:border-[#3d3530]"
+                        : "border-[#2a2420] bg-[#0f0c0a] text-[#8f7f6e] hover:text-[#e8d5a3] hover:bg-[#1a1714] hover:border-[#3d3530]"
                     }`}
                   >
                     {type === "service" && <Wrench className="h-5 w-5" />}
@@ -296,7 +296,7 @@ export default function CreateNeedPage() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-xs text-[#7a6b5a]">Sub-category (optional)</Label>
+                <Label className="text-xs text-[#8f7f6e]">Sub-category (optional)</Label>
                 <div className="flex flex-wrap gap-2">
                   {EXCHANGE_MODES.filter((mode) => {
                     const incompatible = INCOMPATIBLE_EXCHANGE_MODES[offerType] || [];
@@ -331,7 +331,7 @@ export default function CreateNeedPage() {
                 {errors.offerDescription && (
                   <p className="text-xs text-[#ff5252]">{errors.offerDescription.message}</p>
                 )}
-                <p className="text-xs text-[#7a6b5a]">
+                <p className="text-xs text-[#8f7f6e]">
                   the more detail, the better your match rate
                 </p>
               </div>
@@ -350,7 +350,7 @@ export default function CreateNeedPage() {
 
               <div className="space-y-2">
                 <div className="flex items-center gap-2 mb-2">
-                  <ImageIcon className="h-4 w-4 text-[#7a6b5a]" />
+                  <ImageIcon className="h-4 w-4 text-[#8f7f6e]" />
                   <Label>Offer Images (Optional)</Label>
                 </div>
                 <Controller
@@ -372,8 +372,8 @@ export default function CreateNeedPage() {
         </div>
 
         <section className="space-y-3">
-          <p className="text-xs text-[#7a6b5a] uppercase tracking-wide font-medium">[deal type]</p>
-          <p className="text-xs text-[#7a6b5a]">choose how you want to structure this exchange</p>
+          <p className="text-xs text-[#8f7f6e] uppercase tracking-wide font-medium">[deal type]</p>
+          <p className="text-xs text-[#8f7f6e]">choose how you want to structure this exchange</p>
           <Controller
             name="requiresContract"
             control={control}
@@ -393,7 +393,7 @@ export default function CreateNeedPage() {
                       className={`p-2 rounded ${!field.value ? "bg-[#00e676]/10" : "bg-[#1a1714]"}`}
                     >
                       <Handshake
-                        className={`h-5 w-5 ${!field.value ? "text-[#00e676]" : "text-[#7a6b5a]"}`}
+                        className={`h-5 w-5 ${!field.value ? "text-[#00e676]" : "text-[#8f7f6e]"}`}
                       />
                     </div>
                     <div>
@@ -402,7 +402,7 @@ export default function CreateNeedPage() {
                       >
                         Free Form
                       </p>
-                      <p className="text-[10px] text-[#7a6b5a]">handshake deal</p>
+                      <p className="text-[10px] text-[#8f7f6e]">handshake deal</p>
                     </div>
                   </div>
                   <p className="text-xs text-[#8f7f6e]">
@@ -425,7 +425,7 @@ export default function CreateNeedPage() {
                       className={`p-2 rounded ${field.value ? "bg-[#f5a623]/10" : "bg-[#1a1714]"}`}
                     >
                       <Shield
-                        className={`h-5 w-5 ${field.value ? "text-[#f5a623]" : "text-[#7a6b5a]"}`}
+                        className={`h-5 w-5 ${field.value ? "text-[#f5a623]" : "text-[#8f7f6e]"}`}
                       />
                     </div>
                     <div>
@@ -434,7 +434,7 @@ export default function CreateNeedPage() {
                       >
                         Formal Contract
                       </p>
-                      <p className="text-[10px] text-[#7a6b5a]">structured terms</p>
+                      <p className="text-[10px] text-[#8f7f6e]">structured terms</p>
                     </div>
                   </div>
                   <p className="text-xs text-[#8f7f6e]">
@@ -459,7 +459,7 @@ export default function CreateNeedPage() {
                   <p className="text-sm text-[#e8d5a3] font-medium">
                     Central Coast NSW trial region
                   </p>
-                  <p className="text-xs text-[#7a6b5a] mt-1">
+                  <p className="text-xs text-[#8f7f6e] mt-1">
                     only central coast suburbs are available during the pilot. remote exchanges are
                     temporarily disabled.
                   </p>
@@ -482,7 +482,7 @@ export default function CreateNeedPage() {
               {errors.locationName && (
                 <p className="text-xs text-[#ff5252]">{errors.locationName.message}</p>
               )}
-              <p className="text-xs text-[#7a6b5a]">
+              <p className="text-xs text-[#8f7f6e]">
                 all central coast suburbs autocomplete. try &quot;terrigal&quot; or &quot;2250&quot;
               </p>
             </div>

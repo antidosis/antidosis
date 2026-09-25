@@ -231,7 +231,7 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                   {fullName || "Your Name"}
                 </h2>
                 {locationName && (
-                  <p className="flex items-center gap-1.5 text-sm text-[#7a6b5a] mt-1">
+                  <p className="flex items-center gap-1.5 text-sm text-[#8f7f6e] mt-1">
                     <MapPin className="h-3.5 w-3.5" />
                     {locationName}
                   </p>
@@ -272,7 +272,7 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                 });
                 setIsEditing(true);
               }}
-              className="shrink-0 text-[#7a6b5a] hover:text-[#e8d5a3]"
+              className="shrink-0 text-[#8f7f6e] hover:text-[#e8d5a3]"
             >
               <Pencil className="h-3.5 w-3.5 mr-1.5" /> Edit
             </Button>
@@ -289,7 +289,7 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
           {mobile && (
             <div className="mt-5 pt-5 border-t border-[#2a2420]/40">
               <div className="flex items-center gap-2 text-sm">
-                <Smartphone className="h-4 w-4 text-[#7a6b5a]" />
+                <Smartphone className="h-4 w-4 text-[#8f7f6e]" />
                 <span className="text-[#b8a078] font-mono text-xs">{mobile}</span>
                 {initialProfile.mobileVerified ? (
                   <span className="inline-flex items-center gap-1 text-xs text-[#00e676]">
@@ -311,7 +311,7 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
           {/* ─── Contact cards ─── */}
           {(hasPublicContact || hasPrivateContact) && (
             <div className="mt-5 pt-5 border-t border-[#2a2420]/40">
-              <p className="text-[10px] uppercase tracking-wider text-[#7a6b5a] mb-3">Contact</p>
+              <p className="text-[10px] uppercase tracking-wider text-[#8f7f6e] mb-3">Contact</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {hasPublicContact && (
                   <div className="rounded border border-[#2a2420] bg-[#12100e]/50 p-4">
@@ -324,7 +324,7 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                     <div className="space-y-2.5">
                       {publicPhone && (
                         <div className="flex items-center gap-2 text-sm">
-                          <Phone className="h-3.5 w-3.5 text-[#7a6b5a]" />
+                          <Phone className="h-3.5 w-3.5 text-[#8f7f6e]" />
                           <span className="text-[#b8a078]">{publicPhone}</span>
                         </div>
                       )}
@@ -355,7 +355,7 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                 {hasPrivateContact && (
                   <div className="rounded border border-[#2a2420] bg-[#12100e]/50 p-4">
                     <div className="flex items-center gap-2 mb-3">
-                      <Lock className="h-3.5 w-3.5 text-[#7a6b5a]" />
+                      <Lock className="h-3.5 w-3.5 text-[#8f7f6e]" />
                       <span className="text-xs font-medium text-[#e8d5a3] uppercase tracking-wider">
                         Private
                       </span>
@@ -363,7 +363,7 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                     <div className="space-y-2.5">
                       {privatePhone && (
                         <div className="flex items-center gap-2 text-sm">
-                          <Phone className="h-3.5 w-3.5 text-[#7a6b5a]" />
+                          <Phone className="h-3.5 w-3.5 text-[#8f7f6e]" />
                           <span className="text-[#b8a078]">{privatePhone}</span>
                         </div>
                       )}
@@ -444,7 +444,7 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
             <div className="bg-[#00e5ff]/10 border border-[#00e5ff]/30 p-3 mt-2">
               <div className="flex items-start gap-2">
                 <Info className="h-3.5 w-3.5 text-[#00e5ff] mt-0.5 flex-shrink-0" />
-                <p className="text-xs text-[#7a6b5a]">
+                <p className="text-xs text-[#8f7f6e]">
                   Central Coast NSW is the trial region. Only Central Coast suburbs are available
                   during the pilot.
                 </p>
@@ -459,22 +459,22 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
           <div className="space-y-2">
             <Label>Mobile Number</Label>
             <div className="flex items-center gap-2">
-              <Smartphone className="h-3.5 w-3.5 text-[#7a6b5a]" />
+              <Smartphone className="h-3.5 w-3.5 text-[#8f7f6e]" />
               <Input {...register("mobile")} placeholder="+61 412 345 678" />
             </div>
             {errors.mobile && <p className="text-xs text-[#ff5252]">{errors.mobile.message}</p>}
-            <p className="text-xs text-[#7a6b5a]">
+            <p className="text-xs text-[#8f7f6e]">
               Used for account security. Australian format only.
             </p>
           </div>
           <div className="space-y-2">
             <Label>ABN (optional)</Label>
             <div className="flex items-center gap-2">
-              <FileText className="h-3.5 w-3.5 text-[#7a6b5a]" />
+              <FileText className="h-3.5 w-3.5 text-[#8f7f6e]" />
               <Input {...register("abn")} placeholder="12 345 678 901" />
             </div>
             {errors.abn && <p className="text-xs text-[#ff5252]">{errors.abn.message}</p>}
-            <p className="text-xs text-[#7a6b5a]">
+            <p className="text-xs text-[#8f7f6e]">
               11 digits. Only needed if you earn through exchanges — it appears on ATO
               sharing-economy (SERR) reports.
             </p>
@@ -493,20 +493,20 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                   <span className="text-sm font-medium text-[#e8d5a3]">Public Profile</span>
                 </div>
                 {publicPanelOpen ? (
-                  <ChevronUp className="h-4 w-4 text-[#7a6b5a]" />
+                  <ChevronUp className="h-4 w-4 text-[#8f7f6e]" />
                 ) : (
-                  <ChevronDown className="h-4 w-4 text-[#7a6b5a]" />
+                  <ChevronDown className="h-4 w-4 text-[#8f7f6e]" />
                 )}
               </button>
               {publicPanelOpen && (
                 <div className="px-4 pb-4 space-y-4 border-t border-[#2a2420]">
-                  <p className="text-xs text-[#7a6b5a] pt-3">
+                  <p className="text-xs text-[#8f7f6e] pt-3">
                     Shown in the pros directory. Anyone can find and contact you.
                   </p>
                   <div className="space-y-2">
                     <Label>Phone</Label>
                     <div className="flex items-center gap-2">
-                      <Phone className="h-3.5 w-3.5 text-[#7a6b5a]" />
+                      <Phone className="h-3.5 w-3.5 text-[#8f7f6e]" />
                       <Input {...register("publicPhone")} placeholder="Public contact number" />
                     </div>
                     {errors.publicPhone && (
@@ -525,7 +525,7 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                           <button
                             type="button"
                             onClick={() => removePublicLink(i)}
-                            className="text-[#7a6b5a] hover:text-[#ff5252]"
+                            className="text-[#8f7f6e] hover:text-[#ff5252]"
                           >
                             <X className="h-3.5 w-3.5" />
                           </button>
@@ -573,24 +573,24 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                 className="w-full flex items-center justify-between p-4 text-left hover:bg-[#1a1714] transition-colors"
               >
                 <div className="flex items-center gap-2">
-                  <Lock className="h-4 w-4 text-[#7a6b5a]" />
+                  <Lock className="h-4 w-4 text-[#8f7f6e]" />
                   <span className="text-sm font-medium text-[#e8d5a3]">Private Profile</span>
                 </div>
                 {privatePanelOpen ? (
-                  <ChevronUp className="h-4 w-4 text-[#7a6b5a]" />
+                  <ChevronUp className="h-4 w-4 text-[#8f7f6e]" />
                 ) : (
-                  <ChevronDown className="h-4 w-4 text-[#7a6b5a]" />
+                  <ChevronDown className="h-4 w-4 text-[#8f7f6e]" />
                 )}
               </button>
               {privatePanelOpen && (
                 <div className="px-4 pb-4 space-y-4 border-t border-[#2a2420]">
-                  <p className="text-xs text-[#7a6b5a] pt-3">
+                  <p className="text-xs text-[#8f7f6e] pt-3">
                     Shared when messaging about needs. More detail builds trust.
                   </p>
                   <div className="space-y-2">
                     <Label>Phone</Label>
                     <div className="flex items-center gap-2">
-                      <Phone className="h-3.5 w-3.5 text-[#7a6b5a]" />
+                      <Phone className="h-3.5 w-3.5 text-[#8f7f6e]" />
                       <Input {...register("privatePhone")} placeholder="Private contact number" />
                     </div>
                     {errors.privatePhone && (
@@ -609,7 +609,7 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                           <button
                             type="button"
                             onClick={() => removePrivateLink(i)}
-                            className="text-[#7a6b5a] hover:text-[#ff5252]"
+                            className="text-[#8f7f6e] hover:text-[#ff5252]"
                           >
                             <X className="h-3.5 w-3.5" />
                           </button>

@@ -41,9 +41,9 @@ export function CredentialList({
   if (credentials.length === 0) {
     return (
       <div className="py-24 text-center vessel">
-        <ShieldCheck className="h-8 w-8 text-[#7a6b5a] mx-auto mb-3" />
+        <ShieldCheck className="h-8 w-8 text-[#8f7f6e] mx-auto mb-3" />
         <p className="text-sm font-medium text-[#b8a078] mb-2">No Credentials Yet</p>
-        <p className="text-xs text-[#7a6b5a] max-w-sm mx-auto">
+        <p className="text-xs text-[#8f7f6e] max-w-sm mx-auto">
           Add your ID to get verified. Qualifications, licenses, WWCC, police checks, and insurance
           also help you get selected for needs.
         </p>
@@ -69,7 +69,7 @@ export function CredentialList({
                         : cred.type}
                 </Badge>
                 {cred.isVerified && <Badge variant="quintessence">Verified</Badge>}
-                {!cred.isPublic && <EyeOff className="h-3.5 w-3.5 text-[#7a6b5a]" />}
+                {!cred.isPublic && <EyeOff className="h-3.5 w-3.5 text-[#8f7f6e]" />}
                 {cred.isPublic && <Eye className="h-3.5 w-3.5 text-[#00e5ff]" />}
               </div>
               <div className="text-xs text-[#b8a078] mt-2 space-y-1">
@@ -100,7 +100,7 @@ export function CredentialList({
                     })}
                   </p>
                 )}
-                {cred.description && <p className="text-[#7a6b5a]">{cred.description}</p>}
+                {cred.description && <p className="text-[#8f7f6e]">{cred.description}</p>}
                 {cred.fileUrl && (
                   <a
                     href={cred.signedUrl ?? cred.fileUrl}

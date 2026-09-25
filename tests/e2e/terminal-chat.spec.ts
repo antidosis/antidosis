@@ -2,19 +2,19 @@ import { test, expect } from "@playwright/test";
 
 import { hasAuthCredentials, login } from "./fixtures/auth";
 
-test.describe("Terminal chat", () => {
+test.describe("Relay chat", () => {
   test("redirects unauthenticated users to login", async ({ page }) => {
     await page.goto("/terminal");
     await expect(page).toHaveURL(/\/login/, { timeout: 10_000 });
   });
 
-  test("authenticated user can access terminal", async ({ page }) => {
+  test("authenticated user can access relay", async ({ page }) => {
     test.skip(!hasAuthCredentials(), "E2E auth credentials not configured");
 
     await login(page);
     await page.goto("/terminal");
 
-    await expect(page.locator("text=antidosis-terminal v2.0.0")).toBeVisible({
+    await expect(page.locator("text=antidosis relay v2.0.0")).toBeVisible({
       timeout: 10_000,
     });
   });

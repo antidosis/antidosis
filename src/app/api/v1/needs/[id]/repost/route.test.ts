@@ -95,6 +95,11 @@ describe("POST /api/v1/needs/[id]/repost", () => {
 
   it("returns 429 when rate limited", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockRateLimit.mockResolvedValue({ allowed: false, remaining: 0, resetAt: Date.now() + 60_000 });
 
     const res = await POST(
@@ -105,6 +110,42 @@ describe("POST /api/v1/needs/[id]/repost", () => {
 
     expect(res.status).toBe(429);
     expect(body.error).toBe("Rate limit exceeded");
+  });
+
+  it("returns 403 when account is suspended", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: new Date("2026-01-01T00:00:00Z"),
+    });
+
+    const res = await POST(
+      makeRequest("http://localhost/api/v1/needs/need-1/repost", { method: "POST" }),
+      { params: { id: "need-1" } }
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(body.code).toBe("ACCOUNT_SUSPENDED");
+  });
+
+  it("returns 403 when mobile is not verified", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: false,
+      bannedAt: null,
+    });
+
+    const res = await POST(
+      makeRequest("http://localhost/api/v1/needs/need-1/repost", { method: "POST" }),
+      { params: { id: "need-1" } }
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(body.code).toBe("MOBILE_NOT_VERIFIED");
   });
 
   it("returns 404 when profile not found", async () => {
@@ -123,7 +164,11 @@ describe("POST /api/v1/needs/[id]/repost", () => {
 
   it("returns 404 when need not found", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue(null);
 
     const res = await POST(
@@ -138,7 +183,11 @@ describe("POST /api/v1/needs/[id]/repost", () => {
 
   it("returns 403 when not poster", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue({ posterId: "other-profile", status: "archived" });
 
     const res = await POST(
@@ -153,7 +202,11 @@ describe("POST /api/v1/needs/[id]/repost", () => {
 
   it("returns 400 when need is not archived", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue({ posterId: "profile-1", status: "open" });
 
     const res = await POST(
@@ -168,7 +221,11 @@ describe("POST /api/v1/needs/[id]/repost", () => {
 
   it("reposts archived need successfully", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue({ posterId: "profile-1", status: "archived" });
     mockNeedUpdate.mockResolvedValue({
       id: "need-1",
@@ -194,7 +251,11 @@ describe("POST /api/v1/needs/[id]/repost", () => {
 
   it("includes x-request-id header", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue({ posterId: "profile-1", status: "archived" });
     mockNeedUpdate.mockResolvedValue({ id: "need-1", status: "open" });
 

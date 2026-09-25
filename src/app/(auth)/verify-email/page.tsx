@@ -59,7 +59,7 @@ export default function VerifyEmailPage() {
 
       <div className="flex-1 flex items-center justify-center px-4">
         <div className="w-full max-w-sm">
-          <p className="text-xs text-[#7a6b5a] mb-8">$ verify --email</p>
+          <p className="text-xs text-[#8f7f6e] mb-8">$ verify --email</p>
           <h1 className="heading-display text-2xl text-[#e8d5a3] mb-2">
             verify_your_email
             <TerminalCursor />
@@ -74,11 +74,11 @@ export default function VerifyEmailPage() {
               <div>
                 <p className="text-sm text-[#e8d5a3] font-medium">verification email sent</p>
                 {email && (
-                  <p className="text-xs text-[#7a6b5a] mt-1">
+                  <p className="text-xs text-[#8f7f6e] mt-1">
                     sent to: <span className="text-[#e8d5a3]">{email}</span>
                   </p>
                 )}
-                <p className="text-xs text-[#7a6b5a] mt-2">
+                <p className="text-xs text-[#8f7f6e] mt-2">
                   click the link in the email to activate your account. the link expires in 1 hour.
                 </p>
               </div>

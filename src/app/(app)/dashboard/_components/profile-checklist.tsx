@@ -227,7 +227,7 @@ export function ProfileChecklist({
             ) : (
               <>
                 <span className="text-3xl font-bold text-[#e8d5a3]">{completed}</span>
-                <span className="text-[10px] uppercase tracking-wider text-[#7a6b5a]">
+                <span className="text-[10px] uppercase tracking-wider text-[#8f7f6e]">
                   of {STEPS.length}
                 </span>
               </>
@@ -269,7 +269,7 @@ export function ProfileChecklist({
       {/* ─── Step list (hidden when complete) ─── */}
       {!allDone && (
         <div className="flex-1 min-w-0 w-full">
-          <p className="text-xs text-[#7a6b5a] uppercase tracking-wider mb-3">profile setup</p>
+          <p className="text-xs text-[#8f7f6e] uppercase tracking-wider mb-3">profile setup</p>
           <div className="space-y-2">
             {STEPS.map((step) => {
               const isDone = doneMap[step.id];
@@ -296,16 +296,16 @@ export function ProfileChecklist({
                   </div>
                   <div className="flex-1 min-w-0">
                     <p
-                      className={`text-sm ${isDone ? "text-[#7a6b5a] line-through" : "text-[#e8d5a3]"}`}
+                      className={`text-sm ${isDone ? "text-[#8f7f6e] line-through" : "text-[#e8d5a3]"}`}
                     >
                       {step.label}
                     </p>
-                    <p className="text-[11px] text-[#7a6b5a]">{step.description}</p>
+                    <p className="text-[11px] text-[#8f7f6e]">{step.description}</p>
                   </div>
                   {isDone ? (
                     <CheckCircle2 className="h-4 w-4 text-[#00e676] shrink-0" />
                   ) : (
-                    <ArrowRight className="h-4 w-4 text-[#7a6b5a] shrink-0" />
+                    <ArrowRight className="h-4 w-4 text-[#8f7f6e] shrink-0" />
                   )}
                 </div>
               );

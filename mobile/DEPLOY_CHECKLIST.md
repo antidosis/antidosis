@@ -83,7 +83,7 @@ npx cap open ios
 - [ ] Test camera photo upload flow
 - [ ] Test share sheet
 - [ ] Verify haptics on iPhone / vibration on Android
-- [ ] Monitor Sentry/LogRocket for crashes
+- [ ] Monitor Firebase Crashlytics (`mobile/src/lib/crash-reporter.ts`) for crashes
 - [ ] Check API rate limits under real load
 
 ---
@@ -99,6 +99,10 @@ cd mobile && npx cap sync
 
 # 3. Update Android versionCode + versionName
 # mobile/android/app/build.gradle
+
+# NOTE: package.json version, build.gradle versionName/versionCode (and iOS
+# MARKETING_VERSION / CURRENT_PROJECT_VERSION) must always be bumped together —
+# they have drifted before (package.json 1.0.0 vs versionName 1.0.9).
 
 # 4. Update iOS MARKETING_VERSION + CURRENT_PROJECT_VERSION
 # mobile/ios/App/App.xcodeproj/project.pbxproj

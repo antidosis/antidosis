@@ -116,7 +116,7 @@ export function InterestedList({
                       </span>
                     )}
                   </div>
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-[#7a6b5a]">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-[#8f7f6e]">
                     {a.user.ratingAvg > 0 && (
                       <span>
                         {a.user.ratingAvg.toFixed(1)} ★ ({a.user.ratingCount})
@@ -132,7 +132,7 @@ export function InterestedList({
                     {a.user.skills.slice(0, 4).map((s) => (
                       <span
                         key={s.id}
-                        className="px-1.5 py-0.5 text-[9px] uppercase tracking-wider border border-[#2a2420] text-[#7a6b5a]"
+                        className="px-1.5 py-0.5 text-[9px] uppercase tracking-wider border border-[#2a2420] text-[#8f7f6e]"
                       >
                         {s.name}
                       </span>

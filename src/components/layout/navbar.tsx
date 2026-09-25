@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { Menu, X, Terminal } from "lucide-react";
+import { Menu, X, Radio } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
@@ -59,7 +59,7 @@ export function Navbar() {
     { href: "/pros", label: "pros" },
     { href: "/blog", label: "blog" },
     { href: "/demo", label: "demo" },
-    ...(user ? [{ href: "/terminal", label: "terminal", isTerminal: true as const }] : []),
+    ...(user ? [{ href: "/terminal", label: "relay", isTerminal: true as const }] : []),
     ...(user ? [{ href: "/dashboard", label: "dashboard" }] : []),
   ];
 
@@ -100,7 +100,7 @@ export function Navbar() {
                           : "text-[#8f7f6e] hover:text-[#e8d5a3]"
                   )}
                 >
-                  {isTerminal && <Terminal className="h-3 w-3" />}
+                  {isTerminal && <Radio className="h-3 w-3" />}
                   {item.label}
                   {!isDashboard && !isTerminal && isActive && (
                     <span className="absolute -bottom-1 left-0 right-0 h-px bg-[#f5a623] shadow-[0_0_8px_rgba(245,166,35,0.5)]" />
@@ -176,7 +176,7 @@ export function Navbar() {
                           : "text-[#8f7f6e] hover:text-[#e8d5a3]"
                   )}
                 >
-                  {isTerminal && <Terminal className="h-4 w-4" />}
+                  {isTerminal && <Radio className="h-4 w-4" />}
                   {item.label}
                 </Link>
               );

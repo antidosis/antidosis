@@ -2,6 +2,8 @@ import { type NextRequest } from "next/server";
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+import { hashOtpCode } from "@/lib/otp";
+
 import { POST } from "./route";
 
 // ─── Prisma mocks ───
@@ -42,6 +44,23 @@ vi.mock("@/lib/rate-limit", () => ({
   getRateLimitIdentifier: () => "test-id",
 }));
 
+// ─── Twilio mock ───
+const mockVerificationChecksCreate = vi.fn();
+
+vi.mock("twilio", () => ({
+  default: () => ({
+    verify: {
+      v2: {
+        services: () => ({
+          verificationChecks: {
+            create: (...args: unknown[]) => mockVerificationChecksCreate(...args),
+          },
+        }),
+      },
+    },
+  }),
+}));
+
 // ─── Logger mock ───
 vi.mock("@/lib/logger", () => ({
   logger: {
@@ -74,6 +93,8 @@ describe("POST /api/v1/auth/verify-otp", () => {
     vi.clearAllMocks();
     mockTransaction.mockResolvedValue([]);
     mockRateLimit.mockResolvedValue({ allowed: true, remaining: 10, resetAt: Date.now() + 60_000 });
+    // Existing tests exercise the dev DB-backed path
+    delete process.env.TWILIO_VERIFY_SERVICE_SID;
     mockProfileFindUnique.mockResolvedValue({
       id: "profile-1",
       mobile: "+61400123456",
@@ -214,7 +235,7 @@ describe("POST /api/v1/auth/verify-otp", () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
     mockFindFirst.mockResolvedValue({
       id: "code-1",
-      code: "123456",
+      code: hashOtpCode("123456", "+61400123456"),
       expiresAt: new Date(Date.now() + 5 * 60_000),
       used: false,
     });
@@ -239,7 +260,7 @@ describe("POST /api/v1/auth/verify-otp", () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
     mockFindFirst.mockResolvedValue({
       id: "code-1",
-      code: "123456",
+      code: hashOtpCode("123456", "+61400123456"),
       expiresAt: new Date(Date.now() + 5 * 60_000),
       used: false,
     });
@@ -286,5 +307,59 @@ describe("POST /api/v1/auth/verify-otp", () => {
     expect(body.error).toContain("Too many incorrect attempts");
     expect(mockUpdateCode).not.toHaveBeenCalled();
     expect(mockTransaction).not.toHaveBeenCalled();
+  });
+
+  // ─── Twilio Verify path (production configuration) ───
+
+  it("Verify path: approves a correct code and marks the profile verified", async () => {
+    process.env.TWILIO_ACCOUNT_SID = "test-sid";
+    process.env.TWILIO_AUTH_TOKEN = "test-token";
+    process.env.TWILIO_VERIFY_SERVICE_SID = "VA-test";
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockVerificationChecksCreate.mockResolvedValue({ status: "approved" });
+
+    const res = await POST(makeRequest({ mobile: "0400123456", code: "123456" }));
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.success).toBe(true);
+    expect(mockVerificationChecksCreate).toHaveBeenCalledWith({
+      to: "+61400123456",
+      code: "123456",
+    });
+    expect(mockUpdateProfile).toHaveBeenCalledWith({
+      where: { id: "profile-1" },
+      data: { mobileVerified: true },
+    });
+    // Verify owns the code — no local DB lookup
+    expect(mockFindFirst).not.toHaveBeenCalled();
+  });
+
+  it("Verify path: rejects a wrong code", async () => {
+    process.env.TWILIO_ACCOUNT_SID = "test-sid";
+    process.env.TWILIO_AUTH_TOKEN = "test-token";
+    process.env.TWILIO_VERIFY_SERVICE_SID = "VA-test";
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockVerificationChecksCreate.mockResolvedValue({ status: "pending" });
+
+    const res = await POST(makeRequest({ mobile: "0400123456", code: "000000" }));
+    const body = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(body.error).toBe("Invalid verification code");
+    expect(mockUpdateProfile).not.toHaveBeenCalled();
+  });
+
+  it("Verify path: 410 when no verification is pending (20404)", async () => {
+    process.env.TWILIO_ACCOUNT_SID = "test-sid";
+    process.env.TWILIO_AUTH_TOKEN = "test-token";
+    process.env.TWILIO_VERIFY_SERVICE_SID = "VA-test";
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    const err = Object.assign(new Error("Not found"), { code: 20404 });
+    mockVerificationChecksCreate.mockRejectedValue(err);
+
+    const res = await POST(makeRequest({ mobile: "0400123456", code: "123456" }));
+    expect(res.status).toBe(410);
+    expect(mockUpdateProfile).not.toHaveBeenCalled();
   });
 });

@@ -15,12 +15,12 @@ import {
   Hash,
   Gauge,
   Mic,
-  Terminal,
+  Radio,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
-/* ─── Terminal CSS Variables (matches real terminal) ─── */
+/* ─── Terminal CSS Variables (matches the real relay surface) ─── */
 
 const TERM_VARS = {
   "--term-bg": "#0a0806",
@@ -28,7 +28,7 @@ const TERM_VARS = {
   "--term-accent": "#f5a623",
   "--term-accent-hover": "#ffb84d",
   "--term-text": "#e8d5a3",
-  "--term-muted": "#7a6b5a",
+  "--term-muted": "#8f7f6e",
   "--term-border": "#2a2420",
   "--term-error": "#ff5252",
   "--term-success": "#00e676",
@@ -76,12 +76,12 @@ Badges: 🌱 Seedling 🤝 Dealmaker 🛡️ Verified
 
 💡 Complete deals, post needs, and verify credentials to earn XP.`;
 
-const HELP_OUTPUT = `👋 Welcome to the Terminal! Here's what you can do:
+const HELP_OUTPUT = `👋 Welcome to the Relay! Here's what you can do:
 
   🖥️  Console (private):
-     When you first open the terminal, you're in your private Console.
+     When you first open the relay, you're in your private Console.
      All /commands you type here are local-only — no one else can see them.
-     Select a channel below only when you're ready to chat publicly.
+     Tune into a channel below only when you're ready to chat publicly.
 
   👤 Profile:
      /whoami                → Show your profile summary
@@ -114,10 +114,10 @@ const HELP_OUTPUT = `👋 Welcome to the Terminal! Here's what you can do:
      /help                  → This help guide
      /commands              → Quick command list
      /whatis <cmd>          → Detailed command help
-     /clear                 → Clear terminal
+     /clear                 → Clear screen
      /history               → Recent commands
      /tutorial              → Interactive beginner tutorial
-     /ask <question>        → Ask Terminal Agent
+     /ask <question>        → Ask Relay Agent
      /status                → XP, level, and badges
      /me <action>           → Send an action message
      /goto <page>           → Navigate to any page
@@ -438,7 +438,7 @@ const SCRIPT: ScriptEvent[] = [
   {
     type: "annotation",
     title: "Reactions, mentions, and community",
-    text: "React with emojis, @mention users to notify them, and build reputation through every public interaction. The terminal is both a tool and a community.",
+    text: "React with emojis, @mention users to notify them, and build reputation through every public interaction. The relay is both a tool and a community.",
     delay: 100,
   },
   { type: "pause", duration: 400 },
@@ -457,7 +457,7 @@ const SCRIPT: ScriptEvent[] = [
   { type: "pause", duration: 500 },
   {
     type: "annotation",
-    title: "Terminal Agent — your personal assistant",
+    title: "Relay Agent — your personal assistant",
     text: "The built-in Agent knows your pending contracts, unread messages, and notifications. Ask it anything — from 'what should I do?' to 'how do I leave a review?'.",
     delay: 100,
   },
@@ -467,7 +467,7 @@ const SCRIPT: ScriptEvent[] = [
   { type: "pause", duration: 200 },
   {
     type: "sysmsg",
-    text: "📚 Tutorial — Step 1 of 7\n\nWelcome to the Terminal! This guided tour will teach you the basics.\n\nType /next to continue or /cancel to quit.",
+    text: "📚 Tutorial — Step 1 of 7\n\nWelcome to the Relay! This guided tour will teach you the basics.\n\nType /next to continue or /cancel to quit.",
     style: "info",
     delay: 40,
   },
@@ -475,7 +475,7 @@ const SCRIPT: ScriptEvent[] = [
   {
     type: "annotation",
     title: "Built-in interactive tutorial",
-    text: "New to the terminal? Run /tutorial for a 7-step guided walkthrough. Or just start typing — Tab completes commands and /help is always there.",
+    text: "New to the relay? Run /tutorial for a 7-step guided walkthrough. Or just start typing — Tab completes commands and /help is always there.",
     delay: 100,
   },
   { type: "pause", duration: 500 },
@@ -691,13 +691,13 @@ export default function TerminalDemoClient() {
       {/* Header */}
       <div className="mb-6">
         <p className="text-xs mb-3 font-mono" style={{ color: "var(--term-muted)" }}>
-          $ ./demo/terminal --replay
+          $ ./demo/relay --replay
         </p>
         <h1 className="heading-display text-2xl md:text-3xl text-[#e8d5a3] mb-2">
-          Community Terminal
+          Community Relay
         </h1>
         <p className="text-sm max-w-lg" style={{ color: "var(--term-muted)" }}>
-          Watch how community members use the terminal — chatting in channels, running commands in
+          Watch how community members use the relay — chatting in channels, running commands in
           Console, negotiating in DMs, and forming contracts. Two ways to use it, one powerful tool.
         </p>
       </div>
@@ -747,7 +747,7 @@ export default function TerminalDemoClient() {
         )}
       </div>
 
-      {/* Terminal Shell */}
+      {/* Relay Shell */}
       <div
         className="rounded-lg border overflow-hidden flex flex-col md:flex-row relative"
         style={{ borderColor: "var(--term-border)", background: "var(--term-bg)", height: "560px" }}
@@ -775,7 +775,7 @@ export default function TerminalDemoClient() {
                 paddingLeft: isConsoleActive ? "6px" : "8px",
               }}
             >
-              <Terminal className="h-3 w-3" />
+              <Radio className="h-3 w-3" />
               <span className="truncate">Console</span>
             </button>
 
@@ -812,13 +812,13 @@ export default function TerminalDemoClient() {
               );
             })}
 
-            {/* Direct Messages */}
+            {/* Direct */}
             <div className="mt-3 border-t pt-3" style={{ borderColor: "var(--term-border)" }}>
               <div
                 className="mb-1.5 text-[10px] uppercase tracking-widest"
                 style={{ color: "var(--term-muted)" }}
               >
-                Direct Messages
+                Direct
               </div>
               {MOCK_DMS.map((dm) => {
                 const isActive = activeDm === dm.name;
@@ -893,7 +893,7 @@ export default function TerminalDemoClient() {
           >
             {activeContext.type === "console" ? (
               <>
-                <Terminal className="h-3.5 w-3.5" style={{ color: "var(--term-accent)" }} />
+                <Radio className="h-3.5 w-3.5" style={{ color: "var(--term-accent)" }} />
                 <span className="text-[13px] font-medium" style={{ color: "var(--term-text)" }}>
                   Console
                 </span>
@@ -935,7 +935,7 @@ export default function TerminalDemoClient() {
               <span className="flex items-center gap-1">
                 {activeContext.type === "console" ? (
                   <>
-                    <Terminal className="h-3 w-3" /> console
+                    <Radio className="h-3 w-3" /> console
                   </>
                 ) : activeContext.type === "dm" ? (
                   <>

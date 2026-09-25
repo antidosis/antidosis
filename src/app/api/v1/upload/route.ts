@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { withApiHandler } from "@/lib/api-handler";
 import { logger } from "@/lib/logger";
+import { requireVerifiedParticipation } from "@/lib/participation";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { bucketForPath } from "@/lib/storage";
 import { createClient } from "@/lib/supabase/server";
@@ -112,10 +113,17 @@ export const POST = withApiHandler(async (req: NextRequest) => {
     );
   }
 
-  const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
-    windowMs: 5 * 60_000,
-    maxRequests: 10,
-  });
+  const participation = await requireVerifiedParticipation(user.id);
+  if (!participation.ok) return participation.response;
+
+  const limit = await rateLimit(
+    getRateLimitIdentifier(req, user.id),
+    {
+      windowMs: 5 * 60_000,
+      maxRequests: 10,
+    },
+    "upload"
+  );
   if (!limit.allowed) {
     return NextResponse.json({ error: "Rate limit exceeded. Try again later." }, { status: 429 });
   }

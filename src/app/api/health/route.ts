@@ -9,8 +9,9 @@ export const dynamic = "force-dynamic";
 const START_TIME = Date.now();
 
 export async function GET() {
-  const checks: Record<string, { status: "ok" | "error"; latencyMs: number; message?: string }> =
-    {};
+  const checks: Record<string, { status: "ok" | "error"; latencyMs: number }> = {};
+  // Error details stay server-side; the public response only reports status.
+  const details: Record<string, string> = {};
   let overall = "ok" as "ok" | "error";
 
   // Database check
@@ -20,11 +21,8 @@ export async function GET() {
     checks.database = { status: "ok", latencyMs: Date.now() - dbStart };
   } catch (err) {
     overall = "error";
-    checks.database = {
-      status: "error",
-      latencyMs: Date.now() - dbStart,
-      message: err instanceof Error ? err.message : "Unknown error",
-    };
+    checks.database = { status: "error", latencyMs: Date.now() - dbStart };
+    details.database = err instanceof Error ? err.message : "Unknown error";
   }
 
   // Supabase check
@@ -36,11 +34,8 @@ export async function GET() {
     checks.supabase = { status: "ok", latencyMs: Date.now() - sbStart };
   } catch (err) {
     overall = "error";
-    checks.supabase = {
-      status: "error",
-      latencyMs: Date.now() - sbStart,
-      message: err instanceof Error ? err.message : "Unknown error",
-    };
+    checks.supabase = { status: "error", latencyMs: Date.now() - sbStart };
+    details.supabase = err instanceof Error ? err.message : "Unknown error";
   }
 
   const uptimeSeconds = Math.floor((Date.now() - START_TIME) / 1000);
@@ -54,7 +49,7 @@ export async function GET() {
   };
 
   if (overall === "error") {
-    logger.error("Health check failed", undefined, { checks, uptimeSeconds });
+    logger.error("Health check failed", undefined, { checks, details, uptimeSeconds });
   }
 
   return NextResponse.json(response, {

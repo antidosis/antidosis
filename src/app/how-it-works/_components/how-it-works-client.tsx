@@ -84,7 +84,7 @@ function PathCard({
         <h3 className="heading-display text-2xl mb-3" style={{ color }}>
           {title}
         </h3>
-        <p className="text-sm text-[#7a6b5a] leading-relaxed mb-6">{desc}</p>
+        <p className="text-sm text-[#8f7f6e] leading-relaxed mb-6">{desc}</p>
         <div className="space-y-3">
           {items.map((item, i) => (
             <div key={i} className="flex items-start gap-3">
@@ -140,7 +140,9 @@ export default function HowItWorksPage() {
         <section className="pt-32 pb-20 md:pt-44 md:pb-28 overflow-hidden">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
-              <p className="text-xs text-[#7a6b5a] mb-8 font-mono">$ cat docs/how-it-works.md</p>
+              <p className="text-xs text-[#8f7f6e] mb-8 font-mono">
+                ◉ ON AIR — HOW THE NETWORK WORKS
+              </p>
             </Reveal>
             <Reveal delay={100}>
               <h1 className="heading-display text-5xl md:text-7xl text-[#e8d5a3] mb-6">
@@ -150,9 +152,10 @@ export default function HowItWorksPage() {
               </h1>
             </Reveal>
             <Reveal delay={200}>
-              <p className="text-base text-[#7a6b5a] max-w-lg leading-relaxed mb-10">
+              <p className="text-base text-[#8f7f6e] max-w-lg leading-relaxed mb-10">
                 Post what you need. Offer what you have. Connect with people you can trust.
-                Contracts are optional — use them when you want extra security.
+                Contracts are optional — use them when you want extra security. One network, every
+                node a neighbour.
               </p>
             </Reveal>
             <Reveal delay={300}>
@@ -181,12 +184,12 @@ export default function HowItWorksPage() {
             <Reveal>
               <div className="flex items-center gap-3 mb-4">
                 <GitFork className="h-4 w-4 text-[#b24bf5]" />
-                <p className="text-xs text-[#7a6b5a] font-mono">$ ls paths/</p>
+                <p className="text-xs text-[#8f7f6e] font-mono">» TWO CHANNELS — PICK ONE</p>
               </div>
               <h2 className="heading-display text-3xl md:text-4xl text-[#e8d5a3] mb-4">
                 Two Ways to Exchange
               </h2>
-              <p className="text-sm text-[#7a6b5a] max-w-md mb-14">
+              <p className="text-sm text-[#8f7f6e] max-w-md mb-14">
                 Every need can be fulfilled with or without a binding contract. Choose what feels
                 right for the exchange.
               </p>
@@ -232,11 +235,11 @@ export default function HowItWorksPage() {
         <section className="py-20 md:py-28">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
-              <p className="text-xs text-[#7a6b5a] mb-8 font-mono">$ cat docs/journey.md</p>
+              <p className="text-xs text-[#8f7f6e] mb-8 font-mono">» TRANSMISSION SEQUENCE</p>
               <h2 className="heading-display text-3xl md:text-4xl text-[#e8d5a3] mb-4">
                 The Journey
               </h2>
-              <p className="text-sm text-[#7a6b5a] max-w-md mb-16">
+              <p className="text-sm text-[#8f7f6e] max-w-md mb-16">
                 From account creation to review. Three phases. Ten minutes to start.
               </p>
             </Reveal>
@@ -246,7 +249,7 @@ export default function HowItWorksPage() {
               <div className="mb-16">
                 <div className="flex items-center gap-3 mb-8">
                   <div className="h-px flex-1 bg-[#2a2420]" />
-                  <span className="text-xs font-mono text-[#7a6b5a]">PHASE 01 — SETUP</span>
+                  <span className="text-xs font-mono text-[#8f7f6e]">PHASE 01 — SETUP</span>
                   <div className="h-px flex-1 bg-[#2a2420]" />
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -273,7 +276,7 @@ export default function HowItWorksPage() {
               <div className="mb-16">
                 <div className="flex items-center gap-3 mb-8">
                   <div className="h-px flex-1 bg-[#2a2420]" />
-                  <span className="text-xs font-mono text-[#7a6b5a]">PHASE 02 — CONNECT</span>
+                  <span className="text-xs font-mono text-[#8f7f6e]">PHASE 02 — CONNECT</span>
                   <div className="h-px flex-1 bg-[#2a2420]" />
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -290,7 +293,7 @@ export default function HowItWorksPage() {
               <div>
                 <div className="flex items-center gap-3 mb-8">
                   <div className="h-px flex-1 bg-[#2a2420]" />
-                  <span className="text-xs font-mono text-[#7a6b5a]">PHASE 03 — COMPLETE</span>
+                  <span className="text-xs font-mono text-[#8f7f6e]">PHASE 03 — COMPLETE</span>
                   <div className="h-px flex-1 bg-[#2a2420]" />
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -322,7 +325,7 @@ export default function HowItWorksPage() {
             <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
               <div>
                 <Reveal>
-                  <p className="text-xs text-[#7a6b5a] mb-6 font-mono">$ cat docs/trust.md</p>
+                  <p className="text-xs text-[#8f7f6e] mb-6 font-mono">» TRUST PROTOCOL</p>
                   <h2 className="heading-display text-3xl md:text-4xl text-[#e8d5a3] mb-6">
                     Trust by
                     <br />
@@ -339,7 +342,7 @@ export default function HowItWorksPage() {
                         <p className="text-sm font-medium text-[#e8d5a3] mb-1">
                           Verified Identities
                         </p>
-                        <p className="text-xs text-[#7a6b5a]">
+                        <p className="text-xs text-[#8f7f6e]">
                           Email, mobile, and credential verification. Know who you&apos;re dealing
                           with.
                         </p>
@@ -351,7 +354,7 @@ export default function HowItWorksPage() {
                       </div>
                       <div>
                         <p className="text-sm font-medium text-[#e8d5a3] mb-1">Bilateral Reviews</p>
-                        <p className="text-xs text-[#7a6b5a]">
+                        <p className="text-xs text-[#8f7f6e]">
                           Both parties rate each other 1-10. Default is excellence — you consciously
                           mark down.
                         </p>
@@ -365,7 +368,7 @@ export default function HowItWorksPage() {
                         <p className="text-sm font-medium text-[#e8d5a3] mb-1">
                           Built-in Messaging
                         </p>
-                        <p className="text-xs text-[#7a6b5a]">
+                        <p className="text-xs text-[#8f7f6e]">
                           No external apps. Every exchange has its own message thread with full
                           history.
                         </p>
@@ -379,7 +382,7 @@ export default function HowItWorksPage() {
                         <p className="text-sm font-medium text-[#e8d5a3] mb-1">
                           Optional Contracts
                         </p>
-                        <p className="text-xs text-[#7a6b5a]">
+                        <p className="text-xs text-[#8f7f6e]">
                           Use binding contracts when you want formal terms. Skip them when you
                           don&apos;t.
                         </p>
@@ -399,7 +402,7 @@ export default function HowItWorksPage() {
                     <div className="text-center">
                       <Star className="h-10 w-10 text-[#f5a623] mx-auto mb-2" />
                       <p className="heading-display text-3xl text-[#e8d5a3]">10</p>
-                      <p className="text-xs text-[#7a6b5a] mt-1">default rating</p>
+                      <p className="text-xs text-[#8f7f6e] mt-1">default rating</p>
                     </div>
                   </div>
                   {/* Orbiting dots */}
@@ -433,15 +436,15 @@ export default function HowItWorksPage() {
         <section className="py-20 md:py-28">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
-              <p className="text-xs text-[#7a6b5a] mb-8 font-mono">$ ./join_network.sh</p>
+              <p className="text-xs text-[#8f7f6e] mb-8 font-mono">◉ TUNE IN</p>
               <h2 className="heading-display text-3xl md:text-5xl text-[#e8d5a3] mb-6">
                 Ready to
                 <br />
                 <span className="text-[#f5a623]">Start?</span>
               </h2>
-              <p className="text-base text-[#7a6b5a] max-w-md mb-10 leading-relaxed">
-                Join the Central Coast trial. Verify your identity, get Pro for free, and help shape
-                the future of exchange.
+              <p className="text-base text-[#8f7f6e] max-w-md mb-10 leading-relaxed">
+                Join the Central Coast trial. Verify your identity, get Pro for free, and help build
+                a network that keeps working when everything else doesn&apos;t.
               </p>
               <div className="flex flex-wrap items-center gap-3">
                 <Button asChild size="lg">

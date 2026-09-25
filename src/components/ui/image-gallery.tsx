@@ -45,7 +45,7 @@ export function ImageGallery({
             <button
               type="button"
               onClick={() => removeImage(i)}
-              className="absolute -top-1 -right-1 p-1 bg-[#12100e] border border-[#2a2420] text-[#7a6b5a] hover:text-[#ff5252] hover:border-[#ff5252]/30 rounded-md transition-colors"
+              className="absolute -top-1 -right-1 p-1 bg-[#12100e] border border-[#2a2420] text-[#8f7f6e] hover:text-[#ff5252] hover:border-[#ff5252]/30 rounded-md transition-colors"
             >
               <X className="h-3 w-3" />
             </button>

@@ -32,10 +32,14 @@ export const GET = withApiHandler(async (req: NextRequest) => {
     );
   }
 
-  const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
-    windowMs: 60_000,
-    maxRequests: 60,
-  });
+  const limit = await rateLimit(
+    getRateLimitIdentifier(req, user.id),
+    {
+      windowMs: 60_000,
+      maxRequests: 60,
+    },
+    "messages-list"
+  );
   if (!limit.allowed) {
     return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
   }
@@ -119,10 +123,14 @@ export const POST = withApiHandler(async (req: NextRequest) => {
     if (!participation.ok) return participation.response;
 
     // Rate limit: 30 messages per 5 minutes per user
-    const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
-      windowMs: 5 * 60_000,
-      maxRequests: 30,
-    });
+    const limit = await rateLimit(
+      getRateLimitIdentifier(req, user.id),
+      {
+        windowMs: 5 * 60_000,
+        maxRequests: 30,
+      },
+      "messages-post"
+    );
     if (!limit.allowed) {
       return NextResponse.json({ error: "Rate limit exceeded. Slow down." }, { status: 429 });
     }

@@ -144,7 +144,7 @@ export default function VerifyMobilePage() {
       <div className="px-4 md:px-8 py-4 border-b border-[#2a2420]">
         <Link
           href="/dashboard"
-          className="flex items-center gap-2 text-sm text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors"
+          className="flex items-center gap-2 text-sm text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Dashboard
@@ -153,7 +153,7 @@ export default function VerifyMobilePage() {
 
       <div className="flex items-center justify-center px-4 py-16">
         <div className="w-full max-w-sm">
-          <p className="text-xs text-[#7a6b5a] mb-8">$ verify-mobile --init</p>
+          <p className="text-xs text-[#8f7f6e] mb-8">$ verify-mobile --init</p>
           <h1 className="heading-display text-2xl text-[#e8d5a3] mb-2">
             mobile_verification
             <TerminalCursor />
@@ -170,7 +170,7 @@ export default function VerifyMobilePage() {
                 </div>
                 <div>
                   <p className="text-[#e8d5a3] font-medium">Mobile Verified</p>
-                  <p className="text-sm text-[#7a6b5a] mt-1">
+                  <p className="text-sm text-[#8f7f6e] mt-1">
                     {profile?.mobile ? maskMobile(profile.mobile) : ""}
                   </p>
                 </div>
@@ -185,7 +185,7 @@ export default function VerifyMobilePage() {
                 </div>
                 <div>
                   <p className="text-[#e8d5a3] font-medium">No Mobile Number</p>
-                  <p className="text-sm text-[#7a6b5a] mt-1">
+                  <p className="text-sm text-[#8f7f6e] mt-1">
                     Add a mobile number in your dashboard first.
                   </p>
                 </div>
@@ -203,7 +203,7 @@ export default function VerifyMobilePage() {
                     <p className="text-sm text-[#e8d5a3] font-medium">
                       {maskMobile(profile.mobile)}
                     </p>
-                    <p className="text-xs text-[#7a6b5a]">awaiting verification</p>
+                    <p className="text-xs text-[#8f7f6e]">awaiting verification</p>
                   </div>
                 </div>
 
@@ -215,7 +215,7 @@ export default function VerifyMobilePage() {
                 ) : (
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <label className="text-xs text-[#7a6b5a]">6-digit code</label>
+                      <label className="text-xs text-[#8f7f6e]">6-digit code</label>
                       <Input
                         type="text"
                         inputMode="numeric"
@@ -230,7 +230,7 @@ export default function VerifyMobilePage() {
                       />
                     </div>
 
-                    <div className="flex items-center justify-between text-xs text-[#7a6b5a]">
+                    <div className="flex items-center justify-between text-xs text-[#8f7f6e]">
                       <span>
                         expires in{" "}
                         <span className={countdown < 60 ? "text-[#ff5252]" : "text-[#e8d5a3]"}>
@@ -251,7 +251,7 @@ export default function VerifyMobilePage() {
 
                     <div className="text-center">
                       {resendTimer > 0 ? (
-                        <span className="text-xs text-[#7a6b5a]">
+                        <span className="text-xs text-[#8f7f6e]">
                           Resend available in {resendTimer}s
                         </span>
                       ) : (

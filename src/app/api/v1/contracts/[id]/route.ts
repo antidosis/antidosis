@@ -159,10 +159,14 @@ export const PATCH = withApiHandler(
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
-    const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
-      windowMs: 60 * 60_000,
-      maxRequests: 20,
-    });
+    const limit = await rateLimit(
+      getRateLimitIdentifier(req, user.id),
+      {
+        windowMs: 60 * 60_000,
+        maxRequests: 20,
+      },
+      "contract-update"
+    );
     if (!limit.allowed) {
       return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
     }

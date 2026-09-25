@@ -18,7 +18,9 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run dev",
+    // CI runs E2E against the production build (the workflow builds first);
+    // locally the dev server is used for speed.
+    command: process.env.CI ? "npm run start" : "npm run dev",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

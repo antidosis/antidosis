@@ -860,17 +860,16 @@ export default function ExamplesPage() {
         {/* Hero */}
         <section className="pt-32 pb-16 md:pt-40 md:pb-20">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
-            <p className="text-xs text-[#7a6b5a] mb-8 font-mono">
-              $ cat /etc/antidosis/examples.md
-            </p>
+            <p className="text-xs text-[#8f7f6e] mb-8 font-mono">» SIGNAL LOG — REAL EXCHANGES</p>
             <h1 className="heading-display text-4xl md:text-6xl text-[#e8d5a3] mb-6">
               What Can You
               <br />
               <span className="text-[#f5a623]">Exchange?</span>
             </h1>
-            <p className="text-base text-[#7a6b5a] max-w-xl leading-relaxed mb-6">
-              Antidosis is built on a simple idea: everyone has something worth trading. A skill. An
-              item. Time. A favour. Here are real ways people are using it right now.
+            <p className="text-base text-[#8f7f6e] max-w-xl leading-relaxed mb-6">
+              Antidosis is built on a simple idea: everyone has something worth broadcasting. A
+              skill. An item. Time. A favour. Here are real exchanges happening on the network right
+              now.
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <Button asChild size="lg">
@@ -894,7 +893,7 @@ export default function ExamplesPage() {
                   <Shuffle className="h-5 w-5" />
                 </div>
                 <h3 className="text-sm font-bold text-[#e8d5a3] mb-2">Swap Anything</h3>
-                <p className="text-xs text-[#7a6b5a] leading-relaxed">
+                <p className="text-xs text-[#8f7f6e] leading-relaxed">
                   Goods for goods. Skills for skills. Services for items. Cash for anything. There
                   is no fixed formula — if both parties agree, the exchange works.
                 </p>
@@ -904,7 +903,7 @@ export default function ExamplesPage() {
                   <MapPin className="h-5 w-5" />
                 </div>
                 <h3 className="text-sm font-bold text-[#e8d5a3] mb-2">Start Local</h3>
-                <p className="text-xs text-[#7a6b5a] leading-relaxed">
+                <p className="text-xs text-[#8f7f6e] leading-relaxed">
                   All these examples are from the Central Coast. Trade with people nearby — walk
                   over with your lemons, meet at the beach for the lesson, or drop off the tools on
                   your way past.
@@ -915,7 +914,7 @@ export default function ExamplesPage() {
                   <Heart className="h-5 w-5" />
                 </div>
                 <h3 className="text-sm font-bold text-[#e8d5a3] mb-2">Build Trust</h3>
-                <p className="text-xs text-[#7a6b5a] leading-relaxed">
+                <p className="text-xs text-[#8f7f6e] leading-relaxed">
                   The best trades come from clear communication. Describe what you need honestly.
                   State what you are offering upfront. Use the contract system when money or
                   valuable items are involved.
@@ -930,7 +929,7 @@ export default function ExamplesPage() {
         {/* Filters */}
         <section className="py-8">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
-            <p className="text-xs text-[#7a6b5a] mb-4 font-mono">$ ls /examples/ | sort</p>
+            <p className="text-xs text-[#8f7f6e] mb-4 font-mono">» CHANNELS — FILTER BY TYPE</p>
             <div className="flex flex-wrap gap-2">
               {categoryFilters.map((cat) => (
                 <Button
@@ -957,11 +956,11 @@ export default function ExamplesPage() {
                     {/* Category badge */}
                     <div className="flex items-center justify-between mb-3">
                       <span
-                        className={`text-[10px] uppercase tracking-wider font-medium ${catMeta?.twText ?? "text-[#7a6b5a]"}`}
+                        className={`text-[10px] uppercase tracking-wider font-medium ${catMeta?.twText ?? "text-[#8f7f6e]"}`}
                       >
                         {catMeta?.label ?? example.category}
                       </span>
-                      <div className="flex items-center gap-1.5 text-xs text-[#7a6b5a]">
+                      <div className="flex items-center gap-1.5 text-xs text-[#8f7f6e]">
                         <MapPin className="h-3 w-3" />
                         <span>{example.location}</span>
                       </div>
@@ -992,12 +991,12 @@ export default function ExamplesPage() {
                         <div className="flex-1 h-px bg-[#2a2420]" />
                       </div>
                       <div className="flex items-start gap-2.5">
-                        <div className="p-1.5 bg-[#1a1714] text-[#7a6b5a] shrink-0 mt-0.5">
+                        <div className="p-1.5 bg-[#1a1714] text-[#8f7f6e] shrink-0 mt-0.5">
                           {offerIcons[example.offerType]}
                         </div>
                         <div>
                           <p className="text-sm text-[#b8a078]">{example.offerDescription}</p>
-                          <span className="text-[10px] text-[#7a6b5a] uppercase tracking-wide mt-0.5 inline-block">
+                          <span className="text-[10px] text-[#8f7f6e] uppercase tracking-wide mt-0.5 inline-block">
                             {example.offerType}
                           </span>
                         </div>
@@ -1010,7 +1009,7 @@ export default function ExamplesPage() {
 
             {filtered.length === 0 && (
               <div className="py-24 text-center">
-                <p className="text-sm text-[#7a6b5a]">No examples in this category yet.</p>
+                <p className="text-sm text-[#8f7f6e]">No examples in this category yet.</p>
               </div>
             )}
           </div>
@@ -1021,8 +1020,8 @@ export default function ExamplesPage() {
         {/* Inspiration Section */}
         <section className="py-16 md:py-24">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
-            <p className="text-xs text-[#7a6b5a] mb-8 font-mono">
-              $ cat /usr/share/inspiration.txt
+            <p className="text-xs text-[#8f7f6e] mb-8 font-mono">
+              » COMMON QUESTIONS — CLEARING THE STATIC
             </p>
             <h2 className="heading-display text-2xl md:text-4xl text-[#e8d5a3] mb-10">
               Still Not Sure?
@@ -1063,7 +1062,7 @@ export default function ExamplesPage() {
               ].map((item, i) => (
                 <div key={i} className="vessel p-5">
                   <p className="text-sm font-medium text-[#e8d5a3] mb-3">&ldquo;{item.q}&rdquo;</p>
-                  <p className="text-xs text-[#7a6b5a] leading-relaxed">{item.a}</p>
+                  <p className="text-xs text-[#8f7f6e] leading-relaxed">{item.a}</p>
                 </div>
               ))}
             </div>
@@ -1075,13 +1074,13 @@ export default function ExamplesPage() {
         {/* CTA */}
         <section className="py-20 md:py-28">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
-            <p className="text-xs text-[#7a6b5a] mb-8 font-mono">$ ./post_need.sh</p>
+            <p className="text-xs text-[#8f7f6e] mb-8 font-mono">◉ BROADCAST YOUR NEED</p>
             <h2 className="heading-display text-3xl md:text-5xl text-[#e8d5a3] mb-6">
               Your Need Is
               <br />
               <span className="text-[#f5a623]">Someone Else&apos;s Want.</span>
             </h2>
-            <p className="text-base text-[#7a6b5a] max-w-md mb-10 leading-relaxed">
+            <p className="text-base text-[#8f7f6e] max-w-md mb-10 leading-relaxed">
               These are just sparks. The real magic happens when you post something only you can
               offer. Be specific. Be honest. See who shows up.
             </p>

@@ -14,7 +14,7 @@ Antidosis is a local needs-exchange platform ("help your neighbour" marketplace)
 
 | Layer         | Technology                                                     |
 | ------------- | -------------------------------------------------------------- |
-| Framework     | Next.js 14.2.21 (App Router)                                   |
+| Framework     | Next.js 14.2.35 (App Router)                                   |
 | Language      | TypeScript 5.x (strict mode)                                   |
 | Styling       | Tailwind CSS 3.4                                               |
 | UI Components | Custom (shadcn/ui-inspired, in `@/components/ui/`)             |
@@ -30,7 +30,7 @@ Antidosis is a local needs-exchange platform ("help your neighbour" marketplace)
 src/
   app/                    # Next.js App Router
     (app)/                # Authenticated routes (layout with shell)
-      terminal/           # Terminal v2 — richest frontend surface
+      terminal/           # Relay — radio mesh themed comms surface, richest frontend surface
       needs/              # Needs marketplace
       contracts/          # Contract management
       dashboard/          # User dashboard
@@ -162,7 +162,9 @@ Run: `npx playwright test`
 
 ## 8. Component Architecture
 
-### Terminal (Most Complex Surface)
+### Relay (Most Complex Surface)
+
+The comms surface is branded **Relay** to users (radio mesh network theme; channels-first mental model, DMs labeled "Direct"). File paths, route segment (`/terminal`), API routes, and type names still use "terminal" — only user-facing strings say Relay.
 
 Decomposed into focused modules:
 
@@ -176,7 +178,7 @@ terminal/
   terminal-render.ts         # ASCII/formatting utilities
   terminal-message-list.tsx  # Message list rendering
   terminal-message-render.tsx # Individual message render
-  terminal-sidebar.tsx       # Channel/DM sidebar
+  terminal-sidebar.tsx       # Channel/Direct sidebar
   terminal-handlers/
     types.ts                 # HandlerContext (strictly typed)
     dispatch.ts              # Command dispatch switch
@@ -213,9 +215,12 @@ needs/[id]/_components/
 - `Review` — ratings and feedback after completion
 - `Profile` — extended user profile (skills, credentials, etc.)
 - `NeedMessage` — messages on needs (public + private threads)
-- `TerminalMessage` — real-time terminal chat messages
-- `Channel` — terminal channels
+- `TerminalMessage` — real-time relay chat messages
+- `Channel` — relay channels
 - `DmThread` / `DmMessage` — direct messages
+- `BannedMobile` — banned mobile numbers, survives account deletion (`src/lib/bans.ts`)
+- `Report` — user-filed trust-and-safety reports (`/api/v1/reports`, admin queue at `/api/v1/admin/reports`)
+- `DeviceToken` — push notification device registrations (`/api/v1/devices`)
 
 ### Migrations
 
@@ -228,7 +233,7 @@ Run `npx prisma migrate dev` for local changes. Never modify applied migrations.
 - Server-side: `createClient()` from `@/lib/supabase/server` validates JWT
 - Client-side: `createClient()` from `@/lib/supabase/client` for auth state
 - Email verification required for certain actions (posting needs, accepting)
-- **Mobile verification required for participation**: posting needs, expressing interest, and messaging (need messages, contract messages, terminal channels, DMs) all pass `requireVerifiedParticipation()` (`src/lib/participation.ts`) — 403 `MOBILE_NOT_VERIFIED` / `ACCOUNT_SUSPENDED`. Bans (`POST/DELETE /api/v1/admin/users/[id]/ban`) also block the banned mobile from re-verifying (send-otp route), so banned users cannot re-enter with a fresh email.
+- **Mobile verification required for participation**: posting needs, expressing interest, and messaging (need messages, contract messages, relay channels, DMs) all pass `requireVerifiedParticipation()` (`src/lib/participation.ts`) — 403 `MOBILE_NOT_VERIFIED` / `ACCOUNT_SUSPENDED`. Bans (`POST/DELETE /api/v1/admin/users/[id]/ban`) also block the banned mobile from re-verifying (send-otp route), so banned users cannot re-enter with a fresh email.
 
 ## 11. Real-Time
 
@@ -268,7 +273,9 @@ const channel = supabase
 4. Add test in `src/app/api/v1/<resource>/route.test.ts`
 5. Update mobile type mirror if shape changes
 
-### Add a terminal command
+### Add a relay command
+
+Command names/aliases are stable (mobile parity + user muscle memory) — add new ones, never rename.
 
 1. Add command definition to `terminal-commands.ts`
 2. Add handler in appropriate `terminal-handlers/<domain>.ts`

@@ -58,10 +58,14 @@ export const GET = withApiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
-    windowMs: 60_000,
-    maxRequests: 60,
-  });
+  const limit = await rateLimit(
+    getRateLimitIdentifier(req, user.id),
+    {
+      windowMs: 60_000,
+      maxRequests: 60,
+    },
+    "dm-messages-list"
+  );
   if (!limit.allowed) {
     return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
   }
@@ -179,10 +183,14 @@ export const POST = withApiHandler(async (req: NextRequest) => {
   const participation = await requireVerifiedParticipation(user.id);
   if (!participation.ok) return participation.response;
 
-  const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
-    windowMs: 5 * 60_000,
-    maxRequests: 30,
-  });
+  const limit = await rateLimit(
+    getRateLimitIdentifier(req, user.id),
+    {
+      windowMs: 5 * 60_000,
+      maxRequests: 30,
+    },
+    "dm-messages-post"
+  );
   if (!limit.allowed) {
     return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
   }

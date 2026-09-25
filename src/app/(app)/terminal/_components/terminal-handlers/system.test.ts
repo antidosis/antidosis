@@ -214,7 +214,7 @@ describe("system handlers", () => {
       await handleClear(ctx);
       expect(ctx.setSysMessages).toHaveBeenCalledWith([]);
       expect(ctx.setMessages).toHaveBeenCalledWith([]);
-      expect(ctx.addSys).toHaveBeenCalledWith("Terminal cleared.", "success");
+      expect(ctx.addSys).toHaveBeenCalledWith("Relay screen cleared.", "success");
     });
   });
 
@@ -340,7 +340,7 @@ describe("system handlers", () => {
     it("restores messages after clear", async () => {
       pushUndo({
         type: "clear_messages",
-        description: "Cleared terminal messages",
+        description: "Cleared relay messages",
         payload: { sysMessages: [{ id: "1", text: "hello" }], messages: [] },
       });
       const ctx = makeCtx();

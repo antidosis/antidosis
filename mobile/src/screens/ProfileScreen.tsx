@@ -27,6 +27,7 @@ import {
   ClipboardList,
   TrendingUp,
   ArrowRight,
+  Smartphone,
 } from "lucide-react";
 import { hapticImpact } from "@mobile/lib/native";
 import {
@@ -216,6 +217,35 @@ export function ProfileScreen() {
               {!hasSocial && <CompletionPill>Social</CompletionPill>}
               {!hasMobile && <CompletionPill>Mobile</CompletionPill>}
             </div>
+          </Vessel>
+        )}
+
+        {/* Mobile Verification CTA — required to post, accept, or message */}
+        {profile && !profile.mobileVerified && (
+          <Vessel variant="lit" className="p-4 mb-6 border-[var(--sun)]/30">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-md bg-[var(--sun)]/10 border border-[var(--sun)]/20 flex items-center justify-center shrink-0">
+                <Smartphone size={18} className="text-[var(--sun)]" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-[var(--gold)]">Verify your mobile</p>
+                <p className="font-mono text-[10px] text-[var(--leather)]">
+                  Required before posting needs, expressing interest, or messaging.
+                </p>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              className="w-full"
+              onClick={() => {
+                hapticImpact("light");
+                navigate("/verify-mobile");
+              }}
+              haptic={false}
+            >
+              <Shield size={14} className="mr-1.5" />
+              Verify Mobile
+            </Button>
           </Vessel>
         )}
 

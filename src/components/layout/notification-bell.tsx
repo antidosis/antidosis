@@ -106,7 +106,7 @@ export function NotificationBell() {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="relative p-2 text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors"
+        className="relative p-2 text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
         aria-label="Notifications"
       >
         <Bell className="h-5 w-5" />
@@ -135,8 +135,8 @@ export function NotificationBell() {
           <div className="overflow-y-auto flex-1">
             {notifications.length === 0 ? (
               <div className="px-4 py-8 text-center">
-                <Bell className="h-6 w-6 mx-auto mb-2 text-[#7a6b5a]" />
-                <p className="text-xs text-[#7a6b5a]">no notifications yet</p>
+                <Bell className="h-6 w-6 mx-auto mb-2 text-[#8f7f6e]" />
+                <p className="text-xs text-[#8f7f6e]">no notifications yet</p>
               </div>
             ) : (
               notifications.map((n) => (
@@ -178,8 +178,8 @@ export function NotificationBell() {
                           {n.title}
                         </p>
                       </div>
-                      <p className="text-xs text-[#7a6b5a] mt-0.5 line-clamp-2">{n.body}</p>
-                      <div className="flex items-center gap-1 mt-1 text-xs text-[#7a6b5a]">
+                      <p className="text-xs text-[#8f7f6e] mt-0.5 line-clamp-2">{n.body}</p>
+                      <div className="flex items-center gap-1 mt-1 text-xs text-[#8f7f6e]">
                         <Clock className="h-3 w-3" />
                         {timeAgo(n.createdAt)}
                       </div>

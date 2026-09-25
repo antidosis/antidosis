@@ -52,7 +52,7 @@ const nextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://static.cloudflareinsights.com",
+              "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' blob: data: https://*.supabase.co",
               "media-src 'self' https://*.supabase.co",

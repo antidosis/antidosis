@@ -125,7 +125,7 @@ export function TerminalSidebar({
             className="mb-1.5 text-[10px] uppercase tracking-widest"
             style={{ color: "var(--term-muted)" }}
           >
-            Direct Messages
+            Direct
           </div>
           {dmThreads.map((thread) => {
             const isActive = activeContext?.type === "dm" && activeContext.threadId === thread.id;
@@ -165,7 +165,7 @@ export function TerminalSidebar({
           className="mb-1.5 text-[10px] uppercase tracking-widest"
           style={{ color: "var(--term-muted)" }}
         >
-          Online Now
+          On Air Now
         </div>
         {onlineUsers.length > 0 ? (
           onlineUsers.map((u) => (
@@ -183,7 +183,7 @@ export function TerminalSidebar({
           ))
         ) : (
           <div className="py-[2px] text-[13px] italic" style={{ color: "var(--term-muted)" }}>
-            No one online
+            No one on the air
           </div>
         )}
       </div>

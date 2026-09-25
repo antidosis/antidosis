@@ -35,6 +35,7 @@ const mockRateLimit = vi.fn();
 
 vi.mock("@/lib/rate-limit", () => ({
   rateLimit: (...args: unknown[]) => mockRateLimit(...args),
+  getRateLimitIdentifier: () => "test-id",
 }));
 
 // ─── Logger mock ───
@@ -81,6 +82,7 @@ describe("POST /api/v1/pro/claim", () => {
   });
 
   it("returns 429 when rate limited", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
     mockRateLimit.mockResolvedValue({ allowed: false, remaining: 0, resetAt: Date.now() + 60_000 });
 
     const res = await POST(makeRequest());
@@ -88,6 +90,43 @@ describe("POST /api/v1/pro/claim", () => {
 
     expect(res.status).toBe(429);
     expect(body.error).toContain("Rate limit exceeded");
+  });
+
+  it("keys the rate limit on the authenticated user id", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      isVerified: true,
+      mobileVerified: true,
+    });
+    mockCredentialFindFirst.mockResolvedValue({ id: "cred-1" });
+    mockProfileUpdate.mockResolvedValue({ id: "profile-1", isPro: true });
+
+    const res = await POST(makeRequest());
+
+    expect(res.status).toBe(200);
+    expect(mockRateLimit).toHaveBeenCalledWith(
+      "test-id",
+      expect.objectContaining({ maxRequests: 3 }),
+      "pro-claim"
+    );
+  });
+
+  it("returns 403 when account is suspended", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      isVerified: true,
+      mobileVerified: true,
+      bannedAt: new Date("2026-01-01T00:00:00Z"),
+    });
+
+    const res = await POST(makeRequest());
+    const body = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(body.code).toBe("ACCOUNT_SUSPENDED");
+    expect(mockProfileUpdate).not.toHaveBeenCalled();
   });
 
   it("returns 401 when unauthenticated", async () => {

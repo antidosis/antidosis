@@ -114,7 +114,11 @@ describe("GET /api/v1/needs/[id]", () => {
 
   it("returns need for authenticated non-poster", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValueOnce({ posterId: "poster-profile" }).mockResolvedValueOnce({
       id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       title: "Test Need",
@@ -265,7 +269,11 @@ describe("PATCH /api/v1/needs/[id]", () => {
 
   it("returns 404 when need not found", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue(null);
 
     const res = await PATCH(
@@ -281,9 +289,55 @@ describe("PATCH /api/v1/needs/[id]", () => {
     expect(body.error).toBe("Need not found");
   });
 
+  it("returns 403 when account is suspended", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: new Date("2026-01-01T00:00:00Z"),
+    });
+
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/needs/need-1", {
+        method: "PATCH",
+        body: JSON.stringify({ title: "Updated" }),
+      }),
+      { params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(body.code).toBe("ACCOUNT_SUSPENDED");
+  });
+
+  it("returns 403 when mobile is not verified", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: false,
+      bannedAt: null,
+    });
+
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/needs/need-1", {
+        method: "PATCH",
+        body: JSON.stringify({ title: "Updated" }),
+      }),
+      { params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(body.code).toBe("MOBILE_NOT_VERIFIED");
+  });
+
   it("returns 403 when not poster", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue({
       posterId: "other-profile",
       status: "open",
@@ -305,7 +359,11 @@ describe("PATCH /api/v1/needs/[id]", () => {
 
   it("returns 400 when need status is not open or archived", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue({
       posterId: "profile-1",
       status: "completed",
@@ -327,7 +385,11 @@ describe("PATCH /api/v1/needs/[id]", () => {
 
   it("returns 400 for invalid schema", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue({ posterId: "profile-1", status: "open", isLocal: true });
 
     const res = await PATCH(
@@ -345,7 +407,11 @@ describe("PATCH /api/v1/needs/[id]", () => {
 
   it("returns 400 for invalid location", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue({ posterId: "profile-1", status: "open", isLocal: true });
 
     const res = await PATCH(
@@ -363,7 +429,11 @@ describe("PATCH /api/v1/needs/[id]", () => {
 
   it("updates need successfully without skills", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue({ posterId: "profile-1", status: "open", isLocal: true });
     mockNeedUpdate.mockResolvedValue({
       id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
@@ -388,7 +458,11 @@ describe("PATCH /api/v1/needs/[id]", () => {
 
   it("updates need successfully with skills", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue({ posterId: "profile-1", status: "open", isLocal: true });
     mockNeedUpdate.mockResolvedValue({
       id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
@@ -420,7 +494,11 @@ describe("PATCH /api/v1/needs/[id]", () => {
 
   it("includes x-request-id header", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue({ posterId: "profile-1", status: "open", isLocal: true });
     mockNeedUpdate.mockResolvedValue({
       id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
@@ -478,7 +556,11 @@ describe("DELETE /api/v1/needs/[id]", () => {
 
   it("returns 404 when need not found", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue(null);
 
     const res = await DELETE(
@@ -491,9 +573,49 @@ describe("DELETE /api/v1/needs/[id]", () => {
     expect(body.error).toBe("Need not found");
   });
 
+  it("returns 403 when account is suspended", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: new Date("2026-01-01T00:00:00Z"),
+    });
+
+    const res = await DELETE(
+      makeRequest("http://localhost/api/v1/needs/need-1", { method: "DELETE" }),
+      { params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(body.code).toBe("ACCOUNT_SUSPENDED");
+  });
+
+  it("returns 403 when mobile is not verified", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: false,
+      bannedAt: null,
+    });
+
+    const res = await DELETE(
+      makeRequest("http://localhost/api/v1/needs/need-1", { method: "DELETE" }),
+      { params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(body.code).toBe("MOBILE_NOT_VERIFIED");
+  });
+
   it("returns 403 when not poster", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue({ posterId: "other-profile", status: "open" });
 
     const res = await DELETE(
@@ -508,7 +630,11 @@ describe("DELETE /api/v1/needs/[id]", () => {
 
   it("returns 400 when need is not open", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue({ posterId: "profile-1", status: "archived" });
 
     const res = await DELETE(
@@ -523,7 +649,11 @@ describe("DELETE /api/v1/needs/[id]", () => {
 
   it("deletes need successfully", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue({ posterId: "profile-1", status: "open" });
     mockNeedDelete.mockResolvedValue({ id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" });
 
@@ -542,7 +672,11 @@ describe("DELETE /api/v1/needs/[id]", () => {
 
   it("includes x-request-id header", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockNeedFindUnique.mockResolvedValue({ posterId: "profile-1", status: "open" });
 
     const res = await DELETE(

@@ -39,10 +39,14 @@ export const POST = withApiHandler(async (req: NextRequest) => {
   if (!participation.ok) return participation.response;
 
   // Rate limit: 10 expressions of interest per hour per user
-  const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
-    windowMs: 60 * 60_000,
-    maxRequests: 10,
-  });
+  const limit = await rateLimit(
+    getRateLimitIdentifier(req, user.id),
+    {
+      windowMs: 60 * 60_000,
+      maxRequests: 10,
+    },
+    "acceptances-post"
+  );
   if (!limit.allowed) {
     return NextResponse.json(
       { error: "Too many expressions of interest. Please try again later." },
@@ -138,24 +142,37 @@ export const POST = withApiHandler(async (req: NextRequest) => {
     );
   }
 
-  const acceptance = await prisma.acceptance.create({
-    data: {
-      needId,
-      userId: profile.id,
-      message: message || null,
-    },
-    include: {
-      user: {
-        select: {
-          id: true,
-          fullName: true,
-          avatarUrl: true,
-          ratingAvg: true,
-          skills: true,
+  let acceptance;
+  try {
+    acceptance = await prisma.acceptance.create({
+      data: {
+        needId,
+        userId: profile.id,
+        message: message || null,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            fullName: true,
+            avatarUrl: true,
+            ratingAvg: true,
+            skills: true,
+          },
         },
       },
-    },
-  });
+    });
+  } catch (err) {
+    // Race-safe guard behind the check above: the (needId, userId) unique
+    // constraint rejects double-clicks and concurrent submissions.
+    if (typeof err === "object" && err !== null && (err as { code?: string }).code === "P2002") {
+      return NextResponse.json(
+        { error: "You have already expressed interest in this need" },
+        { status: 409 }
+      );
+    }
+    throw err;
+  }
 
   // Notify need poster
   try {

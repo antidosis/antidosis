@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { ArrowRight, ArrowRightLeft, FileText, MessageSquare, Terminal } from "lucide-react";
+import { ArrowRight, ArrowRightLeft, FileText, MessageSquare, Radio } from "lucide-react";
 import type { Metadata } from "next";
 
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 export const metadata: Metadata = {
   title: "Interactive Demos — antidosis",
   description:
-    "Learn how Antidosis works with hands-on demos. Try posting a need, using the terminal, or negotiating a contract — no account required.",
+    "Learn how Antidosis works with hands-on demos. Try posting a need, using the relay, or negotiating a contract — no account required.",
 };
 
 const DEMOS = [
@@ -31,9 +31,9 @@ const DEMOS = [
   },
   {
     id: "terminal",
-    title: "Community Terminal",
+    title: "Community Relay",
     description:
-      "Watch a live replay of real terminal usage. See how community members find each other, negotiate deals, and build trust in public channels and DMs.",
+      "Watch a live replay of real relay usage. See how community members find each other, negotiate deals, and build trust in public channels and DMs.",
     icon: MessageSquare,
     href: "/demo/terminal",
     color: "#00e5ff",
@@ -115,7 +115,7 @@ export default function DemoIndexPage() {
 
                 {/* Lessons */}
                 <div className="px-6 flex-1">
-                  <p className="text-[10px] uppercase tracking-wider text-[#7a6b5a] mb-3">
+                  <p className="text-[10px] uppercase tracking-wider text-[#8f7f6e] mb-3">
                     You will learn
                   </p>
                   <ul className="space-y-2">
@@ -152,15 +152,15 @@ export default function DemoIndexPage() {
           })}
         </div>
 
-        {/* Terminal teaser */}
+        {/* Relay teaser */}
         <div className="mt-12 p-6 rounded-lg border border-[#2a2420] bg-[#12100e]">
           <div className="flex items-start gap-4">
-            <Terminal className="h-5 w-5 text-[#00e5ff] mt-0.5 shrink-0" />
+            <Radio className="h-5 w-5 text-[#00e5ff] mt-0.5 shrink-0" />
             <div>
               <p className="text-sm text-[#e8d5a3] font-medium">Prefer learning by watching?</p>
               <p className="text-xs text-[#8f7f6e] mt-1">
-                The Terminal demo auto-plays a realistic conversation between community members.
-                Just hit play and watch how deals get made.
+                The Relay demo auto-plays a realistic conversation between community members. Just
+                hit play and watch how deals get made.
               </p>
             </div>
           </div>

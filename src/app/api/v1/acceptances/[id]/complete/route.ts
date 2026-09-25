@@ -33,10 +33,14 @@ export const POST = withApiHandler(
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
-    const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
-      windowMs: 60 * 60_000,
-      maxRequests: 10,
-    });
+    const limit = await rateLimit(
+      getRateLimitIdentifier(req, user.id),
+      {
+        windowMs: 60 * 60_000,
+        maxRequests: 10,
+      },
+      "acceptance-complete"
+    );
     if (!limit.allowed) {
       return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
     }

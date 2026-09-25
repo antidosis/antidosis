@@ -34,11 +34,6 @@ const config: CapacitorConfig = {
     PushNotifications: {
       presentationOptions: ["badge", "sound", "alert"],
     },
-    App: {
-      appUrlOpen: {
-        urlScheme: "antidosis",
-      },
-    },
   },
 };
 

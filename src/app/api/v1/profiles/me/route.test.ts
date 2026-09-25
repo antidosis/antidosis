@@ -11,6 +11,10 @@ const mockProfileUpdate = vi.fn();
 const mockProfileDelete = vi.fn();
 const mockAuditLogDeleteMany = vi.fn();
 const mockMobileVerificationCodeDeleteMany = vi.fn();
+const mockCredentialDeleteMany = vi.fn();
+const mockSkillDeleteMany = vi.fn();
+const mockSocialLinkDeleteMany = vi.fn();
+const mockNotificationDeleteMany = vi.fn();
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
@@ -26,7 +30,37 @@ vi.mock("@/lib/prisma", () => ({
     mobileVerificationCode: {
       deleteMany: (...args: unknown[]) => mockMobileVerificationCodeDeleteMany(...args),
     },
+    credential: {
+      deleteMany: (...args: unknown[]) => mockCredentialDeleteMany(...args),
+    },
+    skill: {
+      deleteMany: (...args: unknown[]) => mockSkillDeleteMany(...args),
+    },
+    socialLink: {
+      deleteMany: (...args: unknown[]) => mockSocialLinkDeleteMany(...args),
+    },
+    notification: {
+      deleteMany: (...args: unknown[]) => mockNotificationDeleteMany(...args),
+    },
   },
+}));
+
+// ─── Bans mock ───
+const mockRecordBannedMobile = vi.fn();
+
+vi.mock("@/lib/bans", () => ({
+  recordBannedMobile: (...args: unknown[]) => mockRecordBannedMobile(...args),
+}));
+
+// ─── Storage (service client) mock ───
+const mockStorageRemove = vi.fn();
+
+vi.mock("@/lib/supabase/service", () => ({
+  createServiceClient: () => ({
+    storage: {
+      from: () => ({ remove: (...args: unknown[]) => mockStorageRemove(...args) }),
+    },
+  }),
 }));
 
 // ─── Supabase mocks ───
@@ -275,6 +309,23 @@ describe("PATCH /api/v1/profiles/me", () => {
 });
 
 describe("DELETE /api/v1/profiles/me", () => {
+  function makeDeletableProfile(overrides?: Record<string, unknown>) {
+    return {
+      id: "profile-1",
+      userId: "user-1",
+      mobile: "+61400123456",
+      bannedAt: null,
+      bannedReason: null,
+      avatarUrl: "https://x.supabase.co/storage/v1/object/public/uploads/avatars/profile-1/a.png",
+      stripeCustomerId: null,
+      stripeSubscriptionId: null,
+      playStorePurchaseToken: null,
+      playStoreProductId: null,
+      credentials: [],
+      ...overrides,
+    };
+  }
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -302,16 +353,9 @@ describe("DELETE /api/v1/profiles/me", () => {
     expect(body.error).toBe("Profile not found");
   });
 
-  it("returns 200 and deletes profile", async () => {
+  it("anonymizes the profile instead of cascade-deleting it", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({
-      id: "profile-1",
-      userId: "user-1",
-      stripeCustomerId: null,
-      stripeSubscriptionId: null,
-      playStorePurchaseToken: null,
-      playStoreProductId: null,
-    });
+    mockProfileFindUnique.mockResolvedValue(makeDeletableProfile());
     mockDeleteUser.mockResolvedValue({ error: null });
 
     const res = await DELETE(
@@ -321,20 +365,104 @@ describe("DELETE /api/v1/profiles/me", () => {
 
     expect(res.status).toBe(200);
     expect(body.success).toBe(true);
-    expect(mockProfileDelete).toHaveBeenCalledWith({ where: { id: "profile-1" } });
+
+    // No hard delete — contracts, reviews, needs, and messages survive
+    expect(mockProfileDelete).not.toHaveBeenCalled();
+
+    // Tombstone: PII scrubbed, email/mobile uniqueness freed
+    expect(mockProfileUpdate).toHaveBeenCalledWith({
+      where: { id: "profile-1" },
+      data: expect.objectContaining({
+        fullName: "Deleted User",
+        email: "deleted+profile-1@deleted.invalid",
+        mobile: null,
+        mobileVerified: false,
+        bio: null,
+        avatarUrl: null,
+        locationName: null,
+        publicPhone: null,
+        privatePhone: null,
+        abn: null,
+        bannedAt: null,
+        bannedReason: null,
+      }),
+    });
+
+    // Dependent PII removed
+    expect(mockCredentialDeleteMany).toHaveBeenCalledWith({ where: { profileId: "profile-1" } });
+    expect(mockSkillDeleteMany).toHaveBeenCalledWith({ where: { profileId: "profile-1" } });
+    expect(mockSocialLinkDeleteMany).toHaveBeenCalledWith({ where: { profileId: "profile-1" } });
+    expect(mockNotificationDeleteMany).toHaveBeenCalledWith({ where: { userId: "profile-1" } });
+    expect(mockMobileVerificationCodeDeleteMany).toHaveBeenCalledWith({
+      where: { profileId: "profile-1" },
+    });
+
+    // Auth user still deleted so the tombstone cannot be logged into
+    expect(mockDeleteUser).toHaveBeenCalledWith("user-1");
+
+    // Not banned — no ban persistence
+    expect(mockRecordBannedMobile).not.toHaveBeenCalled();
+  });
+
+  it("persists the mobile to BannedMobile before scrubbing a banned profile", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue(
+      makeDeletableProfile({ bannedAt: new Date(), bannedReason: "scam reports" })
+    );
+    mockDeleteUser.mockResolvedValue({ error: null });
+
+    const res = await DELETE(
+      makeRequest("http://localhost/api/v1/profiles/me", { method: "DELETE" })
+    );
+
+    expect(res.status).toBe(200);
+    expect(mockRecordBannedMobile).toHaveBeenCalledWith({
+      id: "profile-1",
+      mobile: "+61400123456",
+      bannedReason: "scam reports",
+    });
+    // The tombstone no longer carries the mobile or the ban markers
+    expect(mockProfileUpdate).toHaveBeenCalledWith({
+      where: { id: "profile-1" },
+      data: expect.objectContaining({ mobile: null, bannedAt: null, bannedReason: null }),
+    });
+  });
+
+  it("does not record a ban when the banned profile has no mobile", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue(
+      makeDeletableProfile({ bannedAt: new Date(), mobile: null })
+    );
+    mockDeleteUser.mockResolvedValue({ error: null });
+
+    const res = await DELETE(
+      makeRequest("http://localhost/api/v1/profiles/me", { method: "DELETE" })
+    );
+
+    expect(res.status).toBe(200);
+    expect(mockRecordBannedMobile).not.toHaveBeenCalled();
+  });
+
+  it("proceeds with anonymization when storage cleanup fails", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue(makeDeletableProfile());
+    mockStorageRemove.mockRejectedValue(new Error("storage down"));
+    mockDeleteUser.mockResolvedValue({ error: null });
+
+    const res = await DELETE(
+      makeRequest("http://localhost/api/v1/profiles/me", { method: "DELETE" })
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.success).toBe(true);
+    expect(mockProfileUpdate).toHaveBeenCalled();
     expect(mockDeleteUser).toHaveBeenCalledWith("user-1");
   });
 
   it("includes x-request-id header", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({
-      id: "profile-1",
-      userId: "user-1",
-      stripeCustomerId: null,
-      stripeSubscriptionId: null,
-      playStorePurchaseToken: null,
-      playStoreProductId: null,
-    });
+    mockProfileFindUnique.mockResolvedValue(makeDeletableProfile());
 
     const res = await DELETE(
       makeRequest("http://localhost/api/v1/profiles/me", { method: "DELETE" })

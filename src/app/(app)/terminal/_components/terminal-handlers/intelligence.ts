@@ -180,7 +180,7 @@ Or browse commands:
 
 /status — XP, level, and badges
 /stats — full activity dashboard
-/activity — recent terminal activity
+/activity — recent relay activity
 
 Current: Level ${level} ${title}`;
     }

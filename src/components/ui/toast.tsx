@@ -80,7 +80,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             <p className="text-sm text-[#e8d5a3] flex-1">{t.message}</p>
             <button
               onClick={() => dismiss(t.id)}
-              className="text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors mt-0.5"
+              className="text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors mt-0.5"
             >
               <X className="h-3.5 w-3.5" />
             </button>

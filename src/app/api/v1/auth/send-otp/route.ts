@@ -5,8 +5,10 @@ import { randomInt } from "crypto";
 import twilio from "twilio";
 
 import { withApiHandler } from "@/lib/api-handler";
+import { isMobileBanned } from "@/lib/bans";
 import { logger } from "@/lib/logger";
 import { normalizeMobile, isValidAustralianMobile } from "@/lib/mobile";
+import { hashOtpCode } from "@/lib/otp";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
@@ -24,10 +26,14 @@ export const POST = withApiHandler(async (req: NextRequest) => {
   }
 
   const identifier = getRateLimitIdentifier(req, user.id);
-  const limit = await rateLimit(identifier, {
-    windowMs: 60 * 60 * 1000, // 1 hour
-    maxRequests: 10,
-  });
+  const limit = await rateLimit(
+    identifier,
+    {
+      windowMs: 60 * 60 * 1000, // 1 hour
+      maxRequests: 10,
+    },
+    "send-otp"
+  );
 
   if (!limit.allowed) {
     return NextResponse.json({ error: "Rate limit exceeded. Try again later." }, { status: 429 });
@@ -64,54 +70,39 @@ export const POST = withApiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: "Mobile number already verified" }, { status: 409 });
   }
 
-  // Ban-sticking: a mobile banned on ANY account can never be verified again
+  // Ban-sticking: a mobile banned on ANY account can never be verified again.
+  // The BannedMobile table survives account deletion, so a banned user cannot
+  // escape the ban by self-deleting and re-registering with a fresh email.
   const bannedWithMobile = await prisma.profile.findFirst({
     where: { mobile: normalizedMobile, bannedAt: { not: null } },
     select: { id: true },
   });
-  if (bannedWithMobile) {
+  if (bannedWithMobile || (await isMobileBanned(normalizedMobile))) {
     return NextResponse.json(
       { error: "This mobile number cannot be verified on Antidosis.", code: "MOBILE_BANNED" },
       { status: 403 }
     );
   }
 
-  const code = randomInt(100000, 1000000).toString();
-  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
-  await prisma.$transaction(async (tx) => {
-    await tx.mobileVerificationCode.deleteMany({
-      where: { profileId: profile.id, used: false },
-    });
-
-    await tx.mobileVerificationCode.create({
-      data: {
-        mobile: normalizedMobile,
-        code,
-        profileId: profile.id,
-        expiresAt,
-      },
-    });
-  });
-
   const twilioSid = process.env.TWILIO_ACCOUNT_SID;
   const twilioToken = process.env.TWILIO_AUTH_TOKEN;
-  const twilioFrom = process.env.TWILIO_PHONE_NUMBER;
+  const verifyServiceSid = process.env.TWILIO_VERIFY_SERVICE_SID;
 
-  if (twilioSid && twilioToken && twilioFrom) {
+  if (twilioSid && twilioToken && verifyServiceSid) {
+    // Twilio Verify owns code generation, delivery, expiry and attempt limits —
+    // no phone-number purchase or AU sender registration required.
     try {
       const client = twilio(twilioSid, twilioToken);
-      await client.messages.create({
-        body: `Your Antidosis verification code is: ${code}. Valid for 10 minutes.`,
-        from: twilioFrom,
+      await client.verify.v2.services(verifyServiceSid).verifications.create({
         to: normalizedMobile,
+        channel: "sms",
       });
     } catch (twilioErr: any) {
       const twilioMessage = twilioErr?.message || String(twilioErr);
       const twilioCode = twilioErr?.code || "unknown";
       const twilioStatus = twilioErr?.status || "unknown";
       logger.error(
-        `Twilio SMS failed — code:${twilioCode} status:${twilioStatus} msg:${twilioMessage}`,
+        `Twilio Verify send failed — code:${twilioCode} status:${twilioStatus} msg:${twilioMessage}`,
         twilioErr
       );
       return NextResponse.json({ error: `SMS delivery failed: ${twilioMessage}` }, { status: 502 });
@@ -119,10 +110,28 @@ export const POST = withApiHandler(async (req: NextRequest) => {
   } else {
     // Fail closed in production — never leak codes to logs outside development
     if (process.env.NODE_ENV === "production") {
-      logger.error("Twilio is not configured in production; OTP not sent");
+      logger.error("Twilio Verify is not configured in production; OTP not sent");
       return NextResponse.json({ error: "SMS service unavailable" }, { status: 503 });
     }
-    // Dev fallback — log to console when Twilio is not configured
+    // Dev fallback — local DB-backed code, logged to console
+    const code = randomInt(100000, 1000000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    await prisma.$transaction(async (tx) => {
+      await tx.mobileVerificationCode.deleteMany({
+        where: { profileId: profile.id, used: false },
+      });
+
+      await tx.mobileVerificationCode.create({
+        data: {
+          mobile: normalizedMobile,
+          code: hashOtpCode(code, normalizedMobile),
+          profileId: profile.id,
+          expiresAt,
+        },
+      });
+    });
+
     console.log(`[DEV OTP] Mobile: ${normalizedMobile}, Code: ${code}`);
   }
 

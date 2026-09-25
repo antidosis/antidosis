@@ -247,9 +247,6 @@ export async function handleBan(ctx: HandlerContext): Promise<HandlerResult> {
     ctx.addSys("Usage: /ban <userId>", "error");
     return { handled: true };
   }
-  ctx.addSys(
-    "Banning users via terminal is not yet implemented. Use the web admin panel.",
-    "error"
-  );
+  ctx.addSys("Banning users via Relay is not yet implemented. Use the web admin panel.", "error");
   return { handled: true };
 }

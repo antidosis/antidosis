@@ -141,8 +141,50 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
     expect(json.code).toBe("EMAIL_NOT_VERIFIED");
   });
 
+  it("returns 403 when account is suspended", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "prof-1",
+      fullName: "Test",
+      mobileVerified: true,
+      bannedAt: new Date("2026-01-01T00:00:00Z"),
+    });
+    const req = makeRequest("http://localhost/api/v1/acceptances/abc", {
+      method: "PATCH",
+      body: JSON.stringify({ status: "accepted" }),
+    });
+    const res = await PATCH(req, { params: { id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } });
+    expect(res.status).toBe(403);
+    const json = await res.json();
+    expect(json.code).toBe("ACCOUNT_SUSPENDED");
+  });
+
+  it("returns 403 when mobile is not verified", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "prof-1",
+      fullName: "Test",
+      mobileVerified: false,
+      bannedAt: null,
+    });
+    const req = makeRequest("http://localhost/api/v1/acceptances/abc", {
+      method: "PATCH",
+      body: JSON.stringify({ status: "accepted" }),
+    });
+    const res = await PATCH(req, { params: { id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } });
+    expect(res.status).toBe(403);
+    const json = await res.json();
+    expect(json.code).toBe("MOBILE_NOT_VERIFIED");
+  });
+
   it("returns 400 for invalid body", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "prof-1",
+      fullName: "Test",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     const req = makeRequest("http://localhost/api/v1/acceptances/abc", {
       method: "PATCH",
       body: JSON.stringify({ status: "invalid" }),
@@ -153,6 +195,12 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
 
   it("returns 404 when acceptance not found", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "prof-1",
+      fullName: "Test",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockAcceptanceFindUnique.mockResolvedValue(null);
     const req = makeRequest("http://localhost/api/v1/acceptances/abc", {
       method: "PATCH",
@@ -193,7 +241,12 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
       needId: "n1",
       status: "pending",
     });
-    mockProfileFindUnique.mockResolvedValue({ id: "prof-1", fullName: "Test" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "prof-1",
+      fullName: "Test",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     const req = makeRequest("http://localhost/api/v1/acceptances/abc", {
       method: "PATCH",
       body: JSON.stringify({ status: "withdrawn" }),
@@ -213,7 +266,12 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
       needId: "n1",
       status: "selected",
     });
-    mockProfileFindUnique.mockResolvedValue({ id: "prof-1", fullName: "Test" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "prof-1",
+      fullName: "Test",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     const req = makeRequest("http://localhost/api/v1/acceptances/abc", {
       method: "PATCH",
       body: JSON.stringify({ status: "withdrawn" }),
@@ -233,7 +291,12 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
       needId: "n1",
       status: "pending",
     });
-    mockProfileFindUnique.mockResolvedValue({ id: "prof-1", fullName: "Test" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "prof-1",
+      fullName: "Test",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     const req = makeRequest("http://localhost/api/v1/acceptances/abc", {
       method: "PATCH",
       body: JSON.stringify({ status: "accepted" }),
@@ -253,7 +316,12 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
       needId: "n1",
       status: "selected",
     });
-    mockProfileFindUnique.mockResolvedValue({ id: "prof-1", fullName: "Test" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "prof-1",
+      fullName: "Test",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     const req = makeRequest("http://localhost/api/v1/acceptances/abc", {
       method: "PATCH",
       body: JSON.stringify({ status: "removed" }),
@@ -273,7 +341,12 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
       needId: "n1",
       status: "pending",
     });
-    mockProfileFindUnique.mockResolvedValue({ id: "prof-1", fullName: "Test" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "prof-1",
+      fullName: "Test",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     const req = makeRequest("http://localhost/api/v1/acceptances/abc", {
       method: "PATCH",
       body: JSON.stringify({ status: "selected" }),
@@ -293,7 +366,12 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
       needId: "n1",
       status: "pending",
     });
-    mockProfileFindUnique.mockResolvedValue({ id: "prof-1", fullName: "Test" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "prof-1",
+      fullName: "Test",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockContractFindUnique.mockResolvedValue({ id: "c1", status: "draft" });
     const req = makeRequest("http://localhost/api/v1/acceptances/abc", {
       method: "PATCH",
@@ -314,7 +392,12 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
       needId: "n1",
       status: "pending",
     });
-    mockProfileFindUnique.mockResolvedValue({ id: "prof-1", fullName: "Test" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "prof-1",
+      fullName: "Test",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockContractFindUnique.mockResolvedValue(null);
     mockCreateContractFromAcceptance.mockResolvedValue({ id: "contract-1" });
     mockAcceptanceFindUnique.mockResolvedValueOnce({
@@ -345,6 +428,12 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
       status: "pending",
     });
     mockProfileFindUnique
+      .mockResolvedValueOnce({
+        id: "prof-1",
+        fullName: "Poster",
+        mobileVerified: true,
+        bannedAt: null,
+      })
       .mockResolvedValueOnce({ id: "prof-1", fullName: "Poster" })
       .mockResolvedValueOnce({ id: "u2", email: "fulfiller@example.com", fullName: "Fulfiller" });
     mockAcceptanceUpdate.mockResolvedValue({
@@ -376,6 +465,12 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
       status: "pending",
     });
     mockProfileFindUnique
+      .mockResolvedValueOnce({
+        id: "prof-1",
+        fullName: "Poster",
+        mobileVerified: true,
+        bannedAt: null,
+      })
       .mockResolvedValueOnce({ id: "prof-1", fullName: "Poster" })
       .mockResolvedValueOnce({ id: "u2", email: "fulfiller@example.com", fullName: "Fulfiller" });
     mockAcceptanceUpdate.mockResolvedValue({
@@ -403,7 +498,12 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
       needId: "n1",
       status: "pending",
     });
-    mockProfileFindUnique.mockResolvedValue({ id: "prof-1", fullName: "Poster" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "prof-1",
+      fullName: "Poster",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockAcceptanceUpdate.mockResolvedValue({
       id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       status: "declined",
@@ -427,7 +527,12 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
       needId: "n1",
       status: "pending",
     });
-    mockProfileFindUnique.mockResolvedValue({ id: "prof-1", fullName: "Creator" });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "prof-1",
+      fullName: "Creator",
+      mobileVerified: true,
+      bannedAt: null,
+    });
     mockAcceptanceUpdate.mockResolvedValue({
       id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
       status: "withdrawn",

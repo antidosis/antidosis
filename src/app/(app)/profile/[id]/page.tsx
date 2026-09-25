@@ -19,6 +19,7 @@ import {
   Loader2,
 } from "lucide-react";
 
+import { ReportButton } from "@/components/report-button";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -100,7 +101,7 @@ export default function ProfilePage() {
   if (isLoading) {
     return (
       <div className="max-w-3xl mx-auto px-4 md:px-8 py-24 text-center">
-        <Loader2 className="h-6 w-6 animate-spin mx-auto text-[#7a6b5a]" />
+        <Loader2 className="h-6 w-6 animate-spin mx-auto text-[#8f7f6e]" />
       </div>
     );
   }
@@ -124,14 +125,17 @@ export default function ProfilePage() {
       <div className="py-6 flex items-center justify-between">
         <Link
           href="/needs"
-          className="inline-flex items-center text-sm text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors"
+          className="inline-flex items-center text-sm text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />$ cd ~/needs/
         </Link>
-        <ProfileActions url={`https://antidosis.com/profile/${id}`} />
+        <div className="flex items-center gap-4">
+          <ProfileActions url={`https://antidosis.com/profile/${id}`} />
+          <ReportButton targetType="profile" targetId={profile.id} />
+        </div>
       </div>
 
-      <p className="text-xs text-[#7a6b5a] mb-4">$ finger {username}</p>
+      <p className="text-xs text-[#8f7f6e] mb-4">$ finger {username}</p>
 
       {/* Profile Header */}
       <div className="vessel p-6">
@@ -209,7 +213,7 @@ export default function ProfilePage() {
 
       {/* Needs */}
       <div className="space-y-6">
-        <p className="text-xs text-[#7a6b5a]">$ ls ~{username}/needs/</p>
+        <p className="text-xs text-[#8f7f6e]">$ ls ~{username}/needs/</p>
         {profile.needsPosted.length === 0 ? (
           <EmptyState
             title="No Active Needs"
@@ -230,14 +234,14 @@ export default function ProfilePage() {
                       {need.requiredSkills.map((skill) => (
                         <span
                           key={skill.id}
-                          className="px-2 py-0.5 text-xs font-medium uppercase tracking-wide border border-[#2a2420] text-[#7a6b5a]"
+                          className="px-2 py-0.5 text-xs font-medium uppercase tracking-wide border border-[#2a2420] text-[#8f7f6e]"
                         >
                           {skill.name}
                         </span>
                       ))}
                     </div>
                   </div>
-                  <span className="shrink-0 text-xs text-[#7a6b5a] uppercase tracking-wide">
+                  <span className="shrink-0 text-xs text-[#8f7f6e] uppercase tracking-wide">
                     {need._count.acceptances} offer
                     {need._count.acceptances !== 1 ? "s" : ""}
                   </span>
@@ -250,7 +254,7 @@ export default function ProfilePage() {
 
       {/* Credentials */}
       <div className="space-y-6">
-        <p className="text-xs text-[#7a6b5a]">$ ls ~{username}/credentials/</p>
+        <p className="text-xs text-[#8f7f6e]">$ ls ~{username}/credentials/</p>
         {profile.credentials.length === 0 ? (
           <EmptyState
             title="No Credentials"
@@ -264,7 +268,7 @@ export default function ProfilePage() {
                 <div className="flex items-center gap-2 flex-wrap mb-2">
                   <Award className="h-4 w-4 text-[#f5a623]" />
                   <span className="text-sm font-medium text-[#e8d5a3]">{cred.title}</span>
-                  <span className="px-2 py-0.5 text-xs uppercase tracking-wide border border-[#2a2420] text-[#7a6b5a]">
+                  <span className="px-2 py-0.5 text-xs uppercase tracking-wide border border-[#2a2420] text-[#8f7f6e]">
                     {cred.type}
                   </span>
                   {cred.isVerified && <Shield className="h-3.5 w-3.5 text-[#00e676]" />}
@@ -301,7 +305,7 @@ export default function ProfilePage() {
 
       {/* Reviews */}
       <div className="space-y-6">
-        <p className="text-xs text-[#7a6b5a]">$ cat ~{username}/reviews.log</p>
+        <p className="text-xs text-[#8f7f6e]">$ cat ~{username}/reviews.log</p>
         {profile.reviewsReceived.length === 0 ? (
           <EmptyState
             title="No Reviews Yet"
@@ -320,7 +324,7 @@ export default function ProfilePage() {
                         {review.giver.fullName || "anonymous"}
                       </p>
                       {review.contract?.need?.title && (
-                        <p className="text-xs text-[#7a6b5a]">{review.contract.need.title}</p>
+                        <p className="text-xs text-[#8f7f6e]">{review.contract.need.title}</p>
                       )}
                     </div>
                   </div>

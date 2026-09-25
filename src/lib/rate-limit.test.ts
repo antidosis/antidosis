@@ -82,6 +82,24 @@ describe("rateLimit (memory fallback)", () => {
     expect(result.remaining).toBe(29); // default maxRequests: 30
   });
 
+  it("isolates budgets by scope", async () => {
+    const scoped = { windowMs: 1000, maxRequests: 1 };
+
+    const first = await rateLimit("test-key-scoped", scoped, "scope-a");
+    expect(first.allowed).toBe(true);
+
+    const blocked = await rateLimit("test-key-scoped", scoped, "scope-a");
+    expect(blocked.allowed).toBe(false);
+
+    // Same identifier under a different scope gets its own budget
+    const otherScope = await rateLimit("test-key-scoped", scoped, "scope-b");
+    expect(otherScope.allowed).toBe(true);
+
+    // Unscoped calls keep their own budget too
+    const unscoped = await rateLimit("test-key-scoped", scoped);
+    expect(unscoped.allowed).toBe(true);
+  });
+
   it("returns correct resetAt timestamp", async () => {
     const before = Date.now();
     const result = await rateLimit("test-key-5", options);

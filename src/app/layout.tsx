@@ -23,11 +23,11 @@ const siteUrl = "https://antidosis.com";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "antidosis — exchange anything, build trust.",
+    default: "antidosis — the exchange network.",
     template: "%s — antidosis",
   },
   description:
-    "A marketplace for reciprocal exchange on the Central Coast, NSW. Post what you need. Say what you'll give back. Connect with verified people you can trust. Barter, gift, or trade anything with verified locals.",
+    "A reciprocal exchange network on the Central Coast, NSW. Post what you need. Say what you'll give back. Connect with verified locals you can trust. Running on the internet today — built to keep working when everything else doesn't.",
   keywords: [
     "barter",
     "exchange",
@@ -66,23 +66,23 @@ export const metadata: Metadata = {
     locale: "en_AU",
     url: siteUrl,
     siteName: "antidosis",
-    title: "antidosis — exchange anything, build trust.",
+    title: "antidosis — the exchange network.",
     description:
-      "A marketplace for reciprocal exchange on the Central Coast, NSW. Post what you need. Say what you'll give back. Connect with verified people you can trust.",
+      "A reciprocal exchange network on the Central Coast, NSW. Post what you need. Say what you'll give back. Connect with verified locals you can trust.",
     images: [
       {
         url: "/opengraph-image",
         width: 1200,
         height: 630,
-        alt: "antidosis — exchange anything, build trust.",
+        alt: "antidosis — the exchange network.",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "antidosis — exchange anything, build trust.",
+    title: "antidosis — the exchange network.",
     description:
-      "A marketplace for reciprocal exchange on the Central Coast, NSW. Post what you need. Say what you'll give back. Connect with verified people you can trust.",
+      "A reciprocal exchange network on the Central Coast, NSW. Post what you need. Say what you'll give back. Connect with verified locals you can trust.",
     images: ["/opengraph-image"],
     creator: "@antidosis",
   },
@@ -114,9 +114,6 @@ export const metadata: Metadata = {
     "geo.position": "-33.3208;151.2335",
     ICBM: "-33.3208, 151.2335",
   },
-  verification: {
-    google: "google-site-verification-code",
-  },
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#0a0806" },
     { media: "(prefers-color-scheme: dark)", color: "#0a0806" },
@@ -138,7 +135,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               name: "antidosis",
               url: siteUrl,
               description:
-                "A marketplace for reciprocal exchange. Post what you need. Say what you'll give back. Connect with verified people you can trust.",
+                "A reciprocal exchange network. Post what you need. Say what you'll give back. Connect with verified locals you can trust.",
               inLanguage: "en-AU",
               publisher: {
                 "@type": "Organization",
@@ -174,7 +171,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               alternateName: "Antidosis Exchange",
               url: siteUrl,
               description:
-                "A marketplace for reciprocal exchange on the Central Coast, NSW. Barter, gift, and trade anything with verified locals.",
+                "A reciprocal exchange network on the Central Coast, NSW. Barter, gift, and trade anything with verified locals.",
               image: `${siteUrl}/opengraph-image`,
               email: "official.antidosis@gmail.com",
               areaServed: {

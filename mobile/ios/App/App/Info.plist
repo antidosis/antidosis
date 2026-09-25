@@ -51,6 +51,18 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
+	<!-- Deep links: antidosis:// -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.antidosis.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>antidosis</string>
+			</array>
+		</dict>
+	</array>
 	<!-- App Store -->
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>

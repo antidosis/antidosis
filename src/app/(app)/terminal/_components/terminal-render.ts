@@ -28,7 +28,7 @@ export const THEMES: Record<string, ThemeColors> = {
     accent: "#f5a623",
     accentHover: "#ffb84d",
     text: "#e8d5a3",
-    muted: "#7a6b5a",
+    muted: "#8f7f6e",
     border: "#2a2420",
     error: "#ff5252",
     success: "#00e676",

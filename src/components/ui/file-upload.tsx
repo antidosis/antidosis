@@ -88,7 +88,7 @@ export function FileUpload({
           <button
             type="button"
             onClick={clearPreview}
-            className="absolute -top-1 -right-1 p-1 bg-[#12100e] border border-[#2a2420] text-[#7a6b5a] hover:text-[#e8d5a3] hover:border-[#f5a623] rounded-md transition-colors"
+            className="absolute -top-1 -right-1 p-1 bg-[#12100e] border border-[#2a2420] text-[#8f7f6e] hover:text-[#e8d5a3] hover:border-[#f5a623] rounded-md transition-colors"
           >
             <X className="h-3 w-3" />
           </button>

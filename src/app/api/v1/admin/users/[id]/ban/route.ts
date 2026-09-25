@@ -5,6 +5,7 @@ import { z } from "zod";
 import { requireAdmin } from "@/lib/admin";
 import { withApiHandler } from "@/lib/api-handler";
 import { auditLog, getClientInfo } from "@/lib/audit";
+import { recordBannedMobile, clearBannedMobile } from "@/lib/bans";
 import { prisma } from "@/lib/prisma";
 
 const banSchema = z.object({
@@ -31,7 +32,7 @@ export const POST = withApiHandler(
 
     const profile = await prisma.profile.findUnique({
       where: { id: params.id },
-      select: { id: true, bannedAt: true, userId: true },
+      select: { id: true, bannedAt: true, userId: true, mobile: true },
     });
     if (!profile) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
@@ -44,6 +45,13 @@ export const POST = withApiHandler(
       where: { id: params.id },
       data: { bannedAt: new Date(), bannedReason: parsed.data.reason ?? null },
       select: { id: true, fullName: true, bannedAt: true, bannedReason: true },
+    });
+
+    // Persist the mobile in banned_mobiles so the ban survives account deletion
+    await recordBannedMobile({
+      id: profile.id,
+      mobile: profile.mobile,
+      bannedReason: parsed.data.reason ?? null,
     });
 
     const { ip, userAgent } = getClientInfo(req);
@@ -83,6 +91,9 @@ export const DELETE = withApiHandler(
       data: { bannedAt: null, bannedReason: null },
       select: { id: true, fullName: true, bannedAt: true },
     });
+
+    // Lift the persisted mobile ban as well (matches on profile id too)
+    await clearBannedMobile(profile.id);
 
     const { ip, userAgent } = getClientInfo(req);
     await auditLog({

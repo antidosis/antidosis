@@ -14,16 +14,16 @@ export default function TermsPage() {
       <div className="py-6">
         <Link
           href="/"
-          className="inline-flex items-center text-[13px] text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors"
+          className="inline-flex items-center text-[13px] text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />$ cd ~/
         </Link>
       </div>
 
-      <p className="text-[12px] text-[#7a6b5a] mb-4">$ cat /etc/antidosis/terms-of-service.md</p>
+      <p className="text-[12px] text-[#8f7f6e] mb-4">$ cat /etc/antidosis/terms-of-service.md</p>
       <h1 className="text-3xl font-bold mb-2 text-[#e8d5a3]">Terms of Service</h1>
-      <p className="text-[13px] text-[#7a6b5a]/70 mb-10">
-        Last updated: 17 May 2026 &middot; Please read these terms carefully before using antidosis
+      <p className="text-[13px] text-[#8f7f6e]/70 mb-10">
+        Last updated: 22 July 2026 &middot; Please read these terms carefully before using antidosis
       </p>
 
       <article className="space-y-10 text-[15px] text-[#b8a078] leading-relaxed">
@@ -76,7 +76,7 @@ export default function TermsPage() {
             </li>
             <li>Form binding exchange contracts with other users using our contract tools</li>
             <li>Build reputation through a review and rating system</li>
-            <li>Participate in community terminal channels and direct messaging</li>
+            <li>Participate in community relay channels and direct messaging</li>
           </ul>
           <p>
             <strong>Important:</strong> Antidosis is a platform that connects users. We do not
@@ -446,8 +446,9 @@ export default function TermsPage() {
             </li>
           </ul>
           <p>
-            Some jurisdictions do not allow the exclusion or limitation of certain damages, so the
-            above limitations may not apply to you.
+            Nothing in these Terms excludes, restricts or modifies any consumer guarantee, right or
+            remedy you have under the Australian Consumer Law. To the extent permitted by law, our
+            liability is limited as set out above.
           </p>
         </section>
 
@@ -535,7 +536,7 @@ export default function TermsPage() {
           </div>
         </section>
 
-        <p className="text-[13px] text-[#7a6b5a]/50 pt-6 border-t border-[#7a6b5a]/10">
+        <p className="text-[13px] text-[#8f7f6e]/50 pt-6 border-t border-[#7a6b5a]/10">
           Last updated: 17 May 2026
         </p>
       </article>

@@ -75,12 +75,12 @@ export function PosterProfileCard({
             )}
           </div>
           {profileId ? (
-            <div className="flex flex-wrap items-center gap-3 text-xs text-[#7a6b5a] mt-0.5">
+            <div className="flex flex-wrap items-center gap-3 text-xs text-[#8f7f6e] mt-0.5">
               {poster.ratingCount > 0 && (
                 <span className="flex items-center gap-1">
                   <Star className="h-3 w-3 text-[#f5a623]" />
                   {poster.ratingAvg.toFixed(1)}
-                  <span className="text-[#7a6b5a]/60">({poster.ratingCount})</span>
+                  <span className="text-[#8f7f6e]/60">({poster.ratingCount})</span>
                 </span>
               )}
               {poster.jobsCompleted > 0 && (
@@ -97,14 +97,14 @@ export function PosterProfileCard({
               )}
             </div>
           ) : (
-            <p className="text-xs text-[#7a6b5a] mt-0.5">log in to see full profile</p>
+            <p className="text-xs text-[#8f7f6e] mt-0.5">log in to see full profile</p>
           )}
         </div>
         {profileId && (
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 px-2 text-[#7a6b5a] hover:text-[#e8d5a3]"
+            className="h-8 px-2 text-[#8f7f6e] hover:text-[#e8d5a3]"
             onClick={onToggleExpand}
           >
             {profileExpanded ? (
@@ -123,12 +123,12 @@ export function PosterProfileCard({
 
           {poster.skills.length > 0 && (
             <div>
-              <p className="text-[10px] text-[#7a6b5a] uppercase tracking-wider mb-2">skills</p>
+              <p className="text-[10px] text-[#8f7f6e] uppercase tracking-wider mb-2">skills</p>
               <div className="flex flex-wrap gap-1.5">
                 {poster.skills.map((s) => (
                   <span
                     key={s.id}
-                    className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide border border-[#2a2420] text-[#7a6b5a] bg-[#1a1714] rounded"
+                    className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide border border-[#2a2420] text-[#8f7f6e] bg-[#1a1714] rounded"
                   >
                     {s.name}
                     {s.isVerified && <span className="text-[#00e676] ml-0.5">✓</span>}
@@ -140,7 +140,7 @@ export function PosterProfileCard({
 
           {poster.socialLinks.length > 0 && (
             <div>
-              <p className="text-[10px] text-[#7a6b5a] uppercase tracking-wider mb-2">links</p>
+              <p className="text-[10px] text-[#8f7f6e] uppercase tracking-wider mb-2">links</p>
               <div className="flex flex-wrap gap-3">
                 {poster.socialLinks.map((link) => (
                   <a
@@ -160,14 +160,14 @@ export function PosterProfileCard({
 
           {/* Credentials (lazy loaded) */}
           <div>
-            <p className="text-[10px] text-[#7a6b5a] uppercase tracking-wider mb-2">credentials</p>
+            <p className="text-[10px] text-[#8f7f6e] uppercase tracking-wider mb-2">credentials</p>
             {credLoading ? (
-              <div className="flex items-center gap-2 text-xs text-[#7a6b5a]">
+              <div className="flex items-center gap-2 text-xs text-[#8f7f6e]">
                 <Loader2 className="h-3 w-3 animate-spin" />
                 loading...
               </div>
             ) : credentials.length === 0 ? (
-              <p className="text-xs text-[#7a6b5a]">no public credentials</p>
+              <p className="text-xs text-[#8f7f6e]">no public credentials</p>
             ) : (
               <div className="space-y-2">
                 {credentials.map((cred) => (
@@ -175,12 +175,12 @@ export function PosterProfileCard({
                     <div className="flex items-center gap-2 flex-wrap">
                       <Award className="h-3.5 w-3.5 text-[#f5a623]" />
                       <span className="text-sm font-medium text-[#e8d5a3]">{cred.title}</span>
-                      <span className="px-1.5 py-0 text-[9px] uppercase tracking-wide border border-[#2a2420] text-[#7a6b5a]">
+                      <span className="px-1.5 py-0 text-[9px] uppercase tracking-wide border border-[#2a2420] text-[#8f7f6e]">
                         {cred.type}
                       </span>
                       {cred.isVerified && <Shield className="h-3 w-3 text-[#00e676]" />}
                     </div>
-                    <div className="text-xs text-[#7a6b5a] mt-1 space-y-0.5">
+                    <div className="text-xs text-[#8f7f6e] mt-1 space-y-0.5">
                       {cred.issuedBy && <p>issued by: {cred.issuedBy}</p>}
                       {cred.expiresAt && (
                         <p>
@@ -218,7 +218,7 @@ export function PosterProfileCard({
       {/* Guest lock */}
       {!profileId && (
         <div className="mt-3 bg-[#1a1714] border border-[#2a2420] p-3 rounded">
-          <div className="flex items-center gap-2 text-[#7a6b5a]">
+          <div className="flex items-center gap-2 text-[#8f7f6e]">
             <Lock className="h-3.5 w-3.5" />
             <p className="text-xs">profile details are only visible to registered users</p>
           </div>

@@ -3,25 +3,12 @@ import { type NextRequest, NextResponse } from "next/server";
 import { withApiHandler } from "@/lib/api-handler";
 import { auditLog, getClientInfo } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
-import { rateLimit } from "@/lib/rate-limit";
+import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { withCors } from "@/lib/security/cors";
 import { createClient } from "@/lib/supabase/server";
 
 export const POST = withCors(
   withApiHandler(async (req: NextRequest) => {
-    // Rate limit: 3 claims per hour per IP
-    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-    const limit = await rateLimit(`pro-claim:${clientIp}`, {
-      maxRequests: 3,
-      windowMs: 60 * 60 * 1000,
-    });
-    if (!limit.allowed) {
-      return NextResponse.json(
-        { error: "Rate limit exceeded. Try again later." },
-        { status: 429, headers: { "X-RateLimit-Remaining": "0" } }
-      );
-    }
-
     const supabase = createClient();
     const {
       data: { user },
@@ -37,12 +24,39 @@ export const POST = withCors(
       );
     }
 
+    // Rate limit: 3 claims per hour per authenticated user (not raw IP —
+    // x-forwarded-for is spoofable and shared behind NAT)
+    const limit = await rateLimit(
+      getRateLimitIdentifier(req, user.id),
+      {
+        maxRequests: 3,
+        windowMs: 60 * 60 * 1000,
+      },
+      "pro-claim"
+    );
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: "Rate limit exceeded. Try again later." },
+        { status: 429, headers: { "X-RateLimit-Remaining": "0" } }
+      );
+    }
+
     const profile = await prisma.profile.findUnique({
       where: { userId: user.id },
     });
 
     if (!profile) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    }
+
+    if (profile.bannedAt) {
+      return NextResponse.json(
+        {
+          error: "This account is suspended and cannot participate in exchanges.",
+          code: "ACCOUNT_SUSPENDED",
+        },
+        { status: 403 }
+      );
     }
 
     // Must have verified identity (admin-approved identification credential)

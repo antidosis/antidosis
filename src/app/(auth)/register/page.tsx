@@ -24,6 +24,7 @@ export default function RegisterPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [mobile, setMobile] = useState("");
   const [agreeTos, setAgreeTos] = useState(false);
+  const [confirmAge, setConfirmAge] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -53,6 +54,12 @@ export default function RegisterPage() {
 
     if (!agreeTos) {
       setError("you must agree to the terms of service.");
+      setLoading(false);
+      return;
+    }
+
+    if (!confirmAge) {
+      setError("you must confirm you are 18 years or older.");
       setLoading(false);
       return;
     }
@@ -125,7 +132,7 @@ export default function RegisterPage() {
 
       <div className="flex-1 flex items-center justify-center px-4">
         <div className="w-full max-w-sm">
-          <p className="text-xs text-[#7a6b5a] mb-8">$ register --new-user</p>
+          <p className="text-xs text-[#8f7f6e] mb-8">$ register --new-user</p>
           <h1 className="heading-display text-2xl text-[#e8d5a3] mb-2">
             create_account
             <TerminalCursor />
@@ -158,7 +165,7 @@ export default function RegisterPage() {
             <div className="space-y-2">
               <Label htmlFor="mobile">mobile_number</Label>
               <div className="relative">
-                <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#7a6b5a]" />
+                <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8f7f6e]" />
                 <Input
                   id="mobile"
                   type="tel"
@@ -168,7 +175,7 @@ export default function RegisterPage() {
                   className="pl-10"
                 />
               </div>
-              <p className="text-xs text-[#7a6b5a]">optional. australian mobiles only.</p>
+              <p className="text-xs text-[#8f7f6e]">optional. australian mobiles only.</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">password</Label>
@@ -185,7 +192,7 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#7a6b5a] hover:text-[#e8d5a3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f5a623] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0806] rounded-sm"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8f7f6e] hover:text-[#e8d5a3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f5a623] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0806] rounded-sm"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -194,7 +201,7 @@ export default function RegisterPage() {
               {password.length > 0 && (
                 <div className="space-y-2 mt-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-[#7a6b5a]">strength</span>
+                    <span className="text-xs text-[#8f7f6e]">strength</span>
                     <span className={`text-xs font-medium ${strengthColor}`}>
                       {strength.replace("-", " ")}
                     </span>
@@ -225,7 +232,7 @@ export default function RegisterPage() {
                         ) : (
                           <X className="h-3 w-3 text-[#ff5252]" />
                         )}
-                        <span className="text-xs text-[#7a6b5a]">{req.label}</span>
+                        <span className="text-xs text-[#8f7f6e]">{req.label}</span>
                       </div>
                     ))}
                   </div>
@@ -248,7 +255,7 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#7a6b5a] hover:text-[#e8d5a3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f5a623] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0806] rounded-sm"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8f7f6e] hover:text-[#e8d5a3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f5a623] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0806] rounded-sm"
                 >
                   {showConfirmPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -269,12 +276,32 @@ export default function RegisterPage() {
               />
               <Label
                 htmlFor="tos"
-                className="text-xs text-[#7a6b5a] font-normal leading-relaxed cursor-pointer"
+                className="text-xs text-[#8f7f6e] font-normal leading-relaxed cursor-pointer"
               >
                 i agree to the{" "}
                 <Link href="/terms" className="text-[#f5a623] hover:underline underline-offset-4">
                   terms of service
+                </Link>{" "}
+                and{" "}
+                <Link href="/privacy" className="text-[#f5a623] hover:underline underline-offset-4">
+                  privacy policy
                 </Link>
+              </Label>
+            </div>
+
+            <div className="flex items-start gap-2">
+              <input
+                id="age"
+                type="checkbox"
+                checked={confirmAge}
+                onChange={(e) => setConfirmAge(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-[#2a2420] bg-[#0f0c0a] text-[#f5a623] focus-visible:ring-2 focus-visible:ring-[#f5a623] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0806]"
+              />
+              <Label
+                htmlFor="age"
+                className="text-xs text-[#8f7f6e] font-normal leading-relaxed cursor-pointer"
+              >
+                i confirm i am 18 years or older
               </Label>
             </div>
 
@@ -284,7 +311,7 @@ export default function RegisterPage() {
             </Button>
           </form>
 
-          <p className="mt-12 text-sm text-[#7a6b5a]">
+          <p className="mt-12 text-sm text-[#8f7f6e]">
             have account?{" "}
             <Button variant="link" size="sm" asChild>
               <Link href="/login">login</Link>

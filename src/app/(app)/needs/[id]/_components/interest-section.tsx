@@ -104,7 +104,7 @@ export function InterestSection({
       {/* Interest form — non-poster only */}
       {canExpressInterest && showInterestForm && profileId && !hasOffered && (
         <div className="vessel p-4">
-          <p className="text-xs text-[#7a6b5a] mb-3">
+          <p className="text-xs text-[#8f7f6e] mb-3">
             tell the poster why you are a good fit. you can also message them below to ask questions
             first.
           </p>
@@ -118,7 +118,7 @@ export function InterestSection({
                 className="text-sm"
                 maxLength={1000}
               />
-              <p className="text-xs text-[#7a6b5a] mt-1 text-right">{offerMessage.length}/1000</p>
+              <p className="text-xs text-[#8f7f6e] mt-1 text-right">{offerMessage.length}/1000</p>
             </div>
             <Button type="submit" variant="default" size="sm" disabled={submittingOffer}>
               {submittingOffer ? (
@@ -146,7 +146,7 @@ export function InterestSection({
           }`}
         >
           <div className="flex items-center gap-2">
-            {myAcceptance.status === "pending" && <Clock className="h-4 w-4 text-[#7a6b5a]" />}
+            {myAcceptance.status === "pending" && <Clock className="h-4 w-4 text-[#8f7f6e]" />}
             {myAcceptance.status === "accepted" && <Check className="h-4 w-4 text-[#00e676]" />}
             {myAcceptance.status === "declined" && <X className="h-4 w-4 text-[#ff5252]" />}
             <p
@@ -155,7 +155,7 @@ export function InterestSection({
                   ? "text-[#00e676]"
                   : myAcceptance.status === "declined"
                     ? "text-[#ff5252]"
-                    : "text-[#7a6b5a]"
+                    : "text-[#8f7f6e]"
               }`}
             >
               {myAcceptance.status === "pending" && "your interest is pending review"}
@@ -175,7 +175,7 @@ export function InterestSection({
           </div>
           {myAcceptance.message && (
             <div className="mt-2 bg-[#0f0c0a] p-2.5 rounded text-xs text-[#b8a078]">
-              <span className="text-[#7a6b5a] uppercase tracking-wider text-[9px]">
+              <span className="text-[#8f7f6e] uppercase tracking-wider text-[9px]">
                 your intro:{" "}
               </span>
               {myAcceptance.message}

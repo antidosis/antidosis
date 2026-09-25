@@ -477,7 +477,7 @@ export async function handleComplete(ctx: HandlerContext): Promise<HandlerResult
 
 export async function handleCancel(ctx: HandlerContext): Promise<HandlerResult> {
   const id = ctx.args[0];
-  const reason = ctx.args.slice(1).join(" ") || "Cancelled via terminal";
+  const reason = ctx.args.slice(1).join(" ") || "Cancelled via Relay";
   if (!id) {
     ctx.addSys("Usage: /cancel <contract-id> [reason]", "error");
     return { handled: true };
@@ -497,7 +497,7 @@ export async function handleCancel(ctx: HandlerContext): Promise<HandlerResult> 
 
 export async function handleRequestCancel(ctx: HandlerContext): Promise<HandlerResult> {
   const id = ctx.args[0];
-  const reason = ctx.args.slice(1).join(" ") || "Cancel request via terminal";
+  const reason = ctx.args.slice(1).join(" ") || "Cancel request via Relay";
   if (!id) {
     ctx.addSys("Usage: /request-cancel <contract-id> [reason]", "error");
     return { handled: true };

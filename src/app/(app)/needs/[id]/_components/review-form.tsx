@@ -34,7 +34,7 @@ export function ReviewForm({
     <div className="bg-[#1a1714] border border-[#2a2420] p-3 rounded space-y-3">
       <p className="text-xs text-[#e8d5a3] font-medium">{title || "Leave a review"}</p>
       <div>
-        <label className="text-xs text-[#7a6b5a] block mb-1">Rating (1–10)</label>
+        <label className="text-xs text-[#8f7f6e] block mb-1">Rating (1–10)</label>
         <input
           type="range"
           min={1}
@@ -43,7 +43,7 @@ export function ReviewForm({
           onChange={(e) => onRatingChange(parseInt(e.target.value))}
           className="w-full accent-[#f5a623]"
         />
-        <div className="flex justify-between text-xs text-[#7a6b5a] mt-1">
+        <div className="flex justify-between text-xs text-[#8f7f6e] mt-1">
           <span>1</span>
           <span className="text-[#f5a623] font-medium">{rating}</span>
           <span>10</span>

@@ -81,7 +81,7 @@ export default function DemoProfilePage() {
     router.replace(`/profile/${id}`);
     return (
       <div className="max-w-3xl mx-auto px-4 md:px-8 py-24 text-center">
-        <Loader2 className="h-6 w-6 animate-spin mx-auto text-[#7a6b5a]" />
+        <Loader2 className="h-6 w-6 animate-spin mx-auto text-[#8f7f6e]" />
       </div>
     );
   }
@@ -95,7 +95,7 @@ export default function DemoProfilePage() {
       <div className="py-6 flex items-center justify-between">
         <Link
           href="/demo/contract-flow"
-          className="inline-flex items-center text-sm text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors"
+          className="inline-flex items-center text-sm text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to demo
@@ -105,7 +105,7 @@ export default function DemoProfilePage() {
         </Badge>
       </div>
 
-      <p className="text-xs text-[#7a6b5a] mb-4">$ finger {username}</p>
+      <p className="text-xs text-[#8f7f6e] mb-4">$ finger {username}</p>
 
       {/* Profile Header */}
       <div className="vessel p-6">

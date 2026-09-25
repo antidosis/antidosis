@@ -65,14 +65,14 @@ export function LocationAutocomplete({
               className="w-full text-left px-3 py-2 text-sm hover:bg-[#1a1714] transition-colors"
             >
               <span className="text-[#e8d5a3]">{suburb.name}</span>
-              <span className="text-[#7a6b5a] ml-2">{suburb.postcode}</span>
-              <span className="text-[#7a6b5a] ml-2 text-xs">{suburb.formatted}</span>
+              <span className="text-[#8f7f6e] ml-2">{suburb.postcode}</span>
+              <span className="text-[#8f7f6e] ml-2 text-xs">{suburb.formatted}</span>
             </button>
           ))}
         </div>
       )}
       {value && !open && (
-        <p className="text-xs text-[#7a6b5a] mt-1">
+        <p className="text-xs text-[#8f7f6e] mt-1">
           stored as: <span className="text-[#f5a623]">{value}</span>
         </p>
       )}

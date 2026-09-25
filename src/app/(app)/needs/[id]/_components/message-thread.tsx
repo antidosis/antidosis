@@ -100,8 +100,8 @@ export function MessageThread({
   return (
     <div ref={messagesRef} className="vessel p-4">
       <div className="flex items-center gap-2 mb-4">
-        <MessageSquare className="h-3.5 w-3.5 text-[#7a6b5a]" />
-        <span className="text-xs text-[#7a6b5a] uppercase tracking-wider">
+        <MessageSquare className="h-3.5 w-3.5 text-[#8f7f6e]" />
+        <span className="text-xs text-[#8f7f6e] uppercase tracking-wider">
           {isPoster && activeMessageThread
             ? "private messages"
             : hasOffered
@@ -118,7 +118,7 @@ export function MessageThread({
             className={`px-3 py-1.5 text-xs rounded whitespace-nowrap transition-colors ${
               activeMessageThread === null
                 ? "bg-[#f5a623] text-[#0a0806] font-medium"
-                : "bg-[#1a1714] text-[#7a6b5a] hover:text-[#e8d5a3]"
+                : "bg-[#1a1714] text-[#8f7f6e] hover:text-[#e8d5a3]"
             }`}
           >
             Public
@@ -132,7 +132,7 @@ export function MessageThread({
                 className={`px-3 py-1.5 text-xs rounded whitespace-nowrap transition-colors ${
                   activeMessageThread === a.id
                     ? "bg-[#f5a623] text-[#0a0806] font-medium"
-                    : "bg-[#1a1714] text-[#7a6b5a] hover:text-[#e8d5a3]"
+                    : "bg-[#1a1714] text-[#8f7f6e] hover:text-[#e8d5a3]"
                 }`}
               >
                 {a.user.fullName || "anonymous"}
@@ -161,7 +161,7 @@ export function MessageThread({
 
       <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
         {filtered.length === 0 && (
-          <p className="text-xs text-[#7a6b5a] text-center py-4">
+          <p className="text-xs text-[#8f7f6e] text-center py-4">
             {isPoster && activeMessageThread
               ? "no private messages yet. send one to reach out directly."
               : isPoster
@@ -184,11 +184,11 @@ export function MessageThread({
                   : "bg-[#12100e] text-[#b8a078] border border-[#2a2420]"
               }`}
             >
-              <p className="text-[10px] text-[#7a6b5a] uppercase tracking-wider mb-1">
+              <p className="text-[10px] text-[#8f7f6e] uppercase tracking-wider mb-1">
                 {msg.sender.fullName || "anonymous"}
               </p>
               <p>{msg.content}</p>
-              <p className="text-[10px] text-[#7a6b5a] mt-1">
+              <p className="text-[10px] text-[#8f7f6e] mt-1">
                 {new Date(msg.createdAt).toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",

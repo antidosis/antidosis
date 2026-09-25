@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { withApiHandler } from "@/lib/api-handler";
 import { isValidCentralCoastSuburb } from "@/lib/data/central-coast-suburbs";
+import { requireVerifiedParticipation } from "@/lib/participation";
 import { prisma } from "@/lib/prisma";
 import { resolveEntityId } from "@/lib/resolve-id";
 import { updateNeedSchema } from "@/lib/schemas";
@@ -174,13 +175,8 @@ export const PATCH = withApiHandler(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const profile = await prisma.profile.findUnique({
-      where: { userId: user.id },
-      select: { id: true },
-    });
-    if (!profile) {
-      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
-    }
+    const participation = await requireVerifiedParticipation(user.id);
+    if (!participation.ok) return participation.response;
 
     const needId = await resolveEntityId("need", params.id);
     if (!needId) {
@@ -194,7 +190,7 @@ export const PATCH = withApiHandler(
     if (!existingNeed) {
       return NextResponse.json({ error: "Need not found" }, { status: 404 });
     }
-    if (existingNeed.posterId !== profile.id) {
+    if (existingNeed.posterId !== participation.profileId) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
     if (existingNeed.status !== "open" && existingNeed.status !== "archived") {
@@ -301,13 +297,8 @@ export const DELETE = withApiHandler(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const profile = await prisma.profile.findUnique({
-      where: { userId: user.id },
-      select: { id: true },
-    });
-    if (!profile) {
-      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
-    }
+    const participation = await requireVerifiedParticipation(user.id);
+    if (!participation.ok) return participation.response;
 
     const needId = await resolveEntityId("need", params.id);
     if (!needId) {
@@ -321,7 +312,7 @@ export const DELETE = withApiHandler(
     if (!existingNeed) {
       return NextResponse.json({ error: "Need not found" }, { status: 404 });
     }
-    if (existingNeed.posterId !== profile.id) {
+    if (existingNeed.posterId !== participation.profileId) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
     if (existingNeed.status !== "open") {

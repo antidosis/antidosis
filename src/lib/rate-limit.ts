@@ -90,11 +90,20 @@ function memoryRateLimit(key: string, options: RateLimitOptions): RateLimitResul
   };
 }
 
+/**
+ * Check (and consume) rate-limit budget for an identifier.
+ *
+ * `scope` namespaces the counter per endpoint (e.g. "send-otp", "upload") so
+ * each endpoint gets an independent budget instead of sharing one counter per
+ * user/IP. Keys look like `ratelimit:v1:<scope>:user:<id>`. Callers that omit
+ * `scope` keep the legacy unscoped key.
+ */
 export async function rateLimit(
   identifier: string,
-  options: RateLimitOptions = { windowMs: 60_000, maxRequests: 30 }
+  options: RateLimitOptions = { windowMs: 60_000, maxRequests: 30 },
+  scope?: string
 ): Promise<RateLimitResult> {
-  const key = `ratelimit:v1:${identifier}`;
+  const key = scope ? `ratelimit:v1:${scope}:${identifier}` : `ratelimit:v1:${identifier}`;
 
   if (redis) {
     try {

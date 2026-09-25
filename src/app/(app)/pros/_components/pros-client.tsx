@@ -49,11 +49,11 @@ export default function ProsDirectoryPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 md:px-8">
       <div className="py-10">
-        <p className="text-xs text-[#7a6b5a] mb-4">$ ls /pros</p>
+        <p className="text-xs text-[#8f7f6e] mb-4">$ ls /pros</p>
         <h1 className="heading-display text-2xl text-[#e8d5a3]">
           pro <span className="text-[#f5a623]">directory</span>
         </h1>
-        <p className="text-sm text-[#7a6b5a] max-w-lg mt-4">
+        <p className="text-sm text-[#8f7f6e] max-w-lg mt-4">
           trusted traders who have committed to the pro standard. browse, connect, trade.
         </p>
       </div>
@@ -61,7 +61,7 @@ export default function ProsDirectoryPage() {
       {/* Search */}
       <div className="vessel p-4 mb-8">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#7a6b5a]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8f7f6e]" />
           <Input
             placeholder="search by name, skill, location..."
             value={query}
@@ -73,7 +73,7 @@ export default function ProsDirectoryPage() {
               variant="ghost"
               size="icon"
               onClick={() => setQuery("")}
-              className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-[#7a6b5a] hover:text-[#e8d5a3]"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-[#8f7f6e] hover:text-[#e8d5a3]"
             >
               <X className="h-4 w-4" />
             </Button>
@@ -83,7 +83,7 @@ export default function ProsDirectoryPage() {
 
       {isLoading && !pros ? (
         <div className="py-12 text-center">
-          <Loader2 className="h-6 w-6 animate-spin mx-auto text-[#7a6b5a]" />
+          <Loader2 className="h-6 w-6 animate-spin mx-auto text-[#8f7f6e]" />
         </div>
       ) : error ? (
         <div className="border border-[#ff5252]/20 bg-[#ff5252]/5 p-6 mb-8 text-center">
@@ -167,7 +167,7 @@ export default function ProsDirectoryPage() {
                     )}
                   </div>
 
-                  {pro.bio && <p className="text-sm text-[#7a6b5a] mt-3 line-clamp-2">{pro.bio}</p>}
+                  {pro.bio && <p className="text-sm text-[#8f7f6e] mt-3 line-clamp-2">{pro.bio}</p>}
 
                   {pro.skills.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-3">
@@ -188,7 +188,7 @@ export default function ProsDirectoryPage() {
         </div>
       )}
 
-      <p className="text-center text-xs text-[#7a6b5a]/50 py-12">sorted by rating.</p>
+      <p className="text-center text-xs text-[#8f7f6e]/50 py-12">sorted by rating.</p>
     </div>
   );
 }

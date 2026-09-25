@@ -15,6 +15,7 @@ import {
   ShieldAlert,
 } from "lucide-react";
 
+import { ReportButton } from "@/components/report-button";
 import { Badge } from "@/components/ui/badge";
 import { CopyLinkButton } from "@/components/ui/copy-link";
 import { getExchangeMode } from "@/lib/categories";
@@ -61,15 +62,18 @@ export function NeedContent({ need, descExpanded, onToggleDesc }: NeedContentPro
       <div className="pt-6 pb-2 flex items-center justify-between">
         <Link
           href="/needs"
-          className="inline-flex items-center text-xs text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors"
+          className="inline-flex items-center text-xs text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
         >
           <ArrowLeft className="mr-1.5 h-3.5 w-3.5" />
           browse needs
         </Link>
-        <CopyLinkButton
-          url={`${typeof window !== "undefined" ? window.location.origin : ""}/needs/${need.id}`}
-          label="Copy link"
-        />
+        <div className="flex items-center gap-4">
+          <CopyLinkButton
+            url={`${typeof window !== "undefined" ? window.location.origin : ""}/needs/${need.id}`}
+            label="Copy link"
+          />
+          <ReportButton targetType="need" targetId={need.id} />
+        </div>
       </div>
 
       <div className="flex flex-wrap items-start gap-3 mb-3">
@@ -101,7 +105,7 @@ export function NeedContent({ need, descExpanded, onToggleDesc }: NeedContentPro
         {need.requiredSkills.map((s) => (
           <span
             key={s.id}
-            className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-[#2a2420] text-[#7a6b5a] bg-[#1a1714] rounded"
+            className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-[#2a2420] text-[#8f7f6e] bg-[#1a1714] rounded"
           >
             {s.name}
           </span>
@@ -118,11 +122,11 @@ export function NeedContent({ need, descExpanded, onToggleDesc }: NeedContentPro
               </span>
             );
           })()}
-        <span className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-[#2a2420] text-[#7a6b5a] bg-[#1a1714] rounded flex items-center gap-1">
+        <span className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-[#2a2420] text-[#8f7f6e] bg-[#1a1714] rounded flex items-center gap-1">
           <MapPin className="h-3 w-3" /> local
         </span>
         {need.deadline && (
-          <span className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-[#2a2420] text-[#7a6b5a] bg-[#1a1714] rounded flex items-center gap-1">
+          <span className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-[#2a2420] text-[#8f7f6e] bg-[#1a1714] rounded flex items-center gap-1">
             <Calendar className="h-3 w-3" />
             {new Date(need.deadline).toLocaleDateString("en-AU", {
               day: "numeric",
@@ -131,7 +135,7 @@ export function NeedContent({ need, descExpanded, onToggleDesc }: NeedContentPro
           </span>
         )}
         {need.timeRange && (
-          <span className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-[#2a2420] text-[#7a6b5a] bg-[#1a1714] rounded flex items-center gap-1">
+          <span className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-[#2a2420] text-[#8f7f6e] bg-[#1a1714] rounded flex items-center gap-1">
             <Clock className="h-3 w-3" />
             {need.timeRange}
           </span>
@@ -189,7 +193,7 @@ export function NeedContent({ need, descExpanded, onToggleDesc }: NeedContentPro
       <div className="bg-[#00e5ff]/10 border border-[#00e5ff]/30 p-3 mb-6">
         <div className="flex items-start gap-2">
           <Info className="h-3.5 w-3.5 text-[#00e5ff] mt-0.5 flex-shrink-0" />
-          <p className="text-xs text-[#7a6b5a]">
+          <p className="text-xs text-[#8f7f6e]">
             Central Coast NSW trial region — all needs are local during the pilot.
           </p>
         </div>
@@ -199,8 +203,8 @@ export function NeedContent({ need, descExpanded, onToggleDesc }: NeedContentPro
       {need.images.length > 0 && (
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-2">
-            <Camera className="h-3.5 w-3.5 text-[#7a6b5a]" />
-            <span className="text-xs text-[#7a6b5a] uppercase tracking-wider">need images</span>
+            <Camera className="h-3.5 w-3.5 text-[#8f7f6e]" />
+            <span className="text-xs text-[#8f7f6e] uppercase tracking-wider">need images</span>
           </div>
           <div className="flex gap-2 overflow-x-auto pb-2 snap-x">
             {need.images.map((url, i) => (
@@ -219,7 +223,7 @@ export function NeedContent({ need, descExpanded, onToggleDesc }: NeedContentPro
       <div className="vessel p-4 mb-6">
         <div className="flex items-center gap-2 mb-2">
           {offerIcon}
-          <span className="text-xs text-[#7a6b5a] uppercase tracking-wider">
+          <span className="text-xs text-[#8f7f6e] uppercase tracking-wider">
             offering in exchange
           </span>
         </div>

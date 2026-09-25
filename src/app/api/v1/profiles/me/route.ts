@@ -1,11 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import { withApiHandler } from "@/lib/api-handler";
+import { recordBannedMobile } from "@/lib/bans";
 import { isValidCentralCoastSuburb } from "@/lib/data/central-coast-suburbs";
+import { logger } from "@/lib/logger";
 import { normalizeMobile, isValidAustralianMobile } from "@/lib/mobile";
 import { prisma } from "@/lib/prisma";
 import { updateProfileSchema } from "@/lib/schemas";
 import { sanitizeUrl } from "@/lib/security/url";
+import { extractStoragePath, bucketForPath } from "@/lib/storage";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -170,10 +173,15 @@ export const DELETE = withApiHandler(async () => {
     select: {
       id: true,
       userId: true,
+      mobile: true,
+      bannedAt: true,
+      bannedReason: true,
+      avatarUrl: true,
       stripeCustomerId: true,
       stripeSubscriptionId: true,
       playStorePurchaseToken: true,
       playStoreProductId: true,
+      credentials: { select: { fileUrl: true, backFileUrl: true } },
     },
   });
 
@@ -211,16 +219,99 @@ export const DELETE = withApiHandler(async () => {
     }
   }
 
+  // Ban persistence: if this account is banned, record the mobile BEFORE
+  // scrubbing it — otherwise self-deletion would free the number for
+  // re-registration with a fresh email (fail closed on error).
+  if (profile.bannedAt && profile.mobile) {
+    await recordBannedMobile({
+      id: profile.id,
+      mobile: profile.mobile,
+      bannedReason: profile.bannedReason,
+    });
+  }
+
+  // Best-effort storage cleanup (avatar + identity documents). Deletion
+  // proceeds even if storage cleanup fails — the DB scrub removes the URLs.
+  try {
+    const urls: (string | null)[] = [profile.avatarUrl];
+    for (const cred of profile.credentials) {
+      urls.push(cred.fileUrl, cred.backFileUrl);
+    }
+    await deleteStorageObjects(urls);
+  } catch (err) {
+    logger.error(
+      `Storage cleanup failed during account deletion (profile ${profile.id})`,
+      err instanceof Error ? err : undefined
+    );
+  }
+
+  // Remove dependent PII that anonymization would otherwise leave behind:
+  // identity documents, skills, social links, notifications.
+  await prisma.credential.deleteMany({ where: { profileId: profile.id } });
+  await prisma.skill.deleteMany({ where: { profileId: profile.id } });
+  await prisma.socialLink.deleteMany({ where: { profileId: profile.id } });
+  await prisma.notification.deleteMany({ where: { userId: profile.id } });
+
   // Clean up non-cascading records
   await prisma.auditLog.deleteMany({ where: { userId: profile.id } });
   await prisma.mobileVerificationCode.deleteMany({ where: { profileId: profile.id } });
 
-  // Delete profile — Prisma cascades all related data
-  await prisma.profile.delete({ where: { id: profile.id } });
+  // Anonymize the profile instead of hard-deleting it. Hard delete cascades
+  // through every FK and would wipe the counterparty's contracts, reviews,
+  // needs, and message history. The tombstone keeps those records intact;
+  // email/mobile are scrambled/nulled so unique constraints are freed for
+  // re-registration.
+  await prisma.profile.update({
+    where: { id: profile.id },
+    data: {
+      fullName: "Deleted User",
+      email: `deleted+${profile.id}@deleted.invalid`,
+      bio: null,
+      avatarUrl: null,
+      locationName: null,
+      latitude: null,
+      longitude: null,
+      publicPhone: null,
+      privatePhone: null,
+      mobile: null,
+      mobileVerified: false,
+      isVerified: false,
+      isPro: false,
+      proActivatedAt: null,
+      proSource: null,
+      proExpiresAt: null,
+      showInDirectory: false,
+      stripeCustomerId: null,
+      stripeSubscriptionId: null,
+      playStorePurchaseToken: null,
+      playStoreProductId: null,
+      playStoreAutoRenewing: null,
+      abn: null,
+      bannedAt: null,
+      bannedReason: null,
+    },
+  });
 
-  // Delete Supabase auth user (requires service-role key)
+  // Delete Supabase auth user (requires service-role key). The anonymized
+  // profile remains as a tombstone but can no longer be logged into.
   const admin = createAdminClient();
   await admin.auth.admin.deleteUser(user.id);
 
   return NextResponse.json({ success: true });
 });
+
+/** Delete storage objects by stored URL/path, grouped by bucket. */
+async function deleteStorageObjects(urls: (string | null | undefined)[]): Promise<void> {
+  const { createServiceClient } = await import("@/lib/supabase/service");
+  const service = createServiceClient();
+  const byBucket = new Map<string, string[]>();
+  for (const url of urls) {
+    const path = extractStoragePath(url);
+    if (!path) continue;
+    const bucket = bucketForPath(path);
+    byBucket.set(bucket, [...(byBucket.get(bucket) ?? []), path]);
+  }
+  for (const [bucket, paths] of Array.from(byBucket.entries())) {
+    await service.storage.from(bucket).remove(paths);
+  }
+}

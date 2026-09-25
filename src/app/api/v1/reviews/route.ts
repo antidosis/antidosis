@@ -27,10 +27,14 @@ export const POST = withApiHandler(async (req: NextRequest) => {
       );
     }
 
-    const limit = await rateLimit(getRateLimitIdentifier(req, user.id), {
-      windowMs: 60 * 60_000,
-      maxRequests: 20,
-    });
+    const limit = await rateLimit(
+      getRateLimitIdentifier(req, user.id),
+      {
+        windowMs: 60 * 60_000,
+        maxRequests: 20,
+      },
+      "reviews-post"
+    );
     if (!limit.allowed) {
       return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
     }

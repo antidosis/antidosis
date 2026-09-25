@@ -3,9 +3,9 @@ import type { Metadata } from "next";
 import TerminalClient from "./_components/terminal-client";
 
 export const metadata: Metadata = {
-  title: "Terminal — antidosis",
+  title: "Relay — antidosis",
   description:
-    "The Antidosis terminal. Connect with the community, send direct messages, and reach staff.",
+    "The Antidosis relay. Tune into community channels, send direct messages, and reach staff.",
 };
 
 export default function TerminalPage() {

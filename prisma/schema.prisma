@@ -8,63 +8,67 @@ datasource db {
 }
 
 model Profile {
-  id            String   @id @default(uuid())
-  userId        String   @unique @map("user_id")
-  email         String   @unique
-  fullName      String?  @map("full_name")
-  bio           String?
-  avatarUrl     String?  @map("avatar_url")
-  locationName  String?  @map("location_name")
-  latitude      Float?
-  longitude      Float?
-  publicPhone   String?  @map("public_phone")
-  privatePhone  String?  @map("private_phone")
-  mobile        String?  @unique
-  mobileVerified Boolean @default(false) @map("mobile_verified")
-  isVerified    Boolean  @default(false) @map("is_verified")
-  isPro         Boolean  @default(false) @map("is_pro")
-  proActivatedAt DateTime? @map("pro_activated_at")
-  proSource     String?   @map("pro_source")
-  proExpiresAt  DateTime? @map("pro_expires_at")
-  showInDirectory Boolean @default(false) @map("show_in_directory")
-  stripeCustomerId      String? @map("stripe_customer_id")
-  stripeSubscriptionId  String? @map("stripe_subscription_id")
-  playStorePurchaseToken  String?   @map("play_store_purchase_token")
-  playStoreProductId      String?   @map("play_store_product_id")
-  playStoreAutoRenewing   Boolean?  @map("play_store_auto_renewing")
-  ratingAvg     Float    @default(0) @map("rating_avg")
-  ratingCount   Int      @default(0) @map("rating_count")
-  jobsCompleted Int      @default(0) @map("jobs_completed")
-  abn           String?
-  bannedAt      DateTime? @map("banned_at")
-  bannedReason  String?   @map("banned_reason")
-  lastSeenAt    DateTime? @map("last_seen_at")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  id                     String    @id @default(uuid())
+  userId                 String    @unique @map("user_id")
+  email                  String    @unique
+  fullName               String?   @map("full_name")
+  bio                    String?
+  avatarUrl              String?   @map("avatar_url")
+  locationName           String?   @map("location_name")
+  latitude               Float?
+  longitude              Float?
+  publicPhone            String?   @map("public_phone")
+  privatePhone           String?   @map("private_phone")
+  mobile                 String?   @unique
+  mobileVerified         Boolean   @default(false) @map("mobile_verified")
+  isVerified             Boolean   @default(false) @map("is_verified")
+  isPro                  Boolean   @default(false) @map("is_pro")
+  proActivatedAt         DateTime? @map("pro_activated_at")
+  proSource              String?   @map("pro_source")
+  proExpiresAt           DateTime? @map("pro_expires_at")
+  showInDirectory        Boolean   @default(false) @map("show_in_directory")
+  stripeCustomerId       String?   @map("stripe_customer_id")
+  stripeSubscriptionId   String?   @map("stripe_subscription_id")
+  playStorePurchaseToken String?   @map("play_store_purchase_token")
+  playStoreProductId     String?   @map("play_store_product_id")
+  playStoreAutoRenewing  Boolean?  @map("play_store_auto_renewing")
+  ratingAvg              Float     @default(0) @map("rating_avg")
+  ratingCount            Int       @default(0) @map("rating_count")
+  jobsCompleted          Int       @default(0) @map("jobs_completed")
+  abn                    String?
+  bannedAt               DateTime? @map("banned_at")
+  bannedReason           String?   @map("banned_reason")
+  lastSeenAt             DateTime? @map("last_seen_at")
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @updatedAt @map("updated_at")
 
-  skills          Skill[]
-  socialLinks     SocialLink[]
-  credentials     Credential[]
-  needsPosted     Need[]       @relation("NeedPoster")
-  acceptances     Acceptance[]
-  contractsAsA    Contract[]   @relation("ContractPartyA")
-  contractsAsB    Contract[]   @relation("ContractPartyB")
-  reviewsGiven    Review[]     @relation("ReviewGiver")
-  reviewsReceived Review[]     @relation("ReviewReceiver")
-  messages        Message[]
-  needMessages    NeedMessage[]
-  notifications   Notification[]
+  skills           Skill[]
+  socialLinks      SocialLink[]
+  credentials      Credential[]
+  needsPosted      Need[]                @relation("NeedPoster")
+  acceptances      Acceptance[]
+  contractsAsA     Contract[]            @relation("ContractPartyA")
+  contractsAsB     Contract[]            @relation("ContractPartyB")
+  reviewsGiven     Review[]              @relation("ReviewGiver")
+  reviewsReceived  Review[]              @relation("ReviewReceiver")
+  messages         Message[]
+  needMessages     NeedMessage[]
+  notifications    Notification[]
   terminalMessages TerminalMessage[]
-  dmThreadsAsA    DirectMessageThread[] @relation("DMUserA")
-  dmThreadsAsB    DirectMessageThread[] @relation("DMUserB")
-  directMessages  DirectMessage[]
-  blocksInitiated Block[]               @relation("blocksInitiated")
-  blocksReceived  Block[]               @relation("blocksReceived")
-  friendsAsA      Friend[]              @relation("friendsAsA")
-  friendsAsB      Friend[]              @relation("friendsAsB")
+  dmThreadsAsA     DirectMessageThread[] @relation("DMUserA")
+  dmThreadsAsB     DirectMessageThread[] @relation("DMUserB")
+  directMessages   DirectMessage[]
+  blocksInitiated  Block[]               @relation("blocksInitiated")
+  blocksReceived   Block[]               @relation("blocksReceived")
+  friendsAsA       Friend[]              @relation("friendsAsA")
+  friendsAsB       Friend[]              @relation("friendsAsB")
+  reportsFiled     Report[]
+  deviceTokens     DeviceToken[]
 
   @@index([isPro])
   @@index([stripeCustomerId])
+  @@index([showInDirectory])
+  @@index([lastSeenAt])
   @@map("profiles")
 }
 
@@ -92,28 +96,28 @@ model Skill {
 }
 
 model Need {
-  id               String   @id @default(uuid())
-  posterId         String   @map("poster_id")
+  id               String    @id @default(uuid())
+  posterId         String    @map("poster_id")
   title            String
   description      String
-  needCategory     String?  @map("need_category")
-  offerType        String   @map("offer_type")
-  offerDescription String   @map("offer_description")
-  offerValue       Float?   @map("offer_value")
-  isLocal          Boolean  @default(true) @map("is_local")
-  locationName     String?  @map("location_name")
+  needCategory     String?   @map("need_category")
+  offerType        String    @map("offer_type")
+  offerDescription String    @map("offer_description")
+  offerValue       Float?    @map("offer_value")
+  isLocal          Boolean   @default(true) @map("is_local")
+  locationName     String?   @map("location_name")
   latitude         Float?
   longitude        Float?
-  status           String   @default("open")
-  requiresContract Boolean  @default(false) @map("requires_contract")
+  status           String    @default("open")
+  requiresContract Boolean   @default(false) @map("requires_contract")
   deadline         DateTime?
-  timeRange        String?  @map("time_range")
+  timeRange        String?   @map("time_range")
   images           String[]
-  offerImages      String[] @map("offer_images")
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
+  offerImages      String[]  @map("offer_images")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
 
-  poster         Profile      @relation("NeedPoster", fields: [posterId], references: [id], onDelete: Cascade)
+  poster         Profile       @relation("NeedPoster", fields: [posterId], references: [id], onDelete: Cascade)
   requiredSkills NeedSkill[]
   acceptances    Acceptance[]
   contracts      Contract[]
@@ -136,66 +140,67 @@ model NeedSkill {
 }
 
 model Acceptance {
-  id                     String   @id @default(uuid())
-  needId                 String   @map("need_id")
-  userId                 String   @map("user_id")
-  message                String?
-  status                 String   @default("pending")
-  posterMarkedComplete   Boolean  @default(false) @map("poster_marked_complete")
-  fulfillerMarkedComplete Boolean @default(false) @map("fulfiller_marked_complete")
-  createdAt              DateTime @default(now()) @map("created_at")
-  updatedAt              DateTime @updatedAt @map("updated_at")
+  id                      String   @id @default(uuid())
+  needId                  String   @map("need_id")
+  userId                  String   @map("user_id")
+  message                 String?
+  status                  String   @default("pending")
+  posterMarkedComplete    Boolean  @default(false) @map("poster_marked_complete")
+  fulfillerMarkedComplete Boolean  @default(false) @map("fulfiller_marked_complete")
+  createdAt               DateTime @default(now()) @map("created_at")
+  updatedAt               DateTime @updatedAt @map("updated_at")
 
-  need Need    @relation(fields: [needId], references: [id], onDelete: Cascade)
-  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  need     Need          @relation(fields: [needId], references: [id], onDelete: Cascade)
+  user     Profile       @relation(fields: [userId], references: [id], onDelete: Cascade)
   messages NeedMessage[]
   reviews  Review[]
 
-  @@map("acceptances")
+  @@unique([needId, userId])
   @@index([needId])
   @@index([userId])
+  @@map("acceptances")
 }
 
 model Contract {
-  id              String    @id @default(uuid())
-  needId          String    @map("need_id")
-  acceptanceId    String?   @unique @map("acceptance_id")
-  partyAId        String    @map("party_a_id")
-  partyBId        String    @map("party_b_id")
-  terms           String
-  partyATerms             String?   @map("party_a_terms")
-  partyBTerms             String?   @map("party_b_terms")
-  deadlineTerms           String?   @map("deadline_terms")
-  completionMethodTerms   String?   @map("completion_method_terms")
-  additionalTerms         String?   @map("additional_terms")
-  partyAUseMessageTerms   Boolean   @default(false) @map("party_a_use_message_terms")
-  partyBUseMessageTerms   Boolean   @default(false) @map("party_b_use_message_terms")
-  negotiationMessages Json? @map("negotiation_messages")
-  pdfUrl          String?   @map("pdf_url")
-  partyASubmittedAt DateTime? @map("party_a_submitted_at")
-  partyBSubmittedAt DateTime? @map("party_b_submitted_at")
-  partyAAgreedAt  DateTime? @map("party_a_agreed_at")
-  partyBAgreedAt  DateTime? @map("party_b_agreed_at")
-  termsLockedAt   DateTime? @map("terms_locked_at")
-  partyASignedAt  DateTime? @map("party_a_signed_at")
-  partyBSignedAt  DateTime? @map("party_b_signed_at")
-  partyASignature String?   @map("party_a_signature")
-  partyBSignature String?   @map("party_b_signature")
-  status          String    @default("draft")
-  aMarkedComplete Boolean   @default(false) @map("a_marked_complete")
-  bMarkedComplete Boolean   @default(false) @map("b_marked_complete")
-  completedAt     DateTime? @map("completed_at")
-  cancelledAt           DateTime? @map("cancelled_at")
-  cancelledById         String?   @map("cancelled_by_id")
-  cancelReason          String?   @map("cancel_reason")
-  cancelRequestedById   String?   @map("cancel_requested_by_id")
-  cancelRequestedAt     DateTime? @map("cancel_requested_at")
-  cancelResponse        String?   @map("cancel_response")
-  cancelResponseAt      DateTime? @map("cancel_response_at")
-  cancelEscalatedAt     DateTime? @map("cancel_escalated_at")
+  id                     String    @id @default(uuid())
+  needId                 String    @map("need_id")
+  acceptanceId           String?   @unique @map("acceptance_id")
+  partyAId               String    @map("party_a_id")
+  partyBId               String    @map("party_b_id")
+  terms                  String
+  partyATerms            String?   @map("party_a_terms")
+  partyBTerms            String?   @map("party_b_terms")
+  deadlineTerms          String?   @map("deadline_terms")
+  completionMethodTerms  String?   @map("completion_method_terms")
+  additionalTerms        String?   @map("additional_terms")
+  partyAUseMessageTerms  Boolean   @default(false) @map("party_a_use_message_terms")
+  partyBUseMessageTerms  Boolean   @default(false) @map("party_b_use_message_terms")
+  negotiationMessages    Json?     @map("negotiation_messages")
+  pdfUrl                 String?   @map("pdf_url")
+  partyASubmittedAt      DateTime? @map("party_a_submitted_at")
+  partyBSubmittedAt      DateTime? @map("party_b_submitted_at")
+  partyAAgreedAt         DateTime? @map("party_a_agreed_at")
+  partyBAgreedAt         DateTime? @map("party_b_agreed_at")
+  termsLockedAt          DateTime? @map("terms_locked_at")
+  partyASignedAt         DateTime? @map("party_a_signed_at")
+  partyBSignedAt         DateTime? @map("party_b_signed_at")
+  partyASignature        String?   @map("party_a_signature")
+  partyBSignature        String?   @map("party_b_signature")
+  status                 String    @default("draft")
+  aMarkedComplete        Boolean   @default(false) @map("a_marked_complete")
+  bMarkedComplete        Boolean   @default(false) @map("b_marked_complete")
+  completedAt            DateTime? @map("completed_at")
+  cancelledAt            DateTime? @map("cancelled_at")
+  cancelledById          String?   @map("cancelled_by_id")
+  cancelReason           String?   @map("cancel_reason")
+  cancelRequestedById    String?   @map("cancel_requested_by_id")
+  cancelRequestedAt      DateTime? @map("cancel_requested_at")
+  cancelResponse         String?   @map("cancel_response")
+  cancelResponseAt       DateTime? @map("cancel_response_at")
+  cancelEscalatedAt      DateTime? @map("cancel_escalated_at")
   lastSignReminderSentAt DateTime? @map("last_sign_reminder_sent_at")
-  createdAt       DateTime  @default(now()) @map("created_at")
-  updatedAt       DateTime  @updatedAt @map("updated_at")
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @updatedAt @map("updated_at")
 
   need     Need      @relation(fields: [needId], references: [id], onDelete: Cascade)
   partyA   Profile   @relation("ContractPartyA", fields: [partyAId], references: [id], onDelete: Cascade)
@@ -203,11 +208,11 @@ model Contract {
   messages Message[]
   reviews  Review[]
 
-  @@map("contracts")
   @@index([needId])
   @@index([partyAId])
   @@index([partyBId])
   @@index([status])
+  @@map("contracts")
 }
 
 model NeedMessage {
@@ -219,32 +224,34 @@ model NeedMessage {
   isRead       Boolean  @default(false) @map("is_read")
   createdAt    DateTime @default(now()) @map("created_at")
 
-  need      Need       @relation(fields: [needId], references: [id], onDelete: Cascade)
-  sender    Profile    @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  need       Need        @relation(fields: [needId], references: [id], onDelete: Cascade)
+  sender     Profile     @relation(fields: [senderId], references: [id], onDelete: Cascade)
   acceptance Acceptance? @relation(fields: [acceptanceId], references: [id], onDelete: Cascade)
 
-  @@map("need_messages")
   @@index([needId])
   @@index([needId, createdAt])
+  @@index([needId, senderId, isRead])
   @@index([senderId])
   @@index([acceptanceId])
+  @@map("need_messages")
 }
 
 model Message {
-  id         String    @id @default(uuid())
-  contractId String?   @map("contract_id")
-  senderId   String    @map("sender_id")
+  id         String   @id @default(uuid())
+  contractId String?  @map("contract_id")
+  senderId   String   @map("sender_id")
   content    String
-  createdAt  DateTime  @default(now()) @map("created_at")
-  isRead     Boolean   @default(false) @map("is_read")
+  createdAt  DateTime @default(now()) @map("created_at")
+  isRead     Boolean  @default(false) @map("is_read")
 
   contract Contract? @relation(fields: [contractId], references: [id], onDelete: Cascade)
   sender   Profile   @relation(fields: [senderId], references: [id], onDelete: Cascade)
 
-  @@map("messages")
   @@index([contractId])
   @@index([contractId, createdAt])
+  @@index([contractId, senderId, isRead])
   @@index([senderId])
+  @@map("messages")
 }
 
 model Review {
@@ -258,10 +265,10 @@ model Review {
   privateFeedback String?  @map("private_feedback")
   createdAt       DateTime @default(now()) @map("created_at")
 
-  contract   Contract?  @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  contract   Contract?   @relation(fields: [contractId], references: [id], onDelete: Cascade)
   acceptance Acceptance? @relation(fields: [acceptanceId], references: [id], onDelete: Cascade)
-  giver      Profile    @relation("ReviewGiver", fields: [giverId], references: [id], onDelete: Cascade)
-  receiver   Profile    @relation("ReviewReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  giver      Profile     @relation("ReviewGiver", fields: [giverId], references: [id], onDelete: Cascade)
+  receiver   Profile     @relation("ReviewReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
 
   @@unique([contractId, giverId])
   @@unique([acceptanceId, giverId])
@@ -272,31 +279,31 @@ model Review {
 }
 
 model Credential {
-  id             String    @id @default(uuid())
-  profileId      String    @map("profile_id")
-  type           String
-  subType        String?   @map("sub_type")
-  title          String
-  description    String?
-  documentNumber String?   @map("document_number")
-  issuedBy       String?   @map("issued_by")
-  issuedAt       DateTime? @map("issued_at")
-  expiresAt      DateTime? @map("expires_at")
-  fileUrl        String?   @map("file_url")
-  backFileUrl    String?   @map("back_file_url")
-  isPublic       Boolean   @default(false) @map("is_public")
-  isVerified     Boolean   @default(false) @map("is_verified")
-  rejectionReason String?  @map("rejection_reason")
-  createdAt      DateTime  @default(now()) @map("created_at")
-  updatedAt      DateTime  @updatedAt @map("updated_at")
+  id              String    @id @default(uuid())
+  profileId       String    @map("profile_id")
+  type            String
+  subType         String?   @map("sub_type")
+  title           String
+  description     String?
+  documentNumber  String?   @map("document_number")
+  issuedBy        String?   @map("issued_by")
+  issuedAt        DateTime? @map("issued_at")
+  expiresAt       DateTime? @map("expires_at")
+  fileUrl         String?   @map("file_url")
+  backFileUrl     String?   @map("back_file_url")
+  isPublic        Boolean   @default(false) @map("is_public")
+  isVerified      Boolean   @default(false) @map("is_verified")
+  rejectionReason String?   @map("rejection_reason")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
 
   profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
-  @@map("credentials")
   @@index([profileId])
   @@index([profileId, isPublic])
   @@index([isVerified])
   @@index([type])
+  @@map("credentials")
 }
 
 model Notification {
@@ -328,7 +335,54 @@ model MobileVerificationCode {
 
   @@index([mobile])
   @@index([profileId])
+  @@index([expiresAt])
   @@map("mobile_verification_codes")
+}
+
+model BannedMobile {
+  id        String   @id @default(uuid())
+  mobile    String   @unique
+  reason    String?
+  bannedAt  DateTime @default(now()) @map("banned_at")
+  profileId String?  @map("profile_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([profileId])
+  @@map("banned_mobiles")
+}
+
+model Report {
+  id         String   @id @default(uuid())
+  reporterId String   @map("reporter_id")
+  targetType String   @map("target_type") // "need" | "profile" | "message"
+  targetId   String   @map("target_id") // polymorphic — no FK
+  reason     String // "scam" | "abuse" | "spam" | "safety" | "other"
+  details    String?
+  status     String   @default("open") // "open" | "resolved" | "dismissed"
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  reporter Profile @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@unique([reporterId, targetType, targetId])
+  @@index([status, createdAt])
+  @@index([targetType, targetId])
+  @@map("reports")
+}
+
+model DeviceToken {
+  id        String   @id @default(uuid())
+  profileId String   @map("profile_id")
+  token     String   @unique
+  platform  String // "ios" | "android" | "web"
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+  @@map("device_tokens")
 }
 
 model AuditLog {
@@ -359,7 +413,7 @@ model TerminalChannel {
   order       Int      @default(0)
   createdAt   DateTime @default(now()) @map("created_at")
 
-  messages    TerminalMessage[]
+  messages TerminalMessage[]
 
   @@index([type])
   @@index([order])
@@ -367,17 +421,17 @@ model TerminalChannel {
 }
 
 model TerminalMessage {
-  id          String   @id @default(uuid())
-  channelId   String   @map("channel_id")
-  senderId    String   @map("sender_id")
+  id          String    @id @default(uuid())
+  channelId   String    @map("channel_id")
+  senderId    String    @map("sender_id")
   content     String
-  attachments Json?    @default("[]")
+  attachments Json?     @default("[]")
   deletedAt   DateTime? @map("deleted_at")
-  createdAt   DateTime @default(now()) @map("created_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
 
-  channel     TerminalChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
-  sender      Profile         @relation(fields: [senderId], references: [id], onDelete: Cascade)
-  reactions   TerminalMessageReaction[]
+  channel   TerminalChannel           @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  sender    Profile                   @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  reactions TerminalMessageReaction[]
 
   @@index([channelId])
   @@index([channelId, createdAt])
@@ -392,7 +446,7 @@ model TerminalMessageReaction {
   emoji     String
   createdAt DateTime @default(now()) @map("created_at")
 
-  message   TerminalMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  message TerminalMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
 
   @@unique([messageId, userId, emoji])
   @@index([messageId])
@@ -406,9 +460,9 @@ model DirectMessageThread {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  messages  DirectMessage[]
-  userA     Profile @relation("DMUserA", fields: [userAId], references: [id], onDelete: Cascade)
-  userB     Profile @relation("DMUserB", fields: [userBId], references: [id], onDelete: Cascade)
+  messages DirectMessage[]
+  userA    Profile         @relation("DMUserA", fields: [userAId], references: [id], onDelete: Cascade)
+  userB    Profile         @relation("DMUserB", fields: [userBId], references: [id], onDelete: Cascade)
 
   @@unique([userAId, userBId])
   @@index([userAId])
@@ -417,18 +471,18 @@ model DirectMessageThread {
 }
 
 model DirectMessage {
-  id          String   @id @default(uuid())
-  threadId    String   @map("thread_id")
-  senderId    String   @map("sender_id")
+  id          String    @id @default(uuid())
+  threadId    String    @map("thread_id")
+  senderId    String    @map("sender_id")
   content     String
-  attachments Json?    @default("[]")
-  isRead      Boolean  @default(false) @map("is_read")
+  attachments Json?     @default("[]")
+  isRead      Boolean   @default(false) @map("is_read")
   deletedAt   DateTime? @map("deleted_at")
-  createdAt   DateTime @default(now()) @map("created_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
 
-  thread      DirectMessageThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
-  sender      Profile             @relation(fields: [senderId], references: [id], onDelete: Cascade)
-  reactions   DirectMessageReaction[]
+  thread    DirectMessageThread     @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  sender    Profile                 @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  reactions DirectMessageReaction[]
 
   @@index([threadId])
   @@index([threadId, createdAt])
@@ -443,7 +497,7 @@ model DirectMessageReaction {
   emoji     String
   createdAt DateTime @default(now()) @map("created_at")
 
-  message   DirectMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  message DirectMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
 
   @@unique([messageId, userId, emoji])
   @@index([messageId])
@@ -479,4 +533,4 @@ model Friend {
 }
 
 // Note: Additional Profile indexes
-// isPro, stripeCustomerId, showInDirectory are added via migration
+// isPro, stripeCustomerId, showInDirectory, lastSeenAt are declared on the model above

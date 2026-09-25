@@ -116,20 +116,23 @@ export default function HomePage() {
           <div className="relative max-w-6xl mx-auto px-4 md:px-8">
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div>
-                <p className="text-xs text-[#8f7f6e] mb-8 font-mono">$ cat /etc/antidosis/motd</p>
+                <p className="text-xs text-[#8f7f6e] mb-8 font-mono">
+                  ◉ ON AIR — CHANNEL 01 · CENTRAL COAST
+                </p>
                 <h1 className="heading-display text-5xl md:text-7xl text-[#e8d5a3] mb-8">
-                  exchange
+                  your neighbourhood,
                   <br />
-                  <span className="text-[#f5a623]">everything.</span>
+                  <span className="text-[#f5a623]">on the air.</span>
                   <TerminalCursor />
                 </h1>
                 <p className="text-base text-[#8f7f6e] max-w-md leading-relaxed mb-6">
-                  A marketplace for reciprocal exchange. Post what you need. Say what you&apos;ll
-                  give back. Connect with people you can trust.
+                  Antidosis is the exchange network. Post what you need. Say what you&apos;ll give
+                  back. Connect with verified locals you can trust.
                 </p>
                 <p className="text-sm text-[#8f7f6e]/90 max-w-md leading-relaxed mb-10">
                   Contracts are optional — use them when you want binding terms, skip them when you
-                  don&apos;t. No middlemen. No hidden fees.
+                  don&apos;t. No middlemen. No hidden fees. Today it runs on the internet; the
+                  design is built for a future where it doesn&apos;t have to.
                 </p>
                 <div className="flex flex-wrap items-center gap-3">
                   <Button asChild size="lg">
@@ -162,7 +165,7 @@ export default function HomePage() {
         <section className="py-20 md:py-28 border-t border-[#2a2420]">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
-              <p className="text-xs text-[#8f7f6e] mb-12 font-mono">$ cat docs/quickstart.md</p>
+              <p className="text-xs text-[#8f7f6e] mb-12 font-mono">» SIGNAL PATH — THREE STEPS</p>
             </Reveal>
             <div className="grid md:grid-cols-3 gap-8">
               <Reveal delay={0}>
@@ -205,7 +208,9 @@ export default function HomePage() {
         <section>
           <div className="max-w-6xl mx-auto px-4 md:px-8 py-12">
             <Reveal>
-              <p className="text-xs text-[#8f7f6e] mb-4 font-mono">$ ls features/</p>
+              <p className="text-xs text-[#8f7f6e] mb-4 font-mono">
+                » CHANNEL LISTING — NETWORK FEATURES
+              </p>
             </Reveal>
           </div>
 
@@ -303,8 +308,8 @@ export default function HomePage() {
                       Built-in Messaging
                     </h3>
                     <p className="text-sm text-[#8f7f6e] leading-relaxed max-w-md">
-                      Negotiate inside every exchange. DM anyone in the community Terminal. No
-                      external apps needed. Full message history stays with the contract.
+                      Negotiate inside every exchange. DM anyone in the community Relay. No external
+                      apps needed. Full message history stays with the contract.
                     </p>
                   </Reveal>
                 </div>
@@ -317,7 +322,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* 05 — Community Terminal — Cyan */}
+          {/* 05 — Community Relay — Cyan */}
           <div className="border-t border-[#2a2420]">
             <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-20">
               <div className="grid md:grid-cols-12 gap-8 items-center">
@@ -328,18 +333,18 @@ export default function HomePage() {
                   <Reveal>
                     <div className="flex items-center gap-3 mb-3">
                       <h3 className="heading-display text-xl md:text-2xl text-[#00e5ff]">
-                        Community Terminal
+                        Community Relay
                       </h3>
                       <LiveBadge />
                     </div>
                     <p className="text-sm text-[#8f7f6e] leading-relaxed max-w-md mb-4">
                       Join real-time channels like #general, #trades, and #help. Message anyone
-                      directly with /dm. Get notified when someone mentions you. The community lives
-                      here.
+                      directly with /dm. Get notified when someone mentions you. The community stays
+                      on the air.
                     </p>
                     <Button asChild variant="secondary" size="sm">
                       <Link href="/terminal">
-                        Open Terminal <ArrowRight className="ml-2 h-4 w-4" />
+                        Open Relay <ArrowRight className="ml-2 h-4 w-4" />
                       </Link>
                     </Button>
                   </Reveal>
@@ -360,7 +365,7 @@ export default function HomePage() {
         <section className="py-20 md:py-28 border-t border-[#2a2420]">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
-              <p className="text-xs text-[#8f7f6e] mb-8 font-mono">$ cat docs/pillars.md</p>
+              <p className="text-xs text-[#8f7f6e] mb-8 font-mono">» NETWORK PILLARS</p>
               <h2 className="heading-display text-3xl md:text-4xl text-[#e8d5a3] mb-12">
                 Built for <span className="text-[#00e676]">Trust.</span>
               </h2>
@@ -408,15 +413,15 @@ export default function HomePage() {
         <section className="py-20 md:py-28 border-t border-[#2a2420]">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
-              <p className="text-xs text-[#8f7f6e] mb-8 font-mono">$ ./join_network.sh</p>
+              <p className="text-xs text-[#8f7f6e] mb-8 font-mono">◉ JOIN THE NETWORK</p>
               <h2 className="heading-display text-3xl md:text-5xl text-[#e8d5a3] mb-6">
                 Start Building
                 <br />
                 <span className="text-[#f5a623]">Your Reputation.</span>
               </h2>
               <p className="text-base text-[#8f7f6e] max-w-md mb-10 leading-relaxed">
-                Join the Central Coast trial. Verify your identity, get Pro for free, and help shape
-                the future of exchange.
+                Join the Central Coast trial. Verify your identity, get Pro for free, and help build
+                a network that keeps working when everything else doesn&apos;t.
               </p>
               <div className="flex flex-wrap items-center gap-3">
                 <Button asChild size="lg">

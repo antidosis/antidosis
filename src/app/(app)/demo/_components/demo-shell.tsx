@@ -21,14 +21,14 @@ export function DemoShell({ children }: { children: React.ReactNode }) {
               <FlaskConical className="h-3 w-3 mr-1" />
               DEMO MODE
             </Badge>
-            <span className="text-xs text-[#7a6b5a] hidden sm:inline">
+            <span className="text-xs text-[#8f7f6e] hidden sm:inline">
               Learn by doing — no real data, no consequences
             </span>
           </div>
           {!isIndex && (
             <Link
               href="/demo"
-              className="inline-flex items-center text-xs text-[#7a6b5a] hover:text-[#e8d5a3] transition-colors"
+              className="inline-flex items-center text-xs text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
             >
               <ArrowLeft className="mr-1.5 h-3.5 w-3.5" />
               All demos
