@@ -5,12 +5,21 @@ import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 
-import { ArrowRight, ShieldCheck, Star, MessageSquare, ScrollText } from "lucide-react";
+import {
+  ArrowRight,
+  ShieldCheck,
+  Star,
+  MessageSquare,
+  ScrollText,
+  MapPin,
+  Radio,
+} from "lucide-react";
 
 import { BootSequence } from "@/components/effects/boot-sequence";
 import { ParticleField } from "@/components/effects/particle-field";
 import { ScanLines } from "@/components/effects/scanlines";
 import { TerminalCursor } from "@/components/effects/terminal-cursor";
+import { ExchangeExamples } from "@/components/exchange-examples";
 import { LaunchCountdown, LaunchBanner } from "@/components/launch-countdown";
 import { Navbar } from "@/components/layout/navbar";
 import { TickerBanner } from "@/components/layout/ticker-banner";
@@ -26,24 +35,14 @@ const TerminalPreview = dynamic(() =>
 const Footer = dynamic(() =>
   import("@/components/layout/footer").then((mod) => ({ default: mod.Footer }))
 );
-const ExchangeIllustration = dynamic(() =>
-  import("@/components/visuals/exchange-illustration").then((mod) => ({
-    default: mod.ExchangeIllustration,
-  }))
-);
-const ContractIllustration = dynamic(() =>
-  import("@/components/visuals/contract-illustration").then((mod) => ({
-    default: mod.ContractIllustration,
+const NetworkMap = dynamic(() =>
+  import("@/components/visuals/network-map").then((mod) => ({
+    default: mod.NetworkMap,
   }))
 );
 const HandshakeIllustration = dynamic(() =>
   import("@/components/visuals/handshake-illustration").then((mod) => ({
     default: mod.HandshakeIllustration,
-  }))
-);
-const IdentityIllustration = dynamic(() =>
-  import("@/components/visuals/identity-illustration").then((mod) => ({
-    default: mod.IdentityIllustration,
   }))
 );
 const PostIllustration = dynamic(() =>
@@ -54,11 +53,6 @@ const PostIllustration = dynamic(() =>
 const ReceiveIllustration = dynamic(() =>
   import("@/components/visuals/receive-illustration").then((mod) => ({
     default: mod.ReceiveIllustration,
-  }))
-);
-const ReputationIllustration = dynamic(() =>
-  import("@/components/visuals/reputation-illustration").then((mod) => ({
-    default: mod.ReputationIllustration,
   }))
 );
 
@@ -86,6 +80,45 @@ function Reveal({
     </div>
   );
 }
+
+const FEATURES = [
+  {
+    icon: ShieldCheck,
+    title: "Verified Identities",
+    desc: "Email, mobile, and credential checks. Know who you're dealing with before you commit.",
+    color: "#00e676",
+  },
+  {
+    icon: ScrollText,
+    title: "Optional Contracts",
+    desc: "Binding terms when the exchange is valuable. A handshake when it isn't. You choose.",
+    color: "#00e5ff",
+  },
+  {
+    icon: Star,
+    title: "Reputation Engine",
+    desc: "Bilateral reviews on every exchange. Your history becomes your passport.",
+    color: "#f5a623",
+  },
+  {
+    icon: MessageSquare,
+    title: "Built-in Messaging",
+    desc: "Negotiate in one thread. The full history stays attached to the exchange.",
+    color: "#b24bf5",
+  },
+  {
+    icon: MapPin,
+    title: "Local First",
+    desc: "Trade with people nearby. Walk over with the lemons. Meet at the beach for the lesson.",
+    color: "#00e5ff",
+  },
+  {
+    icon: Radio,
+    title: "Built to Survive",
+    desc: "Today the internet carries the signal. The design is ready for a future where it doesn't have to.",
+    color: "#00e676",
+  },
+];
 
 export default function HomePage() {
   const [hasBooted, setHasBooted] = useState(false);
@@ -125,14 +158,13 @@ export default function HomePage() {
                   <span className="text-[#f5a623]">on the air.</span>
                   <TerminalCursor />
                 </h1>
-                <p className="text-base text-[#8f7f6e] max-w-md leading-relaxed mb-6">
+                <p className="text-base text-[#8f7f6e] max-w-md leading-relaxed mb-4">
                   Antidosis is the exchange network. Post what you need. Say what you&apos;ll give
                   back. Connect with verified locals you can trust.
                 </p>
                 <p className="text-sm text-[#8f7f6e]/90 max-w-md leading-relaxed mb-10">
-                  Contracts are optional — use them when you want binding terms, skip them when you
-                  don&apos;t. No middlemen. No hidden fees. Today it runs on the internet; the
-                  design is built for a future where it doesn&apos;t have to.
+                  Contracts optional. No middlemen, no hidden fees. Built to keep working when the
+                  internet doesn&apos;t.
                 </p>
                 <div className="flex flex-wrap items-center gap-3">
                   <Button asChild size="lg">
@@ -148,10 +180,23 @@ export default function HomePage() {
                   </Button>
                 </div>
               </div>
-              <div className="hidden md:flex justify-center items-center">
-                <ExchangeIllustration className="w-full max-w-[320px] text-[#e8d5a3] opacity-70" />
+              <div className="hidden md:block">
+                <NetworkMap className="w-full h-[340px]" />
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* LIVE SIGNALS — example exchanges first, concept second */}
+        <section className="py-16 md:py-20 border-t border-[#2a2420]">
+          <div className="max-w-6xl mx-auto px-4 md:px-8">
+            <Reveal>
+              <p className="text-xs text-[#8f7f6e] mb-3 font-mono">» LIVE SIGNALS — ON THE AIR</p>
+              <h2 className="heading-display text-2xl md:text-4xl text-[#e8d5a3] mb-10">
+                Your Need Is <span className="text-[#f5a623]">Someone Else&apos;s Want.</span>
+              </h2>
+            </Reveal>
+            <ExchangeExamples />
           </div>
         </section>
 
@@ -204,204 +249,53 @@ export default function HomePage() {
 
         <div className="divider" />
 
-        {/* FEATURES */}
-        <section>
-          <div className="max-w-6xl mx-auto px-4 md:px-8 py-12">
+        {/* FEATURES — one compact grid */}
+        <section className="py-20 md:py-28 border-t border-[#2a2420]">
+          <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
-              <p className="text-xs text-[#8f7f6e] mb-4 font-mono">
+              <p className="text-xs text-[#8f7f6e] mb-8 font-mono">
                 » CHANNEL LISTING — NETWORK FEATURES
               </p>
+              <h2 className="heading-display text-3xl md:text-4xl text-[#e8d5a3] mb-12">
+                Built for <span className="text-[#00e676]">Trust.</span>
+              </h2>
             </Reveal>
-          </div>
-
-          {/* 01 — Verified Identities — Gold */}
-          <div className="border-t border-[#2a2420]">
-            <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-20">
-              <div className="grid md:grid-cols-12 gap-8 items-center">
-                <div className="md:col-span-2">
-                  <span className="text-6xl md:text-7xl font-bold text-[#f5a623]/15">01</span>
-                </div>
-                <div className="md:col-span-6">
-                  <Reveal>
-                    <h3 className="heading-display text-xl md:text-2xl text-[#f5a623] mb-3">
-                      Verified Identities
-                    </h3>
-                    <p className="text-sm text-[#8f7f6e] leading-relaxed max-w-md">
-                      Email verification, social proof, skill credentials. Know who you&apos;re
-                      dealing with before you commit.
-                    </p>
-                  </Reveal>
-                </div>
-                <div className="md:col-span-4 flex justify-center">
-                  <Reveal delay={150}>
-                    <IdentityIllustration className="w-40 h-40 text-[#f5a623] opacity-70" />
-                  </Reveal>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 02 — Optional Contracts — Cyan */}
-          <div className="border-t border-[#2a2420]">
-            <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-20">
-              <div className="grid md:grid-cols-12 gap-8 items-center">
-                <div className="md:col-span-2">
-                  <span className="text-6xl md:text-7xl font-bold text-[#00e5ff]/15">02</span>
-                </div>
-                <div className="md:col-span-6">
-                  <Reveal>
-                    <h3 className="heading-display text-xl md:text-2xl text-[#00e5ff] mb-3">
-                      Optional Contracts
-                    </h3>
-                    <p className="text-sm text-[#8f7f6e] leading-relaxed max-w-md">
-                      Use binding contracts for security, or exchange freely with a handshake
-                      agreement. You choose what fits.
-                    </p>
-                  </Reveal>
-                </div>
-                <div className="md:col-span-4 flex justify-center">
-                  <Reveal delay={150}>
-                    <ContractIllustration className="w-40 h-40 text-[#00e5ff] opacity-70" />
-                  </Reveal>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 03 — Reputation Engine — Violet */}
-          <div className="border-t border-[#2a2420]">
-            <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-20">
-              <div className="grid md:grid-cols-12 gap-8 items-center">
-                <div className="md:col-span-2">
-                  <span className="text-6xl md:text-7xl font-bold text-[#b24bf5]/15">03</span>
-                </div>
-                <div className="md:col-span-6">
-                  <Reveal>
-                    <h3 className="heading-display text-xl md:text-2xl text-[#b24bf5] mb-3">
-                      Reputation Engine
-                    </h3>
-                    <p className="text-sm text-[#8f7f6e] leading-relaxed max-w-md">
-                      Bilateral 1-10 reviews with default excellence. Your history becomes your
-                      passport. Every exchange builds trust.
-                    </p>
-                  </Reveal>
-                </div>
-                <div className="md:col-span-4 flex justify-center">
-                  <Reveal delay={150}>
-                    <ReputationIllustration className="w-40 h-40 text-[#b24bf5] opacity-70" />
-                  </Reveal>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 04 — Built-in Messaging — Gold again */}
-          <div className="border-t border-[#2a2420]">
-            <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-20">
-              <div className="grid md:grid-cols-12 gap-8 items-center">
-                <div className="md:col-span-2">
-                  <span className="text-6xl md:text-7xl font-bold text-[#f5a623]/15">04</span>
-                </div>
-                <div className="md:col-span-6">
-                  <Reveal>
-                    <h3 className="heading-display text-xl md:text-2xl text-[#f5a623] mb-3">
-                      Built-in Messaging
-                    </h3>
-                    <p className="text-sm text-[#8f7f6e] leading-relaxed max-w-md">
-                      Negotiate inside every exchange. DM anyone in the community Relay. No external
-                      apps needed. Full message history stays with the contract.
-                    </p>
-                  </Reveal>
-                </div>
-                <div className="md:col-span-4 flex justify-center">
-                  <Reveal delay={150}>
-                    <MessageSquare className="w-32 h-32 text-[#f5a623] opacity-40" />
-                  </Reveal>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 05 — Community Relay — Cyan */}
-          <div className="border-t border-[#2a2420]">
-            <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-20">
-              <div className="grid md:grid-cols-12 gap-8 items-center">
-                <div className="md:col-span-2">
-                  <span className="text-6xl md:text-7xl font-bold text-[#00e5ff]/15">05</span>
-                </div>
-                <div className="md:col-span-5">
-                  <Reveal>
-                    <div className="flex items-center gap-3 mb-3">
-                      <h3 className="heading-display text-xl md:text-2xl text-[#00e5ff]">
-                        Community Relay
-                      </h3>
-                      <LiveBadge />
-                    </div>
-                    <p className="text-sm text-[#8f7f6e] leading-relaxed max-w-md mb-4">
-                      Join real-time channels like #general, #trades, and #help. Message anyone
-                      directly with /dm. Get notified when someone mentions you. The community stays
-                      on the air.
-                    </p>
-                    <Button asChild variant="secondary" size="sm">
-                      <Link href="/terminal">
-                        Open Relay <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </Reveal>
-                </div>
-                <div className="md:col-span-5">
-                  <Reveal delay={150}>
-                    <TerminalPreview />
-                  </Reveal>
-                </div>
-              </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {FEATURES.map((f, i) => (
+                <Reveal key={f.title} delay={i * 80}>
+                  <PillarCard icon={f.icon} title={f.title} desc={f.desc} color={f.color} />
+                </Reveal>
+              ))}
             </div>
           </div>
         </section>
 
         <div className="divider" />
 
-        {/* TRUST PILLARS */}
+        {/* COMMUNITY RELAY */}
         <section className="py-20 md:py-28 border-t border-[#2a2420]">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
-            <Reveal>
-              <p className="text-xs text-[#8f7f6e] mb-8 font-mono">» NETWORK PILLARS</p>
-              <h2 className="heading-display text-3xl md:text-4xl text-[#e8d5a3] mb-12">
-                Built for <span className="text-[#00e676]">Trust.</span>
-              </h2>
-            </Reveal>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Reveal delay={0}>
-                <PillarCard
-                  icon={ShieldCheck}
-                  title="Verified"
-                  desc="Multi-layer identity verification"
-                  color="#00e676"
-                />
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <Reveal>
+                <p className="text-xs text-[#8f7f6e] mb-8 font-mono">◉ RELAY — COMMUNITY COMMS</p>
+                <div className="flex items-center gap-3 mb-4">
+                  <h2 className="heading-display text-2xl md:text-4xl text-[#e8d5a3]">
+                    Community <span className="text-[#00e5ff]">Relay</span>
+                  </h2>
+                  <LiveBadge />
+                </div>
+                <p className="text-sm text-[#8f7f6e] leading-relaxed max-w-md mb-6">
+                  Real-time channels like #general, #trades, and #help. Message anyone directly with
+                  /dm. Get notified when someone mentions you. The community stays on the air.
+                </p>
+                <Button asChild variant="secondary" size="sm">
+                  <Link href="/terminal">
+                    Open Relay <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
               </Reveal>
-              <Reveal delay={100}>
-                <PillarCard
-                  icon={Star}
-                  title="Rated"
-                  desc="Bilateral reviews with every exchange"
-                  color="#f5a623"
-                />
-              </Reveal>
-              <Reveal delay={200}>
-                <PillarCard
-                  icon={MessageSquare}
-                  title="Transparent"
-                  desc="All negotiation in one thread"
-                  color="#00e5ff"
-                />
-              </Reveal>
-              <Reveal delay={300}>
-                <PillarCard
-                  icon={ScrollText}
-                  title="Protected"
-                  desc="Optional binding contracts"
-                  color="#b24bf5"
-                />
+              <Reveal delay={150}>
+                <TerminalPreview />
               </Reveal>
             </div>
           </div>
@@ -482,7 +376,7 @@ function PillarCard({
 }) {
   return (
     <div
-      className="vessel p-6 group hover:scale-[1.02] transition-transform duration-300"
+      className="vessel p-6 group hover:scale-[1.02] transition-transform duration-300 h-full"
       style={{ borderColor: `${color}15` }}
     >
       <div
