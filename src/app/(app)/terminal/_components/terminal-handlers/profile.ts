@@ -13,7 +13,6 @@ export async function handleWhoami(ctx: HandlerContext): Promise<HandlerResult> 
     `👤 ${p?.fullName || "You"}\n` +
       `   ID:        ${shortId(ctx.user.id)}\n` +
       `   Verified:  ${p?.isVerified ? "✅" : "❌"}\n` +
-      `   Pro:       ${p?.isPro ? "⭐" : "—"}\n` +
       `   Rating:    ${fmtRating(p?.ratingAvg, p?.ratingCount)}\n` +
       `   Jobs:      ${p?.jobsCompleted ?? 0}\n` +
       `   Skills:    ${skills}\n` +
@@ -224,8 +223,11 @@ export async function handlePhone(ctx: HandlerContext): Promise<HandlerResult> {
 
 export async function handleDirectory(ctx: HandlerContext): Promise<HandlerResult> {
   const p = ctx.myProfile;
-  if (!p?.isPro) {
-    ctx.addSys("Pro members only.", "error");
+  if (!p?.isVerified || !p?.mobileVerified) {
+    ctx.addSys(
+      "Verified members only. Upload ID (/credential add) and verify your mobile (/verify-mobile) first.",
+      "error"
+    );
     return { handled: true };
   }
   const arg = ctx.args[0]?.toLowerCase();

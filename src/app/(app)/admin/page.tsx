@@ -11,7 +11,7 @@ import {
   FileText,
   Award,
   Clock,
-  Crown,
+  ShieldCheck,
   CheckCircle2,
   XCircle,
   ExternalLink,
@@ -38,7 +38,7 @@ type Stats = {
   totalContracts: number;
   totalCredentials: number;
   pendingVerifications: number;
-  totalPros: number;
+  totalVerified: number;
   recentNeeds: number;
   recentContracts: number;
 };
@@ -189,7 +189,7 @@ export default function AdminPage() {
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
           <StatCard icon={Users} label="users" value={stats.totalUsers} />
-          <StatCard icon={Crown} label="pros" value={stats.totalPros} />
+          <StatCard icon={ShieldCheck} label="verified" value={stats.totalVerified} />
           <StatCard icon={Briefcase} label="needs" value={stats.totalNeeds} />
           <StatCard icon={FileText} label="contracts" value={stats.totalContracts} />
           <StatCard icon={Award} label="credentials" value={stats.totalCredentials} />

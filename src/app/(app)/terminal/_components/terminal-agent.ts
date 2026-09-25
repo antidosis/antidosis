@@ -366,17 +366,17 @@ export async function generateAgentResponse(
 
   // Rating/reputation help
   if (q.includes("rating") || q.includes("reputation") || q.includes("review")) {
-    return `⭐ Reputation on Antidosis\n\n  Your rating is calculated from reviews after completed deals.\n  It's a 1-10 scale shown as stars.\n\n  How to improve:\n  • Complete deals and leave reviews (/review)\n  • Be responsive to messages\n  • Get verified credentials (/credential add)\n  • Claim Pro status (/pro claim) if eligible\n\n  Current: ${context.myProfile?.ratingAvg ? `${context.myProfile.ratingAvg}/10 (${context.myProfile.ratingCount} reviews)` : "No ratings yet"}`;
+    return `⭐ Reputation on Antidosis\n\n  Your rating is calculated from reviews after completed deals.\n  It's a 1-10 scale shown as stars.\n\n  How to improve:\n  • Complete deals and leave reviews (/review)\n  • Be responsive to messages\n  • Get verified credentials (/credential add)\n\n  Current: ${context.myProfile?.ratingAvg ? `${context.myProfile.ratingAvg}/10 (${context.myProfile.ratingCount} reviews)` : "No ratings yet"}`;
   }
 
   // Verification help
   if (q.includes("verify") || q.includes("credential") || q.includes("badge")) {
-    return `🛡️ Verification\n\n  Upload credentials to prove your skills:\n  → /credential add\n\n  Supported types: license, qualification, certification,\n  WWCC, insurance, business registration, and more.\n\n  Verified credentials show a ✅ on your profile\n  and unlock Pro status.`;
+    return `🛡️ Verification\n\n  Upload credentials to prove your skills:\n  → /credential add\n\n  Supported types: license, qualification, certification,\n  WWCC, insurance, business registration, and more.\n\n  Verified credentials show a ✅ on your profile.`;
   }
 
-  // Pro help
+  // Verification status help
   if (q.includes("pro") || q.includes("premium") || q.includes("subscription")) {
-    return `⭐ Pro Status\n\n  Pro members get:\n  • Enhanced visibility in search\n  • Emergency support access\n  • Public directory listing\n  • Trust badge on profile\n\n  Claim free Pro for life if you're:\n  • Identity verified + mobile verified\n  • Located in the Central Coast trial region\n\n  → /pro claim to check eligibility`;
+    return `🛡️ Verified Membership\n\n  There are no paid tiers — everything is free.\n\n  Verified members get:\n  • Visibility in search and the directory\n  • Trust badge on your profile\n\n  To get verified:\n  • Upload ID (/credential add) and verify your mobile (/phone)\n\n  → /whoami to check your status`;
   }
 
   // Messaging help

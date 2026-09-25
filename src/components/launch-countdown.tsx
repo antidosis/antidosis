@@ -106,8 +106,8 @@ export function LaunchCountdown() {
                 year: "numeric",
               })}
             </span>
-            , Wollongong, Newcastle, and the Gold Coast join the network. Verify now — Pro is free
-            for every verified member, no matter how far the signal reaches.
+            , Wollongong, Newcastle, and the Gold Coast join the network. Verify now — free for
+            everyone, no matter how far the signal reaches.
           </p>
         </div>
 
@@ -142,9 +142,9 @@ export function LaunchCountdown() {
             </Button>
           ) : (
             <Button asChild size="lg">
-              <Link href="/pro">
+              <Link href="/register">
                 <Clock className="mr-2 h-4 w-4" />
-                Lock In Free Pro
+                Get Verified Early
               </Link>
             </Button>
           )}
@@ -157,8 +157,7 @@ export function LaunchCountdown() {
 
         {/* Footer note */}
         <p className="mt-6 text-xs text-[#8f7f6e]/90">
-          Pro is free for every verified member — yours to keep as long as the network runs. No
-          credit card required.
+          Free for everyone — yours to keep as long as the network runs. No credit card required.
         </p>
       </div>
 
@@ -275,10 +274,10 @@ export function LaunchBanner() {
 
         {/* CTA */}
         <Link
-          href="/pro"
+          href="/register"
           className="text-xs text-[#f5a623] hover:text-[#e8d5a3] transition-colors font-medium underline underline-offset-2 shrink-0"
         >
-          Lock in free Pro →
+          Get verified →
         </Link>
       </div>
     </div>

@@ -62,7 +62,7 @@ export default function SuccessContent() {
         <h1 className="text-2xl font-bold mb-4">verification failed</h1>
         <p className="text-[13px] text-[#8f7f6e] mb-8">{errorMsg}</p>
         <Button className="w-full" asChild>
-          <Link href="/pro">Back to Pro</Link>
+          <Link href="/dashboard">Back to dashboard</Link>
         </Button>
       </div>
     );

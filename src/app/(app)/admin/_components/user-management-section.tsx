@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { Ban, Crown, Loader2, Search, Shield, ShieldAlert, Smartphone } from "lucide-react";
+import { Ban, Loader2, Search, Shield, ShieldAlert, Smartphone } from "lucide-react";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +15,6 @@ type AdminUser = {
   locationName: string | null;
   mobileVerified: boolean;
   isVerified: boolean;
-  isPro: boolean;
   ratingAvg: number;
   ratingCount: number;
   jobsCompleted: number;
@@ -129,7 +128,6 @@ export function UserManagementSection() {
                         {u.fullName || "anonymous"}
                       </p>
                       {u.isVerified && <Shield className="h-3.5 w-3.5 text-[#00e676]" />}
-                      {u.isPro && <Crown className="h-3.5 w-3.5 text-[#f0cc33]" />}
                       {u.mobileVerified && (
                         <span title="mobile verified">
                           <Smartphone className="h-3.5 w-3.5 text-[#00e5ff]" />

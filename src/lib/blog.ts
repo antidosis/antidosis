@@ -32,7 +32,7 @@ Every antidosis profile shows verification status. Look for:
 - **Email verified** — Confirms the account is real
 - **Mobile verified** — SMS confirmation via Twilio
 - **Identity credentials** — Optional but strong signal of trustworthiness
-- **Pro badge** — Means the user has verified credentials in their field
+- **Verified badge** — Means the user has verified credentials in their field
 
 Don't skip this step. A verified profile isn't a guarantee, but it's a strong foundation.
 
@@ -451,7 +451,7 @@ Before we expand anywhere, we need to hit these milestones:
 | **Contract usage rate** | 15–25% | Proof contracts add value without being forced |
 | **Repeat traders** | 40%+ | Proof people come back |
 | **Geographic spread** | 5+ suburbs | Proof it's not just one pocket |
-| **Pro members** | 50+ | Proof professionals see value |
+| **Verified members** | 50+ | Proof people trust the network |
 
 We're not there yet. That's fine. The trial is called a trial for a reason.
 
@@ -1496,13 +1496,13 @@ On antidosis, the math changes:
 
 **The scammer's hourly wage on antidosis is roughly zero.** They can make more money begging at Gosford Station.
 
-## For Honest Users: Verification Is Free Pro
+## For Honest Users: Verification Is Everything
 
-Here's something we don't advertise enough: **verification is basically free Pro status.**
+Here's something we don't advertise enough: **verification is the whole trust layer.**
 
-Pro members get a badge, priority listing, and verified credentials. But even without Pro, an email-verified, mobile-verified user with one uploaded credential gets most of the same trust benefits.
+Verified members get a badge, directory listing, and credential checks. An email-verified, mobile-verified user with one uploaded credential carries real trust on the network.
 
-The difference between a fully verified free user and a Pro user is mostly visibility. The trust level is nearly identical.
+There's nothing to buy and nothing to claim. Verify once and you're in.
 
 ## How to Get Fully Verified in 10 Minutes
 

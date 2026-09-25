@@ -20,7 +20,6 @@ export type CommandCategory =
   | "admin"
   | "editing"
   | "credentials"
-  | "pro"
   | "shell";
 
 export interface TerminalCommand {
@@ -512,7 +511,7 @@ export const COMMANDS: TerminalCommand[] = [
   {
     name: "pros",
     aliases: ["experts", "verified"],
-    description: "List verified pros on the platform",
+    description: "List verified members on the platform",
     usage: "/pros",
     example: "/pros",
     category: "discovery",
@@ -836,38 +835,6 @@ export const COMMANDS: TerminalCommand[] = [
     usage: "/credential delete <id>",
     example: "/credential delete a1b2c3d4",
     category: "credentials",
-    adminOnly: false,
-    implemented: true,
-  },
-
-  // ─── Pro & Billing (NEW) ───
-  {
-    name: "pro-claim",
-    aliases: ["claimpro"],
-    description: "Claim free Pro status if eligible",
-    usage: "/pro claim",
-    example: "/pro claim",
-    category: "pro",
-    adminOnly: false,
-    implemented: true,
-  },
-  {
-    name: "pro-status",
-    aliases: ["proinfo"],
-    description: "Show your Pro membership details",
-    usage: "/pro status",
-    example: "/pro status",
-    category: "pro",
-    adminOnly: false,
-    implemented: true,
-  },
-  {
-    name: "subscribe",
-    aliases: ["pro-renew"],
-    description: "Pro is free — how to claim it (no billing)",
-    usage: "/subscribe",
-    example: "/subscribe",
-    category: "pro",
     adminOnly: false,
     implemented: true,
   },
@@ -1357,7 +1324,6 @@ export function generateHelpText(
     social: "social",
     chat: "chat",
     credentials: "credentials",
-    pro: "pro",
     lab: "lab",
     shell: "shell",
     misc: "misc",
@@ -1384,7 +1350,6 @@ export function generateHelpText(
       misc: "🛠️",
       admin: "🛡️",
       credentials: "🛡️",
-      pro: "💎",
       shell: "📁",
     };
     let out = `${catEmoji[cat]} ${cat.charAt(0).toUpperCase() + cat.slice(1)} Commands\n\n`;
@@ -1435,7 +1400,6 @@ export function generateHelpText(
     `  ⭐ Reviews:\n${byCategory("reviews")}\n\n` +
     `  🔔 Notifications:\n${byCategory("notifications")}\n\n` +
     `  🛡️  Credentials:\n${byCategory("credentials")}\n\n` +
-    `  💎 Pro & Billing:\n${byCategory("pro")}\n\n` +
     `  🧪 Lab:\n${byCategory("lab")}\n\n` +
     `  📁 Shell:\n${byCategory("shell")}\n\n` +
     `  👤 Profile:\n${byCategory("profile")}\n\n` +
@@ -1461,7 +1425,6 @@ export function generateCommandsText(isAdmin: boolean): string {
     "social",
     "chat",
     "credentials",
-    "pro",
     "lab",
     "shell",
     "misc",
@@ -1482,7 +1445,6 @@ export function generateCommandsText(isAdmin: boolean): string {
     misc: "🛠️",
     admin: "🛡️",
     credentials: "🛡️",
-    pro: "💎",
     shell: "📁",
   };
 

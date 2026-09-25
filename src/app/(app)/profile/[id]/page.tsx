@@ -21,7 +21,6 @@ import {
 
 import { ReportButton } from "@/components/report-button";
 import { Avatar } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ProfileActions } from "@/components/ui/profile-actions";
 import { useApi } from "@/lib/swr-config";
@@ -80,7 +79,6 @@ interface ProfileData {
   ratingCount: number;
   jobsCompleted: number;
   isVerified: boolean;
-  isPro: boolean;
   skills: Skill[];
   socialLinks: SocialLink[];
   credentials: Credential[];
@@ -147,7 +145,6 @@ export default function ProfilePage() {
                 {profile.fullName || "anonymous"}
               </h1>
               {profile.isVerified && <Shield className="h-5 w-5 text-[#00e676]" />}
-              {profile.isPro && <Badge variant="default">pro</Badge>}
             </div>
             <div className="flex flex-wrap items-center gap-4 text-sm text-[#b8a078] mt-2">
               {(profile.ratingCount ?? 0) > 0 && (

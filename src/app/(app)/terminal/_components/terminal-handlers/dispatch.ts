@@ -65,7 +65,6 @@ import {
   handleReviews,
   handleReview,
 } from "./marketplace";
-import { handleProClaim, handleProStatus, handleSubscribe } from "./pro";
 import {
   handleWhoami,
   handleStats,
@@ -454,17 +453,6 @@ export async function dispatchCommand(
     case "credential-delete":
     case "creddel":
       return handleCredentialDelete(fullCtx);
-
-    // Pro
-    case "pro-claim":
-    case "claimpro":
-      return handleProClaim(fullCtx);
-    case "pro-status":
-    case "proinfo":
-      return handleProStatus(fullCtx);
-    case "subscribe":
-    case "pro-renew":
-      return handleSubscribe(fullCtx);
 
     // Admin
     case "admin-stats":

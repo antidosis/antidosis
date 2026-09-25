@@ -51,7 +51,6 @@ type ProfileData = {
   abn: string | null;
   mobileVerified: boolean;
   isVerified: boolean;
-  isPro: boolean;
   ratingAvg: number;
   ratingCount: number;
   jobsCompleted: number;
@@ -269,18 +268,16 @@ export default function DashboardPage() {
             </div>
           </div>
         </Link>
-        <Link href="/pro" className="group vessel p-4 hover:border-[#f0cc33]/40 transition-colors">
+        <Link href="/pros" className="group vessel p-4 hover:border-[#00e676]/40 transition-colors">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded flex items-center justify-center bg-[#f0cc33]/10 text-[#f0cc33]">
-              <Star className="h-4 w-4" />
+            <div className="h-9 w-9 rounded flex items-center justify-center bg-[#00e676]/10 text-[#00e676]">
+              <Users className="h-4 w-4" />
             </div>
             <div>
-              <p className="text-sm font-medium text-[#e8d5a3] group-hover:text-[#f0cc33] transition-colors">
-                Pro Status
+              <p className="text-sm font-medium text-[#e8d5a3] group-hover:text-[#00e676] transition-colors">
+                Directory
               </p>
-              <p className="text-[11px] text-[#8f7f6e]">
-                {profile.isPro ? "Active for life" : "Claim free Pro"}
-              </p>
+              <p className="text-[11px] text-[#8f7f6e]">Find verified locals</p>
             </div>
           </div>
         </Link>

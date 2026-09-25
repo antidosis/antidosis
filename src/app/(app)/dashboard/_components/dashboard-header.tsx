@@ -1,13 +1,12 @@
 "use client";
 
-import { Star, Briefcase, FileText, HandHelping, Shield, Crown } from "lucide-react";
+import { Star, Briefcase, FileText, HandHelping, Shield } from "lucide-react";
 
 import { Avatar } from "@/components/ui/avatar";
 
 type ProfileData = {
   fullName: string | null;
   avatarUrl: string | null;
-  isPro: boolean;
   isVerified: boolean;
   mobileVerified: boolean;
   ratingAvg: number;
@@ -84,11 +83,6 @@ export function DashboardHeader({
               {profile.isVerified && (
                 <span className="inline-flex items-center gap-1 text-[11px] uppercase tracking-wider px-2 py-0.5 rounded border border-[#00e676]/30 text-[#00e676] bg-[#00e676]/5">
                   <Shield className="h-3 w-3" /> verified
-                </span>
-              )}
-              {profile.isPro && (
-                <span className="inline-flex items-center gap-1 text-[11px] uppercase tracking-wider px-2 py-0.5 rounded border border-[#f0cc33]/30 text-[#f0cc33] bg-[#f0cc33]/5">
-                  <Crown className="h-3 w-3" /> pro
                 </span>
               )}
               {profile.mobileVerified && (

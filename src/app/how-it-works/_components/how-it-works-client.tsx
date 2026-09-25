@@ -443,8 +443,8 @@ export default function HowItWorksPage() {
                 <span className="text-[#f5a623]">Start?</span>
               </h2>
               <p className="text-base text-[#8f7f6e] max-w-md mb-10 leading-relaxed">
-                Join the Central Coast trial. Verify your identity, get Pro for free, and help build
-                a network that keeps working when everything else doesn&apos;t.
+                Join the Central Coast trial. Verify your identity, and help build a network that
+                keeps working when everything else doesn&apos;t.
               </p>
               <div className="flex flex-wrap items-center gap-3">
                 <Button asChild size="lg">

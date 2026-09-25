@@ -87,7 +87,6 @@ describe("profile handlers", () => {
           id: "user-1",
           fullName: "Alice",
           isVerified: true,
-          isPro: true,
           ratingAvg: 4.5,
           ratingCount: 10,
           jobsCompleted: 5,
@@ -106,13 +105,12 @@ describe("profile handlers", () => {
       expect(ctx.addSys).toHaveBeenCalledWith(expect.stringContaining("You"), "info");
     });
 
-    it("shows unverified and non-pro", async () => {
+    it("shows unverified", async () => {
       const ctx = makeCtx({
         myProfile: {
           id: "user-1",
           fullName: "Bob",
           isVerified: false,
-          isPro: false,
           skills: [],
         } as any,
       });
@@ -449,15 +447,23 @@ describe("profile handlers", () => {
   });
 
   describe("handleDirectory", () => {
-    it("rejects non-pro users", async () => {
-      const ctx = makeCtx({ myProfile: { id: "user-1", isPro: false } as any });
+    it("rejects unverified users", async () => {
+      const ctx = makeCtx({ myProfile: { id: "user-1", isVerified: false } as any });
       await handleDirectory(ctx);
-      expect(ctx.addSys).toHaveBeenCalledWith("Pro members only.", "error");
+      expect(ctx.addSys).toHaveBeenCalledWith(
+        expect.stringContaining("Verified members only"),
+        "error"
+      );
     });
 
-    it("shows current status for pro", async () => {
+    it("shows current status for verified member", async () => {
       const ctx = makeCtx({
-        myProfile: { id: "user-1", isPro: true, showInDirectory: true } as any,
+        myProfile: {
+          id: "user-1",
+          isVerified: true,
+          mobileVerified: true,
+          showInDirectory: true,
+        } as any,
       });
       await handleDirectory(ctx);
       expect(ctx.addSys).toHaveBeenCalledWith(expect.stringContaining("Visible"), "info");
@@ -466,7 +472,12 @@ describe("profile handlers", () => {
     it("toggles directory on", async () => {
       vi.mocked(global.fetch).mockResolvedValue({ ok: true, json: async () => ({}) } as Response);
       const ctx = makeCtx({
-        myProfile: { id: "user-1", isPro: true, showInDirectory: false } as any,
+        myProfile: {
+          id: "user-1",
+          isVerified: true,
+          mobileVerified: true,
+          showInDirectory: false,
+        } as any,
         args: ["on"],
       });
       await handleDirectory(ctx);
@@ -476,7 +487,12 @@ describe("profile handlers", () => {
     it("toggles directory off", async () => {
       vi.mocked(global.fetch).mockResolvedValue({ ok: true, json: async () => ({}) } as Response);
       const ctx = makeCtx({
-        myProfile: { id: "user-1", isPro: true, showInDirectory: true } as any,
+        myProfile: {
+          id: "user-1",
+          isVerified: true,
+          mobileVerified: true,
+          showInDirectory: true,
+        } as any,
         args: ["off"],
       });
       await handleDirectory(ctx);
@@ -486,7 +502,7 @@ describe("profile handlers", () => {
     it("handles API error", async () => {
       vi.mocked(global.fetch).mockRejectedValue(new Error(""));
       const ctx = makeCtx({
-        myProfile: { id: "user-1", isPro: true } as any,
+        myProfile: { id: "user-1", isVerified: true, mobileVerified: true } as any,
         args: ["on"],
       });
       await handleDirectory(ctx);

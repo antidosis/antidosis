@@ -20,14 +20,13 @@ export interface MyProfile {
   avatarUrl: string | null;
   bio: string | null;
   isVerified: boolean;
-  isPro: boolean;
+  mobileVerified?: boolean;
   ratingAvg: number | null;
   ratingCount: number | null;
   jobsCompleted: number;
   locationName: string | null;
   skills?: { id: string; name: string }[];
   showInDirectory?: boolean;
-  proSource?: string;
 }
 
 export interface HandlerContext {

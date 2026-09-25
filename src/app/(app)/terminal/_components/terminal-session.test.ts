@@ -255,7 +255,6 @@ describe("terminal-session", () => {
         reviewsGiven: 0,
         ratingAvg: null,
         isVerified: false,
-        isPro: false,
       });
       expect(badges).toContain("🌱 Seedling");
     });
@@ -269,7 +268,6 @@ describe("terminal-session", () => {
         reviewsGiven: 0,
         ratingAvg: null,
         isVerified: false,
-        isPro: false,
       });
       expect(badges).toContain("🤝 Dealmaker");
     });
@@ -283,7 +281,6 @@ describe("terminal-session", () => {
         reviewsGiven: 0,
         ratingAvg: null,
         isVerified: false,
-        isPro: false,
       });
       expect(badges).toContain("🏆 Centurion");
     });
@@ -297,7 +294,6 @@ describe("terminal-session", () => {
         reviewsGiven: 0,
         ratingAvg: null,
         isVerified: false,
-        isPro: false,
       });
       expect(badges).toContain("🗣️ Socialite");
     });
@@ -311,7 +307,6 @@ describe("terminal-session", () => {
         reviewsGiven: 0,
         ratingAvg: null,
         isVerified: false,
-        isPro: false,
       });
       expect(badges).toContain("📢 Orator");
     });
@@ -325,7 +320,6 @@ describe("terminal-session", () => {
         reviewsGiven: 5,
         ratingAvg: null,
         isVerified: false,
-        isPro: false,
       });
       expect(badges).toContain("⭐ Critic");
     });
@@ -339,7 +333,6 @@ describe("terminal-session", () => {
         reviewsGiven: 0,
         ratingAvg: 9.5,
         isVerified: false,
-        isPro: false,
       });
       expect(badges).toContain("🏅 Trusted");
     });
@@ -353,7 +346,6 @@ describe("terminal-session", () => {
         reviewsGiven: 0,
         ratingAvg: 8,
         isVerified: false,
-        isPro: false,
       });
       expect(badges).not.toContain("🏅 Trusted");
     });
@@ -367,23 +359,8 @@ describe("terminal-session", () => {
         reviewsGiven: 0,
         ratingAvg: null,
         isVerified: true,
-        isPro: false,
       });
       expect(badges).toContain("🛡️ Verified");
-    });
-
-    it("awards Pro badge", () => {
-      const session = makeSession();
-      const badges = checkBadges(session, {
-        needsPosted: 0,
-        dealsCompleted: 0,
-        messagesSent: 0,
-        reviewsGiven: 0,
-        ratingAvg: null,
-        isVerified: false,
-        isPro: true,
-      });
-      expect(badges).toContain("⭐ Pro");
     });
 
     it("awards Streak Starter for 7 days", () => {
@@ -395,7 +372,6 @@ describe("terminal-session", () => {
         reviewsGiven: 0,
         ratingAvg: null,
         isVerified: false,
-        isPro: false,
       });
       expect(badges).toContain("🔥 Streak Starter");
     });
@@ -409,7 +385,6 @@ describe("terminal-session", () => {
         reviewsGiven: 0,
         ratingAvg: null,
         isVerified: false,
-        isPro: false,
       });
       expect(badges).toContain("⚡ Streak Master");
     });
@@ -423,7 +398,6 @@ describe("terminal-session", () => {
         reviewsGiven: 0,
         ratingAvg: null,
         isVerified: false,
-        isPro: false,
       });
       expect(badges).toHaveLength(0);
     });
@@ -437,7 +411,6 @@ describe("terminal-session", () => {
         reviewsGiven: 5,
         ratingAvg: 9.5,
         isVerified: true,
-        isPro: true,
       });
       expect(badges).toContain("🌱 Seedling");
       expect(badges).toContain("🤝 Dealmaker");
@@ -445,7 +418,6 @@ describe("terminal-session", () => {
       expect(badges).toContain("⭐ Critic");
       expect(badges).toContain("🏅 Trusted");
       expect(badges).toContain("🛡️ Verified");
-      expect(badges).toContain("⭐ Pro");
     });
   });
 
@@ -473,7 +445,6 @@ describe("terminal-session", () => {
         jobsCompleted: 5,
         ratingAvg: 9.2,
         isVerified: true,
-        isPro: false,
       };
 
       const result = await refreshBadges(session, profile as any);

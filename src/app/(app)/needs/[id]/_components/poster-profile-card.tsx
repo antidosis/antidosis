@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 
 import { Avatar } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 import type { Credential } from "./need-detail-client";
@@ -32,7 +31,6 @@ interface Poster {
   ratingCount: number;
   locationName: string | null;
   isVerified: boolean;
-  isPro: boolean;
   jobsCompleted: number;
   skills: { id: string; name: string; isVerified: boolean }[];
   socialLinks: { id: string; platform: string; url: string }[];
@@ -68,11 +66,6 @@ export function PosterProfileCard({
               {poster.fullName || "anonymous"}
             </span>
             {poster.isVerified && <Shield className="h-4 w-4 text-[#00e676]" />}
-            {profileId && poster.isPro && (
-              <Badge variant="default" className="text-[10px]">
-                pro
-              </Badge>
-            )}
           </div>
           {profileId ? (
             <div className="flex flex-wrap items-center gap-3 text-xs text-[#8f7f6e] mt-0.5">

@@ -32,7 +32,6 @@ export type Poster = {
   ratingCount: number;
   locationName: string | null;
   isVerified: boolean;
-  isPro: boolean;
   jobsCompleted: number;
   skills: { id: string; name: string; isVerified: boolean }[];
   socialLinks: { id: string; platform: string; url: string }[];

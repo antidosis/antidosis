@@ -46,7 +46,11 @@ describe("GET /api/v1/pros", () => {
     expect(json[0].id).toBe("p1");
     expect(mockProfileFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: expect.objectContaining({ isPro: true, showInDirectory: true }),
+        where: expect.objectContaining({
+          isVerified: true,
+          mobileVerified: true,
+          showInDirectory: true,
+        }),
         take: 100,
       })
     );

@@ -7,7 +7,6 @@ import Link from "next/link";
 import { Star, MapPin, Briefcase, Shield, Phone, Award, Search, X, Loader2 } from "lucide-react";
 
 import { Avatar } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
@@ -49,12 +48,12 @@ export default function ProsDirectoryPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 md:px-8">
       <div className="py-10">
-        <p className="text-xs text-[#8f7f6e] mb-4">$ ls /pros</p>
+        <p className="text-xs text-[#8f7f6e] mb-4">» DIRECTORY — VERIFIED LOCALS</p>
         <h1 className="heading-display text-2xl text-[#e8d5a3]">
-          pro <span className="text-[#f5a623]">directory</span>
+          the <span className="text-[#f5a623]">directory</span>
         </h1>
         <p className="text-sm text-[#8f7f6e] max-w-lg mt-4">
-          trusted traders who have committed to the pro standard. browse, connect, trade.
+          verified members of the network. browse, connect, trade.
         </p>
       </div>
 
@@ -93,19 +92,19 @@ export default function ProsDirectoryPage() {
         </div>
       ) : !pros || pros.length === 0 ? (
         <EmptyState
-          title={query ? "No pros match your search" : "No pros in the directory yet."}
+          title={query ? "No members match your search" : "No one in the directory yet."}
           description={
             query
               ? "try a different search term."
-              : "Claim pro and opt-in to public sharing to appear here."
+              : "Verify your identity and mobile, then opt in to public sharing in your dashboard to appear here."
           }
           action={
             !query ? (
               <Link
-                href="/pro"
+                href="/dashboard"
                 className="inline-flex items-center gap-2 text-sm text-[#f5a623] hover:underline"
               >
-                go to pro page →
+                go to dashboard →
               </Link>
             ) : undefined
           }
@@ -131,7 +130,6 @@ export default function ProsDirectoryPage() {
                       {pro.fullName || "anonymous"}
                     </h3>
                     {pro.isVerified && <Shield className="h-4 w-4 text-[#00e676]" />}
-                    <Badge variant="default">pro</Badge>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-3 text-xs text-[#b8a078] mt-1">

@@ -15,10 +15,7 @@ const linkGroups = [
   },
   {
     title: "Directory",
-    links: [
-      { href: "/pros", label: "Find Pros", external: false },
-      { href: "/pro", label: "Go Pro", external: false },
-    ],
+    links: [{ href: "/pros", label: "Directory", external: false }],
   },
   {
     title: "Legal",

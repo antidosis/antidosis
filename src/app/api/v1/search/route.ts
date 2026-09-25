@@ -50,7 +50,8 @@ export const GET = withApiHandler(async (req: NextRequest) => {
     }),
     prisma.profile.findMany({
       where: {
-        isPro: true,
+        isVerified: true,
+        mobileVerified: true,
         OR: [
           { fullName: { contains: query, mode: "insensitive" } },
           { skills: { some: { name: { contains: query, mode: "insensitive" } } } },

@@ -9,7 +9,11 @@ export const GET = withCors(
     const { searchParams } = new URL(req.url);
     const q = searchParams.get("q")?.slice(0, 100);
 
-    const where: Record<string, any> = { isPro: true, showInDirectory: true };
+    const where: Record<string, any> = {
+      isVerified: true,
+      mobileVerified: true,
+      showInDirectory: true,
+    };
 
     if (q) {
       where.OR = [

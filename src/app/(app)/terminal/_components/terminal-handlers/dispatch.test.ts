@@ -193,13 +193,6 @@ describe("dispatchCommand", () => {
     expect(result).toEqual({ handled: true });
   });
 
-  it("routes pro-claim command", async () => {
-    vi.mocked(global.fetch).mockResolvedValue({ ok: true, json: async () => ({}) } as Response);
-    const ctx = makeCtx();
-    const result = await dispatchCommand("pro-claim", [], ctx);
-    expect(result).toEqual({ handled: true });
-  });
-
   it("routes ban command for admin", async () => {
     const ctx = makeCtx({ isAdmin: true });
     const result = await dispatchCommand("ban", ["user-2"], ctx);

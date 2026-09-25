@@ -1,15 +1,6 @@
 "use client";
 
-import {
-  Mail,
-  User,
-  Smartphone,
-  ShieldCheck,
-  Award,
-  Crown,
-  CheckCircle2,
-  ArrowRight,
-} from "lucide-react";
+import { Mail, User, Smartphone, ShieldCheck, Award, CheckCircle2, ArrowRight } from "lucide-react";
 
 /* ─── 6-segment circular tracker ───
  * Each step is a 60° slice of a donut.
@@ -68,16 +59,6 @@ const STEPS = [
     href: null,
     anchor: null,
   },
-  {
-    id: "pro",
-    label: "Pro",
-    description: "Claim your free Pro status",
-    color: "#f0cc33",
-    bg: "rgba(240,204,51,0.12)",
-    icon: Crown,
-    href: "/pro",
-    anchor: null,
-  },
 ] as const;
 
 /* SVG geometry */
@@ -117,7 +98,6 @@ interface ProfileChecklistProps {
     mobile: string | null;
     mobileVerified: boolean;
     isVerified: boolean;
-    isPro: boolean;
     credentials?: { isVerified: boolean; type?: string }[];
   };
   emailVerified: boolean;
@@ -143,7 +123,6 @@ export function ProfileChecklist({
     mobile: profile.mobileVerified,
     credentials: hasIdentification,
     verified: profile.isVerified,
-    pro: profile.isPro,
   };
 
   const completed = STEPS.filter((s) => doneMap[s.id]).length;

@@ -102,7 +102,7 @@ describe("GET /api/v1/admin/stats", () => {
       totalContracts: 30,
       totalCredentials: 80,
       pendingVerifications: 20,
-      totalPros: 10,
+      totalVerified: 10,
       recentNeeds: 5,
       recentContracts: 7,
       pendingContractCancellations: 2,
@@ -110,7 +110,7 @@ describe("GET /api/v1/admin/stats", () => {
 
     expect(mockProfileCount).toHaveBeenCalledTimes(2);
     expect(mockProfileCount).toHaveBeenNthCalledWith(1);
-    expect(mockProfileCount).toHaveBeenNthCalledWith(2, { where: { isPro: true } });
+    expect(mockProfileCount).toHaveBeenNthCalledWith(2, { where: { isVerified: true } });
 
     expect(mockNeedCount).toHaveBeenCalledTimes(2);
     expect(mockNeedCount).toHaveBeenNthCalledWith(1);

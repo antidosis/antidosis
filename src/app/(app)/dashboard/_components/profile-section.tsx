@@ -23,7 +23,6 @@ import {
   ExternalLink,
   Award,
   Shield,
-  Crown,
   FileText,
 } from "lucide-react";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
@@ -74,7 +73,6 @@ interface ProfileSectionProps {
     abn: string | null;
     mobileVerified: boolean;
     isVerified: boolean;
-    isPro: boolean;
     socialLinks: SocialLink[];
   };
   credentials: CredentialData[];
@@ -240,11 +238,6 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                   {initialProfile.isVerified && (
                     <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border border-[#00e676]/30 text-[#00e676] bg-[#00e676]/5">
                       <Shield className="h-3 w-3" /> verified
-                    </span>
-                  )}
-                  {initialProfile.isPro && (
-                    <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border border-[#f0cc33]/30 text-[#f0cc33] bg-[#f0cc33]/5">
-                      <Crown className="h-3 w-3" /> pro
                     </span>
                   )}
                   {initialProfile.mobileVerified && (

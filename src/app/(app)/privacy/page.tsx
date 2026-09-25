@@ -165,12 +165,12 @@ export default function PrivacyPage() {
             2.4 Payment Information
           </h3>
           <p className="mb-3">
-            Antidosis Pro membership is currently <strong>free</strong> — we do not collect or store
-            your credit card details, banking information, or other payment method details. If paid
-            features are introduced in future, payments will be processed by a third-party payment
-            processor and this policy will be updated beforehand. If you previously held a paid
-            subscription (processed by Stripe), we retain only the processor&apos;s customer and
-            subscription identifiers, and subscription status, for audit purposes.
+            Antidosis is <strong>free</strong> — we do not collect or store your credit card
+            details, banking information, or other payment method details. If paid features are
+            introduced in future, payments will be processed by a third-party payment processor and
+            this policy will be updated beforehand. If you previously held a paid subscription
+            (processed by Stripe), we retain only the processor&apos;s customer and subscription
+            identifiers, and subscription status, for audit purposes.
           </p>
 
           <h3 className="text-base font-medium text-[#e8d5a3]/90 mb-2 mt-4">
@@ -242,7 +242,7 @@ export default function PrivacyPage() {
             </li>
             <li>
               <strong>Legacy payments</strong> — Stripe is retained for legacy paid accounts only;
-              Pro membership is currently free and no payment processing occurs
+              the Service is free and no payment processing occurs
             </li>
           </ul>
         </section>
@@ -333,8 +333,8 @@ export default function PrivacyPage() {
             </li>
             <li>
               <strong>Stripe</strong> (legacy, inactive) — Stripe is retained for legacy paid
-              accounts only; Pro membership is currently free and no payment processing occurs. For
-              legacy accounts, Stripe handles all payment card data. See{" "}
+              accounts only; the Service is free and no payment processing occurs. For legacy
+              accounts, Stripe handles all payment card data. See{" "}
               <Link
                 href="https://stripe.com/au/privacy"
                 className="text-[#e8d5a3] hover:underline"

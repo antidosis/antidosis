@@ -8,7 +8,7 @@ Antidosis is a local needs-exchange platform ("help your neighbour" marketplace)
 
 **Current phase**: Central Coast NSW pilot.
 
-**Monetization**: Pro membership is **free** — gated on identity + mobile verification, not payment (since 2026-07-22). The paid billing stack (`src/app/api/v1/billing/` — Stripe checkout, Play Store verify/RTDN webhook, `src/lib/play-store.ts`) is **parked**: routes stay live and secured for legacy accounts and possible future paid tiers, but nothing links to them. Do not wire them back up without a product decision.
+**Monetization**: None — the platform is entirely free. The "Pro" tier was retired (2026-07-23): verification (identity + mobile) is the trust layer, not a membership. Legacy `isPro`/`proSource` DB columns and the `/api/v1/pro/claim` route remain as no-ops for old mobile builds; do not surface them in UI. The paid billing stack (`src/app/api/v1/billing/` — Stripe checkout, Play Store verify/RTDN webhook, `src/lib/play-store.ts`) is **parked**: routes stay live and secured for legacy accounts and possible future paid features (e.g. hardware), but nothing links to them. Do not wire them back up without a product decision.
 
 ## 2. Tech Stack
 
@@ -186,7 +186,7 @@ terminal/
     marketplace.ts, social.ts,
     admin.ts, lab.ts, shell.ts,
     intelligence.ts, chat.ts,
-    pro.ts, utils.ts
+    utils.ts
 ```
 
 ### Need Detail

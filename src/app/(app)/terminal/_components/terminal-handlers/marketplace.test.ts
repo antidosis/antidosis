@@ -710,7 +710,6 @@ describe("marketplace handlers", () => {
           jobsCompleted: 5,
           ratingAvg: 9.5,
           isVerified: true,
-          isPro: false,
         } as any,
       });
       await handleComplete(ctx);

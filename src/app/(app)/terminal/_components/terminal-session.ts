@@ -235,7 +235,6 @@ export function checkBadges(
     reviewsGiven: number;
     ratingAvg: number | null;
     isVerified: boolean;
-    isPro: boolean;
   }
 ): string[] {
   const newBadges: string[] = [];
@@ -252,7 +251,6 @@ export function checkBadges(
   if (stats.reviewsGiven >= 5) award("⭐ Critic");
   if (stats.ratingAvg && stats.ratingAvg >= 9 && stats.dealsCompleted >= 5) award("🏅 Trusted");
   if (stats.isVerified) award("🛡️ Verified");
-  if (stats.isPro) award("⭐ Pro");
   if (session.streakDays >= 7) award("🔥 Streak Starter");
   if (session.streakDays >= 30) award("⚡ Streak Master");
 
@@ -263,7 +261,6 @@ interface BadgeProfile {
   jobsCompleted: number;
   ratingAvg: number | null;
   isVerified: boolean;
-  isPro: boolean;
 }
 
 export async function refreshBadges(
@@ -284,7 +281,6 @@ export async function refreshBadges(
     reviewsGiven: reviews.length,
     ratingAvg: profile?.ratingAvg ?? null,
     isVerified: profile?.isVerified || false,
-    isPro: profile?.isPro || false,
   };
 
   const newBadges = checkBadges(session, stats);

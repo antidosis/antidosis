@@ -19,7 +19,6 @@ const PARTY_A = {
   ratingCount: 12,
   locationName: "Terrigal, NSW",
   isVerified: true,
-  isPro: false,
   skills: [
     { id: "s1", name: "project management", isVerified: false },
     { id: "s2", name: "design", isVerified: false },
@@ -36,7 +35,6 @@ const PARTY_B = {
   ratingCount: 34,
   locationName: "Woy Woy, NSW",
   isVerified: true,
-  isPro: false,
   skills: [
     { id: "s3", name: "gardening", isVerified: true },
     { id: "s4", name: "landscaping", isVerified: true },
@@ -54,7 +52,6 @@ const PARTY_C = {
   ratingCount: 19,
   locationName: "Macmasters Beach, NSW",
   isVerified: true,
-  isPro: false,
   skills: [
     { id: "s6", name: "gardening", isVerified: true },
     { id: "s7", name: "irrigation", isVerified: true },

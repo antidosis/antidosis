@@ -70,7 +70,6 @@ describe("COMMANDS", () => {
       "admin",
       "editing",
       "credentials",
-      "pro",
       "shell",
     ]);
     for (const cmd of COMMANDS) {

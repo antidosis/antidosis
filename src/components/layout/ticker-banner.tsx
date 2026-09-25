@@ -7,7 +7,7 @@ import { Zap, ShieldCheck, Globe, Repeat, Lock, Star, MapPin, Sparkles } from "l
 const TICKER_ITEMS = [
   {
     icon: Sparkles,
-    text: "The Central Coast is where it begins — verify your identity & claim free Pro for life",
+    text: "The Central Coast is where it begins — free for everyone, forever",
     accent: "#f5a623",
   },
   {
@@ -42,7 +42,7 @@ const TICKER_ITEMS = [
   },
   {
     icon: Zap,
-    text: "Verify once. Get Pro for life. No credit card. No expiry.",
+    text: "Free. No subscriptions. No credit card. No expiry — just verified people.",
     accent: "#f5a623",
   },
 ];

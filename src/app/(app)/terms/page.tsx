@@ -272,8 +272,8 @@ export default function TermsPage() {
             <strong>Cancellation and disputes:</strong> The Service provides mechanisms for contract
             cancellation, including mutual agreement, requested cancellation with response, and
             escalation to admin review. However, we are under no obligation to intervene in disputes
-            between users. Pro members may receive enhanced dispute resolution support at our sole
-            discretion.
+            between users. Verified members may receive enhanced dispute resolution support at our
+            sole discretion.
           </p>
         </section>
 
@@ -305,28 +305,27 @@ export default function TermsPage() {
           </p>
         </section>
 
-        {/* ── 9. Pro Membership ── */}
+        {/* ── 9. Verification ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">9. Pro Membership (Free)</h2>
+          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">9. Verification</h2>
           <p className="mb-3">
-            Antidosis offers an optional &quot;Pro&quot; membership tier with enhanced features
-            (badge, directory listing, priority support). Pro is <strong>free</strong>: there are no
-            fees, subscriptions, recurring billing, or payment details collected for it.
+            The Service is <strong>free</strong> for everyone: there are no fees, subscriptions,
+            recurring billing, or payment details collected. Users may optionally complete
+            verification to unlock a trust badge, directory listing, and participation features
+            (posting needs, expressing interest, messaging).
           </p>
           <ul className="list-disc pl-5 space-y-1 mb-3">
             <li>
-              <strong>Eligibility</strong> — Pro is granted to users who complete identity
-              verification (a government-issued ID reviewed by our team) and mobile-number
-              verification
+              <strong>Verification</strong> — granted to users who complete identity verification (a
+              government-issued ID reviewed by our team) and mobile-number verification
             </li>
             <li>
-              <strong>Revocation</strong> — we may revoke Pro status, without refund liability (as
-              no payment is taken), if verification documents are found to be false or misleading,
-              or for abuse of the Service
+              <strong>Revocation</strong> — we may revoke verified status if verification documents
+              are found to be false or misleading, or for abuse of the Service
             </li>
             <li>
-              <strong>No charge, ever</strong> — because Pro is free, no cancellation, refund, or
-              price-change terms apply to it
+              <strong>No charge, ever</strong> — because the Service is free, no cancellation,
+              refund, or price-change terms apply
             </li>
             <li>
               <strong>Future paid features</strong> — if Antidosis introduces paid features in
