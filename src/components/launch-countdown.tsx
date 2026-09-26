@@ -103,6 +103,7 @@ export function LaunchCountdown() {
                 day: "numeric",
                 month: "long",
                 year: "numeric",
+                timeZone: "Australia/Sydney",
               })}
             </span>
             , Wollongong, Newcastle, and the Gold Coast join the network. Verify now — free for
