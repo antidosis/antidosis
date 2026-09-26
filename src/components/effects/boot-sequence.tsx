@@ -7,14 +7,14 @@ import { ShieldCheck, Lock, Users } from "lucide-react";
 import { TerminalCursor } from "./terminal-cursor";
 
 const BOOT_LINES = [
-  { text: "initializing antidosis relay network...", delay: 100 },
-  { text: "", delay: 180 },
-  { text: "[OK] verifying network integrity", delay: 260 },
-  { text: "[OK] loading trust protocol v2.1", delay: 340 },
-  { text: "[OK] opening secure exchange channels", delay: 420 },
-  { text: "[OK] linking to local mesh node", delay: 500 },
-  { text: "", delay: 580 },
-  { text: "on air.", delay: 660 },
+  { text: "initializing antidosis relay network...", delay: 60 },
+  { text: "", delay: 110 },
+  { text: "[OK] verifying network integrity", delay: 160 },
+  { text: "[OK] loading trust protocol v2.1", delay: 210 },
+  { text: "[OK] opening secure exchange channels", delay: 260 },
+  { text: "[OK] linking to local mesh node", delay: 310 },
+  { text: "", delay: 360 },
+  { text: "on air.", delay: 410 },
 ];
 
 const TRUST_SIGNALS = [
@@ -47,25 +47,41 @@ export function BootSequence({ onComplete }: { onComplete: () => void }) {
             setShowCursor(false);
             setTimeout(() => {
               setDone(true);
-              setTimeout(onComplete, 250);
-            }, 200);
-          }, 350);
+              setTimeout(onComplete, 150);
+            }, 120);
+          }, 220);
         }
       }, line.delay);
       timeouts.push(t);
     });
 
+    function skip() {
+      timeouts.forEach(clearTimeout);
+      clearTimeout(logoTimer);
+      clearTimeout(signalsTimer);
+      setDone(true);
+      onComplete();
+    }
+    window.addEventListener("pointerdown", skip, { once: true });
+    window.addEventListener("keydown", skip, { once: true });
+
     return () => {
       clearTimeout(logoTimer);
       clearTimeout(signalsTimer);
       timeouts.forEach(clearTimeout);
+      window.removeEventListener("pointerdown", skip);
+      window.removeEventListener("keydown", skip);
     };
   }, [onComplete]);
 
   if (done) return null;
 
   return (
-    <div className="fixed inset-0 z-40 bg-void flex flex-col items-center justify-center p-6">
+    <div
+      className="fixed inset-0 z-40 bg-void flex flex-col items-center justify-center p-6 cursor-pointer"
+      role="button"
+      aria-label="Skip intro"
+    >
       {/* Logo + Brand */}
       <div
         className={`flex flex-col items-center transition-all duration-700 ${

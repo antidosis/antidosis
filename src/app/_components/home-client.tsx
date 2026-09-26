@@ -126,7 +126,8 @@ export default function HomePage() {
   useEffect(() => {
     const bootedBefore = sessionStorage.getItem("antidosis-booted");
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
-    if (bootedBefore || isMobile) {
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (bootedBefore || isMobile || reducedMotion) {
       setHasBooted(true);
     }
   }, []);
