@@ -53,31 +53,31 @@ export default function RegisterPage() {
     setError(null);
 
     if (!agreeTos) {
-      setError("you must agree to the terms of service.");
+      setError("You must agree to the Terms of Service.");
       setLoading(false);
       return;
     }
 
     if (!confirmAge) {
-      setError("you must confirm you are 18 years or older.");
+      setError("You must confirm you are 18 years or older.");
       setLoading(false);
       return;
     }
 
     if (!validation.valid) {
-      setError("password does not meet requirements.");
+      setError("Password does not meet the requirements below.");
       setLoading(false);
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("passwords do not match.");
+      setError("Passwords do not match.");
       setLoading(false);
       return;
     }
 
     if (mobile && !isValidAustralianMobile(mobile)) {
-      setError("invalid mobile number. use australian format: +61 412 345 678");
+      setError("Invalid mobile number. Use Australian format: +61 412 345 678");
       setLoading(false);
       return;
     }
@@ -96,7 +96,7 @@ export default function RegisterPage() {
       authData = res.data;
       authError = res.error;
     } catch {
-      setError("couldn't reach the auth server. check your connection and try again.");
+      setError("Couldn't reach the authentication server. Check your connection and try again.");
       setLoading(false);
       return;
     }
@@ -150,29 +150,29 @@ export default function RegisterPage() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="fullName">full_name</Label>
+              <Label htmlFor="fullName">Full name</Label>
               <Input
                 id="fullName"
                 type="text"
-                placeholder="john_doe"
+                placeholder="John Doe"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">email_address</Label>
+              <Label htmlFor="email">Email address</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="user@example.com"
+                placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="mobile">mobile_number</Label>
+              <Label htmlFor="mobile">Mobile number</Label>
               <div className="relative">
                 <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8f7f6e]" />
                 <Input
@@ -184,15 +184,15 @@ export default function RegisterPage() {
                   className="pl-10"
                 />
               </div>
-              <p className="text-xs text-[#8f7f6e]">optional. australian mobiles only.</p>
+              <p className="text-xs text-[#8f7f6e]">Optional. Australian mobiles only.</p>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">password</Label>
+              <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="min_8_chars_complex"
+                  placeholder="Choose a strong password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -210,7 +210,7 @@ export default function RegisterPage() {
               {password.length > 0 && (
                 <div className="space-y-2 mt-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-[#8f7f6e]">strength</span>
+                    <span className="text-xs text-[#8f7f6e]">Strength</span>
                     <span className={`text-xs font-medium ${strengthColor}`}>
                       {strength.replace("-", " ")}
                     </span>
@@ -250,12 +250,12 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">confirm_password</Label>
+              <Label htmlFor="confirmPassword">Confirm password</Label>
               <div className="relative">
                 <Input
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
-                  placeholder="repeat_password"
+                  placeholder="Re-enter your password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
@@ -287,13 +287,13 @@ export default function RegisterPage() {
                 htmlFor="tos"
                 className="text-xs text-[#8f7f6e] font-normal leading-relaxed cursor-pointer"
               >
-                i agree to the{" "}
+                I agree to the{" "}
                 <Link href="/terms" className="text-[#f5a623] hover:underline underline-offset-4">
-                  terms of service
+                  Terms of Service
                 </Link>{" "}
                 and{" "}
                 <Link href="/privacy" className="text-[#f5a623] hover:underline underline-offset-4">
-                  privacy policy
+                  Privacy Policy
                 </Link>
               </Label>
             </div>
@@ -310,20 +310,20 @@ export default function RegisterPage() {
                 htmlFor="age"
                 className="text-xs text-[#8f7f6e] font-normal leading-relaxed cursor-pointer"
               >
-                i confirm i am 18 years or older
+                I confirm I am 18 years or older
               </Label>
             </div>
 
-            {error && <p className="text-sm text-[#ff5252]">error: {error}</p>}
+            {error && <p className="text-sm text-[#ff5252]">{error}</p>}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "creating..." : "create_account"}
+              {loading ? "Creating account..." : "Create account"}
             </Button>
           </form>
 
           <p className="mt-12 text-sm text-[#8f7f6e]">
-            have account?{" "}
+            Already have an account?{" "}
             <Button variant="link" size="sm" asChild>
-              <Link href="/login">login</Link>
+              <Link href="/login">Log in</Link>
             </Button>
           </p>
         </div>

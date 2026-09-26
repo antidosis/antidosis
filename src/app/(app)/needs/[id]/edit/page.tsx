@@ -166,14 +166,14 @@ export default function EditNeedPage() {
     return (
       <div className="max-w-2xl mx-auto px-4 md:px-8 py-24 text-center">
         <Loader2 className="h-6 w-6 animate-spin mx-auto mb-4 text-[#8f7f6e]" />
-        <p className="text-sm text-[#8f7f6e]">loading...</p>
+        <p className="text-sm text-[#8f7f6e]">Loading...</p>
       </div>
     );
 
   if (notFound)
     return (
       <div className="max-w-2xl mx-auto px-4 md:px-8 py-24 text-center">
-        <p className="text-sm text-[#ff5252]">error: need not found</p>
+        <p className="text-sm text-[#ff5252]">Need not found</p>
       </div>
     );
 

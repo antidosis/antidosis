@@ -159,7 +159,7 @@ export default function VerifyMobilePage() {
             <TerminalCursor />
           </h1>
           <p className="text-sm text-[#b8a078] mb-12">
-            secure your account with a verified mobile number
+            Secure your account with a verified mobile number
           </p>
 
           <div className="vessel p-6 space-y-6">
@@ -203,14 +203,14 @@ export default function VerifyMobilePage() {
                     <p className="text-sm text-[#e8d5a3] font-medium">
                       {maskMobile(profile.mobile)}
                     </p>
-                    <p className="text-xs text-[#8f7f6e]">awaiting verification</p>
+                    <p className="text-xs text-[#8f7f6e]">Awaiting verification</p>
                   </div>
                 </div>
 
                 {!otpSent ? (
                   <Button onClick={sendOtp} disabled={sending} className="w-full">
                     {sending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                    Send OTP
+                    Send code
                   </Button>
                 ) : (
                   <div className="space-y-4">
@@ -232,12 +232,12 @@ export default function VerifyMobilePage() {
 
                     <div className="flex items-center justify-between text-xs text-[#8f7f6e]">
                       <span>
-                        expires in{" "}
+                        Expires in{" "}
                         <span className={countdown < 60 ? "text-[#ff5252]" : "text-[#e8d5a3]"}>
                           {formatTime(countdown)}
                         </span>
                       </span>
-                      {countdown === 0 && <span className="text-[#ff5252]">code expired</span>}
+                      {countdown === 0 && <span className="text-[#ff5252]">Code expired</span>}
                     </div>
 
                     <Button
@@ -261,7 +261,7 @@ export default function VerifyMobilePage() {
                           disabled={sending}
                           className="text-xs text-[#f5a623] hover:underline underline-offset-4 disabled:opacity-40"
                         >
-                          {sending ? "Sending..." : "Resend OTP"}
+                          {sending ? "Sending..." : "Resend code"}
                         </button>
                       )}
                     </div>

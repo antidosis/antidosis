@@ -63,13 +63,13 @@ export default function ResetPasswordPage() {
     setError(null);
 
     if (password !== confirmPassword) {
-      setError("passwords do not match.");
+      setError("Passwords do not match.");
       setLoading(false);
       return;
     }
 
     if (!validation.valid) {
-      setError("password does not meet requirements.");
+      setError("Password does not meet the requirements below.");
       setLoading(false);
       return;
     }
@@ -111,19 +111,19 @@ export default function ResetPasswordPage() {
             <div className="border border-[#2a2420] bg-[#12100e] p-5">
               <div className="flex items-center gap-2 mb-2">
                 <Loader2 className="h-4 w-4 text-[#00e676] animate-spin" />
-                <p className="text-sm text-[#00e676]">password updated.</p>
+                <p className="text-sm text-[#00e676]">Password updated.</p>
               </div>
-              <p className="text-xs text-[#8f7f6e]">redirecting to login in {countdown}s...</p>
+              <p className="text-xs text-[#8f7f6e]">Redirecting to login in {countdown}s...</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="password">new_password</Label>
+                <Label htmlFor="password">New password</Label>
                 <div className="relative">
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="min_8_chars_complex"
+                    placeholder="Choose a strong password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -141,7 +141,7 @@ export default function ResetPasswordPage() {
                 {password.length > 0 && (
                   <div className="space-y-2 mt-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-[#8f7f6e]">strength</span>
+                      <span className="text-xs text-[#8f7f6e]">Strength</span>
                       <span className={`text-xs font-medium ${strengthColor}`}>
                         {strength.replace("-", " ")}
                       </span>
@@ -184,12 +184,12 @@ export default function ResetPasswordPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">confirm_password</Label>
+                <Label htmlFor="confirmPassword">Confirm password</Label>
                 <div className="relative">
                   <Input
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
-                    placeholder="repeat_password"
+                    placeholder="Re-enter your password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
@@ -209,9 +209,9 @@ export default function ResetPasswordPage() {
                 </div>
               </div>
 
-              {error && <p className="text-sm text-[#ff5252]">error: {error}</p>}
+              {error && <p className="text-sm text-[#ff5252]">{error}</p>}
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "updating..." : "update_password"}
+                {loading ? "Updating..." : "Update password"}
               </Button>
             </form>
           )}

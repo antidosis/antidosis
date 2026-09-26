@@ -59,20 +59,20 @@ export default function ForgotPasswordPage() {
             <TerminalCursor />
           </h1>
           <p className="text-sm text-[#b8a078] mb-12">
-            enter your email and we&apos;ll send you a reset link
+            Enter your email and we&apos;ll send you a reset link
           </p>
 
           {sent ? (
             <div className="border border-[#2a2420] bg-[#12100e] p-5">
-              <p className="text-sm text-[#00e676] mb-2">reset link sent.</p>
+              <p className="text-sm text-[#00e676] mb-2">Reset link sent.</p>
               <p className="text-xs text-[#8f7f6e]">
-                check your inbox (and spam folder) for an email from us.
+                Check your inbox (and spam folder) for an email from us.
               </p>
               <div className="mt-6 text-center">
                 <Button variant="link" size="sm" asChild>
                   <Link href="/login" className="inline-flex items-center gap-2">
                     <ArrowLeft className="h-4 w-4" />
-                    back to login
+                    Back to login
                   </Link>
                 </Button>
               </div>
@@ -80,23 +80,23 @@ export default function ForgotPasswordPage() {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="email">email_address</Label>
+                <Label htmlFor="email">Email address</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="user@example.com"
+                  placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
-              {error && <p className="text-sm text-[#ff5252]">error: {error}</p>}
+              {error && <p className="text-sm text-[#ff5252]">{error}</p>}
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "sending..." : "send_reset_link"}
+                {loading ? "Sending..." : "Send reset link"}
               </Button>
               <p className="text-sm text-[#8f7f6e] text-center">
                 <Button variant="link" size="sm" asChild>
-                  <Link href="/login">back to login</Link>
+                  <Link href="/login">Back to login</Link>
                 </Button>
               </p>
             </form>

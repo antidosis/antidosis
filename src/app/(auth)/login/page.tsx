@@ -32,7 +32,7 @@ export default function LoginPage() {
       setLoading(true);
       supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
         if (error) {
-          setError("verification failed: " + error.message);
+          setError("Verification failed: " + error.message);
           setLoading(false);
         } else {
           router.push("/needs");
@@ -94,37 +94,37 @@ export default function LoginPage() {
           {emailVerified && (
             <div className="border border-[#00e676]/30 bg-[#00e676]/5 p-5 mb-8 flex items-center gap-3">
               <CheckCircle className="h-5 w-5 text-[#00e676] flex-shrink-0" />
-              <p className="text-sm text-[#00e676]">email verified. you can now log in.</p>
+              <p className="text-sm text-[#00e676]">Email verified — you can now log in.</p>
             </div>
           )}
 
           {justRegistered && !emailVerified && (
             <div className="border border-[#2a2420] bg-[#12100e] p-5 mb-8">
               <p className="text-sm text-[#00e676]">
-                account created. please verify your email before logging in.
+                Account created. Please verify your email before logging in.
               </p>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email">email_address</Label>
+              <Label htmlFor="email">Email address</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="user@example.com"
+                placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">password</Label>
+              <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="your_password"
+                  placeholder="Your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -139,21 +139,21 @@ export default function LoginPage() {
                 </button>
               </div>
             </div>
-            {error && <p className="text-sm text-[#ff5252]">error: {error}</p>}
+            {error && <p className="text-sm text-[#ff5252]">{error}</p>}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "authenticating..." : "login"}
+              {loading ? "Logging in..." : "Log in"}
             </Button>
             <p className="text-center">
               <Button variant="link" size="sm" asChild>
-                <Link href="/forgot-password">forgot_password?</Link>
+                <Link href="/forgot-password">Forgot password?</Link>
               </Button>
             </p>
           </form>
 
           <p className="mt-12 text-sm text-[#8f7f6e]">
-            no account?{" "}
+            Don&apos;t have an account?{" "}
             <Button variant="link" size="sm" asChild>
-              <Link href="/register">register</Link>
+              <Link href="/register">Register</Link>
             </Button>
           </p>
         </div>

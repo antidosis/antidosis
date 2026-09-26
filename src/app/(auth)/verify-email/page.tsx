@@ -65,21 +65,21 @@ export default function VerifyEmailPage() {
             <TerminalCursor />
           </h1>
           <p className="text-sm text-[#b8a078] mb-12">
-            security checkpoint. check your inbox to continue.
+            Security checkpoint — check your inbox to continue.
           </p>
 
           <div className="vessel p-5 mb-8">
             <div className="flex items-start gap-3">
               <Mail className="h-6 w-6 text-[#f5a623] mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-sm text-[#e8d5a3] font-medium">verification email sent</p>
+                <p className="text-sm text-[#e8d5a3] font-medium">Verification email sent</p>
                 {email && (
                   <p className="text-xs text-[#8f7f6e] mt-1">
-                    sent to: <span className="text-[#e8d5a3]">{email}</span>
+                    Sent to: <span className="text-[#e8d5a3]">{email}</span>
                   </p>
                 )}
                 <p className="text-xs text-[#8f7f6e] mt-2">
-                  click the link in the email to activate your account. the link expires in 1 hour.
+                  Click the link in the email to activate your account. The link expires in 1 hour.
                 </p>
               </div>
             </div>
@@ -88,21 +88,23 @@ export default function VerifyEmailPage() {
           {resent && (
             <div className="border border-[#2a2420] bg-[#12100e] p-5 mb-6 flex items-center gap-3">
               <Shield className="h-4 w-4 text-[#00e676] flex-shrink-0" />
-              <p className="text-sm text-[#00e676]">verification email resent. check your inbox.</p>
+              <p className="text-sm text-[#00e676]">
+                Verification email resent — check your inbox.
+              </p>
             </div>
           )}
 
-          {error && <p className="text-sm text-[#ff5252] mb-6">error: {error}</p>}
+          {error && <p className="text-sm text-[#ff5252] mb-6">{error}</p>}
 
           <Button onClick={resendVerification} disabled={loading || resent} className="w-full mb-4">
             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
-            {loading ? "sending..." : "resend_verification"}
+            {loading ? "Sending..." : "Resend verification email"}
           </Button>
 
           <Button variant="ghost" size="sm" asChild className="px-0">
             <Link href="/login" className="inline-flex items-center">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              back_to_login
+              Back to login
             </Link>
           </Button>
         </div>
