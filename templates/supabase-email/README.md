@@ -28,4 +28,4 @@ Copy the HTML from each file into your Supabase dashboard:
 - The templates use the Alchemist's Terminal color palette (dark bronze background, gold accents)
 - All CTAs use lowercase text to match the site's terminal aesthetic
 - Footer reads "Antidosis — A marketplace for reciprocal exchange"
-- The `{{ .ConfirmationURL }}` variable is automatically populated by Supabase
+- The templates link directly to the app's `/auth/confirm` route using `{{ .TokenHash }}` (not `{{ .ConfirmationURL }}`). This is deliberate: the PKCE `ConfirmationURL` flow breaks whenever the email is opened in a different browser or mail app than the one used to sign up ("PKCE code verifier not found"). The token_hash flow works anywhere — the route calls `verifyOtp` server-side and logs the user in.

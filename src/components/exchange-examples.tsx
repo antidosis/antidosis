@@ -33,9 +33,9 @@ const SIGNALS: Signal[] = [
 
 export function ExchangeExamples() {
   return (
-    <div className="grid sm:grid-cols-2 gap-4">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4">
       {SIGNALS.map((s) => (
-        <div key={s.need} className="vessel p-5 group">
+        <div key={s.need} className="vessel p-4 sm:p-5 group">
           <div className="flex items-center justify-end gap-1.5 text-xs text-ash mb-3">
             <MapPin className="h-3 w-3" />
             <span>{s.suburb}</span>
@@ -56,7 +56,7 @@ export function ExchangeExamples() {
           </div>
         </div>
       ))}
-      <div className="sm:col-span-2 flex justify-center pt-2">
+      <div className="col-span-2 flex justify-center pt-2">
         <Link
           href="/examples"
           className="text-xs text-ash hover:text-sun transition-colors inline-flex items-center gap-1.5 font-mono"

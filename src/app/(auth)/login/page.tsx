@@ -27,6 +27,11 @@ export default function LoginPage() {
 
   // Handle email verification callback from Supabase
   useEffect(() => {
+    const urlError = searchParams.get("error");
+    if (urlError) {
+      setError(urlError);
+      return;
+    }
     const code = searchParams.get("code");
     if (code) {
       setLoading(true);

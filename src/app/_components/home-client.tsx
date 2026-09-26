@@ -181,8 +181,8 @@ export default function HomePage() {
                   </Button>
                 </div>
               </div>
-              <div className="hidden md:block">
-                <NetworkMap className="w-full h-[340px]" />
+              <div className="mt-10 md:mt-0">
+                <NetworkMap className="w-full h-[220px] md:h-[340px]" />
               </div>
             </div>
           </div>
@@ -259,7 +259,7 @@ export default function HomePage() {
                 Built for <span className="text-ok">Trust.</span>
               </h2>
             </Reveal>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
               {FEATURES.map((f, i) => (
                 <Reveal key={f.title} delay={i * 80}>
                   <PillarCard icon={f.icon} title={f.title} desc={f.desc} color={f.color} />
@@ -375,7 +375,7 @@ function PillarCard({
 }) {
   return (
     <div
-      className="vessel p-6 group hover:scale-[1.02] transition-transform duration-300 h-full"
+      className="vessel p-4 md:p-6 group hover:scale-[1.02] transition-transform duration-300 h-full"
       style={{ borderColor: `${color}15` }}
     >
       <div

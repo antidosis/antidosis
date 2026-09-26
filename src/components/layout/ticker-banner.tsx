@@ -62,6 +62,8 @@ export function TickerBanner() {
       }}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={() => setIsPaused(true)}
+      onTouchEnd={() => setIsPaused(false)}
       data-nosnippet
     >
       {/* Top glow line */}

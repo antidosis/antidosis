@@ -490,7 +490,7 @@
 }
 
 .animate-ticker {
-  animation: ticker 40s linear infinite;
+  animation: ticker 55s linear infinite;
 }
 
 @keyframes terminal-fade-in {
@@ -615,6 +615,6 @@
 
 @media (max-width: 768px) {
   .animate-ticker {
-    animation: ticker 25s linear infinite;
+    animation: ticker 80s linear infinite;
   }
 }
