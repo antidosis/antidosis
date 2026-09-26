@@ -20,11 +20,11 @@ type ReportItem = {
 };
 
 const REASON_VARIANT: Record<string, string> = {
-  safety: "text-[#ff5252]",
-  scam: "text-[#f5a623]",
-  abuse: "text-[#f5a623]",
-  spam: "text-[#8f7f6e]",
-  other: "text-[#8f7f6e]",
+  safety: "text-bad",
+  scam: "text-sun",
+  abuse: "text-sun",
+  spam: "text-ash",
+  other: "text-ash",
 };
 
 export function ReportsSection() {
@@ -63,35 +63,33 @@ export function ReportsSection() {
 
   return (
     <section className="mt-8">
-      <p className="text-xs text-[#8f7f6e] mb-6">$ ls ~/open_reports/ ({reports.length})</p>
+      <p className="text-xs text-ash mb-6">$ ls ~/open_reports/ ({reports.length})</p>
 
       {loading ? (
-        <div className="py-8 text-center text-sm text-[#8f7f6e]">
+        <div className="py-8 text-center text-sm text-ash">
           <Loader2 className="h-5 w-5 animate-spin mx-auto mb-3" />
           loading reports...
         </div>
       ) : reports.length === 0 ? (
         <EmptyState
-          icon={<CheckCircle2 className="h-8 w-8 text-[#00e676]" />}
+          icon={<CheckCircle2 className="h-8 w-8 text-ok" />}
           title="all caught up"
           description="no open reports"
         />
       ) : (
         <div className="space-y-4">
           {reports.map((report) => (
-            <div key={report.id} className="vessel p-5 hover:bg-[#1a1714] transition-colors">
+            <div key={report.id} className="vessel p-5 hover:bg-raise transition-colors">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-2">
-                    <Flag
-                      className={`h-4 w-4 ${REASON_VARIANT[report.reason] || "text-[#8f7f6e]"}`}
-                    />
+                    <Flag className={`h-4 w-4 ${REASON_VARIANT[report.reason] || "text-ash"}`} />
                     <Badge variant="outline">{report.reason}</Badge>
-                    <span className="text-xs text-[#8f7f6e]">
+                    <span className="text-xs text-ash">
                       {report.targetType} · {report.targetId}
                     </span>
                   </div>
-                  <p className="text-xs text-[#8f7f6e] mb-1">
+                  <p className="text-xs text-ash mb-1">
                     reported by {report.reporter.fullName || "unnamed user"} (
                     {report.reporter.email}) ·{" "}
                     {new Date(report.createdAt).toLocaleDateString("en-AU", {
@@ -102,16 +100,14 @@ export function ReportsSection() {
                       minute: "2-digit",
                     })}
                   </p>
-                  {report.details && (
-                    <p className="text-sm text-[#e8d5a3] mt-2">{report.details}</p>
-                  )}
+                  {report.details && <p className="text-sm text-gold mt-2">{report.details}</p>}
                 </div>
                 <div className="flex flex-col gap-2 shrink-0">
                   <Button
                     size="sm"
                     onClick={() => setStatus(report.id, "resolved")}
                     disabled={actioning === report.id}
-                    className="bg-[#00e676] text-[#0a0806] hover:bg-[#00e676]/90"
+                    className="bg-ok text-onaccent hover:bg-ok/90"
                   >
                     {actioning === report.id ? (
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -125,7 +121,7 @@ export function ReportsSection() {
                     variant="ghost"
                     onClick={() => setStatus(report.id, "dismissed")}
                     disabled={actioning === report.id}
-                    className="text-[#8f7f6e]"
+                    className="text-ash"
                   >
                     <XCircle className="h-3.5 w-3.5 mr-1" />
                     dismiss

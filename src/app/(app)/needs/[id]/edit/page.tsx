@@ -165,15 +165,15 @@ export default function EditNeedPage() {
   if (loading)
     return (
       <div className="max-w-2xl mx-auto px-4 md:px-8 py-24 text-center">
-        <Loader2 className="h-6 w-6 animate-spin mx-auto mb-4 text-[#8f7f6e]" />
-        <p className="text-sm text-[#8f7f6e]">Loading...</p>
+        <Loader2 className="h-6 w-6 animate-spin mx-auto mb-4 text-ash" />
+        <p className="text-sm text-ash">Loading...</p>
       </div>
     );
 
   if (notFound)
     return (
       <div className="max-w-2xl mx-auto px-4 md:px-8 py-24 text-center">
-        <p className="text-sm text-[#ff5252]">Need not found</p>
+        <p className="text-sm text-bad">Need not found</p>
       </div>
     );
 
@@ -182,28 +182,28 @@ export default function EditNeedPage() {
       <div className="py-6">
         <Link
           href={`/needs/${needId}`}
-          className="inline-flex items-center text-sm text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
+          className="inline-flex items-center text-sm text-ash hover:text-gold transition-colors"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />$ cd ~/needs/{needId.slice(0, 8)}
         </Link>
       </div>
 
-      <h1 className="heading-display text-2xl text-[#e8d5a3]">Edit Need</h1>
-      <p className="text-xs text-[#8f7f6e] mt-3">$ nano edit_need.conf</p>
-      <p className="text-sm text-[#b8a078] mb-8">update your need details</p>
+      <h1 className="heading-display text-2xl text-gold">Edit Need</h1>
+      <p className="text-xs text-ash mt-3">$ nano edit_need.conf</p>
+      <p className="text-sm text-parchment mb-8">update your need details</p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <section className="vessel-need p-5">
-            <p className="text-xs text-[#35c2f0] uppercase tracking-wide font-medium mb-1">
+            <p className="text-xs text-aero uppercase tracking-wide font-medium mb-1">
               [what you need]
             </p>
-            <p className="text-xs text-[#8f7f6e] mb-5">what are you seeking from the community?</p>
+            <p className="text-xs text-ash mb-5">what are you seeking from the community?</p>
             <div className="space-y-5">
               <div className="space-y-2">
                 <Label>Title</Label>
                 <Input placeholder="e.g. electrical_work_1hr" {...register("title")} />
-                {errors.title && <p className="text-xs text-[#ff5252]">{errors.title.message}</p>}
+                {errors.title && <p className="text-xs text-bad">{errors.title.message}</p>}
               </div>
               <div className="space-y-2">
                 <Label>Description</Label>
@@ -213,20 +213,20 @@ export default function EditNeedPage() {
                   {...register("description")}
                 />
                 {errors.description && (
-                  <p className="text-xs text-[#ff5252]">{errors.description.message}</p>
+                  <p className="text-xs text-bad">{errors.description.message}</p>
                 )}
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 mb-1">
-                    <Calendar className="h-4 w-4 text-[#8f7f6e]" />
+                    <Calendar className="h-4 w-4 text-ash" />
                     <Label>Deadline (Optional)</Label>
                   </div>
                   <Input type="date" {...register("deadline")} />
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 mb-1">
-                    <Clock className="h-4 w-4 text-[#8f7f6e]" />
+                    <Clock className="h-4 w-4 text-ash" />
                     <Label>Time Estimate (Optional)</Label>
                   </div>
                   <Input placeholder="e.g. 2-4 hours" {...register("timeRange")} />
@@ -234,7 +234,7 @@ export default function EditNeedPage() {
               </div>
               <div className="space-y-2">
                 <Label>
-                  Required Skills <span className="text-[#8f7f6e] font-normal">(optional)</span>
+                  Required Skills <span className="text-ash font-normal">(optional)</span>
                 </Label>
                 <Controller
                   name="requiredSkills"
@@ -249,7 +249,7 @@ export default function EditNeedPage() {
                   )}
                 />
                 {regulatedTrade && (
-                  <p className="text-xs text-[#ffb300] flex items-center gap-1.5">
+                  <p className="text-xs text-alert flex items-center gap-1.5">
                     <Shield className="h-3.5 w-3.5 flex-shrink-0" />
                     This looks like licensed {regulatedTrade.label} work — only members with a
                     verified {regulatedTrade.licenceLabel} will be able to fulfil it (NSW).
@@ -258,7 +258,7 @@ export default function EditNeedPage() {
               </div>
               <div className="space-y-2">
                 <div className="flex items-center gap-2 mb-2">
-                  <Camera className="h-4 w-4 text-[#8f7f6e]" />
+                  <Camera className="h-4 w-4 text-ash" />
                   <Label>Need Images (Optional)</Label>
                 </div>
                 <Controller
@@ -279,10 +279,10 @@ export default function EditNeedPage() {
           </section>
 
           <section className="vessel-offer p-5">
-            <p className="text-xs text-[#f5a623] uppercase tracking-wide font-medium mb-1">
+            <p className="text-xs text-sun uppercase tracking-wide font-medium mb-1">
               [what you are offering]
             </p>
-            <p className="text-xs text-[#8f7f6e] mb-5">
+            <p className="text-xs text-ash mb-5">
               this determines which exchange categories are available below
             </p>
             <div className="space-y-5">
@@ -295,8 +295,8 @@ export default function EditNeedPage() {
                     onClick={() => setValue("offerType", type)}
                     className={`flex flex-col items-center gap-2 h-auto py-4 px-2 ${
                       offerType === type
-                        ? "border-[#f5a623] bg-[#f5a623]/5 text-[#e8d5a3] hover:bg-[#f5a623]/10 hover:text-[#e8d5a3]"
-                        : "border-[#2a2420] bg-[#0f0c0a] text-[#8f7f6e] hover:text-[#e8d5a3] hover:bg-[#1a1714] hover:border-[#3d3530]"
+                        ? "border-sun bg-sun/5 text-gold hover:bg-sun/10 hover:text-gold"
+                        : "border-line bg-inset text-ash hover:text-gold hover:bg-raise hover:border-linehi"
                     }`}
                   >
                     {type === "service" && <Wrench className="h-5 w-5" />}
@@ -307,7 +307,7 @@ export default function EditNeedPage() {
                 ))}
               </div>
               <div className="space-y-2">
-                <Label className="text-xs text-[#8f7f6e]">Sub-category (optional)</Label>
+                <Label className="text-xs text-ash">Sub-category (optional)</Label>
                 <div className="flex flex-wrap gap-2">
                   {EXCHANGE_MODES.filter((mode) => {
                     const incompatible = INCOMPATIBLE_EXCHANGE_MODES[offerType || "service"] || [];
@@ -322,7 +322,7 @@ export default function EditNeedPage() {
                         className={`text-[11px] uppercase tracking-wider px-2.5 py-1 rounded border transition-colors ${mode.twText} ${
                           active
                             ? `${mode.twBorder} ${mode.twBg} border-current`
-                            : "border-[#2a2420] hover:border-current"
+                            : "border-line hover:border-current"
                         }`}
                       >
                         {mode.label}
@@ -339,7 +339,7 @@ export default function EditNeedPage() {
                   {...register("offerDescription")}
                 />
                 {errors.offerDescription && (
-                  <p className="text-xs text-[#ff5252]">{errors.offerDescription.message}</p>
+                  <p className="text-xs text-bad">{errors.offerDescription.message}</p>
                 )}
               </div>
               <div className="space-y-2">
@@ -350,12 +350,12 @@ export default function EditNeedPage() {
                   {...register("offerValue", { valueAsNumber: true })}
                 />
                 {errors.offerValue && (
-                  <p className="text-xs text-[#ff5252]">{errors.offerValue.message}</p>
+                  <p className="text-xs text-bad">{errors.offerValue.message}</p>
                 )}
               </div>
               <div className="space-y-2">
                 <div className="flex items-center gap-2 mb-2">
-                  <ImageIcon className="h-4 w-4 text-[#8f7f6e]" />
+                  <ImageIcon className="h-4 w-4 text-ash" />
                   <Label>Offer Images (Optional)</Label>
                 </div>
                 <Controller
@@ -377,8 +377,8 @@ export default function EditNeedPage() {
         </div>
 
         <section className="space-y-3">
-          <p className="text-xs text-[#8f7f6e] uppercase tracking-wide font-medium">[deal type]</p>
-          <p className="text-xs text-[#8f7f6e]">choose how you want to structure this exchange</p>
+          <p className="text-xs text-ash uppercase tracking-wide font-medium">[deal type]</p>
+          <p className="text-xs text-ash">choose how you want to structure this exchange</p>
           <Controller
             name="requiresContract"
             control={control}
@@ -388,29 +388,23 @@ export default function EditNeedPage() {
                   type="button"
                   onClick={() => field.onChange(false)}
                   className={`text-left p-5 rounded border transition-all ${
-                    !field.value
-                      ? "border-[#00e676] bg-[#00e676]/5"
-                      : "border-[#2a2420] bg-[#0f0c0a] hover:border-[#3a342e]"
+                    !field.value ? "border-ok bg-ok/5" : "border-line bg-inset hover:border-linehi"
                   }`}
                 >
                   <div className="flex items-center gap-3 mb-2">
-                    <div
-                      className={`p-2 rounded ${!field.value ? "bg-[#00e676]/10" : "bg-[#1a1714]"}`}
-                    >
-                      <Handshake
-                        className={`h-5 w-5 ${!field.value ? "text-[#00e676]" : "text-[#8f7f6e]"}`}
-                      />
+                    <div className={`p-2 rounded ${!field.value ? "bg-ok/10" : "bg-raise"}`}>
+                      <Handshake className={`h-5 w-5 ${!field.value ? "text-ok" : "text-ash"}`} />
                     </div>
                     <div>
                       <p
-                        className={`text-sm font-medium ${!field.value ? "text-[#00e676]" : "text-[#e8d5a3]"}`}
+                        className={`text-sm font-medium ${!field.value ? "text-ok" : "text-gold"}`}
                       >
                         Free Form
                       </p>
-                      <p className="text-[10px] text-[#8f7f6e]">handshake deal</p>
+                      <p className="text-[10px] text-ash">handshake deal</p>
                     </div>
                   </div>
-                  <p className="text-xs text-[#8f7f6e]">
+                  <p className="text-xs text-ash">
                     Trust-based exchange with no formal contract. Best for smaller jobs or when you
                     already know the person.
                   </p>
@@ -420,29 +414,23 @@ export default function EditNeedPage() {
                   type="button"
                   onClick={() => field.onChange(true)}
                   className={`text-left p-5 rounded border transition-all ${
-                    field.value
-                      ? "border-[#f5a623] bg-[#f5a623]/5"
-                      : "border-[#2a2420] bg-[#0f0c0a] hover:border-[#3a342e]"
+                    field.value ? "border-sun bg-sun/5" : "border-line bg-inset hover:border-linehi"
                   }`}
                 >
                   <div className="flex items-center gap-3 mb-2">
-                    <div
-                      className={`p-2 rounded ${field.value ? "bg-[#f5a623]/10" : "bg-[#1a1714]"}`}
-                    >
-                      <Shield
-                        className={`h-5 w-5 ${field.value ? "text-[#f5a623]" : "text-[#8f7f6e]"}`}
-                      />
+                    <div className={`p-2 rounded ${field.value ? "bg-sun/10" : "bg-raise"}`}>
+                      <Shield className={`h-5 w-5 ${field.value ? "text-sun" : "text-ash"}`} />
                     </div>
                     <div>
                       <p
-                        className={`text-sm font-medium ${field.value ? "text-[#f5a623]" : "text-[#e8d5a3]"}`}
+                        className={`text-sm font-medium ${field.value ? "text-sun" : "text-gold"}`}
                       >
                         Formal Contract
                       </p>
-                      <p className="text-[10px] text-[#8f7f6e]">structured terms</p>
+                      <p className="text-[10px] text-ash">structured terms</p>
                     </div>
                   </div>
-                  <p className="text-xs text-[#8f7f6e]">
+                  <p className="text-xs text-ash">
                     Written terms, digital signatures, and built-in dispute resolution. Recommended
                     for larger or more complex exchanges.
                   </p>
@@ -452,19 +440,15 @@ export default function EditNeedPage() {
           />
         </section>
 
-        <section className="p-4 rounded border border-[#ff5252]/30 bg-[#ff5252]/5">
-          <p className="text-xs text-[#ff5252] uppercase tracking-wide font-medium mb-4">
-            [location]
-          </p>
+        <section className="p-4 rounded border border-bad/30 bg-bad/5">
+          <p className="text-xs text-bad uppercase tracking-wide font-medium mb-4">[location]</p>
           <div className="space-y-4">
-            <div className="bg-[#00e5ff]/10 border border-[#00e5ff]/30 p-3">
+            <div className="bg-mercury/10 border border-mercury/30 p-3">
               <div className="flex items-start gap-3">
-                <Info className="h-4 w-4 text-[#00e5ff] mt-0.5 flex-shrink-0" />
+                <Info className="h-4 w-4 text-mercury mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-sm text-[#e8d5a3] font-medium">
-                    Central Coast NSW trial region
-                  </p>
-                  <p className="text-xs text-[#8f7f6e] mt-1">
+                  <p className="text-sm text-gold font-medium">Central Coast NSW trial region</p>
+                  <p className="text-xs text-ash mt-1">
                     only central coast suburbs are available during the pilot. remote exchanges are
                     temporarily disabled.
                   </p>
@@ -488,7 +472,7 @@ export default function EditNeedPage() {
           </div>
         </section>
 
-        {rootError && <p className="text-sm text-[#ff5252]">{rootError}</p>}
+        {rootError && <p className="text-sm text-bad">{rootError}</p>}
 
         <div className="flex gap-3 pb-12">
           <Button

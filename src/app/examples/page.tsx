@@ -854,19 +854,19 @@ export default function ExamplesPage() {
     categoryFilter === "all" ? examples : examples.filter((e) => e.category === categoryFilter);
 
   return (
-    <div className="min-h-screen bg-[#0a0806] text-[#e8d5a3] flex flex-col">
+    <div className="min-h-screen bg-void text-gold flex flex-col">
       <Navbar />
       <main className="flex-1">
         {/* Hero */}
         <section className="pt-32 pb-16 md:pt-40 md:pb-20">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
-            <p className="text-xs text-[#8f7f6e] mb-8 font-mono">» SIGNAL LOG — REAL EXCHANGES</p>
-            <h1 className="heading-display text-4xl md:text-6xl text-[#e8d5a3] mb-6">
+            <p className="text-xs text-ash mb-8 font-mono">» SIGNAL LOG — REAL EXCHANGES</p>
+            <h1 className="heading-display text-4xl md:text-6xl text-gold mb-6">
               What Can You
               <br />
-              <span className="text-[#f5a623]">Exchange?</span>
+              <span className="text-sun">Exchange?</span>
             </h1>
-            <p className="text-base text-[#8f7f6e] max-w-xl leading-relaxed mb-6">
+            <p className="text-base text-ash max-w-xl leading-relaxed mb-6">
               Antidosis is built on a simple idea: everyone has something worth broadcasting. A
               skill. An item. Time. A favour. Here are real exchanges happening on the network right
               now.
@@ -889,32 +889,32 @@ export default function ExamplesPage() {
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <div className="grid sm:grid-cols-3 gap-4">
               <div className="vessel p-5">
-                <div className="inline-flex bg-[#1a1714] p-3 rounded-md text-[#f5a623] mb-4">
+                <div className="inline-flex bg-raise p-3 rounded-md text-sun mb-4">
                   <Shuffle className="h-5 w-5" />
                 </div>
-                <h3 className="text-sm font-bold text-[#e8d5a3] mb-2">Swap Anything</h3>
-                <p className="text-xs text-[#8f7f6e] leading-relaxed">
+                <h3 className="text-sm font-bold text-gold mb-2">Swap Anything</h3>
+                <p className="text-xs text-ash leading-relaxed">
                   Goods for goods. Skills for skills. Services for items. Cash for anything. There
                   is no fixed formula — if both parties agree, the exchange works.
                 </p>
               </div>
               <div className="vessel p-5">
-                <div className="inline-flex bg-[#1a1714] p-3 rounded-md text-[#00e5ff] mb-4">
+                <div className="inline-flex bg-raise p-3 rounded-md text-mercury mb-4">
                   <MapPin className="h-5 w-5" />
                 </div>
-                <h3 className="text-sm font-bold text-[#e8d5a3] mb-2">Start Local</h3>
-                <p className="text-xs text-[#8f7f6e] leading-relaxed">
+                <h3 className="text-sm font-bold text-gold mb-2">Start Local</h3>
+                <p className="text-xs text-ash leading-relaxed">
                   All these examples are from the Central Coast. Trade with people nearby — walk
                   over with your lemons, meet at the beach for the lesson, or drop off the tools on
                   your way past.
                 </p>
               </div>
               <div className="vessel p-5">
-                <div className="inline-flex bg-[#1a1714] p-3 rounded-md text-[#00e676] mb-4">
+                <div className="inline-flex bg-raise p-3 rounded-md text-ok mb-4">
                   <Heart className="h-5 w-5" />
                 </div>
-                <h3 className="text-sm font-bold text-[#e8d5a3] mb-2">Build Trust</h3>
-                <p className="text-xs text-[#8f7f6e] leading-relaxed">
+                <h3 className="text-sm font-bold text-gold mb-2">Build Trust</h3>
+                <p className="text-xs text-ash leading-relaxed">
                   The best trades come from clear communication. Describe what you need honestly.
                   State what you are offering upfront. Use the contract system when money or
                   valuable items are involved.
@@ -929,7 +929,7 @@ export default function ExamplesPage() {
         {/* Filters */}
         <section className="py-8">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
-            <p className="text-xs text-[#8f7f6e] mb-4 font-mono">» CHANNELS — FILTER BY TYPE</p>
+            <p className="text-xs text-ash mb-4 font-mono">» CHANNELS — FILTER BY TYPE</p>
             <div className="flex flex-wrap gap-2">
               {categoryFilters.map((cat) => (
                 <Button
@@ -956,11 +956,11 @@ export default function ExamplesPage() {
                     {/* Category badge */}
                     <div className="flex items-center justify-between mb-3">
                       <span
-                        className={`text-[10px] uppercase tracking-wider font-medium ${catMeta?.twText ?? "text-[#8f7f6e]"}`}
+                        className={`text-[10px] uppercase tracking-wider font-medium ${catMeta?.twText ?? "text-ash"}`}
                       >
                         {catMeta?.label ?? example.category}
                       </span>
-                      <div className="flex items-center gap-1.5 text-xs text-[#8f7f6e]">
+                      <div className="flex items-center gap-1.5 text-xs text-ash">
                         <MapPin className="h-3 w-3" />
                         <span>{example.location}</span>
                       </div>
@@ -969,34 +969,34 @@ export default function ExamplesPage() {
                     {/* I NEED */}
                     <div className="mb-3">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-[9px] font-bold uppercase tracking-widest text-[#ff5252]">
+                        <span className="text-[9px] font-bold uppercase tracking-widest text-bad">
                           I Need
                         </span>
-                        <div className="flex-1 h-px bg-[#2a2420]" />
+                        <div className="flex-1 h-px bg-line" />
                       </div>
-                      <h3 className="text-base font-medium text-[#e8d5a3] group-hover:text-[#f5a623] transition-colors">
+                      <h3 className="text-base font-medium text-gold group-hover:text-sun transition-colors">
                         {example.needTitle}
                       </h3>
-                      <p className="text-sm text-[#b8a078] leading-relaxed mt-1">
+                      <p className="text-sm text-parchment leading-relaxed mt-1">
                         {example.needDescription}
                       </p>
                     </div>
 
                     {/* I OFFER */}
-                    <div className="pt-3 border-t border-[#2a2420]">
+                    <div className="pt-3 border-t border-line">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-[9px] font-bold uppercase tracking-widest text-[#00e676]">
+                        <span className="text-[9px] font-bold uppercase tracking-widest text-ok">
                           I Offer
                         </span>
-                        <div className="flex-1 h-px bg-[#2a2420]" />
+                        <div className="flex-1 h-px bg-line" />
                       </div>
                       <div className="flex items-start gap-2.5">
-                        <div className="p-1.5 bg-[#1a1714] text-[#8f7f6e] shrink-0 mt-0.5">
+                        <div className="p-1.5 bg-raise text-ash shrink-0 mt-0.5">
                           {offerIcons[example.offerType]}
                         </div>
                         <div>
-                          <p className="text-sm text-[#b8a078]">{example.offerDescription}</p>
-                          <span className="text-[10px] text-[#8f7f6e] uppercase tracking-wide mt-0.5 inline-block">
+                          <p className="text-sm text-parchment">{example.offerDescription}</p>
+                          <span className="text-[10px] text-ash uppercase tracking-wide mt-0.5 inline-block">
                             {example.offerType}
                           </span>
                         </div>
@@ -1009,7 +1009,7 @@ export default function ExamplesPage() {
 
             {filtered.length === 0 && (
               <div className="py-24 text-center">
-                <p className="text-sm text-[#8f7f6e]">No examples in this category yet.</p>
+                <p className="text-sm text-ash">No examples in this category yet.</p>
               </div>
             )}
           </div>
@@ -1020,13 +1020,13 @@ export default function ExamplesPage() {
         {/* Inspiration Section */}
         <section className="py-16 md:py-24">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
-            <p className="text-xs text-[#8f7f6e] mb-8 font-mono">
+            <p className="text-xs text-ash mb-8 font-mono">
               » COMMON QUESTIONS — CLEARING THE STATIC
             </p>
-            <h2 className="heading-display text-2xl md:text-4xl text-[#e8d5a3] mb-10">
+            <h2 className="heading-display text-2xl md:text-4xl text-gold mb-10">
               Still Not Sure?
               <br />
-              <span className="text-[#f5a623]">Here Are Some Truths.</span>
+              <span className="text-sun">Here Are Some Truths.</span>
             </h2>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1061,8 +1061,8 @@ export default function ExamplesPage() {
                 },
               ].map((item, i) => (
                 <div key={i} className="vessel p-5">
-                  <p className="text-sm font-medium text-[#e8d5a3] mb-3">&ldquo;{item.q}&rdquo;</p>
-                  <p className="text-xs text-[#8f7f6e] leading-relaxed">{item.a}</p>
+                  <p className="text-sm font-medium text-gold mb-3">&ldquo;{item.q}&rdquo;</p>
+                  <p className="text-xs text-ash leading-relaxed">{item.a}</p>
                 </div>
               ))}
             </div>
@@ -1074,13 +1074,13 @@ export default function ExamplesPage() {
         {/* CTA */}
         <section className="py-20 md:py-28">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
-            <p className="text-xs text-[#8f7f6e] mb-8 font-mono">◉ BROADCAST YOUR NEED</p>
-            <h2 className="heading-display text-3xl md:text-5xl text-[#e8d5a3] mb-6">
+            <p className="text-xs text-ash mb-8 font-mono">◉ BROADCAST YOUR NEED</p>
+            <h2 className="heading-display text-3xl md:text-5xl text-gold mb-6">
               Your Need Is
               <br />
-              <span className="text-[#f5a623]">Someone Else&apos;s Want.</span>
+              <span className="text-sun">Someone Else&apos;s Want.</span>
             </h2>
-            <p className="text-base text-[#8f7f6e] max-w-md mb-10 leading-relaxed">
+            <p className="text-base text-ash max-w-md mb-10 leading-relaxed">
               These are just sparks. The real magic happens when you post something only you can
               offer. Be specific. Be honest. See who shows up.
             </p>

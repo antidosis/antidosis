@@ -19,7 +19,7 @@ const DEMOS = [
       "Walk through the entire exchange lifecycle from both sides. Watch Sarah post a need, Marcus find it, negotiate, and complete the exchange — with reviews.",
     icon: ArrowRightLeft,
     href: "/demo/user-experience",
-    color: "#f5a623",
+    color: "var(--x-f5a623)",
     bg: "#f5a62308",
     border: "#f5a62320",
     lessons: [
@@ -36,7 +36,7 @@ const DEMOS = [
       "Watch a live replay of real relay usage. See how community members find each other, negotiate deals, and build trust in public channels and DMs.",
     icon: MessageSquare,
     href: "/demo/terminal",
-    color: "#00e5ff",
+    color: "var(--x-00e5ff)",
     bg: "#00e5ff08",
     border: "#00e5ff20",
     lessons: [
@@ -53,7 +53,7 @@ const DEMOS = [
       "Experience the full lifecycle of a formal exchange. Post a need, receive interest, negotiate terms, sign a binding contract, and leave reviews.",
     icon: FileText,
     href: "/demo/contract-flow",
-    color: "#00e676",
+    color: "var(--x-00e676)",
     bg: "#00e67608",
     border: "#00e67620",
     lessons: [
@@ -67,16 +67,16 @@ const DEMOS = [
 
 export default function DemoIndexPage() {
   return (
-    <div className="min-h-screen bg-[#0a0806]">
+    <div className="min-h-screen bg-void">
       {/* Hero */}
-      <div className="border-b border-[#2a2420]">
+      <div className="border-b border-line">
         <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-24">
           <div className="max-w-2xl">
-            <p className="text-xs text-[#8f7f6e] mb-6 font-mono">$ ./tutorials --interactive</p>
-            <h1 className="heading-display text-4xl md:text-5xl text-[#e8d5a3] mb-6">
-              Learn by <span className="text-[#f5a623]">doing.</span>
+            <p className="text-xs text-ash mb-6 font-mono">$ ./tutorials --interactive</p>
+            <h1 className="heading-display text-4xl md:text-5xl text-gold mb-6">
+              Learn by <span className="text-sun">doing.</span>
             </h1>
-            <p className="text-base text-[#8f7f6e] leading-relaxed max-w-lg">
+            <p className="text-base text-ash leading-relaxed max-w-lg">
               These hands-on demos let you explore Antidosis without creating an account or
               affecting real data. Switch between users, try different flows, and reset anytime.
             </p>
@@ -109,18 +109,18 @@ export default function DemoIndexPage() {
                   >
                     <Icon className="h-5 w-5" style={{ color: demo.color }} />
                   </div>
-                  <h2 className="heading-display text-xl text-[#e8d5a3] mb-2">{demo.title}</h2>
-                  <p className="text-sm text-[#8f7f6e] leading-relaxed">{demo.description}</p>
+                  <h2 className="heading-display text-xl text-gold mb-2">{demo.title}</h2>
+                  <p className="text-sm text-ash leading-relaxed">{demo.description}</p>
                 </div>
 
                 {/* Lessons */}
                 <div className="px-6 flex-1">
-                  <p className="text-[10px] uppercase tracking-wider text-[#8f7f6e] mb-3">
+                  <p className="text-[10px] uppercase tracking-wider text-ash mb-3">
                     You will learn
                   </p>
                   <ul className="space-y-2">
                     {demo.lessons.map((lesson, i) => (
-                      <li key={i} className="flex items-start gap-2 text-xs text-[#b8a078]">
+                      <li key={i} className="flex items-start gap-2 text-xs text-parchment">
                         <span
                           className="mt-0.5 h-1.5 w-1.5 rounded-full shrink-0"
                           style={{ background: demo.color }}
@@ -153,12 +153,12 @@ export default function DemoIndexPage() {
         </div>
 
         {/* Relay teaser */}
-        <div className="mt-12 p-6 rounded-lg border border-[#2a2420] bg-[#12100e]">
+        <div className="mt-12 p-6 rounded-lg border border-line bg-surface">
           <div className="flex items-start gap-4">
-            <Radio className="h-5 w-5 text-[#00e5ff] mt-0.5 shrink-0" />
+            <Radio className="h-5 w-5 text-mercury mt-0.5 shrink-0" />
             <div>
-              <p className="text-sm text-[#e8d5a3] font-medium">Prefer learning by watching?</p>
-              <p className="text-xs text-[#8f7f6e] mt-1">
+              <p className="text-sm text-gold font-medium">Prefer learning by watching?</p>
+              <p className="text-xs text-ash mt-1">
                 The Relay demo auto-plays a realistic conversation between community members. Just
                 hit play and watch how deals get made.
               </p>

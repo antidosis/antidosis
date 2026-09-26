@@ -31,21 +31,21 @@ export function ReviewForm({
   onCancel,
 }: ReviewFormProps) {
   return (
-    <div className="bg-[#1a1714] border border-[#2a2420] p-3 rounded space-y-3">
-      <p className="text-xs text-[#e8d5a3] font-medium">{title || "Leave a review"}</p>
+    <div className="bg-raise border border-line p-3 rounded space-y-3">
+      <p className="text-xs text-gold font-medium">{title || "Leave a review"}</p>
       <div>
-        <label className="text-xs text-[#8f7f6e] block mb-1">Rating (1–10)</label>
+        <label className="text-xs text-ash block mb-1">Rating (1–10)</label>
         <input
           type="range"
           min={1}
           max={10}
           value={rating}
           onChange={(e) => onRatingChange(parseInt(e.target.value))}
-          className="w-full accent-[#f5a623]"
+          className="w-full accent-sun"
         />
-        <div className="flex justify-between text-xs text-[#8f7f6e] mt-1">
+        <div className="flex justify-between text-xs text-ash mt-1">
           <span>1</span>
-          <span className="text-[#f5a623] font-medium">{rating}</span>
+          <span className="text-sun font-medium">{rating}</span>
           <span>10</span>
         </div>
       </div>

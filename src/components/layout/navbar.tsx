@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 
 import { Menu, X, Radio } from "lucide-react";
 
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -65,7 +66,7 @@ export function Navbar() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#0a0806]/95 backdrop-blur-sm border-b border-[#2a2420]">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-void/95 backdrop-blur-sm border-b border-line">
         <div className="flex items-center justify-between h-20 px-4 md:px-8 text-sm">
           <Link href="/" className="flex items-center gap-3 group">
             <img
@@ -74,7 +75,7 @@ export function Navbar() {
               width={138}
               height={56}
               fetchPriority="high"
-              className="opacity-80 group-hover:opacity-100 transition-opacity"
+              className="brand-logo opacity-80 group-hover:opacity-100 transition-opacity"
             />
           </Link>
 
@@ -92,18 +93,18 @@ export function Navbar() {
                   className={cn(
                     "relative transition-colors py-1 flex items-center gap-1.5",
                     isDashboard
-                      ? "px-3 py-1.5 rounded border border-[#f5a623]/40 text-[#f5a623] hover:bg-[#f5a623]/10 hover:text-[#f5a623]"
+                      ? "px-3 py-1.5 rounded border border-sun/40 text-sun hover:bg-sun/10 hover:text-sun"
                       : isTerminal
-                        ? "px-3 py-1.5 rounded border border-[#00e5ff]/30 text-[#00e5ff] hover:bg-[#00e5ff]/10 hover:text-[#00e5ff]"
+                        ? "px-3 py-1.5 rounded border border-mercury/30 text-mercury hover:bg-mercury/10 hover:text-mercury"
                         : isActive
-                          ? "text-[#f5a623] glow-gold-subtle"
-                          : "text-[#8f7f6e] hover:text-[#e8d5a3]"
+                          ? "text-sun glow-gold-subtle"
+                          : "text-ash hover:text-gold"
                   )}
                 >
                   {isTerminal && <Radio className="h-3 w-3" />}
                   {item.label}
                   {!isDashboard && !isTerminal && isActive && (
-                    <span className="absolute -bottom-1 left-0 right-0 h-px bg-[#f5a623] shadow-[0_0_8px_rgba(245,166,35,0.5)]" />
+                    <span className="absolute -bottom-1 left-0 right-0 h-px bg-sun shadow-[0_0_8px_rgba(245,166,35,0.5)]" />
                   )}
                 </Link>
               );
@@ -112,13 +113,11 @@ export function Navbar() {
 
           {/* Desktop auth + notifications */}
           <div className="hidden md:flex items-center gap-4">
+            <ThemeToggle />
             {user && <NotificationBell />}
             {!user ? (
               <>
-                <Link
-                  href="/login"
-                  className="text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors text-sm"
-                >
+                <Link href="/login" className="text-ash hover:text-gold transition-colors text-sm">
                   login
                 </Link>
                 <Button asChild size="sm">
@@ -129,7 +128,7 @@ export function Navbar() {
               <button
                 type="button"
                 onClick={() => supabase.auth.signOut().then(() => (window.location.href = "/"))}
-                className="text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors text-sm"
+                className="text-ash hover:text-gold transition-colors text-sm"
               >
                 logout
               </button>
@@ -138,11 +137,12 @@ export function Navbar() {
 
           {/* Mobile hamburger */}
           <div className="flex md:hidden items-center gap-3">
+            <ThemeToggle />
             {user && <NotificationBell />}
             <button
               type="button"
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="p-2 text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
+              className="p-2 text-ash hover:text-gold transition-colors"
               aria-label="Toggle menu"
               aria-expanded={mobileOpen}
             >
@@ -154,7 +154,7 @@ export function Navbar() {
 
       {/* Mobile menu overlay */}
       {mobileOpen && (
-        <div className="md:hidden fixed left-0 right-0 top-20 h-[calc(100dvh-5rem)] bg-[#0a0806] z-[60] border-t border-[#2a2420]">
+        <div className="md:hidden fixed left-0 right-0 top-20 h-[calc(100dvh-5rem)] bg-void z-[60] border-t border-line">
           <div className="flex flex-col p-6 space-y-1">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
@@ -166,14 +166,14 @@ export function Navbar() {
                   href={item.href}
                   aria-current={isActive ? "page" : undefined}
                   className={cn(
-                    "py-3 text-base transition-colors border-b border-[#2a2420]/50 flex items-center gap-2",
+                    "py-3 text-base transition-colors border-b border-line/50 flex items-center gap-2",
                     isDashboard
-                      ? "text-[#f5a623] font-medium"
+                      ? "text-sun font-medium"
                       : isTerminal
-                        ? "text-[#00e5ff] font-medium"
+                        ? "text-mercury font-medium"
                         : isActive
-                          ? "text-[#f5a623] glow-gold-subtle"
-                          : "text-[#8f7f6e] hover:text-[#e8d5a3]"
+                          ? "text-sun glow-gold-subtle"
+                          : "text-ash hover:text-gold"
                   )}
                 >
                   {isTerminal && <Radio className="h-4 w-4" />}
@@ -186,7 +186,7 @@ export function Navbar() {
                 <>
                   <Link
                     href="/login"
-                    className="py-3 text-base text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors border-b border-[#2a2420]/50"
+                    className="py-3 text-base text-ash hover:text-gold transition-colors border-b border-line/50"
                   >
                     login
                   </Link>
@@ -198,7 +198,7 @@ export function Navbar() {
                 <button
                   type="button"
                   onClick={() => supabase.auth.signOut().then(() => (window.location.href = "/"))}
-                  className="py-3 text-base text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors text-left"
+                  className="py-3 text-base text-ash hover:text-gold transition-colors text-left"
                 >
                   logout
                 </button>

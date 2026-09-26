@@ -32,7 +32,7 @@ export function ImageGallery({
   return (
     <div className="space-y-3">
       {label && (
-        <p className="text-xs font-medium uppercase tracking-wide text-[#b8a078]">{label}</p>
+        <p className="text-xs font-medium uppercase tracking-wide text-parchment">{label}</p>
       )}
       <div className="flex flex-wrap gap-3">
         {images.map((url, i) => (
@@ -40,12 +40,12 @@ export function ImageGallery({
             <img
               src={url}
               alt=""
-              className="h-20 w-20 object-cover border border-[#2a2420] rounded-md"
+              className="h-20 w-20 object-cover border border-line rounded-md"
             />
             <button
               type="button"
               onClick={() => removeImage(i)}
-              className="absolute -top-1 -right-1 p-1 bg-[#12100e] border border-[#2a2420] text-[#8f7f6e] hover:text-[#ff5252] hover:border-[#ff5252]/30 rounded-md transition-colors"
+              className="absolute -top-1 -right-1 p-1 bg-surface border border-line text-ash hover:text-bad hover:border-bad/30 rounded-md transition-colors"
             >
               <X className="h-3 w-3" />
             </button>
@@ -58,7 +58,7 @@ export function ImageGallery({
         )}
       </div>
       {images.length > 0 && (
-        <p className="text-xs text-[#00e676]">
+        <p className="text-xs text-ok">
           {images.length} image{images.length !== 1 ? "s" : ""} attached
         </p>
       )}

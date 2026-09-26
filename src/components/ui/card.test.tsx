@@ -15,7 +15,7 @@ describe("Card", () => {
     render(<Card>Default</Card>);
     const card = screen.getByText("Default");
     expect(card).toHaveClass("vessel");
-    expect(card).toHaveClass("text-[#e8d5a3]");
+    expect(card).toHaveClass("text-gold");
   });
 
   it("applies custom className to Card", () => {
@@ -72,7 +72,7 @@ describe("CardTitle", () => {
     const title = screen.getByRole("heading", { level: 3 });
     expect(title).toHaveClass("text-base");
     expect(title).toHaveClass("font-semibold");
-    expect(title).toHaveClass("text-[#e8d5a3]");
+    expect(title).toHaveClass("text-gold");
   });
 
   it("forwards ref", () => {
@@ -92,7 +92,7 @@ describe("CardDescription", () => {
     render(<CardDescription>Description</CardDescription>);
     const desc = screen.getByText("Description");
     expect(desc).toHaveClass("text-sm");
-    expect(desc).toHaveClass("text-[#b8a078]");
+    expect(desc).toHaveClass("text-parchment");
   });
 
   it("forwards ref", () => {

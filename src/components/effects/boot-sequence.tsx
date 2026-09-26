@@ -65,7 +65,7 @@ export function BootSequence({ onComplete }: { onComplete: () => void }) {
   if (done) return null;
 
   return (
-    <div className="fixed inset-0 z-40 bg-[#0a0806] flex flex-col items-center justify-center p-6">
+    <div className="fixed inset-0 z-40 bg-void flex flex-col items-center justify-center p-6">
       {/* Logo + Brand */}
       <div
         className={`flex flex-col items-center transition-all duration-700 ${
@@ -77,15 +77,11 @@ export function BootSequence({ onComplete }: { onComplete: () => void }) {
           alt="Antidosis"
           width={160}
           height={65}
-          className="opacity-80 mb-4"
+          className="brand-logo opacity-80 mb-4"
           fetchPriority="high"
         />
-        <h1 className="heading-display text-2xl md:text-3xl text-[#e8d5a3] tracking-tight">
-          antidosis
-        </h1>
-        <p className="text-xs text-[#8f7f6e] mt-2 tracking-widest uppercase">
-          the exchange network.
-        </p>
+        <h1 className="heading-display text-2xl md:text-3xl text-gold tracking-tight">antidosis</h1>
+        <p className="text-xs text-ash mt-2 tracking-widest uppercase">the exchange network.</p>
       </div>
 
       {/* Trust Signals */}
@@ -96,8 +92,8 @@ export function BootSequence({ onComplete }: { onComplete: () => void }) {
       >
         {TRUST_SIGNALS.map((signal, i) => (
           <div key={i} className="flex items-center gap-2">
-            <signal.icon className="h-3.5 w-3.5 text-[#f5a623]" />
-            <span className="text-[10px] md:text-xs text-[#8f7f6e] uppercase tracking-wider">
+            <signal.icon className="h-3.5 w-3.5 text-sun" />
+            <span className="text-[10px] md:text-xs text-ash uppercase tracking-wider">
               {signal.label}
             </span>
           </div>
@@ -110,24 +106,24 @@ export function BootSequence({ onComplete }: { onComplete: () => void }) {
           visibleLines > 0 ? "opacity-100" : "opacity-0"
         }`}
       >
-        <div className="border border-[#2a2420] bg-[#12100e] p-4 md:p-5">
+        <div className="border border-line bg-surface p-4 md:p-5">
           <div className="text-[11px] md:text-[13px] leading-relaxed font-mono">
             {BOOT_LINES.slice(0, visibleLines).map((line, i) => (
               <div
                 key={i}
                 className={`${
                   line.text.startsWith("[OK]")
-                    ? "text-[#00e676]"
+                    ? "text-ok"
                     : line.text === "on air."
-                      ? "text-[#f5a623] font-semibold"
-                      : "text-[#8f7f6e]"
+                      ? "text-sun font-semibold"
+                      : "text-ash"
                 }`}
               >
                 {line.text || "\u00A0"}
               </div>
             ))}
             {showCursor && visibleLines > 0 && (
-              <div className="text-[#f5a623]">
+              <div className="text-sun">
                 <TerminalCursor />
               </div>
             )}
@@ -137,7 +133,7 @@ export function BootSequence({ onComplete }: { onComplete: () => void }) {
 
       {/* Bottom hint */}
       <p
-        className={`text-[10px] text-[#8f7f6e]/50 mt-6 transition-opacity duration-1000 ${
+        className={`text-[10px] text-ash/50 mt-6 transition-opacity duration-1000 ${
           logoVisible ? "opacity-100" : "opacity-0"
         }`}
       >

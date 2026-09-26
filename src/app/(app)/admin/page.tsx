@@ -173,7 +173,7 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <div className="py-24 text-center text-sm text-[#8f7f6e]">
+      <div className="py-24 text-center text-sm text-ash">
         <Loader2 className="h-6 w-6 animate-spin mx-auto mb-4" />
         loading admin...
       </div>
@@ -182,8 +182,8 @@ export default function AdminPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 md:px-8">
-      <p className="text-xs text-[#8f7f6e] mb-6">$ sudo su</p>
-      <h1 className="text-2xl heading-display text-[#e8d5a3] mb-8">admin dashboard</h1>
+      <p className="text-xs text-ash mb-6">$ sudo su</p>
+      <h1 className="text-2xl heading-display text-gold mb-8">admin dashboard</h1>
 
       {/* Stats */}
       {stats && (
@@ -208,13 +208,11 @@ export default function AdminPage() {
 
       {/* Pending Verifications */}
       <section>
-        <p className="text-xs text-[#8f7f6e] mb-6">
-          $ ls ~/pending_verifications/ ({pending.length})
-        </p>
+        <p className="text-xs text-ash mb-6">$ ls ~/pending_verifications/ ({pending.length})</p>
 
         {pending.length === 0 ? (
           <EmptyState
-            icon={<CheckCircle2 className="h-8 w-8 text-[#00e676]" />}
+            icon={<CheckCircle2 className="h-8 w-8 text-ok" />}
             title="all caught up"
             description="no pending credential verifications"
           />
@@ -224,7 +222,7 @@ export default function AdminPage() {
               const isExpanded = expandedId === cred.id;
               const isRejecting = rejectingId === cred.id;
               return (
-                <div key={cred.id} className="vessel p-5 hover:bg-[#1a1714] transition-colors">
+                <div key={cred.id} className="vessel p-5 hover:bg-raise transition-colors">
                   {/* Header row */}
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
@@ -235,29 +233,29 @@ export default function AdminPage() {
                           className="h-8 w-8"
                         />
                         <div>
-                          <p className="text-sm font-medium text-[#e8d5a3]">
+                          <p className="text-sm font-medium text-gold">
                             {cred.profile.fullName || "unnamed user"}
                           </p>
-                          <p className="text-xs text-[#8f7f6e]">{cred.profile.email}</p>
+                          <p className="text-xs text-ash">{cred.profile.email}</p>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-2 flex-wrap mb-2">
-                        <p className="text-base font-medium text-[#e8d5a3]">{cred.title}</p>
+                        <p className="text-base font-medium text-gold">{cred.title}</p>
                         <Badge variant="outline">
                           {cred.subType && cred.type === "identification"
                             ? cred.subType.replace(/_/g, " ")
                             : cred.type}
                         </Badge>
                         {cred.isPublic && (
-                          <span className="flex items-center gap-1 text-xs text-[#b8a078]">
+                          <span className="flex items-center gap-1 text-xs text-parchment">
                             <Eye className="h-3 w-3" /> public
                           </span>
                         )}
                       </div>
 
                       {/* Quick details (always visible) */}
-                      <div className="text-xs text-[#8f7f6e] space-y-1">
+                      <div className="text-xs text-ash space-y-1">
                         {cred.documentNumber && (
                           <p>
                             number: {"*".repeat(Math.max(0, cred.documentNumber.length - 4))}
@@ -284,7 +282,7 @@ export default function AdminPage() {
                             href={cred.signedUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-xs text-[#f5a623] hover:underline"
+                            className="inline-flex items-center gap-1 text-xs text-sun hover:underline"
                           >
                             <ExternalLink className="h-3 w-3" /> view document
                           </a>
@@ -294,14 +292,14 @@ export default function AdminPage() {
                             href={cred.signedBackUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-xs text-[#f5a623] hover:underline"
+                            className="inline-flex items-center gap-1 text-xs text-sun hover:underline"
                           >
                             <ExternalLink className="h-3 w-3" /> view back
                           </a>
                         )}
                         <button
                           onClick={() => setExpandedId(isExpanded ? null : cred.id)}
-                          className="inline-flex items-center gap-1 text-xs text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
+                          className="inline-flex items-center gap-1 text-xs text-ash hover:text-gold transition-colors"
                         >
                           {isExpanded ? (
                             <ChevronUp className="h-3 w-3" />
@@ -314,7 +312,7 @@ export default function AdminPage() {
 
                       {/* Expanded details */}
                       {isExpanded && (
-                        <div className="mt-3 pt-3 border-t border-[#2a2420]/40 text-xs text-[#8f7f6e] space-y-1">
+                        <div className="mt-3 pt-3 border-t border-line/40 text-xs text-ash space-y-1">
                           {cred.profile.mobile && (
                             <p className="flex items-center gap-1">
                               <Smartphone className="h-3 w-3" />
@@ -331,9 +329,7 @@ export default function AdminPage() {
                               })}
                             </p>
                           )}
-                          {cred.description && (
-                            <p className="text-[#8f7f6e]/70">{cred.description}</p>
-                          )}
+                          {cred.description && <p className="text-ash/70">{cred.description}</p>}
                           <p>
                             uploaded:{" "}
                             {new Date(cred.createdAt).toLocaleDateString("en-AU", {
@@ -352,7 +348,7 @@ export default function AdminPage() {
                         size="sm"
                         onClick={() => verifyCredential(cred.id)}
                         disabled={actioning === cred.id}
-                        className="bg-[#00e676] text-[#0a0806] hover:bg-[#00e676]/90"
+                        className="bg-ok text-onaccent hover:bg-ok/90"
                       >
                         {actioning === cred.id ? (
                           <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -369,7 +365,7 @@ export default function AdminPage() {
                           setRejectReason("");
                         }}
                         disabled={actioning === cred.id}
-                        className="text-[#ff5252]"
+                        className="text-bad"
                       >
                         <XCircle className="h-3.5 w-3.5 mr-1" />
                         {isRejecting ? "cancel" : "reject"}
@@ -379,16 +375,16 @@ export default function AdminPage() {
 
                   {/* Rejection reason form */}
                   {isRejecting && (
-                    <div className="mt-4 pt-4 border-t border-[#2a2420]/40">
+                    <div className="mt-4 pt-4 border-t border-line/40">
                       <div className="flex items-start gap-2">
-                        <MessageSquare className="h-4 w-4 text-[#ff5252] mt-1" />
+                        <MessageSquare className="h-4 w-4 text-bad mt-1" />
                         <div className="flex-1">
-                          <p className="text-xs text-[#e8d5a3] mb-2">Rejection reason (optional)</p>
+                          <p className="text-xs text-gold mb-2">Rejection reason (optional)</p>
                           <textarea
                             value={rejectReason}
                             onChange={(e) => setRejectReason(e.target.value)}
                             placeholder="e.g. Image unclear, expired document, wrong document type..."
-                            className="w-full bg-[#0f0c0a] border border-[#2a2420] text-[#e8d5a3] text-sm px-3 py-2 outline-none focus:border-[#ff5252] rounded mb-2 resize-none"
+                            className="w-full bg-inset border border-line text-gold text-sm px-3 py-2 outline-none focus:border-bad rounded mb-2 resize-none"
                             rows={2}
                           />
                           <div className="flex gap-2">
@@ -397,7 +393,7 @@ export default function AdminPage() {
                               variant="ghost"
                               onClick={() => rejectCredential(cred.id)}
                               disabled={actioning === cred.id}
-                              className="text-[#ff5252] border border-[#ff5252]/30 hover:bg-[#ff5252]/5"
+                              className="text-bad border border-bad/30 hover:bg-bad/5"
                             >
                               {actioning === cred.id ? (
                                 <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
@@ -432,13 +428,13 @@ export default function AdminPage() {
 
       {/* Pending Contract Cancellations */}
       <section>
-        <p className="text-xs text-[#8f7f6e] mb-6">
+        <p className="text-xs text-ash mb-6">
           $ ls ~/pending_contract_cancellations/ ({pendingCancellations.length})
         </p>
 
         {pendingCancellations.length === 0 ? (
           <EmptyState
-            icon={<CheckCircle2 className="h-8 w-8 text-[#00e676]" />}
+            icon={<CheckCircle2 className="h-8 w-8 text-ok" />}
             title="all caught up"
             description="no pending contract cancellations"
           />
@@ -449,15 +445,15 @@ export default function AdminPage() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
-                      <FileText className="h-4 w-4 text-[#f5a623]" />
-                      <p className="text-sm font-medium text-[#e8d5a3]">{c.need.title}</p>
+                      <FileText className="h-4 w-4 text-sun" />
+                      <p className="text-sm font-medium text-gold">{c.need.title}</p>
                     </div>
-                    <div className="flex items-center gap-3 text-xs text-[#8f7f6e] mb-2">
+                    <div className="flex items-center gap-3 text-xs text-ash mb-2">
                       <span>{c.partyA.fullName || "Unknown"}</span>
                       <span>vs</span>
                       <span>{c.partyB.fullName || "Unknown"}</span>
                     </div>
-                    <div className="text-xs text-[#8f7f6e] space-y-1">
+                    <div className="text-xs text-ash space-y-1">
                       <p>
                         Requested:{" "}
                         {new Date(c.cancelRequestedAt).toLocaleDateString("en-AU", {
@@ -488,7 +484,7 @@ export default function AdminPage() {
                       size="sm"
                       onClick={() => forceCancelContract(c.id)}
                       disabled={forceCancellingId === c.id}
-                      className="bg-[#ff5252] text-white hover:bg-[#ff5252]/90"
+                      className="bg-bad text-white hover:bg-bad/90"
                     >
                       {forceCancellingId === c.id ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
@@ -528,12 +524,10 @@ function StatCard({
   return (
     <div className={accent ? "vessel-lit p-5" : "vessel p-5"}>
       <div className="flex items-center gap-2 mb-2">
-        <Icon className={`h-4 w-4 ${accent ? "text-[#f5a623]" : "text-[#8f7f6e]"}`} />
-        <span className="text-xs text-[#8f7f6e] uppercase tracking-wide">{label}</span>
+        <Icon className={`h-4 w-4 ${accent ? "text-sun" : "text-ash"}`} />
+        <span className="text-xs text-ash uppercase tracking-wide">{label}</span>
       </div>
-      <p className={`text-2xl font-bold ${accent ? "text-[#f5a623]" : "text-[#e8d5a3]"}`}>
-        {value}
-      </p>
+      <p className={`text-2xl font-bold ${accent ? "text-sun" : "text-gold"}`}>{value}</p>
     </div>
   );
 }

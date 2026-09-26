@@ -37,7 +37,7 @@ export function Avatar({ src, name, size = "md", className }: AvatarProps) {
   return (
     <div
       className={cn(
-        "relative inline-flex items-center justify-center overflow-hidden border border-[#2a2420] bg-[#1a1714] rounded-md flex-shrink-0",
+        "relative inline-flex items-center justify-center overflow-hidden border border-line bg-raise rounded-md flex-shrink-0",
         sizeClasses[size],
         className
       )}
@@ -55,7 +55,7 @@ export function Avatar({ src, name, size = "md", className }: AvatarProps) {
           unoptimized={src.startsWith("data:")}
         />
       ) : null}
-      <span className="text-[#b8a078] font-medium">{initials}</span>
+      <span className="text-parchment font-medium">{initials}</span>
     </div>
   );
 }

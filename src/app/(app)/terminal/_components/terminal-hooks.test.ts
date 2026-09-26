@@ -1,4 +1,4 @@
-﻿import { renderHook, cleanup } from "@testing-library/react";
+import { renderHook, cleanup } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 
 import { useThemeStyles, useNotificationSound, useSwipeGesture } from "./terminal-hooks";
@@ -6,8 +6,11 @@ import { useThemeStyles, useNotificationSound, useSwipeGesture } from "./termina
 describe("useThemeStyles", () => {
   it("returns default theme variables", () => {
     const { result } = renderHook(() => useThemeStyles("default"));
-    expect((result.current.vars as Record<string, string>)["--term-bg"]).toBe("#0a0806");
-    expect((result.current.vars as Record<string, string>)["--term-accent"]).toBe("#f5a623");
+    // The default skin follows the site's light/dark theme tokens
+    expect((result.current.vars as Record<string, string>)["--term-bg"]).toBe("rgb(var(--c-void))");
+    expect((result.current.vars as Record<string, string>)["--term-accent"]).toBe(
+      "rgb(var(--c-sun))"
+    );
     expect(result.current.t.accent).toBe("#f5a623");
   });
 
@@ -53,7 +56,9 @@ describe("useThemeStyles", () => {
     const { result, rerender } = renderHook(({ theme }) => useThemeStyles(theme), {
       initialProps: { theme: "default" },
     });
-    expect((result.current.vars as Record<string, string>)["--term-accent"]).toBe("#f5a623");
+    expect((result.current.vars as Record<string, string>)["--term-accent"]).toBe(
+      "rgb(var(--c-sun))"
+    );
     rerender({ theme: "cyberpunk" });
     expect((result.current.vars as Record<string, string>)["--term-accent"]).toBe("#ff00ff");
   });

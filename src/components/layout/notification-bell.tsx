@@ -106,26 +106,26 @@ export function NotificationBell() {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="relative p-2 text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
+        className="relative p-2 text-ash hover:text-gold transition-colors"
         aria-label="Notifications"
       >
         <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
-          <span className="absolute top-0.5 right-0.5 h-4 min-w-[16px] px-1 bg-[#ff5252] text-[#0a0806] text-[10px] font-bold rounded-full flex items-center justify-center">
+          <span className="absolute top-0.5 right-0.5 h-4 min-w-[16px] px-1 bg-bad text-onaccent text-[10px] font-bold rounded-full flex items-center justify-center">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-[#12100e] border border-[#2a2420] z-50 max-h-[400px] flex flex-col rounded-md box-glow-gold">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-[#2a2420]">
-            <span className="text-sm font-medium text-[#e8d5a3]">Notifications</span>
+        <div className="absolute right-0 top-full mt-2 w-80 bg-surface border border-line z-50 max-h-[400px] flex flex-col rounded-md box-glow-gold">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-line">
+            <span className="text-sm font-medium text-gold">Notifications</span>
             {unreadCount > 0 && (
               <button
                 type="button"
                 onClick={markAllRead}
-                className="text-xs text-[#b8a078] hover:text-[#e8d5a3] flex items-center gap-1 transition-colors"
+                className="text-xs text-parchment hover:text-gold flex items-center gap-1 transition-colors"
               >
                 <CheckCheck className="h-3 w-3" /> mark all read
               </button>
@@ -135,8 +135,8 @@ export function NotificationBell() {
           <div className="overflow-y-auto flex-1">
             {notifications.length === 0 ? (
               <div className="px-4 py-8 text-center">
-                <Bell className="h-6 w-6 mx-auto mb-2 text-[#8f7f6e]" />
-                <p className="text-xs text-[#8f7f6e]">no notifications yet</p>
+                <Bell className="h-6 w-6 mx-auto mb-2 text-ash" />
+                <p className="text-xs text-ash">no notifications yet</p>
               </div>
             ) : (
               notifications.map((n) => (
@@ -148,38 +148,34 @@ export function NotificationBell() {
                     setOpen(false);
                   }}
                   className={cn(
-                    "block px-4 py-3 border-b border-[#2a2420]/50 hover:bg-[#1a1714] transition-colors",
-                    !n.isRead && "bg-[#f5a623]/[0.04]"
+                    "block px-4 py-3 border-b border-line/50 hover:bg-raise transition-colors",
+                    !n.isRead && "bg-sun/[0.04]"
                   )}
                 >
                   <div className="flex items-start gap-2">
                     <div
                       className={cn(
                         "mt-1 h-2 w-2 rounded-full flex-shrink-0",
-                        n.isRead
-                          ? "bg-transparent"
-                          : "bg-[#f5a623] shadow-[0_0_6px_rgba(245,166,35,0.5)]"
+                        n.isRead ? "bg-transparent" : "bg-sun shadow-[0_0_6px_rgba(245,166,35,0.5)]"
                       )}
                     />
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5">
                         {(n.type === "dm_message" || n.type === "mention") && (
-                          <MessageSquare className="h-3 w-3 text-[#00e5ff]" />
+                          <MessageSquare className="h-3 w-3 text-mercury" />
                         )}
-                        {n.type === "channel_message" && (
-                          <Hash className="h-3 w-3 text-[#f5a623]" />
-                        )}
+                        {n.type === "channel_message" && <Hash className="h-3 w-3 text-sun" />}
                         <p
                           className={cn(
                             "text-xs leading-snug",
-                            !n.isRead ? "text-[#e8d5a3] font-medium" : "text-[#b8a078]"
+                            !n.isRead ? "text-gold font-medium" : "text-parchment"
                           )}
                         >
                           {n.title}
                         </p>
                       </div>
-                      <p className="text-xs text-[#8f7f6e] mt-0.5 line-clamp-2">{n.body}</p>
-                      <div className="flex items-center gap-1 mt-1 text-xs text-[#8f7f6e]">
+                      <p className="text-xs text-ash mt-0.5 line-clamp-2">{n.body}</p>
+                      <div className="flex items-center gap-1 mt-1 text-xs text-ash">
                         <Clock className="h-3 w-3" />
                         {timeAgo(n.createdAt)}
                       </div>

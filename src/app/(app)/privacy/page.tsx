@@ -16,26 +16,26 @@ export default function PrivacyPage() {
       <div className="py-6">
         <Link
           href="/"
-          className="inline-flex items-center text-[13px] text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
+          className="inline-flex items-center text-[13px] text-ash hover:text-gold transition-colors"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />$ cd ~/
         </Link>
       </div>
 
-      <p className="text-[12px] text-[#8f7f6e] mb-4">$ cat /etc/antidosis/privacy-policy.md</p>
-      <h1 className="text-3xl font-bold mb-2 text-[#e8d5a3]">Privacy Policy</h1>
-      <p className="text-[13px] text-[#8f7f6e]/70 mb-10">
+      <p className="text-[12px] text-ash mb-4">$ cat /etc/antidosis/privacy-policy.md</p>
+      <h1 className="text-3xl font-bold mb-2 text-gold">Privacy Policy</h1>
+      <p className="text-[13px] text-ash/70 mb-10">
         Last updated: 22 July 2026 &middot; Applies to the antidosis website and mobile application
       </p>
 
-      <article className="space-y-10 text-[15px] text-[#b8a078] leading-relaxed">
+      <article className="space-y-10 text-[15px] text-parchment leading-relaxed">
         {/* ── 1. Introduction ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">1. Introduction</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">1. Introduction</h2>
           <p className="mb-3">
             Antidosis Pty Ltd (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;) operates the
             antidosis platform (the &quot;Service&quot;), accessible via{" "}
-            <Link href="https://www.antidosis.com" className="text-[#e8d5a3] hover:underline">
+            <Link href="https://www.antidosis.com" className="text-gold hover:underline">
               www.antidosis.com
             </Link>{" "}
             and the antidosis mobile application.
@@ -55,14 +55,14 @@ export default function PrivacyPage() {
 
         {/* ── 2. Information We Collect ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">2. Information We Collect</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">2. Information We Collect</h2>
           <p className="mb-3">
             We collect information that you provide directly to us, information generated
             automatically through your use of the Service, and information from third-party
             services.
           </p>
 
-          <h3 className="text-base font-medium text-[#e8d5a3]/90 mb-2 mt-4">
+          <h3 className="text-base font-medium text-gold/90 mb-2 mt-4">
             2.1 Account and Authentication Information
           </h3>
           <ul className="list-disc pl-5 space-y-1 mb-4">
@@ -90,9 +90,7 @@ export default function PrivacyPage() {
             </li>
           </ul>
 
-          <h3 className="text-base font-medium text-[#e8d5a3]/90 mb-2 mt-4">
-            2.2 Profile Information
-          </h3>
+          <h3 className="text-base font-medium text-gold/90 mb-2 mt-4">2.2 Profile Information</h3>
           <ul className="list-disc pl-5 space-y-1 mb-4">
             <li>
               <strong>Bio / description</strong> — optional text you provide about yourself
@@ -129,7 +127,7 @@ export default function PrivacyPage() {
             </li>
           </ul>
 
-          <h3 className="text-base font-medium text-[#e8d5a3]/90 mb-2 mt-4">
+          <h3 className="text-base font-medium text-gold/90 mb-2 mt-4">
             2.3 Activity and Transaction Data
           </h3>
           <ul className="list-disc pl-5 space-y-1 mb-4">
@@ -163,9 +161,7 @@ export default function PrivacyPage() {
             </li>
           </ul>
 
-          <h3 className="text-base font-medium text-[#e8d5a3]/90 mb-2 mt-4">
-            2.4 Payment Information
-          </h3>
+          <h3 className="text-base font-medium text-gold/90 mb-2 mt-4">2.4 Payment Information</h3>
           <p className="mb-3">
             Antidosis is <strong>free</strong> — we do not collect or store your credit card
             details, banking information, or other payment method details. If paid features are
@@ -175,7 +171,7 @@ export default function PrivacyPage() {
             identifiers, and subscription status, for audit purposes.
           </p>
 
-          <h3 className="text-base font-medium text-[#e8d5a3]/90 mb-2 mt-4">
+          <h3 className="text-base font-medium text-gold/90 mb-2 mt-4">
             2.5 Automatically Collected Information
           </h3>
           <ul className="list-disc pl-5 space-y-1 mb-4">
@@ -197,7 +193,7 @@ export default function PrivacyPage() {
             </li>
           </ul>
 
-          <h3 className="text-base font-medium text-[#e8d5a3]/90 mb-2 mt-4">2.6 Uploaded Media</h3>
+          <h3 className="text-base font-medium text-gold/90 mb-2 mt-4">2.6 Uploaded Media</h3>
           <p className="mb-3">
             You may upload images (JPEG, PNG, WebP, GIF) and audio files (WebM, OGG, WAV, MP3) up to
             10MB per file. This includes need photos, offer photos, profile avatars, and credential
@@ -212,9 +208,7 @@ export default function PrivacyPage() {
 
         {/* ── 3. How We Use Your Information ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">
-            3. How We Use Your Information
-          </h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">3. How We Use Your Information</h2>
           <p className="mb-3">We use the information we collect for the following purposes:</p>
           <ul className="list-disc pl-5 space-y-1">
             <li>
@@ -251,9 +245,7 @@ export default function PrivacyPage() {
 
         {/* ── 4. Legal Basis for Processing ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">
-            4. Legal Basis for Processing
-          </h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">4. Legal Basis for Processing</h2>
           <p className="mb-3">
             Under the <em>Australian Privacy Principles</em>, we collect and handle your personal
             information based on the following grounds:
@@ -280,18 +272,14 @@ export default function PrivacyPage() {
 
         {/* ── 5. How We Share Your Information ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">
-            5. How We Share Your Information
-          </h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">5. How We Share Your Information</h2>
           <p className="mb-3">
             We do <strong>not</strong> sell, rent, or trade your personal information to third
             parties for marketing purposes.
           </p>
           <p className="mb-3">We share information only in the following circumstances:</p>
 
-          <h3 className="text-base font-medium text-[#e8d5a3]/90 mb-2 mt-4">
-            5.1 With Other Users
-          </h3>
+          <h3 className="text-base font-medium text-gold/90 mb-2 mt-4">5.1 With Other Users</h3>
           <p className="mb-3">
             By design, antidosis is a marketplace that connects people. The following information is
             visible to other users:
@@ -320,7 +308,7 @@ export default function PrivacyPage() {
             </li>
           </ul>
 
-          <h3 className="text-base font-medium text-[#e8d5a3]/90 mb-2 mt-4">
+          <h3 className="text-base font-medium text-gold/90 mb-2 mt-4">
             5.2 With Service Providers
           </h3>
           <p className="mb-3">
@@ -339,7 +327,7 @@ export default function PrivacyPage() {
               accounts, Stripe handles all payment card data. See{" "}
               <Link
                 href="https://stripe.com/au/privacy"
-                className="text-[#e8d5a3] hover:underline"
+                className="text-gold hover:underline"
                 target="_blank"
               >
                 Stripe&apos;s Privacy Policy
@@ -351,7 +339,7 @@ export default function PrivacyPage() {
               interest alerts). Resend processes your email address and message content. See{" "}
               <Link
                 href="https://resend.com/legal/privacy-policy"
-                className="text-[#e8d5a3] hover:underline"
+                className="text-gold hover:underline"
                 target="_blank"
               >
                 Resend&apos;s Privacy Policy
@@ -360,7 +348,7 @@ export default function PrivacyPage() {
             </li>
           </ul>
 
-          <h3 className="text-base font-medium text-[#e8d5a3]/90 mb-2 mt-4">
+          <h3 className="text-base font-medium text-gold/90 mb-2 mt-4">
             5.3 For Legal and Safety Reasons
           </h3>
           <p>
@@ -373,9 +361,7 @@ export default function PrivacyPage() {
 
         {/* ── 6. Data Storage and Security ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">
-            6. Data Storage and Security
-          </h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">6. Data Storage and Security</h2>
           <p className="mb-3">
             We take the security of your personal information seriously and implement appropriate
             technical and organisational measures to protect it.
@@ -418,9 +404,7 @@ export default function PrivacyPage() {
 
         {/* ── 7. Data Retention and Deletion ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">
-            7. Data Retention and Deletion
-          </h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">7. Data Retention and Deletion</h2>
           <p className="mb-3">
             We retain your personal information for as long as your account is active or as long as
             necessary to provide the Service, comply with legal obligations, resolve disputes, and
@@ -449,7 +433,7 @@ export default function PrivacyPage() {
           </ul>
           <p>
             To request deletion of your account and personal data, contact us at{" "}
-            <EmailLink email="privacy@antidosis.com" className="text-[#e8d5a3] hover:underline">
+            <EmailLink email="privacy@antidosis.com" className="text-gold hover:underline">
               privacy@antidosis.com
             </EmailLink>
             .
@@ -458,7 +442,7 @@ export default function PrivacyPage() {
 
         {/* ── 8. Your Rights ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">8. Your Rights</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">8. Your Rights</h2>
           <p className="mb-3">
             Under the <em>Australian Privacy Principles</em>, you have the following rights
             regarding your personal information:
@@ -484,7 +468,7 @@ export default function PrivacyPage() {
           </ul>
           <p className="mt-3">
             To exercise any of these rights, contact us at{" "}
-            <EmailLink email="privacy@antidosis.com" className="text-[#e8d5a3] hover:underline">
+            <EmailLink email="privacy@antidosis.com" className="text-gold hover:underline">
               privacy@antidosis.com
             </EmailLink>
             . We will respond within 30 days.
@@ -493,7 +477,7 @@ export default function PrivacyPage() {
 
         {/* ── 9. Cookies and Tracking ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">
+          <h2 className="text-lg font-semibold text-gold mb-3">
             9. Cookies and Tracking Technologies
           </h2>
           <p className="mb-3">
@@ -522,7 +506,7 @@ export default function PrivacyPage() {
 
         {/* ── 10. Push Notifications ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">10. Push Notifications</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">10. Push Notifications</h2>
           <p className="mb-3">
             The antidosis mobile app may send push notifications to your device to alert you about:
           </p>
@@ -541,12 +525,12 @@ export default function PrivacyPage() {
 
         {/* ── 11. Children&apos;s Privacy ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">11. Children&apos;s Privacy</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">11. Children&apos;s Privacy</h2>
           <p>
             The Service is not intended for use by children under the age of 18. We do not knowingly
             collect personal information from children. If you are a parent or guardian and believe
             your child has provided us with personal information, please contact us immediately at{" "}
-            <EmailLink email="privacy@antidosis.com" className="text-[#e8d5a3] hover:underline">
+            <EmailLink email="privacy@antidosis.com" className="text-gold hover:underline">
               privacy@antidosis.com
             </EmailLink>
             . If we become aware that we have collected personal information from a child without
@@ -556,9 +540,7 @@ export default function PrivacyPage() {
 
         {/* ── 12. International Data Transfers ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">
-            12. International Data Transfers
-          </h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">12. International Data Transfers</h2>
           <p>
             Our service providers (Supabase, Stripe, Resend) may store and process your information
             in countries outside of Australia, including the United States. By using the Service,
@@ -571,7 +553,7 @@ export default function PrivacyPage() {
 
         {/* ── 13. Changes to This Policy ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">
+          <h2 className="text-lg font-semibold text-gold mb-3">
             13. Changes to This Privacy Policy
           </h2>
           <p>
@@ -586,15 +568,15 @@ export default function PrivacyPage() {
 
         {/* ── 14. Contact Us ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">14. Contact Us</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">14. Contact Us</h2>
           <p className="mb-3">
             If you have any questions, concerns, or requests regarding this Privacy Policy or our
             handling of your personal information, please contact us:
           </p>
-          <div className="pl-4 border-l-2 border-[#7a6b5a]/30">
+          <div className="pl-4 border-l-2 border-leather/30">
             <p>
               <strong>Email:</strong>{" "}
-              <EmailLink email="privacy@antidosis.com" className="text-[#e8d5a3] hover:underline">
+              <EmailLink email="privacy@antidosis.com" className="text-gold hover:underline">
                 privacy@antidosis.com
               </EmailLink>
             </p>
@@ -603,7 +585,7 @@ export default function PrivacyPage() {
             </p>
             <p>
               <strong>Website:</strong>{" "}
-              <Link href="https://www.antidosis.com" className="text-[#e8d5a3] hover:underline">
+              <Link href="https://www.antidosis.com" className="text-gold hover:underline">
                 www.antidosis.com
               </Link>
             </p>
@@ -612,7 +594,7 @@ export default function PrivacyPage() {
             If you are not satisfied with our response, you may lodge a complaint with the{" "}
             <Link
               href="https://www.oaic.gov.au/"
-              className="text-[#e8d5a3] hover:underline"
+              className="text-gold hover:underline"
               target="_blank"
             >
               Office of the Australian Information Commissioner
@@ -621,7 +603,7 @@ export default function PrivacyPage() {
           </p>
         </section>
 
-        <p className="text-[13px] text-[#8f7f6e]/50 pt-6 border-t border-[#7a6b5a]/10">
+        <p className="text-[13px] text-ash/50 pt-6 border-t border-leather/10">
           Last updated: 17 May 2026
         </p>
       </article>

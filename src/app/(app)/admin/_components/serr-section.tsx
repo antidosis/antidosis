@@ -67,9 +67,9 @@ export function SerrSection() {
   return (
     <section>
       <div className="divider mb-8" />
-      <p className="text-xs text-[#8f7f6e] mb-2">$ ls ~/serr_reporting/</p>
-      <h2 className="text-lg heading-display text-[#e8d5a3] mb-2">SERR reporting (ATO)</h2>
-      <p className="text-xs text-[#8f7f6e] mb-6 max-w-2xl">
+      <p className="text-xs text-ash mb-2">$ ls ~/serr_reporting/</p>
+      <h2 className="text-lg heading-display text-gold mb-2">SERR reporting (ATO)</h2>
+      <p className="text-xs text-ash mb-6 max-w-2xl">
         Sharing Economy Reporting Regime: per-seller transaction totals for completed exchanges.
         Leave dates blank for the most recent statutory half-year period (Jan–Jun due 31 Jul,
         Jul–Dec due 31 Jan). Lodge the CSV via ATO Online services for business.
@@ -78,21 +78,21 @@ export function SerrSection() {
       <div className="vessel p-5 mb-6">
         <div className="flex flex-wrap items-end gap-4">
           <div className="space-y-1">
-            <label className="text-xs text-[#8f7f6e] uppercase tracking-wide">from</label>
+            <label className="text-xs text-ash uppercase tracking-wide">from</label>
             <input
               type="date"
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              className="block bg-[#1a1714] border border-[#2a2420] rounded px-3 py-2 text-sm text-[#e8d5a3]"
+              className="block bg-raise border border-line rounded px-3 py-2 text-sm text-gold"
             />
           </div>
           <div className="space-y-1">
-            <label className="text-xs text-[#8f7f6e] uppercase tracking-wide">to</label>
+            <label className="text-xs text-ash uppercase tracking-wide">to</label>
             <input
               type="date"
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              className="block bg-[#1a1714] border border-[#2a2420] rounded px-3 py-2 text-sm text-[#e8d5a3]"
+              className="block bg-raise border border-line rounded px-3 py-2 text-sm text-gold"
             />
           </div>
           <Button onClick={loadReport} disabled={loading}>
@@ -106,46 +106,42 @@ export function SerrSection() {
           {report && (
             <a
               href={csvUrl}
-              className="inline-flex items-center gap-1 text-sm text-[#f5a623] hover:text-[#e8d5a3] transition-colors"
+              className="inline-flex items-center gap-1 text-sm text-sun hover:text-gold transition-colors"
             >
               <Download className="h-3.5 w-3.5" />
               download CSV
             </a>
           )}
         </div>
-        {error && <p className="text-xs text-[#ff5252] mt-3">{error}</p>}
+        {error && <p className="text-xs text-bad mt-3">{error}</p>}
       </div>
 
       {report && (
         <>
           <div className="grid grid-cols-3 gap-4 mb-6">
             <div className="vessel p-4">
-              <p className="text-xs text-[#8f7f6e] uppercase tracking-wide mb-1">sellers</p>
-              <p className="text-xl font-bold text-[#e8d5a3]">{report.totals.sellers}</p>
+              <p className="text-xs text-ash uppercase tracking-wide mb-1">sellers</p>
+              <p className="text-xl font-bold text-gold">{report.totals.sellers}</p>
             </div>
             <div className="vessel p-4">
-              <p className="text-xs text-[#8f7f6e] uppercase tracking-wide mb-1">transactions</p>
-              <p className="text-xl font-bold text-[#e8d5a3]">{report.totals.transactions}</p>
+              <p className="text-xs text-ash uppercase tracking-wide mb-1">transactions</p>
+              <p className="text-xl font-bold text-gold">{report.totals.transactions}</p>
             </div>
             <div className="vessel p-4">
-              <p className="text-xs text-[#8f7f6e] uppercase tracking-wide mb-1">
-                gross cash (AUD)
-              </p>
-              <p className="text-xl font-bold text-[#f5a623]">
-                ${report.totals.totalCashAud.toFixed(2)}
-              </p>
+              <p className="text-xs text-ash uppercase tracking-wide mb-1">gross cash (AUD)</p>
+              <p className="text-xl font-bold text-sun">${report.totals.totalCashAud.toFixed(2)}</p>
             </div>
           </div>
 
           {report.sellers.length === 0 ? (
-            <p className="text-sm text-[#8f7f6e]">
+            <p className="text-sm text-ash">
               No completed exchanges in this period — a nil report is not required.
             </p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left text-xs text-[#8f7f6e] uppercase tracking-wide border-b border-[#2a2420]">
+                  <tr className="text-left text-xs text-ash uppercase tracking-wide border-b border-line">
                     <th className="py-2 pr-4">seller</th>
                     <th className="py-2 pr-4">ABN</th>
                     <th className="py-2 pr-4">location</th>
@@ -156,20 +152,18 @@ export function SerrSection() {
                 </thead>
                 <tbody>
                   {report.sellers.map((s) => (
-                    <tr key={s.profileId} className="border-b border-[#2a2420]/50">
+                    <tr key={s.profileId} className="border-b border-line/50">
                       <td className="py-2 pr-4">
-                        <p className="text-[#e8d5a3]">{s.fullName || "—"}</p>
-                        <p className="text-xs text-[#8f7f6e]">{s.email}</p>
+                        <p className="text-gold">{s.fullName || "—"}</p>
+                        <p className="text-xs text-ash">{s.email}</p>
                       </td>
-                      <td className="py-2 pr-4 text-[#b8a078]">{s.abn || "—"}</td>
-                      <td className="py-2 pr-4 text-[#b8a078]">{s.locationName || "—"}</td>
-                      <td className="py-2 pr-4 text-right text-[#b8a078]">{s.transactionCount}</td>
-                      <td className="py-2 pr-4 text-right text-[#b8a078]">
+                      <td className="py-2 pr-4 text-parchment">{s.abn || "—"}</td>
+                      <td className="py-2 pr-4 text-parchment">{s.locationName || "—"}</td>
+                      <td className="py-2 pr-4 text-right text-parchment">{s.transactionCount}</td>
+                      <td className="py-2 pr-4 text-right text-parchment">
                         {s.cashTransactionCount}
                       </td>
-                      <td className="py-2 text-right text-[#e8d5a3]">
-                        ${s.totalCashAud.toFixed(2)}
-                      </td>
+                      <td className="py-2 text-right text-gold">${s.totalCashAud.toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -179,7 +173,7 @@ export function SerrSection() {
 
           <ul className="mt-4 space-y-1">
             {report.notes.map((note) => (
-              <li key={note} className="text-xs text-[#8f7f6e]">
+              <li key={note} className="text-xs text-ash">
                 · {note}
               </li>
             ))}

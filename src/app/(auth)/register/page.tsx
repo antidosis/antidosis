@@ -34,17 +34,17 @@ export default function RegisterPage() {
   const strength = getPasswordStrength(password);
 
   const strengthColor = {
-    weak: "text-[#ff5252]",
-    fair: "text-[#ffb300]",
-    strong: "text-[#00e676]",
-    "very-strong": "text-[#00e676]",
+    weak: "text-bad",
+    fair: "text-alert",
+    strong: "text-ok",
+    "very-strong": "text-ok",
   }[strength];
 
   const strengthBar = {
-    weak: "w-1/4 bg-[#ff5252]",
-    fair: "w-2/4 bg-[#ffb300]",
-    strong: "w-3/4 bg-[#00e676]",
-    "very-strong": "w-full bg-[#00e676]",
+    weak: "w-1/4 bg-bad",
+    fair: "w-2/4 bg-alert",
+    strong: "w-3/4 bg-ok",
+    "very-strong": "w-full bg-ok",
   }[strength];
 
   async function handleSubmit(e: React.FormEvent) {
@@ -128,8 +128,8 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0806] text-[#e8d5a3] flex flex-col">
-      <div className="px-4 md:px-8 py-3 border-b border-[#2a2420]">
+    <div className="min-h-screen bg-void text-gold flex flex-col">
+      <div className="px-4 md:px-8 py-3 border-b border-line">
         <Link href="/" className="flex items-center gap-2">
           <img
             src="/images/logo.webp"
@@ -137,19 +137,19 @@ export default function RegisterPage() {
             width={138}
             height={56}
             fetchPriority="high"
-            className="opacity-80 hover:opacity-100 transition-opacity"
+            className="brand-logo opacity-80 hover:opacity-100 transition-opacity"
           />
         </Link>
       </div>
 
       <div className="flex-1 flex items-center justify-center px-4">
         <div className="w-full max-w-sm">
-          <p className="text-xs text-[#8f7f6e] mb-8">$ register --new-user</p>
-          <h1 className="heading-display text-2xl text-[#e8d5a3] mb-2">
+          <p className="text-xs text-ash mb-8">$ register --new-user</p>
+          <h1 className="heading-display text-2xl text-gold mb-2">
             create_account
             <TerminalCursor />
           </h1>
-          <p className="text-sm text-[#b8a078] mb-12">initialize profile and join the network</p>
+          <p className="text-sm text-parchment mb-12">initialize profile and join the network</p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
@@ -177,7 +177,7 @@ export default function RegisterPage() {
             <div className="space-y-2">
               <Label htmlFor="mobile">Mobile number</Label>
               <div className="relative">
-                <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8f7f6e]" />
+                <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ash" />
                 <Input
                   id="mobile"
                   type="tel"
@@ -187,7 +187,7 @@ export default function RegisterPage() {
                   className="pl-10"
                 />
               </div>
-              <p className="text-xs text-[#8f7f6e]">Optional. Australian mobiles only.</p>
+              <p className="text-xs text-ash">Optional. Australian mobiles only.</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
@@ -204,7 +204,7 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8f7f6e] hover:text-[#e8d5a3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f5a623] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0806] rounded-sm"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ash hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun focus-visible:ring-offset-2 focus-visible:ring-offset-void rounded-sm"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -213,12 +213,12 @@ export default function RegisterPage() {
               {password.length > 0 && (
                 <div className="space-y-2 mt-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-[#8f7f6e]">Strength</span>
+                    <span className="text-xs text-ash">Strength</span>
                     <span className={`text-xs font-medium ${strengthColor}`}>
                       {strength.replace("-", " ")}
                     </span>
                   </div>
-                  <div className="h-1.5 bg-[#12100e]">
+                  <div className="h-1.5 bg-surface">
                     <div className={`h-full transition-all duration-300 ${strengthBar}`} />
                   </div>
                   <div className="space-y-1">
@@ -240,11 +240,11 @@ export default function RegisterPage() {
                     ].map((req) => (
                       <div key={req.label} className="flex items-center gap-2 text-xs">
                         {req.test ? (
-                          <Check className="h-3 w-3 text-[#00e676]" />
+                          <Check className="h-3 w-3 text-ok" />
                         ) : (
-                          <X className="h-3 w-3 text-[#ff5252]" />
+                          <X className="h-3 w-3 text-bad" />
                         )}
-                        <span className="text-xs text-[#8f7f6e]">{req.label}</span>
+                        <span className="text-xs text-ash">{req.label}</span>
                       </div>
                     ))}
                   </div>
@@ -267,7 +267,7 @@ export default function RegisterPage() {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8f7f6e] hover:text-[#e8d5a3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f5a623] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0806] rounded-sm"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ash hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun focus-visible:ring-offset-2 focus-visible:ring-offset-void rounded-sm"
                 >
                   {showConfirmPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -284,18 +284,18 @@ export default function RegisterPage() {
                 type="checkbox"
                 checked={agreeTos}
                 onChange={(e) => setAgreeTos(e.target.checked)}
-                className="mt-0.5 h-4 w-4 rounded border-[#2a2420] bg-[#0f0c0a] text-[#f5a623] focus-visible:ring-2 focus-visible:ring-[#f5a623] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0806]"
+                className="mt-0.5 h-4 w-4 rounded border-line bg-inset text-sun focus-visible:ring-2 focus-visible:ring-sun focus-visible:ring-offset-2 focus-visible:ring-offset-void"
               />
               <Label
                 htmlFor="tos"
-                className="text-xs text-[#8f7f6e] font-normal leading-relaxed cursor-pointer"
+                className="text-xs text-ash font-normal leading-relaxed cursor-pointer"
               >
                 I agree to the{" "}
-                <Link href="/terms" className="text-[#f5a623] hover:underline underline-offset-4">
+                <Link href="/terms" className="text-sun hover:underline underline-offset-4">
                   Terms of Service
                 </Link>{" "}
                 and{" "}
-                <Link href="/privacy" className="text-[#f5a623] hover:underline underline-offset-4">
+                <Link href="/privacy" className="text-sun hover:underline underline-offset-4">
                   Privacy Policy
                 </Link>
               </Label>
@@ -307,23 +307,23 @@ export default function RegisterPage() {
                 type="checkbox"
                 checked={confirmAge}
                 onChange={(e) => setConfirmAge(e.target.checked)}
-                className="mt-0.5 h-4 w-4 rounded border-[#2a2420] bg-[#0f0c0a] text-[#f5a623] focus-visible:ring-2 focus-visible:ring-[#f5a623] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0806]"
+                className="mt-0.5 h-4 w-4 rounded border-line bg-inset text-sun focus-visible:ring-2 focus-visible:ring-sun focus-visible:ring-offset-2 focus-visible:ring-offset-void"
               />
               <Label
                 htmlFor="age"
-                className="text-xs text-[#8f7f6e] font-normal leading-relaxed cursor-pointer"
+                className="text-xs text-ash font-normal leading-relaxed cursor-pointer"
               >
                 I confirm I am 18 years or older
               </Label>
             </div>
 
-            {error && <p className="text-sm text-[#ff5252]">{error}</p>}
+            {error && <p className="text-sm text-bad">{error}</p>}
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Creating account..." : "Create account"}
             </Button>
           </form>
 
-          <p className="mt-12 text-sm text-[#8f7f6e]">
+          <p className="mt-12 text-sm text-ash">
             Already have an account?{" "}
             <Button variant="link" size="sm" asChild>
               <Link href="/login">Log in</Link>

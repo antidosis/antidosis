@@ -155,9 +155,7 @@ export function CredentialForm({
 
   return (
     <div className="vessel p-6 mb-8">
-      <p className="text-xs text-[#f5a623] mb-4">
-        {editingId ? "Edit Credential" : "Add Credential"}
-      </p>
+      <p className="text-xs text-sun mb-4">{editingId ? "Edit Credential" : "Add Credential"}</p>
       <form onSubmit={handleSubmit} className="space-y-4 max-w-lg">
         {/* Type */}
         <div className="space-y-2">
@@ -165,7 +163,7 @@ export function CredentialForm({
           <select
             value={credForm.type}
             onChange={(e) => handleTypeChange(e.target.value)}
-            className="w-full bg-[#0f0c0a] border border-[#2a2420] text-[#e8d5a3] text-sm px-3 py-2 outline-none focus:border-[#f5a623] rounded"
+            className="w-full bg-inset border border-line text-gold text-sm px-3 py-2 outline-none focus:border-sun rounded"
           >
             {TYPE_OPTIONS.map((t) => (
               <option key={t.value} value={t.value}>
@@ -182,7 +180,7 @@ export function CredentialForm({
             <select
               value={credForm.subType}
               onChange={(e) => handleSubTypeChange(e.target.value)}
-              className="w-full bg-[#0f0c0a] border border-[#2a2420] text-[#e8d5a3] text-sm px-3 py-2 outline-none focus:border-[#f5a623] rounded"
+              className="w-full bg-inset border border-line text-gold text-sm px-3 py-2 outline-none focus:border-sun rounded"
             >
               {ID_SUBTYPES.map((t) => (
                 <option key={t.value} value={t.value}>
@@ -267,9 +265,7 @@ export function CredentialForm({
 
         {/* File Upload(s) */}
         <div className="space-y-2">
-          <Label>
-            Document File {config.fileRequired && <span className="text-[#ff5252]">*</span>}
-          </Label>
+          <Label>Document File {config.fileRequired && <span className="text-bad">*</span>}</Label>
           <FileUpload
             folder="credentials"
             onUpload={(url) => setCredForm({ ...credForm, fileUrl: url })}
@@ -280,9 +276,7 @@ export function CredentialForm({
                 ? "Upload Front"
                 : "Upload File"}
           </FileUpload>
-          {credForm.fileUrl && (
-            <p className="text-xs text-[#8f7f6e] truncate">{credForm.fileUrl}</p>
-          )}
+          {credForm.fileUrl && <p className="text-xs text-ash truncate">{credForm.fileUrl}</p>}
         </div>
 
         {config.showBackFile && (
@@ -295,7 +289,7 @@ export function CredentialForm({
               {credForm.backFileUrl ? "Change File" : "Upload Back"}
             </FileUpload>
             {credForm.backFileUrl && (
-              <p className="text-xs text-[#8f7f6e] truncate">{credForm.backFileUrl}</p>
+              <p className="text-xs text-ash truncate">{credForm.backFileUrl}</p>
             )}
           </div>
         )}
@@ -308,7 +302,7 @@ export function CredentialForm({
               id="isPublic"
               checked={credForm.isPublic}
               onChange={(e) => setCredForm({ ...credForm, isPublic: e.target.checked })}
-              className="accent-[#f5a623]"
+              className="accent-sun"
             />
             <Label htmlFor="isPublic" className="cursor-pointer">
               Public (visible on profile)
@@ -316,7 +310,7 @@ export function CredentialForm({
           </div>
         )}
         {config.forcePrivate && (
-          <p className="text-xs text-[#8f7f6e]">
+          <p className="text-xs text-ash">
             This credential type is always kept private for your security.
           </p>
         )}

@@ -35,7 +35,7 @@ describe("LocationAutocomplete", () => {
   it("displays stored value when value prop is set and dropdown is closed", () => {
     render(<LocationAutocomplete value="terrigal_2260" onChange={vi.fn()} />);
     expect(screen.getByText("stored as:")).toBeInTheDocument();
-    expect(screen.getByText("terrigal_2260")).toHaveClass("text-[#f5a623]");
+    expect(screen.getByText("terrigal_2260")).toHaveClass("text-sun");
   });
 
   it("closes dropdown when clicking outside", () => {

@@ -84,7 +84,7 @@ function PathCard({
         <h3 className="heading-display text-2xl mb-3" style={{ color }}>
           {title}
         </h3>
-        <p className="text-sm text-[#8f7f6e] leading-relaxed mb-6">{desc}</p>
+        <p className="text-sm text-ash leading-relaxed mb-6">{desc}</p>
         <div className="space-y-3">
           {items.map((item, i) => (
             <div key={i} className="flex items-start gap-3">
@@ -96,7 +96,7 @@ function PathCard({
                   {String(i + 1).padStart(2, "0")}
                 </span>
               </div>
-              <p className="text-sm text-[#b8a078]">{item}</p>
+              <p className="text-sm text-parchment">{item}</p>
             </div>
           ))}
         </div>
@@ -133,26 +133,24 @@ function JourneyStep({
 
 export default function HowItWorksPage() {
   return (
-    <div className="min-h-screen bg-[#0a0806] text-[#e8d5a3] flex flex-col">
+    <div className="min-h-screen bg-void text-gold flex flex-col">
       <Navbar />
       <main className="flex-1">
         {/* HERO */}
         <section className="pt-32 pb-20 md:pt-44 md:pb-28 overflow-hidden">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
-              <p className="text-xs text-[#8f7f6e] mb-8 font-mono">
-                ◉ ON AIR — HOW THE NETWORK WORKS
-              </p>
+              <p className="text-xs text-ash mb-8 font-mono">◉ ON AIR — HOW THE NETWORK WORKS</p>
             </Reveal>
             <Reveal delay={100}>
-              <h1 className="heading-display text-5xl md:text-7xl text-[#e8d5a3] mb-6">
+              <h1 className="heading-display text-5xl md:text-7xl text-gold mb-6">
                 Exchange,
                 <br />
-                <span className="text-[#f5a623]">Simplified.</span>
+                <span className="text-sun">Simplified.</span>
               </h1>
             </Reveal>
             <Reveal delay={200}>
-              <p className="text-base text-[#8f7f6e] max-w-lg leading-relaxed mb-10">
+              <p className="text-base text-ash max-w-lg leading-relaxed mb-10">
                 Post what you need. Offer what you have. Connect with people you can trust.
                 Contracts are optional — use them when you want extra security. One network, every
                 node a neighbour.
@@ -183,13 +181,13 @@ export default function HowItWorksPage() {
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <div className="flex items-center gap-3 mb-4">
-                <GitFork className="h-4 w-4 text-[#b24bf5]" />
-                <p className="text-xs text-[#8f7f6e] font-mono">» TWO CHANNELS — PICK ONE</p>
+                <GitFork className="h-4 w-4 text-quint" />
+                <p className="text-xs text-ash font-mono">» TWO CHANNELS — PICK ONE</p>
               </div>
-              <h2 className="heading-display text-3xl md:text-4xl text-[#e8d5a3] mb-4">
+              <h2 className="heading-display text-3xl md:text-4xl text-gold mb-4">
                 Two Ways to Exchange
               </h2>
-              <p className="text-sm text-[#8f7f6e] max-w-md mb-14">
+              <p className="text-sm text-ash max-w-md mb-14">
                 Every need can be fulfilled with or without a binding contract. Choose what feels
                 right for the exchange.
               </p>
@@ -206,8 +204,8 @@ export default function HowItWorksPage() {
                     "Message to coordinate details",
                     "Complete and leave a review",
                   ]}
-                  color="#00e5ff"
-                  accent="#00e5ff"
+                  color="var(--x-00e5ff)"
+                  accent="var(--x-00e5ff)"
                 />
               </Reveal>
               <Reveal delay={300}>
@@ -221,8 +219,8 @@ export default function HowItWorksPage() {
                     "Digitally sign the generated contract",
                     "Mark complete and review",
                   ]}
-                  color="#f5a623"
-                  accent="#f5a623"
+                  color="var(--x-f5a623)"
+                  accent="var(--x-f5a623)"
                 />
               </Reveal>
             </div>
@@ -235,11 +233,9 @@ export default function HowItWorksPage() {
         <section className="py-20 md:py-28">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
-              <p className="text-xs text-[#8f7f6e] mb-8 font-mono">» TRANSMISSION SEQUENCE</p>
-              <h2 className="heading-display text-3xl md:text-4xl text-[#e8d5a3] mb-4">
-                The Journey
-              </h2>
-              <p className="text-sm text-[#8f7f6e] max-w-md mb-16">
+              <p className="text-xs text-ash mb-8 font-mono">» TRANSMISSION SEQUENCE</p>
+              <h2 className="heading-display text-3xl md:text-4xl text-gold mb-4">The Journey</h2>
+              <p className="text-sm text-ash max-w-md mb-16">
                 From account creation to review. Three phases. Ten minutes to start.
               </p>
             </Reveal>
@@ -248,23 +244,33 @@ export default function HowItWorksPage() {
             <Reveal delay={100}>
               <div className="mb-16">
                 <div className="flex items-center gap-3 mb-8">
-                  <div className="h-px flex-1 bg-[#2a2420]" />
-                  <span className="text-xs font-mono text-[#8f7f6e]">PHASE 01 — SETUP</span>
-                  <div className="h-px flex-1 bg-[#2a2420]" />
+                  <div className="h-px flex-1 bg-line" />
+                  <span className="text-xs font-mono text-ash">PHASE 01 — SETUP</span>
+                  <div className="h-px flex-1 bg-line" />
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                  <JourneyStep icon={UserPlus} title="Create Account" color="#f5a623" delay={0} />
+                  <JourneyStep
+                    icon={UserPlus}
+                    title="Create Account"
+                    color="var(--x-f5a623)"
+                    delay={0}
+                  />
                   <JourneyStep
                     icon={ShieldCheck}
                     title="Get Verified"
-                    color="#00e5ff"
+                    color="var(--x-00e5ff)"
                     delay={100}
                   />
-                  <JourneyStep icon={FileText} title="Post a Need" color="#f5a623" delay={200} />
+                  <JourneyStep
+                    icon={FileText}
+                    title="Post a Need"
+                    color="var(--x-f5a623)"
+                    delay={200}
+                  />
                   <JourneyStep
                     icon={PenTool}
                     title="Optional Contract"
-                    color="#b24bf5"
+                    color="var(--x-b24bf5)"
                     delay={300}
                   />
                 </div>
@@ -275,15 +281,35 @@ export default function HowItWorksPage() {
             <Reveal delay={100}>
               <div className="mb-16">
                 <div className="flex items-center gap-3 mb-8">
-                  <div className="h-px flex-1 bg-[#2a2420]" />
-                  <span className="text-xs font-mono text-[#8f7f6e]">PHASE 02 — CONNECT</span>
-                  <div className="h-px flex-1 bg-[#2a2420]" />
+                  <div className="h-px flex-1 bg-line" />
+                  <span className="text-xs font-mono text-ash">PHASE 02 — CONNECT</span>
+                  <div className="h-px flex-1 bg-line" />
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                  <JourneyStep icon={Search} title="Browse & Find" color="#00e5ff" delay={0} />
-                  <JourneyStep icon={Hand} title="Express Interest" color="#00e5ff" delay={100} />
-                  <JourneyStep icon={MessageSquare} title="Message" color="#b24bf5" delay={200} />
-                  <JourneyStep icon={CheckCircle} title="Accept" color="#f5a623" delay={300} />
+                  <JourneyStep
+                    icon={Search}
+                    title="Browse & Find"
+                    color="var(--x-00e5ff)"
+                    delay={0}
+                  />
+                  <JourneyStep
+                    icon={Hand}
+                    title="Express Interest"
+                    color="var(--x-00e5ff)"
+                    delay={100}
+                  />
+                  <JourneyStep
+                    icon={MessageSquare}
+                    title="Message"
+                    color="var(--x-b24bf5)"
+                    delay={200}
+                  />
+                  <JourneyStep
+                    icon={CheckCircle}
+                    title="Accept"
+                    color="var(--x-f5a623)"
+                    delay={300}
+                  />
                 </div>
               </div>
             </Reveal>
@@ -292,23 +318,28 @@ export default function HowItWorksPage() {
             <Reveal delay={100}>
               <div>
                 <div className="flex items-center gap-3 mb-8">
-                  <div className="h-px flex-1 bg-[#2a2420]" />
-                  <span className="text-xs font-mono text-[#8f7f6e]">PHASE 03 — COMPLETE</span>
-                  <div className="h-px flex-1 bg-[#2a2420]" />
+                  <div className="h-px flex-1 bg-line" />
+                  <span className="text-xs font-mono text-ash">PHASE 03 — COMPLETE</span>
+                  <div className="h-px flex-1 bg-line" />
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                  <JourneyStep icon={Package} title="Do the Exchange" color="#e8d5a3" delay={0} />
+                  <JourneyStep
+                    icon={Package}
+                    title="Do the Exchange"
+                    color="var(--x-e8d5a3)"
+                    delay={0}
+                  />
                   <JourneyStep
                     icon={CheckCircle}
                     title="Mark Complete"
-                    color="#00e676"
+                    color="var(--x-00e676)"
                     delay={100}
                   />
-                  <JourneyStep icon={Star} title="Rate 1-10" color="#f5a623" delay={200} />
+                  <JourneyStep icon={Star} title="Rate 1-10" color="var(--x-f5a623)" delay={200} />
                   <JourneyStep
                     icon={ShieldCheck}
                     title="Build Reputation"
-                    color="#00e5ff"
+                    color="var(--x-00e5ff)"
                     delay={300}
                   />
                 </div>
@@ -325,64 +356,58 @@ export default function HowItWorksPage() {
             <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
               <div>
                 <Reveal>
-                  <p className="text-xs text-[#8f7f6e] mb-6 font-mono">» TRUST PROTOCOL</p>
-                  <h2 className="heading-display text-3xl md:text-4xl text-[#e8d5a3] mb-6">
+                  <p className="text-xs text-ash mb-6 font-mono">» TRUST PROTOCOL</p>
+                  <h2 className="heading-display text-3xl md:text-4xl text-gold mb-6">
                     Trust by
                     <br />
-                    <span className="text-[#00e676]">Design.</span>
+                    <span className="text-ok">Design.</span>
                   </h2>
                 </Reveal>
                 <Reveal delay={150}>
                   <div className="space-y-5">
                     <div className="flex gap-4">
-                      <div className="w-8 h-8 flex items-center justify-center shrink-0 bg-[#00e676]/10 border border-[#00e676]/20">
-                        <ShieldCheck className="h-4 w-4 text-[#00e676]" />
+                      <div className="w-8 h-8 flex items-center justify-center shrink-0 bg-ok/10 border border-ok/20">
+                        <ShieldCheck className="h-4 w-4 text-ok" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-[#e8d5a3] mb-1">
-                          Verified Identities
-                        </p>
-                        <p className="text-xs text-[#8f7f6e]">
+                        <p className="text-sm font-medium text-gold mb-1">Verified Identities</p>
+                        <p className="text-xs text-ash">
                           Email, mobile, and credential verification. Know who you&apos;re dealing
                           with.
                         </p>
                       </div>
                     </div>
                     <div className="flex gap-4">
-                      <div className="w-8 h-8 flex items-center justify-center shrink-0 bg-[#f5a623]/10 border border-[#f5a623]/20">
-                        <Star className="h-4 w-4 text-[#f5a623]" />
+                      <div className="w-8 h-8 flex items-center justify-center shrink-0 bg-sun/10 border border-sun/20">
+                        <Star className="h-4 w-4 text-sun" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-[#e8d5a3] mb-1">Bilateral Reviews</p>
-                        <p className="text-xs text-[#8f7f6e]">
+                        <p className="text-sm font-medium text-gold mb-1">Bilateral Reviews</p>
+                        <p className="text-xs text-ash">
                           Both parties rate each other 1-10. Default is excellence — you consciously
                           mark down.
                         </p>
                       </div>
                     </div>
                     <div className="flex gap-4">
-                      <div className="w-8 h-8 flex items-center justify-center shrink-0 bg-[#00e5ff]/10 border border-[#00e5ff]/20">
-                        <MessageSquare className="h-4 w-4 text-[#00e5ff]" />
+                      <div className="w-8 h-8 flex items-center justify-center shrink-0 bg-mercury/10 border border-mercury/20">
+                        <MessageSquare className="h-4 w-4 text-mercury" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-[#e8d5a3] mb-1">
-                          Built-in Messaging
-                        </p>
-                        <p className="text-xs text-[#8f7f6e]">
+                        <p className="text-sm font-medium text-gold mb-1">Built-in Messaging</p>
+                        <p className="text-xs text-ash">
                           No external apps. Every exchange has its own message thread with full
                           history.
                         </p>
                       </div>
                     </div>
                     <div className="flex gap-4">
-                      <div className="w-8 h-8 flex items-center justify-center shrink-0 bg-[#b24bf5]/10 border border-[#b24bf5]/20">
-                        <ScrollText className="h-4 w-4 text-[#b24bf5]" />
+                      <div className="w-8 h-8 flex items-center justify-center shrink-0 bg-quint/10 border border-quint/20">
+                        <ScrollText className="h-4 w-4 text-quint" />
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-[#e8d5a3] mb-1">
-                          Optional Contracts
-                        </p>
-                        <p className="text-xs text-[#8f7f6e]">
+                        <p className="text-sm font-medium text-gold mb-1">Optional Contracts</p>
+                        <p className="text-xs text-ash">
                           Use binding contracts when you want formal terms. Skip them when you
                           don&apos;t.
                         </p>
@@ -394,15 +419,15 @@ export default function HowItWorksPage() {
               <Reveal delay={200} className="flex justify-center">
                 <div className="relative w-72 h-72 md:w-80 md:h-80">
                   {/* Orbital reputation rings */}
-                  <div className="absolute inset-0 rounded-full border border-[#2a2420]" />
-                  <div className="absolute inset-4 rounded-full border border-[#2a2420]" />
-                  <div className="absolute inset-8 rounded-full border border-[#f5a623]/20" />
-                  <div className="absolute inset-12 rounded-full border border-[#00e5ff]/20" />
+                  <div className="absolute inset-0 rounded-full border border-line" />
+                  <div className="absolute inset-4 rounded-full border border-line" />
+                  <div className="absolute inset-8 rounded-full border border-sun/20" />
+                  <div className="absolute inset-12 rounded-full border border-mercury/20" />
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center">
-                      <Star className="h-10 w-10 text-[#f5a623] mx-auto mb-2" />
-                      <p className="heading-display text-3xl text-[#e8d5a3]">10</p>
-                      <p className="text-xs text-[#8f7f6e] mt-1">default rating</p>
+                      <Star className="h-10 w-10 text-sun mx-auto mb-2" />
+                      <p className="heading-display text-3xl text-gold">10</p>
+                      <p className="text-xs text-ash mt-1">default rating</p>
                     </div>
                   </div>
                   {/* Orbiting dots */}
@@ -410,19 +435,19 @@ export default function HowItWorksPage() {
                     className="absolute inset-0 animate-spin"
                     style={{ animationDuration: "20s" }}
                   >
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-[#f5a623]" />
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-sun" />
                   </div>
                   <div
                     className="absolute inset-0 animate-spin"
                     style={{ animationDuration: "30s", animationDirection: "reverse" }}
                   >
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#00e5ff]" />
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-mercury" />
                   </div>
                   <div
                     className="absolute inset-0 animate-spin"
                     style={{ animationDuration: "25s" }}
                   >
-                    <div className="absolute top-1/2 right-0 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#b24bf5]" />
+                    <div className="absolute top-1/2 right-0 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-quint" />
                   </div>
                 </div>
               </Reveal>
@@ -436,13 +461,13 @@ export default function HowItWorksPage() {
         <section className="py-20 md:py-28">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
-              <p className="text-xs text-[#8f7f6e] mb-8 font-mono">◉ TUNE IN</p>
-              <h2 className="heading-display text-3xl md:text-5xl text-[#e8d5a3] mb-6">
+              <p className="text-xs text-ash mb-8 font-mono">◉ TUNE IN</p>
+              <h2 className="heading-display text-3xl md:text-5xl text-gold mb-6">
                 Ready to
                 <br />
-                <span className="text-[#f5a623]">Start?</span>
+                <span className="text-sun">Start?</span>
               </h2>
-              <p className="text-base text-[#8f7f6e] max-w-md mb-10 leading-relaxed">
+              <p className="text-base text-ash max-w-md mb-10 leading-relaxed">
                 Join the Central Coast trial. Verify your identity, and help build a network that
                 keeps working when everything else doesn&apos;t.
               </p>

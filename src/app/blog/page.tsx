@@ -51,9 +51,9 @@ export default function BlogIndexPage() {
         <div className="max-w-4xl mx-auto px-4 md:px-8 py-16 md:py-24">
           {/* Header */}
           <div className="mb-16">
-            <p className="text-xs font-mono text-[#8f7f6e] mb-4">» TRANSMISSION LOG</p>
-            <h1 className="heading-display text-4xl md:text-5xl text-[#e8d5a3] mb-4">Blog</h1>
-            <p className="text-[#b8a078] max-w-xl">
+            <p className="text-xs font-mono text-ash mb-4">» TRANSMISSION LOG</p>
+            <h1 className="heading-display text-4xl md:text-5xl text-gold mb-4">Blog</h1>
+            <p className="text-parchment max-w-xl">
               Guides, stories, and insights about barter, exchange, and building a network that
               keeps working — on the Central Coast.
             </p>
@@ -64,24 +64,24 @@ export default function BlogIndexPage() {
             {blogPosts.map((post) => (
               <article
                 key={post.slug}
-                className="vessel p-6 md:p-8 group hover:border-[#00e5ff]/30 transition-colors"
+                className="vessel p-6 md:p-8 group hover:border-mercury/30 transition-colors"
               >
                 <Link href={`/blog/${post.slug}`} className="block">
                   <div className="flex flex-wrap gap-2 mb-4">
                     {post.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 bg-[#00e5ff]/5 border border-[#00e5ff]/10 text-[#00e5ff]"
+                        className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 bg-mercury/5 border border-mercury/10 text-mercury"
                       >
                         {tag}
                       </span>
                     ))}
                   </div>
-                  <h2 className="heading-display text-xl md:text-2xl text-[#e8d5a3] group-hover:text-[#00e5ff] transition-colors mb-3">
+                  <h2 className="heading-display text-xl md:text-2xl text-gold group-hover:text-mercury transition-colors mb-3">
                     {post.title}
                   </h2>
-                  <p className="text-sm text-[#b8a078] leading-relaxed mb-4">{post.excerpt}</p>
-                  <div className="flex items-center gap-4 text-xs text-[#8f7f6e]">
+                  <p className="text-sm text-parchment leading-relaxed mb-4">{post.excerpt}</p>
+                  <div className="flex items-center gap-4 text-xs text-ash">
                     <span className="flex items-center gap-1.5">
                       <Calendar className="h-3 w-3" />
                       {new Date(post.publishedAt).toLocaleDateString("en-AU", {
@@ -95,7 +95,7 @@ export default function BlogIndexPage() {
                       {post.readingTime}
                     </span>
                   </div>
-                  <div className="mt-4 flex items-center gap-2 text-sm text-[#00e5ff] opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="mt-4 flex items-center gap-2 text-sm text-mercury opacity-0 group-hover:opacity-100 transition-opacity">
                     <span>Read article</span>
                     <ArrowRight className="h-4 w-4" />
                   </div>
@@ -106,11 +106,11 @@ export default function BlogIndexPage() {
 
           {/* CTA */}
           <div className="mt-16 text-center">
-            <p className="text-sm text-[#8f7f6e] mb-4">Want to share your exchange story?</p>
+            <p className="text-sm text-ash mb-4">Want to share your exchange story?</p>
             <EmailLink
               email="official.antidosis@gmail.com"
               subject="Blog Submission"
-              className="inline-flex items-center gap-2 text-sm text-[#00e5ff] hover:underline"
+              className="inline-flex items-center gap-2 text-sm text-mercury hover:underline"
             >
               Submit an article idea
               <ArrowRight className="h-4 w-4" />

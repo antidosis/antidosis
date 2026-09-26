@@ -39,7 +39,7 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-[#2a2420] bg-[#0a0806]">
+    <footer className="border-t border-line bg-void">
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         {/* Main footer content */}
         <div className="py-12 md:py-16">
@@ -52,23 +52,23 @@ export function Footer() {
                   alt="antidosis"
                   width={197}
                   height={80}
-                  className="opacity-80 hover:opacity-100 transition-opacity"
+                  className="brand-logo opacity-80 hover:opacity-100 transition-opacity"
                 />
               </Link>
-              <p className="text-sm text-[#8f7f6e] leading-relaxed max-w-xs mb-6">
+              <p className="text-sm text-ash leading-relaxed max-w-xs mb-6">
                 A marketplace for reciprocal exchange. Post what you need. Offer what you have.
                 Build trust through every transaction.
               </p>
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#00e676] animate-pulse" />
-                <span className="text-xs text-[#8f7f6e]">Central Coast NSW trial active</span>
+                <span className="w-2 h-2 rounded-full bg-ok animate-pulse" />
+                <span className="text-xs text-ash">Central Coast NSW trial active</span>
               </div>
             </div>
 
             {/* Link columns */}
             {linkGroups.map((group) => (
               <div key={group.title} className="md:col-span-2">
-                <h2 className="text-xs font-medium text-[#e8d5a3] uppercase tracking-wider mb-4">
+                <h2 className="text-xs font-medium text-gold uppercase tracking-wider mb-4">
                   {group.title}
                 </h2>
                 <ul className="space-y-2.5">
@@ -77,21 +77,21 @@ export function Footer() {
                       {link.email ? (
                         <EmailLink
                           email={link.email}
-                          className="text-sm text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
+                          className="text-sm text-ash hover:text-gold transition-colors"
                         >
                           {link.label}
                         </EmailLink>
                       ) : link.external ? (
                         <a
                           href={link.href}
-                          className="text-sm text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
+                          className="text-sm text-ash hover:text-gold transition-colors"
                         >
                           {link.label}
                         </a>
                       ) : (
                         <Link
                           href={link.href ?? "/"}
-                          className="text-sm text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
+                          className="text-sm text-ash hover:text-gold transition-colors"
                         >
                           {link.label}
                         </Link>
@@ -105,12 +105,10 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="border-t border-[#2a2420] py-6">
+        <div className="border-t border-line py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-xs text-[#8f7f6e]">&copy; {year} Antidosis. All rights reserved.</p>
-            <p className="text-xs text-[#8f7f6e]">
-              Crafted with intention on the Central Coast, NSW.
-            </p>
+            <p className="text-xs text-ash">&copy; {year} Antidosis. All rights reserved.</p>
+            <p className="text-xs text-ash">Crafted with intention on the Central Coast, NSW.</p>
           </div>
         </div>
       </div>

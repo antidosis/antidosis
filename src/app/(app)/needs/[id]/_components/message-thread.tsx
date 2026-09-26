@@ -66,12 +66,12 @@ export function MessageThread({
 }: MessageThreadProps) {
   if (!profileId) {
     return (
-      <div className="bg-[#f5a623]/5 border border-[#f5a623]/20 p-4 rounded">
-        <p className="text-sm text-[#e8d5a3] mb-2">want to message the poster?</p>
-        <p className="text-xs text-[#b8a078]">
+      <div className="bg-sun/5 border border-sun/20 p-4 rounded">
+        <p className="text-sm text-gold mb-2">want to message the poster?</p>
+        <p className="text-xs text-parchment">
           <Button
             variant="link"
-            className="p-0 h-auto text-[#f5a623] hover:underline text-xs"
+            className="p-0 h-auto text-sun hover:underline text-xs"
             onClick={() => onAuthRequired(false)}
           >
             log in
@@ -79,7 +79,7 @@ export function MessageThread({
           {" or "}
           <Button
             variant="link"
-            className="p-0 h-auto text-[#f5a623] hover:underline text-xs"
+            className="p-0 h-auto text-sun hover:underline text-xs"
             onClick={() => onAuthRequired(true)}
           >
             create an account
@@ -100,8 +100,8 @@ export function MessageThread({
   return (
     <div ref={messagesRef} className="vessel p-4">
       <div className="flex items-center gap-2 mb-4">
-        <MessageSquare className="h-3.5 w-3.5 text-[#8f7f6e]" />
-        <span className="text-xs text-[#8f7f6e] uppercase tracking-wider">
+        <MessageSquare className="h-3.5 w-3.5 text-ash" />
+        <span className="text-xs text-ash uppercase tracking-wider">
           {isPoster && activeMessageThread
             ? "private messages"
             : hasOffered
@@ -117,8 +117,8 @@ export function MessageThread({
             onClick={() => onSetActiveThread(null)}
             className={`px-3 py-1.5 text-xs rounded whitespace-nowrap transition-colors ${
               activeMessageThread === null
-                ? "bg-[#f5a623] text-[#0a0806] font-medium"
-                : "bg-[#1a1714] text-[#8f7f6e] hover:text-[#e8d5a3]"
+                ? "bg-sun text-onaccent font-medium"
+                : "bg-raise text-ash hover:text-gold"
             }`}
           >
             Public
@@ -131,8 +131,8 @@ export function MessageThread({
                 onClick={() => onSetActiveThread(a.id)}
                 className={`px-3 py-1.5 text-xs rounded whitespace-nowrap transition-colors ${
                   activeMessageThread === a.id
-                    ? "bg-[#f5a623] text-[#0a0806] font-medium"
-                    : "bg-[#1a1714] text-[#8f7f6e] hover:text-[#e8d5a3]"
+                    ? "bg-sun text-onaccent font-medium"
+                    : "bg-raise text-ash hover:text-gold"
                 }`}
               >
                 {a.user.fullName || "anonymous"}
@@ -143,7 +143,7 @@ export function MessageThread({
 
       {/* Public thread label */}
       {(!isPoster || !activeMessageThread) && (
-        <div className="mb-2 px-2 py-1 bg-[#00e5ff]/10 border border-[#00e5ff]/20 rounded text-xs text-[#00e5ff]">
+        <div className="mb-2 px-2 py-1 bg-mercury/10 border border-mercury/20 rounded text-xs text-mercury">
           {isPoster
             ? "Public — anyone viewing this need can see these messages"
             : hasOffered
@@ -154,14 +154,14 @@ export function MessageThread({
 
       {/* Thread label for private threads */}
       {isPoster && activeMessageThread && (
-        <div className="mb-2 px-2 py-1 bg-[#f5a623]/10 border border-[#f5a623]/20 rounded text-xs text-[#f5a623]">
+        <div className="mb-2 px-2 py-1 bg-sun/10 border border-sun/20 rounded text-xs text-sun">
           Private thread — only you and this fulfiller can see these messages
         </div>
       )}
 
       <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
         {filtered.length === 0 && (
-          <p className="text-xs text-[#8f7f6e] text-center py-4">
+          <p className="text-xs text-ash text-center py-4">
             {isPoster && activeMessageThread
               ? "no private messages yet. send one to reach out directly."
               : isPoster
@@ -180,15 +180,15 @@ export function MessageThread({
             <div
               className={`max-w-[75%] px-3 py-2 text-sm rounded ${
                 msg.sender.id === profileId
-                  ? "bg-[#1a1714] text-[#e8d5a3] border-l-2 border-[#f5a623]"
-                  : "bg-[#12100e] text-[#b8a078] border border-[#2a2420]"
+                  ? "bg-raise text-gold border-l-2 border-sun"
+                  : "bg-surface text-parchment border border-line"
               }`}
             >
-              <p className="text-[10px] text-[#8f7f6e] uppercase tracking-wider mb-1">
+              <p className="text-[10px] text-ash uppercase tracking-wider mb-1">
                 {msg.sender.fullName || "anonymous"}
               </p>
               <p>{msg.content}</p>
-              <p className="text-[10px] text-[#8f7f6e] mt-1">
+              <p className="text-[10px] text-ash mt-1">
                 {new Date(msg.createdAt).toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",

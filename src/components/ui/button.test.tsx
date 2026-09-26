@@ -12,8 +12,8 @@ describe("Button", () => {
   it("applies default variant classes", () => {
     render(<Button>Default</Button>);
     const button = screen.getByRole("button", { name: "Default" });
-    expect(button).toHaveClass("bg-[#f5a623]");
-    expect(button).toHaveClass("text-[#0a0806]");
+    expect(button).toHaveClass("bg-sun");
+    expect(button).toHaveClass("text-onaccent");
     expect(button).toHaveClass("font-bold");
   });
 
@@ -21,23 +21,23 @@ describe("Button", () => {
     render(<Button variant="secondary">Secondary</Button>);
     const button = screen.getByRole("button", { name: "Secondary" });
     expect(button).toHaveClass("bg-transparent");
-    expect(button).toHaveClass("text-[#e8d5a3]");
+    expect(button).toHaveClass("text-gold");
     expect(button).toHaveClass("border");
-    expect(button).toHaveClass("border-[#2a2420]");
+    expect(button).toHaveClass("border-line");
   });
 
   it("applies ghost variant classes", () => {
     render(<Button variant="ghost">Ghost</Button>);
     const button = screen.getByRole("button", { name: "Ghost" });
     expect(button).toHaveClass("bg-transparent");
-    expect(button).toHaveClass("text-[#b8a078]");
+    expect(button).toHaveClass("text-parchment");
   });
 
   it("applies destructive variant classes", () => {
     render(<Button variant="destructive">Destructive</Button>);
     const button = screen.getByRole("button", { name: "Destructive" });
     expect(button).toHaveClass("bg-transparent");
-    expect(button).toHaveClass("text-[#ff5252]");
+    expect(button).toHaveClass("text-bad");
     expect(button).toHaveClass("border");
   });
 

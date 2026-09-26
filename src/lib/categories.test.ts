@@ -27,7 +27,7 @@ describe("EXCHANGE_MODES", () => {
     for (const mode of EXCHANGE_MODES) {
       expect(mode.value).toBeTruthy();
       expect(mode.label).toBeTruthy();
-      expect(mode.color).toMatch(/^#/);
+      expect(mode.color).toMatch(/^(#|var\(--x-)/);
       expect(mode.twText).toContain("text-");
     }
   });
@@ -44,7 +44,7 @@ describe("getExchangeMode", () => {
     const mode = getExchangeMode("goods-swap");
     expect(mode).not.toBeNull();
     expect(mode?.label).toBe("Goods ↔ Goods");
-    expect(mode?.color).toBe("#35e87a");
+    expect(mode?.color).toBe("var(--x-35e87a)");
   });
 
   it("returns null for invalid value", () => {

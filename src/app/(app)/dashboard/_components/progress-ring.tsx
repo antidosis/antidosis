@@ -16,7 +16,7 @@ export function ProgressRing({
   const pct = total > 0 ? progress / total : 0;
   const offset = circumference - pct * circumference;
 
-  const color = pct === 1 ? "#00e676" : pct >= 0.6 ? "#f5a623" : "#7a6b5a";
+  const color = pct === 1 ? "var(--x-00e676)" : pct >= 0.6 ? "var(--x-f5a623)" : "var(--x-7a6b5a)";
 
   return (
     <div
@@ -29,7 +29,7 @@ export function ProgressRing({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#1a1714"
+          stroke="var(--x-1a1714)"
           strokeWidth={strokeWidth}
         />
         <circle

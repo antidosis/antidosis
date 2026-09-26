@@ -13,7 +13,7 @@ const STEPS = [
     id: "email",
     label: "Email",
     description: "Verify your email address",
-    color: "#35c2f0",
+    color: "var(--x-35c2f0)",
     bg: "rgba(53,194,240,0.12)",
     icon: Mail,
     href: "/verify-email",
@@ -23,7 +23,7 @@ const STEPS = [
     id: "profile",
     label: "Profile",
     description: "Add name, bio, avatar, location",
-    color: "#f5a623",
+    color: "var(--x-f5a623)",
     bg: "rgba(245,166,35,0.12)",
     icon: User,
     href: null,
@@ -33,7 +33,7 @@ const STEPS = [
     id: "mobile",
     label: "Mobile",
     description: "Add and verify your mobile",
-    color: "#00e676",
+    color: "var(--x-00e676)",
     bg: "rgba(0,230,118,0.12)",
     icon: Smartphone,
     href: "/verify-mobile",
@@ -43,7 +43,7 @@ const STEPS = [
     id: "credentials",
     label: "ID Upload",
     description: "Upload a government-issued ID",
-    color: "#d76bf5",
+    color: "var(--x-d76bf5)",
     bg: "rgba(215,107,245,0.12)",
     icon: Award,
     href: null,
@@ -53,7 +53,7 @@ const STEPS = [
     id: "verified",
     label: "Approved",
     description: "Admin reviews your ID (24h)",
-    color: "#00e676",
+    color: "var(--x-00e676)",
     bg: "rgba(0,230,118,0.12)",
     icon: ShieldCheck,
     href: null,
@@ -162,8 +162,8 @@ export function ProfileChecklist({
               <path
                 key={`track-${i}`}
                 d={arcPath(start, end)}
-                fill="#1a1714"
-                stroke="#2a2420"
+                fill="var(--x-1a1714)"
+                stroke="var(--x-2a2420)"
                 strokeWidth="1"
               />
             );
@@ -196,17 +196,17 @@ export function ProfileChecklist({
           <div className="flex flex-col items-center justify-center">
             {allDone ? (
               <>
-                <div className="h-12 w-12 rounded-full bg-[#00e676]/10 border border-[#00e676]/30 flex items-center justify-center mb-1">
-                  <CheckCircle2 className="h-6 w-6 text-[#00e676]" />
+                <div className="h-12 w-12 rounded-full bg-ok/10 border border-ok/30 flex items-center justify-center mb-1">
+                  <CheckCircle2 className="h-6 w-6 text-ok" />
                 </div>
-                <span className="text-[10px] uppercase tracking-wider text-[#00e676] font-medium">
+                <span className="text-[10px] uppercase tracking-wider text-ok font-medium">
                   verified
                 </span>
               </>
             ) : (
               <>
-                <span className="text-3xl font-bold text-[#e8d5a3]">{completed}</span>
-                <span className="text-[10px] uppercase tracking-wider text-[#8f7f6e]">
+                <span className="text-3xl font-bold text-gold">{completed}</span>
+                <span className="text-[10px] uppercase tracking-wider text-ash">
                   of {STEPS.length}
                 </span>
               </>
@@ -227,14 +227,14 @@ export function ProfileChecklist({
                 className={`absolute flex items-center justify-center h-7 w-7 rounded-full border transition-colors ${
                   isDone
                     ? "border-transparent"
-                    : "border-[#2a2420] bg-[#12100e] cursor-pointer hover:border-[#3d3530]"
+                    : "border-line bg-surface cursor-pointer hover:border-linehi"
                 }`}
                 style={{
                   left: `${(pos.x / 200) * 100}%`,
                   top: `${(pos.y / 200) * 100}%`,
                   transform: "translate(-50%, -50%)",
                   backgroundColor: isDone ? step.bg : undefined,
-                  color: isDone ? step.color : "#7a6b5a",
+                  color: isDone ? step.color : "var(--x-7a6b5a)",
                 }}
                 onClick={() => handleSliceClick(step)}
                 title={step.label}
@@ -248,7 +248,7 @@ export function ProfileChecklist({
       {/* ─── Step list (hidden when complete) ─── */}
       {!allDone && (
         <div className="flex-1 min-w-0 w-full">
-          <p className="text-xs text-[#8f7f6e] uppercase tracking-wider mb-3">profile setup</p>
+          <p className="text-xs text-ash uppercase tracking-wider mb-3">profile setup</p>
           <div className="space-y-2">
             {STEPS.map((step) => {
               const isDone = doneMap[step.id];
@@ -259,7 +259,7 @@ export function ProfileChecklist({
                   className={`flex items-center gap-3 p-2 rounded border transition-colors ${
                     isDone
                       ? "border-transparent opacity-50"
-                      : "border-[#2a2420] hover:border-[#3d3530] cursor-pointer"
+                      : "border-line hover:border-linehi cursor-pointer"
                   }`}
                   style={isDone ? { backgroundColor: step.bg } : undefined}
                   onClick={() => handleSliceClick(step)}
@@ -267,24 +267,22 @@ export function ProfileChecklist({
                   <div
                     className="flex items-center justify-center h-7 w-7 rounded-full shrink-0"
                     style={{
-                      backgroundColor: isDone ? `${step.color}15` : "#1a1714",
-                      color: isDone ? step.color : "#7a6b5a",
+                      backgroundColor: isDone ? `${step.color}15` : "var(--x-1a1714)",
+                      color: isDone ? step.color : "var(--x-7a6b5a)",
                     }}
                   >
                     <Icon className="h-3.5 w-3.5" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p
-                      className={`text-sm ${isDone ? "text-[#8f7f6e] line-through" : "text-[#e8d5a3]"}`}
-                    >
+                    <p className={`text-sm ${isDone ? "text-ash line-through" : "text-gold"}`}>
                       {step.label}
                     </p>
-                    <p className="text-[11px] text-[#8f7f6e]">{step.description}</p>
+                    <p className="text-[11px] text-ash">{step.description}</p>
                   </div>
                   {isDone ? (
-                    <CheckCircle2 className="h-4 w-4 text-[#00e676] shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-ok shrink-0" />
                   ) : (
-                    <ArrowRight className="h-4 w-4 text-[#8f7f6e] shrink-0" />
+                    <ArrowRight className="h-4 w-4 text-ash shrink-0" />
                   )}
                 </div>
               );

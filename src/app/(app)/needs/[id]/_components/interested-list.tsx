@@ -88,15 +88,15 @@ export function InterestedList({
 
   return (
     <div className="vessel p-4">
-      <h2 className="text-sm font-medium text-[#e8d5a3] mb-4">Interested ({visible.length})</h2>
+      <h2 className="text-sm font-medium text-gold mb-4">Interested ({visible.length})</h2>
       <div className="space-y-3">
         {visible.map((a) => (
           <div
             key={a.id}
             className={`p-3 rounded ${
               a.status === "accepted"
-                ? "border border-[#00e676]/20 bg-[#00e676]/5"
-                : "bg-[#1a1714] border border-[#2a2420]"
+                ? "border border-ok/20 bg-ok/5"
+                : "bg-raise border border-line"
             }`}
           >
             <div className="flex items-start justify-between gap-3">
@@ -106,17 +106,17 @@ export function InterestedList({
                   <div className="flex items-center gap-1.5">
                     <Link
                       href={`/profile/${a.user.id}`}
-                      className="text-sm font-medium text-[#e8d5a3] truncate hover:underline"
+                      className="text-sm font-medium text-gold truncate hover:underline"
                     >
                       {a.user.fullName || "anonymous"}
                     </Link>
                     {a.user.isVerified && (
                       <span title="Verified">
-                        <Shield className="h-3 w-3 text-[#00e676] shrink-0" />
+                        <Shield className="h-3 w-3 text-ok shrink-0" />
                       </span>
                     )}
                   </div>
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-[#8f7f6e]">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-ash">
                     {a.user.ratingAvg > 0 && (
                       <span>
                         {a.user.ratingAvg.toFixed(1)} ★ ({a.user.ratingCount})
@@ -126,19 +126,19 @@ export function InterestedList({
                     {a.user.locationName && <span>{a.user.locationName}</span>}
                   </div>
                   {a.user.bio && (
-                    <p className="text-[10px] text-[#b8a078] mt-0.5 line-clamp-1">{a.user.bio}</p>
+                    <p className="text-[10px] text-parchment mt-0.5 line-clamp-1">{a.user.bio}</p>
                   )}
                   <div className="flex flex-wrap gap-1 mt-1">
                     {a.user.skills.slice(0, 4).map((s) => (
                       <span
                         key={s.id}
-                        className="px-1.5 py-0.5 text-[9px] uppercase tracking-wider border border-[#2a2420] text-[#8f7f6e]"
+                        className="px-1.5 py-0.5 text-[9px] uppercase tracking-wider border border-line text-ash"
                       >
                         {s.name}
                       </span>
                     ))}
                     {a.user.credentials.length > 0 && (
-                      <span className="px-1.5 py-0.5 text-[9px] uppercase tracking-wider border border-[#00e676]/30 text-[#00e676]">
+                      <span className="px-1.5 py-0.5 text-[9px] uppercase tracking-wider border border-ok/30 text-ok">
                         {a.user.credentials.filter((c) => c.isVerified).length}/
                         {a.user.credentials.length} credentials
                       </span>
@@ -200,7 +200,7 @@ export function InterestedList({
                 )}
                 {a.status === "accepted" && !needRequiresContract && needStatus === "active" && (
                   <div className="flex flex-col gap-1.5 items-end">
-                    <span className="text-xs text-[#00e676] flex items-center gap-1">
+                    <span className="text-xs text-ok flex items-center gap-1">
                       <Check className="h-3 w-3" />
                       deal confirmed
                     </span>
@@ -221,19 +221,17 @@ export function InterestedList({
                           Mark complete
                         </Button>
                       ) : (
-                        <span className="text-[10px] text-[#00e676]">you marked complete</span>
+                        <span className="text-[10px] text-ok">you marked complete</span>
                       )}
                       {a.fulfillerMarkedComplete && (
-                        <span className="text-[10px] text-[#00e676]">
-                          fulfiller marked complete
-                        </span>
+                        <span className="text-[10px] text-ok">fulfiller marked complete</span>
                       )}
                     </div>
                   </div>
                 )}
                 {a.status === "completed" && !needRequiresContract && (
                   <div className="flex flex-col gap-1.5 items-end">
-                    <span className="text-xs text-[#00e676] flex items-center gap-1">
+                    <span className="text-xs text-ok flex items-center gap-1">
                       <Check className="h-3 w-3" />
                       deal completed
                     </span>
@@ -254,7 +252,7 @@ export function InterestedList({
                   </div>
                 )}
                 {a.status === "declined" && (
-                  <span className="text-xs text-[#ff5252] flex items-center gap-1">
+                  <span className="text-xs text-bad flex items-center gap-1">
                     <X className="h-3 w-3" />
                     declined
                   </span>
@@ -262,7 +260,7 @@ export function InterestedList({
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="h-7 text-xs px-2 text-[#ff5252] hover:text-[#ff5252]"
+                  className="h-7 text-xs px-2 text-bad hover:text-bad"
                   onClick={() => {
                     if (
                       window.confirm(
@@ -279,7 +277,7 @@ export function InterestedList({
               </div>
             </div>
             {a.message && (
-              <p className="text-xs text-[#b8a078] mt-2 bg-[#0f0c0a] p-2.5 rounded">{a.message}</p>
+              <p className="text-xs text-parchment mt-2 bg-inset p-2.5 rounded">{a.message}</p>
             )}
             {/* Poster review form inline */}
             {posterReviewAcceptanceId === a.id && (

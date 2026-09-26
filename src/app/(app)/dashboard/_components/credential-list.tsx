@@ -41,9 +41,9 @@ export function CredentialList({
   if (credentials.length === 0) {
     return (
       <div className="py-24 text-center vessel">
-        <ShieldCheck className="h-8 w-8 text-[#8f7f6e] mx-auto mb-3" />
-        <p className="text-sm font-medium text-[#b8a078] mb-2">No Credentials Yet</p>
-        <p className="text-xs text-[#8f7f6e] max-w-sm mx-auto">
+        <ShieldCheck className="h-8 w-8 text-ash mx-auto mb-3" />
+        <p className="text-sm font-medium text-parchment mb-2">No Credentials Yet</p>
+        <p className="text-xs text-ash max-w-sm mx-auto">
           Add your ID to get verified. Qualifications, licenses, WWCC, police checks, and insurance
           also help you get selected for needs.
         </p>
@@ -54,11 +54,11 @@ export function CredentialList({
   return (
     <div className="space-y-3">
       {credentials.map((cred) => (
-        <div key={cred.id} className="vessel p-5 hover:bg-[#1a1714] transition-colors">
+        <div key={cred.id} className="vessel p-5 hover:bg-raise transition-colors">
           <div className="flex items-start justify-between">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <p className="text-base font-medium text-[#e8d5a3]">{cred.title}</p>
+                <p className="text-base font-medium text-gold">{cred.title}</p>
                 <Badge variant="outline">
                   {cred.type === "wwcc"
                     ? "WWCC"
@@ -69,10 +69,10 @@ export function CredentialList({
                         : cred.type}
                 </Badge>
                 {cred.isVerified && <Badge variant="quintessence">Verified</Badge>}
-                {!cred.isPublic && <EyeOff className="h-3.5 w-3.5 text-[#8f7f6e]" />}
-                {cred.isPublic && <Eye className="h-3.5 w-3.5 text-[#00e5ff]" />}
+                {!cred.isPublic && <EyeOff className="h-3.5 w-3.5 text-ash" />}
+                {cred.isPublic && <Eye className="h-3.5 w-3.5 text-mercury" />}
               </div>
-              <div className="text-xs text-[#b8a078] mt-2 space-y-1">
+              <div className="text-xs text-parchment mt-2 space-y-1">
                 {cred.documentNumber && (
                   <p>
                     {"*".repeat(Math.max(0, cred.documentNumber.length - 4))}
@@ -100,13 +100,13 @@ export function CredentialList({
                     })}
                   </p>
                 )}
-                {cred.description && <p className="text-[#8f7f6e]">{cred.description}</p>}
+                {cred.description && <p className="text-ash">{cred.description}</p>}
                 {cred.fileUrl && (
                   <a
                     href={cred.signedUrl ?? cred.fileUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[#f5a623] hover:underline inline-flex items-center gap-1"
+                    className="text-sun hover:underline inline-flex items-center gap-1"
                   >
                     <FileCheck className="h-3 w-3" /> View Document
                   </a>
@@ -116,7 +116,7 @@ export function CredentialList({
                     href={cred.signedBackUrl ?? cred.backFileUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[#f5a623] hover:underline inline-flex items-center gap-1 ml-3"
+                    className="text-sun hover:underline inline-flex items-center gap-1 ml-3"
                   >
                     <FileCheck className="h-3 w-3" /> View Back
                   </a>
@@ -136,7 +136,7 @@ export function CredentialList({
                 <span className="text-xs">Edit</span>
               </Button>
               <Button size="sm" variant="ghost" onClick={() => onDelete(cred.id)} title="Delete">
-                <Trash2 className="h-4 w-4 text-[#ff5252]" />
+                <Trash2 className="h-4 w-4 text-bad" />
               </Button>
             </div>
           </div>

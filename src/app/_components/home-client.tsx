@@ -86,37 +86,37 @@ const FEATURES = [
     icon: ShieldCheck,
     title: "Verified Identities",
     desc: "Email, mobile, and credential checks. Know who you're dealing with before you commit.",
-    color: "#00e676",
+    color: "var(--x-00e676)",
   },
   {
     icon: ScrollText,
     title: "Optional Contracts",
     desc: "Binding terms when the exchange is valuable. A handshake when it isn't. You choose.",
-    color: "#00e5ff",
+    color: "var(--x-00e5ff)",
   },
   {
     icon: Star,
     title: "Reputation Engine",
     desc: "Bilateral reviews on every exchange. Your history becomes your passport.",
-    color: "#f5a623",
+    color: "var(--x-f5a623)",
   },
   {
     icon: MessageSquare,
     title: "Built-in Messaging",
     desc: "Negotiate in one thread. The full history stays attached to the exchange.",
-    color: "#b24bf5",
+    color: "var(--x-b24bf5)",
   },
   {
     icon: MapPin,
     title: "Local First",
     desc: "Trade with people nearby. Walk over with the lemons. Meet at the beach for the lesson.",
-    color: "#00e5ff",
+    color: "var(--x-00e5ff)",
   },
   {
     icon: Radio,
     title: "Built to Survive",
     desc: "Today the internet carries the signal. The design is ready for a future where it doesn't have to.",
-    color: "#00e676",
+    color: "var(--x-00e676)",
   },
 ];
 
@@ -136,7 +136,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0806] text-[#e8d5a3] flex flex-col relative">
+    <div className="min-h-screen bg-void text-gold flex flex-col relative">
       <ScanLines />
       {!hasBooted && <BootSequence onComplete={handleBootComplete} />}
       <Navbar />
@@ -149,20 +149,20 @@ export default function HomePage() {
           <div className="relative max-w-6xl mx-auto px-4 md:px-8">
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <div>
-                <p className="text-xs text-[#8f7f6e] mb-8 font-mono">
+                <p className="text-xs text-ash mb-8 font-mono">
                   ◉ ON AIR — CHANNEL 01 · CENTRAL COAST
                 </p>
-                <h1 className="heading-display text-5xl md:text-7xl text-[#e8d5a3] mb-8">
+                <h1 className="heading-display text-5xl md:text-7xl text-gold mb-8">
                   your neighbourhood,
                   <br />
-                  <span className="text-[#f5a623]">on the air.</span>
+                  <span className="text-sun">on the air.</span>
                   <TerminalCursor />
                 </h1>
-                <p className="text-base text-[#8f7f6e] max-w-md leading-relaxed mb-4">
+                <p className="text-base text-ash max-w-md leading-relaxed mb-4">
                   Antidosis is the exchange network. Post what you need. Say what you&apos;ll give
                   back. Connect with verified locals you can trust.
                 </p>
-                <p className="text-sm text-[#8f7f6e]/90 max-w-md leading-relaxed mb-10">
+                <p className="text-sm text-ash/90 max-w-md leading-relaxed mb-10">
                   Contracts optional. No middlemen, no hidden fees. Built to keep working when the
                   internet doesn&apos;t.
                 </p>
@@ -188,12 +188,12 @@ export default function HomePage() {
         </section>
 
         {/* LIVE SIGNALS — example exchanges first, concept second */}
-        <section className="py-16 md:py-20 border-t border-[#2a2420]">
+        <section className="py-16 md:py-20 border-t border-line">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
-              <p className="text-xs text-[#8f7f6e] mb-3 font-mono">» LIVE SIGNALS — ON THE AIR</p>
-              <h2 className="heading-display text-2xl md:text-4xl text-[#e8d5a3] mb-10">
-                Your Need Is <span className="text-[#f5a623]">Someone Else&apos;s Want.</span>
+              <p className="text-xs text-ash mb-3 font-mono">» LIVE SIGNALS — ON THE AIR</p>
+              <h2 className="heading-display text-2xl md:text-4xl text-gold mb-10">
+                Your Need Is <span className="text-sun">Someone Else&apos;s Want.</span>
               </h2>
             </Reveal>
             <ExchangeExamples />
@@ -207,10 +207,10 @@ export default function HomePage() {
         <div className="divider" />
 
         {/* HOW IT WORKS — 3 Steps */}
-        <section className="py-20 md:py-28 border-t border-[#2a2420]">
+        <section className="py-20 md:py-28 border-t border-line">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
-              <p className="text-xs text-[#8f7f6e] mb-12 font-mono">» SIGNAL PATH — THREE STEPS</p>
+              <p className="text-xs text-ash mb-12 font-mono">» SIGNAL PATH — THREE STEPS</p>
             </Reveal>
             <div className="grid md:grid-cols-3 gap-8">
               <Reveal delay={0}>
@@ -218,9 +218,7 @@ export default function HomePage() {
                   num="01"
                   title="Post What You Need"
                   desc="Describe a service, item, or task. Set what you're offering in return."
-                  illustration={
-                    <PostIllustration className="w-24 h-24 text-[#f5a623] opacity-60" />
-                  }
+                  illustration={<PostIllustration className="w-24 h-24 text-sun opacity-60" />}
                 />
               </Reveal>
               <Reveal delay={150}>
@@ -229,7 +227,7 @@ export default function HomePage() {
                   title="Review Interested Responses"
                   desc="Browse profiles, ratings, and skills before choosing who to work with."
                   illustration={
-                    <ReceiveIllustration className="w-24 h-24 text-[#00e5ff] opacity-60" />
+                    <ReceiveIllustration className="w-24 h-24 text-mercury opacity-60" />
                   }
                 />
               </Reveal>
@@ -239,7 +237,7 @@ export default function HomePage() {
                   title="Exchange & Review"
                   desc="Complete the work. Leave a bilateral review. Build your reputation."
                   illustration={
-                    <HandshakeIllustration className="w-24 h-24 text-[#b24bf5] opacity-60" />
+                    <HandshakeIllustration className="w-24 h-24 text-quint opacity-60" />
                   }
                 />
               </Reveal>
@@ -250,14 +248,14 @@ export default function HomePage() {
         <div className="divider" />
 
         {/* FEATURES — one compact grid */}
-        <section className="py-20 md:py-28 border-t border-[#2a2420]">
+        <section className="py-20 md:py-28 border-t border-line">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
-              <p className="text-xs text-[#8f7f6e] mb-8 font-mono">
+              <p className="text-xs text-ash mb-8 font-mono">
                 » CHANNEL LISTING — NETWORK FEATURES
               </p>
-              <h2 className="heading-display text-3xl md:text-4xl text-[#e8d5a3] mb-12">
-                Built for <span className="text-[#00e676]">Trust.</span>
+              <h2 className="heading-display text-3xl md:text-4xl text-gold mb-12">
+                Built for <span className="text-ok">Trust.</span>
               </h2>
             </Reveal>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -273,18 +271,18 @@ export default function HomePage() {
         <div className="divider" />
 
         {/* COMMUNITY RELAY */}
-        <section className="py-20 md:py-28 border-t border-[#2a2420]">
+        <section className="py-20 md:py-28 border-t border-line">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <Reveal>
-                <p className="text-xs text-[#8f7f6e] mb-8 font-mono">◉ RELAY — COMMUNITY COMMS</p>
+                <p className="text-xs text-ash mb-8 font-mono">◉ RELAY — COMMUNITY COMMS</p>
                 <div className="flex items-center gap-3 mb-4">
-                  <h2 className="heading-display text-2xl md:text-4xl text-[#e8d5a3]">
-                    Community <span className="text-[#00e5ff]">Relay</span>
+                  <h2 className="heading-display text-2xl md:text-4xl text-gold">
+                    Community <span className="text-mercury">Relay</span>
                   </h2>
                   <LiveBadge />
                 </div>
-                <p className="text-sm text-[#8f7f6e] leading-relaxed max-w-md mb-6">
+                <p className="text-sm text-ash leading-relaxed max-w-md mb-6">
                   Real-time channels like #general, #trades, and #help. Message anyone directly with
                   /dm. Get notified when someone mentions you. The community stays on the air.
                 </p>
@@ -304,16 +302,16 @@ export default function HomePage() {
         <div className="divider" />
 
         {/* CTA */}
-        <section className="py-20 md:py-28 border-t border-[#2a2420]">
+        <section className="py-20 md:py-28 border-t border-line">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
-              <p className="text-xs text-[#8f7f6e] mb-8 font-mono">◉ JOIN THE NETWORK</p>
-              <h2 className="heading-display text-3xl md:text-5xl text-[#e8d5a3] mb-6">
+              <p className="text-xs text-ash mb-8 font-mono">◉ JOIN THE NETWORK</p>
+              <h2 className="heading-display text-3xl md:text-5xl text-gold mb-6">
                 Start Building
                 <br />
-                <span className="text-[#f5a623]">Your Reputation.</span>
+                <span className="text-sun">Your Reputation.</span>
               </h2>
-              <p className="text-base text-[#8f7f6e] max-w-md mb-10 leading-relaxed">
+              <p className="text-base text-ash max-w-md mb-10 leading-relaxed">
                 Join the Central Coast trial. Verify your identity, and help build a network that
                 keeps working when everything else doesn&apos;t.
               </p>
@@ -352,13 +350,13 @@ function StepCard({
   illustration: React.ReactNode;
 }) {
   return (
-    <div className="bg-[#12100e] border border-[#2a2420] p-8 hover:border-[#f5a623]/30 transition-colors group">
+    <div className="bg-surface border border-line p-8 hover:border-sun/30 transition-colors group">
       <div className="flex items-center justify-between mb-6">
-        <span className="text-4xl font-bold text-[#8f7f6e]">{num}</span>
+        <span className="text-4xl font-bold text-ash">{num}</span>
         {illustration}
       </div>
       <h3 className="heading-display text-xl md:text-2xl mb-3">{title}</h3>
-      <p className="text-sm text-[#8f7f6e] leading-relaxed">{desc}</p>
+      <p className="text-sm text-ash leading-relaxed">{desc}</p>
     </div>
   );
 }
@@ -385,8 +383,8 @@ function PillarCard({
       >
         <Icon className="h-5 w-5" style={{ color }} />
       </div>
-      <p className="text-sm font-medium text-[#e8d5a3] mb-1">{title}</p>
-      <p className="text-xs text-[#8f7f6e]">{desc}</p>
+      <p className="text-sm font-medium text-gold mb-1">{title}</p>
+      <p className="text-xs text-ash">{desc}</p>
     </div>
   );
 }

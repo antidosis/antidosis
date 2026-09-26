@@ -79,14 +79,14 @@ function parseInlineMarkdown(text: string): React.ReactNode[] {
     if (match[2] !== undefined) {
       // Bold
       parts.push(
-        <strong key={key++} className="text-[#e8d5a3] font-medium">
+        <strong key={key++} className="text-gold font-medium">
           {match[2]}
         </strong>
       );
     } else if (match[4] !== undefined) {
       // Italic
       parts.push(
-        <em key={key++} className="text-[#b8a078] italic">
+        <em key={key++} className="text-parchment italic">
           {match[4]}
         </em>
       );
@@ -124,13 +124,13 @@ function renderTable(rows: string[], startKey: number): [React.ReactNode, number
 
   return [
     <div key={key++} className="overflow-x-auto mb-6">
-      <table className="w-full text-left border border-[#2a2420]">
+      <table className="w-full text-left border border-line">
         <thead>
-          <tr className="bg-[#1a1714]">
+          <tr className="bg-raise">
             {headerCells.map((cell, ci) => (
               <th
                 key={ci}
-                className="px-4 py-3 text-xs font-mono uppercase tracking-wider text-[#e8d5a3] border-b border-[#2a2420]"
+                className="px-4 py-3 text-xs font-mono uppercase tracking-wider text-gold border-b border-line"
               >
                 {parseInlineMarkdown(cell)}
               </th>
@@ -141,9 +141,9 @@ function renderTable(rows: string[], startKey: number): [React.ReactNode, number
           {dataRows.map((row, ri) => {
             const cells = parseTableRow(row);
             return (
-              <tr key={ri} className="border-b border-[#2a2420] last:border-0">
+              <tr key={ri} className="border-b border-line last:border-0">
                 {cells.map((cell, ci) => (
-                  <td key={ci} className="px-4 py-3 text-sm text-[#b8a078] leading-relaxed">
+                  <td key={ci} className="px-4 py-3 text-sm text-parchment leading-relaxed">
                     {parseInlineMarkdown(cell)}
                   </td>
                 ))}
@@ -191,9 +191,9 @@ function renderMarkdownContent(content: string) {
       elements.push(
         <blockquote
           key={key++}
-          className="border-l-2 border-[#f5a623] pl-4 py-2 my-4 bg-[#1a1714]/50 rounded-r"
+          className="border-l-2 border-sun pl-4 py-2 my-4 bg-raise/50 rounded-r"
         >
-          <p className="text-sm text-[#b8a078] italic leading-relaxed">
+          <p className="text-sm text-parchment italic leading-relaxed">
             {parseInlineMarkdown(quoteLines.join(" "))}
           </p>
         </blockquote>
@@ -219,7 +219,7 @@ function renderMarkdownContent(content: string) {
       elements.push(
         <ol key={key++} className="list-decimal ml-6 mb-4 space-y-2">
           {listItems.map((item, idx) => (
-            <li key={idx} className="text-sm text-[#b8a078] pl-2">
+            <li key={idx} className="text-sm text-parchment pl-2">
               {parseInlineMarkdown(item)}
             </li>
           ))}
@@ -231,41 +231,41 @@ function renderMarkdownContent(content: string) {
 
     if (line.startsWith("# ")) {
       elements.push(
-        <h1 key={key++} className="heading-display text-3xl md:text-4xl text-[#e8d5a3] mt-12 mb-6">
+        <h1 key={key++} className="heading-display text-3xl md:text-4xl text-gold mt-12 mb-6">
           {parseInlineMarkdown(line.slice(2))}
         </h1>
       );
     } else if (line.startsWith("## ")) {
       elements.push(
-        <h2 key={key++} className="heading-display text-xl md:text-2xl text-[#e8d5a3] mt-10 mb-4">
+        <h2 key={key++} className="heading-display text-xl md:text-2xl text-gold mt-10 mb-4">
           {parseInlineMarkdown(line.slice(3))}
         </h2>
       );
     } else if (line.startsWith("### ")) {
       elements.push(
-        <h3 key={key++} className="heading-display text-lg text-[#e8d5a3] mt-8 mb-3">
+        <h3 key={key++} className="heading-display text-lg text-gold mt-8 mb-3">
           {parseInlineMarkdown(line.slice(4))}
         </h3>
       );
     } else if (line.startsWith("- ")) {
       elements.push(
-        <li key={key++} className="text-sm text-[#b8a078] ml-4 mb-2 list-disc">
+        <li key={key++} className="text-sm text-parchment ml-4 mb-2 list-disc">
           {parseInlineMarkdown(line.slice(2))}
         </li>
       );
     } else if (line.startsWith("---")) {
-      elements.push(<hr key={key++} className="border-[#2a2420] my-8" />);
+      elements.push(<hr key={key++} className="border-line my-8" />);
     } else if (line.trim() === "") {
       elements.push(<div key={key++} className="h-4" />);
     } else if (line.startsWith("**") && line.endsWith("**")) {
       elements.push(
-        <p key={key++} className="text-sm text-[#e8d5a3] font-medium mb-4">
+        <p key={key++} className="text-sm text-gold font-medium mb-4">
           {parseInlineMarkdown(line.slice(2, -2))}
         </p>
       );
     } else {
       elements.push(
-        <p key={key++} className="text-sm text-[#b8a078] leading-relaxed mb-4">
+        <p key={key++} className="text-sm text-parchment leading-relaxed mb-4">
           {parseInlineMarkdown(line)}
         </p>
       );
@@ -290,7 +290,7 @@ export default function BlogPostPage({ params }: Props) {
           {/* Back link */}
           <Link
             href="/blog"
-            className="inline-flex items-center text-[13px] text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors mb-8"
+            className="inline-flex items-center text-[13px] text-ash hover:text-gold transition-colors mb-8"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to the transmission log
@@ -301,7 +301,7 @@ export default function BlogPostPage({ params }: Props) {
             {post.tags.map((tag) => (
               <span
                 key={tag}
-                className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 bg-[#00e5ff]/5 border border-[#00e5ff]/10 text-[#00e5ff]"
+                className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 bg-mercury/5 border border-mercury/10 text-mercury"
               >
                 {tag}
               </span>
@@ -309,10 +309,10 @@ export default function BlogPostPage({ params }: Props) {
           </div>
 
           {/* Title */}
-          <h1 className="heading-display text-3xl md:text-5xl text-[#e8d5a3] mb-6">{post.title}</h1>
+          <h1 className="heading-display text-3xl md:text-5xl text-gold mb-6">{post.title}</h1>
 
           {/* Author / date */}
-          <div className="flex items-center gap-4 text-xs text-[#8f7f6e] mb-12 pb-8 border-b border-[#2a2420]">
+          <div className="flex items-center gap-4 text-xs text-ash mb-12 pb-8 border-b border-line">
             <span className="flex items-center gap-1.5">
               <Calendar className="h-3 w-3" />
               {new Date(post.publishedAt).toLocaleDateString("en-AU", {
@@ -335,13 +335,13 @@ export default function BlogPostPage({ params }: Props) {
           <div>{renderMarkdownContent(post.content)}</div>
 
           {/* Share / CTA */}
-          <div className="mt-16 pt-8 border-t border-[#2a2420]">
-            <p className="text-sm text-[#b8a078] mb-4">
+          <div className="mt-16 pt-8 border-t border-line">
+            <p className="text-sm text-parchment mb-4">
               Found this helpful? Post a need and put it into practice.
             </p>
             <Link
               href="/needs/new"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[#00e5ff]/10 border border-[#00e5ff]/20 text-sm text-[#00e5ff] hover:bg-[#00e5ff]/20 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-mercury/10 border border-mercury/20 text-sm text-mercury hover:bg-mercury/20 transition-colors"
             >
               Post a Need
               <ArrowLeft className="h-4 w-4 rotate-180" />

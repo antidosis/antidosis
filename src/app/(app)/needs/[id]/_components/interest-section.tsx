@@ -104,7 +104,7 @@ export function InterestSection({
       {/* Interest form — non-poster only */}
       {canExpressInterest && showInterestForm && profileId && !hasOffered && (
         <div className="vessel p-4">
-          <p className="text-xs text-[#8f7f6e] mb-3">
+          <p className="text-xs text-ash mb-3">
             tell the poster why you are a good fit. you can also message them below to ask questions
             first.
           </p>
@@ -118,7 +118,7 @@ export function InterestSection({
                 className="text-sm"
                 maxLength={1000}
               />
-              <p className="text-xs text-[#8f7f6e] mt-1 text-right">{offerMessage.length}/1000</p>
+              <p className="text-xs text-ash mt-1 text-right">{offerMessage.length}/1000</p>
             </div>
             <Button type="submit" variant="default" size="sm" disabled={submittingOffer}>
               {submittingOffer ? (
@@ -139,23 +139,23 @@ export function InterestSection({
         <div
           className={`p-3 rounded border ${
             myAcceptance.status === "accepted"
-              ? "bg-[#00e676]/5 border-[#00e676]/30"
+              ? "bg-ok/5 border-ok/30"
               : myAcceptance.status === "declined"
-                ? "bg-[#ff5252]/5 border-[#ff5252]/30"
-                : "bg-[#1a1714] border-[#2a2420]"
+                ? "bg-bad/5 border-bad/30"
+                : "bg-raise border-line"
           }`}
         >
           <div className="flex items-center gap-2">
-            {myAcceptance.status === "pending" && <Clock className="h-4 w-4 text-[#8f7f6e]" />}
-            {myAcceptance.status === "accepted" && <Check className="h-4 w-4 text-[#00e676]" />}
-            {myAcceptance.status === "declined" && <X className="h-4 w-4 text-[#ff5252]" />}
+            {myAcceptance.status === "pending" && <Clock className="h-4 w-4 text-ash" />}
+            {myAcceptance.status === "accepted" && <Check className="h-4 w-4 text-ok" />}
+            {myAcceptance.status === "declined" && <X className="h-4 w-4 text-bad" />}
             <p
               className={`text-sm ${
                 myAcceptance.status === "accepted"
-                  ? "text-[#00e676]"
+                  ? "text-ok"
                   : myAcceptance.status === "declined"
-                    ? "text-[#ff5252]"
-                    : "text-[#8f7f6e]"
+                    ? "text-bad"
+                    : "text-ash"
               }`}
             >
               {myAcceptance.status === "pending" && "your interest is pending review"}
@@ -174,10 +174,8 @@ export function InterestSection({
             </p>
           </div>
           {myAcceptance.message && (
-            <div className="mt-2 bg-[#0f0c0a] p-2.5 rounded text-xs text-[#b8a078]">
-              <span className="text-[#8f7f6e] uppercase tracking-wider text-[9px]">
-                your intro:{" "}
-              </span>
+            <div className="mt-2 bg-inset p-2.5 rounded text-xs text-parchment">
+              <span className="text-ash uppercase tracking-wider text-[9px]">your intro: </span>
               {myAcceptance.message}
             </div>
           )}
@@ -202,12 +200,12 @@ export function InterestSection({
                     Mark as complete
                   </Button>
                 ) : (
-                  <span className="text-xs text-[#00e676] flex items-center gap-1">
+                  <span className="text-xs text-ok flex items-center gap-1">
                     <Check className="h-3 w-3" /> you marked complete
                   </span>
                 )}
                 {myAcceptance.posterMarkedComplete && (
-                  <span className="text-xs text-[#00e676] flex items-center gap-1 ml-3">
+                  <span className="text-xs text-ok flex items-center gap-1 ml-3">
                     <Check className="h-3 w-3" /> poster marked complete
                   </span>
                 )}

@@ -81,8 +81,8 @@ export function UserManagementSection() {
   return (
     <section>
       <div className="divider mb-8" />
-      <p className="text-xs text-[#8f7f6e] mb-2">$ ls ~/users/ ({users.length})</p>
-      <h2 className="text-lg heading-display text-[#e8d5a3] mb-4">user management</h2>
+      <p className="text-xs text-ash mb-2">$ ls ~/users/ ({users.length})</p>
+      <h2 className="text-lg heading-display text-gold mb-4">user management</h2>
 
       <form
         onSubmit={(e) => {
@@ -91,13 +91,13 @@ export function UserManagementSection() {
         }}
         className="flex gap-2 mb-6"
       >
-        <div className="flex items-center gap-2 flex-1 bg-[#1a1714] border border-[#2a2420] rounded px-3">
-          <Search className="h-3.5 w-3.5 text-[#8f7f6e] shrink-0" />
+        <div className="flex items-center gap-2 flex-1 bg-raise border border-line rounded px-3">
+          <Search className="h-3.5 w-3.5 text-ash shrink-0" />
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="search by name or email..."
-            className="w-full bg-transparent py-2 text-sm text-[#e8d5a3] outline-none placeholder:text-[#8f7f6e]"
+            className="w-full bg-transparent py-2 text-sm text-gold outline-none placeholder:text-ash"
           />
         </div>
         <Button type="submit" size="sm" disabled={loading}>
@@ -105,42 +105,40 @@ export function UserManagementSection() {
         </Button>
       </form>
 
-      {error && <p className="text-xs text-[#ff5252] mb-4">{error}</p>}
+      {error && <p className="text-xs text-bad mb-4">{error}</p>}
 
       {loading && users.length === 0 ? (
-        <div className="py-8 text-center text-sm text-[#8f7f6e]">
+        <div className="py-8 text-center text-sm text-ash">
           <Loader2 className="h-5 w-5 animate-spin mx-auto mb-3" />
           loading users...
         </div>
       ) : users.length === 0 ? (
-        <p className="text-sm text-[#8f7f6e]">no users found.</p>
+        <p className="text-sm text-ash">no users found.</p>
       ) : (
         <div className="space-y-3">
           {users.map((u) => {
             const banned = !!u.bannedAt;
             return (
-              <div key={u.id} className={`vessel p-4 ${banned ? "border-[#ff5252]/30" : ""}`}>
+              <div key={u.id} className={`vessel p-4 ${banned ? "border-bad/30" : ""}`}>
                 <div className="flex items-start gap-3">
                   <Avatar src={null} name={u.fullName} size="sm" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-medium text-[#e8d5a3]">
-                        {u.fullName || "anonymous"}
-                      </p>
-                      {u.isVerified && <Shield className="h-3.5 w-3.5 text-[#00e676]" />}
+                      <p className="text-sm font-medium text-gold">{u.fullName || "anonymous"}</p>
+                      {u.isVerified && <Shield className="h-3.5 w-3.5 text-ok" />}
                       {u.mobileVerified && (
                         <span title="mobile verified">
-                          <Smartphone className="h-3.5 w-3.5 text-[#00e5ff]" />
+                          <Smartphone className="h-3.5 w-3.5 text-mercury" />
                         </span>
                       )}
                       {banned && (
-                        <Badge variant="outline" className="border-[#ff5252]/40 text-[#ff5252]">
+                        <Badge variant="outline" className="border-bad/40 text-bad">
                           banned
                         </Badge>
                       )}
                     </div>
-                    <p className="text-xs text-[#8f7f6e] truncate">{u.email}</p>
-                    <p className="text-[10px] text-[#8f7f6e] mt-1">
+                    <p className="text-xs text-ash truncate">{u.email}</p>
+                    <p className="text-[10px] text-ash mt-1">
                       {u.locationName || "—"} · {u.jobsCompleted} jobs ·{" "}
                       {u.ratingCount > 0
                         ? `${u.ratingAvg.toFixed(1)} (${u.ratingCount})`
@@ -148,7 +146,7 @@ export function UserManagementSection() {
                       · joined {new Date(u.createdAt).toLocaleDateString("en-AU")}
                     </p>
                     {banned && u.bannedReason && (
-                      <p className="text-[10px] text-[#ff5252]/80 mt-1">reason: {u.bannedReason}</p>
+                      <p className="text-[10px] text-bad/80 mt-1">reason: {u.bannedReason}</p>
                     )}
                   </div>
                   <div className="shrink-0">
@@ -158,7 +156,7 @@ export function UserManagementSection() {
                         variant="outline"
                         onClick={() => setBan(u.id, false)}
                         disabled={actioning === u.id}
-                        className="text-[#00e676] border-[#00e676]/30 hover:bg-[#00e676]/5"
+                        className="text-ok border-ok/30 hover:bg-ok/5"
                       >
                         {actioning === u.id ? (
                           <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
@@ -171,13 +169,13 @@ export function UserManagementSection() {
                           value={banReason}
                           onChange={(e) => setBanReason(e.target.value)}
                           placeholder="reason (optional)"
-                          className="bg-[#0f0c0a] border border-[#2a2420] text-[#e8d5a3] text-xs px-2 py-1.5 rounded w-36 outline-none focus:border-[#ff5252]"
+                          className="bg-inset border border-line text-gold text-xs px-2 py-1.5 rounded w-36 outline-none focus:border-bad"
                         />
                         <Button
                           size="sm"
                           onClick={() => setBan(u.id, true)}
                           disabled={actioning === u.id}
-                          className="bg-[#ff5252] text-white hover:bg-[#ff5252]/90"
+                          className="bg-bad text-white hover:bg-bad/90"
                         >
                           {actioning === u.id ? (
                             <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -190,7 +188,7 @@ export function UserManagementSection() {
                             setBanningId(null);
                             setBanReason("");
                           }}
-                          className="text-xs text-[#8f7f6e] hover:text-[#e8d5a3]"
+                          className="text-xs text-ash hover:text-gold"
                         >
                           cancel
                         </button>
@@ -200,7 +198,7 @@ export function UserManagementSection() {
                         size="sm"
                         variant="outline"
                         onClick={() => setBanningId(u.id)}
-                        className="text-[#ff5252] border-[#ff5252]/30 hover:bg-[#ff5252]/5"
+                        className="text-bad border-bad/30 hover:bg-bad/5"
                       >
                         <Ban className="h-3.5 w-3.5 mr-1" />
                         ban
@@ -214,7 +212,7 @@ export function UserManagementSection() {
         </div>
       )}
 
-      <p className="text-[10px] text-[#8f7f6e] mt-4 flex items-center gap-1.5">
+      <p className="text-[10px] text-ash mt-4 flex items-center gap-1.5">
         <ShieldAlert className="h-3 w-3" />
         banning blocks participation and permanently blacklists the user&apos;s mobile number.
       </p>

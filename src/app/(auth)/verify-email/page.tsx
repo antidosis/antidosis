@@ -46,8 +46,8 @@ export default function VerifyEmailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0806] text-[#e8d5a3] flex flex-col">
-      <div className="px-4 md:px-8 py-3 border-b border-[#2a2420]">
+    <div className="min-h-screen bg-void text-gold flex flex-col">
+      <div className="px-4 md:px-8 py-3 border-b border-line">
         <Link href="/" className="flex items-center gap-2">
           <img
             src="/images/logo.webp"
@@ -55,33 +55,33 @@ export default function VerifyEmailPage() {
             width={138}
             height={56}
             fetchPriority="high"
-            className="opacity-80 hover:opacity-100 transition-opacity"
+            className="brand-logo opacity-80 hover:opacity-100 transition-opacity"
           />
         </Link>
       </div>
 
       <div className="flex-1 flex items-center justify-center px-4">
         <div className="w-full max-w-sm">
-          <p className="text-xs text-[#8f7f6e] mb-8">$ verify --email</p>
-          <h1 className="heading-display text-2xl text-[#e8d5a3] mb-2">
+          <p className="text-xs text-ash mb-8">$ verify --email</p>
+          <h1 className="heading-display text-2xl text-gold mb-2">
             verify_your_email
             <TerminalCursor />
           </h1>
-          <p className="text-sm text-[#b8a078] mb-12">
+          <p className="text-sm text-parchment mb-12">
             Security checkpoint — check your inbox to continue.
           </p>
 
           <div className="vessel p-5 mb-8">
             <div className="flex items-start gap-3">
-              <Mail className="h-6 w-6 text-[#f5a623] mt-0.5 flex-shrink-0" />
+              <Mail className="h-6 w-6 text-sun mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-sm text-[#e8d5a3] font-medium">Verification email sent</p>
+                <p className="text-sm text-gold font-medium">Verification email sent</p>
                 {email && (
-                  <p className="text-xs text-[#8f7f6e] mt-1">
-                    Sent to: <span className="text-[#e8d5a3]">{email}</span>
+                  <p className="text-xs text-ash mt-1">
+                    Sent to: <span className="text-gold">{email}</span>
                   </p>
                 )}
-                <p className="text-xs text-[#8f7f6e] mt-2">
+                <p className="text-xs text-ash mt-2">
                   Click the link in the email to activate your account. The link expires in 1 hour.
                 </p>
               </div>
@@ -89,15 +89,13 @@ export default function VerifyEmailPage() {
           </div>
 
           {resent && (
-            <div className="border border-[#2a2420] bg-[#12100e] p-5 mb-6 flex items-center gap-3">
-              <Shield className="h-4 w-4 text-[#00e676] flex-shrink-0" />
-              <p className="text-sm text-[#00e676]">
-                Verification email resent — check your inbox.
-              </p>
+            <div className="border border-line bg-surface p-5 mb-6 flex items-center gap-3">
+              <Shield className="h-4 w-4 text-ok flex-shrink-0" />
+              <p className="text-sm text-ok">Verification email resent — check your inbox.</p>
             </div>
           )}
 
-          {error && <p className="text-sm text-[#ff5252] mb-6">{error}</p>}
+          {error && <p className="text-sm text-bad mb-6">{error}</p>}
 
           <Button onClick={resendVerification} disabled={loading || resent} className="w-full mb-4">
             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />

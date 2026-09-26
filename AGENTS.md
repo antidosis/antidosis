@@ -76,7 +76,9 @@ mobile/                   # Capacitor mobile app
 ### Styling
 
 - Tailwind utility classes only
-- Theme tokens use hex values directly (e.g. `text-[#e8d5a3]`) — no CSS variables
+- **Theme tokens, not hex values**: use the semantic colors from `tailwind.config.ts` (e.g. `text-gold`, `bg-void`, `border-line`, `text-sun`, `text-ok`, `text-bad`). Values come from `--c-*` CSS vars in `globals.css`; `[data-theme="light"]` overrides them. Never introduce new `[#rrggbb]` arbitrary values — add a token instead
+- Light/dark themes: default follows `prefers-color-scheme`, overridden by the navbar toggle (persisted as `antidosis-theme` in localStorage; init script runs pre-paint in `layout.tsx`). Inline-style accent colors use hex-valued `--x-*` vars so `` `${color}15` `` alpha suffixes keep working
+- Contract parchment (`paper*` tokens) and terminal named skins (cyberpunk/matrix/minimal) are constants — identical in both themes by design
 - Custom class: `vessel` = card container with border/bg
 - Custom class: `heading-display` = display font stack
 

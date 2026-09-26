@@ -82,16 +82,16 @@ export function TerminalPreview({ className = "" }: { className?: string }) {
 
   return (
     <div
-      className={`relative rounded-lg border border-[#2a2420] bg-[#0a0806] overflow-hidden shadow-[0_0_40px_rgba(245,166,35,0.08)] ${className}`}
+      className={`relative rounded-lg border border-line bg-void overflow-hidden shadow-[0_0_40px_rgba(245,166,35,0.08)] ${className}`}
     >
       {/* Window chrome */}
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-[#2a2420] bg-[#12100e]">
+      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-line bg-surface">
         <div className="flex gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-[#ff5252]/60" />
-          <span className="h-2.5 w-2.5 rounded-full bg-[#f5a623]/60" />
-          <span className="h-2.5 w-2.5 rounded-full bg-[#00e676]/60" />
+          <span className="h-2.5 w-2.5 rounded-full bg-bad/60" />
+          <span className="h-2.5 w-2.5 rounded-full bg-sun/60" />
+          <span className="h-2.5 w-2.5 rounded-full bg-ok/60" />
         </div>
-        <span className="ml-2 text-[10px] text-[#8f7f6e] font-mono tracking-wide">
+        <span className="ml-2 text-[10px] text-ash font-mono tracking-wide">
           antidosis relay — community
         </span>
       </div>
@@ -101,11 +101,11 @@ export function TerminalPreview({ className = "" }: { className?: string }) {
         <div className="transition-opacity duration-300" style={{ opacity: clearing ? 0 : 1 }}>
           {/* Command line */}
           <div className="flex items-start gap-2 mb-2">
-            <span className="text-[#f5a623] shrink-0">$</span>
-            <span className="text-[#e8d5a3]">
+            <span className="text-sun shrink-0">$</span>
+            <span className="text-gold">
               {displayedCommand}
               {typedChars < scene.command.length && (
-                <span className="inline-block w-2 h-4 bg-[#f5a623]/60 ml-0.5 animate-pulse align-text-bottom" />
+                <span className="inline-block w-2 h-4 bg-sun/60 ml-0.5 animate-pulse align-text-bottom" />
               )}
             </span>
           </div>
@@ -116,7 +116,7 @@ export function TerminalPreview({ className = "" }: { className?: string }) {
               {scene.response.map((line, i) => (
                 <p
                   key={i}
-                  className="text-[#b8a078] leading-relaxed"
+                  className="text-parchment leading-relaxed"
                   style={{
                     animation: `terminal-fade-in 0.2s ease ${i * 60}ms both`,
                   }}
@@ -128,7 +128,7 @@ export function TerminalPreview({ className = "" }: { className?: string }) {
                           <span key={idx}>{part}</span>
                         ) : (
                           <span key={idx}>
-                            <span className="text-[#00e5ff]">@{part.split(" ")[0]}</span>
+                            <span className="text-mercury">@{part.split(" ")[0]}</span>
                             {" " + part.split(" ").slice(1).join(" ")}
                           </span>
                         )

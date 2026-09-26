@@ -160,9 +160,9 @@ export default function NeedsPage() {
     <div className="max-w-5xl mx-auto px-4 md:px-8">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 py-10">
         <div>
-          <h1 className="heading-display text-2xl text-[#e8d5a3]">Browse Needs</h1>
-          <p className="text-xs text-[#8f7f6e] mt-3">$ ls ~/needs/</p>
-          <p className="text-sm text-[#b8a078] mt-2">
+          <h1 className="heading-display text-2xl text-gold">Browse Needs</h1>
+          <p className="text-xs text-ash mt-3">$ ls ~/needs/</p>
+          <p className="text-sm text-parchment mt-2">
             find needs you can fulfill — for services, items, or money in return
           </p>
         </div>
@@ -173,12 +173,12 @@ export default function NeedsPage() {
         </Button>
       </div>
 
-      <div className="bg-[#00e5ff]/10 border border-[#00e5ff]/30 p-4 mb-6">
+      <div className="bg-mercury/10 border border-mercury/30 p-4 mb-6">
         <div className="flex items-start gap-3">
-          <Info className="h-4 w-4 text-[#00e5ff] mt-0.5 flex-shrink-0" />
+          <Info className="h-4 w-4 text-mercury mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-sm text-[#e8d5a3] font-medium">Central Coast NSW pilot</p>
-            <p className="text-xs text-[#8f7f6e] mt-1">
+            <p className="text-sm text-gold font-medium">Central Coast NSW pilot</p>
+            <p className="text-xs text-ash mt-1">
               all needs are local to the Central Coast region during the trial. remote exchanges
               will be available soon.
             </p>
@@ -190,9 +190,9 @@ export default function NeedsPage() {
       {recData && recData.needs.length > 0 && (
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-3">
-            <Zap className="h-4 w-4 text-[#f5a623]" />
-            <h2 className="text-sm font-medium text-[#e8d5a3]">Recommended for you</h2>
-            <span className="text-[10px] text-[#8f7f6e] uppercase tracking-wider">
+            <Zap className="h-4 w-4 text-sun" />
+            <h2 className="text-sm font-medium text-gold">Recommended for you</h2>
+            <span className="text-[10px] text-ash uppercase tracking-wider">
               based on your skills
             </span>
           </div>
@@ -203,20 +203,20 @@ export default function NeedsPage() {
                 <Link
                   key={need.id}
                   href={`/needs/${need.id}`}
-                  className="vessel p-4 hover:bg-[#1a1714] transition-colors group"
+                  className="vessel p-4 hover:bg-raise transition-colors group"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-medium text-[#e8d5a3] group-hover:text-[#f5a623] transition-colors line-clamp-1">
+                      <h3 className="text-sm font-medium text-gold group-hover:text-sun transition-colors line-clamp-1">
                         {need.title}
                       </h3>
-                      <p className="text-xs text-[#b8a078] mt-1 line-clamp-1">{need.description}</p>
+                      <p className="text-xs text-parchment mt-1 line-clamp-1">{need.description}</p>
                       {match && match.matchingSkillNames.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 mt-2">
                           {match.matchingSkillNames.map((name) => (
                             <span
                               key={name}
-                              className="px-1.5 py-0.5 text-[10px] text-[#f5a623] bg-[#f5a623]/10 border border-[#f5a623]/20 rounded"
+                              className="px-1.5 py-0.5 text-[10px] text-sun bg-sun/10 border border-sun/20 rounded"
                             >
                               {name}
                             </span>
@@ -224,16 +224,16 @@ export default function NeedsPage() {
                         </div>
                       )}
                     </div>
-                    <span className="shrink-0 text-[10px] text-[#8f7f6e] uppercase tracking-wide">
+                    <span className="shrink-0 text-[10px] text-ash uppercase tracking-wide">
                       {need._count.acceptances} interested
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 mt-3 pt-2 border-t border-[#2a2420]">
+                  <div className="flex items-center gap-2 mt-3 pt-2 border-t border-line">
                     <Avatar src={need.poster.avatarUrl} name={need.poster.fullName} size="sm" />
-                    <span className="text-xs text-[#b8a078]">
+                    <span className="text-xs text-parchment">
                       {need.poster.fullName || "anonymous"}
                     </span>
-                    <span className="text-[10px] text-[#8f7f6e] ml-auto flex items-center gap-1">
+                    <span className="text-[10px] text-ash ml-auto flex items-center gap-1">
                       {offerIcons[need.offerType as keyof typeof offerIcons]}
                       {need.offerType}
                     </span>
@@ -249,7 +249,7 @@ export default function NeedsPage() {
         {/* Search + type + skill row */}
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8f7f6e]" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ash" />
             <Input
               placeholder="search_needs..."
               value={query}
@@ -261,7 +261,7 @@ export default function NeedsPage() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setQuery("")}
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-[#8f7f6e] hover:text-[#e8d5a3]"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-ash hover:text-gold"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -269,7 +269,7 @@ export default function NeedsPage() {
           </div>
           {/* Skill filter */}
           <div className="relative sm:w-56">
-            <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#f5a623]" />
+            <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-sun" />
             <Input
               placeholder="filter by skill..."
               value={skillInput}
@@ -292,14 +292,14 @@ export default function NeedsPage() {
                   setSkillFilter("");
                   setSkillInput("");
                 }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-[#8f7f6e] hover:text-[#ff5252] uppercase tracking-wider"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-ash hover:text-bad uppercase tracking-wider"
               >
                 clear
               </button>
             )}
             {/* Skill dropdown */}
             {showSkillDropdown && skillSuggestions.length > 0 && !skillFilter && (
-              <div className="absolute z-50 mt-1 w-full rounded border border-[#2a2420] bg-[#14110e] shadow-lg max-h-48 overflow-y-auto">
+              <div className="absolute z-50 mt-1 w-full rounded border border-line bg-surface shadow-lg max-h-48 overflow-y-auto">
                 {skillSuggestions.map((skill) => (
                   <button
                     key={skill}
@@ -309,9 +309,9 @@ export default function NeedsPage() {
                       setSkillInput("");
                       setShowSkillDropdown(false);
                     }}
-                    className="w-full px-3 py-2 text-left text-sm text-[#b8a078] hover:bg-[#2a2420] hover:text-[#e8d5a3] transition-colors flex items-center gap-2"
+                    className="w-full px-3 py-2 text-left text-sm text-parchment hover:bg-line hover:text-gold transition-colors flex items-center gap-2"
                   >
-                    <Sparkles className="h-3 w-3 text-[#f5a623] opacity-60" />
+                    <Sparkles className="h-3 w-3 text-sun opacity-60" />
                     {skill}
                   </button>
                 ))}
@@ -334,23 +334,18 @@ export default function NeedsPage() {
 
         {/* Active filters bar */}
         {activeFiltersCount > 0 && (
-          <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-[#2a2420]">
-            <span className="text-[10px] uppercase tracking-wider text-[#8f7f6e]">
-              active filters:
-            </span>
+          <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-line">
+            <span className="text-[10px] uppercase tracking-wider text-ash">active filters:</span>
             {debouncedQuery && (
-              <span className="inline-flex items-center gap-1 text-xs text-[#e8d5a3] bg-[#1a1714] border border-[#2a2420] rounded px-2 py-0.5">
+              <span className="inline-flex items-center gap-1 text-xs text-gold bg-raise border border-line rounded px-2 py-0.5">
                 search: {debouncedQuery}
-                <button
-                  onClick={() => setQuery("")}
-                  className="text-[#8f7f6e] hover:text-[#ff5252]"
-                >
+                <button onClick={() => setQuery("")} className="text-ash hover:text-bad">
                   <X className="h-3 w-3" />
                 </button>
               </span>
             )}
             {skillFilter && (
-              <span className="inline-flex items-center gap-1 text-xs text-[#f5a623] bg-[#1a1714] border border-[#f5a623]/30 rounded px-2 py-0.5">
+              <span className="inline-flex items-center gap-1 text-xs text-sun bg-raise border border-sun/30 rounded px-2 py-0.5">
                 <Sparkles className="h-3 w-3" />
                 {skillFilter}
                 <button
@@ -358,30 +353,24 @@ export default function NeedsPage() {
                     setSkillFilter("");
                     setSkillInput("");
                   }}
-                  className="text-[#8f7f6e] hover:text-[#ff5252]"
+                  className="text-ash hover:text-bad"
                 >
                   <X className="h-3 w-3" />
                 </button>
               </span>
             )}
             {typeFilter && (
-              <span className="inline-flex items-center gap-1 text-xs text-[#e8d5a3] bg-[#1a1714] border border-[#2a2420] rounded px-2 py-0.5">
+              <span className="inline-flex items-center gap-1 text-xs text-gold bg-raise border border-line rounded px-2 py-0.5">
                 type: {typeFilter}
-                <button
-                  onClick={() => setTypeFilter("")}
-                  className="text-[#8f7f6e] hover:text-[#ff5252]"
-                >
+                <button onClick={() => setTypeFilter("")} className="text-ash hover:text-bad">
                   <X className="h-3 w-3" />
                 </button>
               </span>
             )}
             {categoryFilter && (
-              <span className="inline-flex items-center gap-1 text-xs text-[#e8d5a3] bg-[#1a1714] border border-[#2a2420] rounded px-2 py-0.5">
+              <span className="inline-flex items-center gap-1 text-xs text-gold bg-raise border border-line rounded px-2 py-0.5">
                 category: {categoryFilter}
-                <button
-                  onClick={() => setCategoryFilter("")}
-                  className="text-[#8f7f6e] hover:text-[#ff5252]"
-                >
+                <button onClick={() => setCategoryFilter("")} className="text-ash hover:text-bad">
                   <X className="h-3 w-3" />
                 </button>
               </span>
@@ -395,7 +384,7 @@ export default function NeedsPage() {
                 setSkillFilter("");
                 setSkillInput("");
               }}
-              className="text-[10px] uppercase tracking-wider text-[#8f7f6e] hover:text-[#ff5252] ml-1"
+              className="text-[10px] uppercase tracking-wider text-ash hover:text-bad ml-1"
             >
               clear all
             </button>
@@ -420,7 +409,7 @@ export default function NeedsPage() {
                 className={`text-[11px] uppercase tracking-wider px-2.5 py-1 rounded border transition-colors ${mode.twText} ${
                   active
                     ? `${mode.twBorder} ${mode.twBg} border-current`
-                    : "border-[#2a2420] hover:border-current"
+                    : "border-line hover:border-current"
                 }`}
               >
                 {mode.label}
@@ -432,7 +421,7 @@ export default function NeedsPage() {
 
       {loading && !needsData ? (
         <div className="py-24 text-center">
-          <Loader2 className="h-6 w-6 animate-spin mx-auto text-[#8f7f6e]" />
+          <Loader2 className="h-6 w-6 animate-spin mx-auto text-ash" />
         </div>
       ) : needs.length === 0 ? (
         <EmptyState
@@ -453,7 +442,7 @@ export default function NeedsPage() {
       ) : (
         <div>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs text-[#8f7f6e]">
+            <p className="text-xs text-ash">
               showing {startItem}–{endItem} of {total}
             </p>
           </div>
@@ -463,7 +452,7 @@ export default function NeedsPage() {
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <h3 className="text-base font-medium text-[#e8d5a3] group-hover:text-[#f5a623] transition-colors">
+                      <h3 className="text-base font-medium text-gold group-hover:text-sun transition-colors">
                         {need.title}
                       </h3>
                       {need.needCategory &&
@@ -479,31 +468,31 @@ export default function NeedsPage() {
                           );
                         })()}
                     </div>
-                    <p className="text-sm text-[#b8a078] mt-1 line-clamp-2">{need.description}</p>
+                    <p className="text-sm text-parchment mt-1 line-clamp-2">{need.description}</p>
                     <div className="flex flex-wrap items-center gap-2 mt-3">
                       {need.requiredSkills.map((skill) => (
                         <span
                           key={skill.id}
-                          className="px-2 py-0.5 text-xs text-[#8f7f6e] bg-[#1a1714] border border-[#2a2420] rounded"
+                          className="px-2 py-0.5 text-xs text-ash bg-raise border border-line rounded"
                         >
                           {skill.name}
                         </span>
                       ))}
                     </div>
                   </div>
-                  <span className="shrink-0 text-xs text-[#8f7f6e] uppercase tracking-wide ml-2">
+                  <span className="shrink-0 text-xs text-ash uppercase tracking-wide ml-2">
                     {need._count.acceptances} interested
                   </span>
                 </div>
-                <div className="flex items-center justify-between mt-4 pt-3 border-t border-[#2a2420]">
+                <div className="flex items-center justify-between mt-4 pt-3 border-t border-line">
                   <Link
                     href={`/profile/${need.poster.id}`}
                     className="flex items-center gap-3 group"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <Avatar src={need.poster.avatarUrl} name={need.poster.fullName} size="sm" />
-                    <div className="text-sm text-[#b8a078]">
-                      <span className="text-[#e8d5a3] group-hover:text-[#f5a623] transition-colors">
+                    <div className="text-sm text-parchment">
+                      <span className="text-gold group-hover:text-sun transition-colors">
                         {need.poster.fullName || "anonymous"}
                       </span>
                       {need.poster.ratingCount > 0 && (
@@ -511,7 +500,7 @@ export default function NeedsPage() {
                       )}
                     </div>
                   </Link>
-                  <div className="flex items-center gap-1.5 text-xs text-[#8f7f6e]">
+                  <div className="flex items-center gap-1.5 text-xs text-ash">
                     {offerIcons[need.offerType as keyof typeof offerIcons]}
                     <span className="truncate max-w-xs">{need.offerDescription}</span>
                   </div>
@@ -532,7 +521,7 @@ export default function NeedsPage() {
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <span className="text-xs text-[#8f7f6e] px-2">
+              <span className="text-xs text-ash px-2">
                 page {page} of {totalPages}
               </span>
               <Button

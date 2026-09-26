@@ -56,15 +56,15 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const icons = {
-    success: <CheckCircle2 className="h-4 w-4 text-[#00e676]" />,
-    error: <AlertCircle className="h-4 w-4 text-[#ff5252]" />,
-    info: <Info className="h-4 w-4 text-[#00e5ff]" />,
+    success: <CheckCircle2 className="h-4 w-4 text-ok" />,
+    error: <AlertCircle className="h-4 w-4 text-bad" />,
+    info: <Info className="h-4 w-4 text-mercury" />,
   };
 
   const borders = {
-    success: "border-[#00e676]/30",
-    error: "border-[#ff5252]/30",
-    info: "border-[#00e5ff]/30",
+    success: "border-ok/30",
+    error: "border-bad/30",
+    info: "border-mercury/30",
   };
 
   return (
@@ -74,13 +74,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         {toasts.map((t) => (
           <div
             key={t.id}
-            className={`pointer-events-auto flex items-start gap-3 min-w-[280px] max-w-md bg-[#12100e] border ${borders[t.type]} rounded-md p-4 shadow-lg animate-in slide-in-from-bottom-2 fade-in duration-200`}
+            className={`pointer-events-auto flex items-start gap-3 min-w-[280px] max-w-md bg-surface border ${borders[t.type]} rounded-md p-4 shadow-lg animate-in slide-in-from-bottom-2 fade-in duration-200`}
           >
             <div className="mt-0.5">{icons[t.type]}</div>
-            <p className="text-sm text-[#e8d5a3] flex-1">{t.message}</p>
+            <p className="text-sm text-gold flex-1">{t.message}</p>
             <button
               onClick={() => dismiss(t.id)}
-              className="text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors mt-0.5"
+              className="text-ash hover:text-gold transition-colors mt-0.5"
             >
               <X className="h-3.5 w-3.5" />
             </button>

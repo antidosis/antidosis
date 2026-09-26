@@ -8,42 +8,42 @@ const TICKER_ITEMS = [
   {
     icon: Sparkles,
     text: "The Central Coast is where it begins — free for everyone, forever",
-    accent: "#f5a623",
+    accent: "var(--x-f5a623)",
   },
   {
     icon: Repeat,
     text: "A marketplace for reciprocal exchange — service for service, item for item, cash for time",
-    accent: "#00e5ff",
+    accent: "var(--x-00e5ff)",
   },
   {
     icon: ShieldCheck,
     text: "Verified identities. Binding contracts. Reputation you can trust.",
-    accent: "#00e676",
+    accent: "var(--x-00e676)",
   },
   {
     icon: Globe,
     text: "Regional today. Global tomorrow. Join the first trial region.",
-    accent: "#b24bf5",
+    accent: "var(--x-b24bf5)",
   },
   {
     icon: Lock,
     text: "No middlemen. No hidden fees. Just people exchanging what they have for what they need.",
-    accent: "#f5a623",
+    accent: "var(--x-f5a623)",
   },
   {
     icon: Star,
     text: "Post what you need. Say what you'll give back. Connect with real people.",
-    accent: "#00e5ff",
+    accent: "var(--x-00e5ff)",
   },
   {
     icon: MapPin,
     text: "The Central Coast trial run — your feedback shapes the future of Antidosis",
-    accent: "#00e676",
+    accent: "var(--x-00e676)",
   },
   {
     icon: Zap,
     text: "Free. No subscriptions. No credit card. No expiry — just verified people.",
-    accent: "#f5a623",
+    accent: "var(--x-f5a623)",
   },
 ];
 
@@ -56,7 +56,7 @@ export function TickerBanner() {
 
   return (
     <div
-      className="relative w-full overflow-hidden border-y border-[#f5a623]/20 bg-[#0f0c0a]"
+      className="relative w-full overflow-hidden border-y border-sun/20 bg-inset"
       style={{
         boxShadow: "inset 0 0 40px rgba(245,166,35,0.04), 0 0 20px rgba(245,166,35,0.06)",
       }}
@@ -65,7 +65,7 @@ export function TickerBanner() {
       data-nosnippet
     >
       {/* Top glow line */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#f5a623]/40 to-transparent" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-sun/40 to-transparent" />
 
       {/* Scrolling track */}
       <div
@@ -88,11 +88,11 @@ export function TickerBanner() {
       </div>
 
       {/* Bottom glow line */}
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#f5a623]/40 to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-sun/40 to-transparent" />
 
       {/* Fade edges */}
-      <div className="absolute inset-y-0 left-0 w-16 md:w-32 bg-gradient-to-r from-[#0f0c0a] to-transparent pointer-events-none z-10" />
-      <div className="absolute inset-y-0 right-0 w-16 md:w-32 bg-gradient-to-l from-[#0f0c0a] to-transparent pointer-events-none z-10" />
+      <div className="absolute inset-y-0 left-0 w-16 md:w-32 bg-gradient-to-r from-inset to-transparent pointer-events-none z-10" />
+      <div className="absolute inset-y-0 right-0 w-16 md:w-32 bg-gradient-to-l from-inset to-transparent pointer-events-none z-10" />
     </div>
   );
 }
@@ -112,7 +112,7 @@ function TickerItem({
       <span className="text-xs md:text-sm font-medium tracking-wide" style={{ color: accent }}>
         {text}
       </span>
-      <span className="text-[#2a2420] text-lg leading-none select-none">|</span>
+      <span className="text-line text-lg leading-none select-none">|</span>
     </div>
   );
 }

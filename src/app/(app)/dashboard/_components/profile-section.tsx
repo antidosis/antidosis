@@ -44,9 +44,9 @@ const PLATFORM_COLORS: Record<string, string> = {
   facebook: "#1877f2",
   linkedin: "#0a66c2",
   twitter: "#1da1f2",
-  website: "#f5a623",
-  github: "#b8a078",
-  other: "#7a6b5a",
+  website: "var(--x-f5a623)",
+  github: "var(--x-b8a078)",
+  other: "var(--x-7a6b5a)",
 };
 
 type FormData = z.input<typeof updateProfileSchema>;
@@ -207,7 +207,7 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
   return (
     <section className="vessel p-5 sm:p-6">
       {saveSuccess && (
-        <div className="flex items-center gap-2 text-[#00e676] text-sm mb-5">
+        <div className="flex items-center gap-2 text-ok text-sm mb-5">
           <CheckCircle2 className="h-4 w-4" />
           Profile updated successfully
         </div>
@@ -225,23 +225,23 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                 className="h-14 w-14 sm:h-16 sm:w-16 shrink-0"
               />
               <div className="min-w-0">
-                <h2 className="heading-display text-xl sm:text-2xl text-[#e8d5a3]">
+                <h2 className="heading-display text-xl sm:text-2xl text-gold">
                   {fullName || "Your Name"}
                 </h2>
                 {locationName && (
-                  <p className="flex items-center gap-1.5 text-sm text-[#8f7f6e] mt-1">
+                  <p className="flex items-center gap-1.5 text-sm text-ash mt-1">
                     <MapPin className="h-3.5 w-3.5" />
                     {locationName}
                   </p>
                 )}
                 <div className="flex items-center gap-2 flex-wrap mt-2">
                   {initialProfile.isVerified && (
-                    <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border border-[#00e676]/30 text-[#00e676] bg-[#00e676]/5">
+                    <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border border-ok/30 text-ok bg-ok/5">
                       <Shield className="h-3 w-3" /> verified
                     </span>
                   )}
                   {initialProfile.mobileVerified && (
-                    <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border border-[#35c2f0]/30 text-[#35c2f0] bg-[#35c2f0]/5">
+                    <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border border-aero/30 text-aero bg-aero/5">
                       <Smartphone className="h-3 w-3" /> mobile ok
                     </span>
                   )}
@@ -265,7 +265,7 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                 });
                 setIsEditing(true);
               }}
-              className="shrink-0 text-[#8f7f6e] hover:text-[#e8d5a3]"
+              className="shrink-0 text-ash hover:text-gold"
             >
               <Pencil className="h-3.5 w-3.5 mr-1.5" /> Edit
             </Button>
@@ -273,25 +273,25 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
 
           {/* ─── Bio ─── */}
           {bio && (
-            <div className="mt-5 pt-5 border-t border-[#2a2420]/40">
-              <p className="text-sm text-[#b8a078] leading-relaxed">{bio}</p>
+            <div className="mt-5 pt-5 border-t border-line/40">
+              <p className="text-sm text-parchment leading-relaxed">{bio}</p>
             </div>
           )}
 
           {/* ─── Mobile ─── */}
           {mobile && (
-            <div className="mt-5 pt-5 border-t border-[#2a2420]/40">
+            <div className="mt-5 pt-5 border-t border-line/40">
               <div className="flex items-center gap-2 text-sm">
-                <Smartphone className="h-4 w-4 text-[#8f7f6e]" />
-                <span className="text-[#b8a078] font-mono text-xs">{mobile}</span>
+                <Smartphone className="h-4 w-4 text-ash" />
+                <span className="text-parchment font-mono text-xs">{mobile}</span>
                 {initialProfile.mobileVerified ? (
-                  <span className="inline-flex items-center gap-1 text-xs text-[#00e676]">
+                  <span className="inline-flex items-center gap-1 text-xs text-ok">
                     <CheckCircle2 className="h-3 w-3" /> verified
                   </span>
                 ) : (
                   <Link
                     href="/verify-mobile"
-                    className="inline-flex items-center gap-1 text-xs text-[#f5a623] hover:underline underline-offset-4"
+                    className="inline-flex items-center gap-1 text-xs text-sun hover:underline underline-offset-4"
                   >
                     <ShieldAlert className="h-3 w-3" /> verify
                     <ArrowRight className="h-3 w-3" />
@@ -303,22 +303,22 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
 
           {/* ─── Contact cards ─── */}
           {(hasPublicContact || hasPrivateContact) && (
-            <div className="mt-5 pt-5 border-t border-[#2a2420]/40">
-              <p className="text-[10px] uppercase tracking-wider text-[#8f7f6e] mb-3">Contact</p>
+            <div className="mt-5 pt-5 border-t border-line/40">
+              <p className="text-[10px] uppercase tracking-wider text-ash mb-3">Contact</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {hasPublicContact && (
-                  <div className="rounded border border-[#2a2420] bg-[#12100e]/50 p-4">
+                  <div className="rounded border border-line bg-surface/50 p-4">
                     <div className="flex items-center gap-2 mb-3">
-                      <Globe className="h-3.5 w-3.5 text-[#f5a623]" />
-                      <span className="text-xs font-medium text-[#e8d5a3] uppercase tracking-wider">
+                      <Globe className="h-3.5 w-3.5 text-sun" />
+                      <span className="text-xs font-medium text-gold uppercase tracking-wider">
                         Public
                       </span>
                     </div>
                     <div className="space-y-2.5">
                       {publicPhone && (
                         <div className="flex items-center gap-2 text-sm">
-                          <Phone className="h-3.5 w-3.5 text-[#8f7f6e]" />
-                          <span className="text-[#b8a078]">{publicPhone}</span>
+                          <Phone className="h-3.5 w-3.5 text-ash" />
+                          <span className="text-parchment">{publicPhone}</span>
                         </div>
                       )}
                       {publicSocialLinks.length > 0 && (
@@ -329,10 +329,10 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                               href={l.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider px-2 py-1 rounded border transition-colors hover:bg-[#1a1714]"
+                              className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider px-2 py-1 rounded border transition-colors hover:bg-raise"
                               style={{
-                                borderColor: `${PLATFORM_COLORS[l.platform] || "#7a6b5a"}30`,
-                                color: PLATFORM_COLORS[l.platform] || "#7a6b5a",
+                                borderColor: `${PLATFORM_COLORS[l.platform] || "var(--x-7a6b5a)"}30`,
+                                color: PLATFORM_COLORS[l.platform] || "var(--x-7a6b5a)",
                               }}
                             >
                               {l.platform}
@@ -346,18 +346,18 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                 )}
 
                 {hasPrivateContact && (
-                  <div className="rounded border border-[#2a2420] bg-[#12100e]/50 p-4">
+                  <div className="rounded border border-line bg-surface/50 p-4">
                     <div className="flex items-center gap-2 mb-3">
-                      <Lock className="h-3.5 w-3.5 text-[#8f7f6e]" />
-                      <span className="text-xs font-medium text-[#e8d5a3] uppercase tracking-wider">
+                      <Lock className="h-3.5 w-3.5 text-ash" />
+                      <span className="text-xs font-medium text-gold uppercase tracking-wider">
                         Private
                       </span>
                     </div>
                     <div className="space-y-2.5">
                       {privatePhone && (
                         <div className="flex items-center gap-2 text-sm">
-                          <Phone className="h-3.5 w-3.5 text-[#8f7f6e]" />
-                          <span className="text-[#b8a078]">{privatePhone}</span>
+                          <Phone className="h-3.5 w-3.5 text-ash" />
+                          <span className="text-parchment">{privatePhone}</span>
                         </div>
                       )}
                       {privateSocialLinks.length > 0 && (
@@ -368,10 +368,10 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                               href={l.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider px-2 py-1 rounded border transition-colors hover:bg-[#1a1714]"
+                              className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider px-2 py-1 rounded border transition-colors hover:bg-raise"
                               style={{
-                                borderColor: `${PLATFORM_COLORS[l.platform] || "#7a6b5a"}30`,
-                                color: PLATFORM_COLORS[l.platform] || "#7a6b5a",
+                                borderColor: `${PLATFORM_COLORS[l.platform] || "var(--x-7a6b5a)"}30`,
+                                color: PLATFORM_COLORS[l.platform] || "var(--x-7a6b5a)",
                               }}
                             >
                               {l.platform}
@@ -389,9 +389,9 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
 
           {/* ─── Credentials summary ─── */}
           {credentials.length > 0 && (
-            <div className="mt-5 pt-5 border-t border-[#2a2420]/40">
-              <div className="flex items-center gap-2 text-sm text-[#b8a078]">
-                <Award className="h-4 w-4 text-[#f5a623]" />
+            <div className="mt-5 pt-5 border-t border-line/40">
+              <div className="flex items-center gap-2 text-sm text-parchment">
+                <Award className="h-4 w-4 text-sun" />
                 <span>
                   {credentials.length} credential{credentials.length !== 1 ? "s" : ""}
                   {publicCreds > 0 && ` (${publicCreds} public)`}
@@ -419,7 +419,7 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
           <div className="space-y-2">
             <Label>Full Name</Label>
             <Input {...register("fullName")} />
-            {errors.fullName && <p className="text-xs text-[#ff5252]">{errors.fullName.message}</p>}
+            {errors.fullName && <p className="text-xs text-bad">{errors.fullName.message}</p>}
           </div>
           <div className="space-y-2">
             <Label>Location</Label>
@@ -434,10 +434,10 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                 />
               )}
             />
-            <div className="bg-[#00e5ff]/10 border border-[#00e5ff]/30 p-3 mt-2">
+            <div className="bg-mercury/10 border border-mercury/30 p-3 mt-2">
               <div className="flex items-start gap-2">
-                <Info className="h-3.5 w-3.5 text-[#00e5ff] mt-0.5 flex-shrink-0" />
-                <p className="text-xs text-[#8f7f6e]">
+                <Info className="h-3.5 w-3.5 text-mercury mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-ash">
                   Central Coast NSW is the trial region. Only Central Coast suburbs are available
                   during the pilot.
                 </p>
@@ -447,27 +447,25 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
           <div className="space-y-2">
             <Label>Bio</Label>
             <Textarea {...register("bio")} placeholder="Tell us about yourself..." rows={4} />
-            {errors.bio && <p className="text-xs text-[#ff5252]">{errors.bio.message}</p>}
+            {errors.bio && <p className="text-xs text-bad">{errors.bio.message}</p>}
           </div>
           <div className="space-y-2">
             <Label>Mobile Number</Label>
             <div className="flex items-center gap-2">
-              <Smartphone className="h-3.5 w-3.5 text-[#8f7f6e]" />
+              <Smartphone className="h-3.5 w-3.5 text-ash" />
               <Input {...register("mobile")} placeholder="+61 412 345 678" />
             </div>
-            {errors.mobile && <p className="text-xs text-[#ff5252]">{errors.mobile.message}</p>}
-            <p className="text-xs text-[#8f7f6e]">
-              Used for account security. Australian format only.
-            </p>
+            {errors.mobile && <p className="text-xs text-bad">{errors.mobile.message}</p>}
+            <p className="text-xs text-ash">Used for account security. Australian format only.</p>
           </div>
           <div className="space-y-2">
             <Label>ABN (optional)</Label>
             <div className="flex items-center gap-2">
-              <FileText className="h-3.5 w-3.5 text-[#8f7f6e]" />
+              <FileText className="h-3.5 w-3.5 text-ash" />
               <Input {...register("abn")} placeholder="12 345 678 901" />
             </div>
-            {errors.abn && <p className="text-xs text-[#ff5252]">{errors.abn.message}</p>}
-            <p className="text-xs text-[#8f7f6e]">
+            {errors.abn && <p className="text-xs text-bad">{errors.abn.message}</p>}
+            <p className="text-xs text-ash">
               11 digits. Only needed if you earn through exchanges — it appears on ATO
               sharing-economy (SERR) reports.
             </p>
@@ -479,31 +477,31 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
               <button
                 type="button"
                 onClick={() => setPublicPanelOpen(!publicPanelOpen)}
-                className="w-full flex items-center justify-between p-4 text-left hover:bg-[#1a1714] transition-colors"
+                className="w-full flex items-center justify-between p-4 text-left hover:bg-raise transition-colors"
               >
                 <div className="flex items-center gap-2">
-                  <Globe className="h-4 w-4 text-[#f5a623]" />
-                  <span className="text-sm font-medium text-[#e8d5a3]">Public Profile</span>
+                  <Globe className="h-4 w-4 text-sun" />
+                  <span className="text-sm font-medium text-gold">Public Profile</span>
                 </div>
                 {publicPanelOpen ? (
-                  <ChevronUp className="h-4 w-4 text-[#8f7f6e]" />
+                  <ChevronUp className="h-4 w-4 text-ash" />
                 ) : (
-                  <ChevronDown className="h-4 w-4 text-[#8f7f6e]" />
+                  <ChevronDown className="h-4 w-4 text-ash" />
                 )}
               </button>
               {publicPanelOpen && (
-                <div className="px-4 pb-4 space-y-4 border-t border-[#2a2420]">
-                  <p className="text-xs text-[#8f7f6e] pt-3">
+                <div className="px-4 pb-4 space-y-4 border-t border-line">
+                  <p className="text-xs text-ash pt-3">
                     Shown in the pros directory. Anyone can find and contact you.
                   </p>
                   <div className="space-y-2">
                     <Label>Phone</Label>
                     <div className="flex items-center gap-2">
-                      <Phone className="h-3.5 w-3.5 text-[#8f7f6e]" />
+                      <Phone className="h-3.5 w-3.5 text-ash" />
                       <Input {...register("publicPhone")} placeholder="Public contact number" />
                     </div>
                     {errors.publicPhone && (
-                      <p className="text-xs text-[#ff5252]">{errors.publicPhone.message}</p>
+                      <p className="text-xs text-bad">{errors.publicPhone.message}</p>
                     )}
                   </div>
                   <div className="space-y-2">
@@ -511,14 +509,12 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                     <div className="space-y-2">
                       {publicSocialLinks.map((link, i) => (
                         <div key={`${link.platform}-${i}`} className="flex items-center gap-2">
-                          <span className="text-xs text-[#f5a623] w-16 uppercase">
-                            {link.platform}
-                          </span>
-                          <span className="text-xs text-[#b8a078] flex-1 truncate">{link.url}</span>
+                          <span className="text-xs text-sun w-16 uppercase">{link.platform}</span>
+                          <span className="text-xs text-parchment flex-1 truncate">{link.url}</span>
                           <button
                             type="button"
                             onClick={() => removePublicLink(i)}
-                            className="text-[#8f7f6e] hover:text-[#ff5252]"
+                            className="text-ash hover:text-bad"
                           >
                             <X className="h-3.5 w-3.5" />
                           </button>
@@ -529,7 +525,7 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                       <select
                         value={newPublicLinkPlatform}
                         onChange={(e) => setNewPublicLinkPlatform(e.target.value)}
-                        className="bg-[#0f0c0a] border border-[#2a2420] text-[#e8d5a3] text-xs px-2 py-1.5 outline-none focus:border-[#f5a623] rounded"
+                        className="bg-inset border border-line text-gold text-xs px-2 py-1.5 outline-none focus:border-sun rounded"
                       >
                         {PLATFORMS.map((p) => (
                           <option key={p} value={p}>
@@ -563,31 +559,31 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
               <button
                 type="button"
                 onClick={() => setPrivatePanelOpen(!privatePanelOpen)}
-                className="w-full flex items-center justify-between p-4 text-left hover:bg-[#1a1714] transition-colors"
+                className="w-full flex items-center justify-between p-4 text-left hover:bg-raise transition-colors"
               >
                 <div className="flex items-center gap-2">
-                  <Lock className="h-4 w-4 text-[#8f7f6e]" />
-                  <span className="text-sm font-medium text-[#e8d5a3]">Private Profile</span>
+                  <Lock className="h-4 w-4 text-ash" />
+                  <span className="text-sm font-medium text-gold">Private Profile</span>
                 </div>
                 {privatePanelOpen ? (
-                  <ChevronUp className="h-4 w-4 text-[#8f7f6e]" />
+                  <ChevronUp className="h-4 w-4 text-ash" />
                 ) : (
-                  <ChevronDown className="h-4 w-4 text-[#8f7f6e]" />
+                  <ChevronDown className="h-4 w-4 text-ash" />
                 )}
               </button>
               {privatePanelOpen && (
-                <div className="px-4 pb-4 space-y-4 border-t border-[#2a2420]">
-                  <p className="text-xs text-[#8f7f6e] pt-3">
+                <div className="px-4 pb-4 space-y-4 border-t border-line">
+                  <p className="text-xs text-ash pt-3">
                     Shared when messaging about needs. More detail builds trust.
                   </p>
                   <div className="space-y-2">
                     <Label>Phone</Label>
                     <div className="flex items-center gap-2">
-                      <Phone className="h-3.5 w-3.5 text-[#8f7f6e]" />
+                      <Phone className="h-3.5 w-3.5 text-ash" />
                       <Input {...register("privatePhone")} placeholder="Private contact number" />
                     </div>
                     {errors.privatePhone && (
-                      <p className="text-xs text-[#ff5252]">{errors.privatePhone.message}</p>
+                      <p className="text-xs text-bad">{errors.privatePhone.message}</p>
                     )}
                   </div>
                   <div className="space-y-2">
@@ -595,14 +591,12 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                     <div className="space-y-2">
                       {privateSocialLinks.map((link, i) => (
                         <div key={`${link.platform}-${i}`} className="flex items-center gap-2">
-                          <span className="text-xs text-[#f5a623] w-16 uppercase">
-                            {link.platform}
-                          </span>
-                          <span className="text-xs text-[#b8a078] flex-1 truncate">{link.url}</span>
+                          <span className="text-xs text-sun w-16 uppercase">{link.platform}</span>
+                          <span className="text-xs text-parchment flex-1 truncate">{link.url}</span>
                           <button
                             type="button"
                             onClick={() => removePrivateLink(i)}
-                            className="text-[#8f7f6e] hover:text-[#ff5252]"
+                            className="text-ash hover:text-bad"
                           >
                             <X className="h-3.5 w-3.5" />
                           </button>
@@ -613,7 +607,7 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
                       <select
                         value={newPrivateLinkPlatform}
                         onChange={(e) => setNewPrivateLinkPlatform(e.target.value)}
-                        className="bg-[#0f0c0a] border border-[#2a2420] text-[#e8d5a3] text-xs px-2 py-1.5 outline-none focus:border-[#f5a623] rounded"
+                        className="bg-inset border border-line text-gold text-xs px-2 py-1.5 outline-none focus:border-sun rounded"
                       >
                         {PLATFORMS.map((p) => (
                           <option key={p} value={p}>
@@ -643,7 +637,7 @@ export function ProfileSection({ initialProfile, credentials, onUpdate }: Profil
             </div>
           </div>
 
-          {rootError && <p className="text-sm text-[#ff5252]">{rootError}</p>}
+          {rootError && <p className="text-sm text-bad">{rootError}</p>}
 
           <div className="flex items-center gap-3">
             <Button type="submit" disabled={isSubmitting}>

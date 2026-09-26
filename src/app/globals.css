@@ -3,50 +3,209 @@
 @tailwind utilities;
 
 @layer base {
-  html {
-    color-scheme: dark;
-  }
   :root {
-    /* The Void — Backgrounds */
-    --void: #0a0806;
-    --void-raised: #12100e;
-    --void-hover: #1a1714;
-    --void-input: #0f0c0a;
+    color-scheme: dark;
 
-    /* Text — Aged & Warm */
-    --gold: #e8d5a3;
-    --parchment: #b8a078;
-    --leather: #7a6b5a;
+    /* Theme tokens — RGB triplets consumed by Tailwind (see tailwind.config.ts).
+       Dark values are the original palette; [data-theme="light"] overrides below. */
+    --c-void: 10 8 6; /* #0a0806 */
+    --c-surface: 18 16 14; /* #12100e */
+    --c-raise: 26 23 20; /* #1a1714 */
+    --c-inset: 15 12 10; /* #0f0c0a */
+    --c-line: 42 36 32; /* #2a2420 */
+    --c-linehi: 61 53 48; /* #3d3530 */
+    --c-linestrong: 90 74 58; /* #5a4a3a */
+
+    --c-gold: 232 213 163; /* #e8d5a3 */
+    --c-goldsoft: 212 184 150; /* #d4b896 */
+    --c-goldhi: 240 223 192; /* #f0dfc0 */
+    --c-parchment: 184 160 120; /* #b8a078 */
+    --c-ash: 143 127 110; /* #8f7f6e */
+    --c-ash2: 138 122 96; /* #8a7a60 */
+    --c-leather: 122 107 90; /* #7a6b5a */
+    --c-faint: 196 180 150; /* #c4b496 */
+
+    --c-sun: 245 166 35; /* #f5a623 */
+    --c-sunhi: 255 184 77; /* #ffb84d */
+    --c-sundim: 196 122 10; /* #c47a0a */
+    --c-ember: 234 88 12; /* #ea580c */
+    --c-alert: 255 179 0; /* #ffb300 */
+
+    --c-ok: 0 230 118; /* #00e676 */
+    --c-termgreen: 0 255 65; /* #00ff41 */
+    --c-bad: 255 82 82; /* #ff5252 */
+
+    --c-mercury: 0 229 255; /* #00e5ff */
+    --c-mercdim: 0 184 212; /* #00b8d4 */
+    --c-aero: 53 194 240; /* #35c2f0 */
+    --c-quint: 178 75 245; /* #b24bf5 */
+    --c-quintdim: 139 92 246; /* #8b5cf6 */
+    --c-orchid: 215 107 245; /* #d76bf5 */
+    --c-magenta: 245 77 153; /* #f54d99 */
+    --c-aqua: 30 196 184; /* #1ec4b8 */
+
+    --c-quintbg: 18 0 31; /* #12001f */
+    --c-mercurybg: 0 21 32; /* #001520 */
+    --c-okbg: 0 17 0; /* #001100 */
+
+    /* x-accent-vars:start */
+    --x-00e5ff: #00e5ff;
+    --x-00e676: #00e676;
+    --x-0a0806: #0a0806;
+    --x-0f0c0a: #0f0c0a;
+    --x-1a1714: #1a1714;
+    --x-1ec4b8: #1ec4b8;
+    --x-24d6a3: #24d6a3;
+    --x-2a2420: #2a2420;
+    --x-2ce090: #2ce090;
+    --x-33d4f5: #33d4f5;
+    --x-35c2f0: #35c2f0;
+    --x-35e87a: #35e87a;
+    --x-3aadf0: #3aadf0;
+    --x-4896f0: #4896f0;
+    --x-7a6b5a: #7a6b5a;
+    --x-8f7f6e: #8f7f6e;
+    --x-b24bf5: #b24bf5;
+    --x-b8a078: #b8a078;
+    --x-d0d040: #d0d040;
+    --x-d76bf5: #d76bf5;
+    --x-e06df0: #e06df0;
+    --x-e0d62e: #e0d62e;
+    --x-e86ee6: #e86ee6;
+    --x-e89e38: #e89e38;
+    --x-e8b830: #e8b830;
+    --x-e8d5a3: #e8d5a3;
+    --x-f08a35: #f08a35;
+    --x-f0cc33: #f0cc33;
+    --x-f54d99: #f54d99;
+    --x-f57633: #f57633;
+    --x-f5a623: #f5a623;
+    --x-ff5252: #ff5252;
+    --x-ff6b6b: #ff6b6b;
+    --x-ffb84d: #ffb84d;
+    /* x-accent-vars:end */
+
+    /* Legacy named vars — derived from the tokens so every existing
+       component class (vessel, glow-*, cmd-link, ...) themes automatically. */
+    --void: rgb(var(--c-void));
+    --void-raised: rgb(var(--c-surface));
+    --void-hover: rgb(var(--c-raise));
+    --void-input: rgb(var(--c-inset));
+    --gold: rgb(var(--c-gold));
+    --parchment: rgb(var(--c-parchment));
+    --leather: rgb(var(--c-leather));
     --void-inverse: #0a0806;
-
-    /* The Three Planes */
-    /* Physical: Solar Plexus — Action, Desire, Energy */
-    --sun: #f5a623;
-    --sun-bright: #ffb84d;
-    --sun-dim: #c47a0a;
-    --ember: #ea580c;
-
-    /* Mental: Throat — Communication, Intellect, Truth */
-    --mercury: #00e5ff;
-    --mercury-dim: #00b8d4;
+    --sun: rgb(var(--c-sun));
+    --sun-bright: rgb(var(--c-sunhi));
+    --sun-dim: rgb(var(--c-sundim));
+    --ember: rgb(var(--c-ember));
+    --mercury: rgb(var(--c-mercury));
+    --mercury-dim: rgb(var(--c-mercdim));
     --mercury-glow: rgba(0, 229, 255, 0.25);
-    --silver: #c0b8a8;
-
-    /* Spiritual: Crown — Completion, Reward, Transcendence */
-    --quintessence: #b24bf5;
-    --quintessence-dim: #8b5cf6;
+    --silver: rgb(var(--c-faint));
+    --quintessence: rgb(var(--c-quint));
+    --quintessence-dim: rgb(var(--c-quintdim));
     --quintessence-glow: rgba(178, 75, 245, 0.3);
     --quintessence-soft: rgba(178, 75, 245, 0.08);
-
-    /* States */
-    --emerald: #00e676;
-    --ruby: #ff5252;
-    --amber-alert: #ffb300;
-
-    /* Borders — Warm Bronze */
-    --bronze: #2a2420;
-    --bronze-hover: #3d3530;
+    --emerald: rgb(var(--c-ok));
+    --ruby: rgb(var(--c-bad));
+    --amber-alert: rgb(var(--c-alert));
+    --bronze: rgb(var(--c-line));
+    --bronze-hover: rgb(var(--c-linehi));
     --bronze-accent: rgba(245, 166, 35, 0.2);
+  }
+
+  :root[data-theme="light"] {
+    color-scheme: light;
+
+    /* Daybreak — warm paper, deep bronze ink, brand gold deepened for contrast */
+    --c-void: 246 241 231; /* #f6f1e7 */
+    --c-surface: 253 250 243; /* #fdfaf3 */
+    --c-raise: 255 255 255; /* #ffffff */
+    --c-inset: 239 232 217; /* #efe8d9 */
+    --c-line: 221 210 189; /* #ddd2bd */
+    --c-linehi: 195 180 154; /* #c3b49a */
+    --c-linestrong: 179 162 134; /* #b3a286 */
+
+    --c-gold: 46 35 24; /* #2e2318 */
+    --c-goldsoft: 61 47 32; /* #3d2f20 */
+    --c-goldhi: 28 19 10; /* #1c130a */
+    --c-parchment: 91 74 53; /* #5b4a35 */
+    --c-ash: 111 94 71; /* #6f5e47 */
+    --c-ash2: 117 99 76; /* #75634c */
+    --c-leather: 110 95 75; /* #6e5f4b */
+    --c-faint: 74 63 48; /* #4a3f30 */
+
+    --c-sun: 176 111 8; /* #b06f08 */
+    --c-sunhi: 154 98 7; /* #9a6207 */
+    --c-sundim: 143 95 6; /* #8f5f06 */
+    --c-ember: 194 65 12; /* #c2410c */
+    --c-alert: 156 106 0; /* #9c6a00 */
+
+    --c-ok: 10 143 69; /* #0a8f45 */
+    --c-termgreen: 10 143 69;
+    --c-bad: 207 47 47; /* #cf2f2f */
+
+    --c-mercury: 10 127 153; /* #0a7f99 */
+    --c-mercdim: 9 122 147; /* #097a93 */
+    --c-aero: 14 110 158; /* #0e6e9e */
+    --c-quint: 138 47 208; /* #8a2fd0 */
+    --c-quintdim: 124 58 237; /* #7c3aed */
+    --c-orchid: 168 63 201; /* #a83fc9 */
+    --c-magenta: 194 24 91; /* #c2185b */
+    --c-aqua: 10 122 108; /* #0a7a6c */
+
+    --c-quintbg: 240 228 250; /* #f0e4fa */
+    --c-mercurybg: 224 238 242; /* #e0eef2 */
+    --c-okbg: 226 240 228; /* #e2f0e4 */
+
+    /* x-accent-vars-light:start */
+    --x-00e5ff: #048b9a;
+    --x-00e676: #048b49;
+    --x-0a0806: #f6f1e7;
+    --x-0f0c0a: #efe8d9;
+    --x-1a1714: #ffffff;
+    --x-1ec4b8: #157770;
+    --x-24d6a3: #198264;
+    --x-2a2420: #ddd2bd;
+    --x-2ce090: #188e5a;
+    --x-33d4f5: #0d90ab;
+    --x-35c2f0: #1081a5;
+    --x-35e87a: #169b49;
+    --x-3aadf0: #1170a8;
+    --x-4896f0: #135baf;
+    --x-7a6b5a: #6e5f4b;
+    --x-8f7f6e: #6f5e47;
+    --x-b24bf5: #750fb8;
+    --x-b8a078: #5b4a35;
+    --x-d0d040: #858524;
+    --x-d76bf5: #a013c8;
+    --x-e06df0: #ab19c0;
+    --x-e0d62e: #8f8819;
+    --x-e86ee6: #b321b1;
+    --x-e89e38: #9d6416;
+    --x-e8b830: #997615;
+    --x-e8d5a3: #2e2318;
+    --x-f08a35: #a55410;
+    --x-f0cc33: #a48810;
+    --x-f54d99: #b90f5c;
+    --x-f57633: #ab430d;
+    --x-f5a623: #a2690c;
+    --x-ff5252: #cc0505;
+    --x-ff6b6b: #db0606;
+    --x-ffb84d: #c97b05;
+    /* x-accent-vars-light:end */
+
+    --mercury-glow: rgba(10, 127, 153, 0.25);
+    --quintessence-glow: rgba(138, 47, 208, 0.25);
+    --quintessence-soft: rgba(138, 47, 208, 0.08);
+    --bronze-accent: rgba(176, 111, 8, 0.25);
+  }
+
+  /* Brand logo is bright emerald artwork — deepen it on light backgrounds
+     so it keeps the same contrast it has on the dark void. */
+  :root[data-theme="light"] .brand-logo {
+    filter: brightness(0.62) saturate(1.35);
   }
 
   * {

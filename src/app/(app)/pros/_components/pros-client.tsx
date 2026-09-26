@@ -48,11 +48,11 @@ export default function ProsDirectoryPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 md:px-8">
       <div className="py-10">
-        <p className="text-xs text-[#8f7f6e] mb-4">» DIRECTORY — VERIFIED LOCALS</p>
-        <h1 className="heading-display text-2xl text-[#e8d5a3]">
-          the <span className="text-[#f5a623]">directory</span>
+        <p className="text-xs text-ash mb-4">» DIRECTORY — VERIFIED LOCALS</p>
+        <h1 className="heading-display text-2xl text-gold">
+          the <span className="text-sun">directory</span>
         </h1>
-        <p className="text-sm text-[#8f7f6e] max-w-lg mt-4">
+        <p className="text-sm text-ash max-w-lg mt-4">
           verified members of the network. browse, connect, trade.
         </p>
       </div>
@@ -60,7 +60,7 @@ export default function ProsDirectoryPage() {
       {/* Search */}
       <div className="vessel p-4 mb-8">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8f7f6e]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ash" />
           <Input
             placeholder="search by name, skill, location..."
             value={query}
@@ -72,7 +72,7 @@ export default function ProsDirectoryPage() {
               variant="ghost"
               size="icon"
               onClick={() => setQuery("")}
-              className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-[#8f7f6e] hover:text-[#e8d5a3]"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-ash hover:text-gold"
             >
               <X className="h-4 w-4" />
             </Button>
@@ -82,13 +82,11 @@ export default function ProsDirectoryPage() {
 
       {isLoading && !pros ? (
         <div className="py-12 text-center">
-          <Loader2 className="h-6 w-6 animate-spin mx-auto text-[#8f7f6e]" />
+          <Loader2 className="h-6 w-6 animate-spin mx-auto text-ash" />
         </div>
       ) : error ? (
-        <div className="border border-[#ff5252]/20 bg-[#ff5252]/5 p-6 mb-8 text-center">
-          <p className="text-sm text-[#ff5252]">
-            Failed to load directory. Please try again later.
-          </p>
+        <div className="border border-bad/20 bg-bad/5 p-6 mb-8 text-center">
+          <p className="text-sm text-bad">Failed to load directory. Please try again later.</p>
         </div>
       ) : !pros || pros.length === 0 ? (
         <EmptyState
@@ -102,7 +100,7 @@ export default function ProsDirectoryPage() {
             !query ? (
               <Link
                 href="/dashboard"
-                className="inline-flex items-center gap-2 text-sm text-[#f5a623] hover:underline"
+                className="inline-flex items-center gap-2 text-sm text-sun hover:underline"
               >
                 go to dashboard →
               </Link>
@@ -115,7 +113,7 @@ export default function ProsDirectoryPage() {
             <Link
               key={pro.id}
               href={`/profile/${pro.id}`}
-              className="block vessel p-6 hover:bg-[#1a1714] transition-colors"
+              className="block vessel p-6 hover:bg-raise transition-colors"
             >
               <div className="flex items-start gap-4">
                 <Avatar
@@ -126,16 +124,14 @@ export default function ProsDirectoryPage() {
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-base font-bold text-[#e8d5a3]">
-                      {pro.fullName || "anonymous"}
-                    </h3>
-                    {pro.isVerified && <Shield className="h-4 w-4 text-[#00e676]" />}
+                    <h3 className="text-base font-bold text-gold">{pro.fullName || "anonymous"}</h3>
+                    {pro.isVerified && <Shield className="h-4 w-4 text-ok" />}
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-[#b8a078] mt-1">
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-parchment mt-1">
                     {pro.ratingCount > 0 && (
                       <span className="flex items-center gap-1">
-                        <Star className="h-3 w-3 text-[#f5a623] drop-shadow-[0_0_4px_rgba(245,166,35,0.5)]" />
+                        <Star className="h-3 w-3 text-sun drop-shadow-[0_0_4px_rgba(245,166,35,0.5)]" />
                         {pro.ratingAvg.toFixed(1)} ({pro.ratingCount} reviews)
                       </span>
                     )}
@@ -165,14 +161,14 @@ export default function ProsDirectoryPage() {
                     )}
                   </div>
 
-                  {pro.bio && <p className="text-sm text-[#8f7f6e] mt-3 line-clamp-2">{pro.bio}</p>}
+                  {pro.bio && <p className="text-sm text-ash mt-3 line-clamp-2">{pro.bio}</p>}
 
                   {pro.skills.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-3">
                       {pro.skills.slice(0, 5).map((s) => (
                         <span
                           key={s.name}
-                          className="px-2 py-1 text-xs text-[#b8a078] bg-[#1a1714] border border-[#2a2420] rounded"
+                          className="px-2 py-1 text-xs text-parchment bg-raise border border-line rounded"
                         >
                           {s.name}
                         </span>
@@ -186,7 +182,7 @@ export default function ProsDirectoryPage() {
         </div>
       )}
 
-      <p className="text-center text-xs text-[#8f7f6e]/50 py-12">sorted by rating.</p>
+      <p className="text-center text-xs text-ash/50 py-12">sorted by rating.</p>
     </div>
   );
 }

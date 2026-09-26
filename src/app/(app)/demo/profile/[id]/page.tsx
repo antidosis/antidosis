@@ -78,7 +78,7 @@ export default function DemoProfilePage() {
     router.replace(`/profile/${id}`);
     return (
       <div className="max-w-3xl mx-auto px-4 md:px-8 py-24 text-center">
-        <Loader2 className="h-6 w-6 animate-spin mx-auto text-[#8f7f6e]" />
+        <Loader2 className="h-6 w-6 animate-spin mx-auto text-ash" />
       </div>
     );
   }
@@ -92,7 +92,7 @@ export default function DemoProfilePage() {
       <div className="py-6 flex items-center justify-between">
         <Link
           href="/demo/contract-flow"
-          className="inline-flex items-center text-sm text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
+          className="inline-flex items-center text-sm text-ash hover:text-gold transition-colors"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back to demo
@@ -102,7 +102,7 @@ export default function DemoProfilePage() {
         </Badge>
       </div>
 
-      <p className="text-xs text-[#8f7f6e] mb-4">$ finger {username}</p>
+      <p className="text-xs text-ash mb-4">$ finger {username}</p>
 
       {/* Profile Header */}
       <div className="vessel p-6">
@@ -110,14 +110,14 @@ export default function DemoProfilePage() {
           <Avatar src={profile.avatarUrl} name={profile.fullName} size="lg" />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="heading-display text-2xl text-[#e8d5a3]">
+              <h1 className="heading-display text-2xl text-gold">
                 {profile.fullName || "anonymous"}
               </h1>
-              {profile.isVerified && <Shield className="h-5 w-5 text-[#00e676]" />}
+              {profile.isVerified && <Shield className="h-5 w-5 text-ok" />}
             </div>
-            <div className="flex flex-wrap items-center gap-4 text-sm text-[#b8a078] mt-2">
+            <div className="flex flex-wrap items-center gap-4 text-sm text-parchment mt-2">
               {(profile.ratingCount ?? 0) > 0 && (
-                <span className="flex items-center gap-1 text-[#f5a623] glow-gold">
+                <span className="flex items-center gap-1 text-sun glow-gold">
                   <Star className="h-4 w-4 fill-current" />
                   {(profile.ratingAvg ?? 0).toFixed(1)} ({profile.ratingCount} reviews)
                 </span>
@@ -136,17 +136,17 @@ export default function DemoProfilePage() {
               )}
             </div>
             {profile.bio && (
-              <p className="text-sm text-[#b8a078] mt-4 leading-relaxed">{profile.bio}</p>
+              <p className="text-sm text-parchment mt-4 leading-relaxed">{profile.bio}</p>
             )}
             {profile.skills.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-5">
                 {profile.skills.map((skill) => (
                   <span
                     key={skill.id}
-                    className="text-xs text-[#b8a078] bg-[#1a1714] border border-[#2a2420] rounded px-2 py-0.5"
+                    className="text-xs text-parchment bg-raise border border-line rounded px-2 py-0.5"
                   >
                     {skill.name}
-                    {skill.isVerified && <span className="ml-1 text-[#00e676]">✓</span>}
+                    {skill.isVerified && <span className="ml-1 text-ok">✓</span>}
                   </span>
                 ))}
               </div>
@@ -157,7 +157,7 @@ export default function DemoProfilePage() {
 
       {/* Demo notice */}
       <div className="vessel-lit p-5">
-        <p className="text-sm text-[#b8a078]">
+        <p className="text-sm text-parchment">
           This is a demo profile. In the real app, you would also see active needs, credentials, and
           reviews from completed exchanges.
         </p>

@@ -69,8 +69,8 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0806] text-[#e8d5a3] flex flex-col">
-      <div className="px-4 md:px-8 py-3 border-b border-[#2a2420]">
+    <div className="min-h-screen bg-void text-gold flex flex-col">
+      <div className="px-4 md:px-8 py-3 border-b border-line">
         <Link href="/" className="flex items-center gap-2">
           <img
             src="/images/logo.webp"
@@ -78,32 +78,32 @@ export default function LoginPage() {
             width={138}
             height={56}
             fetchPriority="high"
-            className="opacity-80 hover:opacity-100 transition-opacity"
+            className="brand-logo opacity-80 hover:opacity-100 transition-opacity"
           />
         </Link>
       </div>
 
       <div className="flex-1 flex items-center justify-center px-4">
         <div className="w-full max-w-sm">
-          <p className="text-xs text-[#8f7f6e] mb-8">$ login --existing-user</p>
-          <h1 className="heading-display text-2xl text-[#e8d5a3] mb-2">
+          <p className="text-xs text-ash mb-8">$ login --existing-user</p>
+          <h1 className="heading-display text-2xl text-gold mb-2">
             authenticate
             <TerminalCursor />
           </h1>
-          <p className="text-sm text-[#b8a078] mb-12">
+          <p className="text-sm text-parchment mb-12">
             access your account and manage your exchanges
           </p>
 
           {emailVerified && (
-            <div className="border border-[#00e676]/30 bg-[#00e676]/5 p-5 mb-8 flex items-center gap-3">
-              <CheckCircle className="h-5 w-5 text-[#00e676] flex-shrink-0" />
-              <p className="text-sm text-[#00e676]">Email verified — you can now log in.</p>
+            <div className="border border-ok/30 bg-ok/5 p-5 mb-8 flex items-center gap-3">
+              <CheckCircle className="h-5 w-5 text-ok flex-shrink-0" />
+              <p className="text-sm text-ok">Email verified — you can now log in.</p>
             </div>
           )}
 
           {justRegistered && !emailVerified && (
-            <div className="border border-[#2a2420] bg-[#12100e] p-5 mb-8">
-              <p className="text-sm text-[#00e676]">
+            <div className="border border-line bg-surface p-5 mb-8">
+              <p className="text-sm text-ok">
                 Account created. Please verify your email before logging in.
               </p>
             </div>
@@ -136,13 +136,13 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8f7f6e] hover:text-[#e8d5a3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f5a623] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0806] rounded-sm"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ash hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun focus-visible:ring-offset-2 focus-visible:ring-offset-void rounded-sm"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
-            {error && <p className="text-sm text-[#ff5252]">{error}</p>}
+            {error && <p className="text-sm text-bad">{error}</p>}
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Logging in..." : "Log in"}
             </Button>
@@ -153,7 +153,7 @@ export default function LoginPage() {
             </p>
           </form>
 
-          <p className="mt-12 text-sm text-[#8f7f6e]">
+          <p className="mt-12 text-sm text-ash">
             Don&apos;t have an account?{" "}
             <Button variant="link" size="sm" asChild>
               <Link href="/register">Register</Link>

@@ -20,9 +20,14 @@ const LABELS = [
   "TOUKLEY",
 ];
 
-const GOLD = "245, 166, 35";
-const CYAN = "0, 229, 255";
 const TAU = Math.PI * 2;
+
+// Canvas colors follow the active site theme — the --c-* tokens are RGB
+// triplets in globals.css, re-read whenever the theme flips.
+function readToken(name: string, fallback: string): string {
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return v ? v.split(/\s+/).join(", ") : fallback;
+}
 
 function buildNodes(width: number, height: number): Node[] {
   // Deterministic scatter (golden-angle spiral) so SSR/first paint is stable
@@ -71,6 +76,18 @@ export function NetworkMap({ className = "" }: { className?: string }) {
     let raf = 0;
     let lastPulseAt = 0;
     let running = true;
+
+    let GOLD = readToken("--c-sun", "245, 166, 35");
+    let CYAN = readToken("--c-mercury", "0, 229, 255");
+    let LABEL = readToken("--c-ash", "143, 127, 110");
+
+    function refreshColors() {
+      GOLD = readToken("--c-sun", "245, 166, 35");
+      CYAN = readToken("--c-mercury", "0, 229, 255");
+      LABEL = readToken("--c-ash", "143, 127, 110");
+      if (reduced) drawFrame(0);
+    }
+    window.addEventListener("antidosis-theme", refreshColors);
 
     function resize() {
       if (!canvas) return;
@@ -140,7 +157,7 @@ export function NetworkMap({ className = "" }: { className?: string }) {
         ctx.arc(n.x, n.y, 6, 0, TAU);
         ctx.stroke();
         if (n.label) {
-          ctx.fillStyle = "rgba(143, 127, 110, 0.55)";
+          ctx.fillStyle = `rgba(${LABEL}, 0.55)`;
           ctx.font = "8px monospace";
           ctx.textAlign = "center";
           ctx.fillText(n.label, n.x, n.y + 16);
@@ -171,6 +188,7 @@ export function NetworkMap({ className = "" }: { className?: string }) {
       running = false;
       cancelAnimationFrame(raf);
       observer.disconnect();
+      window.removeEventListener("antidosis-theme", refreshColors);
     };
   }, []);
 

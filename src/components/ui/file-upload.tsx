@@ -78,17 +78,17 @@ export function FileUpload({
           <img
             src={preview}
             alt="Preview"
-            className="h-16 w-16 object-cover border border-[#2a2420] rounded-md"
+            className="h-16 w-16 object-cover border border-line rounded-md"
           />
           {uploading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#0a0806]/60 rounded-md">
-              <Loader2 className="h-4 w-4 animate-spin text-[#f5a623]" />
+            <div className="absolute inset-0 flex items-center justify-center bg-void/60 rounded-md">
+              <Loader2 className="h-4 w-4 animate-spin text-sun" />
             </div>
           )}
           <button
             type="button"
             onClick={clearPreview}
-            className="absolute -top-1 -right-1 p-1 bg-[#12100e] border border-[#2a2420] text-[#8f7f6e] hover:text-[#e8d5a3] hover:border-[#f5a623] rounded-md transition-colors"
+            className="absolute -top-1 -right-1 p-1 bg-surface border border-line text-ash hover:text-gold hover:border-sun rounded-md transition-colors"
           >
             <X className="h-3 w-3" />
           </button>

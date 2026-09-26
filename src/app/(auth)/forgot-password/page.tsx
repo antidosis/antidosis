@@ -40,8 +40,8 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0806] text-[#e8d5a3] flex flex-col">
-      <div className="px-4 md:px-8 py-3 border-b border-[#2a2420]">
+    <div className="min-h-screen bg-void text-gold flex flex-col">
+      <div className="px-4 md:px-8 py-3 border-b border-line">
         <Link href="/" className="flex items-center gap-2">
           <img
             src="/images/logo.webp"
@@ -49,26 +49,26 @@ export default function ForgotPasswordPage() {
             width={138}
             height={56}
             fetchPriority="high"
-            className="opacity-80 hover:opacity-100 transition-opacity"
+            className="brand-logo opacity-80 hover:opacity-100 transition-opacity"
           />
         </Link>
       </div>
 
       <div className="flex-1 flex items-center justify-center px-4">
         <div className="w-full max-w-sm">
-          <p className="text-xs text-[#8f7f6e] mb-8">$ passwd --reset</p>
-          <h1 className="heading-display text-2xl text-[#e8d5a3] mb-2">
+          <p className="text-xs text-ash mb-8">$ passwd --reset</p>
+          <h1 className="heading-display text-2xl text-gold mb-2">
             reset_password
             <TerminalCursor />
           </h1>
-          <p className="text-sm text-[#b8a078] mb-12">
+          <p className="text-sm text-parchment mb-12">
             Enter your email and we&apos;ll send you a reset link
           </p>
 
           {sent ? (
-            <div className="border border-[#2a2420] bg-[#12100e] p-5">
-              <p className="text-sm text-[#00e676] mb-2">Reset link sent.</p>
-              <p className="text-xs text-[#8f7f6e]">
+            <div className="border border-line bg-surface p-5">
+              <p className="text-sm text-ok mb-2">Reset link sent.</p>
+              <p className="text-xs text-ash">
                 Check your inbox (and spam folder) for an email from us.
               </p>
               <div className="mt-6 text-center">
@@ -93,11 +93,11 @@ export default function ForgotPasswordPage() {
                   required
                 />
               </div>
-              {error && <p className="text-sm text-[#ff5252]">{error}</p>}
+              {error && <p className="text-sm text-bad">{error}</p>}
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Sending..." : "Send reset link"}
               </Button>
-              <p className="text-sm text-[#8f7f6e] text-center">
+              <p className="text-sm text-ash text-center">
                 <Button variant="link" size="sm" asChild>
                   <Link href="/login">Back to login</Link>
                 </Button>

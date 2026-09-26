@@ -78,17 +78,17 @@ export function CredentialsSection({ initialCredentials, onUpdate }: Credentials
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <p className="text-xs text-[#7a6b5a]">$ ls ~/credentials/</p>
+        <p className="text-xs text-leather">$ ls ~/credentials/</p>
         <Button size="sm" variant="secondary" onClick={() => setCredFormOpen(true)}>
           <Plus className="h-4 w-4 mr-1" /> Add Credential
         </Button>
       </div>
 
-      <div className="bg-[#00e5ff]/5 border border-[#00e5ff]/20 p-4 mb-6">
+      <div className="bg-mercury/5 border border-mercury/20 p-4 mb-6">
         <div className="flex items-start gap-3">
-          <Info className="h-4 w-4 text-[#00e5ff] mt-0.5 flex-shrink-0" />
-          <div className="text-xs text-[#7a6b5a] space-y-1">
-            <p className="text-[#e8d5a3] font-medium">How identity verification works</p>
+          <Info className="h-4 w-4 text-mercury mt-0.5 flex-shrink-0" />
+          <div className="text-xs text-leather space-y-1">
+            <p className="text-gold font-medium">How identity verification works</p>
             <p>
               Upload a government-issued ID (driver&apos;s licence, passport, etc.) as an{" "}
               <strong>&ldquo;identification&rdquo;</strong> type credential. Our team reviews and

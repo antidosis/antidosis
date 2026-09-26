@@ -125,7 +125,7 @@ export function SkillAutocomplete({
     <div className={cn("relative", className)}>
       {/* Input row */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8f7f6e]" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ash" />
         <Input
           ref={inputRef}
           value={input}
@@ -146,7 +146,7 @@ export function SkillAutocomplete({
           size="icon"
           onClick={() => input.trim() && addSkill(input)}
           disabled={!input.trim() || value.length >= maxSkills}
-          className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-[#8f7f6e] hover:text-[#e8d5a3] disabled:opacity-30"
+          className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 text-ash hover:text-gold disabled:opacity-30"
         >
           <Plus className="h-4 w-4" />
         </Button>
@@ -156,12 +156,12 @@ export function SkillAutocomplete({
       {open && (suggestions.length > 0 || showCustomOption) && (
         <div
           ref={dropdownRef}
-          className="absolute z-50 mt-1 w-full max-h-72 overflow-y-auto rounded border border-[#2a2420] bg-[#14110e] shadow-lg"
+          className="absolute z-50 mt-1 w-full max-h-72 overflow-y-auto rounded border border-line bg-surface shadow-lg"
         >
           {/* Suggestions grouped by category */}
           {groupedSuggestions.map((group) => (
             <div key={group.categoryId}>
-              <div className="px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider text-[#8f7f6e] bg-[#1a1714] border-b border-[#2a2420]">
+              <div className="px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider text-ash bg-raise border-b border-line">
                 {group.categoryLabel}
               </div>
               {group.skills.map((skill) => {
@@ -175,12 +175,10 @@ export function SkillAutocomplete({
                     onMouseEnter={() => setHighlightedIndex(globalIndex)}
                     className={cn(
                       "w-full px-3 py-2 text-left text-sm transition-colors flex items-center gap-2",
-                      isHighlighted
-                        ? "bg-[#2a2420] text-[#e8d5a3]"
-                        : "text-[#b8a078] hover:bg-[#1e1a16]"
+                      isHighlighted ? "bg-line text-gold" : "text-parchment hover:bg-raise"
                     )}
                   >
-                    <Sparkles className="h-3 w-3 text-[#f5a623] opacity-60" />
+                    <Sparkles className="h-3 w-3 text-sun opacity-60" />
                     <span>{skill}</span>
                   </button>
                 );
@@ -195,15 +193,15 @@ export function SkillAutocomplete({
               onClick={() => addSkill(input)}
               onMouseEnter={() => setHighlightedIndex(suggestions.length)}
               className={cn(
-                "w-full px-3 py-2 text-left text-sm transition-colors border-t border-[#2a2420] flex items-center gap-2",
+                "w-full px-3 py-2 text-left text-sm transition-colors border-t border-line flex items-center gap-2",
                 highlightedIndex === suggestions.length
-                  ? "bg-[#2a2420] text-[#e8d5a3]"
-                  : "text-[#b8a078] hover:bg-[#1e1a16]"
+                  ? "bg-line text-gold"
+                  : "text-parchment hover:bg-raise"
               )}
             >
-              <Plus className="h-3 w-3 text-[#00e676]" />
+              <Plus className="h-3 w-3 text-ok" />
               <span>
-                Add &quot;<span className="text-[#e8d5a3]">{input.trim()}</span>&quot;
+                Add &quot;<span className="text-gold">{input.trim()}</span>&quot;
               </span>
             </button>
           )}
@@ -214,9 +212,9 @@ export function SkillAutocomplete({
       {open && !input.trim() && suggestions.length === 0 && !showCustomOption && (
         <div
           ref={dropdownRef}
-          className="absolute z-50 mt-1 w-full rounded border border-[#2a2420] bg-[#14110e] shadow-lg"
+          className="absolute z-50 mt-1 w-full rounded border border-line bg-surface shadow-lg"
         >
-          <div className="px-3 py-3 text-sm text-[#8f7f6e] text-center">
+          <div className="px-3 py-3 text-sm text-ash text-center">
             Start typing to see skill suggestions
           </div>
         </div>
@@ -228,13 +226,13 @@ export function SkillAutocomplete({
           {value.map((skill) => (
             <span
               key={skill}
-              className="inline-flex items-center gap-1.5 text-xs text-[#e8d5a3] bg-[#1a1714] border border-[#2a2420] rounded px-2.5 py-1"
+              className="inline-flex items-center gap-1.5 text-xs text-gold bg-raise border border-line rounded px-2.5 py-1"
             >
               {skill}
               <button
                 type="button"
                 onClick={() => removeSkill(skill)}
-                className="text-[#8f7f6e] hover:text-[#ff5252] transition-colors"
+                className="text-ash hover:text-bad transition-colors"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -244,7 +242,7 @@ export function SkillAutocomplete({
       )}
 
       {value.length >= maxSkills && (
-        <p className="text-[10px] text-[#8f7f6e] mt-1.5">Maximum {maxSkills} skills allowed.</p>
+        <p className="text-[10px] text-ash mt-1.5">Maximum {maxSkills} skills allowed.</p>
       )}
     </div>
   );

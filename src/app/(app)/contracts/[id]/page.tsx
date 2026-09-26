@@ -494,14 +494,10 @@ export default function ContractPage() {
   }
 
   if (loading)
-    return (
-      <div className="max-w-3xl mx-auto py-24 text-center text-[#8f7f6e]">loading contract...</div>
-    );
+    return <div className="max-w-3xl mx-auto py-24 text-center text-ash">loading contract...</div>;
   if (!contract)
     return (
-      <div className="max-w-3xl mx-auto py-24 text-center text-[#ff5252]">
-        error: contract not found
-      </div>
+      <div className="max-w-3xl mx-auto py-24 text-center text-bad">error: contract not found</div>
     );
 
   const isPartyA = contract.partyA.id === profileId;
@@ -556,11 +552,11 @@ export default function ContractPage() {
   return (
     <div className={`${ebGaramond.variable} min-h-screen contract-parchment`}>
       {/* Top nav bar — dark strip for UI chrome */}
-      <div className="print-hidden bg-[#0a0806] border-b border-[#2a2420]">
+      <div className="print-hidden bg-void border-b border-line">
         <div className="max-w-3xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
           <Link
             href={`/needs/${contract.need.id}`}
-            className="inline-flex items-center text-sm text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
+            className="inline-flex items-center text-sm text-ash hover:text-gold transition-colors"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Need
@@ -574,10 +570,10 @@ export default function ContractPage() {
 
       <div className="max-w-3xl mx-auto px-4 md:px-8 space-y-8 pb-12 pt-8">
         {/* Contract Document Header */}
-        <div className="text-center pb-6 border-b border-[#d4b896]">
+        <div className="text-center pb-6 border-b border-paperline">
           <div className="contract-seal mb-4">Antidosis</div>
           <h1 className="contract-heading text-3xl md:text-4xl mb-2">Binding Exchange Contract</h1>
-          <p className="contract-body text-sm text-[#5a4a3a]">
+          <p className="contract-body text-sm text-linestrong">
             Contract Reference:{" "}
             <span className="font-mono text-xs">{contract.id.slice(0, 8).toUpperCase()}</span>
           </p>
@@ -599,9 +595,9 @@ export default function ContractPage() {
 
         {/* Cancelled banner */}
         {contract.status === "cancelled" && (
-          <div className="contract-page p-4 print-hidden border-l-2 border-l-[#ff5252] bg-[#ff5252]/5">
-            <p className="text-sm font-medium text-[#ff5252]">This contract has been cancelled</p>
-            <p className="text-xs text-[#8f7f6e] mt-1">
+          <div className="contract-page p-4 print-hidden border-l-2 border-l-bad bg-bad/5">
+            <p className="text-sm font-medium text-bad">This contract has been cancelled</p>
+            <p className="text-xs text-ash mt-1">
               No further actions can be taken. The need is available for new interest.
             </p>
           </div>
@@ -630,23 +626,19 @@ export default function ContractPage() {
               <div key={step.label} className="flex items-center gap-1 flex-1">
                 <div
                   className={`flex-1 h-1.5 rounded-full transition-colors ${
-                    step.done ? "bg-emerald-600" : step.active ? "bg-amber-600" : "bg-[#d4c4a8]"
+                    step.done ? "bg-emerald-600" : step.active ? "bg-amber-600" : "bg-goldsoft"
                   }`}
                 />
                 <span
                   className={`text-[10px] uppercase tracking-wider whitespace-nowrap ${
-                    step.done
-                      ? "text-emerald-700"
-                      : step.active
-                        ? "text-amber-700"
-                        : "text-[#8a7a60]"
+                    step.done ? "text-emerald-700" : step.active ? "text-amber-700" : "text-ash2"
                   }`}
                 >
                   {step.label}
                 </span>
                 {i < arr.length - 1 && (
                   <div
-                    className={`flex-1 h-1.5 rounded-full ${step.done ? "bg-emerald-600" : "bg-[#d4c4a8]"}`}
+                    className={`flex-1 h-1.5 rounded-full ${step.done ? "bg-emerald-600" : "bg-goldsoft"}`}
                   />
                 )}
               </div>
@@ -658,13 +650,13 @@ export default function ContractPage() {
         {isPartyA &&
           !contract.partyBSignedAt &&
           (contract.status === "draft" || contract.status === "pending_terms") && (
-            <div className="contract-page p-4 print-hidden border-l-2 border-l-[#ff5252]/40 bg-[#ff5252]/5">
+            <div className="contract-page p-4 print-hidden border-l-2 border-l-bad/40 bg-bad/5">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-medium text-[#ff5252]">
+                  <p className="text-sm font-medium text-bad">
                     Waiting for {contract.partyB.fullName || "the fulfiller"} to sign
                   </p>
-                  <p className="text-xs text-[#8f7f6e] mt-0.5">
+                  <p className="text-xs text-ash mt-0.5">
                     You can cancel this contract at any time before both parties sign. The need will
                     be archived so you can edit and re-post it.
                   </p>
@@ -675,7 +667,7 @@ export default function ContractPage() {
                   }
                   variant="outline"
                   size="sm"
-                  className="text-[#ff5252] border-[#ff5252]/30 hover:border-[#ff5252]/60 hover:bg-[#ff5252]/10 shrink-0"
+                  className="text-bad border-bad/30 hover:border-bad/60 hover:bg-bad/10 shrink-0"
                 >
                   {termsLocked ? "Request Cancellation" : "Cancel Contract"}
                 </Button>
@@ -687,25 +679,25 @@ export default function ContractPage() {
         <div className="contract-page p-5 print-hidden">
           <button
             onClick={() => setShowNeedDetails(!showNeedDetails)}
-            className="w-full flex items-center justify-between text-left hover:bg-[#1a1714] transition-colors"
+            className="w-full flex items-center justify-between text-left hover:bg-raise transition-colors"
           >
-            <span className="text-xs font-medium uppercase tracking-wide text-[#8f7f6e]">
+            <span className="text-xs font-medium uppercase tracking-wide text-ash">
               Original Need Post
             </span>
             {showNeedDetails ? (
-              <ChevronUp className="h-4 w-4 text-[#8f7f6e]" />
+              <ChevronUp className="h-4 w-4 text-ash" />
             ) : (
-              <ChevronDown className="h-4 w-4 text-[#8f7f6e]" />
+              <ChevronDown className="h-4 w-4 text-ash" />
             )}
           </button>
           {showNeedDetails && (
             <div className="pt-4 space-y-4">
-              <p className="text-sm text-[#b8a078] leading-relaxed whitespace-pre-line">
+              <p className="text-sm text-parchment leading-relaxed whitespace-pre-line">
                 {contract.need.description}
               </p>
               <div className="flex items-start gap-3">
-                <div className="text-sm text-[#b8a078]">
-                  <span className="text-xs uppercase tracking-wide text-[#8f7f6e] block mb-1">
+                <div className="text-sm text-parchment">
+                  <span className="text-xs uppercase tracking-wide text-ash block mb-1">
                     Offering In Exchange
                   </span>
                   {contract.need.offerDescription}
@@ -718,7 +710,7 @@ export default function ContractPage() {
                       key={i}
                       src={url}
                       alt=""
-                      className="h-24 w-24 object-cover border border-[#2a2420]"
+                      className="h-24 w-24 object-cover border border-line"
                     />
                   ))}
                 </div>
@@ -739,14 +731,14 @@ export default function ContractPage() {
         {/* Negotiation Transcript */}
         {contract.negotiationMessages.length > 0 && (
           <div className="contract-page p-5">
-            <h2 className="text-lg heading-display text-[#e8d5a3] mb-4 flex items-center gap-2">
+            <h2 className="text-lg heading-display text-gold mb-4 flex items-center gap-2">
               <MessageSquare className="h-4 w-4" />
               Negotiation Transcript
             </h2>
             <div className="space-y-4 max-h-72 overflow-y-auto pr-2">
               {contract.negotiationMessages.map((msg, idx) => (
-                <div key={idx} className="border-l-2 border-l-[#2a2420] pl-3">
-                  <p className="text-xs text-[#8f7f6e]">
+                <div key={idx} className="border-l-2 border-l-line pl-3">
+                  <p className="text-xs text-ash">
                     {msg.senderName || "anonymous"} —{" "}
                     {new Date(msg.createdAt).toLocaleString("en-AU", {
                       day: "numeric",
@@ -755,7 +747,7 @@ export default function ContractPage() {
                       minute: "2-digit",
                     })}
                   </p>
-                  <p className="text-sm text-[#b8a078] mt-1">{msg.content}</p>
+                  <p className="text-sm text-parchment mt-1">{msg.content}</p>
                 </div>
               ))}
             </div>
@@ -764,20 +756,20 @@ export default function ContractPage() {
 
         {/* Terms Section */}
         <div className="contract-page p-6 space-y-6">
-          <div className="flex items-center justify-between border-b border-[#d4b896] pb-4">
+          <div className="flex items-center justify-between border-b border-paperline pb-4">
             <h2 className="contract-heading text-xl">1. Terms of Agreement</h2>
             {termsLocked ? (
-              <span className="text-xs font-medium uppercase tracking-wide text-[#00e676] flex items-center gap-1">
+              <span className="text-xs font-medium uppercase tracking-wide text-ok flex items-center gap-1">
                 <Lock className="h-3 w-3" />
                 locked
               </span>
             ) : bothSubmitted ? (
-              <span className="text-xs font-medium uppercase tracking-wide text-[#f5a623] flex items-center gap-1">
+              <span className="text-xs font-medium uppercase tracking-wide text-sun flex items-center gap-1">
                 <Info className="h-3 w-3" />
                 review phase
               </span>
             ) : (
-              <span className="text-xs font-medium uppercase tracking-wide text-[#ff5252] flex items-center gap-1">
+              <span className="text-xs font-medium uppercase tracking-wide text-bad flex items-center gap-1">
                 <Unlock className="h-3 w-3" />
                 writing terms
               </span>
@@ -787,9 +779,11 @@ export default function ContractPage() {
           {/* Phase 1: Write Terms */}
           {!bothSubmitted && !termsLocked && (
             <>
-              <div className="bg-[#f0dfc0] border border-[#d4b896] rounded-sm p-4 print-hidden">
-                <p className="text-sm text-[#5a4a3a] font-medium mb-1">Phase 1: Write Your Terms</p>
-                <p className="text-xs text-[#8f7f6e]">
+              <div className="bg-paper border border-paperline rounded-sm p-4 print-hidden">
+                <p className="text-sm text-linestrong font-medium mb-1">
+                  Phase 1: Write Your Terms
+                </p>
+                <p className="text-xs text-ash">
                   Both parties must write and submit their own terms before review can begin. You
                   can edit your terms until you submit them.
                 </p>
@@ -797,13 +791,13 @@ export default function ContractPage() {
 
               <div className="grid md:grid-cols-2 gap-6 print-hidden">
                 {/* My Terms — Write Mode */}
-                <div className="border border-[#d4b896] p-5 bg-[#f0dfc0]">
+                <div className="border border-paperline p-5 bg-paper">
                   <div className="flex items-center justify-between mb-4">
-                    <p className="text-xs font-medium uppercase tracking-wide text-[#8f7f6e]">
+                    <p className="text-xs font-medium uppercase tracking-wide text-ash">
                       Your Terms
                     </p>
                     {iSubmitted && (
-                      <span className="text-[10px] font-medium uppercase tracking-wide text-[#00e676] flex items-center gap-1">
+                      <span className="text-[10px] font-medium uppercase tracking-wide text-ok flex items-center gap-1">
                         <Check className="h-3 w-3" />
                         submitted
                       </span>
@@ -816,14 +810,14 @@ export default function ContractPage() {
                           type="checkbox"
                           checked={useMessageTerms}
                           onChange={(e) => setUseMessageTerms(e.target.checked)}
-                          className="accent-[#f5a623]"
+                          className="accent-sun"
                         />
-                        <span className="text-sm text-[#5a4a3a]">
+                        <span className="text-sm text-linestrong">
                           use message thread as my terms
                         </span>
                       </label>
                       {useMessageTerms ? (
-                        <p className="text-sm text-[#8f7f6e] italic">
+                        <p className="text-sm text-ash italic">
                           your terms will be derived from the message thread.
                         </p>
                       ) : (
@@ -832,7 +826,7 @@ export default function ContractPage() {
                           onChange={(e) => setMyTerms(e.target.value)}
                           placeholder="describe your terms, expectations, requirements..."
                           rows={4}
-                          className="bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]"
+                          className="bg-paper border-paperline text-paperink placeholder:text-ash2"
                         />
                       )}
                       <div className="flex gap-2 mt-3">
@@ -842,7 +836,7 @@ export default function ContractPage() {
                         <Button
                           onClick={submitTerms}
                           disabled={submittingTerms || (!useMessageTerms && !myTerms.trim())}
-                          className="bg-[#ff3333] hover:bg-[#ff5555] text-white border-[#ff3333] shadow-lg shadow-[#ff3333]/30 font-semibold px-4"
+                          className="bg-bad hover:bg-bad text-white border-bad shadow-lg shadow-bad/30 font-semibold px-4"
                         >
                           <Send className="h-4 w-4 mr-2" />
                           {submittingTerms ? "Submitting..." : "Submit for Review"}
@@ -854,15 +848,13 @@ export default function ContractPage() {
                       {(
                         isPartyA ? contract.partyAUseMessageTerms : contract.partyBUseMessageTerms
                       ) ? (
-                        <p className="text-sm text-[#8f7f6e] italic">
-                          using message thread as terms
-                        </p>
+                        <p className="text-sm text-ash italic">using message thread as terms</p>
                       ) : (
-                        <p className="text-sm text-[#b8a078] whitespace-pre-line">
+                        <p className="text-sm text-parchment whitespace-pre-line">
                           {myTerms || "no terms provided."}
                         </p>
                       )}
-                      <p className="text-xs text-[#8f7f6e] mt-3 italic">
+                      <p className="text-xs text-ash mt-3 italic">
                         your terms have been submitted and cannot be edited until the other party
                         submits theirs or terms are rejected.
                       </p>
@@ -871,35 +863,35 @@ export default function ContractPage() {
                 </div>
 
                 {/* Their Terms — Write Mode (waiting) */}
-                <div className="border border-[#d4b896] p-5 bg-[#f0dfc0]">
+                <div className="border border-paperline p-5 bg-paper">
                   <div className="flex items-center justify-between mb-4">
-                    <p className="text-xs font-medium uppercase tracking-wide text-[#8f7f6e]">
+                    <p className="text-xs font-medium uppercase tracking-wide text-ash">
                       {otherParty.fullName || "Other Party"}&apos;s Terms
                     </p>
                     {(isPartyA ? bSubmitted : aSubmitted) ? (
-                      <span className="text-[10px] font-medium uppercase tracking-wide text-[#00e676] flex items-center gap-1">
+                      <span className="text-[10px] font-medium uppercase tracking-wide text-ok flex items-center gap-1">
                         <Check className="h-3 w-3" />
                         submitted
                       </span>
                     ) : (
-                      <span className="text-[10px] font-medium uppercase tracking-wide text-[#ff5252]">
+                      <span className="text-[10px] font-medium uppercase tracking-wide text-bad">
                         waiting...
                       </span>
                     )}
                   </div>
                   {(isPartyA ? bSubmitted : aSubmitted) ? (
                     theyUseMessageTerms ? (
-                      <p className="text-sm text-[#8f7f6e] italic">
+                      <p className="text-sm text-ash italic">
                         {otherParty.fullName || "the other party"} is using the message thread as
                         their terms.
                       </p>
                     ) : (
-                      <p className="text-sm text-[#b8a078] whitespace-pre-line">
+                      <p className="text-sm text-parchment whitespace-pre-line">
                         {theirTerms || "no terms provided."}
                       </p>
                     )
                   ) : (
-                    <p className="text-sm text-[#8f7f6e] italic">
+                    <p className="text-sm text-ash italic">
                       waiting for {otherParty.fullName || "the other party"} to submit their
                       terms...
                     </p>
@@ -913,11 +905,11 @@ export default function ContractPage() {
           {(bothSubmitted || termsLocked) && (
             <>
               {!termsLocked && (
-                <div className="bg-[#f0dfc0] border border-[#d4b896] rounded-sm p-4 print-hidden">
-                  <p className="text-sm text-[#5a4a3a] font-medium mb-1">
+                <div className="bg-paper border border-paperline rounded-sm p-4 print-hidden">
+                  <p className="text-sm text-linestrong font-medium mb-1">
                     Phase 2: Review & Accept
                   </p>
-                  <p className="text-xs text-[#8f7f6e]">
+                  <p className="text-xs text-ash">
                     Both parties have submitted their terms. Review them carefully before accepting.
                     Once both parties accept, terms will be locked and the contract moves to
                     signing.
@@ -927,26 +919,26 @@ export default function ContractPage() {
 
               {/* Both parties' terms side by side — readonly */}
               <div className="grid md:grid-cols-2 gap-6">
-                <div className="border border-[#d4b896] p-5 bg-[#f0dfc0]">
-                  <p className="text-xs font-medium uppercase tracking-wide text-[#8f7f6e] mb-3">
+                <div className="border border-paperline p-5 bg-paper">
+                  <p className="text-xs font-medium uppercase tracking-wide text-ash mb-3">
                     {contract.partyA.fullName || "Party A"}&apos;s Terms
                   </p>
                   {contract.partyAUseMessageTerms ? (
-                    <p className="text-sm text-[#8f7f6e] italic">using message thread as terms</p>
+                    <p className="text-sm text-ash italic">using message thread as terms</p>
                   ) : (
-                    <p className="text-sm text-[#2c1810] whitespace-pre-line leading-relaxed">
+                    <p className="text-sm text-paperink whitespace-pre-line leading-relaxed">
                       {contract.partyATerms || "no terms provided."}
                     </p>
                   )}
                 </div>
-                <div className="border border-[#d4b896] p-5 bg-[#f0dfc0]">
-                  <p className="text-xs font-medium uppercase tracking-wide text-[#8f7f6e] mb-3">
+                <div className="border border-paperline p-5 bg-paper">
+                  <p className="text-xs font-medium uppercase tracking-wide text-ash mb-3">
                     {contract.partyB.fullName || "Party B"}&apos;s Terms
                   </p>
                   {contract.partyBUseMessageTerms ? (
-                    <p className="text-sm text-[#8f7f6e] italic">using message thread as terms</p>
+                    <p className="text-sm text-ash italic">using message thread as terms</p>
                   ) : (
-                    <p className="text-sm text-[#2c1810] whitespace-pre-line leading-relaxed">
+                    <p className="text-sm text-paperink whitespace-pre-line leading-relaxed">
                       {contract.partyBTerms || "no terms provided."}
                     </p>
                   )}
@@ -955,8 +947,8 @@ export default function ContractPage() {
 
               {/* Agreement status + Accept button */}
               {!termsLocked && (
-                <div className="border border-[#d4b896] p-5 bg-[#f0dfc0] print-hidden">
-                  <p className="text-xs font-medium uppercase tracking-wide text-[#8f7f6e] mb-4">
+                <div className="border border-paperline p-5 bg-paper print-hidden">
+                  <p className="text-xs font-medium uppercase tracking-wide text-ash mb-4">
                     Acceptance Status
                   </p>
                   <div className="space-y-3">
@@ -978,7 +970,7 @@ export default function ContractPage() {
                         <Check className="h-4 w-4 mr-2" />
                         {agreeing ? "Accepting..." : "I Accept These Terms"}
                       </Button>
-                      <p className="text-center text-xs text-[#8f7f6e]">
+                      <p className="text-center text-xs text-ash">
                         By clicking accept, you agree to be bound by both parties&apos; terms as
                         shown above.
                       </p>
@@ -986,10 +978,10 @@ export default function ContractPage() {
                   )}
                   {iAgreed && !termsLocked && (
                     <div className="mt-5 text-center">
-                      <p className="text-sm text-[#5a4a3a] font-medium">
+                      <p className="text-sm text-linestrong font-medium">
                         You have accepted these terms
                       </p>
-                      <p className="text-xs text-[#8f7f6e] mt-1">
+                      <p className="text-xs text-ash mt-1">
                         waiting for the other party to accept...
                       </p>
                     </div>
@@ -1003,15 +995,13 @@ export default function ContractPage() {
         {/* PDF Section */}
         {termsLocked && (
           <div className="contract-page p-5 print-hidden">
-            <h2 className="text-lg heading-display text-[#e8d5a3] mb-4 flex items-center gap-2">
+            <h2 className="text-lg heading-display text-gold mb-4 flex items-center gap-2">
               <FileText className="h-4 w-4" />
               Contract Document
             </h2>
             {contract.pdfUrl ? (
               <div className="space-y-3">
-                <p className="text-sm text-[#00e676]">
-                  contract pdf generated and ready for signing
-                </p>
+                <p className="text-sm text-ok">contract pdf generated and ready for signing</p>
                 <Button size="sm" variant="mercury" asChild>
                   <a href={contract.pdfUrl} target="_blank" rel="noopener noreferrer">
                     <FileText className="h-3.5 w-3.5 mr-2" />
@@ -1021,7 +1011,7 @@ export default function ContractPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                <p className="text-sm text-[#b8a078]">
+                <p className="text-sm text-parchment">
                   terms are locked. generate the contract document to proceed.
                 </p>
                 <Button size="sm" onClick={generatePdf} disabled={generatingPdf}>
@@ -1035,7 +1025,7 @@ export default function ContractPage() {
         {/* Signatures */}
         {termsLocked && (
           <div className="contract-page p-6">
-            <h2 className="contract-heading text-xl mb-4 border-b border-[#d4b896] pb-2">
+            <h2 className="contract-heading text-xl mb-4 border-b border-paperline pb-2">
               2. Digital Signatures
             </h2>
             <div className="space-y-4">
@@ -1045,7 +1035,7 @@ export default function ContractPage() {
                 signedAt={contract.partyASignedAt}
                 signatureText={contract.partyASignature}
               />
-              <div className="border-t border-[#2a2420]" />
+              <div className="border-t border-line" />
               <SignatureRow
                 name={contract.partyB.fullName}
                 signed={!!contract.partyBSignedAt}
@@ -1060,7 +1050,7 @@ export default function ContractPage() {
               )}
               {iSigned && !bothSigned && (
                 <div className="space-y-3 mt-4">
-                  <p className="text-center text-sm text-[#8f7f6e]">
+                  <p className="text-center text-sm text-ash">
                     waiting for {otherParty.fullName || "the other party"} to sign...
                   </p>
                   <Button
@@ -1074,12 +1064,12 @@ export default function ContractPage() {
                 </div>
               )}
               {bothSigned && contract.status !== "completed" && contract.status !== "cancelled" && (
-                <p className="text-center text-sm text-[#b24bf5] mt-4">
+                <p className="text-center text-sm text-quint mt-4">
                   contract is active — both parties have digitally signed
                 </p>
               )}
               {contract.status === "completed" && (
-                <p className="text-center text-sm text-[#00e676] mt-4">
+                <p className="text-center text-sm text-ok mt-4">
                   contract complete — both parties fulfilled their obligations
                 </p>
               )}
@@ -1090,27 +1080,27 @@ export default function ContractPage() {
         {/* Active / Completion */}
         {(contract.status === "active" || contract.status === "pending_completion") && (
           <div className="contract-page p-5 print-hidden">
-            <h2 className="text-lg heading-display text-[#e8d5a3] mb-4">Completion</h2>
+            <h2 className="text-lg heading-display text-gold mb-4">Completion</h2>
             <div className="space-y-0">
               <div className="flex items-center justify-between py-3">
-                <span className="text-sm text-[#b8a078]">
+                <span className="text-sm text-parchment">
                   {contract.partyA.fullName || "party_a"}
                 </span>
                 {contract.aMarkedComplete ? (
                   <Badge variant="success">done</Badge>
                 ) : (
-                  <span className="text-xs text-[#8f7f6e] uppercase tracking-wide">pending</span>
+                  <span className="text-xs text-ash uppercase tracking-wide">pending</span>
                 )}
               </div>
-              <div className="border-t border-[#2a2420]" />
+              <div className="border-t border-line" />
               <div className="flex items-center justify-between py-3">
-                <span className="text-sm text-[#b8a078]">
+                <span className="text-sm text-parchment">
                   {contract.partyB.fullName || "party_b"}
                 </span>
                 {contract.bMarkedComplete ? (
                   <Badge variant="success">done</Badge>
                 ) : (
-                  <span className="text-xs text-[#8f7f6e] uppercase tracking-wide">pending</span>
+                  <span className="text-xs text-ash uppercase tracking-wide">pending</span>
                 )}
               </div>
             </div>
@@ -1120,28 +1110,26 @@ export default function ContractPage() {
               </Button>
             )}
             {iMarkedComplete && !otherMarkedComplete && (
-              <p className="text-center text-sm text-[#8f7f6e] mt-4">
-                waiting for the other party...
-              </p>
+              <p className="text-center text-sm text-ash mt-4">waiting for the other party...</p>
             )}
             {iMarkedComplete && otherMarkedComplete && (
-              <p className="text-center text-sm text-[#00e676] mt-4">contract complete</p>
+              <p className="text-center text-sm text-ok mt-4">contract complete</p>
             )}
           </div>
         )}
 
         {/* Messages */}
         <div className="contract-page p-5 print-hidden">
-          <h2 className="text-lg heading-display text-[#e8d5a3] mb-2">Messages</h2>
-          <p className="text-xs text-[#8f7f6e] mb-4">
+          <h2 className="text-lg heading-display text-gold mb-2">Messages</h2>
+          <p className="text-xs text-ash mb-4">
             messages in this thread are part of the contract record.
             {(contract.status === "completed" || contract.status === "cancelled") && (
-              <span className="text-[#f5a623] ml-1">(read-only)</span>
+              <span className="text-sun ml-1">(read-only)</span>
             )}
           </p>
           <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
             {contract.messages.length === 0 && (
-              <p className="text-sm text-[#8f7f6e] text-center py-4">no messages yet</p>
+              <p className="text-sm text-ash text-center py-4">no messages yet</p>
             )}
             {contract.messages.map((msg) => (
               <div
@@ -1152,12 +1140,12 @@ export default function ContractPage() {
                 <div
                   className={`max-w-lg px-4 py-2.5 text-sm ${
                     msg.sender.id === profileId
-                      ? "bg-[#1a1714] text-[#e8d5a3] border-l-2 border-l-[#f5a623]"
-                      : "bg-[#12100e] text-[#b8a078] border border-[#2a2420]"
+                      ? "bg-raise text-gold border-l-2 border-l-sun"
+                      : "bg-surface text-parchment border border-line"
                   }`}
                 >
                   <p>{msg.content}</p>
-                  <p className="text-xs text-[#8f7f6e] mt-1">
+                  <p className="text-xs text-ash mt-1">
                     {new Date(msg.createdAt).toLocaleTimeString([], {
                       hour: "2-digit",
                       minute: "2-digit",
@@ -1175,7 +1163,7 @@ export default function ContractPage() {
                 value={messageInput}
                 onChange={(e) => setMessageInput(e.target.value)}
                 disabled={sendingMsg}
-                className="bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]"
+                className="bg-paper border-paperline text-paperink placeholder:text-ash2"
               />
               <Button type="submit" size="icon" disabled={sendingMsg}>
                 <Send className="h-4 w-4" />
@@ -1187,21 +1175,21 @@ export default function ContractPage() {
         {/* Reviews */}
         {contract.status === "completed" && (
           <div className="contract-page p-5 print-hidden">
-            <h2 className="text-lg heading-display text-[#e8d5a3] mb-4">Reviews</h2>
+            <h2 className="text-lg heading-display text-gold mb-4">Reviews</h2>
             <div className="space-y-6">
               {!hasReviewed && (
                 <div className="space-y-4">
                   {/* Rating Guidance */}
                   <div className="vessel-lit p-5">
                     <div className="flex items-center gap-2 mb-2">
-                      <Info className="h-4 w-4 text-[#f5a623]" />
-                      <p className="text-sm font-medium text-[#e8d5a3]">Rating Guide</p>
+                      <Info className="h-4 w-4 text-sun" />
+                      <p className="text-sm font-medium text-gold">Rating Guide</p>
                     </div>
-                    <p className="text-sm text-[#b8a078] mb-2">
+                    <p className="text-sm text-parchment mb-2">
                       Default excellence. Unless there was a significant problem, keep it at 10.
                       Constructive feedback is more valuable than a low score.
                     </p>
-                    <div className="text-xs text-[#8f7f6e] space-y-1">
+                    <div className="text-xs text-ash space-y-1">
                       <p>• 10: default — everything went well, no change needed</p>
                       <p>• 8-9: good — minor suggestions go in private feedback</p>
                       <p>• 5-7: average — explain what was missing in your review</p>
@@ -1209,7 +1197,7 @@ export default function ContractPage() {
                     </div>
                   </div>
 
-                  <p className="text-sm text-[#b8a078]">
+                  <p className="text-sm text-parchment">
                     rate {otherParty.fullName || "the other party"}
                   </p>
                   <div className="flex items-center gap-3">
@@ -1219,10 +1207,10 @@ export default function ContractPage() {
                       max={10}
                       value={rating}
                       onChange={(e) => setRating(parseInt(e.target.value))}
-                      className={`flex-1 transition-all duration-300 ${rating === 10 ? "accent-[#00e676]" : "accent-[#f5a623]"}`}
+                      className={`flex-1 transition-all duration-300 ${rating === 10 ? "accent-ok" : "accent-sun"}`}
                     />
                     <span
-                      className={`text-lg font-bold w-12 text-center transition-colors duration-300 ${rating === 10 ? "text-[#00e676]" : "text-[#e8d5a3]"}`}
+                      className={`text-lg font-bold w-12 text-center transition-colors duration-300 ${rating === 10 ? "text-ok" : "text-gold"}`}
                     >
                       {rating}
                     </span>
@@ -1235,7 +1223,7 @@ export default function ContractPage() {
                       value={reviewComment}
                       onChange={(e) => setReviewComment(e.target.value)}
                       rows={3}
-                      className="bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]"
+                      className="bg-paper border-paperline text-paperink placeholder:text-ash2"
                     />
                   </div>
 
@@ -1249,7 +1237,7 @@ export default function ContractPage() {
                       value={privateFeedback}
                       onChange={(e) => setPrivateFeedback(e.target.value)}
                       rows={3}
-                      className="bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]"
+                      className="bg-paper border-paperline text-paperink placeholder:text-ash2"
                     />
                   </div>
 
@@ -1259,19 +1247,19 @@ export default function ContractPage() {
                 </div>
               )}
               {hasReviewed && (
-                <p className="text-center text-sm text-[#8f7f6e]">you have submitted your review</p>
+                <p className="text-center text-sm text-ash">you have submitted your review</p>
               )}
               {otherReview && (
                 <div className="vessel p-4 mt-4">
-                  <p className="text-xs text-[#8f7f6e] uppercase tracking-wide mb-2">
+                  <p className="text-xs text-ash uppercase tracking-wide mb-2">
                     {otherParty.fullName || "the other party"} reviewed you
                   </p>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-lg font-bold text-[#f5a623]">{otherReview.rating}</span>
-                    <span className="text-xs text-[#8f7f6e]">/ 10</span>
+                    <span className="text-lg font-bold text-sun">{otherReview.rating}</span>
+                    <span className="text-xs text-ash">/ 10</span>
                   </div>
                   {otherReview.comment && (
-                    <p className="text-sm text-[#b8a078]">{otherReview.comment}</p>
+                    <p className="text-sm text-parchment">{otherReview.comment}</p>
                   )}
                 </div>
               )}
@@ -1286,7 +1274,7 @@ export default function ContractPage() {
             {cancelEscalated && (
               <div className="contract-page p-4 border-l-2 border-l-amber-500 bg-amber-500/5">
                 <p className="text-sm font-medium text-amber-500">Escalated to admin</p>
-                <p className="text-xs text-[#8f7f6e] mt-1">
+                <p className="text-xs text-ash mt-1">
                   This cancellation request has been escalated to an admin for review.
                 </p>
               </div>
@@ -1296,7 +1284,7 @@ export default function ContractPage() {
             {cancelPending && isCancelRequester && (
               <div className="contract-page p-4 border-l-2 border-l-amber-500 bg-amber-500/5">
                 <p className="text-sm font-medium text-amber-500">Cancellation requested</p>
-                <p className="text-xs text-[#8f7f6e] mt-1">
+                <p className="text-xs text-ash mt-1">
                   Waiting for {otherParty.fullName || "the other party"} to respond.
                 </p>
               </div>
@@ -1304,22 +1292,22 @@ export default function ContractPage() {
 
             {/* Pending request — other party view */}
             {cancelPending && !isCancelRequester && (
-              <div className="contract-page p-4 border-l-2 border-l-[#ff5252] bg-[#ff5252]/5">
-                <p className="text-sm font-medium text-[#ff5252]">
+              <div className="contract-page p-4 border-l-2 border-l-bad bg-bad/5">
+                <p className="text-sm font-medium text-bad">
                   {contract.cancelRequestedById === contract.partyA.id
                     ? contract.partyA.fullName || "The poster"
                     : contract.partyB.fullName || "The fulfiller"}{" "}
                   requested to cancel this contract
                 </p>
                 {contract.cancelReason && (
-                  <p className="text-xs text-[#8f7f6e] mt-1">Reason: {contract.cancelReason}</p>
+                  <p className="text-xs text-ash mt-1">Reason: {contract.cancelReason}</p>
                 )}
                 <div className="flex gap-2 mt-3">
                   <Button
                     onClick={() => setShowRespondCancelModal(true)}
                     variant="outline"
                     size="sm"
-                    className="text-[#ff5252] border-[#ff5252]/30"
+                    className="text-bad border-bad/30"
                   >
                     Respond
                   </Button>
@@ -1329,11 +1317,11 @@ export default function ContractPage() {
 
             {/* Declined — requester view */}
             {cancelDeclined && isCancelRequester && (
-              <div className="contract-page p-4 border-l-2 border-l-[#ff5252] bg-[#ff5252]/5">
-                <p className="text-sm font-medium text-[#ff5252]">
+              <div className="contract-page p-4 border-l-2 border-l-bad bg-bad/5">
+                <p className="text-sm font-medium text-bad">
                   {otherParty.fullName || "The other party"} declined your cancellation request
                 </p>
-                <p className="text-xs text-[#8f7f6e] mt-1">
+                <p className="text-xs text-ash mt-1">
                   The contract will continue. You can escalate to an admin for review.
                 </p>
                 <Button
@@ -1341,7 +1329,7 @@ export default function ContractPage() {
                   disabled={escalating}
                   variant="ghost"
                   size="sm"
-                  className="text-[#ff5252] mt-2"
+                  className="text-bad mt-2"
                 >
                   {escalating ? "Escalating..." : "Escalate to Admin"}
                 </Button>
@@ -1356,7 +1344,7 @@ export default function ContractPage() {
                   <Button
                     onClick={() => setShowCancelConfirm(true)}
                     variant="ghost"
-                    className="text-[#ff5252]"
+                    className="text-bad"
                   >
                     Cancel Contract
                   </Button>
@@ -1364,7 +1352,7 @@ export default function ContractPage() {
                   <Button
                     onClick={() => setShowRequestCancelModal(true)}
                     variant="ghost"
-                    className="text-[#ff5252]"
+                    className="text-bad"
                   >
                     Request Cancellation
                   </Button>
@@ -1377,8 +1365,8 @@ export default function ContractPage() {
         {/* Confirmation Dialogs */}
         {showCancelConfirm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-            <div className="bg-[#12100e] border border-[#2a2420] p-6 rounded-md max-w-sm w-full mx-4">
-              <p className="text-sm text-[#e8d5a3] mb-4">
+            <div className="bg-surface border border-line p-6 rounded-md max-w-sm w-full mx-4">
+              <p className="text-sm text-gold mb-4">
                 Cancel this contract? The need will be archived so you can edit and re-post it
                 later.
               </p>
@@ -1387,7 +1375,7 @@ export default function ContractPage() {
                   onClick={cancelContract}
                   disabled={cancelling}
                   variant="ghost"
-                  className="flex-1 text-[#ff5252]"
+                  className="flex-1 text-bad"
                 >
                   {cancelling ? "Cancelling..." : "Yes, Cancel"}
                 </Button>
@@ -1404,8 +1392,8 @@ export default function ContractPage() {
         )}
         {showCompleteConfirm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-            <div className="bg-[#12100e] border border-[#2a2420] p-6 rounded-md max-w-sm w-full mx-4">
-              <p className="text-sm text-[#e8d5a3] mb-4">
+            <div className="bg-surface border border-line p-6 rounded-md max-w-sm w-full mx-4">
+              <p className="text-sm text-gold mb-4">
                 Are you sure both parties have fulfilled their obligations?
               </p>
               <div className="flex gap-3">
@@ -1432,9 +1420,9 @@ export default function ContractPage() {
         {/* Request Cancellation Modal */}
         {showRequestCancelModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-            <div className="bg-[#12100e] border border-[#2a2420] p-6 rounded-md max-w-sm w-full mx-4">
-              <p className="text-sm text-[#e8d5a3] mb-2">Request Cancellation</p>
-              <p className="text-xs text-[#8f7f6e] mb-4">
+            <div className="bg-surface border border-line p-6 rounded-md max-w-sm w-full mx-4">
+              <p className="text-sm text-gold mb-2">Request Cancellation</p>
+              <p className="text-xs text-ash mb-4">
                 The other party must agree to cancel this contract. You can optionally provide a
                 reason.
               </p>
@@ -1443,14 +1431,14 @@ export default function ContractPage() {
                 value={cancelReason}
                 onChange={(e) => setCancelReason(e.target.value)}
                 rows={3}
-                className="bg-[#0f0c0a] border-[#2a2420] text-[#e8d5a3] placeholder:text-[#8f7f6e] mb-4"
+                className="bg-inset border-line text-gold placeholder:text-ash mb-4"
               />
               <div className="flex gap-3">
                 <Button
                   onClick={requestCancel}
                   disabled={requestingCancel}
                   variant="ghost"
-                  className="flex-1 text-[#ff5252]"
+                  className="flex-1 text-bad"
                 >
                   {requestingCancel ? "Requesting..." : "Request Cancellation"}
                 </Button>
@@ -1472,9 +1460,9 @@ export default function ContractPage() {
         {/* Respond Cancellation Modal */}
         {showRespondCancelModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-            <div className="bg-[#12100e] border border-[#2a2420] p-6 rounded-md max-w-sm w-full mx-4">
-              <p className="text-sm text-[#e8d5a3] mb-2">Respond to Cancellation Request</p>
-              <p className="text-xs text-[#8f7f6e] mb-4">
+            <div className="bg-surface border border-line p-6 rounded-md max-w-sm w-full mx-4">
+              <p className="text-sm text-gold mb-2">Respond to Cancellation Request</p>
+              <p className="text-xs text-ash mb-4">
                 {contract?.cancelRequestedById === contract?.partyA.id
                   ? contract?.partyA.fullName || "The poster"
                   : contract?.partyB.fullName || "The fulfiller"}{" "}
@@ -1486,7 +1474,7 @@ export default function ContractPage() {
                   onClick={() => respondCancel(true)}
                   disabled={respondingCancel}
                   variant="ghost"
-                  className="flex-1 text-[#ff5252]"
+                  className="flex-1 text-bad"
                 >
                   {respondingCancel ? "Processing..." : "Agree to Cancel"}
                 </Button>
@@ -1506,16 +1494,16 @@ export default function ContractPage() {
         {/* Signature Modal */}
         {showSignModal && contract && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-            <div className="bg-[#f5e6c8] border border-[#d4b896] p-6 rounded-sm max-w-md w-full mx-4 shadow-2xl">
+            <div className="bg-paperbg border border-paperline p-6 rounded-sm max-w-md w-full mx-4 shadow-2xl">
               <div className="text-center mb-5">
                 <div className="contract-seal text-lg mb-2">Antidosis</div>
-                <h3 className="contract-heading text-xl text-[#1a0f08]">Digital Signature</h3>
-                <p className="text-xs text-[#5a4a3a] mt-1">
+                <h3 className="contract-heading text-xl text-paperhead">Digital Signature</h3>
+                <p className="text-xs text-linestrong mt-1">
                   You are about to sign a legally binding contract
                 </p>
               </div>
 
-              <div className="bg-[#f0dfc0] border border-[#d4b896] p-3 mb-4 text-xs text-[#5a4a3a]">
+              <div className="bg-paper border border-paperline p-3 mb-4 text-xs text-linestrong">
                 <p className="font-medium mb-1">Contract Summary:</p>
                 <p>
                   <strong>Need:</strong> {contract.need.title}
@@ -1530,14 +1518,14 @@ export default function ContractPage() {
 
               <div className="space-y-4">
                 <div>
-                  <Label className="text-xs text-[#5a4a3a] uppercase tracking-wider mb-1.5 block">
+                  <Label className="text-xs text-linestrong uppercase tracking-wider mb-1.5 block">
                     Type your full name as your signature
                   </Label>
                   <Input
                     value={signatureInput}
                     onChange={(e) => setSignatureInput(e.target.value)}
                     placeholder={`e.g. ${isPartyA ? contract.partyA.fullName : contract.partyB.fullName}`}
-                    className="bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]"
+                    className="bg-paper border-paperline text-paperink placeholder:text-ash2"
                   />
                 </div>
 
@@ -1546,9 +1534,9 @@ export default function ContractPage() {
                     type="checkbox"
                     checked={agreedToTermsCheck}
                     onChange={(e) => setAgreedToTermsCheck(e.target.checked)}
-                    className="accent-[#f5a623] mt-0.5"
+                    className="accent-sun mt-0.5"
                   />
-                  <span className="text-xs text-[#5a4a3a] leading-relaxed">
+                  <span className="text-xs text-linestrong leading-relaxed">
                     I have read and understood the terms of this contract. I agree to be legally
                     bound by both parties&apos; terms as shown above. I understand this constitutes
                     a digital signature under the <em>Electronic Transactions Act 1999</em> (Cth).
@@ -1572,7 +1560,7 @@ export default function ContractPage() {
                     setAgreedToTermsCheck(false);
                   }}
                   variant="outline"
-                  className="flex-1 border-[#d4b896] text-[#5a4a3a] hover:bg-[#f0dfc0]"
+                  className="flex-1 border-paperline text-linestrong hover:bg-paper"
                 >
                   Cancel
                 </Button>
@@ -1599,9 +1587,7 @@ function PartySection({
       <div className="flex items-center justify-between mb-3">
         <span className="contract-label">{label}</span>
         {isMe && (
-          <span className="text-[10px] font-medium uppercase tracking-wider text-[#8a7a60]">
-            you
-          </span>
+          <span className="text-[10px] font-medium uppercase tracking-wider text-ash2">you</span>
         )}
       </div>
       <div className="flex items-center gap-3">
@@ -1612,16 +1598,16 @@ function PartySection({
           <div className="flex items-center gap-2">
             <Link
               href={`/profile/${party.id}`}
-              className="text-base font-semibold truncate text-[#1a0f08] hover:text-[#5a4a3a] transition-colors print:hidden"
+              className="text-base font-semibold truncate text-paperhead hover:text-linestrong transition-colors print:hidden"
             >
               {party.fullName || "anonymous"}
             </Link>
-            <span className="text-base font-semibold text-[#1a0f08] hidden print:inline">
+            <span className="text-base font-semibold text-paperhead hidden print:inline">
               {party.fullName || "anonymous"}
             </span>
             {party.isVerified && <Shield className="h-3.5 w-3.5 text-emerald-600" />}
           </div>
-          <div className="text-sm text-[#5a4a3a] mt-0.5">
+          <div className="text-sm text-linestrong mt-0.5">
             {party.ratingCount > 0 && <span>{party.ratingAvg.toFixed(1)} ★</span>}
             {party.locationName && <span className="ml-2">{party.locationName}</span>}
           </div>
@@ -1632,7 +1618,7 @@ function PartySection({
           {party.skills.map((skill) => (
             <span
               key={skill.id}
-              className="px-2 py-0.5 text-xs font-medium uppercase tracking-wide border border-[#c4b496] text-[#5a4a3a]"
+              className="px-2 py-0.5 text-xs font-medium uppercase tracking-wide border border-faint text-linestrong"
             >
               {skill.name}
             </span>
@@ -1664,13 +1650,11 @@ function SignatureRow({
             signed
           </Badge>
         ) : (
-          <span className="text-xs text-[#8a7a60] uppercase tracking-wide print-hidden">
-            pending
-          </span>
+          <span className="text-xs text-ash2 uppercase tracking-wide print-hidden">pending</span>
         )}
       </div>
       {signed && signedAt && (
-        <p className="text-xs text-[#5a4a3a] mb-2 print-hidden">
+        <p className="text-xs text-linestrong mb-2 print-hidden">
           digitally signed on{" "}
           {new Date(signedAt).toLocaleString("en-AU", {
             day: "numeric",
@@ -1684,13 +1668,13 @@ function SignatureRow({
       <div className="signature-line" />
       {signed && signatureText ? (
         <p
-          className="text-sm text-[#2c1810] mt-1 font-serif italic"
+          className="text-sm text-paperink mt-1 font-serif italic"
           style={{ fontFamily: "'Georgia', serif" }}
         >
           {signatureText}
         </p>
       ) : (
-        <p className="text-[10px] text-[#8a7a60] mt-1 uppercase tracking-wider">Signature</p>
+        <p className="text-[10px] text-ash2 mt-1 uppercase tracking-wider">Signature</p>
       )}
     </div>
   );
@@ -1713,8 +1697,8 @@ function AgreementRow({ name, agreed }: { name: string | null; agreed: boolean }
         </div>
       ) : (
         <div className="flex items-center gap-2 print-hidden">
-          <div className="h-2 w-2 rounded-full bg-[#8a7a60]" />
-          <span className="text-xs text-[#8a7a60] uppercase tracking-wide">pending agreement</span>
+          <div className="h-2 w-2 rounded-full bg-ash2" />
+          <span className="text-xs text-ash2 uppercase tracking-wide">pending agreement</span>
         </div>
       )}
     </div>

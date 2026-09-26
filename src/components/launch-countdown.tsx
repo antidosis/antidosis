@@ -64,42 +64,40 @@ export function LaunchCountdown() {
 
   return (
     <section
-      className="relative w-full overflow-hidden border-y border-[#f5a623]/15"
+      className="relative w-full overflow-hidden border-y border-sun/15"
       style={{
         background: "linear-gradient(180deg, #0f0c0a 0%, #0a0806 50%, #0f0c0a 100%)",
         boxShadow: "inset 0 0 60px rgba(245,166,35,0.03), 0 0 30px rgba(245,166,35,0.04)",
       }}
     >
       {/* Top glow line */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#f5a623]/30 to-transparent" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-sun/30 to-transparent" />
 
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-14 md:py-20">
         {/* Terminal prompt */}
-        <p className="text-xs text-[#8f7f6e] mb-8 font-mono">
-          » NEW NODES COMING ONLINE — COUNTDOWN
-        </p>
+        <p className="text-xs text-ash mb-8 font-mono">» NEW NODES COMING ONLINE — COUNTDOWN</p>
 
         {/* Header */}
         <div className="mb-10 md:mb-14">
           <div className="flex items-center gap-3 mb-4">
             <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#f5a623] opacity-75" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#f5a623]" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sun opacity-75" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-sun" />
             </span>
-            <span className="text-xs font-medium tracking-widest text-[#f5a623] uppercase">
+            <span className="text-xs font-medium tracking-widest text-sun uppercase">
               Trial in progress
             </span>
           </div>
 
-          <h2 className="heading-display text-3xl md:text-5xl text-[#e8d5a3] mb-4">
+          <h2 className="heading-display text-3xl md:text-5xl text-gold mb-4">
             The Trial Ends.
             <br />
-            <span className="text-[#f5a623] glow-gold-subtle">The Network Grows.</span>
+            <span className="text-sun glow-gold-subtle">The Network Grows.</span>
           </h2>
 
-          <p className="text-sm md:text-base text-[#8f7f6e] max-w-lg leading-relaxed">
+          <p className="text-sm md:text-base text-ash max-w-lg leading-relaxed">
             The Central Coast is just the first node. On{" "}
-            <span className="text-[#e8d5a3]">
+            <span className="text-gold">
               {REGIONAL_LAUNCH_DATE.toLocaleDateString("en-AU", {
                 day: "numeric",
                 month: "long",
@@ -113,21 +111,25 @@ export function LaunchCountdown() {
 
         {/* Countdown grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-10 md:mb-14 max-w-2xl">
-          <CountdownBox value={mounted ? pad(timeLeft.days) : "--"} label="Days" accent="#f5a623" />
+          <CountdownBox
+            value={mounted ? pad(timeLeft.days) : "--"}
+            label="Days"
+            accent="var(--x-f5a623)"
+          />
           <CountdownBox
             value={mounted ? pad(timeLeft.hours) : "--"}
             label="Hours"
-            accent="#00e5ff"
+            accent="var(--x-00e5ff)"
           />
           <CountdownBox
             value={mounted ? pad(timeLeft.minutes) : "--"}
             label="Minutes"
-            accent="#b24bf5"
+            accent="var(--x-b24bf5)"
           />
           <CountdownBox
             value={mounted ? pad(timeLeft.seconds) : "--"}
             label="Seconds"
-            accent="#00e676"
+            accent="var(--x-00e676)"
           />
         </div>
 
@@ -156,13 +158,13 @@ export function LaunchCountdown() {
         </div>
 
         {/* Footer note */}
-        <p className="mt-6 text-xs text-[#8f7f6e]/90">
+        <p className="mt-6 text-xs text-ash/90">
           Free for everyone — yours to keep as long as the network runs. No credit card required.
         </p>
       </div>
 
       {/* Bottom glow line */}
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#f5a623]/20 to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-sun/20 to-transparent" />
     </section>
   );
 }
@@ -179,7 +181,7 @@ function CountdownBox({ value, label, accent }: { value: string; label: string; 
       >
         {value}
       </div>
-      <div className="text-[10px] md:text-xs text-[#8f7f6e] uppercase tracking-widest">{label}</div>
+      <div className="text-[10px] md:text-xs text-ash uppercase tracking-widest">{label}</div>
       {/* Subtle accent glow on hover */}
       <div
         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
@@ -210,20 +212,20 @@ export function LaunchBanner() {
 
   if (hasLaunched) {
     return (
-      <div className="w-full bg-[#00e676]/10 border-b border-[#00e676]/20">
+      <div className="w-full bg-ok/10 border-b border-ok/20">
         <div className="max-w-6xl mx-auto px-4 md:px-8 py-2 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00e676] opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00e676]" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-ok opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-ok" />
             </span>
-            <span className="text-xs text-[#00e676] font-medium">
+            <span className="text-xs text-ok font-medium">
               Antidosis is now regional — Wollongong, Newcastle & Gold Coast are live.
             </span>
           </div>
           <Link
             href="/register"
-            className="text-xs text-[#00e676] hover:text-[#e8d5a3] transition-colors font-medium underline underline-offset-2 shrink-0"
+            className="text-xs text-ok hover:text-gold transition-colors font-medium underline underline-offset-2 shrink-0"
           >
             Join your region →
           </Link>
@@ -234,29 +236,29 @@ export function LaunchBanner() {
 
   return (
     <div
-      className="w-full border-b border-[#f5a623]/15 relative overflow-hidden"
+      className="w-full border-b border-sun/15 relative overflow-hidden"
       style={{
         background: "linear-gradient(90deg, #0f0c0a 0%, #12100e 50%, #0f0c0a 100%)",
       }}
     >
       {/* Subtle animated shimmer line */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#f5a623]/40 to-transparent" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-sun/40 to-transparent" />
 
       <div className="max-w-6xl mx-auto px-4 md:px-8 py-2.5 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
           {/* Pulsing dot */}
           <span className="relative flex h-2 w-2 shrink-0">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#f5a623] opacity-60" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#f5a623]" />
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sun opacity-60" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-sun" />
           </span>
 
           {/* Message */}
-          <span className="text-xs text-[#8f7f6e] truncate hidden sm:inline">
+          <span className="text-xs text-ash truncate hidden sm:inline">
             Central Coast trial active.
           </span>
 
           {/* Countdown */}
-          <span className="text-xs font-mono text-[#f5a623] shrink-0">
+          <span className="text-xs font-mono text-sun shrink-0">
             {mounted ? (
               <>
                 {pad(timeLeft.days)}d:{pad(timeLeft.hours)}h:
@@ -267,15 +269,13 @@ export function LaunchBanner() {
             )}
           </span>
 
-          <span className="text-xs text-[#8f7f6e] truncate hidden md:inline">
-            until regional launch.
-          </span>
+          <span className="text-xs text-ash truncate hidden md:inline">until regional launch.</span>
         </div>
 
         {/* CTA */}
         <Link
           href="/register"
-          className="text-xs text-[#f5a623] hover:text-[#e8d5a3] transition-colors font-medium underline underline-offset-2 shrink-0"
+          className="text-xs text-sun hover:text-gold transition-colors font-medium underline underline-offset-2 shrink-0"
         >
           Get verified →
         </Link>

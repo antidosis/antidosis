@@ -47,7 +47,7 @@ export default function SuccessContent() {
 
   if (status === "loading") {
     return (
-      <div className="max-w-md mx-auto py-24 text-center text-[#8f7f6e]">
+      <div className="max-w-md mx-auto py-24 text-center text-ash">
         confirming subscription with stripe...
       </div>
     );
@@ -56,11 +56,11 @@ export default function SuccessContent() {
   if (status === "error") {
     return (
       <div className="max-w-md mx-auto py-24 text-center">
-        <div className="inline-flex items-center justify-center p-3 border border-[#ff5252]/20 text-[#ff5252] mb-6">
+        <div className="inline-flex items-center justify-center p-3 border border-bad/20 text-bad mb-6">
           <X className="h-8 w-8" />
         </div>
         <h1 className="text-2xl font-bold mb-4">verification failed</h1>
-        <p className="text-[13px] text-[#8f7f6e] mb-8">{errorMsg}</p>
+        <p className="text-[13px] text-ash mb-8">{errorMsg}</p>
         <Button className="w-full" asChild>
           <Link href="/dashboard">Back to dashboard</Link>
         </Button>
@@ -70,11 +70,11 @@ export default function SuccessContent() {
 
   return (
     <div className="max-w-md mx-auto py-24 text-center">
-      <div className="inline-flex items-center justify-center p-3 border border-[#00e676]/20 text-[#00e676] mb-6">
+      <div className="inline-flex items-center justify-center p-3 border border-ok/20 text-ok mb-6">
         <Check className="h-8 w-8" />
       </div>
       <h1 className="text-2xl font-bold mb-4">welcome to pro</h1>
-      <p className="text-[13px] text-[#8f7f6e] mb-8">
+      <p className="text-[13px] text-ash mb-8">
         your subscription is active. you are now covered by our dispute resolution and loss
         protection.
       </p>

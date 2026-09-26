@@ -212,19 +212,17 @@ function PartySection({
       <div className="flex items-center justify-between mb-3">
         <span className="contract-label">{label}</span>
         {isMe && (
-          <span className="text-[10px] font-medium uppercase tracking-wider text-[#8a7a60]">
-            you
-          </span>
+          <span className="text-[10px] font-medium uppercase tracking-wider text-ash2">you</span>
         )}
       </div>
       <div className="flex items-center gap-3">
         <Avatar src={party.avatarUrl} name={party.fullName} size="md" />
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-base font-semibold text-[#1a0f08]">{party.fullName}</span>
+            <span className="text-base font-semibold text-paperhead">{party.fullName}</span>
             {party.isVerified && <Shield className="h-3.5 w-3.5 text-emerald-600" />}
           </div>
-          <div className="text-sm text-[#5a4a3a] mt-0.5">
+          <div className="text-sm text-linestrong mt-0.5">
             {party.ratingCount > 0 && <span>{party.ratingAvg.toFixed(1)} ★</span>}
             {party.locationName && <span className="ml-2">{party.locationName}</span>}
           </div>
@@ -235,7 +233,7 @@ function PartySection({
           {party.skills.map((s) => (
             <span
               key={s.id}
-              className="px-2 py-0.5 text-xs font-medium uppercase tracking-wide border border-[#c4b496] text-[#5a4a3a]"
+              className="px-2 py-0.5 text-xs font-medium uppercase tracking-wide border border-faint text-linestrong"
             >
               {s.name}
             </span>
@@ -266,11 +264,11 @@ function SignatureRow({
             <Check className="h-3 w-3" /> signed
           </Badge>
         ) : (
-          <span className="text-xs text-[#8a7a60] uppercase tracking-wide">pending</span>
+          <span className="text-xs text-ash2 uppercase tracking-wide">pending</span>
         )}
       </div>
       {signed && signedAt && (
-        <p className="text-xs text-[#5a4a3a] mb-2">
+        <p className="text-xs text-linestrong mb-2">
           digitally signed on{" "}
           {new Date(signedAt).toLocaleString("en-AU", {
             day: "numeric",
@@ -284,13 +282,13 @@ function SignatureRow({
       <div className="signature-line" />
       {signed && signatureText ? (
         <p
-          className="text-sm text-[#2c1810] mt-1 font-serif italic"
+          className="text-sm text-paperink mt-1 font-serif italic"
           style={{ fontFamily: "'Georgia', serif" }}
         >
           {signatureText}
         </p>
       ) : (
-        <p className="text-[10px] text-[#8a7a60] mt-1 uppercase tracking-wider">Signature</p>
+        <p className="text-[10px] text-ash2 mt-1 uppercase tracking-wider">Signature</p>
       )}
     </div>
   );
@@ -341,10 +339,10 @@ function FlowProgress({
           <div
             className={`px-2 py-1 rounded text-[10px] uppercase tracking-wider whitespace-nowrap border ${
               step.done
-                ? "bg-[#00e676]/10 text-[#00e676] border-[#00e676]/30"
+                ? "bg-ok/10 text-ok border-ok/30"
                 : step.active
-                  ? "bg-[#f5a623]/10 text-[#f5a623] border-[#f5a623]/30"
-                  : "bg-[#1a1714] text-[#8f7f6e] border-[#2a2420]"
+                  ? "bg-sun/10 text-sun border-sun/30"
+                  : "bg-raise text-ash border-line"
             }`}
           >
             {step.done && <Check className="h-2.5 w-2.5 inline mr-1" />}
@@ -466,15 +464,15 @@ function StepGuide({
   if (!title) return null;
 
   return (
-    <div className="rounded border border-[#00e5ff]/20 bg-[#00e5ff]/5 p-4">
+    <div className="rounded border border-mercury/20 bg-mercury/5 p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm font-medium text-[#00e5ff]">{title}</p>
-          <p className="text-xs text-[#b8a078] mt-1 leading-relaxed">{text}</p>
+          <p className="text-sm font-medium text-mercury">{title}</p>
+          <p className="text-xs text-parchment mt-1 leading-relaxed">{text}</p>
         </div>
         <button
           onClick={() => setDismissed(true)}
-          className="text-[10px] text-[#8f7f6e] hover:text-[#e8d5a3] shrink-0"
+          className="text-[10px] text-ash hover:text-gold shrink-0"
         >
           <X className="h-3.5 w-3.5" />
         </button>
@@ -1038,20 +1036,18 @@ export default function ContractFlowDemoPage() {
 
   /* ─── Render ─── */
   return (
-    <div className={`${ebGaramond.variable} min-h-screen bg-[#0a0806]`}>
+    <div className={`${ebGaramond.variable} min-h-screen bg-void`}>
       {/* Demo HUD */}
-      <div className="bg-[#1a1714] border-b border-[#2a2420] sticky top-0 z-50">
+      <div className="bg-raise border-b border-line sticky top-0 z-50">
         <div className="max-w-3xl mx-auto px-4 md:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <Badge variant="default" className="text-[10px]">
               DEMO MODE
             </Badge>
-            <span className="text-xs text-[#8f7f6e]">
-              Test the contract flow without real users
-            </span>
+            <span className="text-xs text-ash">Test the contract flow without real users</span>
           </div>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-            <span className="text-xs text-[#8f7f6e] hidden sm:inline">Viewing as:</span>
+            <span className="text-xs text-ash hidden sm:inline">Viewing as:</span>
             <div className="flex flex-col sm:flex-row gap-2">
               <Button
                 size="sm"
@@ -1108,7 +1104,7 @@ export default function ContractFlowDemoPage() {
             >
               You are {currentParty.fullName}
             </p>
-            <p className="text-xs text-[#b8a078]">
+            <p className="text-xs text-parchment">
               {isPartyA
                 ? "You are the poster who created this need. You choose who to work with, negotiate terms, and manage the contract."
                 : myAcceptance?.status === "accepted" || myAcceptance?.status === "completed"
@@ -1150,7 +1146,7 @@ export default function ContractFlowDemoPage() {
 
       {/* Divider between meta header and interactive content */}
       <div className="max-w-3xl mx-auto px-4 md:px-8">
-        <div className="border-t border-[#2a2420]" />
+        <div className="border-t border-line" />
       </div>
 
       <div className="max-w-3xl mx-auto px-4 md:px-8 py-8 space-y-8">
@@ -1158,8 +1154,8 @@ export default function ContractFlowDemoPage() {
         <div className="vessel p-5 print-hidden">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
-              <h2 className="text-sm font-medium text-[#e8d5a3]">Demo Settings</h2>
-              <p className="text-xs text-[#8f7f6e]">Configure the post before testing</p>
+              <h2 className="text-sm font-medium text-gold">Demo Settings</h2>
+              <p className="text-xs text-ash">Configure the post before testing</p>
             </div>
             <div className="flex items-center gap-3">
               {isPartyA && (
@@ -1171,16 +1167,16 @@ export default function ContractFlowDemoPage() {
                       setRequiresContract(e.target.checked);
                       resetFlow();
                     }}
-                    className="accent-[#f5a623]"
+                    className="accent-sun"
                   />
-                  <span className="text-sm text-[#b8a078]">Require formal contract</span>
+                  <span className="text-sm text-parchment">Require formal contract</span>
                 </label>
               )}
               <Button
                 size="sm"
                 variant="ghost"
                 onClick={resetFlow}
-                className="text-[#8f7f6e] h-7 text-xs"
+                className="text-ash h-7 text-xs"
               >
                 Reset Flow
               </Button>
@@ -1205,16 +1201,14 @@ export default function ContractFlowDemoPage() {
             <div className="py-2">
               <Link
                 href="/"
-                className="inline-flex items-center text-xs text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
+                className="inline-flex items-center text-xs text-ash hover:text-gold transition-colors"
               >
                 <ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> browse needs
               </Link>
             </div>
 
             <div className="flex flex-wrap items-start gap-3 mb-3">
-              <h1 className="heading-display text-2xl md:text-3xl text-[#e8d5a3]">
-                {MOCK_NEED.title}
-              </h1>
+              <h1 className="heading-display text-2xl md:text-3xl text-gold">{MOCK_NEED.title}</h1>
               {interestAccepted && (
                 <Badge variant="warning" className="mt-1.5 capitalize">
                   {requiresContract ? "negotiating" : "active"}
@@ -1230,11 +1224,9 @@ export default function ContractFlowDemoPage() {
 
             {/* Declined banner for non-selected fulfillers */}
             {iAmDeclined && (
-              <div className="p-4 mb-6 rounded border bg-[#ff5252]/5 border-[#ff5252]/20">
-                <p className="text-sm text-[#ff5252] font-medium">
-                  You were not selected for this need
-                </p>
-                <p className="text-xs text-[#8f7f6e] mt-1">
+              <div className="p-4 mb-6 rounded border bg-bad/5 border-bad/20">
+                <p className="text-sm text-bad font-medium">You were not selected for this need</p>
+                <p className="text-xs text-ash mt-1">
                   The poster has chosen another fulfiller. Your acceptance has been declined.
                 </p>
               </div>
@@ -1244,31 +1236,31 @@ export default function ContractFlowDemoPage() {
               {MOCK_NEED.requiredSkills.map((s) => (
                 <span
                   key={s.id}
-                  className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-[#2a2420] text-[#8f7f6e] bg-[#1a1714] rounded"
+                  className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-line text-ash bg-raise rounded"
                 >
                   {s.name}
                 </span>
               ))}
-              <span className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-[#2a2420] text-[#8f7f6e] bg-[#1a1714] rounded flex items-center gap-1">
+              <span className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-line text-ash bg-raise rounded flex items-center gap-1">
                 <MapPin className="h-3 w-3" /> {MOCK_NEED.locationName}
               </span>
             </div>
 
             <div className="mb-6">
-              <p className="text-sm text-[#b8a078] leading-relaxed whitespace-pre-line">
+              <p className="text-sm text-parchment leading-relaxed whitespace-pre-line">
                 {MOCK_NEED.description}
               </p>
             </div>
 
             <div className="vessel p-4 mb-6">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-xs text-[#8f7f6e] uppercase tracking-wider">
+                <span className="text-xs text-ash uppercase tracking-wider">
                   offering in exchange
                 </span>
               </div>
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <p className="text-sm font-medium text-[#e8d5a3]">{MOCK_NEED.offerDescription}</p>
-                <span className="text-xs text-[#b8a078]">
+                <p className="text-sm font-medium text-gold">{MOCK_NEED.offerDescription}</p>
+                <span className="text-xs text-parchment">
                   est. ${MOCK_NEED.offerValue.toLocaleString()}
                 </span>
               </div>
@@ -1280,10 +1272,10 @@ export default function ContractFlowDemoPage() {
                 <Avatar src={PARTY_A.avatarUrl} name={PARTY_A.fullName} size="md" />
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-base font-medium text-[#e8d5a3]">{PARTY_A.fullName}</span>
-                    {PARTY_A.isVerified && <Shield className="h-4 w-4 text-[#00e676]" />}
+                    <span className="text-base font-medium text-gold">{PARTY_A.fullName}</span>
+                    {PARTY_A.isVerified && <Shield className="h-4 w-4 text-ok" />}
                   </div>
-                  <div className="text-xs text-[#8f7f6e] mt-0.5">
+                  <div className="text-xs text-ash mt-0.5">
                     <span>{PARTY_A.ratingAvg.toFixed(1)} ★</span>
                     <span className="ml-2">{PARTY_A.locationName}</span>
                   </div>
@@ -1294,9 +1286,7 @@ export default function ContractFlowDemoPage() {
             {/* Fulfiller actions */}
             {!isPartyA && !myAcceptance && (
               <div className="vessel p-4 mb-6 print-hidden">
-                <p className="text-xs text-[#8f7f6e] mb-3">
-                  tell the poster why you are a good fit.
-                </p>
+                <p className="text-xs text-ash mb-3">tell the poster why you are a good fit.</p>
                 <div className="space-y-3">
                   <Textarea
                     placeholder="introduce yourself..."
@@ -1314,13 +1304,13 @@ export default function ContractFlowDemoPage() {
             )}
 
             {!isPartyA && myAcceptance?.status === "pending" && (
-              <div className="p-3 rounded border bg-[#1a1714] border-[#2a2420] mb-6">
+              <div className="p-3 rounded border bg-raise border-line mb-6">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-[#8f7f6e]">your interest is pending review</span>
+                  <span className="text-sm text-ash">your interest is pending review</span>
                 </div>
                 {myAcceptance.message && (
-                  <div className="mt-2 bg-[#0f0c0a] p-2.5 rounded text-xs text-[#b8a078]">
-                    <span className="text-[#8f7f6e] uppercase tracking-wider text-[9px]">
+                  <div className="mt-2 bg-inset p-2.5 rounded text-xs text-parchment">
+                    <span className="text-ash uppercase tracking-wider text-[9px]">
                       your intro:{" "}
                     </span>
                     {myAcceptance.message}
@@ -1330,10 +1320,10 @@ export default function ContractFlowDemoPage() {
             )}
 
             {!isPartyA && myAcceptance?.status === "accepted" && (
-              <div className="p-3 rounded border bg-[#00e676]/5 border-[#00e676]/30 mb-6">
+              <div className="p-3 rounded border bg-ok/5 border-ok/30 mb-6">
                 <div className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-[#00e676]" />
-                  <p className="text-sm text-[#00e676]">
+                  <Check className="h-4 w-4 text-ok" />
+                  <p className="text-sm text-ok">
                     {requiresContract
                       ? "poster accepted — ready to form contract"
                       : myAcceptance.posterMarkedComplete && !myAcceptance.fulfillerMarkedComplete
@@ -1357,10 +1347,10 @@ export default function ContractFlowDemoPage() {
                         Mark as complete
                       </Button>
                     ) : (
-                      <span className="text-xs text-[#00e676]">you marked complete</span>
+                      <span className="text-xs text-ok">you marked complete</span>
                     )}
                     {myAcceptance.posterMarkedComplete && (
-                      <span className="text-xs text-[#00e676]">poster marked complete</span>
+                      <span className="text-xs text-ok">poster marked complete</span>
                     )}
                   </div>
                 )}
@@ -1368,29 +1358,29 @@ export default function ContractFlowDemoPage() {
             )}
 
             {!isPartyA && myAcceptance?.status === "completed" && (
-              <div className="p-3 rounded border bg-[#00e676]/5 border-[#00e676]/30 mb-6">
+              <div className="p-3 rounded border bg-ok/5 border-ok/30 mb-6">
                 <div className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-[#00e676]" />
-                  <p className="text-sm text-[#00e676]">deal completed — thank you!</p>
+                  <Check className="h-4 w-4 text-ok" />
+                  <p className="text-sm text-ok">deal completed — thank you!</p>
                 </div>
                 {/* Free-form review — non-poster */}
                 {!requiresContract && !hasReviewedFreeForm && (
                   <div className="mt-3">
-                    <div className="bg-[#1a1714] border border-[#2a2420] p-3 rounded space-y-3">
-                      <p className="text-xs text-[#e8d5a3] font-medium">Leave a review</p>
+                    <div className="bg-raise border border-line p-3 rounded space-y-3">
+                      <p className="text-xs text-gold font-medium">Leave a review</p>
                       <div>
-                        <label className="text-xs text-[#8f7f6e] block mb-1">Rating (1–10)</label>
+                        <label className="text-xs text-ash block mb-1">Rating (1–10)</label>
                         <input
                           type="range"
                           min={1}
                           max={10}
                           value={rating}
                           onChange={(e) => setRating(parseInt(e.target.value))}
-                          className="w-full accent-[#f5a623]"
+                          className="w-full accent-sun"
                         />
-                        <div className="flex justify-between text-xs text-[#8f7f6e] mt-1">
+                        <div className="flex justify-between text-xs text-ash mt-1">
                           <span>1</span>
-                          <span className="text-[#f5a623] font-medium">{rating}</span>
+                          <span className="text-sun font-medium">{rating}</span>
                           <span>10</span>
                         </div>
                       </div>
@@ -1421,21 +1411,19 @@ export default function ContractFlowDemoPage() {
                   </div>
                 )}
                 {!requiresContract && hasReviewedFreeForm && (
-                  <p className="text-xs text-[#8f7f6e] mt-2">
-                    You have already reviewed this deal.
-                  </p>
+                  <p className="text-xs text-ash mt-2">You have already reviewed this deal.</p>
                 )}
               </div>
             )}
 
             {/* Poster prominent review banner — free-form completed */}
             {isPartyA && freeFormCompleted && !requiresContract && (
-              <div className="p-4 rounded border bg-[#00e676]/5 border-[#00e676]/30 mb-6">
+              <div className="p-4 rounded border bg-ok/5 border-ok/30 mb-6">
                 <div className="flex items-center gap-2 mb-2">
-                  <Check className="h-4 w-4 text-[#00e676]" />
-                  <p className="text-sm text-[#00e676] font-medium">Deal completed</p>
+                  <Check className="h-4 w-4 text-ok" />
+                  <p className="text-sm text-ok font-medium">Deal completed</p>
                 </div>
-                <p className="text-xs text-[#8f7f6e] mb-3">
+                <p className="text-xs text-ash mb-3">
                   Leave a review to close this deal out and help build trust in the community.
                 </p>
                 {!(freeFormReviews[freeFormAccepted?.id ?? ""] ?? []).some(
@@ -1461,20 +1449,20 @@ export default function ContractFlowDemoPage() {
                     </Button>
                   )}
                 {freeFormAccepted && posterReviewAccId === freeFormAccepted.id && (
-                  <div className="mt-3 bg-[#1a1714] border border-[#2a2420] p-3 rounded space-y-3">
+                  <div className="mt-3 bg-raise border border-line p-3 rounded space-y-3">
                     <div>
-                      <label className="text-xs text-[#8f7f6e] block mb-1">Rating (1–10)</label>
+                      <label className="text-xs text-ash block mb-1">Rating (1–10)</label>
                       <input
                         type="range"
                         min={1}
                         max={10}
                         value={rating}
                         onChange={(e) => setRating(parseInt(e.target.value))}
-                        className="w-full accent-[#f5a623]"
+                        className="w-full accent-sun"
                       />
-                      <div className="flex justify-between text-xs text-[#8f7f6e] mt-1">
+                      <div className="flex justify-between text-xs text-ash mt-1">
                         <span>1</span>
-                        <span className="text-[#f5a623] font-medium">{rating}</span>
+                        <span className="text-sun font-medium">{rating}</span>
                         <span>10</span>
                       </div>
                     </div>
@@ -1524,7 +1512,7 @@ export default function ContractFlowDemoPage() {
                   (freeFormReviews[freeFormAccepted.id] ?? []).some(
                     (r) => r.giverId === PARTY_A.id
                   ) && (
-                    <p className="text-xs text-[#8f7f6e] mt-2">
+                    <p className="text-xs text-ash mt-2">
                       You have already reviewed this deal. Thank you!
                     </p>
                   )}
@@ -1534,7 +1522,7 @@ export default function ContractFlowDemoPage() {
             {/* Poster interested list */}
             {isPartyA && acceptances.filter((a) => a.status !== "declined").length > 0 && (
               <div className="mb-6 space-y-4">
-                <h3 className="text-xs text-[#8f7f6e] uppercase tracking-wider">Interested</h3>
+                <h3 className="text-xs text-ash uppercase tracking-wider">Interested</h3>
                 {acceptances
                   .filter((a) => a.status !== "declined")
                   .map((acc) => {
@@ -1551,13 +1539,11 @@ export default function ContractFlowDemoPage() {
                               <div className="flex items-center gap-2">
                                 <Link
                                   href={`/demo/profile/${party.id}`}
-                                  className="text-sm font-medium text-[#e8d5a3] hover:underline"
+                                  className="text-sm font-medium text-gold hover:underline"
                                 >
                                   {party.fullName}
                                 </Link>
-                                {party.isVerified && (
-                                  <Shield className="h-3.5 w-3.5 text-[#00e676]" />
-                                )}
+                                {party.isVerified && <Shield className="h-3.5 w-3.5 text-ok" />}
                               </div>
                               <div className="flex items-center gap-1.5">
                                 {acc.status === "pending" && (
@@ -1573,7 +1559,7 @@ export default function ContractFlowDemoPage() {
                                     <Button
                                       size="sm"
                                       variant="ghost"
-                                      className="h-7 text-xs px-2 text-[#ff5252] hover:text-[#ff5252]"
+                                      className="h-7 text-xs px-2 text-bad hover:text-bad"
                                       onClick={() => declineInterest(acc.id)}
                                     >
                                       <X className="h-3 w-3 mr-1" /> Decline
@@ -1607,12 +1593,12 @@ export default function ContractFlowDemoPage() {
                                           Mark complete
                                         </Button>
                                       ) : (
-                                        <span className="text-[10px] text-[#00e676]">
+                                        <span className="text-[10px] text-ok">
                                           you marked complete
                                         </span>
                                       )}
                                       {acc.fulfillerMarkedComplete && (
-                                        <span className="text-[10px] text-[#00e676]">
+                                        <span className="text-[10px] text-ok">
                                           fulfiller marked complete
                                         </span>
                                       )}
@@ -1628,10 +1614,10 @@ export default function ContractFlowDemoPage() {
                                 )}
                               </div>
                             </div>
-                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-[#8f7f6e]">
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-ash">
                               <span className="flex items-center gap-1">
-                                <Star className="h-3 w-3 text-[#f5a623]" />{" "}
-                                {party.ratingAvg.toFixed(1)} ({party.ratingCount})
+                                <Star className="h-3 w-3 text-sun" /> {party.ratingAvg.toFixed(1)} (
+                                {party.ratingCount})
                               </span>
                               <span className="flex items-center gap-1">
                                 <Briefcase className="h-3 w-3" /> {party.jobsCompleted} jobs
@@ -1640,20 +1626,20 @@ export default function ContractFlowDemoPage() {
                                 <MapPin className="h-3 w-3" /> {party.locationName}
                               </span>
                             </div>
-                            <p className="text-xs text-[#b8a078] mt-2 line-clamp-1">{party.bio}</p>
+                            <p className="text-xs text-parchment mt-2 line-clamp-1">{party.bio}</p>
                             <div className="flex flex-wrap gap-1.5 mt-2">
                               {party.skills.slice(0, 4).map((s) => (
                                 <span
                                   key={s.id}
-                                  className="px-1.5 py-0.5 text-[10px] uppercase tracking-wide border border-[#2a2420] text-[#8f7f6e] rounded"
+                                  className="px-1.5 py-0.5 text-[10px] uppercase tracking-wide border border-line text-ash rounded"
                                 >
                                   {s.name}
                                 </span>
                               ))}
                             </div>
                             {acc.message && (
-                              <div className="mt-2 bg-[#0f0c0a] p-2.5 rounded text-xs text-[#b8a078]">
-                                <span className="text-[#8f7f6e] uppercase tracking-wider text-[9px]">
+                              <div className="mt-2 bg-inset p-2.5 rounded text-xs text-parchment">
+                                <span className="text-ash uppercase tracking-wider text-[9px]">
                                   Message:{" "}
                                 </span>
                                 {acc.message}
@@ -1670,8 +1656,8 @@ export default function ContractFlowDemoPage() {
             {/* Messages */}
             <div className="vessel p-4 print-hidden">
               <div className="flex items-center gap-2 mb-4">
-                <MessageSquare className="h-3.5 w-3.5 text-[#8f7f6e]" />
-                <span className="text-xs text-[#8f7f6e] uppercase tracking-wider">
+                <MessageSquare className="h-3.5 w-3.5 text-ash" />
+                <span className="text-xs text-ash uppercase tracking-wider">
                   {isPartyA && activeThread !== null
                     ? "private messages"
                     : myAcceptance
@@ -1685,7 +1671,7 @@ export default function ContractFlowDemoPage() {
                 <div className="flex gap-2 mb-3 overflow-x-auto pb-1">
                   <button
                     onClick={() => setActiveThread(null)}
-                    className={`px-3 py-1.5 text-xs rounded whitespace-nowrap transition-colors ${activeThread === null ? "bg-[#f5a623] text-black" : "bg-[#1a1714] text-[#8f7f6e] border border-[#2a2420] hover:text-[#b8a078]"}`}
+                    className={`px-3 py-1.5 text-xs rounded whitespace-nowrap transition-colors ${activeThread === null ? "bg-sun text-black" : "bg-raise text-ash border border-line hover:text-parchment"}`}
                   >
                     Public
                   </button>
@@ -1698,7 +1684,7 @@ export default function ContractFlowDemoPage() {
                         <button
                           key={acc.id}
                           onClick={() => setActiveThread(acc.id)}
-                          className={`px-3 py-1.5 text-xs rounded whitespace-nowrap transition-colors ${activeThread === acc.id ? "bg-[#f5a623] text-black" : "bg-[#1a1714] text-[#8f7f6e] border border-[#2a2420] hover:text-[#b8a078]"}`}
+                          className={`px-3 py-1.5 text-xs rounded whitespace-nowrap transition-colors ${activeThread === acc.id ? "bg-sun text-black" : "bg-raise text-ash border border-line hover:text-parchment"}`}
                         >
                           {party.fullName}
                         </button>
@@ -1709,7 +1695,7 @@ export default function ContractFlowDemoPage() {
 
               {/* Public thread label */}
               {(!isPartyA || activeThread === null) && (
-                <div className="mb-2 px-2 py-1 bg-[#00e5ff]/10 border border-[#00e5ff]/20 rounded text-xs text-[#00e5ff]">
+                <div className="mb-2 px-2 py-1 bg-mercury/10 border border-mercury/20 rounded text-xs text-mercury">
                   {isPartyA
                     ? "Public — anyone viewing this need can see these messages"
                     : myAcceptance
@@ -1720,13 +1706,13 @@ export default function ContractFlowDemoPage() {
 
               {/* Private thread label */}
               {isPartyA && activeThread !== null && (
-                <p className="text-xs text-[#8f7f6e] mb-3 flex items-center gap-1.5">
+                <p className="text-xs text-ash mb-3 flex items-center gap-1.5">
                   <Lock className="h-3 w-3" />
                   Private thread — only you and this fulfiller can see these messages
                 </p>
               )}
               {!isPartyA && myAcceptance && (
-                <p className="text-xs text-[#8f7f6e] mb-3 flex items-center gap-1.5">
+                <p className="text-xs text-ash mb-3 flex items-center gap-1.5">
                   <Lock className="h-3 w-3" />
                   Private thread — only you and the poster can see these messages
                 </p>
@@ -1734,7 +1720,7 @@ export default function ContractFlowDemoPage() {
 
               <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
                 {visibleMessages.length === 0 && (
-                  <p className="text-xs text-[#8f7f6e] text-center py-4">
+                  <p className="text-xs text-ash text-center py-4">
                     {myAcceptance
                       ? "no messages yet. be the first to reach out."
                       : "no messages yet. send one to reach out to the poster."}
@@ -1747,9 +1733,9 @@ export default function ContractFlowDemoPage() {
                   >
                     <Avatar src={null} name={msg.senderName} size="sm" />
                     <div
-                      className={`max-w-[75%] px-3 py-2 text-sm rounded ${msg.senderId === profileId ? "bg-[#1a1714] text-[#e8d5a3] border-l-2 border-[#f5a623]" : "bg-[#12100e] text-[#b8a078] border border-[#2a2420]"}`}
+                      className={`max-w-[75%] px-3 py-2 text-sm rounded ${msg.senderId === profileId ? "bg-raise text-gold border-l-2 border-sun" : "bg-surface text-parchment border border-line"}`}
                     >
-                      <p className="text-[10px] text-[#8f7f6e] uppercase tracking-wider mb-1">
+                      <p className="text-[10px] text-ash uppercase tracking-wider mb-1">
                         {msg.senderName}
                       </p>
                       <p>{msg.content}</p>
@@ -1782,19 +1768,19 @@ export default function ContractFlowDemoPage() {
                       const reviewer = PARTIES[review.giverId];
                       const reviewee = PARTIES[review.receiverId];
                       return (
-                        <div key={i} className="bg-[#1a1714] border border-[#2a2420] p-3 rounded">
+                        <div key={i} className="bg-raise border border-line p-3 rounded">
                           <div className="flex items-center gap-2 mb-1">
-                            <Star className="h-3 w-3 text-[#f5a623]" />
-                            <span className="text-sm font-medium text-[#e8d5a3]">
+                            <Star className="h-3 w-3 text-sun" />
+                            <span className="text-sm font-medium text-gold">
                               {review.rating}/10
                             </span>
-                            <span className="text-xs text-[#8f7f6e]">
+                            <span className="text-xs text-ash">
                               from {reviewer?.fullName || "anonymous"} to{" "}
                               {reviewee?.fullName || "anonymous"}
                             </span>
                           </div>
                           {review.comment && (
-                            <p className="text-xs text-[#b8a078] mt-1">{review.comment}</p>
+                            <p className="text-xs text-parchment mt-1">{review.comment}</p>
                           )}
                         </div>
                       );
@@ -1809,12 +1795,12 @@ export default function ContractFlowDemoPage() {
         {canViewContract && (
           <div className="contract-parchment min-h-screen -mx-4 -my-8 px-4 py-8">
             {/* Nav */}
-            <div className="print-hidden bg-[#0a0806] border-b border-[#2a2420] -mx-4 -mt-8 px-4 py-4 mb-8 flex items-center justify-between gap-2">
+            <div className="print-hidden bg-void border-b border-line -mx-4 -mt-8 px-4 py-4 mb-8 flex items-center justify-between gap-2">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setUserContractView((prev) => ({ ...prev, [profileId]: false }))}
-                className="text-[#8f7f6e]"
+                className="text-ash"
               >
                 <ArrowLeft className="h-3.5 w-3.5 mr-1.5" /> Back to Need
               </Button>
@@ -1823,7 +1809,7 @@ export default function ContractFlowDemoPage() {
                   variant="ghost"
                   size="sm"
                   onClick={resetFlow}
-                  className="text-[#ff5252] h-7 text-xs"
+                  className="text-bad h-7 text-xs"
                 >
                   Reset Demo
                 </Button>
@@ -1835,12 +1821,12 @@ export default function ContractFlowDemoPage() {
 
             <div className="max-w-3xl mx-auto space-y-8">
               {/* Document Header */}
-              <div className="text-center pb-6 border-b border-[#d4b896]">
+              <div className="text-center pb-6 border-b border-paperline">
                 <div className="contract-seal mb-4">Antidosis</div>
                 <h1 className="contract-heading text-3xl md:text-4xl mb-2">
                   Binding Exchange Contract
                 </h1>
-                <p className="contract-body text-sm text-[#5a4a3a]">
+                <p className="contract-body text-sm text-linestrong">
                   Ref:{" "}
                   <span className="font-mono text-xs">{MOCK_NEED.id.slice(-6).toUpperCase()}</span>
                 </p>
@@ -1860,11 +1846,9 @@ export default function ContractFlowDemoPage() {
 
               {/* Cancelled banner */}
               {currentContract.status === "cancelled" && (
-                <div className="contract-page p-4 print-hidden border-l-2 border-l-[#ff5252] bg-[#ff5252]/5">
-                  <p className="text-sm font-medium text-[#ff5252]">
-                    This contract has been cancelled
-                  </p>
-                  <p className="text-xs text-[#8f7f6e] mt-1">
+                <div className="contract-page p-4 print-hidden border-l-2 border-l-bad bg-bad/5">
+                  <p className="text-sm font-medium text-bad">This contract has been cancelled</p>
+                  <p className="text-xs text-ash mt-1">
                     No further actions can be taken. The need is available for new interest.
                   </p>
                 </div>
@@ -1875,13 +1859,13 @@ export default function ContractFlowDemoPage() {
                 !currentContract.partyBSignedAt &&
                 (currentContract.status === "draft" ||
                   currentContract.status === "pending_terms") && (
-                  <div className="contract-page p-4 print-hidden border-l-2 border-l-[#ff5252]/40 bg-[#ff5252]/5">
+                  <div className="contract-page p-4 print-hidden border-l-2 border-l-bad/40 bg-bad/5">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div>
-                        <p className="text-sm font-medium text-[#ff5252]">
+                        <p className="text-sm font-medium text-bad">
                           Waiting for {contractPartyB?.fullName || PARTY_B.fullName} to sign
                         </p>
-                        <p className="text-xs text-[#8f7f6e] mt-0.5">
+                        <p className="text-xs text-ash mt-0.5">
                           You can cancel this contract at any time before both parties sign. The
                           need will return to open status so new fulfillers can express interest.
                         </p>
@@ -1892,7 +1876,7 @@ export default function ContractFlowDemoPage() {
                         }
                         variant="outline"
                         size="sm"
-                        className="text-[#ff5252] border-[#ff5252]/30 hover:border-[#ff5252]/60 hover:bg-[#ff5252]/10 shrink-0"
+                        className="text-bad border-bad/30 hover:border-bad/60 hover:bg-bad/10 shrink-0"
                       >
                         {termsLocked ? "Request Cancellation" : "Cancel Contract"}
                       </Button>
@@ -1922,16 +1906,16 @@ export default function ContractFlowDemoPage() {
                   ].map((step, i, arr) => (
                     <div key={step.label} className="flex items-center gap-1 flex-1">
                       <div
-                        className={`flex-1 h-1.5 rounded-full transition-colors ${step.done ? "bg-emerald-600" : step.active ? "bg-amber-600" : "bg-[#d4c4a8]"}`}
+                        className={`flex-1 h-1.5 rounded-full transition-colors ${step.done ? "bg-emerald-600" : step.active ? "bg-amber-600" : "bg-goldsoft"}`}
                       />
                       <span
-                        className={`text-[10px] uppercase tracking-wider whitespace-nowrap ${step.done ? "text-emerald-700" : step.active ? "text-amber-700" : "text-[#8a7a60]"}`}
+                        className={`text-[10px] uppercase tracking-wider whitespace-nowrap ${step.done ? "text-emerald-700" : step.active ? "text-amber-700" : "text-ash2"}`}
                       >
                         {step.label}
                       </span>
                       {i < arr.length - 1 && (
                         <div
-                          className={`flex-1 h-1.5 rounded-full ${step.done ? "bg-emerald-600" : "bg-[#d4c4a8]"}`}
+                          className={`flex-1 h-1.5 rounded-full ${step.done ? "bg-emerald-600" : "bg-goldsoft"}`}
                         />
                       )}
                     </div>
@@ -1944,11 +1928,11 @@ export default function ContractFlowDemoPage() {
                 <p className="contract-label mb-3">Subject of Agreement</p>
                 <h3 className="contract-heading text-lg mb-2">{MOCK_NEED.title}</h3>
                 <p className="contract-body text-sm whitespace-pre-line">{MOCK_NEED.description}</p>
-                <div className="mt-4 pt-4 border-t border-[#d4b896]">
+                <div className="mt-4 pt-4 border-t border-paperline">
                   <p className="contract-label mb-1">Exchange Offer</p>
                   <p className="contract-body text-sm font-medium">{MOCK_NEED.offerDescription}</p>
                   {MOCK_NEED.offerValue && (
-                    <p className="text-sm text-[#5a4a3a] mt-1">
+                    <p className="text-sm text-linestrong mt-1">
                       Estimated value: ${MOCK_NEED.offerValue.toLocaleString()}
                     </p>
                   )}
@@ -1970,14 +1954,14 @@ export default function ContractFlowDemoPage() {
 
               {/* Terms */}
               <div className="contract-page p-6 space-y-6">
-                <div className="flex items-center justify-between border-b border-[#d4b896] pb-4">
+                <div className="flex items-center justify-between border-b border-paperline pb-4">
                   <h2 className="contract-heading text-xl">1. Terms of Agreement</h2>
                   {termsLocked ? (
                     <span className="text-xs font-medium uppercase tracking-wide text-emerald-700 flex items-center gap-1">
                       <Lock className="h-3 w-3" /> locked
                     </span>
                   ) : bothSubmitted ? (
-                    <span className="text-xs font-medium uppercase tracking-wide text-[#f5a623] flex items-center gap-1">
+                    <span className="text-xs font-medium uppercase tracking-wide text-sun flex items-center gap-1">
                       <Info className="h-3 w-3" /> review phase
                     </span>
                   ) : (
@@ -1990,11 +1974,11 @@ export default function ContractFlowDemoPage() {
                 {/* Phase 1: Write Terms */}
                 {!bothSubmitted && !termsLocked && (
                   <>
-                    <div className="bg-[#f0dfc0] border border-[#d4b896] rounded-sm p-4 print-hidden">
-                      <p className="text-sm text-[#5a4a3a] font-medium mb-1">
+                    <div className="bg-paper border border-paperline rounded-sm p-4 print-hidden">
+                      <p className="text-sm text-linestrong font-medium mb-1">
                         Phase 1: Write Your Terms
                       </p>
-                      <p className="text-xs text-[#8f7f6e]">
+                      <p className="text-xs text-ash">
                         Both parties must write and submit their own terms before review can begin.
                         You can edit your terms until you submit them.
                       </p>
@@ -2002,7 +1986,7 @@ export default function ContractFlowDemoPage() {
 
                     <div className="grid md:grid-cols-2 gap-6 print-hidden">
                       {/* My Terms — Write Mode */}
-                      <div className="border border-[#d4b896] p-5 bg-[#f0dfc0]">
+                      <div className="border border-paperline p-5 bg-paper">
                         <div className="flex items-center justify-between mb-3">
                           <p className="contract-label">Your Terms</p>
                           {iSubmitted && (
@@ -2018,14 +2002,14 @@ export default function ContractFlowDemoPage() {
                                 type="checkbox"
                                 checked={useMessageTermsDraft}
                                 onChange={(e) => setUseMessageTermsDraft(e.target.checked)}
-                                className="accent-[#f5a623]"
+                                className="accent-sun"
                               />
-                              <span className="text-sm text-[#5a4a3a]">
+                              <span className="text-sm text-linestrong">
                                 use message thread as my terms
                               </span>
                             </label>
                             {useMessageTermsDraft ? (
-                              <p className="text-sm text-[#8f7f6e] italic">
+                              <p className="text-sm text-ash italic">
                                 your terms will be derived from the message thread.
                               </p>
                             ) : (
@@ -2034,7 +2018,7 @@ export default function ContractFlowDemoPage() {
                                 onChange={(e) => setMyTermsDraft(e.target.value)}
                                 placeholder="describe your terms..."
                                 rows={4}
-                                className="bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]"
+                                className="bg-paper border-paperline text-paperink placeholder:text-ash2"
                               />
                             )}
                             <div className="flex gap-2 mt-3">
@@ -2044,7 +2028,7 @@ export default function ContractFlowDemoPage() {
                               <Button
                                 onClick={submitTerms}
                                 disabled={!useMessageTermsDraft && !myTermsDraft.trim()}
-                                className="bg-[#ff3333] hover:bg-[#ff5555] text-white border-[#ff3333] shadow-lg shadow-[#ff3333]/30 font-semibold px-4"
+                                className="bg-bad hover:bg-bad text-white border-bad shadow-lg shadow-bad/30 font-semibold px-4"
                               >
                                 <Send className="h-4 w-4 mr-2" />
                                 Submit for Review
@@ -2058,7 +2042,7 @@ export default function ContractFlowDemoPage() {
                                 ? currentContract.partyAUseMessageTerms
                                 : currentContract.partyBUseMessageTerms
                             ) ? (
-                              <p className="text-sm text-[#8f7f6e] italic">
+                              <p className="text-sm text-ash italic">
                                 using message thread as terms
                               </p>
                             ) : (
@@ -2068,7 +2052,7 @@ export default function ContractFlowDemoPage() {
                                   : currentContract.partyBTerms || "no terms provided."}
                               </p>
                             )}
-                            <p className="text-xs text-[#8f7f6e] mt-3 italic">
+                            <p className="text-xs text-ash mt-3 italic">
                               your terms have been submitted and cannot be edited until the other
                               party submits theirs or terms are rejected.
                             </p>
@@ -2077,7 +2061,7 @@ export default function ContractFlowDemoPage() {
                       </div>
 
                       {/* Their Terms — Write Mode (waiting) */}
-                      <div className="border border-[#d4b896] p-5 bg-[#f0dfc0]">
+                      <div className="border border-paperline p-5 bg-paper">
                         <div className="flex items-center justify-between mb-3">
                           <p className="contract-label">{otherParty.fullName}&apos;s Terms</p>
                           {(isPartyA ? bSubmitted : aSubmitted) ? (
@@ -2085,7 +2069,7 @@ export default function ContractFlowDemoPage() {
                               <Check className="h-3 w-3" /> submitted
                             </span>
                           ) : (
-                            <span className="text-[10px] font-medium uppercase tracking-wide text-[#ff5252]">
+                            <span className="text-[10px] font-medium uppercase tracking-wide text-bad">
                               waiting...
                             </span>
                           )}
@@ -2096,7 +2080,7 @@ export default function ContractFlowDemoPage() {
                               ? currentContract.partyBUseMessageTerms
                               : currentContract.partyAUseMessageTerms
                           ) ? (
-                            <p className="text-sm text-[#8f7f6e] italic">
+                            <p className="text-sm text-ash italic">
                               {otherParty.fullName} is using the message thread as their terms.
                             </p>
                           ) : (
@@ -2107,7 +2091,7 @@ export default function ContractFlowDemoPage() {
                             </p>
                           )
                         ) : (
-                          <p className="text-sm text-[#8f7f6e] italic">
+                          <p className="text-sm text-ash italic">
                             waiting for {otherParty.fullName} to submit their terms...
                           </p>
                         )}
@@ -2120,11 +2104,11 @@ export default function ContractFlowDemoPage() {
                 {(bothSubmitted || termsLocked) && (
                   <>
                     {!termsLocked && (
-                      <div className="bg-[#f0dfc0] border border-[#d4b896] rounded-sm p-4 print-hidden">
-                        <p className="text-sm text-[#5a4a3a] font-medium mb-1">
+                      <div className="bg-paper border border-paperline rounded-sm p-4 print-hidden">
+                        <p className="text-sm text-linestrong font-medium mb-1">
                           Phase 2: Review & Accept
                         </p>
-                        <p className="text-xs text-[#8f7f6e]">
+                        <p className="text-xs text-ash">
                           Both parties have submitted their terms. Review them carefully before
                           accepting. Once both parties accept, terms will be locked and the contract
                           moves to signing.
@@ -2134,26 +2118,22 @@ export default function ContractFlowDemoPage() {
 
                     {/* Both parties' terms side by side — readonly */}
                     <div className="grid md:grid-cols-2 gap-6">
-                      <div className="border border-[#d4b896] p-5 bg-[#f0dfc0]">
+                      <div className="border border-paperline p-5 bg-paper">
                         <p className="contract-label mb-3">{PARTY_A.fullName}&apos;s Terms</p>
                         {currentContract.partyAUseMessageTerms ? (
-                          <p className="text-sm text-[#8f7f6e] italic">
-                            using message thread as terms
-                          </p>
+                          <p className="text-sm text-ash italic">using message thread as terms</p>
                         ) : (
                           <p className="contract-body text-sm whitespace-pre-line">
                             {currentContract.partyATerms || "no terms provided."}
                           </p>
                         )}
                       </div>
-                      <div className="border border-[#d4b896] p-5 bg-[#f0dfc0]">
+                      <div className="border border-paperline p-5 bg-paper">
                         <p className="contract-label mb-3">
                           {contractPartyB?.fullName || PARTY_B.fullName}&apos;s Terms
                         </p>
                         {currentContract.partyBUseMessageTerms ? (
-                          <p className="text-sm text-[#8f7f6e] italic">
-                            using message thread as terms
-                          </p>
+                          <p className="text-sm text-ash italic">using message thread as terms</p>
                         ) : (
                           <p className="contract-body text-sm whitespace-pre-line">
                             {currentContract.partyBTerms || "no terms provided."}
@@ -2164,7 +2144,7 @@ export default function ContractFlowDemoPage() {
 
                     {/* Agreement status + Accept button */}
                     {!termsLocked && (
-                      <div className="border border-[#d4b896] p-5 bg-[#f0dfc0] print-hidden">
+                      <div className="border border-paperline p-5 bg-paper print-hidden">
                         <p className="contract-label mb-3">Acceptance Status</p>
                         <div className="space-y-3">
                           <div className="flex items-center justify-between py-2">
@@ -2178,8 +2158,8 @@ export default function ContractFlowDemoPage() {
                               </div>
                             ) : (
                               <div className="flex items-center gap-2">
-                                <div className="h-2 w-2 rounded-full bg-[#8a7a60]" />
-                                <span className="text-xs text-[#8a7a60] uppercase tracking-wide">
+                                <div className="h-2 w-2 rounded-full bg-ash2" />
+                                <span className="text-xs text-ash2 uppercase tracking-wide">
                                   pending
                                 </span>
                               </div>
@@ -2198,8 +2178,8 @@ export default function ContractFlowDemoPage() {
                               </div>
                             ) : (
                               <div className="flex items-center gap-2">
-                                <div className="h-2 w-2 rounded-full bg-[#8a7a60]" />
-                                <span className="text-xs text-[#8a7a60] uppercase tracking-wide">
+                                <div className="h-2 w-2 rounded-full bg-ash2" />
+                                <span className="text-xs text-ash2 uppercase tracking-wide">
                                   pending
                                 </span>
                               </div>
@@ -2219,7 +2199,7 @@ export default function ContractFlowDemoPage() {
                             >
                               <Check className="h-4 w-4 mr-2" /> I Accept These Terms
                             </Button>
-                            <p className="text-center text-xs text-[#8f7f6e]">
+                            <p className="text-center text-xs text-ash">
                               By clicking accept, you agree to be bound by both parties&apos; terms
                               as shown above.
                             </p>
@@ -2227,10 +2207,10 @@ export default function ContractFlowDemoPage() {
                         )}
                         {iAgreed && !termsLocked && (
                           <div className="mt-5 text-center">
-                            <p className="text-sm text-[#5a4a3a] font-medium">
+                            <p className="text-sm text-linestrong font-medium">
                               You have accepted these terms
                             </p>
-                            <p className="text-xs text-[#8f7f6e] mt-1">
+                            <p className="text-xs text-ash mt-1">
                               waiting for the other party to accept...
                             </p>
                           </div>
@@ -2242,7 +2222,7 @@ export default function ContractFlowDemoPage() {
 
                 {/* Locked terms display */}
                 {termsLocked && (
-                  <div className="border border-[#d4b896] p-5 bg-[#f0dfc0]">
+                  <div className="border border-paperline p-5 bg-paper">
                     <p className="contract-label mb-3">Locked Terms</p>
                     <div className="space-y-3 contract-body text-sm">
                       {currentContract.partyATerms && (
@@ -2272,7 +2252,7 @@ export default function ContractFlowDemoPage() {
               {/* Signatures */}
               {termsLocked && (
                 <div className="contract-page p-6">
-                  <h2 className="contract-heading text-xl mb-4 border-b border-[#d4b896] pb-2">
+                  <h2 className="contract-heading text-xl mb-4 border-b border-paperline pb-2">
                     2. Digital Signatures
                   </h2>
                   <div className="space-y-4">
@@ -2282,7 +2262,7 @@ export default function ContractFlowDemoPage() {
                       signedAt={currentContract.partyASignedAt}
                       signatureText={currentContract.partyASignature}
                     />
-                    <div className="border-t border-[#d4b896]" />
+                    <div className="border-t border-paperline" />
                     <SignatureRow
                       name={contractPartyB?.fullName || PARTY_B.fullName}
                       signed={!!currentContract.partyBSignedAt}
@@ -2299,7 +2279,7 @@ export default function ContractFlowDemoPage() {
                     </Button>
                   )}
                   {iSigned && !bothSigned && (
-                    <p className="text-center text-sm text-[#5a4a3a] mt-4 print-hidden">
+                    <p className="text-center text-sm text-linestrong mt-4 print-hidden">
                       waiting for {otherParty.fullName} to sign...
                     </p>
                   )}
@@ -2326,12 +2306,10 @@ export default function ContractFlowDemoPage() {
                       {currentContract.aMarkedComplete ? (
                         <Badge variant="success">done</Badge>
                       ) : (
-                        <span className="text-xs text-[#8a7a60] uppercase tracking-wide">
-                          pending
-                        </span>
+                        <span className="text-xs text-ash2 uppercase tracking-wide">pending</span>
                       )}
                     </div>
-                    <div className="border-t border-[#d4b896]" />
+                    <div className="border-t border-paperline" />
                     <div className="flex items-center justify-between py-3">
                       <span className="contract-body">
                         {contractPartyB?.fullName || PARTY_B.fullName}
@@ -2339,9 +2317,7 @@ export default function ContractFlowDemoPage() {
                       {currentContract.bMarkedComplete ? (
                         <Badge variant="success">done</Badge>
                       ) : (
-                        <span className="text-xs text-[#8a7a60] uppercase tracking-wide">
-                          pending
-                        </span>
+                        <span className="text-xs text-ash2 uppercase tracking-wide">pending</span>
                       )}
                     </div>
                   </div>
@@ -2351,7 +2327,7 @@ export default function ContractFlowDemoPage() {
                     </Button>
                   )}
                   {iMarkedComplete && !otherMarkedComplete && (
-                    <p className="text-center text-sm text-[#5a4a3a] mt-4">
+                    <p className="text-center text-sm text-linestrong mt-4">
                       waiting for the other party...
                     </p>
                   )}
@@ -2364,24 +2340,24 @@ export default function ContractFlowDemoPage() {
               {/* Reviews */}
               {currentContract.status === "completed" && (
                 <div className="contract-page p-6">
-                  <h2 className="contract-heading text-xl mb-4 border-b border-[#d4b896] pb-2">
+                  <h2 className="contract-heading text-xl mb-4 border-b border-paperline pb-2">
                     4. Reviews
                   </h2>
                   {!hasReviewed && (
                     <div className="space-y-4">
-                      <div className="bg-[#f0dfc0] border border-[#d4b896] rounded-sm p-4">
-                        <p className="text-sm text-[#5a4a3a] font-medium mb-1">Rating Guide</p>
-                        <p className="text-xs text-[#8f7f6e] mb-2">
+                      <div className="bg-paper border border-paperline rounded-sm p-4">
+                        <p className="text-sm text-linestrong font-medium mb-1">Rating Guide</p>
+                        <p className="text-xs text-ash mb-2">
                           Default excellence. Unless there was a significant problem, keep it at 10.
                         </p>
-                        <div className="text-xs text-[#8f7f6e] space-y-1">
+                        <div className="text-xs text-ash space-y-1">
                           <p>• 10: default — everything went well, no change needed</p>
                           <p>• 8-9: good — minor suggestions go in private feedback</p>
                           <p>• 5-7: average — explain what was missing in your review</p>
                           <p>• 1-4: poor — only for significant problems</p>
                         </div>
                       </div>
-                      <p className="text-sm text-[#5a4a3a]">Rate {otherParty.fullName}</p>
+                      <p className="text-sm text-linestrong">Rate {otherParty.fullName}</p>
                       <div className="flex items-center gap-3">
                         <input
                           type="range"
@@ -2389,26 +2365,26 @@ export default function ContractFlowDemoPage() {
                           max={10}
                           value={rating}
                           onChange={(e) => setRating(parseInt(e.target.value))}
-                          className={`flex-1 transition-all duration-300 ${rating === 10 ? "accent-[#00e676]" : "accent-[#f5a623]"}`}
+                          className={`flex-1 transition-all duration-300 ${rating === 10 ? "accent-ok" : "accent-sun"}`}
                         />
                         <span
-                          className={`text-lg font-bold w-12 text-center transition-colors duration-300 ${rating === 10 ? "text-[#00e676]" : "text-[#e8d5a3]"}`}
+                          className={`text-lg font-bold w-12 text-center transition-colors duration-300 ${rating === 10 ? "text-ok" : "text-gold"}`}
                         >
                           {rating}
                         </span>
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-sm text-[#5a4a3a]">Public Review</Label>
+                        <Label className="text-sm text-linestrong">Public Review</Label>
                         <Textarea
                           placeholder="share your experience publicly..."
                           value={reviewComment}
                           onChange={(e) => setReviewComment(e.target.value)}
                           rows={3}
-                          className="bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]"
+                          className="bg-paper border-paperline text-paperink placeholder:text-ash2"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-sm text-[#5a4a3a]">
+                        <Label className="text-sm text-linestrong">
                           Private Feedback (only visible to {otherParty.fullName}, not on their
                           public profile)
                         </Label>
@@ -2417,7 +2393,7 @@ export default function ContractFlowDemoPage() {
                           value={privateFeedbackDraft}
                           onChange={(e) => setPrivateFeedbackDraft(e.target.value)}
                           rows={3}
-                          className="bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]"
+                          className="bg-paper border-paperline text-paperink placeholder:text-ash2"
                         />
                       </div>
                       <Button onClick={submitReview} className="w-full">
@@ -2426,35 +2402,33 @@ export default function ContractFlowDemoPage() {
                     </div>
                   )}
                   {hasReviewed && (
-                    <p className="text-center text-sm text-[#5a4a3a]">
+                    <p className="text-center text-sm text-linestrong">
                       You have submitted your review
                     </p>
                   )}
                   {otherReview && (
-                    <div className="border border-[#d4b896] p-4 mt-4 bg-[#f0dfc0]">
-                      <p className="text-xs text-[#8f7f6e] uppercase tracking-wide mb-2">
+                    <div className="border border-paperline p-4 mt-4 bg-paper">
+                      <p className="text-xs text-ash uppercase tracking-wide mb-2">
                         {otherParty.fullName} reviewed you
                       </p>
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="text-lg font-bold text-[#f5a623]">
-                          {otherReview.rating}
-                        </span>
-                        <span className="text-xs text-[#8f7f6e]">/ 10</span>
+                        <span className="text-lg font-bold text-sun">{otherReview.rating}</span>
+                        <span className="text-xs text-ash">/ 10</span>
                       </div>
                       {otherReview.comment && (
                         <div className="mb-2">
-                          <p className="text-[10px] text-[#8f7f6e] uppercase tracking-wide mb-1">
+                          <p className="text-[10px] text-ash uppercase tracking-wide mb-1">
                             Public Review
                           </p>
-                          <p className="text-sm text-[#5a4a3a]">{otherReview.comment}</p>
+                          <p className="text-sm text-linestrong">{otherReview.comment}</p>
                         </div>
                       )}
                       {otherReview.privateFeedback && (
-                        <div className="mt-2 pt-2 border-t border-[#d4b896]">
-                          <p className="text-[10px] text-[#8f7f6e] uppercase tracking-wide mb-1">
+                        <div className="mt-2 pt-2 border-t border-paperline">
+                          <p className="text-[10px] text-ash uppercase tracking-wide mb-1">
                             Private Feedback
                           </p>
-                          <p className="text-sm text-[#5a4a3a]">{otherReview.privateFeedback}</p>
+                          <p className="text-sm text-linestrong">{otherReview.privateFeedback}</p>
                         </div>
                       )}
                     </div>
@@ -2469,7 +2443,7 @@ export default function ContractFlowDemoPage() {
                 </h2>
                 <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
                   {contractMessages.length === 0 && (
-                    <p className="text-xs text-[#8a7a60] text-center py-4">no messages yet.</p>
+                    <p className="text-xs text-ash2 text-center py-4">no messages yet.</p>
                   )}
                   {contractMessages.map((msg) => (
                     <div
@@ -2478,9 +2452,9 @@ export default function ContractFlowDemoPage() {
                     >
                       <Avatar src={null} name={msg.senderName} size="sm" />
                       <div
-                        className={`max-w-[75%] px-3 py-2 text-sm rounded ${msg.senderId === profileId ? "bg-[#f0dfc0] text-[#2c1810] border-l-2 border-[#b89a68]" : "bg-[#e8d5b8] text-[#2c1810] border border-[#d4b896]"}`}
+                        className={`max-w-[75%] px-3 py-2 text-sm rounded ${msg.senderId === profileId ? "bg-paper text-paperink border-l-2 border-paperline" : "bg-papersoft text-paperink border border-paperline"}`}
                       >
-                        <p className="text-[10px] text-[#8a7a60] uppercase tracking-wider mb-1">
+                        <p className="text-[10px] text-ash2 uppercase tracking-wider mb-1">
                           {msg.senderName}
                         </p>
                         <p>{msg.content}</p>
@@ -2495,7 +2469,7 @@ export default function ContractFlowDemoPage() {
                         placeholder="type a message..."
                         value={messageInput}
                         onChange={(e) => setMessageInput(e.target.value)}
-                        className="h-9 text-sm bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]"
+                        className="h-9 text-sm bg-paper border-paperline text-paperink placeholder:text-ash2"
                       />
                       <Button type="submit" size="icon" className="h-9 w-9 shrink-0">
                         <Send className="h-4 w-4" />
@@ -2511,7 +2485,7 @@ export default function ContractFlowDemoPage() {
                   {cancelEscalated && (
                     <div className="contract-page p-4 border-l-2 border-l-amber-500 bg-amber-500/5">
                       <p className="text-sm font-medium text-amber-500">Escalated to admin</p>
-                      <p className="text-xs text-[#8f7f6e] mt-1">
+                      <p className="text-xs text-ash mt-1">
                         This cancellation request has been escalated to an admin for review.
                       </p>
                     </div>
@@ -2521,14 +2495,14 @@ export default function ContractFlowDemoPage() {
                   {cancelPending && isCancelRequester && (
                     <div className="contract-page p-4 border-l-2 border-l-amber-500 bg-amber-500/5">
                       <p className="text-sm font-medium text-amber-500">Cancellation requested</p>
-                      <p className="text-xs text-[#8f7f6e] mt-1">
+                      <p className="text-xs text-ash mt-1">
                         Waiting for {otherParty.fullName} to respond.
                       </p>
                       <Button
                         onClick={withdrawCancelRequest}
                         variant="ghost"
                         size="sm"
-                        className="text-[#8f7f6e] mt-2"
+                        className="text-ash mt-2"
                       >
                         Withdraw Request
                       </Button>
@@ -2537,14 +2511,14 @@ export default function ContractFlowDemoPage() {
 
                   {/* Pending request — other party view */}
                   {cancelPending && !isCancelRequester && (
-                    <div className="contract-page p-4 border-l-2 border-l-[#ff5252] bg-[#ff5252]/5">
-                      <p className="text-sm font-medium text-[#ff5252]">
+                    <div className="contract-page p-4 border-l-2 border-l-bad bg-bad/5">
+                      <p className="text-sm font-medium text-bad">
                         {PARTIES[currentContract.cancelRequestedById!]?.fullName ||
                           "The other party"}{" "}
                         requested to cancel this contract
                       </p>
                       {currentContract.cancelReason && (
-                        <p className="text-xs text-[#8f7f6e] mt-1">
+                        <p className="text-xs text-ash mt-1">
                           Reason: {currentContract.cancelReason}
                         </p>
                       )}
@@ -2553,7 +2527,7 @@ export default function ContractFlowDemoPage() {
                           onClick={() => setShowRespondCancelModal(true)}
                           variant="outline"
                           size="sm"
-                          className="text-[#ff5252] border-[#ff5252]/30"
+                          className="text-bad border-bad/30"
                         >
                           Respond
                         </Button>
@@ -2563,18 +2537,18 @@ export default function ContractFlowDemoPage() {
 
                   {/* Declined — requester view */}
                   {cancelDeclined && isCancelRequester && (
-                    <div className="contract-page p-4 border-l-2 border-l-[#ff5252] bg-[#ff5252]/5">
-                      <p className="text-sm font-medium text-[#ff5252]">
+                    <div className="contract-page p-4 border-l-2 border-l-bad bg-bad/5">
+                      <p className="text-sm font-medium text-bad">
                         {otherParty.fullName} declined your cancellation request
                       </p>
-                      <p className="text-xs text-[#8f7f6e] mt-1">
+                      <p className="text-xs text-ash mt-1">
                         The contract will continue. You can escalate to an admin for review.
                       </p>
                       <Button
                         onClick={escalateCancel}
                         variant="ghost"
                         size="sm"
-                        className="text-[#ff5252] mt-2"
+                        className="text-bad mt-2"
                       >
                         Escalate to Admin
                       </Button>
@@ -2590,7 +2564,7 @@ export default function ContractFlowDemoPage() {
                         <Button
                           onClick={() => setShowCancelConfirm(true)}
                           variant="ghost"
-                          className="text-[#ff5252]"
+                          className="text-bad"
                         >
                           Cancel Contract
                         </Button>
@@ -2598,7 +2572,7 @@ export default function ContractFlowDemoPage() {
                         <Button
                           onClick={() => setShowRequestCancelModal(true)}
                           variant="ghost"
-                          className="text-[#ff5252]"
+                          className="text-bad"
                         >
                           Request Cancellation
                         </Button>
@@ -2614,13 +2588,13 @@ export default function ContractFlowDemoPage() {
         {/* Cancel Confirmation Modal */}
         {showCancelConfirm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-            <div className="bg-[#12100e] border border-[#2a2420] p-6 rounded-md max-w-sm w-full mx-4">
-              <p className="text-sm text-[#e8d5a3] mb-4">
+            <div className="bg-surface border border-line p-6 rounded-md max-w-sm w-full mx-4">
+              <p className="text-sm text-gold mb-4">
                 Cancel this contract? The need will return to open status so new fulfillers can
                 express interest.
               </p>
               <div className="flex gap-3">
-                <Button onClick={cancelContract} variant="ghost" className="flex-1 text-[#ff5252]">
+                <Button onClick={cancelContract} variant="ghost" className="flex-1 text-bad">
                   Yes, Cancel
                 </Button>
                 <Button
@@ -2638,8 +2612,8 @@ export default function ContractFlowDemoPage() {
         {/* Complete Confirmation Modal */}
         {showCompleteConfirm && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-            <div className="bg-[#12100e] border border-[#2a2420] p-6 rounded-md max-w-sm w-full mx-4">
-              <p className="text-sm text-[#e8d5a3] mb-4">
+            <div className="bg-surface border border-line p-6 rounded-md max-w-sm w-full mx-4">
+              <p className="text-sm text-gold mb-4">
                 Are you sure both parties have fulfilled their obligations?
               </p>
               <div className="flex gap-3">
@@ -2668,9 +2642,9 @@ export default function ContractFlowDemoPage() {
         {/* Request Cancellation Modal */}
         {showRequestCancelModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-            <div className="bg-[#12100e] border border-[#2a2420] p-6 rounded-md max-w-sm w-full mx-4">
-              <p className="text-sm text-[#e8d5a3] mb-2">Request Cancellation</p>
-              <p className="text-xs text-[#8f7f6e] mb-4">
+            <div className="bg-surface border border-line p-6 rounded-md max-w-sm w-full mx-4">
+              <p className="text-sm text-gold mb-2">Request Cancellation</p>
+              <p className="text-xs text-ash mb-4">
                 The other party must agree to cancel this contract. You can optionally provide a
                 reason.
               </p>
@@ -2679,13 +2653,13 @@ export default function ContractFlowDemoPage() {
                 value={cancelReasonDraft}
                 onChange={(e) => setCancelReasonDraft(e.target.value)}
                 rows={3}
-                className="bg-[#0f0c0a] border-[#2a2420] text-[#e8d5a3] placeholder:text-[#8f7f6e] mb-4"
+                className="bg-inset border-line text-gold placeholder:text-ash mb-4"
               />
               <div className="flex gap-3">
                 <Button
                   onClick={() => requestCancel(cancelReasonDraft)}
                   variant="ghost"
-                  className="flex-1 text-[#ff5252]"
+                  className="flex-1 text-bad"
                 >
                   Request Cancellation
                 </Button>
@@ -2707,9 +2681,9 @@ export default function ContractFlowDemoPage() {
         {/* Respond Cancellation Modal */}
         {showRespondCancelModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-            <div className="bg-[#12100e] border border-[#2a2420] p-6 rounded-md max-w-sm w-full mx-4">
-              <p className="text-sm text-[#e8d5a3] mb-2">Respond to Cancellation Request</p>
-              <p className="text-xs text-[#8f7f6e] mb-4">
+            <div className="bg-surface border border-line p-6 rounded-md max-w-sm w-full mx-4">
+              <p className="text-sm text-gold mb-2">Respond to Cancellation Request</p>
+              <p className="text-xs text-ash mb-4">
                 {PARTIES[currentContract.cancelRequestedById!]?.fullName || "The other party"}{" "}
                 requested to cancel this contract.
                 {currentContract.cancelReason && ` Reason: "${currentContract.cancelReason}"`}
@@ -2718,7 +2692,7 @@ export default function ContractFlowDemoPage() {
                 <Button
                   onClick={() => respondCancel(true)}
                   variant="ghost"
-                  className="flex-1 text-[#ff5252]"
+                  className="flex-1 text-bad"
                 >
                   Agree to Cancel
                 </Button>
@@ -2733,16 +2707,16 @@ export default function ContractFlowDemoPage() {
         {/* Signature Modal */}
         {showSignModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-            <div className="bg-[#f5e6c8] border border-[#d4b896] p-6 rounded-sm max-w-md w-full mx-4 shadow-2xl">
+            <div className="bg-paperbg border border-paperline p-6 rounded-sm max-w-md w-full mx-4 shadow-2xl">
               <div className="text-center mb-5">
                 <div className="contract-seal text-lg mb-2">Antidosis</div>
-                <h3 className="contract-heading text-xl text-[#1a0f08]">Digital Signature</h3>
-                <p className="text-xs text-[#5a4a3a] mt-1">
+                <h3 className="contract-heading text-xl text-paperhead">Digital Signature</h3>
+                <p className="text-xs text-linestrong mt-1">
                   You are about to sign a legally binding contract
                 </p>
               </div>
 
-              <div className="bg-[#f0dfc0] border border-[#d4b896] p-3 mb-4 text-xs text-[#5a4a3a]">
+              <div className="bg-paper border border-paperline p-3 mb-4 text-xs text-linestrong">
                 <p className="font-medium mb-1">Contract Summary:</p>
                 <p>
                   <strong>Need:</strong> {MOCK_NEED.title}
@@ -2757,14 +2731,14 @@ export default function ContractFlowDemoPage() {
 
               <div className="space-y-4">
                 <div>
-                  <label className="text-xs text-[#5a4a3a] uppercase tracking-wider mb-1.5 block">
+                  <label className="text-xs text-linestrong uppercase tracking-wider mb-1.5 block">
                     Type your full name as your signature
                   </label>
                   <Input
                     value={signatureInput}
                     onChange={(e) => setSignatureInput(e.target.value)}
                     placeholder={`e.g. ${isPartyA ? PARTY_A.fullName : contractPartyB?.fullName || PARTY_B.fullName}`}
-                    className="bg-[#f0dfc0] border-[#d4b896] text-[#2c1810] placeholder:text-[#8a7a60]"
+                    className="bg-paper border-paperline text-paperink placeholder:text-ash2"
                   />
                 </div>
 
@@ -2773,9 +2747,9 @@ export default function ContractFlowDemoPage() {
                     type="checkbox"
                     checked={agreedToTermsCheck}
                     onChange={(e) => setAgreedToTermsCheck(e.target.checked)}
-                    className="accent-[#f5a623] mt-0.5"
+                    className="accent-sun mt-0.5"
                   />
-                  <span className="text-xs text-[#5a4a3a] leading-relaxed">
+                  <span className="text-xs text-linestrong leading-relaxed">
                     I have read and understood the terms of this contract. I agree to be legally
                     bound by both parties&apos; terms as shown above. I understand this constitutes
                     a digital signature under the <em>Electronic Transactions Act 1999</em> (Cth).
@@ -2804,7 +2778,7 @@ export default function ContractFlowDemoPage() {
                     setAgreedToTermsCheck(false);
                   }}
                   variant="outline"
-                  className="flex-1 border-[#d4b896] text-[#5a4a3a] hover:bg-[#f0dfc0]"
+                  className="flex-1 border-paperline text-linestrong hover:bg-paper"
                 >
                   Cancel
                 </Button>

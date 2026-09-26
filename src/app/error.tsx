@@ -28,13 +28,13 @@ export default function ErrorPage({
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-[#0a0806] text-[#e8d5a3] flex items-center justify-center px-6 font-mono">
+    <div className="min-h-screen bg-void text-gold flex items-center justify-center px-6 font-mono">
       <div className="text-center space-y-6 max-w-md">
-        <p className="text-xs text-[#8f7f6e] font-mono">$ dmesg | tail -n 1</p>
+        <p className="text-xs text-ash font-mono">$ dmesg | tail -n 1</p>
         <h1 className="heading-display text-4xl tracking-tight">
-          <span className="text-[#ff5252]">Error.</span>
+          <span className="text-bad">Error.</span>
         </h1>
-        <p className="text-sm text-[#8f7f6e] leading-relaxed">
+        <p className="text-sm text-ash leading-relaxed">
           An unexpected error occurred. We have logged it and will investigate.
         </p>
         <div className="flex items-center justify-center gap-3 pt-4">

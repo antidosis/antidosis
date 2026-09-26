@@ -62,18 +62,18 @@ export function PosterProfileCard({
         <Avatar src={poster.avatarUrl} name={poster.fullName} size="md" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-base font-medium text-[#e8d5a3]">
+            <span className="text-base font-medium text-gold">
               {poster.fullName || "anonymous"}
             </span>
-            {poster.isVerified && <Shield className="h-4 w-4 text-[#00e676]" />}
+            {poster.isVerified && <Shield className="h-4 w-4 text-ok" />}
           </div>
           {profileId ? (
-            <div className="flex flex-wrap items-center gap-3 text-xs text-[#8f7f6e] mt-0.5">
+            <div className="flex flex-wrap items-center gap-3 text-xs text-ash mt-0.5">
               {poster.ratingCount > 0 && (
                 <span className="flex items-center gap-1">
-                  <Star className="h-3 w-3 text-[#f5a623]" />
+                  <Star className="h-3 w-3 text-sun" />
                   {poster.ratingAvg.toFixed(1)}
-                  <span className="text-[#8f7f6e]/60">({poster.ratingCount})</span>
+                  <span className="text-ash/60">({poster.ratingCount})</span>
                 </span>
               )}
               {poster.jobsCompleted > 0 && (
@@ -90,14 +90,14 @@ export function PosterProfileCard({
               )}
             </div>
           ) : (
-            <p className="text-xs text-[#8f7f6e] mt-0.5">log in to see full profile</p>
+            <p className="text-xs text-ash mt-0.5">log in to see full profile</p>
           )}
         </div>
         {profileId && (
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 px-2 text-[#8f7f6e] hover:text-[#e8d5a3]"
+            className="h-8 px-2 text-ash hover:text-gold"
             onClick={onToggleExpand}
           >
             {profileExpanded ? (
@@ -111,20 +111,20 @@ export function PosterProfileCard({
 
       {/* Expanded content */}
       {profileId && profileExpanded && (
-        <div className="mt-4 pt-4 border-t border-[#2a2420] space-y-4">
-          {poster.bio && <p className="text-sm text-[#b8a078] leading-relaxed">{poster.bio}</p>}
+        <div className="mt-4 pt-4 border-t border-line space-y-4">
+          {poster.bio && <p className="text-sm text-parchment leading-relaxed">{poster.bio}</p>}
 
           {poster.skills.length > 0 && (
             <div>
-              <p className="text-[10px] text-[#8f7f6e] uppercase tracking-wider mb-2">skills</p>
+              <p className="text-[10px] text-ash uppercase tracking-wider mb-2">skills</p>
               <div className="flex flex-wrap gap-1.5">
                 {poster.skills.map((s) => (
                   <span
                     key={s.id}
-                    className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide border border-[#2a2420] text-[#8f7f6e] bg-[#1a1714] rounded"
+                    className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide border border-line text-ash bg-raise rounded"
                   >
                     {s.name}
-                    {s.isVerified && <span className="text-[#00e676] ml-0.5">✓</span>}
+                    {s.isVerified && <span className="text-ok ml-0.5">✓</span>}
                   </span>
                 ))}
               </div>
@@ -133,7 +133,7 @@ export function PosterProfileCard({
 
           {poster.socialLinks.length > 0 && (
             <div>
-              <p className="text-[10px] text-[#8f7f6e] uppercase tracking-wider mb-2">links</p>
+              <p className="text-[10px] text-ash uppercase tracking-wider mb-2">links</p>
               <div className="flex flex-wrap gap-3">
                 {poster.socialLinks.map((link) => (
                   <a
@@ -141,7 +141,7 @@ export function PosterProfileCard({
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-[#b8a078] hover:text-[#e8d5a3] transition-colors capitalize flex items-center gap-1"
+                    className="text-xs text-parchment hover:text-gold transition-colors capitalize flex items-center gap-1"
                   >
                     <Globe className="h-3 w-3" />
                     {link.platform}
@@ -153,27 +153,27 @@ export function PosterProfileCard({
 
           {/* Credentials (lazy loaded) */}
           <div>
-            <p className="text-[10px] text-[#8f7f6e] uppercase tracking-wider mb-2">credentials</p>
+            <p className="text-[10px] text-ash uppercase tracking-wider mb-2">credentials</p>
             {credLoading ? (
-              <div className="flex items-center gap-2 text-xs text-[#8f7f6e]">
+              <div className="flex items-center gap-2 text-xs text-ash">
                 <Loader2 className="h-3 w-3 animate-spin" />
                 loading...
               </div>
             ) : credentials.length === 0 ? (
-              <p className="text-xs text-[#8f7f6e]">no public credentials</p>
+              <p className="text-xs text-ash">no public credentials</p>
             ) : (
               <div className="space-y-2">
                 {credentials.map((cred) => (
-                  <div key={cred.id} className="bg-[#1a1714] border border-[#2a2420] p-3 rounded">
+                  <div key={cred.id} className="bg-raise border border-line p-3 rounded">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <Award className="h-3.5 w-3.5 text-[#f5a623]" />
-                      <span className="text-sm font-medium text-[#e8d5a3]">{cred.title}</span>
-                      <span className="px-1.5 py-0 text-[9px] uppercase tracking-wide border border-[#2a2420] text-[#8f7f6e]">
+                      <Award className="h-3.5 w-3.5 text-sun" />
+                      <span className="text-sm font-medium text-gold">{cred.title}</span>
+                      <span className="px-1.5 py-0 text-[9px] uppercase tracking-wide border border-line text-ash">
                         {cred.type}
                       </span>
-                      {cred.isVerified && <Shield className="h-3 w-3 text-[#00e676]" />}
+                      {cred.isVerified && <Shield className="h-3 w-3 text-ok" />}
                     </div>
-                    <div className="text-xs text-[#8f7f6e] mt-1 space-y-0.5">
+                    <div className="text-xs text-ash mt-1 space-y-0.5">
                       {cred.issuedBy && <p>issued by: {cred.issuedBy}</p>}
                       {cred.expiresAt && (
                         <p>
@@ -186,7 +186,7 @@ export function PosterProfileCard({
                         </p>
                       )}
                       {cred.isVerified && (
-                        <span className="text-[#00e676] text-xs inline-flex items-center gap-1">
+                        <span className="text-ok text-xs inline-flex items-center gap-1">
                           <FileCheck className="h-3 w-3" /> verified
                         </span>
                       )}
@@ -210,15 +210,15 @@ export function PosterProfileCard({
 
       {/* Guest lock */}
       {!profileId && (
-        <div className="mt-3 bg-[#1a1714] border border-[#2a2420] p-3 rounded">
-          <div className="flex items-center gap-2 text-[#8f7f6e]">
+        <div className="mt-3 bg-raise border border-line p-3 rounded">
+          <div className="flex items-center gap-2 text-ash">
             <Lock className="h-3.5 w-3.5" />
             <p className="text-xs">profile details are only visible to registered users</p>
           </div>
-          <p className="text-xs text-[#b8a078] mt-1.5">
+          <p className="text-xs text-parchment mt-1.5">
             <Button
               variant="link"
-              className="p-0 h-auto text-[#f5a623] hover:underline text-xs"
+              className="p-0 h-auto text-sun hover:underline text-xs"
               onClick={() => onAuthRequired(false)}
             >
               log in
@@ -226,7 +226,7 @@ export function PosterProfileCard({
             {" or "}
             <Button
               variant="link"
-              className="p-0 h-auto text-[#f5a623] hover:underline text-xs"
+              className="p-0 h-auto text-sun hover:underline text-xs"
               onClick={() => onAuthRequired(true)}
             >
               create an account

@@ -91,7 +91,7 @@ describe("ToastProvider", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "Show Success" }));
     const toast = screen.getByText("Success!").closest("div[class*='border-']");
-    expect(toast).toHaveClass("border-[#00e676]/30");
+    expect(toast).toHaveClass("border-ok/30");
   });
 
   it("shows error toast with error border", () => {
@@ -102,7 +102,7 @@ describe("ToastProvider", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "Show Error" }));
     const toast = screen.getByText("Error!").closest("div[class*='border-']");
-    expect(toast).toHaveClass("border-[#ff5252]/30");
+    expect(toast).toHaveClass("border-bad/30");
   });
 
   it("shows info toast with info border", () => {
@@ -113,7 +113,7 @@ describe("ToastProvider", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "Show Info" }));
     const toast = screen.getByText("Hello").closest("div[class*='border-']");
-    expect(toast).toHaveClass("border-[#00e5ff]/30");
+    expect(toast).toHaveClass("border-mercury/30");
   });
 
   it("renders multiple toasts", () => {

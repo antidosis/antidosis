@@ -214,18 +214,17 @@ export default function DashboardPage() {
   if (isLoading)
     return (
       <div className="py-24 text-center">
-        <Loader2 className="h-6 w-6 animate-spin mx-auto mb-4 text-[#b8a078]" />
-        <p className="text-sm text-[#8f7f6e]">Loading...</p>
+        <Loader2 className="h-6 w-6 animate-spin mx-auto mb-4 text-parchment" />
+        <p className="text-sm text-ash">Loading...</p>
       </div>
     );
 
-  if (!profile)
-    return <div className="py-24 text-center text-[#ff5252]">Failed to load profile</div>;
+  if (!profile) return <div className="py-24 text-center text-bad">Failed to load profile</div>;
 
   return (
     <div className="max-w-5xl mx-auto px-4 md:px-8">
-      <h1 className="heading-display text-2xl text-[#e8d5a3] mb-2">Dashboard</h1>
-      <p className="text-xs text-[#8f7f6e] mb-8">$ whoami</p>
+      <h1 className="heading-display text-2xl text-gold mb-2">Dashboard</h1>
+      <p className="text-xs text-ash mb-8">$ whoami</p>
 
       <DashboardHeader
         profile={profile}
@@ -236,48 +235,42 @@ export default function DashboardPage() {
 
       {/* Persistent quick actions — above tabs, visible on all tabs */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <Link
-          href="/needs/new"
-          className="group vessel p-4 hover:border-[#f5a623]/40 transition-colors"
-        >
+        <Link href="/needs/new" className="group vessel p-4 hover:border-sun/40 transition-colors">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded flex items-center justify-center bg-[#f5a623]/10 text-[#f5a623]">
+            <div className="h-9 w-9 rounded flex items-center justify-center bg-sun/10 text-sun">
               <TrendingUp className="h-4 w-4" />
             </div>
             <div>
-              <p className="text-sm font-medium text-[#e8d5a3] group-hover:text-[#f5a623] transition-colors">
+              <p className="text-sm font-medium text-gold group-hover:text-sun transition-colors">
                 Post a Need
               </p>
-              <p className="text-[11px] text-[#8f7f6e]">Start a new exchange</p>
+              <p className="text-[11px] text-ash">Start a new exchange</p>
             </div>
           </div>
         </Link>
-        <Link
-          href="/needs"
-          className="group vessel p-4 hover:border-[#35c2f0]/40 transition-colors"
-        >
+        <Link href="/needs" className="group vessel p-4 hover:border-aero/40 transition-colors">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded flex items-center justify-center bg-[#35c2f0]/10 text-[#35c2f0]">
+            <div className="h-9 w-9 rounded flex items-center justify-center bg-aero/10 text-aero">
               <Briefcase className="h-4 w-4" />
             </div>
             <div>
-              <p className="text-sm font-medium text-[#e8d5a3] group-hover:text-[#35c2f0] transition-colors">
+              <p className="text-sm font-medium text-gold group-hover:text-aero transition-colors">
                 Browse Needs
               </p>
-              <p className="text-[11px] text-[#8f7f6e]">Find opportunities</p>
+              <p className="text-[11px] text-ash">Find opportunities</p>
             </div>
           </div>
         </Link>
-        <Link href="/pros" className="group vessel p-4 hover:border-[#00e676]/40 transition-colors">
+        <Link href="/pros" className="group vessel p-4 hover:border-ok/40 transition-colors">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded flex items-center justify-center bg-[#00e676]/10 text-[#00e676]">
+            <div className="h-9 w-9 rounded flex items-center justify-center bg-ok/10 text-ok">
               <Users className="h-4 w-4" />
             </div>
             <div>
-              <p className="text-sm font-medium text-[#e8d5a3] group-hover:text-[#00e676] transition-colors">
+              <p className="text-sm font-medium text-gold group-hover:text-ok transition-colors">
                 Directory
               </p>
-              <p className="text-[11px] text-[#8f7f6e]">Find verified locals</p>
+              <p className="text-[11px] text-ash">Find verified locals</p>
             </div>
           </div>
         </Link>
@@ -292,8 +285,8 @@ export default function DashboardPage() {
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded transition-colors whitespace-nowrap",
                 activeTab === tab.id
-                  ? "bg-[#1a1714] text-[#f5a623] shadow-[0_0_20px_rgba(245,166,35,0.1)]"
-                  : "text-[#8f7f6e] hover:text-[#e8d5a3]"
+                  ? "bg-raise text-sun shadow-[0_0_20px_rgba(245,166,35,0.1)]"
+                  : "text-ash hover:text-gold"
               )}
             >
               <tab.icon className="h-4 w-4" />
@@ -333,15 +326,15 @@ export default function DashboardPage() {
           {/* Skills */}
           {profile.skills.length > 0 && (
             <section className="vessel p-5">
-              <p className="text-xs text-[#8f7f6e] mb-4">$ cat ~/.skills</p>
+              <p className="text-xs text-ash mb-4">$ cat ~/.skills</p>
               <div className="flex flex-wrap gap-2">
                 {profile.skills.map((skill) => (
                   <span
                     key={skill.id}
                     className={`text-xs rounded px-2.5 py-1 border transition-colors ${
                       skill.isVerified
-                        ? "bg-[#00e676]/5 border-[#00e676]/30 text-[#00e676]"
-                        : "bg-[#1a1714] border-[#2a2420] text-[#b8a078]"
+                        ? "bg-ok/5 border-ok/30 text-ok"
+                        : "bg-raise border-line text-parchment"
                     }`}
                   >
                     {skill.name}
@@ -353,12 +346,12 @@ export default function DashboardPage() {
           )}
 
           {/* Delete Account */}
-          <section className="vessel p-5 border-[#ff5252]/20">
-            <p className="text-xs text-[#8f7f6e] mb-4">$ rm -rf ~/</p>
+          <section className="vessel p-5 border-bad/20">
+            <p className="text-xs text-ash mb-4">$ rm -rf ~/</p>
             {!showDeleteConfirm ? (
               <button
                 onClick={() => setShowDeleteConfirm(true)}
-                className="flex items-center gap-2 text-sm text-[#ff5252] hover:text-[#ff5252]/80 transition-colors"
+                className="flex items-center gap-2 text-sm text-bad hover:text-bad/80 transition-colors"
               >
                 <Trash2 className="h-4 w-4" />
                 Delete Account
@@ -366,10 +359,10 @@ export default function DashboardPage() {
             ) : (
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <AlertTriangle className="h-5 w-5 text-[#ff5252] shrink-0 mt-0.5" />
+                  <AlertTriangle className="h-5 w-5 text-bad shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm font-medium text-[#e8d5a3]">Delete your account?</p>
-                    <p className="text-xs text-[#8f7f6e] mt-1">
+                    <p className="text-sm font-medium text-gold">Delete your account?</p>
+                    <p className="text-xs text-ash mt-1">
                       This will permanently delete your profile, needs, contracts, messages, and all
                       associated data. This cannot be undone.
                     </p>
@@ -381,7 +374,7 @@ export default function DashboardPage() {
                   </Button>
                   <Button
                     size="sm"
-                    className="bg-[#ff5252] hover:bg-[#ff5252]/80 text-white"
+                    className="bg-bad hover:bg-bad/80 text-white"
                     onClick={async () => {
                       setDeletingAccount(true);
                       try {
@@ -419,7 +412,7 @@ export default function DashboardPage() {
         <div>
           {!needs || needs.length === 0 ? (
             <>
-              <p className="text-xs text-[#8f7f6e] mb-4">$ ls ~/needs/</p>
+              <p className="text-xs text-ash mb-4">$ ls ~/needs/</p>
               <EmptyState
                 title="No Needs Posted"
                 description="Post your first need to start exchanging."
@@ -438,7 +431,7 @@ export default function DashboardPage() {
                 const archivedNeeds = needs.filter((n) => n.status === "archived");
                 return (
                   <>
-                    <p className="text-xs text-[#8f7f6e] mb-4">$ ls ~/needs/</p>
+                    <p className="text-xs text-ash mb-4">$ ls ~/needs/</p>
                     {activeNeeds.length === 0 ? (
                       <EmptyState
                         title="No Active Needs"
@@ -454,23 +447,23 @@ export default function DashboardPage() {
                         {activeNeeds.map((need) => (
                           <div
                             key={need.id}
-                            className="vessel p-5 mb-3 hover:bg-[#1a1714] transition-colors border-l-2 border-l-[#35c2f0]/40"
+                            className="vessel p-5 mb-3 hover:bg-raise transition-colors border-l-2 border-l-aero/40"
                           >
                             <div className="flex items-center justify-between group">
                               <div className="min-w-0">
                                 <Link
                                   href={`/needs/${need.id}`}
-                                  className="text-base font-medium text-[#e8d5a3] hover:text-[#f5a623] transition-colors block truncate"
+                                  className="text-base font-medium text-gold hover:text-sun transition-colors block truncate"
                                 >
                                   {need.title}
                                 </Link>
-                                <div className="flex items-center gap-3 text-xs text-[#8f7f6e] mt-1 flex-wrap">
+                                <div className="flex items-center gap-3 text-xs text-ash mt-1 flex-wrap">
                                   <Badge variant={statusBadgeVariant(need.status)}>
                                     {need.status}
                                   </Badge>
                                   <span>{need._count?.acceptances || 0} interested</span>
                                   {need.acceptances && need.acceptances.length > 0 && (
-                                    <span className="text-[#00e676]">
+                                    <span className="text-ok">
                                       {need.acceptances.length} ready to contract
                                     </span>
                                   )}
@@ -490,19 +483,19 @@ export default function DashboardPage() {
                     {/* Archived needs */}
                     {archivedNeeds.length > 0 && (
                       <>
-                        <p className="text-xs text-[#8f7f6e] mb-4">$ ls ~/needs/archive/</p>
+                        <p className="text-xs text-ash mb-4">$ ls ~/needs/archive/</p>
                         <div className="space-y-3">
                           {archivedNeeds.map((need) => (
                             <div
                               key={need.id}
-                              className="vessel p-5 mb-3 hover:bg-[#1a1714] transition-colors border-l-2 border-l-[#7a6b5a]/40 opacity-80"
+                              className="vessel p-5 mb-3 hover:bg-raise transition-colors border-l-2 border-l-leather/40 opacity-80"
                             >
                               <div className="flex items-center justify-between group">
                                 <div className="min-w-0">
-                                  <p className="text-base font-medium text-[#b8a078] truncate">
+                                  <p className="text-base font-medium text-parchment truncate">
                                     {need.title}
                                   </p>
-                                  <div className="flex items-center gap-3 text-xs text-[#8f7f6e] mt-1 flex-wrap">
+                                  <div className="flex items-center gap-3 text-xs text-ash mt-1 flex-wrap">
                                     <Badge variant="outline">archived</Badge>
                                     <span>cancelled contract</span>
                                   </div>
@@ -512,7 +505,7 @@ export default function DashboardPage() {
                                     size="sm"
                                     variant="ghost"
                                     asChild
-                                    className="text-[#b8a078] hover:text-[#e8d5a3]"
+                                    className="text-parchment hover:text-gold"
                                   >
                                     <Link href={`/needs/${need.id}/edit`}>
                                       <Pencil className="h-4 w-4" />
@@ -522,7 +515,7 @@ export default function DashboardPage() {
                                     size="sm"
                                     variant="ghost"
                                     onClick={() => handleRepostNeed(need.id)}
-                                    className="text-[#00e676] hover:text-[#00e676]"
+                                    className="text-ok hover:text-ok"
                                   >
                                     <RotateCcw className="h-4 w-4" />
                                   </Button>
@@ -543,7 +536,7 @@ export default function DashboardPage() {
 
       {activeTab === "contracts" && (
         <div>
-          <p className="text-xs text-[#8f7f6e] mb-4">$ ls ~/contracts/</p>
+          <p className="text-xs text-ash mb-4">$ ls ~/contracts/</p>
           {!contracts || contracts.length === 0 ? (
             <EmptyState
               title="No Contracts Yet"
@@ -564,27 +557,25 @@ export default function DashboardPage() {
                 return (
                   <div
                     key={contract.id}
-                    className={`vessel p-5 mb-3 hover:bg-[#1a1714] transition-colors border-l-2 ${
+                    className={`vessel p-5 mb-3 hover:bg-raise transition-colors border-l-2 ${
                       contract.status === "active" || contract.status === "completed"
-                        ? "border-l-[#00e676]/40"
+                        ? "border-l-ok/40"
                         : contract.status === "cancelled"
-                          ? "border-l-[#ff5252]/40"
-                          : "border-l-[#f5a623]/40"
+                          ? "border-l-bad/40"
+                          : "border-l-sun/40"
                     }`}
                   >
                     <div className="flex items-center justify-between group">
                       <div className="min-w-0">
-                        <p className="text-base font-medium text-[#e8d5a3] truncate">
+                        <p className="text-base font-medium text-gold truncate">
                           {contract.need?.title || "contract"}
                         </p>
-                        <div className="flex items-center gap-2 text-xs text-[#8f7f6e] mt-1 flex-wrap">
+                        <div className="flex items-center gap-2 text-xs text-ash mt-1 flex-wrap">
                           <Badge variant={statusBadgeVariant(contract.status)}>
                             {contract.status}
                           </Badge>
                           {canCancel && (
-                            <span className="text-[#f5a623]">
-                              waiting for signature — you can cancel
-                            </span>
+                            <span className="text-sun">waiting for signature — you can cancel</span>
                           )}
                         </div>
                       </div>
@@ -595,7 +586,7 @@ export default function DashboardPage() {
                             variant="ghost"
                             onClick={() => handleCancelContract(contract.id)}
                             disabled={cancellingContractId === contract.id}
-                            className="text-[#ff5252] hover:text-[#ff5252] hover:bg-[#ff5252]/10"
+                            className="text-bad hover:text-bad hover:bg-bad/10"
                           >
                             {cancellingContractId === contract.id ? (
                               <Loader2 className="h-4 w-4 animate-spin" />
@@ -621,7 +612,7 @@ export default function DashboardPage() {
 
       {activeTab === "offers" && (
         <div>
-          <p className="text-xs text-[#8f7f6e] mb-4">$ ls ~/interests/</p>
+          <p className="text-xs text-ash mb-4">$ ls ~/interests/</p>
           {!offers || offers.length === 0 ? (
             <EmptyState
               title="No Interests Expressed"
@@ -637,37 +628,35 @@ export default function DashboardPage() {
               {offers.map((offer) => (
                 <div
                   key={offer.id}
-                  className={`vessel p-5 mb-3 hover:bg-[#1a1714] transition-colors border-l-2 ${
+                  className={`vessel p-5 mb-3 hover:bg-raise transition-colors border-l-2 ${
                     offer.status === "selected" || offer.status === "accepted"
-                      ? "border-l-[#00e676]/40"
+                      ? "border-l-ok/40"
                       : offer.status === "declined"
-                        ? "border-l-[#ff5252]/40"
-                        : "border-l-[#d76bf5]/40"
+                        ? "border-l-bad/40"
+                        : "border-l-orchid/40"
                   }`}
                 >
                   <div className="flex items-center justify-between group">
                     <div className="min-w-0">
                       <Link
                         href={`/needs/${offer.need?.id}`}
-                        className="text-base font-medium text-[#e8d5a3] hover:text-[#f5a623] transition-colors block truncate"
+                        className="text-base font-medium text-gold hover:text-sun transition-colors block truncate"
                       >
                         {offer.need?.title}
                       </Link>
-                      <div className="text-xs text-[#8f7f6e] mt-1 flex items-center gap-2 flex-wrap">
+                      <div className="text-xs text-ash mt-1 flex items-center gap-2 flex-wrap">
                         <Badge variant={statusBadgeVariant(offer.status)}>{offer.status}</Badge>
                         {offer.status === "accepted" && (
-                          <span className="text-[#00e676]">poster accepted — contract pending</span>
+                          <span className="text-ok">poster accepted — contract pending</span>
                         )}
                         {offer.status === "pending" && <span>waiting for poster review</span>}
-                        {offer.status === "declined" && (
-                          <span className="text-[#ff5252]">declined</span>
-                        )}
+                        {offer.status === "declined" && <span className="text-bad">declined</span>}
                         {offer.status === "selected" && (
-                          <span className="text-[#00e676]">contract formed</span>
+                          <span className="text-ok">contract formed</span>
                         )}
                       </div>
                       {offer.message && (
-                        <p className="text-sm text-[#b8a078] mt-2">&ldquo;{offer.message}&rdquo;</p>
+                        <p className="text-sm text-parchment mt-2">&ldquo;{offer.message}&rdquo;</p>
                       )}
                     </div>
                     <Button size="sm" variant="ghost" asChild>
@@ -694,7 +683,7 @@ export default function DashboardPage() {
 
       {activeTab === "community" && (
         <div className="space-y-6">
-          <p className="text-xs text-[#8f7f6e] mb-4">$ tail -f ~/community.log</p>
+          <p className="text-xs text-ash mb-4">$ tail -f ~/community.log</p>
           <SocialSection />
           <TerminalActivityFeed />
         </div>

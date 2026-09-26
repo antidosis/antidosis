@@ -115,7 +115,7 @@ export const metadata: Metadata = {
     ICBM: "-33.3208, 151.2335",
   },
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#0a0806" },
+    { media: "(prefers-color-scheme: light)", color: "#f6f1e7" },
     { media: "(prefers-color-scheme: dark)", color: "#0a0806" },
   ],
 };
@@ -124,6 +124,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en-AU" suppressHydrationWarning>
       <head>
+        {/* Theme init — must run before first paint to avoid a flash of the wrong theme */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem("antidosis-theme");if(t!=="light"&&t!=="dark"){t=window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"}}catch(e){t="dark"}document.documentElement.dataset.theme=t})()`,
+          }}
+        />
         <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
         {/* Structured Data: WebSite */}
         <script
@@ -216,9 +222,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      <body
-        className={`${inter.variable} ${jetbrainsMono.variable} antialiased bg-[#0a0806] text-[#e8d5a3]`}
-      >
+      <body className={`${inter.variable} ${jetbrainsMono.variable} antialiased bg-void text-gold`}>
         <ErrorReporterInit />
         <ToastProvider>{children}</ToastProvider>
       </body>

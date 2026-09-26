@@ -6,7 +6,7 @@ import { NotificationRealtime } from "@/components/layout/notification-realtime"
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-[#0a0806] text-[#e8d5a3] flex flex-col relative">
+    <div className="min-h-screen bg-void text-gold flex flex-col relative">
       <ScanLines />
       <Navbar />
       <LaunchBanner />

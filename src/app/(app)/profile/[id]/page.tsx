@@ -99,7 +99,7 @@ export default function ProfilePage() {
   if (isLoading) {
     return (
       <div className="max-w-3xl mx-auto px-4 md:px-8 py-24 text-center">
-        <Loader2 className="h-6 w-6 animate-spin mx-auto text-[#8f7f6e]" />
+        <Loader2 className="h-6 w-6 animate-spin mx-auto text-ash" />
       </div>
     );
   }
@@ -107,8 +107,8 @@ export default function ProfilePage() {
   if (error) {
     return (
       <div className="max-w-3xl mx-auto px-4 md:px-8 py-12">
-        <div className="vessel p-6 border-[#ff5252]/30">
-          <p className="text-sm text-[#ff5252]">Failed to load profile.</p>
+        <div className="vessel p-6 border-bad/30">
+          <p className="text-sm text-bad">Failed to load profile.</p>
         </div>
       </div>
     );
@@ -123,7 +123,7 @@ export default function ProfilePage() {
       <div className="py-6 flex items-center justify-between">
         <Link
           href="/needs"
-          className="inline-flex items-center text-sm text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
+          className="inline-flex items-center text-sm text-ash hover:text-gold transition-colors"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />$ cd ~/needs/
         </Link>
@@ -133,7 +133,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <p className="text-xs text-[#8f7f6e] mb-4">$ finger {username}</p>
+      <p className="text-xs text-ash mb-4">$ finger {username}</p>
 
       {/* Profile Header */}
       <div className="vessel p-6">
@@ -141,14 +141,14 @@ export default function ProfilePage() {
           <Avatar src={profile.avatarUrl} name={profile.fullName} size="lg" />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="heading-display text-2xl text-[#e8d5a3]">
+              <h1 className="heading-display text-2xl text-gold">
                 {profile.fullName || "anonymous"}
               </h1>
-              {profile.isVerified && <Shield className="h-5 w-5 text-[#00e676]" />}
+              {profile.isVerified && <Shield className="h-5 w-5 text-ok" />}
             </div>
-            <div className="flex flex-wrap items-center gap-4 text-sm text-[#b8a078] mt-2">
+            <div className="flex flex-wrap items-center gap-4 text-sm text-parchment mt-2">
               {(profile.ratingCount ?? 0) > 0 && (
-                <span className="flex items-center gap-1 text-[#f5a623] glow-gold">
+                <span className="flex items-center gap-1 text-sun glow-gold">
                   <Star className="h-4 w-4 fill-current" />
                   {(profile.ratingAvg ?? 0).toFixed(1)} ({profile.ratingCount} reviews)
                 </span>
@@ -167,23 +167,23 @@ export default function ProfilePage() {
               )}
             </div>
             {profile.bio && (
-              <p className="text-sm text-[#b8a078] mt-4 leading-relaxed">{profile.bio}</p>
+              <p className="text-sm text-parchment mt-4 leading-relaxed">{profile.bio}</p>
             )}
             {profile.skills.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-5">
                 {profile.skills.map((skill) => (
                   <span
                     key={skill.id}
-                    className="text-xs text-[#b8a078] bg-[#1a1714] border border-[#2a2420] rounded px-2 py-0.5"
+                    className="text-xs text-parchment bg-raise border border-line rounded px-2 py-0.5"
                   >
                     {skill.name}
-                    {skill.isVerified && <span className="ml-1 text-[#00e676]">✓</span>}
+                    {skill.isVerified && <span className="ml-1 text-ok">✓</span>}
                   </span>
                 ))}
               </div>
             )}
             {profile.publicPhone && (
-              <div className="flex items-center gap-2 mt-4 text-sm text-[#b8a078]">
+              <div className="flex items-center gap-2 mt-4 text-sm text-parchment">
                 <Phone className="h-4 w-4" />
                 {profile.publicPhone}
               </div>
@@ -196,7 +196,7 @@ export default function ProfilePage() {
                     href={link.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-[#b8a078] hover:text-[#e8d5a3] transition-colors capitalize flex items-center gap-1"
+                    className="text-sm text-parchment hover:text-gold transition-colors capitalize flex items-center gap-1"
                   >
                     <Globe className="h-3 w-3" />
                     {link.platform}
@@ -210,7 +210,7 @@ export default function ProfilePage() {
 
       {/* Needs */}
       <div className="space-y-6">
-        <p className="text-xs text-[#8f7f6e]">$ ls ~{username}/needs/</p>
+        <p className="text-xs text-ash">$ ls ~{username}/needs/</p>
         {profile.needsPosted.length === 0 ? (
           <EmptyState
             title="No Active Needs"
@@ -223,22 +223,22 @@ export default function ProfilePage() {
               <Link key={need.id} href={`/needs/${need.id}`} className="block vessel p-5 group">
                 <div className="flex items-center justify-between">
                   <div className="min-w-0">
-                    <h3 className="text-sm font-medium text-[#e8d5a3] group-hover:text-[#f5a623] transition-colors">
+                    <h3 className="text-sm font-medium text-gold group-hover:text-sun transition-colors">
                       {need.title}
                     </h3>
-                    <p className="text-sm text-[#b8a078] mt-1 line-clamp-1">{need.description}</p>
+                    <p className="text-sm text-parchment mt-1 line-clamp-1">{need.description}</p>
                     <div className="flex flex-wrap gap-2 mt-2">
                       {need.requiredSkills.map((skill) => (
                         <span
                           key={skill.id}
-                          className="px-2 py-0.5 text-xs font-medium uppercase tracking-wide border border-[#2a2420] text-[#8f7f6e]"
+                          className="px-2 py-0.5 text-xs font-medium uppercase tracking-wide border border-line text-ash"
                         >
                           {skill.name}
                         </span>
                       ))}
                     </div>
                   </div>
-                  <span className="shrink-0 text-xs text-[#8f7f6e] uppercase tracking-wide">
+                  <span className="shrink-0 text-xs text-ash uppercase tracking-wide">
                     {need._count.acceptances} offer
                     {need._count.acceptances !== 1 ? "s" : ""}
                   </span>
@@ -251,7 +251,7 @@ export default function ProfilePage() {
 
       {/* Credentials */}
       <div className="space-y-6">
-        <p className="text-xs text-[#8f7f6e]">$ ls ~{username}/credentials/</p>
+        <p className="text-xs text-ash">$ ls ~{username}/credentials/</p>
         {profile.credentials.length === 0 ? (
           <EmptyState
             title="No Credentials"
@@ -263,14 +263,14 @@ export default function ProfilePage() {
             {profile.credentials.map((cred) => (
               <div key={cred.id} className="vessel p-5">
                 <div className="flex items-center gap-2 flex-wrap mb-2">
-                  <Award className="h-4 w-4 text-[#f5a623]" />
-                  <span className="text-sm font-medium text-[#e8d5a3]">{cred.title}</span>
-                  <span className="px-2 py-0.5 text-xs uppercase tracking-wide border border-[#2a2420] text-[#8f7f6e]">
+                  <Award className="h-4 w-4 text-sun" />
+                  <span className="text-sm font-medium text-gold">{cred.title}</span>
+                  <span className="px-2 py-0.5 text-xs uppercase tracking-wide border border-line text-ash">
                     {cred.type}
                   </span>
-                  {cred.isVerified && <Shield className="h-3.5 w-3.5 text-[#00e676]" />}
+                  {cred.isVerified && <Shield className="h-3.5 w-3.5 text-ok" />}
                 </div>
-                <div className="text-sm text-[#b8a078] space-y-1">
+                <div className="text-sm text-parchment space-y-1">
                   {cred.documentNumber && (
                     <p>
                       {"*".repeat(Math.max(0, cred.documentNumber.length - 4))}
@@ -289,7 +289,7 @@ export default function ProfilePage() {
                     </p>
                   )}
                   {cred.isVerified && (
-                    <span className="text-[#00e676] text-xs inline-flex items-center gap-1">
+                    <span className="text-ok text-xs inline-flex items-center gap-1">
                       <FileCheck className="h-3 w-3" /> verified
                     </span>
                   )}
@@ -302,7 +302,7 @@ export default function ProfilePage() {
 
       {/* Reviews */}
       <div className="space-y-6">
-        <p className="text-xs text-[#8f7f6e]">$ cat ~{username}/reviews.log</p>
+        <p className="text-xs text-ash">$ cat ~{username}/reviews.log</p>
         {profile.reviewsReceived.length === 0 ? (
           <EmptyState
             title="No Reviews Yet"
@@ -317,21 +317,21 @@ export default function ProfilePage() {
                   <div className="flex items-center gap-3">
                     <Avatar src={review.giver.avatarUrl} name={review.giver.fullName} size="sm" />
                     <div>
-                      <p className="text-sm font-medium text-[#e8d5a3]">
+                      <p className="text-sm font-medium text-gold">
                         {review.giver.fullName || "anonymous"}
                       </p>
                       {review.contract?.need?.title && (
-                        <p className="text-xs text-[#8f7f6e]">{review.contract.need.title}</p>
+                        <p className="text-xs text-ash">{review.contract.need.title}</p>
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-1 text-[#f5a623] glow-gold">
+                  <div className="flex items-center gap-1 text-sun glow-gold">
                     <Star className="h-4 w-4 fill-current" />
                     <span className="text-sm font-bold">{review.rating}/10</span>
                   </div>
                 </div>
                 {review.comment && (
-                  <p className="text-sm text-[#b8a078] mt-4 leading-relaxed">{review.comment}</p>
+                  <p className="text-sm text-parchment mt-4 leading-relaxed">{review.comment}</p>
                 )}
               </div>
             ))}

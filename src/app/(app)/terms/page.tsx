@@ -16,28 +16,28 @@ export default function TermsPage() {
       <div className="py-6">
         <Link
           href="/"
-          className="inline-flex items-center text-[13px] text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
+          className="inline-flex items-center text-[13px] text-ash hover:text-gold transition-colors"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />$ cd ~/
         </Link>
       </div>
 
-      <p className="text-[12px] text-[#8f7f6e] mb-4">$ cat /etc/antidosis/terms-of-service.md</p>
-      <h1 className="text-3xl font-bold mb-2 text-[#e8d5a3]">Terms of Service</h1>
-      <p className="text-[13px] text-[#8f7f6e]/70 mb-10">
+      <p className="text-[12px] text-ash mb-4">$ cat /etc/antidosis/terms-of-service.md</p>
+      <h1 className="text-3xl font-bold mb-2 text-gold">Terms of Service</h1>
+      <p className="text-[13px] text-ash/70 mb-10">
         Last updated: 22 July 2026 &middot; Please read these terms carefully before using antidosis
       </p>
 
-      <article className="space-y-10 text-[15px] text-[#b8a078] leading-relaxed">
+      <article className="space-y-10 text-[15px] text-parchment leading-relaxed">
         {/* ── 1. Agreement to Terms ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">1. Agreement to Terms</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">1. Agreement to Terms</h2>
           <p className="mb-3">
             These Terms of Service (&quot;Terms&quot;) constitute a legally binding agreement
             between you and <strong>Antidosis Pty Ltd</strong> (&quot;we&quot;, &quot;us&quot;,
             &quot;our&quot;, or &quot;antidosis&quot;) governing your access to and use of the
             antidosis platform, including our website at{" "}
-            <Link href="https://www.antidosis.com" className="text-[#e8d5a3] hover:underline">
+            <Link href="https://www.antidosis.com" className="text-gold hover:underline">
               www.antidosis.com
             </Link>{" "}
             and the antidosis mobile application (collectively, the &quot;Service&quot;).
@@ -45,7 +45,7 @@ export default function TermsPage() {
           <p className="mb-3">
             By creating an account, accessing, or using the Service, you agree to be bound by these
             Terms and our{" "}
-            <Link href="/privacy" className="text-[#e8d5a3] hover:underline">
+            <Link href="/privacy" className="text-gold hover:underline">
               Privacy Policy
             </Link>
             . If you do not agree to these Terms, you must not access or use the Service.
@@ -60,7 +60,7 @@ export default function TermsPage() {
 
         {/* ── 2. Description of Service ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">2. Description of Service</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">2. Description of Service</h2>
           <p className="mb-3">
             Antidosis is a community marketplace for reciprocal exchange. The Service enables users
             to:
@@ -90,7 +90,7 @@ export default function TermsPage() {
 
         {/* ── 3. Eligibility ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">3. Eligibility</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">3. Eligibility</h2>
           <p className="mb-3">
             You must be at least <strong>18 years of age</strong> to create an account and use the
             Service. By registering, you represent and warrant that:
@@ -116,9 +116,7 @@ export default function TermsPage() {
 
         {/* ── 4. User Accounts ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">
-            4. User Accounts and Security
-          </h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">4. User Accounts and Security</h2>
           <p className="mb-3">
             To use most features of the Service, you must register for an account. You agree to:
           </p>
@@ -148,7 +146,7 @@ export default function TermsPage() {
 
         {/* ── 5. User Conduct ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">
+          <h2 className="text-lg font-semibold text-gold mb-3">
             5. User Conduct and Prohibited Activities
           </h2>
           <p className="mb-3">
@@ -204,7 +202,7 @@ export default function TermsPage() {
 
         {/* ── 6. Needs, Offers, and Acceptances ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">
+          <h2 className="text-lg font-semibold text-gold mb-3">
             6. Needs, Offers, and Acceptances
           </h2>
           <p className="mb-3">
@@ -237,7 +235,7 @@ export default function TermsPage() {
 
         {/* ── 7. Contracts ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">
+          <h2 className="text-lg font-semibold text-gold mb-3">
             7. Contracts and Binding Agreements
           </h2>
           <p className="mb-3">
@@ -281,7 +279,7 @@ export default function TermsPage() {
 
         {/* ── 8. Reviews and Ratings ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">8. Reviews and Ratings</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">8. Reviews and Ratings</h2>
           <p className="mb-3">
             The Service includes a review system where users can rate and comment on their
             experience with other users following a completed exchange or acceptance.
@@ -309,7 +307,7 @@ export default function TermsPage() {
 
         {/* ── 9. Verification ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">9. Verification</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">9. Verification</h2>
           <p className="mb-3">
             The Service is <strong>free</strong> for everyone: there are no fees, subscriptions,
             recurring billing, or payment details collected. Users may optionally complete
@@ -339,7 +337,7 @@ export default function TermsPage() {
 
         {/* ── 10. Intellectual Property ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">10. Intellectual Property</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">10. Intellectual Property</h2>
           <p className="mb-3">
             <strong>Our content:</strong> The Service and its original content (excluding
             user-generated content), features, and functionality are and will remain the exclusive
@@ -363,7 +361,7 @@ export default function TermsPage() {
 
         {/* ── 11. Content Moderation ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">
+          <h2 className="text-lg font-semibold text-gold mb-3">
             11. Content Moderation and Removal
           </h2>
           <p className="mb-3">
@@ -384,10 +382,10 @@ export default function TermsPage() {
 
         {/* ── 12. Termination ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">12. Termination</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">12. Termination</h2>
           <p className="mb-3">
             <strong>By you:</strong> You may terminate your account at any time by contacting us at{" "}
-            <EmailLink email="support@antidosis.com" className="text-[#e8d5a3] hover:underline">
+            <EmailLink email="support@antidosis.com" className="text-gold hover:underline">
               support@antidosis.com
             </EmailLink>
             . Upon termination, your right to use the Service ceases immediately.
@@ -411,7 +409,7 @@ export default function TermsPage() {
 
         {/* ── 13. Disclaimers ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">
+          <h2 className="text-lg font-semibold text-gold mb-3">
             13. Disclaimers and Limitation of Liability
           </h2>
           <p className="mb-3">
@@ -455,7 +453,7 @@ export default function TermsPage() {
 
         {/* ── 14. Indemnification ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">14. Indemnification</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">14. Indemnification</h2>
           <p>
             You agree to indemnify, defend, and hold harmless Antidosis Pty Ltd, its directors,
             officers, employees, agents, and affiliates from and against any and all claims,
@@ -469,11 +467,11 @@ export default function TermsPage() {
 
         {/* ── 15. Dispute Resolution ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">15. Dispute Resolution</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">15. Dispute Resolution</h2>
           <p className="mb-3">
             <strong>Informal resolution:</strong> Before filing any formal legal proceeding, you
             agree to contact us at{" "}
-            <EmailLink email="support@antidosis.com" className="text-[#e8d5a3] hover:underline">
+            <EmailLink email="support@antidosis.com" className="text-gold hover:underline">
               support@antidosis.com
             </EmailLink>{" "}
             and attempt to resolve the dispute informally for at least 30 days.
@@ -492,7 +490,7 @@ export default function TermsPage() {
 
         {/* ── 16. Severability ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">16. Severability</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">16. Severability</h2>
           <p>
             If any provision of these Terms is held to be invalid, illegal, or unenforceable by a
             court of competent jurisdiction, such provision shall be severed from these Terms and
@@ -502,10 +500,10 @@ export default function TermsPage() {
 
         {/* ── 17. Entire Agreement ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">17. Entire Agreement</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">17. Entire Agreement</h2>
           <p>
             These Terms, together with our{" "}
-            <Link href="/privacy" className="text-[#e8d5a3] hover:underline">
+            <Link href="/privacy" className="text-gold hover:underline">
               Privacy Policy
             </Link>
             , constitute the entire agreement between you and Antidosis Pty Ltd regarding the
@@ -516,12 +514,12 @@ export default function TermsPage() {
 
         {/* ── 18. Contact ── */}
         <section>
-          <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">18. Contact Us</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">18. Contact Us</h2>
           <p className="mb-3">If you have any questions about these Terms, please contact us:</p>
-          <div className="pl-4 border-l-2 border-[#7a6b5a]/30">
+          <div className="pl-4 border-l-2 border-leather/30">
             <p>
               <strong>Email:</strong>{" "}
-              <EmailLink email="support@antidosis.com" className="text-[#e8d5a3] hover:underline">
+              <EmailLink email="support@antidosis.com" className="text-gold hover:underline">
                 support@antidosis.com
               </EmailLink>
             </p>
@@ -530,14 +528,14 @@ export default function TermsPage() {
             </p>
             <p>
               <strong>Website:</strong>{" "}
-              <Link href="https://www.antidosis.com" className="text-[#e8d5a3] hover:underline">
+              <Link href="https://www.antidosis.com" className="text-gold hover:underline">
                 www.antidosis.com
               </Link>
             </p>
           </div>
         </section>
 
-        <p className="text-[13px] text-[#8f7f6e]/50 pt-6 border-t border-[#7a6b5a]/10">
+        <p className="text-[13px] text-ash/50 pt-6 border-t border-leather/10">
           Last updated: 17 May 2026
         </p>
       </article>

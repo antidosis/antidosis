@@ -29,10 +29,10 @@ describe("Textarea", () => {
     const textarea = screen.getByRole("textbox");
     expect(textarea).toHaveClass("min-h-[100px]");
     expect(textarea).toHaveClass("w-full");
-    expect(textarea).toHaveClass("bg-[#0f0c0a]");
+    expect(textarea).toHaveClass("bg-inset");
     expect(textarea).toHaveClass("border");
-    expect(textarea).toHaveClass("border-[#2a2420]");
-    expect(textarea).toHaveClass("text-[#e8d5a3]");
+    expect(textarea).toHaveClass("border-line");
+    expect(textarea).toHaveClass("text-gold");
     expect(textarea).toHaveClass("resize-y");
   });
 
@@ -56,7 +56,7 @@ describe("Textarea", () => {
     render(<Textarea className="my-class" />);
     const textarea = screen.getByRole("textbox");
     expect(textarea).toHaveClass("my-class");
-    expect(textarea).toHaveClass("bg-[#0f0c0a]");
+    expect(textarea).toHaveClass("bg-inset");
   });
 
   it("spreads additional props", () => {

@@ -49,11 +49,11 @@ export function NeedContent({ need, descExpanded, onToggleDesc }: NeedContentPro
 
   const offerIcon =
     need.offerType === "money" ? (
-      <CircleDollarSign className="h-4 w-4 text-[#f5a623]" />
+      <CircleDollarSign className="h-4 w-4 text-sun" />
     ) : need.offerType === "item" ? (
-      <Package className="h-4 w-4 text-[#00e5ff]" />
+      <Package className="h-4 w-4 text-mercury" />
     ) : (
-      <Wrench className="h-4 w-4 text-[#00e676]" />
+      <Wrench className="h-4 w-4 text-ok" />
     );
 
   return (
@@ -62,7 +62,7 @@ export function NeedContent({ need, descExpanded, onToggleDesc }: NeedContentPro
       <div className="pt-6 pb-2 flex items-center justify-between">
         <Link
           href="/needs"
-          className="inline-flex items-center text-xs text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
+          className="inline-flex items-center text-xs text-ash hover:text-gold transition-colors"
         >
           <ArrowLeft className="mr-1.5 h-3.5 w-3.5" />
           browse needs
@@ -77,7 +77,7 @@ export function NeedContent({ need, descExpanded, onToggleDesc }: NeedContentPro
       </div>
 
       <div className="flex flex-wrap items-start gap-3 mb-3">
-        <h1 className="heading-display text-2xl md:text-3xl text-[#e8d5a3]">{need.title}</h1>
+        <h1 className="heading-display text-2xl md:text-3xl text-gold">{need.title}</h1>
         {need.status !== "open" && (
           <Badge
             variant={
@@ -105,7 +105,7 @@ export function NeedContent({ need, descExpanded, onToggleDesc }: NeedContentPro
         {need.requiredSkills.map((s) => (
           <span
             key={s.id}
-            className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-[#2a2420] text-[#8f7f6e] bg-[#1a1714] rounded"
+            className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-line text-ash bg-raise rounded"
           >
             {s.name}
           </span>
@@ -122,11 +122,11 @@ export function NeedContent({ need, descExpanded, onToggleDesc }: NeedContentPro
               </span>
             );
           })()}
-        <span className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-[#2a2420] text-[#8f7f6e] bg-[#1a1714] rounded flex items-center gap-1">
+        <span className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-line text-ash bg-raise rounded flex items-center gap-1">
           <MapPin className="h-3 w-3" /> local
         </span>
         {need.deadline && (
-          <span className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-[#2a2420] text-[#8f7f6e] bg-[#1a1714] rounded flex items-center gap-1">
+          <span className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-line text-ash bg-raise rounded flex items-center gap-1">
             <Calendar className="h-3 w-3" />
             {new Date(need.deadline).toLocaleDateString("en-AU", {
               day: "numeric",
@@ -135,7 +135,7 @@ export function NeedContent({ need, descExpanded, onToggleDesc }: NeedContentPro
           </span>
         )}
         {need.timeRange && (
-          <span className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-[#2a2420] text-[#8f7f6e] bg-[#1a1714] rounded flex items-center gap-1">
+          <span className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-line text-ash bg-raise rounded flex items-center gap-1">
             <Clock className="h-3 w-3" />
             {need.timeRange}
           </span>
@@ -150,10 +150,10 @@ export function NeedContent({ need, descExpanded, onToggleDesc }: NeedContentPro
         });
         if (trade) {
           return (
-            <div className="bg-[#ffb300]/10 border border-[#ffb300]/30 p-3 mb-6">
+            <div className="bg-alert/10 border border-alert/30 p-3 mb-6">
               <div className="flex items-start gap-2">
-                <ShieldAlert className="h-3.5 w-3.5 text-[#ffb300] mt-0.5 flex-shrink-0" />
-                <p className="text-xs text-[#b8a078]">
+                <ShieldAlert className="h-3.5 w-3.5 text-alert mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-parchment">
                   Licensed trade work (NSW) — this need involves {trade.label}. It can only be
                   fulfilled by a member holding a verified {trade.licenceLabel}.
                 </p>
@@ -165,10 +165,10 @@ export function NeedContent({ need, descExpanded, onToggleDesc }: NeedContentPro
           detectBuildingWork({ title: need.title, skills: need.requiredSkills.map((s) => s.name) })
         ) {
           return (
-            <div className="bg-[#00e5ff]/10 border border-[#00e5ff]/30 p-3 mb-6">
+            <div className="bg-mercury/10 border border-mercury/30 p-3 mb-6">
               <div className="flex items-start gap-2">
-                <Info className="h-3.5 w-3.5 text-[#00e5ff] mt-0.5 flex-shrink-0" />
-                <p className="text-xs text-[#b8a078]">
+                <Info className="h-3.5 w-3.5 text-mercury mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-parchment">
                   Building work note: in NSW, residential building work over $5,000 (labour +
                   materials incl. GST) must be done by a licensed contractor.
                 </p>
@@ -181,19 +181,19 @@ export function NeedContent({ need, descExpanded, onToggleDesc }: NeedContentPro
 
       {/* ========== DESCRIPTION ========== */}
       <div className="mb-6">
-        <p className="text-sm text-[#b8a078] leading-relaxed whitespace-pre-line">{displayDesc}</p>
+        <p className="text-sm text-parchment leading-relaxed whitespace-pre-line">{displayDesc}</p>
         {descTooLong && (
-          <button onClick={onToggleDesc} className="text-xs text-[#f5a623] hover:underline mt-2">
+          <button onClick={onToggleDesc} className="text-xs text-sun hover:underline mt-2">
             {descExpanded ? "show less" : "show more"}
           </button>
         )}
       </div>
 
       {/* ========== TRIAL NOTICE ========== */}
-      <div className="bg-[#00e5ff]/10 border border-[#00e5ff]/30 p-3 mb-6">
+      <div className="bg-mercury/10 border border-mercury/30 p-3 mb-6">
         <div className="flex items-start gap-2">
-          <Info className="h-3.5 w-3.5 text-[#00e5ff] mt-0.5 flex-shrink-0" />
-          <p className="text-xs text-[#8f7f6e]">
+          <Info className="h-3.5 w-3.5 text-mercury mt-0.5 flex-shrink-0" />
+          <p className="text-xs text-ash">
             Central Coast NSW trial region — all needs are local during the pilot.
           </p>
         </div>
@@ -203,8 +203,8 @@ export function NeedContent({ need, descExpanded, onToggleDesc }: NeedContentPro
       {need.images.length > 0 && (
         <div className="mb-6">
           <div className="flex items-center gap-2 mb-2">
-            <Camera className="h-3.5 w-3.5 text-[#8f7f6e]" />
-            <span className="text-xs text-[#8f7f6e] uppercase tracking-wider">need images</span>
+            <Camera className="h-3.5 w-3.5 text-ash" />
+            <span className="text-xs text-ash uppercase tracking-wider">need images</span>
           </div>
           <div className="flex gap-2 overflow-x-auto pb-2 snap-x">
             {need.images.map((url, i) => (
@@ -212,7 +212,7 @@ export function NeedContent({ need, descExpanded, onToggleDesc }: NeedContentPro
                 key={i}
                 src={url}
                 alt=""
-                className="h-28 w-28 md:h-32 md:w-32 object-cover border border-[#2a2420] hover:border-[#f5a623] transition-colors cursor-pointer shrink-0 snap-start"
+                className="h-28 w-28 md:h-32 md:w-32 object-cover border border-line hover:border-sun transition-colors cursor-pointer shrink-0 snap-start"
               />
             ))}
           </div>
@@ -223,14 +223,12 @@ export function NeedContent({ need, descExpanded, onToggleDesc }: NeedContentPro
       <div className="vessel p-4 mb-6">
         <div className="flex items-center gap-2 mb-2">
           {offerIcon}
-          <span className="text-xs text-[#8f7f6e] uppercase tracking-wider">
-            offering in exchange
-          </span>
+          <span className="text-xs text-ash uppercase tracking-wider">offering in exchange</span>
         </div>
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <p className="text-sm font-medium text-[#e8d5a3]">{need.offerDescription}</p>
+          <p className="text-sm font-medium text-gold">{need.offerDescription}</p>
           {need.offerValue && (
-            <span className="text-xs text-[#b8a078]">est. ${need.offerValue.toLocaleString()}</span>
+            <span className="text-xs text-parchment">est. ${need.offerValue.toLocaleString()}</span>
           )}
         </div>
         {need.offerImages.length > 0 && (
@@ -240,7 +238,7 @@ export function NeedContent({ need, descExpanded, onToggleDesc }: NeedContentPro
                 key={i}
                 src={url}
                 alt=""
-                className="h-20 w-20 object-cover border border-[#2a2420] hover:border-[#f5a623] transition-colors cursor-pointer shrink-0 snap-start"
+                className="h-20 w-20 object-cover border border-line hover:border-sun transition-colors cursor-pointer shrink-0 snap-start"
               />
             ))}
           </div>

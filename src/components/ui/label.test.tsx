@@ -29,14 +29,14 @@ describe("Label", () => {
     expect(label).toHaveClass("font-medium");
     expect(label).toHaveClass("uppercase");
     expect(label).toHaveClass("tracking-wide");
-    expect(label).toHaveClass("text-[#b8a078]");
+    expect(label).toHaveClass("text-parchment");
   });
 
   it("applies custom className", () => {
     render(<Label className="custom-label">Custom</Label>);
     const label = screen.getByText("Custom");
     expect(label).toHaveClass("custom-label");
-    expect(label).toHaveClass("text-[#b8a078]");
+    expect(label).toHaveClass("text-parchment");
   });
 
   it("forwards ref correctly", () => {

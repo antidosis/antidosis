@@ -11,9 +11,9 @@ interface ConfirmDialogProps {
 
 export function ConfirmDialog({ type, userName, onCancel, onConfirm }: ConfirmDialogProps) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0a0806]/80 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-void/80 p-4">
       <div className="vessel p-5 max-w-sm w-full">
-        <p className="text-sm font-medium text-[#e8d5a3] mb-5">
+        <p className="text-sm font-medium text-gold mb-5">
           {type === "delete"
             ? "Delete this need? This cannot be undone."
             : `Form a contract with ${userName}?`}

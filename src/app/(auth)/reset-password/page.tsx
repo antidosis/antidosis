@@ -30,17 +30,17 @@ export default function ResetPasswordPage() {
   const strength = getPasswordStrength(password);
 
   const strengthColor = {
-    weak: "text-[#ff5252]",
-    fair: "text-[#ffb300]",
-    strong: "text-[#00e676]",
-    "very-strong": "text-[#00e676]",
+    weak: "text-bad",
+    fair: "text-alert",
+    strong: "text-ok",
+    "very-strong": "text-ok",
   }[strength];
 
   const strengthBar = {
-    weak: "w-1/4 bg-[#ff5252]",
-    fair: "w-2/4 bg-[#ffb300]",
-    strong: "w-3/4 bg-[#00e676]",
-    "very-strong": "w-full bg-[#00e676]",
+    weak: "w-1/4 bg-bad",
+    fair: "w-2/4 bg-alert",
+    strong: "w-3/4 bg-ok",
+    "very-strong": "w-full bg-ok",
   }[strength];
 
   useEffect(() => {
@@ -88,8 +88,8 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0806] text-[#e8d5a3] flex flex-col">
-      <div className="px-4 md:px-8 py-3 border-b border-[#2a2420]">
+    <div className="min-h-screen bg-void text-gold flex flex-col">
+      <div className="px-4 md:px-8 py-3 border-b border-line">
         <Link href="/" className="flex items-center gap-2">
           <img
             src="/images/logo.webp"
@@ -97,27 +97,27 @@ export default function ResetPasswordPage() {
             width={138}
             height={56}
             fetchPriority="high"
-            className="opacity-80 hover:opacity-100 transition-opacity"
+            className="brand-logo opacity-80 hover:opacity-100 transition-opacity"
           />
         </Link>
       </div>
 
       <div className="flex-1 flex items-center justify-center px-4">
         <div className="w-full max-w-sm">
-          <p className="text-xs text-[#8f7f6e] mb-8">$ passwd --new</p>
-          <h1 className="heading-display text-2xl text-[#e8d5a3] mb-2">
+          <p className="text-xs text-ash mb-8">$ passwd --new</p>
+          <h1 className="heading-display text-2xl text-gold mb-2">
             new_password
             <TerminalCursor />
           </h1>
-          <p className="text-sm text-[#b8a078] mb-12">set a new password for your account</p>
+          <p className="text-sm text-parchment mb-12">set a new password for your account</p>
 
           {success ? (
-            <div className="border border-[#2a2420] bg-[#12100e] p-5">
+            <div className="border border-line bg-surface p-5">
               <div className="flex items-center gap-2 mb-2">
-                <Loader2 className="h-4 w-4 text-[#00e676] animate-spin" />
-                <p className="text-sm text-[#00e676]">Password updated.</p>
+                <Loader2 className="h-4 w-4 text-ok animate-spin" />
+                <p className="text-sm text-ok">Password updated.</p>
               </div>
-              <p className="text-xs text-[#8f7f6e]">Redirecting to login in {countdown}s...</p>
+              <p className="text-xs text-ash">Redirecting to login in {countdown}s...</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -136,7 +136,7 @@ export default function ResetPasswordPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8f7f6e] hover:text-[#e8d5a3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f5a623] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0806] rounded-sm"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-ash hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun focus-visible:ring-offset-2 focus-visible:ring-offset-void rounded-sm"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -145,12 +145,12 @@ export default function ResetPasswordPage() {
                 {password.length > 0 && (
                   <div className="space-y-2 mt-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-[#8f7f6e]">Strength</span>
+                      <span className="text-xs text-ash">Strength</span>
                       <span className={`text-xs font-medium ${strengthColor}`}>
                         {strength.replace("-", " ")}
                       </span>
                     </div>
-                    <div className="h-1.5 bg-[#12100e]">
+                    <div className="h-1.5 bg-surface">
                       <div className={`h-full transition-all duration-300 ${strengthBar}`} />
                     </div>
                     <div className="space-y-1">
@@ -175,11 +175,11 @@ export default function ResetPasswordPage() {
                       ].map((req) => (
                         <div key={req.label} className="flex items-center gap-2 text-xs">
                           {req.test ? (
-                            <Check className="h-3 w-3 text-[#00e676]" />
+                            <Check className="h-3 w-3 text-ok" />
                           ) : (
-                            <X className="h-3 w-3 text-[#ff5252]" />
+                            <X className="h-3 w-3 text-bad" />
                           )}
-                          <span className="text-xs text-[#8f7f6e]">{req.label}</span>
+                          <span className="text-xs text-ash">{req.label}</span>
                         </div>
                       ))}
                     </div>
@@ -202,7 +202,7 @@ export default function ResetPasswordPage() {
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8f7f6e] hover:text-[#e8d5a3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f5a623] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0806] rounded-sm"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-ash hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun focus-visible:ring-offset-2 focus-visible:ring-offset-void rounded-sm"
                   >
                     {showConfirmPassword ? (
                       <EyeOff className="h-4 w-4" />
@@ -213,7 +213,7 @@ export default function ResetPasswordPage() {
                 </div>
               </div>
 
-              {error && <p className="text-sm text-[#ff5252]">{error}</p>}
+              {error && <p className="text-sm text-bad">{error}</p>}
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Updating..." : "Update password"}
               </Button>

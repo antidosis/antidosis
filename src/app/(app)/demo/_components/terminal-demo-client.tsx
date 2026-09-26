@@ -23,16 +23,16 @@ import { Button } from "@/components/ui/button";
 /* ─── Terminal CSS Variables (matches the real relay surface) ─── */
 
 const TERM_VARS = {
-  "--term-bg": "#0a0806",
-  "--term-sidebar-bg": "#0f0c0a",
-  "--term-accent": "#f5a623",
-  "--term-accent-hover": "#ffb84d",
-  "--term-text": "#e8d5a3",
-  "--term-muted": "#8f7f6e",
-  "--term-border": "#2a2420",
-  "--term-error": "#ff5252",
-  "--term-success": "#00e676",
-  "--term-info": "#00e5ff",
+  "--term-bg": "var(--x-0a0806)",
+  "--term-sidebar-bg": "var(--x-0f0c0a)",
+  "--term-accent": "var(--x-f5a623)",
+  "--term-accent-hover": "var(--x-ffb84d)",
+  "--term-text": "var(--x-e8d5a3)",
+  "--term-muted": "var(--x-8f7f6e)",
+  "--term-border": "var(--x-2a2420)",
+  "--term-error": "var(--x-ff5252)",
+  "--term-success": "var(--x-00e676)",
+  "--term-info": "var(--x-00e5ff)",
 } as React.CSSProperties;
 
 /* ─── Types ─── */
@@ -60,10 +60,10 @@ interface DemoUser {
 /* ─── Demo Users ─── */
 
 const USERS: Record<string, DemoUser> = {
-  sarah: { id: "u1", name: "sarah", color: "#f5a623", bg: "#f5a62315" },
-  mike: { id: "u2", name: "mike", color: "#00e5ff", bg: "#00e5ff15" },
-  jess: { id: "u3", name: "jess", color: "#b24bf5", bg: "#b24bf515" },
-  system: { id: "sys", name: "system", color: "#8f7f6e", bg: "transparent" },
+  sarah: { id: "u1", name: "sarah", color: "var(--x-f5a623)", bg: "#f5a62315" },
+  mike: { id: "u2", name: "mike", color: "var(--x-00e5ff)", bg: "#00e5ff15" },
+  jess: { id: "u3", name: "jess", color: "var(--x-b24bf5)", bg: "#b24bf515" },
+  system: { id: "sys", name: "system", color: "var(--x-8f7f6e)", bg: "transparent" },
 };
 
 /* ─── Mock Command Outputs ─── */
@@ -287,11 +287,11 @@ const SCRIPT: ScriptEvent[] = [
   {
     type: "online",
     users: [
-      { name: "sarah", color: "#f5a623" },
-      { name: "mike", color: "#00e5ff" },
-      { name: "jess", color: "#b24bf5" },
-      { name: "david", color: "#00e676" },
-      { name: "lisa", color: "#ff6b6b" },
+      { name: "sarah", color: "var(--x-f5a623)" },
+      { name: "mike", color: "var(--x-00e5ff)" },
+      { name: "jess", color: "var(--x-b24bf5)" },
+      { name: "david", color: "var(--x-00e676)" },
+      { name: "lisa", color: "var(--x-ff6b6b)" },
     ],
     delay: 200,
   },
@@ -693,9 +693,7 @@ export default function TerminalDemoClient() {
         <p className="text-xs mb-3 font-mono" style={{ color: "var(--term-muted)" }}>
           $ ./demo/relay --replay
         </p>
-        <h1 className="heading-display text-2xl md:text-3xl text-[#e8d5a3] mb-2">
-          Community Relay
-        </h1>
+        <h1 className="heading-display text-2xl md:text-3xl text-gold mb-2">Community Relay</h1>
         <p className="text-sm max-w-lg" style={{ color: "var(--term-muted)" }}>
           Watch how community members use the relay — chatting in channels, running commands in
           Console, negotiating in DMs, and forming contracts. Two ways to use it, one powerful tool.
@@ -723,7 +721,7 @@ export default function TerminalDemoClient() {
         <Button size="sm" variant="ghost" onClick={reset}>
           <RotateCcw className="h-4 w-4 mr-1.5" /> Reset
         </Button>
-        <div className="h-6 w-px bg-[#2a2420] mx-1" />
+        <div className="h-6 w-px bg-line mx-1" />
         <Button
           size="sm"
           variant={speed === 1 ? "default" : "ghost"}
@@ -867,7 +865,7 @@ export default function TerminalDemoClient() {
                   <div key={u.name} className="flex items-center gap-1.5 text-[11px]">
                     <span
                       className="h-1.5 w-1.5 rounded-full shrink-0"
-                      style={{ background: "#00e676" }}
+                      style={{ background: "var(--x-00e676)" }}
                     />
                     <span style={{ color: u.color }}>{u.name}</span>
                   </div>
@@ -985,7 +983,7 @@ export default function TerminalDemoClient() {
                   {currentTypingUser.name}
                 </span>
                 <span style={{ color: "var(--term-text)" }}>{partialText}</span>
-                <span className="inline-block w-2 h-4 bg-[#f5a623]/60 ml-0.5 animate-pulse" />
+                <span className="inline-block w-2 h-4 bg-sun/60 ml-0.5 animate-pulse" />
               </div>
             )}
 
@@ -1032,25 +1030,25 @@ export default function TerminalDemoClient() {
             />
             <div className="flex items-center gap-1 shrink-0">
               <button
-                className="p-1.5 rounded hover:bg-[#1a1714] transition-colors"
+                className="p-1.5 rounded hover:bg-raise transition-colors"
                 style={{ color: "var(--term-muted)" }}
               >
                 <Paperclip className="h-4 w-4" />
               </button>
               <button
-                className="p-1.5 rounded hover:bg-[#1a1714] transition-colors"
+                className="p-1.5 rounded hover:bg-raise transition-colors"
                 style={{ color: "var(--term-muted)" }}
               >
                 <Mic className="h-4 w-4" />
               </button>
               <button
-                className="p-1.5 rounded hover:bg-[#1a1714] transition-colors"
+                className="p-1.5 rounded hover:bg-raise transition-colors"
                 style={{ color: "var(--term-muted)" }}
               >
                 <Smile className="h-4 w-4" />
               </button>
               <button
-                className="p-1.5 rounded hover:bg-[#1a1714] transition-colors"
+                className="p-1.5 rounded hover:bg-raise transition-colors"
                 style={{ color: "var(--term-accent)" }}
               >
                 <Send className="h-4 w-4" />
@@ -1061,12 +1059,12 @@ export default function TerminalDemoClient() {
 
         {/* Watch Demo Overlay */}
         {showOverlay && (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#0a0806]/90 backdrop-blur-sm">
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-void/90 backdrop-blur-sm">
             <div className="text-center space-y-4">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full border-2 border-[#f5a623]/30 bg-[#f5a623]/10">
-                <Play className="h-8 w-8 text-[#f5a623] ml-1" />
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full border-2 border-sun/30 bg-sun/10">
+                <Play className="h-8 w-8 text-sun ml-1" />
               </div>
-              <h2 className="heading-display text-xl text-[#e8d5a3]">Watch Demo</h2>
+              <h2 className="heading-display text-xl text-gold">Watch Demo</h2>
               <p className="text-sm max-w-sm mx-auto" style={{ color: "var(--term-muted)" }}>
                 See how community members chat in public channels, run commands in private Console,
                 negotiate in DMs, and form binding contracts.
@@ -1085,10 +1083,10 @@ export default function TerminalDemoClient() {
         {annotations.map((a) => (
           <div
             key={a._id}
-            className="p-4 rounded border border-[#f5a623]/20 bg-[#f5a623]/5 animate-in fade-in slide-in-from-bottom-2 duration-500"
+            className="p-4 rounded border border-sun/20 bg-sun/5 animate-in fade-in slide-in-from-bottom-2 duration-500"
           >
-            <p className="text-sm font-medium text-[#f5a623] mb-1">{a.title}</p>
-            <p className="text-xs text-[#b8a078] leading-relaxed">{a.text}</p>
+            <p className="text-sm font-medium text-sun mb-1">{a.title}</p>
+            <p className="text-xs text-parchment leading-relaxed">{a.text}</p>
           </div>
         ))}
       </div>
@@ -1129,7 +1127,7 @@ function renderEvent(event: ScriptEvent & { _id: number }, idx: number, reaction
           {reactions && reactions.length > 0 && (
             <div className="flex items-center gap-1 mt-0.5 ml-10">
               {reactions.map((emoji, i) => (
-                <span key={i} className="text-xs bg-[#1a1714] px-1.5 py-0.5 rounded">
+                <span key={i} className="text-xs bg-raise px-1.5 py-0.5 rounded">
                   {emoji}
                 </span>
               ))}

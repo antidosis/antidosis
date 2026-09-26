@@ -34,11 +34,11 @@ export function LiveBadge({ className = "" }: { className?: string }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 text-[11px] text-[#00e676] bg-[#00e676]/10 border border-[#00e676]/20 px-2 py-1 rounded-full ${className}`}
+      className={`inline-flex items-center gap-1.5 text-[11px] text-ok bg-ok/10 border border-ok/20 px-2 py-1 rounded-full ${className}`}
     >
       <span className="relative flex h-2 w-2">
-        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00e676] opacity-75" />
-        <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00e676]" />
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-ok opacity-75" />
+        <span className="relative inline-flex rounded-full h-2 w-2 bg-ok" />
       </span>
       <Users className="h-3 w-3" />
       {count} online

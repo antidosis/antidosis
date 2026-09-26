@@ -49,7 +49,7 @@ function getLink(item: ActivityItem): string {
 function ContextBadge({ item }: { item: ActivityItem }) {
   if (item.type === "mention") {
     return (
-      <span className="inline-flex items-center gap-1 text-[10px] text-[#f5a623] bg-[#f5a623]/10 px-1.5 py-0.5 rounded">
+      <span className="inline-flex items-center gap-1 text-[10px] text-sun bg-sun/10 px-1.5 py-0.5 rounded">
         <AtSign className="h-3 w-3" />
         mention
       </span>
@@ -57,14 +57,14 @@ function ContextBadge({ item }: { item: ActivityItem }) {
   }
   if (item.context.type === "dm") {
     return (
-      <span className="inline-flex items-center gap-1 text-[10px] text-[#00e5ff] bg-[#00e5ff]/10 px-1.5 py-0.5 rounded">
+      <span className="inline-flex items-center gap-1 text-[10px] text-mercury bg-mercury/10 px-1.5 py-0.5 rounded">
         <MessageSquare className="h-3 w-3" />
         DM
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 text-[10px] text-[#b8a078] bg-[#b8a078]/10 px-1.5 py-0.5 rounded">
+    <span className="inline-flex items-center gap-1 text-[10px] text-parchment bg-parchment/10 px-1.5 py-0.5 rounded">
       <Hash className="h-3 w-3" />
       {item.context.name}
     </span>
@@ -78,8 +78,8 @@ export function TerminalActivityFeed() {
   if (isLoading) {
     return (
       <div className="vessel p-8 text-center">
-        <Loader2 className="h-5 w-5 animate-spin mx-auto mb-3 text-[#b8a078]" />
-        <p className="text-xs text-[#8f7f6e]">loading community activity...</p>
+        <Loader2 className="h-5 w-5 animate-spin mx-auto mb-3 text-parchment" />
+        <p className="text-xs text-ash">loading community activity...</p>
       </div>
     );
   }
@@ -87,11 +87,11 @@ export function TerminalActivityFeed() {
   if (items.length === 0) {
     return (
       <div className="vessel p-8 text-center">
-        <MessageSquare className="h-6 w-6 mx-auto mb-3 text-[#8f7f6e]" />
-        <p className="text-sm text-[#b8a078] mb-1">No activity yet</p>
-        <p className="text-xs text-[#8f7f6e]">
+        <MessageSquare className="h-6 w-6 mx-auto mb-3 text-ash" />
+        <p className="text-sm text-parchment mb-1">No activity yet</p>
+        <p className="text-xs text-ash">
           Join the{" "}
-          <Link href="/terminal" className="text-[#f5a623] hover:underline">
+          <Link href="/terminal" className="text-sun hover:underline">
             Relay
           </Link>{" "}
           to start chatting with the community.
@@ -102,39 +102,36 @@ export function TerminalActivityFeed() {
 
   return (
     <div className="vessel overflow-hidden">
-      <div className="px-5 py-4 border-b border-[#2a2420]/60 flex items-center justify-between">
+      <div className="px-5 py-4 border-b border-line/60 flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-[#e8d5a3]">Community Activity</p>
-          <p className="text-[11px] text-[#8f7f6e]">Recent messages, DMs, and mentions</p>
+          <p className="text-sm font-medium text-gold">Community Activity</p>
+          <p className="text-[11px] text-ash">Recent messages, DMs, and mentions</p>
         </div>
-        <Link
-          href="/terminal"
-          className="text-xs text-[#f5a623] hover:text-[#e8d5a3] transition-colors"
-        >
+        <Link href="/terminal" className="text-xs text-sun hover:text-gold transition-colors">
           Open Relay →
         </Link>
       </div>
-      <div className="divide-y divide-[#2a2420]/40">
+      <div className="divide-y divide-line/40">
         {items.map((item) => (
           <Link
             key={item.id}
             href={getLink(item)}
-            className="block px-5 py-3.5 hover:bg-[#1a1714]/60 transition-colors group"
+            className="block px-5 py-3.5 hover:bg-raise/60 transition-colors group"
           >
             <div className="flex items-start gap-3">
               {/* Avatar */}
-              <div className="h-8 w-8 rounded-full bg-[#1a1714] border border-[#2a2420] flex items-center justify-center text-[10px] font-bold text-[#b8a078] shrink-0">
+              <div className="h-8 w-8 rounded-full bg-raise border border-line flex items-center justify-center text-[10px] font-bold text-parchment shrink-0">
                 {getInitials(item.sender.fullName)}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap mb-1">
-                  <span className="text-xs font-medium text-[#e8d5a3]">
+                  <span className="text-xs font-medium text-gold">
                     {item.sender.fullName || "User"}
                   </span>
                   <ContextBadge item={item} />
-                  <span className="text-[10px] text-[#8f7f6e]">{timeAgo(item.createdAt)}</span>
+                  <span className="text-[10px] text-ash">{timeAgo(item.createdAt)}</span>
                 </div>
-                <p className="text-xs text-[#b8a078] line-clamp-2 group-hover:text-[#e8d5a3] transition-colors">
+                <p className="text-xs text-parchment line-clamp-2 group-hover:text-gold transition-colors">
                   {item.content}
                 </p>
               </div>

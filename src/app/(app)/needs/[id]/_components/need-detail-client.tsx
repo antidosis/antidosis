@@ -444,15 +444,15 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
   if (loading) {
     return (
       <div className="max-w-3xl mx-auto px-4 md:px-8 py-24 text-center">
-        <Loader2 className="h-6 w-6 animate-spin mx-auto text-[#8f7f6e]" />
-        <p className="text-sm text-[#8f7f6e] mt-3">Loading...</p>
+        <Loader2 className="h-6 w-6 animate-spin mx-auto text-ash" />
+        <p className="text-sm text-ash mt-3">Loading...</p>
       </div>
     );
   }
   if (!need) {
     return (
       <div className="max-w-3xl mx-auto px-4 md:px-8 py-24 text-center">
-        <p className="text-sm text-[#ff5252]">Need not found</p>
+        <p className="text-sm text-bad">Need not found</p>
         <Button variant="secondary" className="mt-4" asChild>
           <Link href="/needs">Browse Needs</Link>
         </Button>
@@ -492,10 +492,10 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
             {need.contracts.map((c) => (
               <div
                 key={c.id}
-                className="bg-[#00e676]/5 border-l-2 border-[#00e676] p-4 flex items-center justify-between"
+                className="bg-ok/5 border-l-2 border-ok p-4 flex items-center justify-between"
               >
                 <div>
-                  <p className="text-sm font-medium text-[#00e676]">contract formed</p>
+                  <p className="text-sm font-medium text-ok">contract formed</p>
                   <Badge variant="success" className="mt-1 capitalize text-[10px]">
                     {c.status}
                   </Badge>
@@ -575,7 +575,7 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
               size="sm"
               variant="ghost"
               onClick={() => setConfirmDialog({ type: "delete" })}
-              className="text-[#8f7f6e] hover:text-[#ff5252]"
+              className="text-ash hover:text-bad"
             >
               <Trash2 className="h-3.5 w-3.5 mr-1" /> delete
             </Button>

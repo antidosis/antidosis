@@ -7,17 +7,32 @@ import { getThemeColors } from "./terminal-render";
 export function useThemeStyles(themeName: string) {
   const t = useMemo(() => getThemeColors(themeName), [themeName]);
   return {
-    vars: {
-      "--term-bg": t.bg,
-      "--term-sidebar-bg": t.sidebarBg,
-      "--term-accent": t.accent,
-      "--term-accent-hover": t.accentHover,
-      "--term-text": t.text,
-      "--term-muted": t.muted,
-      "--term-border": t.border,
-      "--term-error": t.error,
-      "--term-success": t.success,
-    } as React.CSSProperties,
+    // The default skin follows the site's active theme (light/dark tokens);
+    // named skins (cyberpunk, matrix, minimal) are fixed palettes by design.
+    vars:
+      themeName === "default"
+        ? ({
+            "--term-bg": "rgb(var(--c-void))",
+            "--term-sidebar-bg": "rgb(var(--c-inset))",
+            "--term-accent": "rgb(var(--c-sun))",
+            "--term-accent-hover": "rgb(var(--c-sunhi))",
+            "--term-text": "rgb(var(--c-gold))",
+            "--term-muted": "rgb(var(--c-ash))",
+            "--term-border": "rgb(var(--c-line))",
+            "--term-error": "rgb(var(--c-bad))",
+            "--term-success": "rgb(var(--c-ok))",
+          } as React.CSSProperties)
+        : ({
+            "--term-bg": t.bg,
+            "--term-sidebar-bg": t.sidebarBg,
+            "--term-accent": t.accent,
+            "--term-accent-hover": t.accentHover,
+            "--term-text": t.text,
+            "--term-muted": t.muted,
+            "--term-border": t.border,
+            "--term-error": t.error,
+            "--term-success": t.success,
+          } as React.CSSProperties),
     t,
   };
 }
