@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { Check, X, Eye, EyeOff, Loader2 } from "lucide-react";
@@ -88,14 +89,17 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0806] text-[#e8d5a3] flex flex-col">
-      <div className="px-4 md:px-8 py-4 border-b border-[#2a2420]">
-        <a href="/" className="flex items-center gap-2">
+      <div className="px-4 md:px-8 py-3 border-b border-[#2a2420]">
+        <Link href="/" className="flex items-center gap-2">
           <img
-            src="/images/logo.png"
+            src="/images/logo.webp"
             alt="antidosis"
-            className="h-8 w-auto opacity-80 hover:opacity-100 transition-opacity"
+            width={138}
+            height={56}
+            fetchPriority="high"
+            className="opacity-80 hover:opacity-100 transition-opacity"
           />
-        </a>
+        </Link>
       </div>
 
       <div className="flex-1 flex items-center justify-center px-4">
