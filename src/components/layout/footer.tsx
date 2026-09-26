@@ -109,6 +109,17 @@ export function Footer() {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="text-xs text-ash">&copy; {year} Antidosis. All rights reserved.</p>
             <p className="text-xs text-ash">Crafted with intention on the Central Coast, NSW.</p>
+            <p className="text-xs text-ash">
+              Built by{" "}
+              <a
+                href="https://hekaweb.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sun hover:text-gold transition-colors font-medium"
+              >
+                HEKAWEB
+              </a>
+            </p>
           </div>
         </div>
       </div>
