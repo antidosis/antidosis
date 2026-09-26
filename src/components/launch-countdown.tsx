@@ -66,7 +66,8 @@ export function LaunchCountdown() {
     <section
       className="relative w-full overflow-hidden border-y border-sun/15"
       style={{
-        background: "linear-gradient(180deg, #0f0c0a 0%, #0a0806 50%, #0f0c0a 100%)",
+        background:
+          "linear-gradient(180deg, rgb(var(--c-inset)) 0%, rgb(var(--c-void)) 50%, rgb(var(--c-inset)) 100%)",
         boxShadow: "inset 0 0 60px rgba(245,166,35,0.03), 0 0 30px rgba(245,166,35,0.04)",
       }}
     >
@@ -238,7 +239,8 @@ export function LaunchBanner() {
     <div
       className="w-full border-b border-sun/15 relative overflow-hidden"
       style={{
-        background: "linear-gradient(90deg, #0f0c0a 0%, #12100e 50%, #0f0c0a 100%)",
+        background:
+          "linear-gradient(90deg, rgb(var(--c-inset)) 0%, rgb(var(--c-surface)) 50%, rgb(var(--c-inset)) 100%)",
       }}
     >
       {/* Subtle animated shimmer line */}
