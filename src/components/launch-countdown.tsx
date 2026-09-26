@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 //  Format: YYYY-MM-DDTHH:mm:ss
 //  The countdown automatically adjusts to the user's timezone.
 // ═══════════════════════════════════════════════════════════════
-const REGIONAL_LAUNCH_DATE = new Date("2026-10-31T23:59:59+10:00");
+const REGIONAL_LAUNCH_DATE = new Date("2027-01-01T00:00:00+11:00");
 
 export function getLaunchDate() {
   return REGIONAL_LAUNCH_DATE;
