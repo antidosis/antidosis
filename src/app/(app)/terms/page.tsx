@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import { ArrowLeft } from "lucide-react";
 
+import { EmailLink } from "@/components/email-link";
+
 export const metadata = {
   title: "Terms of Service — antidosis",
   description:
@@ -385,9 +387,9 @@ export default function TermsPage() {
           <h2 className="text-lg font-semibold text-[#e8d5a3] mb-3">12. Termination</h2>
           <p className="mb-3">
             <strong>By you:</strong> You may terminate your account at any time by contacting us at{" "}
-            <a href="mailto:support@antidosis.com" className="text-[#e8d5a3] hover:underline">
+            <EmailLink email="support@antidosis.com" className="text-[#e8d5a3] hover:underline">
               support@antidosis.com
-            </a>
+            </EmailLink>
             . Upon termination, your right to use the Service ceases immediately.
           </p>
           <p className="mb-3">
@@ -471,9 +473,9 @@ export default function TermsPage() {
           <p className="mb-3">
             <strong>Informal resolution:</strong> Before filing any formal legal proceeding, you
             agree to contact us at{" "}
-            <a href="mailto:support@antidosis.com" className="text-[#e8d5a3] hover:underline">
+            <EmailLink email="support@antidosis.com" className="text-[#e8d5a3] hover:underline">
               support@antidosis.com
-            </a>{" "}
+            </EmailLink>{" "}
             and attempt to resolve the dispute informally for at least 30 days.
           </p>
           <p className="mb-3">
@@ -519,9 +521,9 @@ export default function TermsPage() {
           <div className="pl-4 border-l-2 border-[#7a6b5a]/30">
             <p>
               <strong>Email:</strong>{" "}
-              <a href="mailto:support@antidosis.com" className="text-[#e8d5a3] hover:underline">
+              <EmailLink email="support@antidosis.com" className="text-[#e8d5a3] hover:underline">
                 support@antidosis.com
-              </a>
+              </EmailLink>
             </p>
             <p>
               <strong>Entity:</strong> Antidosis Pty Ltd

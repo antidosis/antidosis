@@ -83,14 +83,23 @@ export default function RegisterPage() {
     }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: fullName },
-        emailRedirectTo: `${appUrl}/login`,
-      },
-    });
+    let authData, authError;
+    try {
+      const res = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: fullName },
+          emailRedirectTo: `${appUrl}/login`,
+        },
+      });
+      authData = res.data;
+      authError = res.error;
+    } catch {
+      setError("couldn't reach the auth server. check your connection and try again.");
+      setLoading(false);
+      return;
+    }
 
     if (authError) {
       setError(authError.message);

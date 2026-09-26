@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import { ArrowLeft } from "lucide-react";
 
+import { EmailLink } from "@/components/email-link";
+
 export const metadata = {
   title: "Privacy Policy — antidosis",
   description:
@@ -447,9 +449,9 @@ export default function PrivacyPage() {
           </ul>
           <p>
             To request deletion of your account and personal data, contact us at{" "}
-            <a href="mailto:privacy@antidosis.com" className="text-[#e8d5a3] hover:underline">
+            <EmailLink email="privacy@antidosis.com" className="text-[#e8d5a3] hover:underline">
               privacy@antidosis.com
-            </a>
+            </EmailLink>
             .
           </p>
         </section>
@@ -482,9 +484,9 @@ export default function PrivacyPage() {
           </ul>
           <p className="mt-3">
             To exercise any of these rights, contact us at{" "}
-            <a href="mailto:privacy@antidosis.com" className="text-[#e8d5a3] hover:underline">
+            <EmailLink email="privacy@antidosis.com" className="text-[#e8d5a3] hover:underline">
               privacy@antidosis.com
-            </a>
+            </EmailLink>
             . We will respond within 30 days.
           </p>
         </section>
@@ -544,9 +546,9 @@ export default function PrivacyPage() {
             The Service is not intended for use by children under the age of 18. We do not knowingly
             collect personal information from children. If you are a parent or guardian and believe
             your child has provided us with personal information, please contact us immediately at{" "}
-            <a href="mailto:privacy@antidosis.com" className="text-[#e8d5a3] hover:underline">
+            <EmailLink email="privacy@antidosis.com" className="text-[#e8d5a3] hover:underline">
               privacy@antidosis.com
-            </a>
+            </EmailLink>
             . If we become aware that we have collected personal information from a child without
             parental consent, we will take steps to delete that information.
           </p>
@@ -592,9 +594,9 @@ export default function PrivacyPage() {
           <div className="pl-4 border-l-2 border-[#7a6b5a]/30">
             <p>
               <strong>Email:</strong>{" "}
-              <a href="mailto:privacy@antidosis.com" className="text-[#e8d5a3] hover:underline">
+              <EmailLink email="privacy@antidosis.com" className="text-[#e8d5a3] hover:underline">
                 privacy@antidosis.com
-              </a>
+              </EmailLink>
             </p>
             <p>
               <strong>Entity:</strong> Antidosis Pty Ltd

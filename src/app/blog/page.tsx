@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, Clock, Calendar } from "lucide-react";
 import type { Metadata } from "next";
 
+import { EmailLink } from "@/components/email-link";
 import { Footer } from "@/components/layout/footer";
 import { Navbar } from "@/components/layout/navbar";
 import { blogPosts } from "@/lib/blog";
@@ -106,13 +107,14 @@ export default function BlogIndexPage() {
           {/* CTA */}
           <div className="mt-16 text-center">
             <p className="text-sm text-[#8f7f6e] mb-4">Want to share your exchange story?</p>
-            <a
-              href="mailto:official.antidosis@gmail.com?subject=Blog%20Submission"
+            <EmailLink
+              email="official.antidosis@gmail.com"
+              subject="Blog Submission"
               className="inline-flex items-center gap-2 text-sm text-[#00e5ff] hover:underline"
             >
               Submit an article idea
               <ArrowRight className="h-4 w-4" />
-            </a>
+            </EmailLink>
           </div>
         </div>
       </main>

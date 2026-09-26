@@ -1,7 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 
-const linkGroups = [
+import { EmailLink } from "@/components/email-link";
+
+const linkGroups: {
+  title: string;
+  links: { href?: string; email?: string; label: string; external?: boolean }[];
+}[] = [
   {
     title: "Product",
     links: [
@@ -26,7 +31,7 @@ const linkGroups = [
   },
   {
     title: "Support",
-    links: [{ href: "mailto:official.antidosis@gmail.com", label: "Contact", external: true }],
+    links: [{ email: "official.antidosis@gmail.com", label: "Contact" }],
   },
 ];
 
@@ -69,7 +74,14 @@ export function Footer() {
                 <ul className="space-y-2.5">
                   {group.links.map((link) => (
                     <li key={link.label}>
-                      {link.external ? (
+                      {link.email ? (
+                        <EmailLink
+                          email={link.email}
+                          className="text-sm text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
+                        >
+                          {link.label}
+                        </EmailLink>
+                      ) : link.external ? (
                         <a
                           href={link.href}
                           className="text-sm text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
@@ -78,7 +90,7 @@ export function Footer() {
                         </a>
                       ) : (
                         <Link
-                          href={link.href}
+                          href={link.href ?? "/"}
                           className="text-sm text-[#8f7f6e] hover:text-[#e8d5a3] transition-colors"
                         >
                           {link.label}
