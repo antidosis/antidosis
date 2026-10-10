@@ -7,8 +7,13 @@ export const dynamic = "force-dynamic";
 // Supabase free-tier keep-alive — schedule daily (see vercel.json crons).
 // Supabase auto-pauses projects after ~7 days without API activity, which
 // takes down auth, realtime and storage (the app DB is on Neon and keeps
-// working, so the failure is not obvious). A daily request through the
-// project's API gateway registers as activity and prevents the pause.
+// working, so the failure is not obvious).
+//
+// The ping must reach the project's own auth service: the anon
+// /auth/v1/health endpoint is served by the API gateway alone and does NOT
+// count toward pause detection — the project paused in Jul 2026 while this
+// cron was hitting health daily. The service-role admin users query goes
+// through the project's auth server and registers as activity.
 export const GET = withApiHandler(async (req: NextRequest) => {
   const secret = process.env.CRON_SECRET;
   if (!secret) {
@@ -19,13 +24,13 @@ export const GET = withApiHandler(async (req: NextRequest) => {
   }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!supabaseUrl || !anonKey) {
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !serviceRoleKey) {
     return NextResponse.json({ error: "Supabase not configured" }, { status: 503 });
   }
 
-  const res = await fetch(`${supabaseUrl}/auth/v1/health`, {
-    headers: { apikey: anonKey },
+  const res = await fetch(`${supabaseUrl}/auth/v1/admin/users?page=1&per_page=1`, {
+    headers: { apikey: serviceRoleKey, Authorization: `Bearer ${serviceRoleKey}` },
     cache: "no-store",
   });
 

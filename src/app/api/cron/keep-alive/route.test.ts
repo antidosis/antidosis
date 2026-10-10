@@ -17,20 +17,20 @@ describe("GET /api/cron/keep-alive", () => {
   const ORIGINAL = {
     cron: process.env.CRON_SECRET,
     url: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    key: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    key: process.env.SUPABASE_SERVICE_ROLE_KEY,
   };
 
   beforeEach(() => {
     mockFetch.mockReset();
     process.env.CRON_SECRET = "test-secret";
     process.env.NEXT_PUBLIC_SUPABASE_URL = "https://example.supabase.co";
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "anon-key";
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "service-role-key";
   });
 
   afterEach(() => {
     process.env.CRON_SECRET = ORIGINAL.cron;
     process.env.NEXT_PUBLIC_SUPABASE_URL = ORIGINAL.url;
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = ORIGINAL.key;
+    process.env.SUPABASE_SERVICE_ROLE_KEY = ORIGINAL.key;
   });
 
   it("fails closed when CRON_SECRET is unset", async () => {
@@ -53,7 +53,7 @@ describe("GET /api/cron/keep-alive", () => {
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
-  it("pings the Supabase auth health endpoint with the anon key", async () => {
+  it("queries the Supabase auth admin API with the service role key", async () => {
     mockFetch.mockResolvedValue({ ok: true });
 
     const res = await GET(req("Bearer test-secret"));
@@ -63,8 +63,10 @@ describe("GET /api/cron/keep-alive", () => {
     expect(body.success).toBe(true);
 
     expect(mockFetch).toHaveBeenCalledWith(
-      "https://example.supabase.co/auth/v1/health",
-      expect.objectContaining({ headers: { apikey: "anon-key" } })
+      "https://example.supabase.co/auth/v1/admin/users?page=1&per_page=1",
+      expect.objectContaining({
+        headers: { apikey: "service-role-key", Authorization: "Bearer service-role-key" },
+      })
     );
   });
 
