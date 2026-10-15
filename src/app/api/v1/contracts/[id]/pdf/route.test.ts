@@ -41,6 +41,7 @@ vi.mock("@/lib/pdf-contract", () => ({
 }));
 
 // ─── Supabase service mock ───
+const mockFrom = vi.fn();
 const mockUpload = vi.fn();
 const mockGetPublicUrl = vi.fn(() => ({
   data: { publicUrl: "https://example.com/contracts/test.pdf" },
@@ -49,10 +50,7 @@ const mockGetPublicUrl = vi.fn(() => ({
 vi.mock("@/lib/supabase/service", () => ({
   createServiceClient: () => ({
     storage: {
-      from: () => ({
-        upload: (...args: unknown[]) => mockUpload(...args),
-        getPublicUrl: () => mockGetPublicUrl(),
-      }),
+      from: (...args: unknown[]) => mockFrom(...args),
     },
   }),
 }));
@@ -132,6 +130,10 @@ describe("POST /api/v1/contracts/[id]/pdf", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockRateLimit.mockResolvedValue({ allowed: true, remaining: 10, resetAt: Date.now() + 60_000 });
+    mockFrom.mockReturnValue({
+      upload: (...args: unknown[]) => mockUpload(...args),
+      getPublicUrl: () => mockGetPublicUrl(),
+    });
     mockGenerateContractPdf.mockResolvedValue(new Uint8Array([1, 2, 3]));
     mockUpload.mockResolvedValue({ error: null });
     mockContractUpdate.mockResolvedValue({
@@ -254,6 +256,8 @@ describe("POST /api/v1/contracts/[id]/pdf", () => {
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.pdfUrl).toBe("https://example.com/contracts/test.pdf");
+    // PDFs land in the private bucket, never the public one
+    expect(mockFrom).toHaveBeenCalledWith("uploads-private");
     expect(mockContractUpdate).toHaveBeenCalledWith(
       expect.objectContaining({ data: { pdfUrl: "https://example.com/contracts/test.pdf" } })
     );

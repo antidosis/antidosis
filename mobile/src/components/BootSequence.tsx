@@ -16,13 +16,13 @@ interface BootLine {
 }
 
 const BOOT_LINES: BootLine[] = [
-  { text: "initializing kernel...", status: "ok", delay: 100 },
+  { text: "initializing antidosis relay network...", status: "ok", delay: 100 },
   { text: "mounting filesystems...", status: "ok", delay: 180 },
-  { text: "loading modules: auth, exchange, terminal...", status: "ok", delay: 260 },
+  { text: "loading modules: auth, exchange, relay...", status: "ok", delay: 260 },
   { text: "connecting to peer network...", status: "info", delay: 340 },
   { text: "verifying cryptographic signatures...", status: "ok", delay: 420 },
   { text: "syncing local state...", status: "ok", delay: 500 },
-  { text: "ready.", status: "ok", delay: 700 },
+  { text: "on air.", status: "ok", delay: 700 },
 ];
 
 const STORAGE_KEY = "boot-sequence-completed";
@@ -127,11 +127,11 @@ export function BootSequence({ onComplete }: { onComplete: () => void }) {
                 <span className="text-[var(--amber-alert)] mr-2">[WARN]</span>
               )}
               <span
-                className={line.text === "ready." ? "text-[var(--sun)]" : "text-[var(--leather)]"}
+                className={line.text === "on air." ? "text-[var(--sun)]" : "text-[var(--leather)]"}
               >
                 {line.text}
               </span>
-              {line.text === "ready." && <TerminalCursor color="sun" size="sm" className="ml-1" />}
+              {line.text === "on air." && <TerminalCursor color="sun" size="sm" className="ml-1" />}
             </div>
           ))}
         </div>

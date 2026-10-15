@@ -221,7 +221,7 @@ export function ChatRoomScreen() {
     ? `#${channels.find((c) => c.id === id)?.name ?? id?.slice(0, 8)}`
     : isNewDm
       ? "New Message"
-      : (threads.find((t) => t.id === id)?.otherUser.fullName ?? "Direct Message");
+      : (threads.find((t) => t.id === id)?.otherUser.fullName ?? "Direct");
 
   const subtitle = isChannel
     ? `${channels.find((c) => c.id === id)?.type ?? "public"} channel`
@@ -395,7 +395,7 @@ export function ChatRoomScreen() {
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5 font-mono text-[11px] text-[var(--leather)]">
-              <span>antidosis-terminal</span>
+              <span>antidosis relay</span>
               <span className="text-[var(--bronze)]">|</span>
               <span className="text-[var(--sun)] truncate">{title}</span>
             </div>

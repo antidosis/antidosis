@@ -25,16 +25,14 @@ vi.mock("@/lib/supabase/server", () => ({
 }));
 
 // ─── Service client mock ───
+const mockFrom = vi.fn();
 const mockUpload = vi.fn();
 const mockGetPublicUrl = vi.fn();
 
 vi.mock("@/lib/supabase/service", () => ({
   createServiceClient: () => ({
     storage: {
-      from: () => ({
-        upload: (...args: unknown[]) => mockUpload(...args),
-        getPublicUrl: (...args: unknown[]) => mockGetPublicUrl(...args),
-      }),
+      from: (...args: unknown[]) => mockFrom(...args),
     },
   }),
 }));
@@ -112,6 +110,10 @@ describe("POST /api/v1/upload", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockRateLimit.mockResolvedValue({ allowed: true, remaining: 10, resetAt: Date.now() + 60_000 });
+    mockFrom.mockReturnValue({
+      upload: (...args: unknown[]) => mockUpload(...args),
+      getPublicUrl: (...args: unknown[]) => mockGetPublicUrl(...args),
+    });
     mockProfileFindUnique.mockResolvedValue({
       id: "profile-1",
       mobileVerified: true,
@@ -228,6 +230,35 @@ describe("POST /api/v1/upload", () => {
     expect(res.status).toBe(200);
     expect(body.url).toBe("https://example.com/general/user-1/test.png");
     expect(mockUpload).toHaveBeenCalled();
+  });
+
+  it("uploads identity documents to the private bucket", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockUpload.mockResolvedValue({
+      data: { path: "credentials/user-1/test.png" },
+      error: null,
+    });
+    mockGetPublicUrl.mockReturnValue({
+      data: { publicUrl: "https://example.com/credentials/user-1/test.png" },
+    });
+
+    const res = await POST(makeFormRequest(makePngFile(), "credentials"));
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(mockFrom).toHaveBeenCalledWith("uploads-private");
+    expect(body.url).toBe("https://example.com/credentials/user-1/test.png");
+  });
+
+  it("keeps public files (avatars, needs) in the public bucket", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+
+    const res = await POST(makeFormRequest(makePngFile(), "avatars"));
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(mockFrom).toHaveBeenCalledWith("uploads");
+    expect(body.url).toBe("https://example.com/general/user-1/test.png");
   });
 
   it("returns 500 when upload fails", async () => {

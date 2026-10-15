@@ -32,7 +32,7 @@ export interface Profile {
     id: string;
     rating: number;
     comment: string | null;
-    giver: { id: string; fullName: string | null; avatarUrl: string | null };
+    giver: { fullName: string | null; avatarUrl: string | null };
     contract: { need: { title: string } } | null;
     createdAt: string;
   }[];
@@ -193,6 +193,24 @@ export interface NeedDetailResponse {
   need: Need;
 }
 
+// Subset returned by GET /needs/mine (not the full Need model)
+export interface MyNeed {
+  id: string;
+  title: string;
+  status: string;
+  createdAt: string;
+  _count: { acceptances: number };
+  acceptances: { id: string }[];
+}
+
+// Subset returned by GET /acceptances/mine (not the full Acceptance model)
+export interface MyAcceptance {
+  id: string;
+  status: string;
+  message: string | null;
+  need: { id: string; title: string };
+}
+
 export interface NotificationsResponse {
   notifications: Notification[];
   unreadCount: number;
@@ -309,6 +327,19 @@ export interface SearchResult {
 
 // ── Contracts ────────────────────────────────────────────────────────
 
+// Party shape returned by GET /contracts/[id]
+export interface ContractParty {
+  id: string;
+  fullName: string | null;
+  avatarUrl: string | null;
+  bio: string | null;
+  ratingAvg: number;
+  ratingCount: number;
+  locationName: string | null;
+  isVerified: boolean;
+  skills: Skill[];
+}
+
 export interface ContractSummary {
   id: string;
   status: string;
@@ -362,8 +393,9 @@ export interface ContractDetail {
   createdAt: string;
   updatedAt: string;
   need: Need & { poster: NeedPoster; requiredSkills: NeedSkill[] };
-  partyA: NeedPoster;
-  partyB: NeedPoster;
+  // GET /contracts/[id] selects this exact subset for both parties
+  partyA: ContractParty;
+  partyB: ContractParty;
   messages: {
     id: string;
     content: string;

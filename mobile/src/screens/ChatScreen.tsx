@@ -8,8 +8,8 @@ import { hapticImpact } from "@mobile/lib/native";
 import { Vessel, Badge } from "@mobile/components/ui";
 
 /* ═══════════════════════════════════════════════════════════════
-   CHAT SCREEN — Terminal Channel / DM List
-   antidosis-terminal v2.0.0 aesthetic throughout.
+   CHAT SCREEN — Relay Channel / Direct List
+   antidosis relay aesthetic throughout.
    ═══════════════════════════════════════════════════════════════ */
 
 export function ChatScreen() {
@@ -36,10 +36,10 @@ export function ChatScreen() {
         <div className="flex items-center gap-2 mb-1">
           <Radio size={12} className="text-[var(--emerald)]" />
           <span className="font-mono text-[10px] text-[var(--leather)] tracking-wide">
-            antidosis-terminal v2.0.0
+            antidosis relay
           </span>
         </div>
-        <h1 className="heading-display text-xl text-[var(--gold)] mb-4">Terminal</h1>
+        <h1 className="heading-display text-xl text-[var(--gold)] mb-4">Relay</h1>
 
         {/* Segment Control — terminal tabs */}
         <div className="flex border border-[var(--bronze)] rounded-md overflow-hidden">
@@ -84,7 +84,7 @@ export function ChatScreen() {
       {/* Prompt */}
       <div className="px-4 mb-3 max-w-3xl mx-auto">
         <p className="font-mono text-xs text-[var(--leather)]">
-          $ ls {segment === "channels" ? "/channels/" : "/dms/"}
+          $ ls {segment === "channels" ? "/channels/" : "/direct/"}
         </p>
       </div>
 

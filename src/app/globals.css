@@ -618,3 +618,80 @@
     animation: ticker 80s linear infinite;
   }
 }
+
+/* ── Employee Brief (/brief) — document page + print stylesheet ──
+   The page is dark "void" on screen; @media print flips it to a clean
+   white A4 document (this doubles as the PDF path). */
+
+.brief-print-footer {
+  display: none;
+}
+
+@media print {
+  @page {
+    margin: 16mm 15mm;
+  }
+
+  .brief-root,
+  .brief-root * {
+    background: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .brief-root {
+    color: #1c1917 !important;
+    font-family: var(--font-sans), system-ui, sans-serif !important;
+  }
+
+  .brief-root [class*="border"] {
+    border-color: #d6d3d1 !important;
+  }
+
+  .brief-ink {
+    color: #292524 !important;
+  }
+
+  .brief-soft {
+    color: #57534e !important;
+  }
+
+  .brief-gold {
+    color: #8a6d1f !important;
+  }
+
+  .brief-accent {
+    color: #b45309 !important;
+  }
+
+  .brief-card,
+  .brief-avoid {
+    break-inside: avoid;
+  }
+
+  /* Compact the generous screen whitespace so pages fill evenly */
+  .brief-root section {
+    padding-top: 28pt !important;
+    padding-bottom: 28pt !important;
+  }
+
+  .brief-root .divider {
+    background: #a8a29e !important;
+    height: 0.5pt !important;
+  }
+
+  .brief-print-footer {
+    display: block !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding-top: 6pt;
+    border-top: 0.5pt solid #a8a29e;
+    font-size: 7.5pt;
+    letter-spacing: 0.08em;
+    color: #78716c;
+  }
+}

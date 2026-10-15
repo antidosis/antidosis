@@ -25,7 +25,8 @@ export default function TermsPage() {
       <p className="text-[12px] text-ash mb-4">$ cat /etc/antidosis/terms-of-service.md</p>
       <h1 className="text-3xl font-bold mb-2 text-gold">Terms of Service</h1>
       <p className="text-[13px] text-ash/70 mb-10">
-        Last updated: 22 July 2026 &middot; Please read these terms carefully before using antidosis
+        Last updated: 16 October 2026 &middot; Please read these terms carefully before using
+        antidosis
       </p>
 
       <article className="space-y-10 text-[15px] text-parchment leading-relaxed">
@@ -84,7 +85,9 @@ export default function TermsPage() {
             <strong>Important:</strong> Antidosis is a platform that connects users. We do not
             provide the services, items, or exchanges listed on the platform, nor do we guarantee
             the quality, safety, legality, or availability of any exchange. We are not a party to
-            any contract or agreement formed between users through the Service.
+            any contract or agreement formed between users through the Service. Under the Australian
+            Consumer Law, consumer guarantees for any goods or services exchanged are owed by the
+            user who supplies them — not by Antidosis.
           </p>
         </section>
 
@@ -277,9 +280,106 @@ export default function TermsPage() {
           </p>
         </section>
 
-        {/* ── 8. Reviews and Ratings ── */}
+        {/* ── 8. Tax, Barter, and Record-Keeping ── */}
         <section>
-          <h2 className="text-lg font-semibold text-gold mb-3">8. Reviews and Ratings</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">
+            8. Tax, Barter, and Record-Keeping
+          </h2>
+          <p className="mb-3">
+            Exchanges arranged through the Service — including swaps and barter where no money
+            changes hands — may be <strong>taxable supplies</strong> under Australian tax law, and
+            may need to be accounted for at <strong>market value</strong> even when nothing is paid
+            in cash.
+          </p>
+          <ul className="list-disc pl-5 space-y-1 mb-3">
+            <li>
+              If you are registered (or required to register) for GST, a swap can create GST
+              obligations on both sides of the exchange
+            </li>
+            <li>
+              The value of what you supply through the platform counts toward the GST registration
+              threshold (currently $75,000 of aggregated turnover)
+            </li>
+            <li>
+              The ATO publishes guidance on barter transactions and the sharing economy (including
+              Practical Compliance Guideline PCG 2016/18) that may apply to your exchanges
+            </li>
+          </ul>
+          <p className="mb-3">
+            <strong>You are responsible for your own tax affairs.</strong> Keep your own records of
+            exchanges you make through the Service. We do not provide tax advice, report individual
+            user transactions to you, or withhold amounts on your behalf. If you are unsure how
+            these rules apply to you, consult the ATO or a registered tax professional.
+          </p>
+        </section>
+
+        {/* ── 9. Licensed and Regulated Work ── */}
+        <section>
+          <h2 className="text-lg font-semibold text-gold mb-3">9. Licensed and Regulated Work</h2>
+          <p className="mb-3">
+            In NSW, certain work may only be performed by a licensed tradesperson{" "}
+            <strong>regardless of the price</strong>, including:
+          </p>
+          <ul className="list-disc pl-5 space-y-1 mb-3">
+            <li>Electrical wiring and electrical installation work</li>
+            <li>Plumbing and drainage work</li>
+            <li>Gas-fitting work</li>
+            <li>Air-conditioning and refrigeration work</li>
+          </ul>
+          <p className="mb-3">
+            Residential building work valued over <strong>$5,000</strong> (including labour,
+            materials, and GST) must be carried out by the holder of an appropriate contractor
+            licence.
+          </p>
+          <p className="mb-3">
+            <strong>You must not post or accept work you are not licensed to perform.</strong>{" "}
+            Posting or fulfilling regulated work without the required licence is prohibited. For
+            regulated categories, only users holding a matching licence credential verified by us
+            may express interest in or fulfil a need. We may gate, restrict, or remove any category
+            of work at any time where we consider it regulated or unsafe.
+          </p>
+          <p>
+            Our credential verification is an administrative check, not an endorsement or a legal
+            clearance. Before engaging anyone for licensed work, you should independently confirm
+            their licence (for example, via the NSW Fair Trading licence register).
+          </p>
+        </section>
+
+        {/* ── 10. Meeting Safely, Insurance, and Working with Children ── */}
+        <section>
+          <h2 className="text-lg font-semibold text-gold mb-3">
+            10. Meeting Safely, Insurance, and Working with Children
+          </h2>
+          <p className="mb-3">
+            Exchanges on the Service involve meeting other users in person. We are not responsible
+            for your safety during any exchange, and we recommend that you:
+          </p>
+          <ul className="list-disc pl-5 space-y-1 mb-3">
+            <li>
+              Meet in a public place for a first exchange, and tell someone where you are going and
+              when you expect to be done
+            </li>
+            <li>
+              If you engage another user to work in your home, consider asking whether they hold
+              public-liability insurance — unlicensed or uninsured work can void insurance coverage
+              and leave you exposed
+            </li>
+            <li>
+              For work involving children or people with disability, consider requesting a Working
+              with Children Check or police-check credential, and never engage someone for that work
+              where a check is legally required unless they hold it
+            </li>
+          </ul>
+          <p>
+            We do not insure exchanges and we do not guarantee that any user holds insurance or a
+            working-with-children check unless a matching verified credential is shown on their
+            profile.
+          </p>
+        </section>
+
+        {/* ── 11. Reviews and Ratings ── */}
+        <section>
+          <h2 className="text-lg font-semibold text-gold mb-3">11. Reviews and Ratings</h2>
           <p className="mb-3">
             The Service includes a review system where users can rate and comment on their
             experience with other users following a completed exchange or acceptance.
@@ -305,9 +405,9 @@ export default function TermsPage() {
           </p>
         </section>
 
-        {/* ── 9. Verification ── */}
+        {/* ── 12. Verification ── */}
         <section>
-          <h2 className="text-lg font-semibold text-gold mb-3">9. Verification</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">12. Verification</h2>
           <p className="mb-3">
             The Service is <strong>free</strong> for everyone: there are no fees, subscriptions,
             recurring billing, or payment details collected. Users may optionally complete
@@ -335,9 +435,9 @@ export default function TermsPage() {
           </ul>
         </section>
 
-        {/* ── 10. Intellectual Property ── */}
+        {/* ── 13. Intellectual Property ── */}
         <section>
-          <h2 className="text-lg font-semibold text-gold mb-3">10. Intellectual Property</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">13. Intellectual Property</h2>
           <p className="mb-3">
             <strong>Our content:</strong> The Service and its original content (excluding
             user-generated content), features, and functionality are and will remain the exclusive
@@ -359,10 +459,10 @@ export default function TermsPage() {
           </p>
         </section>
 
-        {/* ── 11. Content Moderation ── */}
+        {/* ── 14. Content Moderation ── */}
         <section>
           <h2 className="text-lg font-semibold text-gold mb-3">
-            11. Content Moderation and Removal
+            14. Content Moderation and Removal
           </h2>
           <p className="mb-3">
             We are not obligated to monitor the Service for inappropriate content. However, we
@@ -380,9 +480,9 @@ export default function TermsPage() {
           <p>We have no liability to you for removing or refusing to post any User Content.</p>
         </section>
 
-        {/* ── 12. Termination ── */}
+        {/* ── 15. Termination ── */}
         <section>
-          <h2 className="text-lg font-semibold text-gold mb-3">12. Termination</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">15. Termination</h2>
           <p className="mb-3">
             <strong>By you:</strong> You may terminate your account at any time by contacting us at{" "}
             <EmailLink email="support@antidosis.com" className="text-gold hover:underline">
@@ -407,10 +507,10 @@ export default function TermsPage() {
           </p>
         </section>
 
-        {/* ── 13. Disclaimers ── */}
+        {/* ── 16. Disclaimers ── */}
         <section>
           <h2 className="text-lg font-semibold text-gold mb-3">
-            13. Disclaimers and Limitation of Liability
+            16. Disclaimers and Limitation of Liability
           </h2>
           <p className="mb-3">
             <strong>The Service is provided &quot;as is&quot; and &quot;as available&quot;</strong>{" "}
@@ -451,9 +551,9 @@ export default function TermsPage() {
           </p>
         </section>
 
-        {/* ── 14. Indemnification ── */}
+        {/* ── 17. Indemnification ── */}
         <section>
-          <h2 className="text-lg font-semibold text-gold mb-3">14. Indemnification</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">17. Indemnification</h2>
           <p>
             You agree to indemnify, defend, and hold harmless Antidosis Pty Ltd, its directors,
             officers, employees, agents, and affiliates from and against any and all claims,
@@ -465,9 +565,9 @@ export default function TermsPage() {
           </p>
         </section>
 
-        {/* ── 15. Dispute Resolution ── */}
+        {/* ── 18. Dispute Resolution ── */}
         <section>
-          <h2 className="text-lg font-semibold text-gold mb-3">15. Dispute Resolution</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">18. Dispute Resolution</h2>
           <p className="mb-3">
             <strong>Informal resolution:</strong> Before filing any formal legal proceeding, you
             agree to contact us at{" "}
@@ -488,9 +588,9 @@ export default function TermsPage() {
           </p>
         </section>
 
-        {/* ── 16. Severability ── */}
+        {/* ── 19. Severability ── */}
         <section>
-          <h2 className="text-lg font-semibold text-gold mb-3">16. Severability</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">19. Severability</h2>
           <p>
             If any provision of these Terms is held to be invalid, illegal, or unenforceable by a
             court of competent jurisdiction, such provision shall be severed from these Terms and
@@ -498,9 +598,9 @@ export default function TermsPage() {
           </p>
         </section>
 
-        {/* ── 17. Entire Agreement ── */}
+        {/* ── 20. Entire Agreement ── */}
         <section>
-          <h2 className="text-lg font-semibold text-gold mb-3">17. Entire Agreement</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">20. Entire Agreement</h2>
           <p>
             These Terms, together with our{" "}
             <Link href="/privacy" className="text-gold hover:underline">
@@ -512,9 +612,9 @@ export default function TermsPage() {
           </p>
         </section>
 
-        {/* ── 18. Contact ── */}
+        {/* ── 21. Contact ── */}
         <section>
-          <h2 className="text-lg font-semibold text-gold mb-3">18. Contact Us</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">21. Contact Us</h2>
           <p className="mb-3">If you have any questions about these Terms, please contact us:</p>
           <div className="pl-4 border-l-2 border-leather/30">
             <p>
@@ -536,7 +636,7 @@ export default function TermsPage() {
         </section>
 
         <p className="text-[13px] text-ash/50 pt-6 border-t border-leather/10">
-          Last updated: 17 May 2026
+          Last updated: 16 October 2026
         </p>
       </article>
     </div>

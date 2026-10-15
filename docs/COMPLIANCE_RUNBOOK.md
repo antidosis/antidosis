@@ -1,8 +1,9 @@
 # Compliance Runbook — SERR, Licensed-Work Gating, Private Document Storage
 
-Operational steps to complete the three compliance workstreams. The code side
-is done; what remains is configuration in Supabase/Google/ATO portals, plus a
-one-off data migration. Estimated total time: ~1 hour + accountant call.
+Operational steps for the three compliance workstreams. The code side and
+the storage migration are done (§1 complete as of 2026-10-15); what remains
+is configuration in the Google/ATO portals. Estimated total time: ~1 hour +
+accountant call.
 
 ---
 
@@ -14,10 +15,17 @@ through short-lived signed URLs after server-side ownership/admin checks.
 
 ### 1.1 Create the private bucket
 
-1. Supabase Dashboard → **Storage** → **New bucket**
-2. Name: `uploads-private` · **Public: OFF** · Create
-3. No RLS policies are needed — every read/write goes through the server with
-   the service-role key, which bypasses RLS.
+The migration script creates the bucket itself (idempotent) — this step is
+only needed if you want to do it by hand:
+
+```bash
+node scripts/migrate-storage-to-private.mjs --ensure-bucket
+```
+
+Manual equivalent: Supabase Dashboard → **Storage** → **New bucket** →
+name `uploads-private` · **Public: OFF**. No RLS policies are needed —
+every read/write goes through the server with the service-role key, which
+bypasses RLS. (Bucket created and verified private 2026-10-15.)
 
 ### 1.2 Keep `uploads` public
 
@@ -26,12 +34,19 @@ they're meant to be world-visible. Do not flip the whole bucket.
 
 ### 1.3 Migrate existing objects
 
-Use the script (moves bytes through the Storage API, verifies each object):
+Use the script (moves bytes through the Storage API, verifies each object
+byte-for-byte, and only deletes the public originals after every copy is
+verified and the target count cross-checks):
 
 ```bash
 node scripts/migrate-storage-to-private.mjs --dry-run   # preview
 node scripts/migrate-storage-to-private.mjs             # move
 ```
+
+**Executed 2026-10-15:** the single existing identity document (moved
+2026-07-21 by an earlier run of this script) was confirmed in
+`uploads-private`; zero objects remain under `credentials/` or `contracts/`
+in the public `uploads` bucket. The script is safe to re-run (idempotent).
 
 Do **not** use SQL (`update storage.objects set bucket_id = …`) for the move:
 it repoints only the metadata row — the file bytes stay in the source bucket's
@@ -51,6 +66,31 @@ the one affected object was reverted and moved via the script instead).
 ## 2. SERR reporting (ATO)
 
 **Goal:** twice-yearly Sharing Economy Reporting Regime reports to the ATO.
+
+### ⚠️ 2.0 Is Antidosis a "reportable platform"? — owner action, before scaling beyond the pilot
+
+> **This section is operational documentation, not legal advice. Confirm the
+> platform's position with the ATO and a tax professional before relying on it.**
+
+- Antidosis is **likely an "electronic distribution platform"** under the
+  Sharing Economy Reporting Regime: it operates a website/app through which
+  third parties (users) make supplies (services, goods, barter exchanges)
+  available to other users. Services via gig-style platforms became
+  **reportable transactions from 1 July 2024** — this is a **live obligation,
+  not a future one**, if the platform is in scope.
+- **Owner action:** confirm with the ATO (and your accountant) that the
+  platform's exact model is in scope, whether registration for SERR reporting
+  is required now, and whether any exemption applies — **before scaling beyond
+  the Central Coast pilot**. Section 2.1 below assumes reporting is required
+  and generates the data; lodgement timing follows the statutory periods in
+  2.2.
+- **Data-protection tension:** SERR reports require **seller identity data**
+  (names, ABNs, addresses, contact details, transaction values). That makes
+  the C1/H5 data-protection work (private document storage, §1 of this
+  runbook) a **legal necessity, not hygiene** — a breach of the identity data
+  the regime obliges us to hold is an OAIC-scale incident.
+- Antidosis does not hold user-to-user funds, so reported amounts are
+  **agreed consideration at completion**, not processed payments (see 2.3).
 
 ### 2.1 Generate the report
 

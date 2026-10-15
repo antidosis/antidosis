@@ -1,11 +1,11 @@
-import { Home, ClipboardList, Terminal, Search, User } from "lucide-react";
+import { Home, ClipboardList, Radio, Search, User } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { hapticImpact } from "@mobile/lib/native";
 
 const tabs = [
   { path: "/home", label: "Home", icon: Home },
   { path: "/needs", label: "Needs", icon: ClipboardList },
-  { path: "/chat", label: "Chat", icon: Terminal },
+  { path: "/chat", label: "Relay", icon: Radio },
   { path: "/discover", label: "Discover", icon: Search },
   { path: "/profile", label: "Profile", icon: User },
 ];

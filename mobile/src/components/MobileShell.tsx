@@ -1,5 +1,5 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { Home, ClipboardList, Hash, Search, User, WifiOff, type LucideIcon } from "lucide-react";
+import { Home, ClipboardList, Radio, Search, User, WifiOff, type LucideIcon } from "lucide-react";
 import { useEffect } from "react";
 import { hapticImpact } from "@mobile/lib/native";
 import { useNetworkStatus } from "@mobile/hooks/useNetworkStatus";
@@ -7,7 +7,7 @@ import { useNetworkStatus } from "@mobile/hooks/useNetworkStatus";
 const TABS: { path: string; label: string; icon: LucideIcon }[] = [
   { path: "/home", label: "Home", icon: Home },
   { path: "/needs", label: "Needs", icon: ClipboardList },
-  { path: "/chat", label: "Chat", icon: Hash },
+  { path: "/chat", label: "Relay", icon: Radio },
   { path: "/discover", label: "Discover", icon: Search },
   { path: "/profile", label: "Profile", icon: User },
 ];

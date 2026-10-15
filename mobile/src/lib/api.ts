@@ -2,6 +2,8 @@ import { supabase } from "@mobile/lib/supabase";
 import type {
   Profile,
   Need,
+  MyNeed,
+  MyAcceptance,
   NeedsListResponse,
   NeedDetailResponse,
   NotificationsResponse,
@@ -210,13 +212,13 @@ export function createNeed(data: CreateNeedInput) {
 }
 
 export function getMyNeeds() {
-  return fetchApi<Need[]>("/needs/mine");
+  return fetchApi<MyNeed[]>("/needs/mine");
 }
 
 // ── Acceptances (Deals) ──────────────────────────────────────────────
 
 export function getMyAcceptances() {
-  return fetchApi<Acceptance[]>("/acceptances/mine");
+  return fetchApi<MyAcceptance[]>("/acceptances/mine");
 }
 
 export function createAcceptance(needId: string, message?: string) {
