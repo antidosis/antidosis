@@ -28,7 +28,7 @@ export async function GET() {
   // Supabase check
   const sbStart = Date.now();
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { error } = await supabase.auth.getSession();
     if (error) throw error;
     checks.supabase = { status: "ok", latencyMs: Date.now() - sbStart };

@@ -11,7 +11,7 @@ function getAdminEmails(): string[] {
 
 export async function requireAdmin() {
   const ADMIN_EMAILS = getAdminEmails();
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

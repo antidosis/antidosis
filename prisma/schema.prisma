@@ -11,6 +11,7 @@ model Profile {
   id                     String    @id @default(uuid())
   userId                 String    @unique @map("user_id")
   email                  String    @unique
+  handle                 String?   @unique
   fullName               String?   @map("full_name")
   bio                    String?
   avatarUrl              String?   @map("avatar_url")

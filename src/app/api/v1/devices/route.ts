@@ -18,7 +18,7 @@ const unregisterSchema = z.object({
 });
 
 async function authedProfile() {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

@@ -6,13 +6,7 @@ import type { ReactNode } from "react";
    ═══════════════════════════════════════════════════════════════ */
 
 export type BadgeVariant =
-  | "default"
-  | "outline"
-  | "success"
-  | "warning"
-  | "destructive"
-  | "mercury"
-  | "quintessence";
+  "default" | "outline" | "success" | "warning" | "destructive" | "mercury" | "quintessence";
 
 export interface BadgeProps {
   variant?: BadgeVariant;

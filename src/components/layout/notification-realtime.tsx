@@ -25,28 +25,32 @@ function playNotificationSound() {
 }
 
 export function NotificationRealtime() {
-  const supabase = createClient();
   const { toast } = useToast();
   const profileIdRef = useRef<string | null>(null);
 
   useEffect(() => {
+    const supabase = createClient();
+    let cancelled = false;
     let channel: ReturnType<typeof supabase.channel> | null = null;
 
     async function setup() {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user || cancelled) return;
 
       const res = await fetch("/api/v1/profiles/me");
-      if (!res.ok) return;
+      if (!res.ok || cancelled) return;
       const profile = await res.json();
-      if (!profile?.id) return;
+      if (!profile?.id || cancelled) return;
 
       profileIdRef.current = profile.id;
 
       channel = supabase
-        .channel("notifications_realtime")
+        // Unique name per effect run: re-runs (StrictMode double-mount, re-render
+        // before cleanup) must not call `.on()` on an already-subscribed channel
+        // with the same name, which throws.
+        .channel(`notifications_realtime:${profile.id}:${crypto.randomUUID()}`)
         .on(
           "postgres_changes",
           {
@@ -75,11 +79,12 @@ export function NotificationRealtime() {
     setup();
 
     return () => {
+      cancelled = true;
       if (channel) {
         supabase.removeChannel(channel);
       }
     };
-  }, [supabase, toast]);
+  }, [toast]);
 
   return null;
 }

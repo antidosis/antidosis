@@ -13,7 +13,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 
 export const GET = withApiHandler(
   async (req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -135,7 +135,7 @@ export const GET = withApiHandler(
 
 export const PATCH = withApiHandler(
   async (req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

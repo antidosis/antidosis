@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export const DELETE = withApiHandler(
   async (_req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

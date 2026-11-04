@@ -15,6 +15,7 @@ const mockCredentialDeleteMany = vi.fn();
 const mockSkillDeleteMany = vi.fn();
 const mockSocialLinkDeleteMany = vi.fn();
 const mockNotificationDeleteMany = vi.fn();
+const mockDeviceTokenDeleteMany = vi.fn();
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
@@ -41,6 +42,9 @@ vi.mock("@/lib/prisma", () => ({
     },
     notification: {
       deleteMany: (...args: unknown[]) => mockNotificationDeleteMany(...args),
+    },
+    deviceToken: {
+      deleteMany: (...args: unknown[]) => mockDeviceTokenDeleteMany(...args),
     },
   },
 }));
@@ -140,6 +144,7 @@ describe("GET /api/v1/profiles/me", () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
     mockProfileFindUnique.mockResolvedValue({
       id: "profile-1",
+      handle: "test_user",
       fullName: "Test User",
       skills: [],
       socialLinks: [],
@@ -152,6 +157,7 @@ describe("GET /api/v1/profiles/me", () => {
 
     expect(res.status).toBe(200);
     expect(body.fullName).toBe("Test User");
+    expect(body.handle).toBe("test_user");
   });
 
   it("auto-creates profile when missing", async () => {
@@ -288,6 +294,64 @@ describe("PATCH /api/v1/profiles/me", () => {
     expect(body.fullName).toBe("Updated");
   });
 
+  it("normalizes scheme-less social link URLs to https", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileUpdate.mockResolvedValue({
+      id: "profile-1",
+      socialLinks: [{ platform: "instagram", url: "https://instagram.com/me", isPublic: true }],
+    });
+
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/profiles/me", {
+        method: "PATCH",
+        body: JSON.stringify({
+          socialLinks: [{ platform: "instagram", url: "instagram.com/me", isPublic: true }],
+        }),
+      })
+    );
+
+    expect(res.status).toBe(200);
+    expect(mockProfileUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          socialLinks: expect.objectContaining({
+            create: [{ platform: "instagram", url: "https://instagram.com/me", isPublic: true }],
+          }),
+        }),
+      })
+    );
+  });
+
+  it("returns 400 for a social link URL that is not a valid http(s) URL", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/profiles/me", {
+        method: "PATCH",
+        body: JSON.stringify({
+          socialLinks: [{ platform: "website", url: "definitely not a url" }],
+        }),
+      })
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(body.error).toContain("http(s) URL");
+  });
+
+  it("returns 400 for schema-invalid profile data instead of 500", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/profiles/me", {
+        method: "PATCH",
+        body: JSON.stringify({ fullName: "a".repeat(101) }),
+      })
+    );
+
+    expect(res.status).toBe(400);
+  });
+
   it("includes x-request-id header", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
     mockProfileFindUnique.mockResolvedValue({
@@ -394,6 +458,9 @@ describe("DELETE /api/v1/profiles/me", () => {
     expect(mockSocialLinkDeleteMany).toHaveBeenCalledWith({ where: { profileId: "profile-1" } });
     expect(mockNotificationDeleteMany).toHaveBeenCalledWith({ where: { userId: "profile-1" } });
     expect(mockMobileVerificationCodeDeleteMany).toHaveBeenCalledWith({
+      where: { profileId: "profile-1" },
+    });
+    expect(mockDeviceTokenDeleteMany).toHaveBeenCalledWith({
       where: { profileId: "profile-1" },
     });
 

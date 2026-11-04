@@ -14,9 +14,9 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
  *   const supabase = createClient();
  *   const { data: { user } } = await supabase.auth.getUser();
  */
-export function createClient() {
-  const cookieStore = cookies();
-  const headerStore = headers();
+export async function createClient() {
+  const cookieStore = await cookies();
+  const headerStore = await headers();
 
   const authHeader = headerStore.get("authorization");
 

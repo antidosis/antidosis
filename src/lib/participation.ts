@@ -14,8 +14,7 @@ import { prisma } from "@/lib/prisma";
  * unless they also control a fresh Australian mobile number.
  */
 export type ParticipationResult =
-  | { ok: true; profileId: string }
-  | { ok: false; response: NextResponse };
+  { ok: true; profileId: string } | { ok: false; response: NextResponse };
 
 export async function requireVerifiedParticipation(userId: string): Promise<ParticipationResult> {
   const profile = await prisma.profile.findUnique({

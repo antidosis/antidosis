@@ -71,6 +71,7 @@ interface Review {
 interface ProfileData {
   id: string;
   fullName: string | null;
+  handle: string | null;
   avatarUrl: string | null;
   bio: string | null;
   locationName: string | null;
@@ -116,7 +117,7 @@ export default function ProfilePage() {
 
   if (!profile) return null;
 
-  const username = profile.fullName?.toLowerCase().replace(/\s/g, "_") || "user";
+  const username = profile.handle || profile.fullName?.toLowerCase().replace(/\s/g, "_") || "user";
 
   return (
     <div className="max-w-3xl mx-auto px-4 md:px-8 space-y-10 pb-12">
@@ -144,9 +145,14 @@ export default function ProfilePage() {
               <h1 className="heading-display text-2xl text-gold">
                 {profile.fullName || "anonymous"}
               </h1>
-              {profile.isVerified && <Shield className="h-5 w-5 text-ok" />}
+              {profile.isVerified && (
+                <span className="inline-flex items-center gap-1 text-[11px] uppercase tracking-wider px-2 py-0.5 rounded border border-ok/30 text-ok bg-ok/5">
+                  <Shield className="h-3 w-3" /> verified
+                </span>
+              )}
             </div>
-            <div className="flex flex-wrap items-center gap-4 text-sm text-parchment mt-2">
+            {profile.handle && <p className="mt-1 font-mono text-sm text-sun">@{profile.handle}</p>}
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-parchment mt-3">
               {(profile.ratingCount ?? 0) > 0 && (
                 <span className="flex items-center gap-1 text-sun glow-gold">
                   <Star className="h-4 w-4 fill-current" />

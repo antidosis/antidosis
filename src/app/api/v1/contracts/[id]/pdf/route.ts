@@ -11,7 +11,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 
 export const POST = withApiHandler(
   async (req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

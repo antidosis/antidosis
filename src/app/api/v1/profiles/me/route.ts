@@ -1,5 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+import { z } from "zod";
+
 import { withApiHandler } from "@/lib/api-handler";
 import { recordBannedMobile } from "@/lib/bans";
 import { isValidCentralCoastSuburb } from "@/lib/data/central-coast-suburbs";
@@ -14,7 +16,7 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 export const dynamic = "force-dynamic";
 
 export const GET = withApiHandler(async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -74,7 +76,7 @@ export const GET = withApiHandler(async () => {
 });
 
 export const PATCH = withApiHandler(async (req: NextRequest) => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -83,7 +85,32 @@ export const PATCH = withApiHandler(async (req: NextRequest) => {
   }
 
   const body = await req.json();
-  const data = updateProfileSchema.parse(body);
+
+  // Tolerate scheme-less URLs (common mobile input) by assuming https before
+  // validation — genuine garbage still fails the schema with a 400 below.
+  if (Array.isArray(body?.socialLinks)) {
+    body.socialLinks = body.socialLinks.map((link: { url?: unknown }) => ({
+      ...link,
+      url:
+        typeof link.url === "string" && !/^[a-z][a-z0-9+.-]*:/i.test(link.url)
+          ? `https://${link.url}`
+          : link.url,
+    }));
+  }
+
+  let data;
+  try {
+    data = updateProfileSchema.parse(body);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const first = error.errors[0];
+      return NextResponse.json(
+        { error: first ? `${first.path.join(".")}: ${first.message}` : "Invalid profile data" },
+        { status: 400 }
+      );
+    }
+    throw error;
+  }
 
   // Trial restriction: Central Coast NSW only
   if (data.locationName && !isValidCentralCoastSuburb(data.locationName)) {
@@ -160,7 +187,7 @@ export const PATCH = withApiHandler(async (req: NextRequest) => {
 });
 
 export const DELETE = withApiHandler(async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -255,6 +282,7 @@ export const DELETE = withApiHandler(async () => {
   // Clean up non-cascading records
   await prisma.auditLog.deleteMany({ where: { userId: profile.id } });
   await prisma.mobileVerificationCode.deleteMany({ where: { profileId: profile.id } });
+  await prisma.deviceToken.deleteMany({ where: { profileId: profile.id } });
 
   // Anonymize the profile instead of hard-deleting it. Hard delete cascades
   // through every FK and would wipe the counterparty's contracts, reviews,

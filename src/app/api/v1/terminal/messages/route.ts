@@ -12,7 +12,7 @@ import { createClient } from "@/lib/supabase/server";
 const MENTION_REGEX = /@([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/gi;
 
 export const GET = withApiHandler(async (req: NextRequest) => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -85,7 +85,7 @@ export const GET = withApiHandler(async (req: NextRequest) => {
 });
 
 export const POST = withApiHandler(async (req: NextRequest) => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

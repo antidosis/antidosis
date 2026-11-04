@@ -13,14 +13,7 @@ import type { WizardState } from "./terminal-session";
 // ─── Wizard Step Types ───────────────────────────────────────
 
 type StepType =
-  | "text"
-  | "number"
-  | "choice"
-  | "confirm"
-  | "multiselect"
-  | "date"
-  | "file"
-  | "review";
+  "text" | "number" | "choice" | "confirm" | "multiselect" | "date" | "file" | "review";
 
 interface WizardStep {
   field: string;

@@ -8,11 +8,12 @@ import { resolveEntityId } from "@/lib/resolve-id";
 import NeedDetailClient from "./_components/need-detail-client";
 
 type Props = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const needId = await resolveEntityId("need", params.id);
+  const { id } = await params;
+  const needId = await resolveEntityId("need", id);
   const need = needId
     ? await prisma.need.findUnique({
         where: { id: needId },
@@ -88,7 +89,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function NeedDetailPage({ params }: Props) {
-  const needId = await resolveEntityId("need", params.id);
+  const { id } = await params;
+  const needId = await resolveEntityId("need", id);
   const needExists = needId
     ? await prisma.need.findUnique({
         where: { id: needId },

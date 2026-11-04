@@ -4,6 +4,7 @@ import { withApiHandler } from "@/lib/api-handler";
 import { prisma } from "@/lib/prisma";
 import { redactCredential } from "@/lib/redaction";
 import { resolveEntityId } from "@/lib/resolve-id";
+import { HANDLE_FORMAT_RE } from "@/lib/schemas";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -11,13 +12,28 @@ export const dynamic = "force-dynamic";
 export const GET = withApiHandler(
   async (req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
     // Accept full UUIDs or unique id prefixes (as printed in terminal tables)
-    const profileId = await resolveEntityId("profile", params.id);
+    let profileId = await resolveEntityId("profile", params.id);
+
+    // Fall back to @handle lookup: explicit "@handle" or anything matching
+    // handle format that didn't resolve as an id
+    if (!profileId) {
+      const raw = params.id.startsWith("@") ? params.id.slice(1) : params.id;
+      const handle = raw.toLowerCase();
+      if (HANDLE_FORMAT_RE.test(handle)) {
+        const byHandle = await prisma.profile.findUnique({
+          where: { handle },
+          select: { id: true },
+        });
+        profileId = byHandle?.id ?? null;
+      }
+    }
+
     if (!profileId) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
     // Check for blocks if viewer is authenticated
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -47,6 +63,7 @@ export const GET = withApiHandler(
       where: { id: profileId },
       select: {
         id: true,
+        handle: true,
         fullName: true,
         avatarUrl: true,
         bio: true,

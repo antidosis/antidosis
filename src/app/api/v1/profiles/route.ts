@@ -16,7 +16,7 @@ const createProfileSchema = z.object({
 
 export const POST = withApiHandler(async (req: NextRequest) => {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

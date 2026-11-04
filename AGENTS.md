@@ -8,13 +8,13 @@ Antidosis is a local needs-exchange platform ("help your neighbour" marketplace)
 
 **Current phase**: Central Coast NSW pilot.
 
-**Monetization**: None — the platform is entirely free. The "Pro" tier was retired (2026-07-23): verification (identity + mobile) is the trust layer, not a membership. Legacy `isPro`/`proSource` DB columns and the `/api/v1/pro/claim` route remain as no-ops for old mobile builds; do not surface them in UI. The paid billing stack (`src/app/api/v1/billing/` — Stripe checkout, Play Store verify/RTDN webhook, `src/lib/play-store.ts`) is **parked**: routes stay live and secured for legacy accounts and possible future paid features (e.g. hardware), but nothing links to them. Do not wire them back up without a product decision.
+**Monetization**: None — the platform is entirely free. The "Pro" tier was retired (2026-07-23): verification (identity + mobile) is the trust layer, not a membership. Legacy `isPro`/`proSource` DB columns and the `/api/v1/pro/claim` route remain as no-ops for old mobile builds; do not surface them in UI. The paid billing stack (`src/app/api/v1/billing/` — Stripe checkout, Play Store verify/RTDN webhook, `src/lib/play-store.ts`) is **parked**: routes stay live and secured for legacy accounts and possible future paid features (e.g. hardware), but nothing links to them. Do not wire them back up without a product decision. Recorded future direction: a gated business side (B2C barter offers + B2B trades, monthly advertising subscription for businesses, core usage stays free) — see `docs/FUTURE_EXPANSION_VISION.md`. Vision only; do not implement without a product decision.
 
 ## 2. Tech Stack
 
 | Layer         | Technology                                                     |
 | ------------- | -------------------------------------------------------------- |
-| Framework     | Next.js 14.2.35 (App Router)                                   |
+| Framework     | Next.js 16 (App Router)                                        |
 | Language      | TypeScript 5.x (strict mode)                                   |
 | Styling       | Tailwind CSS 3.4                                               |
 | UI Components | Custom (shadcn/ui-inspired, in `@/components/ui/`)             |
@@ -147,7 +147,7 @@ Examples: `needs/new`, `needs/[id]/edit`, `dashboard/_components/profile-section
 
 Run: `npm test`
 
-**130 test files · 1,740 tests.** Every API route directory under `src/app/api/` has an adjacent `route.test.ts`; strong suites cover terminal handlers/commands, `lib/schemas`, `lib/security`, and `components/ui`. Page components, `src/middleware.ts`, `src/lib/supabase/*`, and `src/lib/pdf-contract.ts` have no direct coverage.
+**143 test files · 1,881 tests.** Every API route directory under `src/app/api/` has an adjacent `route.test.ts`; strong suites cover terminal handlers/commands, `lib/schemas`, `lib/security`, and `components/ui`. Page components, `src/proxy.ts`, `src/lib/supabase/*`, and `src/lib/pdf-contract.ts` have no direct coverage.
 
 ### E2E Tests (Playwright)
 

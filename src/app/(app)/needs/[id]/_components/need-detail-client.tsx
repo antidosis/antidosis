@@ -333,8 +333,27 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
   async function executeConfirm() {
     if (!confirmDialog || !need) return;
     if (confirmDialog.type === "delete") {
-      const res = await fetch(`/api/v1/needs/${need.id}`, { method: "DELETE" });
-      if (res.ok) router.push("/dashboard");
+      try {
+        const res = await fetch(`/api/v1/needs/${need.id}`, { method: "DELETE" });
+        if (res.ok) {
+          router.push("/dashboard");
+          return;
+        }
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 403 && data.code === "MOBILE_NOT_VERIFIED") {
+          toast("Verify your mobile number to manage needs", "error");
+          router.push("/verify-mobile");
+          return;
+        }
+        if (res.status === 403 && data.code === "ACCOUNT_SUSPENDED") {
+          toast(data.error || "This account is suspended", "error");
+          return;
+        }
+        toast(data.error || "Failed to delete need", "error");
+      } catch {
+        toast("Network error — check your connection and try again", "error");
+      }
+      return;
     } else if (confirmDialog.type === "contract" && confirmDialog.acceptanceId) {
       setConfirmingContract(confirmDialog.acceptanceId);
       const res = await fetch(`/api/v1/acceptances/${confirmDialog.acceptanceId}`, {
