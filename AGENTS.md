@@ -8,7 +8,7 @@ Antidosis is a local needs-exchange platform ("help your neighbour" marketplace)
 
 **Current phase**: Central Coast NSW pilot.
 
-**Monetization**: None — the platform is entirely free. The "Pro" tier was retired (2026-07-23): verification (identity + mobile) is the trust layer, not a membership. Legacy `isPro`/`proSource` DB columns and the `/api/v1/pro/claim` route remain as no-ops for old mobile builds; do not surface them in UI. The paid billing stack (`src/app/api/v1/billing/` — Stripe checkout, Play Store verify/RTDN webhook, `src/lib/play-store.ts`) is **parked**: routes stay live and secured for legacy accounts and possible future paid features (e.g. hardware), but nothing links to them. Do not wire them back up without a product decision.
+**Monetization**: None — the platform is entirely free. The "Pro" tier was retired (2026-07-23): verification (identity + mobile) is the trust layer, not a membership. Legacy `isPro`/`proSource` DB columns and the `/api/v1/pro/claim` route remain as no-ops for old mobile builds; do not surface them in UI. The paid billing stack (`src/app/api/v1/billing/` — Stripe checkout, Play Store verify/RTDN webhook, `src/lib/play-store.ts`) is **parked**: routes stay live and secured for legacy accounts and possible future paid features (e.g. hardware), but nothing links to them. Do not wire them back up without a product decision. Recorded future direction: a gated business side (B2C barter offers + B2B trades, monthly advertising subscription for businesses, core usage stays free) — see `docs/FUTURE_EXPANSION_VISION.md`. Vision only; do not implement without a product decision.
 
 ## 2. Tech Stack
 

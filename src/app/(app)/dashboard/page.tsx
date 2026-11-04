@@ -49,6 +49,8 @@ type ProfileData = {
   privatePhone: string | null;
   mobile: string | null;
   abn: string | null;
+  handle: string | null;
+  showInDirectory: boolean;
   mobileVerified: boolean;
   isVerified: boolean;
   ratingAvg: number;
@@ -302,9 +304,9 @@ export default function DashboardPage() {
           <div id="profile-section">
             <ProfileSection
               initialProfile={profile}
-              credentials={credentials}
-              onUpdate={(_updated) => {
-                // mutate profile data optimistically
+              onUpdate={() => {
+                // Revalidate SWR cache so the saved profile renders immediately
+                mutate("/api/v1/profiles/me");
               }}
             />
           </div>

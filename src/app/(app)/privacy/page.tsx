@@ -25,7 +25,8 @@ export default function PrivacyPage() {
       <p className="text-[12px] text-ash mb-4">$ cat /etc/antidosis/privacy-policy.md</p>
       <h1 className="text-3xl font-bold mb-2 text-gold">Privacy Policy</h1>
       <p className="text-[13px] text-ash/70 mb-10">
-        Last updated: 22 July 2026 &middot; Applies to the antidosis website and mobile application
+        Last updated: 17 October 2026 &middot; Applies to the antidosis website and mobile
+        application
       </p>
 
       <article className="space-y-10 text-[15px] text-parchment leading-relaxed">
@@ -33,12 +34,14 @@ export default function PrivacyPage() {
         <section>
           <h2 className="text-lg font-semibold text-gold mb-3">1. Introduction</h2>
           <p className="mb-3">
-            Antidosis Pty Ltd (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;) operates the
-            antidosis platform (the &quot;Service&quot;), accessible via{" "}
+            The antidosis platform (the &quot;Service&quot;) is operated by Martin Khoury trading as
+            antidosis (ABN 96 557 008 393) (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;),
+            accessible via{" "}
             <Link href="https://www.antidosis.com" className="text-gold hover:underline">
               www.antidosis.com
             </Link>{" "}
-            and the antidosis mobile application.
+            and the antidosis mobile application. On Google Play, the Service is published under the
+            developer name hekaverse.
           </p>
           <p className="mb-3">
             This Privacy Policy explains how we collect, use, store, disclose, and protect your
@@ -421,18 +424,47 @@ export default function PrivacyPage() {
               anonymised form for dispute resolution and legal compliance
             </li>
             <li>
-              <strong>Account deletion</strong> — upon request, we will delete your account and
-              associated personal data within 30 days. Some data may be retained longer where
-              required by law or for legitimate business purposes (e.g., anonymised transaction
-              records for fraud prevention)
+              <strong>Account deletion</strong> — see <em>How to delete your account</em> below.
+              Upon deletion your account and associated personal data are removed or irreversibly
+              anonymised; some records may be kept longer where required by law or for legitimate
+              business purposes (e.g., anonymised transaction records for fraud prevention)
             </li>
             <li>
               <strong>Audit logs</strong> — retained for 12 months for security and compliance
               purposes
             </li>
           </ul>
+          <h2 className="text-lg font-semibold text-gold mb-3">How to delete your account</h2>
+          <ol className="list-decimal pl-5 space-y-1 mb-3">
+            <li>
+              <strong>In the app or on the website (fastest)</strong> — sign in, go to your
+              Dashboard, scroll to the <strong>Delete account</strong> section, and confirm. Your
+              account is deleted immediately.
+            </li>
+            <li>
+              <strong>By email</strong> — send a request from your registered email address to{" "}
+              <EmailLink email="privacy@antidosis.com" className="text-gold hover:underline">
+                privacy@antidosis.com
+              </EmailLink>{" "}
+              with the subject &quot;Account deletion&quot;. We will verify your identity and
+              complete the deletion within 30 days.
+            </li>
+          </ol>
+          <p className="mb-3">
+            <strong>What is deleted:</strong> your identity documents (credentials), skills, social
+            links, notifications, push notification device tokens, and uploaded images (avatar and
+            identity documents). Your auth login is destroyed and can no longer be used.
+          </p>
           <p>
-            To request deletion of your account and personal data, contact us at{" "}
+            <strong>What is kept (anonymised):</strong> your profile is irreversibly anonymised
+            (&quot;Deleted User&quot;), and needs, messages, reviews, and contract records you were
+            part of are kept in anonymised form so the other party&apos;s history stays intact — no
+            personal identifiers remain attached to them. Contract records and audit logs may be
+            retained in anonymised form for fraud prevention, dispute resolution, and legal
+            compliance, for up to 12 months.
+          </p>
+          <p>
+            To request deletion of any other personal data, contact us at{" "}
             <EmailLink email="privacy@antidosis.com" className="text-gold hover:underline">
               privacy@antidosis.com
             </EmailLink>

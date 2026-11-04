@@ -48,24 +48,31 @@ const nextConfig = {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(self), geolocation=(self)",
           },
-          {
-            key: "Content-Security-Policy",
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com",
-              "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' blob: data: https://*.supabase.co",
-              "media-src 'self' https://*.supabase.co",
-              "font-src 'self'",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://accelerate.prisma-data.net",
-              "frame-src 'self' https://checkout.stripe.com",
-              "form-action 'self'",
-              "base-uri 'self'",
-              "frame-ancestors 'none'",
-              "manifest-src 'self'",
-              "upgrade-insecure-requests",
-            ].join("; "),
-          },
+          // Dev mode needs 'unsafe-eval' (Next.js webpack source maps, HMR), and
+          // without it every client chunk fails and pages render unhydrated.
+          // The production CSP stays strict; only dev is exempt.
+          ...(process.env.NODE_ENV === "production"
+            ? [
+                {
+                  key: "Content-Security-Policy",
+                  value: [
+                    "default-src 'self'",
+                    "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com",
+                    "style-src 'self' 'unsafe-inline'",
+                    "img-src 'self' blob: data: https://*.supabase.co",
+                    "media-src 'self' https://*.supabase.co",
+                    "font-src 'self'",
+                    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://accelerate.prisma-data.net",
+                    "frame-src 'self' https://checkout.stripe.com",
+                    "form-action 'self'",
+                    "base-uri 'self'",
+                    "frame-ancestors 'none'",
+                    "manifest-src 'self'",
+                    "upgrade-insecure-requests",
+                  ].join("; "),
+                },
+              ]
+            : []),
         ],
       },
     ];

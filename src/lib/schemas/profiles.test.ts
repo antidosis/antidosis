@@ -1,6 +1,39 @@
 import { describe, it, expect } from "vitest";
 
-import { createProfileSchema, updateProfileSchema } from "./profiles";
+import { createProfileSchema, isHttpUrl, socialLinkSchema, updateProfileSchema } from "./profiles";
+
+describe("isHttpUrl", () => {
+  it("accepts http and https URLs", () => {
+    expect(isHttpUrl("https://example.com/x")).toBe(true);
+    expect(isHttpUrl("http://example.com")).toBe(true);
+  });
+
+  it("rejects other schemes and non-URLs", () => {
+    expect(isHttpUrl("ftp://example.com")).toBe(false);
+    expect(isHttpUrl("javascript:alert(1)")).toBe(false);
+    expect(isHttpUrl("not a url")).toBe(false);
+    expect(isHttpUrl("")).toBe(false);
+  });
+});
+
+describe("socialLinkSchema", () => {
+  it("accepts a valid https link with a client-side id", () => {
+    const result = socialLinkSchema.safeParse({
+      id: "link-1",
+      platform: "linkedin",
+      url: "https://linkedin.com/in/test",
+      isPublic: true,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects non-http(s) URLs", () => {
+    expect(socialLinkSchema.safeParse({ platform: "x", url: "ftp://example.com" }).success).toBe(
+      false
+    );
+    expect(socialLinkSchema.safeParse({ platform: "x", url: "not a url" }).success).toBe(false);
+  });
+});
 
 describe("createProfileSchema", () => {
   it("accepts valid profile", () => {
@@ -103,5 +136,19 @@ describe("updateProfileSchema", () => {
       socialLinks: [{ platform: "", url: "https://example.com" }],
     });
     expect(result.success).toBe(false);
+  });
+
+  it("rejects social link with a non-http(s) URL", () => {
+    const result = updateProfileSchema.safeParse({
+      socialLinks: [{ platform: "website", url: "not a url" }],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts social links carrying client-side ids", () => {
+    const result = updateProfileSchema.safeParse({
+      socialLinks: [{ id: "link-1", platform: "website", url: "https://example.com" }],
+    });
+    expect(result.success).toBe(true);
   });
 });

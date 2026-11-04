@@ -1,6 +1,7 @@
 import { Capacitor } from "@capacitor/core";
 import { Haptics, ImpactStyle, NotificationType } from "@capacitor/haptics";
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
+import { Filesystem } from "@capacitor/filesystem";
 import { Share } from "@capacitor/share";
 import { Preferences } from "@capacitor/preferences";
 import {
@@ -83,17 +84,16 @@ export async function takePhoto(): Promise<CameraImage | null> {
 
 export async function pickPhotos(): Promise<CameraImage | null> {
   try {
-    const photo = await Camera.getPhoto({
-      resultType: CameraResultType.Base64,
-      source: CameraSource.Photos,
-      quality: 85,
-      allowEditing: false,
-    });
+    // Uses the Android/iOS system photo picker — no media permissions required.
+    const gallery = await Camera.pickImages({ quality: 85, limit: 1 });
+    const picked = gallery.photos[0];
+    if (!picked?.path) return null;
+    const read = await Filesystem.readFile({ path: picked.path.replace(/^file:\/\//, "") });
     return {
-      base64String: photo.base64String,
-      path: photo.path,
-      webPath: photo.webPath ?? undefined,
-      format: photo.format,
+      base64String: read.data as string,
+      path: picked.path,
+      webPath: picked.webPath,
+      format: picked.format,
     };
   } catch {
     return null;
