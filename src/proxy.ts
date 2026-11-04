@@ -31,7 +31,7 @@ const PROTECTED_API_PREFIXES = [
 // API routes that bypass auth entirely (webhooks authenticate themselves)
 const PUBLIC_API_ROUTES = ["/api/v1/billing/webhook", "/api/v1/billing/play-store/webhook"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // Redirect www to non-www
   const host = request.headers.get("host") || "";
   if (host.startsWith("www.")) {

@@ -42,8 +42,8 @@ interface MessageThreadProps {
   onMessageInputChange: (value: string) => void;
   sendingMessage: boolean;
   onSendMessage: (e: React.FormEvent) => void;
-  messagesRef: React.RefObject<HTMLDivElement>;
-  messagesEndRef: React.RefObject<HTMLDivElement>;
+  messagesRef: React.RefObject<HTMLDivElement | null>;
+  messagesEndRef: React.RefObject<HTMLDivElement | null>;
   onAuthRequired: (register?: boolean) => void;
 }
 

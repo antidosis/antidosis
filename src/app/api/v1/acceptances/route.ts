@@ -20,7 +20,7 @@ const createSchema = z.object({
 });
 
 export const POST = withApiHandler(async (req: NextRequest) => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

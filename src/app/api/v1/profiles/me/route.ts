@@ -16,7 +16,7 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 export const dynamic = "force-dynamic";
 
 export const GET = withApiHandler(async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -76,7 +76,7 @@ export const GET = withApiHandler(async () => {
 });
 
 export const PATCH = withApiHandler(async (req: NextRequest) => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -187,7 +187,7 @@ export const PATCH = withApiHandler(async (req: NextRequest) => {
 });
 
 export const DELETE = withApiHandler(async () => {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

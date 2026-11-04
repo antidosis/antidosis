@@ -119,8 +119,9 @@ jobs:
   dependency-audit:
     name: Dependency Audit
     runs-on: ubuntu-latest
-    # Non-blocking until the Next.js major upgrade lands: next@14.2.35 is the
-    # newest 14.x and carries 2 critical advisories fixed only in next@16+.
+    # Non-blocking: the Next.js 14 criticals are fixed (next@16), but 2 dev-only
+    # criticals remain in vitest/tinypool (fix needs the vitest 5 major — 4 test
+    # files need mock migration first). Re-block once vitest is upgraded.
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4

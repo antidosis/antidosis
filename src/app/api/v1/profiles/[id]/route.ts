@@ -33,7 +33,7 @@ export const GET = withApiHandler(
     }
 
     // Check for blocks if viewer is authenticated
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

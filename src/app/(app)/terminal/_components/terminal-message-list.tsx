@@ -39,7 +39,7 @@ interface TerminalMessageListProps {
   onShowEmojiPicker: (msgId: string | null) => void;
   onReplyTo: (target: ReplyTarget) => void;
   onLightbox: (url: string) => void;
-  scrollRef: React.RefObject<HTMLDivElement>;
+  scrollRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export function TerminalMessageList({

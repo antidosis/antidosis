@@ -18,7 +18,7 @@ export const GET = withApiHandler(
       return NextResponse.json({ error: "Need not found" }, { status: 404 });
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -167,7 +167,7 @@ export const GET = withApiHandler(
 
 export const PATCH = withApiHandler(
   async (req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -289,7 +289,7 @@ export const PATCH = withApiHandler(
 
 export const DELETE = withApiHandler(
   async (req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

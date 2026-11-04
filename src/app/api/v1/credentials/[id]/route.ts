@@ -51,7 +51,7 @@ async function getUserCredential(userId: string, credentialId: string) {
 export const PATCH = withApiHandler(
   async (req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
     try {
-      const supabase = createClient();
+      const supabase = await createClient();
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -116,7 +116,7 @@ export const PATCH = withApiHandler(
 
 export const DELETE = withApiHandler(
   async (req: NextRequest, _ctx, { params }: { params: { id: string } }) => {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();

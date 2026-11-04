@@ -61,12 +61,10 @@ async function uploadImage(remoteUrl, path) {
   const res = await fetch(remoteUrl, { redirect: "follow" });
   if (!res.ok) return null;
   const buf = Buffer.from(await res.arrayBuffer());
-  const { error } = await supabase.storage
-    .from("uploads")
-    .upload(path, buf, {
-      contentType: res.headers.get("content-type") || "image/jpeg",
-      upsert: true,
-    });
+  const { error } = await supabase.storage.from("uploads").upload(path, buf, {
+    contentType: res.headers.get("content-type") || "image/jpeg",
+    upsert: true,
+  });
   if (error) {
     log(`  (image upload skipped: ${path} — ${error.message})`);
     return null;

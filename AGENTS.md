@@ -14,7 +14,7 @@ Antidosis is a local needs-exchange platform ("help your neighbour" marketplace)
 
 | Layer         | Technology                                                     |
 | ------------- | -------------------------------------------------------------- |
-| Framework     | Next.js 14.2.35 (App Router)                                   |
+| Framework     | Next.js 16 (App Router)                                        |
 | Language      | TypeScript 5.x (strict mode)                                   |
 | Styling       | Tailwind CSS 3.4                                               |
 | UI Components | Custom (shadcn/ui-inspired, in `@/components/ui/`)             |
@@ -147,7 +147,7 @@ Examples: `needs/new`, `needs/[id]/edit`, `dashboard/_components/profile-section
 
 Run: `npm test`
 
-**130 test files · 1,740 tests.** Every API route directory under `src/app/api/` has an adjacent `route.test.ts`; strong suites cover terminal handlers/commands, `lib/schemas`, `lib/security`, and `components/ui`. Page components, `src/middleware.ts`, `src/lib/supabase/*`, and `src/lib/pdf-contract.ts` have no direct coverage.
+**143 test files · 1,881 tests.** Every API route directory under `src/app/api/` has an adjacent `route.test.ts`; strong suites cover terminal handlers/commands, `lib/schemas`, `lib/security`, and `components/ui`. Page components, `src/proxy.ts`, `src/lib/supabase/*`, and `src/lib/pdf-contract.ts` have no direct coverage.
 
 ### E2E Tests (Playwright)
 
