@@ -1,7 +1,8 @@
 # Antidosis Mesh Network Design
 
 **Status**: Parked vision — Phase 0 (document only). Nothing in this document is built or scheduled.
-**Last updated**: 2026-07
+**Last updated**: 2026-11 — added §7 (device ecosystem, channels, shop strategy) from
+ecosystem research; wire-format design unchanged.
 
 This document records the long-term design for running the Antidosis marketplace over a
 decentralized LoRa radio mesh when internet/cellular infrastructure fails (bushfire, flood,
@@ -190,6 +191,64 @@ everyone in earshot, with legal and etiquette duty-cycle limits (see §6). Conse
   (a) run Antidosis envelopes as a _private channel / custom module over stock Meshtastic_
   (protocol-compatible, no rebrand), or (b) build our own minimal flood protocol on open
   LoRa hardware. Default plan: (a) for pilots, (b) only if needed.
+
+## 7. Device Ecosystem — Channels, the Shop, and Sellers (2026-11 research)
+
+### 7.1 The key fact: channels, not hardware, define membership
+
+Every Meshtastic node carries one or more **channels**, and a channel is just a **name +
+pre-shared key (PSK)**. The default channel ("LongFast") uses a key the whole world knows,
+so its traffic is readable by anyone. Create a channel named e.g. `antidosis` with a random
+AES-256 PSK, and **every device configured with that name+key can read and write it — on
+completely commodity hardware, with zero firmware changes** ([channels explained](https://www.lorameshdevices.com/blog/meshtastic/meshtastic-meshcore-channels-explained-public-vs-private-keys.html), [Meshtastic encryption](https://kiloelectronics.com/en/meshtastic-encryption/)). Nodes can hold the public channel
+and the antidosis channel **simultaneously**, so a seller's device joins our network without
+leaving the wider mesh. There is no "our frequency" to defend — Australian nodes share the
+915–928 MHz ISM band (licence-free, up to 1 W EIRP with frequency hopping under ACMA LIPD;
+community practice is 100–500 mW plus duty-cycle etiquette). Our channel's privacy and
+identity come from the key, not the spectrum.
+
+**Implication: we do not need proprietary devices, and we could not enforce them if we did.**
+The network's boundary is a secret it shares with members, not a chip.
+
+### 7.2 Hardware is a commodity market — with an existing seller community
+
+Proven boards: Heltec WiFi LoRa 32 V3 (~US$20–30), LilyGo T-Beam (~US$50–70 with GPS +
+18650), RAK WisMesh (~US$29–52), all ESP32 + SX1262, all pre-flashable ([device guide](https://nodakmesh.org/meshtastic/devices), [Heltec store](https://heltec.org/product-category/lora/meshtastic/), [LILYGO store](https://lilygo.cc/en-us/collections/lilygo-with-meshtastic)). A lively community of makers already sells
+**pre-flashed, cased, ready-to-run nodes** (Etsy/eBay/etc.) — exactly the sellers we would
+pitch. Any of their devices can carry the antidosis channel at configuration time.
+
+### 7.3 Three go-to-market models
+
+| Model                                  | What it is                                                                                                                          | Pros                                                                                                                                                                | Cons                                                                                      |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| **A — Channel only**                   | We publish the antidosis channel (name + rotating PSK) to verified members; sellers/users configure their own devices               | Zero inventory, zero hardware risk, instant compatibility with every device ever sold                                                                               | No revenue, no quality control, onboarding friction for non-technical members             |
+| **B — Branded pre-configured devices** | Commodity boards in an antidosis enclosure, pre-flashed with stock firmware + the channel preconfigured + pairing flow into the app | Plug-and-play for members; revenue margin; quality story; **firmware stays stock/open (GPL-safe)** — we brand enclosure + onboarding + experience, not the firmware | Inventory/logistics; per-unit margin is modest at community prices                        |
+| **C — Proprietary hardware**           | Custom PCB/radio design                                                                                                             | Full control                                                                                                                                                        | Slow, capital-hungry, and pointless: it cannot exclude stock devices from the mesh anyway |
+
+**Recommendation: B as the flagship, A always available, C never (unless B hits serious
+scale).** The moat is not the device — it is the channel key, the verified membership, the
+app integration, and the community.
+
+### 7.4 The seller pitch — "verified node builders"
+
+Sellers already do the hard part (sourcing, flashing, casing, support). The pitch:
+
+1. **Become an antidosis verified node builder**: sell devices pre-configured with the
+   antidosis channel; get listed in the platform directory; buyers join the local mesh the
+   moment they power on.
+2. **We supply the demand**: every Central Coast member who wants a node gets pointed at the
+   builders' listings. The shop page on antidosis is the funnel.
+3. **Gateway story**: any powered node can bridge the mesh to the internet over MQTT
+   ([MQTT setup](https://nodakmesh.org/blog/meshtastic-mqtt-setup-guide), [RAK WisMesh gateway](https://docs.rakwireless.com/product-categories/meshtastic/wismesh-wifi-mqtt-gw/quickstart/)) — that is how mesh activity eventually reconciles with
+   the antidosis servers (§5), and how the app and the radios interoperate.
+
+### 7.5 What this changes in the roadmap
+
+Nothing is rescheduled — Phase gating (§7 previously) still applies. What changes is that
+**Phase 2's hardware procurement stops being a custom-build problem**: pilot nodes are
+off-the-shelf boards plus the antidosis channel config, and community sellers can supply
+them. The custom work stays where the design doc always put it: the envelope protocol, the
+app transport, and the gateway daemon.
 
 ## 7. Phased Roadmap
 
