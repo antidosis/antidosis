@@ -9,6 +9,12 @@ const needCategoryEnum = z
   .optional()
   .nullable();
 
+const offerValueField = z.preprocess(
+  // Empty number inputs arrive as NaN via RHF's valueAsNumber — treat as unset
+  (v) => (typeof v === "number" && Number.isNaN(v) ? undefined : v),
+  z.number().min(0).optional().nullable()
+);
+
 export const createNeedSchema = z.object({
   title: z
     .string()
@@ -24,7 +30,7 @@ export const createNeedSchema = z.object({
     .string()
     .min(3, "Offer description must be at least 3 characters")
     .max(2000, "Offer description must be under 2000 characters"),
-  offerValue: z.number().min(0).optional().nullable(),
+  offerValue: offerValueField,
   isLocal: z.boolean().default(true),
   locationName: z.string().optional().nullable(),
   latitude: z.number().optional().nullable(),
@@ -61,7 +67,7 @@ export const updateNeedSchema = z.object({
     .min(3, "Offer description must be at least 3 characters")
     .max(2000, "Offer description must be under 2000 characters")
     .optional(),
-  offerValue: z.number().min(0).optional().nullable(),
+  offerValue: offerValueField,
   isLocal: z.boolean().optional(),
   locationName: z.string().optional().nullable(),
   latitude: z.number().optional().nullable(),

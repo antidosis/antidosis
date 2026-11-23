@@ -56,6 +56,18 @@ describe("createNeedSchema", () => {
     const result = createNeedSchema.safeParse({ ...valid, offerValue: -1 });
     expect(result.success).toBe(false);
   });
+
+  it("treats NaN offerValue (empty number input) as unset", () => {
+    // RHF valueAsNumber yields NaN for an empty Estimated Value field —
+    // posting a need without a value must not fail validation.
+    const result = createNeedSchema.safeParse({ ...valid, offerValue: NaN });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.offerValue == null).toBe(true);
+    }
+    const upd = updateNeedSchema.safeParse({ offerValue: NaN });
+    expect(upd.success).toBe(true);
+  });
 });
 
 describe("updateNeedSchema", () => {
