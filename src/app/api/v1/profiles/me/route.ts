@@ -13,7 +13,7 @@ import { updateProfileSchema } from "@/lib/schemas";
 import { sanitizeUrl } from "@/lib/security/url";
 import { extractStoragePath, bucketForPath } from "@/lib/storage";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
-import { isFontPackId, isSiteThemeId } from "@/lib/themes";
+import { isFontPackId, isLightThemeId, isSiteThemeId } from "@/lib/themes";
 
 export const dynamic = "force-dynamic";
 
@@ -193,13 +193,23 @@ export const PATCH = withApiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: "Business accounts require an ABN" }, { status: 400 });
   }
 
-  // Appearance preferences are validated against the shipped theme/font
-  // registries, then serialised into the JSON preferences column. Null
-  // clears back to the device default.
+  // Appearance preferences: validate against the shipped theme/font
+  // registries, then serialise into the JSON preferences column. Members keep
+  // one light and one dark pick; `theme` (legacy) maps onto its brightness
+  // slot. Null clears back to the device default.
   if (data.preferences !== undefined) {
-    const { theme, font } = data.preferences ?? {};
-    if (theme != null && !isSiteThemeId(theme)) {
-      return NextResponse.json({ error: "Unknown theme" }, { status: 400 });
+    const { theme, light, dark, font } = data.preferences ?? {};
+    const themeIds = [theme, light, dark].filter((v): v is string => v != null);
+    for (const id of themeIds) {
+      if (!isSiteThemeId(id)) {
+        return NextResponse.json({ error: "Unknown theme" }, { status: 400 });
+      }
+    }
+    if (light != null && !isLightThemeId(light)) {
+      return NextResponse.json({ error: "light must be a light theme" }, { status: 400 });
+    }
+    if (dark != null && isLightThemeId(dark)) {
+      return NextResponse.json({ error: "dark must be a dark theme" }, { status: 400 });
     }
     if (font != null && !isFontPackId(font)) {
       return NextResponse.json({ error: "Unknown font pack" }, { status: 400 });
@@ -207,7 +217,11 @@ export const PATCH = withApiHandler(async (req: NextRequest) => {
     cleanedData.preferences =
       data.preferences === null
         ? null
-        : JSON.stringify({ theme: theme ?? null, font: font ?? null });
+        : JSON.stringify({
+            light: light ?? (theme != null && isLightThemeId(theme) ? theme : null),
+            dark: dark ?? (theme != null && !isLightThemeId(theme) ? theme : null),
+            font: font ?? null,
+          });
   }
 
   const profile = await prisma.profile.update({

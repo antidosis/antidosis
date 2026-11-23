@@ -53,7 +53,11 @@ export const updateProfileSchema = z.object({
   audienceSize: z.number().int().min(0).max(2_000_000_000).optional().nullable(),
   preferences: z
     .object({
+      /** Legacy single-theme field — mapped onto the matching pair slot. */
       theme: z.string().max(32).nullable().optional(),
+      /** The member's chosen light/dark themes (one slot per brightness). */
+      light: z.string().max(32).nullable().optional(),
+      dark: z.string().max(32).nullable().optional(),
       font: z.string().max(32).nullable().optional(),
     })
     .nullable()

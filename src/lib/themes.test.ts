@@ -4,6 +4,7 @@ import {
   applySiteTheme,
   currentSiteTheme,
   FONT_PACKS,
+  getThemePair,
   isFontPackId,
   isLightThemeId,
   isSiteThemeId,
@@ -77,5 +78,29 @@ describe("applySiteTheme", () => {
 
     applySiteTheme("ember");
     expect(currentSiteTheme()).toBe("ember");
+  });
+
+  it("claims the brightness slot in the saved pair", () => {
+    applySiteTheme("ultraviolet");
+    expect(getThemePair().dark).toBe("ultraviolet");
+
+    applySiteTheme("sage");
+    expect(getThemePair().light).toBe("sage");
+    expect(getThemePair().dark).toBe("ultraviolet"); // other slot untouched
+  });
+});
+
+describe("getThemePair", () => {
+  it("defaults to Chrome + Daybreak", () => {
+    localStorage.removeItem("antidosis-pair");
+    expect(getThemePair()).toEqual({ dark: "chrome", light: "light" });
+  });
+
+  it("repairs invalid or wrong-brightness slots", () => {
+    localStorage.setItem("antidosis-pair", JSON.stringify({ dark: "porcelain", light: "ember" }));
+    expect(getThemePair()).toEqual({ dark: "chrome", light: "light" });
+
+    localStorage.setItem("antidosis-pair", JSON.stringify({ dark: "chrome", light: "bogus" }));
+    expect(getThemePair()).toEqual({ dark: "chrome", light: "light" });
   });
 });

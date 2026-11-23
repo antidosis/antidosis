@@ -4,13 +4,18 @@ import { useEffect, useState } from "react";
 
 import { Moon, Sun } from "lucide-react";
 
-import { isLightThemeId, type SiteThemeId, type ThemeBrightness } from "@/lib/themes";
+import {
+  applySiteTheme,
+  getThemePair,
+  isLightThemeId,
+  type SiteThemeId,
+  type ThemeBrightness,
+} from "@/lib/themes";
 
 /**
- * Quick brightness toggle — treats every named theme by its actual
- * brightness: any light palette (Daybreak, Porcelain, …) flips to Obsidian,
- * any dark palette flips to Daybreak. Pick specific themes in Dashboard →
- * Settings → Appearance.
+ * Intelligent brightness toggle. Each member has a chosen dark theme and a
+ * chosen light theme (Dashboard → Settings → Appearance); this flips between
+ * THEIRS — light pick ↔ dark pick — rather than hardcoding Daybreak/Obsidian.
  */
 export function ThemeToggle({ className = "" }: { className?: string }) {
   const [brightness, setBrightness] = useState<ThemeBrightness>("dark");
@@ -28,23 +33,20 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
   }, []);
 
   function toggle() {
-    const theme: SiteThemeId = brightness === "dark" ? "light" : "dark";
-    setBrightness(theme === "light" ? "light" : "dark");
-    document.documentElement.dataset.theme = theme;
-    try {
-      localStorage.setItem("antidosis-theme", theme);
-    } catch {
-      // private mode — theme still applies for this session
-    }
-    window.dispatchEvent(new CustomEvent("antidosis-theme", { detail: theme }));
+    const pair = getThemePair();
+    const next: SiteThemeId = brightness === "dark" ? pair.light : pair.dark;
+    setBrightness(isLightThemeId(next) ? "light" : "dark");
+    applySiteTheme(next);
   }
 
   return (
     <button
       type="button"
       onClick={toggle}
-      aria-label={brightness === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-      title={brightness === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+      aria-label={
+        brightness === "dark" ? "Switch to your light theme" : "Switch to your dark theme"
+      }
+      title={brightness === "dark" ? "Switch to your light theme" : "Switch to your dark theme"}
       className={`text-ash hover:text-gold transition-colors ${className}`}
     >
       {brightness === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}

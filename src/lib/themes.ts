@@ -165,8 +165,52 @@ export function isLightThemeId(value: string | null | undefined): boolean {
   return !!value && LIGHT_THEME_IDS.has(value as SiteThemeId);
 }
 
+/* ─── Light/dark pairing ───
+ * Members pick ONE dark theme and ONE light theme. The header toggle flips
+ * between the two picks; the pre-paint init script uses the pair with the OS
+ * preference to choose which side shows by default. */
+
+export interface ThemePair {
+  dark: SiteThemeId;
+  light: SiteThemeId;
+}
+
+export const DEFAULT_THEME_PAIR: ThemePair = { dark: "chrome", light: "light" };
+
+export function getThemePair(): ThemePair {
+  try {
+    const raw = localStorage.getItem("antidosis-pair");
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<ThemePair>;
+      return {
+        dark: isSiteThemeId(parsed.dark) && !isLightThemeId(parsed.dark) ? parsed.dark : "chrome",
+        light: isSiteThemeId(parsed.light) && isLightThemeId(parsed.light) ? parsed.light : "light",
+      };
+    }
+  } catch {
+    // fall through to defaults
+  }
+  return { ...DEFAULT_THEME_PAIR };
+}
+
+export function setThemePair(pair: ThemePair) {
+  try {
+    localStorage.setItem("antidosis-pair", JSON.stringify(pair));
+  } catch {
+    // private mode — pair still applies for this session
+  }
+}
+
 export function applySiteTheme(theme: SiteThemeId) {
   document.documentElement.dataset.theme = theme;
+  // Keep the pair in sync: applying a theme claims its brightness slot.
+  const pair = getThemePair();
+  if (isLightThemeId(theme)) {
+    pair.light = theme;
+  } else {
+    pair.dark = theme;
+  }
+  setThemePair(pair);
   try {
     localStorage.setItem("antidosis-theme", theme);
   } catch {

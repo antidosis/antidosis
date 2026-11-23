@@ -609,7 +609,7 @@ describe("PATCH /api/v1/profiles/me", () => {
     expect(mockProfileUpdate).not.toHaveBeenCalled();
   });
 
-  it("stores appearance preferences as validated JSON", async () => {
+  it("stores appearance preferences as validated JSON, mapping theme onto its slot", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
     mockProfileFindUnique.mockResolvedValue({
       id: "profile-1",
@@ -630,10 +630,56 @@ describe("PATCH /api/v1/profiles/me", () => {
     expect(mockProfileUpdate).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          preferences: JSON.stringify({ theme: "porcelain", font: "editorial" }),
+          preferences: JSON.stringify({ light: "porcelain", dark: null, font: "editorial" }),
         }),
       })
     );
+  });
+
+  it("accepts explicit light/dark pair slots and validates their brightness", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobile: null,
+      mobileVerified: false,
+      abn: null,
+      accountType: "individual",
+    });
+    mockProfileUpdate.mockResolvedValue({ id: "profile-1" });
+
+    const ok = await PATCH(
+      makeRequest("http://localhost/api/v1/profiles/me", {
+        method: "PATCH",
+        body: JSON.stringify({ preferences: { light: "porcelain", dark: "chrome" } }),
+      })
+    );
+    expect(ok.status).toBe(200);
+    expect(mockProfileUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          preferences: JSON.stringify({ light: "porcelain", dark: "chrome", font: null }),
+        }),
+      })
+    );
+
+    vi.clearAllMocks();
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobile: null,
+      mobileVerified: false,
+      abn: null,
+      accountType: "individual",
+    });
+
+    const wrongSide = await PATCH(
+      makeRequest("http://localhost/api/v1/profiles/me", {
+        method: "PATCH",
+        body: JSON.stringify({ preferences: { light: "ember", dark: "porcelain" } }),
+      })
+    );
+    expect(wrongSide.status).toBe(400);
+    expect(mockProfileUpdate).not.toHaveBeenCalled();
   });
 
   it("rejects unknown theme or font ids in preferences", async () => {

@@ -128,7 +128,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Theme init — must run before first paint to avoid a flash of the wrong theme */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var v=["dark","light","chrome","ember","phosphor","ultraviolet","glacier","regal","rose","porcelain","sage","linen","skyline","rosewater","lavender","citrus"];var t=localStorage.getItem("antidosis-theme");if(v.indexOf(t)<0){t=window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"}}catch(e){t="dark"}document.documentElement.dataset.theme=t;try{var f=localStorage.getItem("antidosis-font");if(["terminal","system","editorial","typewriter"].indexOf(f)>=0){document.documentElement.dataset.font=f}}catch(e){}})()`,
+            __html: `(function(){try{var v="dark light chrome ember phosphor ultraviolet glacier regal rose porcelain sage linen skyline rosewater lavender citrus".split(" ");function ok(x){return v.indexOf(x)>=0}var t=null;try{t=localStorage.getItem("antidosis-theme")}catch(e){}if(!ok(t)){var wantL=false;try{wantL=window.matchMedia("(prefers-color-scheme: light)").matches}catch(e){}var p=null;try{p=JSON.parse(localStorage.getItem("antidosis-pair")||"null")}catch(e){}var side=wantL?"light":"dark";t=p&&ok(p[side])?p[side]:(wantL?"light":"chrome")}document.documentElement.dataset.theme=t}catch(e){document.documentElement.dataset.theme="dark"}try{var f=localStorage.getItem("antidosis-font");if(["terminal","system","editorial","typewriter"].indexOf(f)>=0){document.documentElement.dataset.font=f}}catch(e){}})()`,
           }}
         />
         <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
