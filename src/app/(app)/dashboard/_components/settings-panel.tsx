@@ -65,8 +65,8 @@ export function SettingsPanel({ profile, onNavigate }: SettingsPanelProps) {
         </p>
         <h3 className="heading-display mb-1 text-lg text-gold">Theme</h3>
         <p className="mb-4 text-xs text-ash">
-          Applies site-wide, on this device only. The navbar toggle still flips between dark and
-          Daybreak.
+          Applies site-wide, on this device only. Choices also save to your account so they follow
+          you to new devices. The navbar toggle still flips between dark and Daybreak.
         </p>
         <ThemePicker />
         <h3 className="heading-display mb-1 mt-6 text-lg text-gold">Font</h3>

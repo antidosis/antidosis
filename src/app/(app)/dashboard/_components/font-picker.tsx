@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { Check, Type } from "lucide-react";
 
+import { syncAppearancePreference } from "@/lib/appearance-sync";
 import { applyFontPack, currentFontPack, FONT_PACKS, type FontPackId } from "@/lib/themes";
 import { cn } from "@/lib/utils";
 
@@ -35,6 +36,7 @@ export function FontPicker() {
             onClick={() => {
               applyFontPack(pack.id);
               setActive(pack.id);
+              syncAppearancePreference({ font: pack.id });
             }}
             aria-pressed={isActive}
             className={cn(

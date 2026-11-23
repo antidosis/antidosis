@@ -13,6 +13,7 @@ import { updateProfileSchema } from "@/lib/schemas";
 import { sanitizeUrl } from "@/lib/security/url";
 import { extractStoragePath, bucketForPath } from "@/lib/storage";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { isFontPackId, isSiteThemeId } from "@/lib/themes";
 
 export const dynamic = "force-dynamic";
 
@@ -190,6 +191,23 @@ export const PATCH = withApiHandler(async (req: NextRequest) => {
 
   if (wantsBusiness && !effectiveAbn) {
     return NextResponse.json({ error: "Business accounts require an ABN" }, { status: 400 });
+  }
+
+  // Appearance preferences are validated against the shipped theme/font
+  // registries, then serialised into the JSON preferences column. Null
+  // clears back to the device default.
+  if (data.preferences !== undefined) {
+    const { theme, font } = data.preferences ?? {};
+    if (theme != null && !isSiteThemeId(theme)) {
+      return NextResponse.json({ error: "Unknown theme" }, { status: 400 });
+    }
+    if (font != null && !isFontPackId(font)) {
+      return NextResponse.json({ error: "Unknown font pack" }, { status: 400 });
+    }
+    cleanedData.preferences =
+      data.preferences === null
+        ? null
+        : JSON.stringify({ theme: theme ?? null, font: font ?? null });
   }
 
   const profile = await prisma.profile.update({

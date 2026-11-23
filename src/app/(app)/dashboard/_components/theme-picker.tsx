@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { Check, Moon, Sun } from "lucide-react";
 
+import { syncAppearancePreference } from "@/lib/appearance-sync";
 import {
   applySiteTheme,
   currentSiteTheme,
@@ -80,6 +81,7 @@ export function ThemePicker() {
               onClick={() => {
                 applySiteTheme(theme.id);
                 setActive(theme.id);
+                syncAppearancePreference({ theme: theme.id });
               }}
               aria-pressed={isActive}
               className={cn(

@@ -40,6 +40,10 @@ model Profile {
   accountType            String    @default("individual") @map("account_type")
   abnVerified            Boolean   @default(false) @map("abn_verified")
   audienceSize           Int?      @map("audience_size")
+  // JSON blob of cross-device preferences: {"theme":"chrome","font":"system"}.
+  // Appearance pickers PATCH this; the client applies it on devices that have
+  // no local choice yet. Invalid shapes are ignored client-side.
+  preferences            String?   @map("preferences")
   bannedAt               DateTime? @map("banned_at")
   bannedReason           String?   @map("banned_reason")
   lastSeenAt             DateTime? @map("last_seen_at")

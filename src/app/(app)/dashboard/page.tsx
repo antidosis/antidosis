@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { mutate } from "swr";
 
+import { applyAccountPreferences } from "@/lib/appearance-sync";
 import { createClient } from "@/lib/supabase/client";
 import { useApi } from "@/lib/swr-config";
 
@@ -44,6 +45,7 @@ type ProfileData = {
   ratingCount: number;
   jobsCompleted: number;
   createdAt?: string;
+  preferences?: string | null;
   skills: { id: string; name: string; isVerified: boolean }[];
   socialLinks: { id: string; platform: string; url: string; isPublic: boolean }[];
   credentials?: CredentialData[];
@@ -109,6 +111,14 @@ function DashboardPageInner() {
       setCredentials(profile.credentials);
     }
   }, [profile?.credentials]);
+
+  /* Cross-device appearance: adopt the account's theme/font on this device
+     only when the member hasn't chosen locally yet. */
+  useEffect(() => {
+    if (profile?.preferences) {
+      applyAccountPreferences(profile.preferences);
+    }
+  }, [profile?.preferences]);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {

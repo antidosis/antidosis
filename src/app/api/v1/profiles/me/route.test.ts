@@ -608,6 +608,84 @@ describe("PATCH /api/v1/profiles/me", () => {
     expect(res.status).toBe(400);
     expect(mockProfileUpdate).not.toHaveBeenCalled();
   });
+
+  it("stores appearance preferences as validated JSON", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobile: null,
+      mobileVerified: false,
+      abn: null,
+      accountType: "individual",
+    });
+    mockProfileUpdate.mockResolvedValue({ id: "profile-1" });
+
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/profiles/me", {
+        method: "PATCH",
+        body: JSON.stringify({ preferences: { theme: "porcelain", font: "editorial" } }),
+      })
+    );
+    expect(res.status).toBe(200);
+    expect(mockProfileUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          preferences: JSON.stringify({ theme: "porcelain", font: "editorial" }),
+        }),
+      })
+    );
+  });
+
+  it("rejects unknown theme or font ids in preferences", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobile: null,
+      mobileVerified: false,
+      abn: null,
+      accountType: "individual",
+    });
+
+    const badTheme = await PATCH(
+      makeRequest("http://localhost/api/v1/profiles/me", {
+        method: "PATCH",
+        body: JSON.stringify({ preferences: { theme: "hacked", font: "system" } }),
+      })
+    );
+    expect(badTheme.status).toBe(400);
+
+    const badFont = await PATCH(
+      makeRequest("http://localhost/api/v1/profiles/me", {
+        method: "PATCH",
+        body: JSON.stringify({ preferences: { theme: "chrome", font: "wingdings" } }),
+      })
+    );
+    expect(badFont.status).toBe(400);
+    expect(mockProfileUpdate).not.toHaveBeenCalled();
+  });
+
+  it("clears preferences with null", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobile: null,
+      mobileVerified: false,
+      abn: null,
+      accountType: "individual",
+    });
+    mockProfileUpdate.mockResolvedValue({ id: "profile-1" });
+
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/profiles/me", {
+        method: "PATCH",
+        body: JSON.stringify({ preferences: null }),
+      })
+    );
+    expect(res.status).toBe(200);
+    expect(mockProfileUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ preferences: null }) })
+    );
+  });
 });
 
 describe("DELETE /api/v1/profiles/me", () => {
