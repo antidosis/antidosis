@@ -17,12 +17,14 @@ import {
   ClipboardList,
   MessageSquareText,
   Loader2,
+  Building2,
 } from "lucide-react";
 
 import { ReportButton } from "@/components/report-button";
 import { Avatar } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ProfileActions } from "@/components/ui/profile-actions";
+import { formatAbn } from "@/lib/abn";
 import { useApi } from "@/lib/swr-config";
 
 interface Skill {
@@ -80,6 +82,9 @@ interface ProfileData {
   ratingCount: number;
   jobsCompleted: number;
   isVerified: boolean;
+  accountType?: string;
+  abn?: string | null;
+  abnVerified?: boolean;
   skills: Skill[];
   socialLinks: SocialLink[];
   credentials: Credential[];
@@ -150,7 +155,22 @@ export default function ProfilePage() {
                   <Shield className="h-3 w-3" /> verified
                 </span>
               )}
+              {profile.accountType === "business" && (
+                <span className="inline-flex items-center gap-1 text-[11px] uppercase tracking-wider px-2 py-0.5 rounded border border-sun/40 text-sun bg-sun/5">
+                  <Building2 className="h-3 w-3" /> business
+                </span>
+              )}
             </div>
+            {profile.accountType === "business" && profile.abn && (
+              <p className="mt-1.5 text-xs text-ash">
+                ABN {formatAbn(profile.abn)}
+                {profile.abnVerified && (
+                  <span className="text-ok ml-1.5 inline-flex items-center gap-0.5">
+                    <Shield className="h-3 w-3" /> verified
+                  </span>
+                )}
+              </p>
+            )}
             {profile.handle && <p className="mt-1 font-mono text-sm text-sun">@{profile.handle}</p>}
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-parchment mt-3">
               {(profile.ratingCount ?? 0) > 0 && (

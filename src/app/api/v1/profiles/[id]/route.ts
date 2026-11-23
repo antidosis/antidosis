@@ -72,6 +72,9 @@ export const GET = withApiHandler(
         mobileVerified: true,
         isVerified: true,
         isPro: true,
+        accountType: true,
+        abn: true,
+        abnVerified: true,
         ratingAvg: true,
         ratingCount: true,
         jobsCompleted: true,
@@ -134,6 +137,11 @@ export const GET = withApiHandler(
     const safeProfile = {
       ...profile,
       credentials: profile.credentials.map(redactCredential),
+      // ABNs are public register data, but only surface them for business
+      // accounts — an individual's ABN (collected for SERR reporting) is
+      // never public.
+      abn: profile.accountType === "business" ? profile.abn : null,
+      abnVerified: profile.accountType === "business" ? profile.abnVerified : false,
     };
 
     return NextResponse.json(safeProfile, {

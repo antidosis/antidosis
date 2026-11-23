@@ -13,6 +13,9 @@ import {
   ScrollText,
   MapPin,
   Radio,
+  Building2,
+  FileText,
+  Handshake,
 } from "lucide-react";
 
 import { BootSequence } from "@/components/effects/boot-sequence";
@@ -297,6 +300,63 @@ export default function HomePage() {
                 <TerminalPreview />
               </Reveal>
             </div>
+          </div>
+        </section>
+
+        <div className="divider" />
+
+        {/* FOR BUSINESSES */}
+        <section className="py-20 md:py-28 border-t border-line">
+          <div className="max-w-6xl mx-auto px-4 md:px-8">
+            <Reveal>
+              <p className="text-xs text-ash mb-8 font-mono">» TRADE DESK — FOR BUSINESSES</p>
+              <h2 className="heading-display text-3xl md:text-4xl text-gold mb-6">
+                Local Business, <span className="text-sun">Verified.</span>
+              </h2>
+              <p className="text-sm text-ash leading-relaxed max-w-2xl mb-12">
+                Tradies, shops, and local services join the same network as everyone else. Post a
+                task, find help, and put your name on it — free during the pilot, and core usage
+                stays free.
+              </p>
+            </Reveal>
+            <div className="grid md:grid-cols-3 gap-8">
+              <Reveal delay={0}>
+                <StepCard
+                  num="B1"
+                  title="Claim Your Business Profile"
+                  desc="Flip your account to business, add your ABN, and show up in the directory with a verified badge."
+                  illustration={<Building2 className="w-24 h-24 text-sun opacity-60" />}
+                />
+              </Reveal>
+              <Reveal delay={150}>
+                <StepCard
+                  num="B2"
+                  title="Post Tasks & Jobs"
+                  desc="Need a hand on a job, a delivery run, or weekend cover? Post it like any need and pick from verified locals."
+                  illustration={<Handshake className="w-24 h-24 text-mercury opacity-60" />}
+                />
+              </Reveal>
+              <Reveal delay={300}>
+                <StepCard
+                  num="B3"
+                  title="Contract With Your ABN On It"
+                  desc="The same binding contract flow, with your legal name and ABN on the document. Reviews build your business reputation."
+                  illustration={<FileText className="w-24 h-24 text-quint opacity-60" />}
+                />
+              </Reveal>
+            </div>
+            <Reveal delay={400}>
+              <p className="text-xs text-ash/70 mt-10 max-w-2xl leading-relaxed">
+                Payments are arranged directly between the parties and recorded in the contract
+                terms — antidosis never holds or transfers money. A monthly featured-placement
+                subscription is planned for later; joining and posting stays free.
+              </p>
+              <Button asChild variant="secondary" size="sm" className="mt-6">
+                <Link href="/pros">
+                  Browse the directory <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </Reveal>
           </div>
         </section>
 

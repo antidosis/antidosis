@@ -71,4 +71,43 @@ describe("GET /api/v1/pros", () => {
     const res = await GET(makeRequest("http://localhost/api/v1/pros"));
     expect(res.headers.get("Cache-Control")).toContain("s-maxage=120");
   });
+
+  it("filters to businesses when type=businesses", async () => {
+    mockProfileFindMany.mockResolvedValue([
+      {
+        id: "b1",
+        fullName: "Acme Plumbing",
+        accountType: "business",
+        abn: "12345678901",
+        abnVerified: true,
+        skills: [],
+        credentials: [],
+      },
+    ]);
+    const res = await GET(makeRequest("http://localhost/api/v1/pros?type=businesses"));
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json).toHaveLength(1);
+    expect(json[0].accountType).toBe("business");
+    expect(json[0].abn).toBe("12345678901");
+    expect(json[0].abnVerified).toBe(true);
+    const call = mockProfileFindMany.mock.calls[0][0];
+    expect(call.where.accountType).toBe("business");
+  });
+
+  it("filters to individuals when type=people", async () => {
+    mockProfileFindMany.mockResolvedValue([]);
+    const res = await GET(makeRequest("http://localhost/api/v1/pros?type=people"));
+    expect(res.status).toBe(200);
+    const call = mockProfileFindMany.mock.calls[0][0];
+    expect(call.where.accountType).toBe("individual");
+  });
+
+  it("ignores unknown type values and applies no account filter", async () => {
+    mockProfileFindMany.mockResolvedValue([]);
+    const res = await GET(makeRequest("http://localhost/api/v1/pros?type=hack"));
+    expect(res.status).toBe(200);
+    const call = mockProfileFindMany.mock.calls[0][0];
+    expect(call.where.accountType).toBeUndefined();
+  });
 });

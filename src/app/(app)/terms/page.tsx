@@ -89,6 +89,31 @@ export default function TermsPage() {
             Consumer Law, consumer guarantees for any goods or services exchanged are owed by the
             user who supplies them — not by Antidosis.
           </p>
+          <h3 className="text-base font-semibold text-parchment mt-6 mb-3">Business accounts</h3>
+          <p className="mb-3">
+            Any user may flag their account as a <strong>business account</strong> (for example a
+            sole trader, tradesperson, or local company). Business accounts:
+          </p>
+          <ul className="list-disc pl-5 space-y-1 mb-3">
+            <li>
+              Must provide an Australian Business Number (ABN), which is validated and displayed on
+              their public profile and in the directory alongside a business badge
+            </li>
+            <li>
+              Use the same posting, contract, and review features as everyone else — reviews and
+              ratings apply equally to businesses
+            </li>
+            <li>
+              May have their legal name and ABN recorded on exchange contracts formed through the
+              Service
+            </li>
+          </ul>
+          <p>
+            <strong>Payments between users:</strong> where a business or any user agrees a monetary
+            payment as part of an exchange, that payment is arranged and made directly between the
+            parties. Antidosis never holds, transfers, or guarantees funds, and payment terms are
+            recorded in the contract for the parties&apos; own records.
+          </p>
         </section>
 
         {/* ── 3. Eligibility ── */}
@@ -429,8 +454,9 @@ export default function TermsPage() {
             </li>
             <li>
               <strong>Future paid features</strong> — if Antidosis introduces paid features in
-              future, these Terms will be updated and reasonable notice provided before any charge
-              applies
+              future (for example an optional featured-placement subscription for businesses), these
+              Terms will be updated and reasonable notice provided before any charge applies. Core
+              usage — joining, posting, contracting, and reviewing — remains free
             </li>
           </ul>
         </section>

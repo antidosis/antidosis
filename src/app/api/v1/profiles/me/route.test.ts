@@ -370,6 +370,183 @@ describe("PATCH /api/v1/profiles/me", () => {
 
     expect(res.headers.get("x-request-id")).toMatch(/^\w+-\w+$/);
   });
+
+  it("returns 400 when becoming a business without an ABN", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobile: null,
+      mobileVerified: false,
+      abn: null,
+      accountType: "individual",
+    });
+
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/profiles/me", {
+        method: "PATCH",
+        body: JSON.stringify({ accountType: "business" }),
+      })
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(body.error).toBe("Business accounts require an ABN");
+    expect(mockProfileUpdate).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when becoming a business with a checksum-invalid ABN", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobile: null,
+      mobileVerified: false,
+      abn: null,
+      accountType: "individual",
+    });
+
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/profiles/me", {
+        method: "PATCH",
+        body: JSON.stringify({ accountType: "business", abn: "12345678901" }),
+      })
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(body.error).toContain("Invalid ABN");
+    expect(mockProfileUpdate).not.toHaveBeenCalled();
+  });
+
+  it("becoming a business with a valid ABN stores it normalised and unverified (no ABR GUID)", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobile: null,
+      mobileVerified: false,
+      abn: null,
+      accountType: "individual",
+    });
+    mockProfileUpdate.mockResolvedValue({
+      id: "profile-1",
+      accountType: "business",
+      abn: "51824753556",
+      abnVerified: false,
+    });
+
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/profiles/me", {
+        method: "PATCH",
+        body: JSON.stringify({ accountType: "business", abn: "51 824 753 556" }),
+      })
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.accountType).toBe("business");
+    expect(mockProfileUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          accountType: "business",
+          abn: "51824753556",
+          abnVerified: false,
+        }),
+      })
+    );
+  });
+
+  it("becoming a business re-validates the ABN already on file", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobile: null,
+      mobileVerified: false,
+      abn: "51824753556",
+      accountType: "individual",
+    });
+    mockProfileUpdate.mockResolvedValue({ id: "profile-1", accountType: "business" });
+
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/profiles/me", {
+        method: "PATCH",
+        body: JSON.stringify({ accountType: "business" }),
+      })
+    );
+
+    expect(res.status).toBe(200);
+    expect(mockProfileUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ accountType: "business", abn: "51824753556" }),
+      })
+    );
+  });
+
+  it("rejects becoming a business when the stored ABN is checksum-invalid", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobile: null,
+      mobileVerified: false,
+      abn: "12345678901",
+      accountType: "individual",
+    });
+
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/profiles/me", {
+        method: "PATCH",
+        body: JSON.stringify({ accountType: "business" }),
+      })
+    );
+
+    expect(res.status).toBe(400);
+    expect(mockProfileUpdate).not.toHaveBeenCalled();
+  });
+
+  it("rejects clearing the ABN in the same request as becoming a business", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobile: null,
+      mobileVerified: false,
+      abn: null,
+      accountType: "individual",
+    });
+
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/profiles/me", {
+        method: "PATCH",
+        body: JSON.stringify({ accountType: "business", abn: null }),
+      })
+    );
+
+    expect(res.status).toBe(400);
+    expect(mockProfileUpdate).not.toHaveBeenCalled();
+  });
+
+  it("resetting abnVerified when the ABN is cleared", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobile: null,
+      mobileVerified: false,
+      abn: "51824753556",
+      accountType: "individual",
+    });
+    mockProfileUpdate.mockResolvedValue({ id: "profile-1", abn: null, abnVerified: false });
+
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/profiles/me", {
+        method: "PATCH",
+        body: JSON.stringify({ abn: "" }),
+      })
+    );
+
+    expect(res.status).toBe(200);
+    expect(mockProfileUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ abn: null, abnVerified: false }),
+      })
+    );
+  });
 });
 
 describe("DELETE /api/v1/profiles/me", () => {

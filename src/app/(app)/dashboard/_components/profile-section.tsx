@@ -34,6 +34,7 @@ function toFormValues(profile: EditorProfile): ProfileFormData {
     privatePhone: profile.privatePhone ?? undefined,
     mobile: profile.mobile ?? undefined,
     abn: profile.abn ?? undefined,
+    accountType: profile.accountType ?? "individual",
     showInDirectory: profile.showInDirectory ?? undefined,
     socialLinks: (profile.socialLinks ?? []).map((l) => ({
       id: l.id,
@@ -77,6 +78,7 @@ export function ProfileSection({ initialProfile, onUpdate }: ProfileSectionProps
   const avatarUrl = watch("avatarUrl");
   const fullName = watch("fullName");
   const showInDirectory = watch("showInDirectory");
+  const accountType = watch("accountType");
 
   function markRemoving(fieldId: string) {
     setRemovingIds((prev) => new Set(prev).add(fieldId));
@@ -195,6 +197,8 @@ export function ProfileSection({ initialProfile, onUpdate }: ProfileSectionProps
         register={register}
         setValue={setValue}
         showInDirectory={!!showInDirectory}
+        accountType={accountType === "business" ? "business" : "individual"}
+        abnVerified={initialProfile.abnVerified}
         errors={errors}
       />
 

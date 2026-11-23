@@ -49,6 +49,8 @@ type ProfileData = {
   privatePhone: string | null;
   mobile: string | null;
   abn: string | null;
+  accountType: "individual" | "business";
+  abnVerified: boolean;
   handle: string | null;
   showInDirectory: boolean;
   mobileVerified: boolean;

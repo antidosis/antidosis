@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { z } from "zod";
 
+import { verifyAbn } from "@/lib/abn";
 import { withApiHandler } from "@/lib/api-handler";
 import { recordBannedMobile } from "@/lib/bans";
 import { isValidCentralCoastSuburb } from "@/lib/data/central-coast-suburbs";
@@ -130,6 +131,11 @@ export const PATCH = withApiHandler(async (req: NextRequest) => {
     cleanedData.avatarUrl = sanitizeUrl(cleanedData.avatarUrl);
   }
 
+  const currentProfile = await prisma.profile.findUnique({
+    where: { userId: user.id },
+    select: { mobile: true, mobileVerified: true, abn: true, accountType: true },
+  });
+
   let mobileVerifiedUpdate: boolean | undefined;
   if (typeof cleanedData.mobile === "string" && cleanedData.mobile) {
     const normalizedMobile = normalizeMobile(cleanedData.mobile);
@@ -137,11 +143,6 @@ export const PATCH = withApiHandler(async (req: NextRequest) => {
     if (!isValidAustralianMobile(normalizedMobile)) {
       return NextResponse.json({ error: "Invalid mobile number format" }, { status: 400 });
     }
-
-    const currentProfile = await prisma.profile.findUnique({
-      where: { userId: user.id },
-      select: { mobile: true, mobileVerified: true },
-    });
 
     if (currentProfile && currentProfile.mobile !== normalizedMobile) {
       const existingMobile = await prisma.profile.findUnique({
@@ -152,6 +153,43 @@ export const PATCH = withApiHandler(async (req: NextRequest) => {
       }
       mobileVerifiedUpdate = false;
     }
+  }
+
+  // Business account rules: an ABN is mandatory and must pass the ATO
+  // checksum. ABR confirmation (when ABR_LOOKUP_GUID is configured) flips
+  // abnVerified; otherwise it stays false. Clients cannot set abnVerified
+  // directly — the server derives it from verification state.
+  const wantsBusiness = cleanedData.accountType === "business";
+  const effectiveAbn =
+    "abn" in cleanedData ? (cleanedData.abn as string | null) : (currentProfile?.abn ?? null);
+
+  if (typeof cleanedData.abn === "string" && cleanedData.abn) {
+    const verification = await verifyAbn(cleanedData.abn);
+    if (!verification.checksumValid) {
+      return NextResponse.json(
+        { error: "Invalid ABN — failed checksum validation" },
+        { status: 400 }
+      );
+    }
+    cleanedData.abn = verification.normalised;
+    cleanedData.abnVerified = verification.verified;
+  } else if (cleanedData.abn === null && "abn" in cleanedData) {
+    cleanedData.abnVerified = false;
+  } else if (wantsBusiness && effectiveAbn) {
+    // Becoming a business with the ABN already on file — re-validate it.
+    const verification = await verifyAbn(effectiveAbn);
+    if (!verification.checksumValid) {
+      return NextResponse.json(
+        { error: "Invalid ABN — failed checksum validation" },
+        { status: 400 }
+      );
+    }
+    cleanedData.abn = verification.normalised;
+    if (verification.verified) cleanedData.abnVerified = true;
+  }
+
+  if (wantsBusiness && !effectiveAbn) {
+    return NextResponse.json({ error: "Business accounts require an ABN" }, { status: 400 });
   }
 
   const profile = await prisma.profile.update({

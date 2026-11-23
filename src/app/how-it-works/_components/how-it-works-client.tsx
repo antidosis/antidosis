@@ -457,6 +457,57 @@ export default function HowItWorksPage() {
 
         <div className="divider" />
 
+        {/* BUSINESS DESK */}
+        <section className="py-20 md:py-28">
+          <div className="max-w-6xl mx-auto px-4 md:px-8">
+            <Reveal>
+              <p className="text-xs text-ash mb-6 font-mono">
+                » TRADE DESK — BUSINESSES ON THE NETWORK
+              </p>
+              <h2 className="heading-display text-3xl md:text-4xl text-gold mb-4">
+                Run Local Jobs on the
+                <br />
+                <span className="text-sun">Same Rails.</span>
+              </h2>
+              <p className="text-sm text-ash leading-relaxed max-w-2xl mb-10">
+                A tradie, a cafe, a tutoring service — any verified member can flip their account to
+                a business account. Everything works exactly the same, with three additions:
+              </p>
+            </Reveal>
+            <Reveal delay={150}>
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="vessel p-6">
+                  <ShieldCheck className="h-5 w-5 text-ok mb-3" />
+                  <p className="text-sm font-medium text-gold mb-2">ABN on the record</p>
+                  <p className="text-xs text-ash leading-relaxed">
+                    Add your ABN once. It is validated, shown with a business badge in the
+                    directory, and never displayed for personal accounts.
+                  </p>
+                </div>
+                <div className="vessel p-6">
+                  <FileText className="h-5 w-5 text-sun mb-3" />
+                  <p className="text-sm font-medium text-gold mb-2">Business contracts</p>
+                  <p className="text-xs text-ash leading-relaxed">
+                    The same negotiation, signing, and PDF flow — with your legal name and ABN on
+                    the contract document.
+                  </p>
+                </div>
+                <div className="vessel p-6">
+                  <Star className="h-5 w-5 text-mercury mb-3" />
+                  <p className="text-sm font-medium text-gold mb-2">Reviews that count</p>
+                  <p className="text-xs text-ash leading-relaxed">
+                    Every completed job feeds the same reputation system. Payment terms are recorded
+                    in the contract; money moves directly between the parties — never through
+                    antidosis.
+                  </p>
+                </div>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+
+        <div className="divider" />
+
         {/* CTA */}
         <section className="py-20 md:py-28">
           <div className="max-w-6xl mx-auto px-4 md:px-8">

@@ -141,10 +141,19 @@ describe("createSignedUrlOrFallback", () => {
     expect(result).toBe("https://signed.example.com/url");
   });
 
-  it("falls back to the stored URL when signing fails (pre-migration objects)", async () => {
+  it("returns null for private paths when signing fails — privacy fails closed", async () => {
     mockCreateSignedUrl.mockResolvedValueOnce({ data: null, error: { message: "Not found" } });
 
-    const stored = "https://xxx.supabase.co/storage/v1/object/public/uploads/credentials/u/abc.jpg";
+    const stored =
+      "https://xxx.supabase.co/storage/v1/object/public/uploads-private/credentials/u/abc.jpg";
+    const result = await createSignedUrlOrFallback(stored);
+    expect(result).toBeNull();
+  });
+
+  it("still falls back to the stored URL for public paths when signing fails", async () => {
+    mockCreateSignedUrl.mockResolvedValueOnce({ data: null, error: { message: "boom" } });
+
+    const stored = "https://xxx.supabase.co/storage/v1/object/public/uploads/avatars/u/abc.jpg";
     const result = await createSignedUrlOrFallback(stored);
     expect(result).toBe(stored);
   });

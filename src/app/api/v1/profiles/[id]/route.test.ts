@@ -100,6 +100,60 @@ describe("GET /api/v1/profiles/[id]", () => {
     expect(body.handle).toBe("test_user");
   });
 
+  it("hides the ABN of individual accounts (collected for SERR, not public)", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "d1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+      handle: "test_user",
+      fullName: "Test User",
+      accountType: "individual",
+      abn: "51824753556",
+      abnVerified: true,
+      skills: [],
+      socialLinks: [],
+      credentials: [],
+      needsPosted: [],
+      reviewsReceived: [],
+    });
+
+    const res = await GET(makeRequest("http://localhost/api/v1/profiles/profile-1"), {
+      params: { id: "d1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
+    });
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.accountType).toBe("individual");
+    expect(body.abn).toBeNull();
+    expect(body.abnVerified).toBe(false);
+  });
+
+  it("shows the ABN of business accounts", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "d1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+      handle: "acme_plumbing",
+      fullName: "Acme Plumbing Pty Ltd",
+      accountType: "business",
+      abn: "51824753556",
+      abnVerified: true,
+      skills: [],
+      socialLinks: [],
+      credentials: [],
+      needsPosted: [],
+      reviewsReceived: [],
+    });
+
+    const res = await GET(makeRequest("http://localhost/api/v1/profiles/profile-1"), {
+      params: { id: "d1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
+    });
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.accountType).toBe("business");
+    expect(body.abn).toBe("51824753556");
+    expect(body.abnVerified).toBe(true);
+  });
+
   it("resolves a profile by @handle", async () => {
     mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
     mockProfileFindUnique

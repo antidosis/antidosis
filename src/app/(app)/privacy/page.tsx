@@ -294,6 +294,11 @@ export default function PrivacyPage() {
               received, and open needs posted
             </li>
             <li>
+              <strong>Business accounts only</strong>: your ABN and business badge are shown on your
+              public profile and in the directory. ABNs provided by individual accounts (collected
+              for ATO sharing-economy reporting) are never displayed publicly
+            </li>
+            <li>
               <strong>Need details</strong>: everything you include in a need post (title,
               description, photos, offer details, location, required skills)
             </li>

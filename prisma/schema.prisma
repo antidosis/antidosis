@@ -37,6 +37,8 @@ model Profile {
   ratingCount            Int       @default(0) @map("rating_count")
   jobsCompleted          Int       @default(0) @map("jobs_completed")
   abn                    String?
+  accountType            String    @default("individual") @map("account_type")
+  abnVerified            Boolean   @default(false) @map("abn_verified")
   bannedAt               DateTime? @map("banned_at")
   bannedReason           String?   @map("banned_reason")
   lastSeenAt             DateTime? @map("last_seen_at")
@@ -69,6 +71,7 @@ model Profile {
   @@index([isPro])
   @@index([stripeCustomerId])
   @@index([showInDirectory])
+  @@index([accountType])
   @@index([lastSeenAt])
   @@map("profiles")
 }

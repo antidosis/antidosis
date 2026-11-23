@@ -1,5 +1,52 @@
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 
+export interface ContractPartyPdfData {
+  fullName: string | null;
+  email: string;
+  locationName: string | null;
+  isVerified: boolean;
+  accountType?: string;
+  abn?: string | null;
+  abnVerified?: boolean;
+}
+
+export function isBusinessParty(party: ContractPartyPdfData): boolean {
+  return party.accountType === "business";
+}
+
+/** True when at least one party is a business account. */
+export function isBusinessContract(parties: {
+  partyA: ContractPartyPdfData;
+  partyB: ContractPartyPdfData;
+}): boolean {
+  return isBusinessParty(parties.partyA) || isBusinessParty(parties.partyB);
+}
+
+/** Single-line party identity for the PARTIES section, e.g.:
+ *  "Acme Plumbing Pty Ltd (ABN 12 345 678 901, verified)  |  Email: …"
+ *  ASCII only — pdf-lib standard fonts encode WinAnsi, no checkmark glyphs. */
+export function formatPartyIdentityLine(party: ContractPartyPdfData): string {
+  const name = party.fullName || "N/A";
+  const parts: string[] = [];
+  if (isBusinessParty(party)) {
+    parts.push(`Business: ${name}`);
+    if (party.abn) {
+      const abnLabel = party.abnVerified ? "ABN (verified)" : "ABN (unverified)";
+      parts.push(`${abnLabel}: ${party.abn}`);
+    }
+  } else {
+    parts.push(`Name: ${name}`);
+  }
+  parts.push(`Email: ${party.email}`);
+  if (party.isVerified) parts.push("(verified)");
+  return parts.join("  |  ");
+}
+
+/** Recorded on the PDF whenever a business is a party — payment happens
+ * off-platform by design. */
+export const BUSINESS_PAYMENT_NOTICE =
+  "Payment terms: where this contract records a payment, the parties arrange payment directly between themselves as described in the agreed terms. Antidosis does not hold, transfer, or guarantee funds.";
+
 export interface ContractPdfData {
   contractId: string;
   generatedAt: string;
@@ -32,12 +79,18 @@ export interface ContractPdfData {
     email: string;
     locationName: string | null;
     isVerified: boolean;
+    accountType?: string;
+    abn?: string | null;
+    abnVerified?: boolean;
   };
   partyB: {
     fullName: string | null;
     email: string;
     locationName: string | null;
     isVerified: boolean;
+    accountType?: string;
+    abn?: string | null;
+    abnVerified?: boolean;
   };
   negotiationMessages: Array<{
     senderName: string | null;
@@ -324,10 +377,7 @@ export async function generateContractPdf(data: ContractPdfData): Promise<Uint8A
 
   drawText("Party A (Need Poster):", { size: 10, bold: true });
   y -= 14;
-  drawText(
-    `Name: ${data.partyA.fullName || "N/A"}  |  Email: ${data.partyA.email}${data.partyA.isVerified ? "  |  ✓ Verified" : ""}`,
-    { size: 9 }
-  );
+  drawText(formatPartyIdentityLine(data.partyA), { size: 9 });
   if (data.partyA.locationName) {
     y -= 14;
     drawText(`Location: ${data.partyA.locationName}`, { size: 9, color: rgb(0.4, 0.4, 0.4) });
@@ -336,13 +386,19 @@ export async function generateContractPdf(data: ContractPdfData): Promise<Uint8A
 
   drawText("Party B (Fulfiller):", { size: 10, bold: true });
   y -= 14;
-  drawText(
-    `Name: ${data.partyB.fullName || "N/A"}  |  Email: ${data.partyB.email}${data.partyB.isVerified ? "  |  ✓ Verified" : ""}`,
-    { size: 9 }
-  );
+  drawText(formatPartyIdentityLine(data.partyB), { size: 9 });
   if (data.partyB.locationName) {
     y -= 14;
     drawText(`Location: ${data.partyB.locationName}`, { size: 9, color: rgb(0.4, 0.4, 0.4) });
+  }
+  if (isBusinessContract(data)) {
+    y -= 14;
+    const noticeLines = wrapText(BUSINESS_PAYMENT_NOTICE, contentWidth, 9);
+    for (const line of noticeLines) {
+      newPageIfNeeded(12);
+      drawText(line, { size: 9, color: rgb(0.4, 0.4, 0.4) });
+      y -= 12;
+    }
   }
   y -= 20;
   newPageIfNeeded(100);

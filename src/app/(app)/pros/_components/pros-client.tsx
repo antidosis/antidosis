@@ -4,14 +4,26 @@ import { useState, useEffect } from "react";
 
 import Link from "next/link";
 
-import { Star, MapPin, Briefcase, Shield, Phone, Award, Search, X, Loader2 } from "lucide-react";
+import {
+  Star,
+  MapPin,
+  Briefcase,
+  Shield,
+  Phone,
+  Award,
+  Search,
+  X,
+  Loader2,
+  Building2,
+} from "lucide-react";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
+import { formatAbn } from "@/lib/abn";
 import { useApi } from "@/lib/swr-config";
-
+import { cn } from "@/lib/utils";
 interface ProProfile {
   id: string;
   fullName: string | null;
@@ -23,13 +35,25 @@ interface ProProfile {
   ratingCount: number;
   jobsCompleted: number;
   isVerified: boolean;
+  accountType: string;
+  abn: string | null;
+  abnVerified: boolean;
   skills: { name: string }[];
   credentials: { id: string }[];
 }
 
+type DirectoryTab = "all" | "people" | "businesses";
+
+const TABS: { value: DirectoryTab; label: string }[] = [
+  { value: "all", label: "everyone" },
+  { value: "people", label: "people" },
+  { value: "businesses", label: "businesses" },
+];
+
 export default function ProsDirectoryPage() {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [tab, setTab] = useState<DirectoryTab>("all");
 
   // Debounce search
   useEffect(() => {
@@ -40,6 +64,7 @@ export default function ProsDirectoryPage() {
   const key = (() => {
     const params = new URLSearchParams();
     if (debouncedQuery) params.set("q", debouncedQuery);
+    if (tab !== "all") params.set("type", tab);
     return `/api/v1/pros?${params.toString()}`;
   })();
 
@@ -53,7 +78,7 @@ export default function ProsDirectoryPage() {
           the <span className="text-sun">directory</span>
         </h1>
         <p className="text-sm text-ash max-w-lg mt-4">
-          verified members of the network. browse, connect, trade.
+          verified people and local businesses on the network. browse, connect, trade.
         </p>
       </div>
 
@@ -78,6 +103,30 @@ export default function ProsDirectoryPage() {
             </Button>
           )}
         </div>
+      </div>
+
+      {/* Tabs */}
+      <div
+        className="flex gap-1 mb-6 border-b border-line"
+        role="tablist"
+        aria-label="Directory filter"
+      >
+        {TABS.map((t) => (
+          <button
+            key={t.value}
+            role="tab"
+            aria-selected={tab === t.value}
+            onClick={() => setTab(t.value)}
+            className={cn(
+              "px-4 py-2 text-sm capitalize transition-colors border-b-2 -mb-px",
+              tab === t.value
+                ? "border-sun text-gold"
+                : "border-transparent text-ash hover:text-parchment"
+            )}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
 
       {isLoading && !pros ? (
@@ -126,7 +175,23 @@ export default function ProsDirectoryPage() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="text-base font-bold text-gold">{pro.fullName || "anonymous"}</h3>
                     {pro.isVerified && <Shield className="h-4 w-4 text-ok" />}
+                    {pro.accountType === "business" && (
+                      <span className="inline-flex items-center gap-1 text-[11px] uppercase tracking-wider px-2 py-0.5 rounded border border-sun/40 text-sun bg-sun/5">
+                        <Building2 className="h-3 w-3" /> business
+                      </span>
+                    )}
                   </div>
+
+                  {pro.accountType === "business" && pro.abn && (
+                    <p className="text-[11px] text-ash mt-1">
+                      ABN {formatAbn(pro.abn)}
+                      {pro.abnVerified && (
+                        <span className="text-ok ml-1.5 inline-flex items-center gap-0.5">
+                          <Shield className="h-3 w-3" /> verified
+                        </span>
+                      )}
+                    </p>
+                  )}
 
                   <div className="flex flex-wrap items-center gap-3 text-xs text-parchment mt-1">
                     {pro.ratingCount > 0 && (

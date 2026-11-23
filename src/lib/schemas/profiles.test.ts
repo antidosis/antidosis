@@ -151,4 +151,25 @@ describe("updateProfileSchema", () => {
     });
     expect(result.success).toBe(true);
   });
+
+  it("accepts accountType individual and business", () => {
+    expect(updateProfileSchema.safeParse({ accountType: "individual" }).success).toBe(true);
+    expect(updateProfileSchema.safeParse({ accountType: "business" }).success).toBe(true);
+    expect(updateProfileSchema.safeParse({ accountType: null }).success).toBe(true);
+  });
+
+  it("rejects unknown accountType values", () => {
+    expect(updateProfileSchema.safeParse({ accountType: "enterprise" }).success).toBe(false);
+    expect(updateProfileSchema.safeParse({ accountType: "" }).success).toBe(false);
+  });
+
+  it("accepts ABNs in display form (digits and spaces)", () => {
+    const result = updateProfileSchema.safeParse({ abn: "51 824 753 556" });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects ABNs containing letters", () => {
+    const result = updateProfileSchema.safeParse({ abn: "ABN 51824753556" });
+    expect(result.success).toBe(false);
+  });
 });

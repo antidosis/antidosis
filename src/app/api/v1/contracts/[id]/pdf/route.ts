@@ -62,10 +62,26 @@ export const POST = withApiHandler(
           },
         },
         partyA: {
-          select: { fullName: true, email: true, locationName: true, isVerified: true },
+          select: {
+            fullName: true,
+            email: true,
+            locationName: true,
+            isVerified: true,
+            accountType: true,
+            abn: true,
+            abnVerified: true,
+          },
         },
         partyB: {
-          select: { fullName: true, email: true, locationName: true, isVerified: true },
+          select: {
+            fullName: true,
+            email: true,
+            locationName: true,
+            isVerified: true,
+            accountType: true,
+            abn: true,
+            abnVerified: true,
+          },
         },
       },
     });

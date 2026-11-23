@@ -8,12 +8,20 @@ export const GET = withCors(
   withApiHandler(async (req: NextRequest) => {
     const { searchParams } = new URL(req.url);
     const q = searchParams.get("q")?.slice(0, 100);
+    // all | people | businesses — additive, unknown values fall back to all
+    // so older mobile builds keep the unfiltered behaviour.
+    const typeFilter = searchParams.get("type");
+    const accountType =
+      typeFilter === "businesses" ? "business" : typeFilter === "people" ? "individual" : null;
 
     const where: Record<string, any> = {
       isVerified: true,
       mobileVerified: true,
       showInDirectory: true,
     };
+    if (accountType) {
+      where.accountType = accountType;
+    }
 
     if (q) {
       where.OR = [
@@ -39,6 +47,9 @@ export const GET = withCors(
         ratingCount: true,
         jobsCompleted: true,
         isVerified: true,
+        accountType: true,
+        abn: true,
+        abnVerified: true,
         skills: { select: { name: true } },
         credentials: { where: { isPublic: true }, select: { id: true } },
       },

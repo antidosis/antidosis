@@ -49,6 +49,7 @@ export const updateProfileSchema = z.object({
     .regex(/^[\d ]*$/, "ABN must contain only digits and spaces")
     .optional()
     .nullable(),
+  accountType: z.enum(["individual", "business"]).optional().nullable(),
   socialLinks: z.array(socialLinkSchema).optional(),
 });
 

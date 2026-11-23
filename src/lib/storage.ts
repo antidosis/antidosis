@@ -8,8 +8,8 @@ import { createServiceClient } from "./supabase/service";
  *   signed URLs generated after server-side ownership/admin checks.
  *
  * Stored file URLs keep the public-URL *shape* as a stable identifier; access
- * is always via createSignedUrl. During the bucket migration window, signing
- * fails for not-yet-moved objects and callers fall back to the stored URL.
+ * is always via createSignedUrl. Private paths fail closed (null) when
+ * signing fails — they never fall back to the stored URL.
  */
 export const PUBLIC_BUCKET = "uploads";
 export const PRIVATE_BUCKET = "uploads-private";
@@ -75,13 +75,19 @@ export async function createSignedUrl(
 }
 
 /**
- * Signed URL when possible, otherwise the stored URL unchanged — keeps
- * pre-migration objects working until the bucket move completes.
+ * Signed URL when possible. For public-bucket paths (avatars, listing
+ * images) the stored URL is a harmless fallback if signing fails. For
+ * private paths (identity documents, contract PDFs) there is no fallback:
+ * signing failure returns null — privacy fails closed, never open.
  */
 export async function createSignedUrlOrFallback(
   publicUrl: string | null | undefined
 ): Promise<string | null> {
   if (!publicUrl) return null;
+  const path = extractStoragePath(publicUrl);
+  if (path && isPrivatePath(path)) {
+    return createSignedUrl(publicUrl);
+  }
   const signed = await createSignedUrl(publicUrl);
   return signed ?? publicUrl;
 }
