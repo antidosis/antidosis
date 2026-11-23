@@ -6,6 +6,7 @@ import { PATCH } from "./route";
 
 // ─── Prisma mocks ───
 const mockAcceptanceFindUnique = vi.fn();
+const mockAcceptanceFindFirst = vi.fn();
 const mockProfileFindUnique = vi.fn();
 const mockContractFindUnique = vi.fn();
 const mockAcceptanceUpdate = vi.fn();
@@ -22,6 +23,7 @@ vi.mock("@/lib/prisma", () => ({
   prisma: {
     acceptance: {
       findUnique: (...args: unknown[]) => mockAcceptanceFindUnique(...args),
+      findFirst: (...args: unknown[]) => mockAcceptanceFindFirst(...args),
       update: (...args: unknown[]) => mockAcceptanceUpdate(...args),
       updateMany: (...args: unknown[]) => mockAcceptanceUpdateMany(...args),
     },
@@ -112,6 +114,7 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
     mockTransaction.mockImplementation(async (cb: any) => cb(mockTx));
     mockSendInterestAcceptedEmail.mockResolvedValue(undefined);
     mockCreateNotification.mockResolvedValue(undefined);
+    mockAcceptanceFindFirst.mockResolvedValue(null);
   });
 
   it("returns 401 when not authenticated", async () => {
@@ -487,6 +490,35 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
     expect(mockTx.need.update).toHaveBeenCalled();
     expect(mockTx.acceptance.updateMany).toHaveBeenCalled();
     expect(mockSendInterestAcceptedEmail).toHaveBeenCalled();
+  });
+
+  it("returns 409 when a free-form need already has an accepted offer", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockAcceptanceFindUnique.mockResolvedValue({
+      id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+      need: { posterId: "prof-1", title: "Need title", requiresContract: false },
+      userId: "u2",
+      needId: "n1",
+      status: "pending",
+    });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "prof-1",
+      fullName: "Poster",
+      mobileVerified: true,
+      bannedAt: null,
+    });
+    mockAcceptanceFindFirst.mockResolvedValue({ id: "other-acceptance" });
+
+    const req = makeRequest("http://localhost/api/v1/acceptances/abc", {
+      method: "PATCH",
+      body: JSON.stringify({ status: "accepted" }),
+    });
+    const res = await PATCH(req, { params: { id: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } });
+
+    expect(res.status).toBe(409);
+    const body = await res.json();
+    expect(body.error).toContain("already has an accepted offer");
+    expect(mockAcceptanceUpdate).not.toHaveBeenCalled();
   });
 
   it("updates status to declined", async () => {

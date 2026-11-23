@@ -132,6 +132,28 @@ export const PATCH = withApiHandler(
 
     // If accepted, just update status and notify
     if (status === "accepted") {
+      if (!acceptance.need.requiresContract) {
+        // Free-form deals have exactly one active fulfiller. Accepting a second
+        // interest would silently displace the first — require explicit removal.
+        const existingAccepted = await prisma.acceptance.findFirst({
+          where: {
+            needId: acceptance.needId,
+            status: "accepted",
+            id: { not: acceptance.id },
+          },
+          select: { id: true },
+        });
+        if (existingAccepted) {
+          return NextResponse.json(
+            {
+              error:
+                "This need already has an accepted offer. Remove or complete it before accepting another.",
+            },
+            { status: 409 }
+          );
+        }
+      }
+
       const updated = await prisma.acceptance.update({
         where: { id: acceptanceId },
         data: { status },

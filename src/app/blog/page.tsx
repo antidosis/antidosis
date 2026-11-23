@@ -108,7 +108,7 @@ export default function BlogIndexPage() {
           <div className="mt-16 text-center">
             <p className="text-sm text-ash mb-4">Want to share your exchange story?</p>
             <EmailLink
-              email="official.antidosis@gmail.com"
+              email="support@antidosis.com"
               subject="Blog Submission"
               className="inline-flex items-center gap-2 text-sm text-mercury hover:underline"
             >

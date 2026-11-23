@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { withApiHandler } from "@/lib/api-handler";
 import { sendContractSignReminderEmail } from "@/lib/email";
 import { createNotification } from "@/lib/notifications";
+import { requireActiveAccount } from "@/lib/participation";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 
@@ -32,6 +33,9 @@ export const POST = withApiHandler(
     if (!profile) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
+
+    const active = await requireActiveAccount(user.id);
+    if (!active.ok) return active.response;
 
     const contract = await prisma.contract.findUnique({
       where: { id: params.id },

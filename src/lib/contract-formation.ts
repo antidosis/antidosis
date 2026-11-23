@@ -98,10 +98,21 @@ export async function createContractFromAcceptance(acceptanceId: string, posterP
       if (existingContract.status !== "cancelled") {
         throw new Error("A contract already exists for this acceptance");
       }
-      // Clean up old cancelled contract and its dependent records
-      await tx.review.deleteMany({ where: { contractId: existingContract.id } });
-      await tx.message.deleteMany({ where: { contractId: existingContract.id } });
-      await tx.contract.delete({ where: { id: existingContract.id } });
+      // Preserve the cancelled contract as history (audit trail, PDF, reviews).
+      // Clear its acceptance link so the new contract can take the unique slot.
+      await tx.contract.update({
+        where: { id: existingContract.id },
+        data: { acceptanceId: null },
+      });
+    }
+
+    // One live contract per need — a second selected interest must not form a
+    // parallel contract while another is still in play.
+    const liveContractOnNeed = await tx.contract.findFirst({
+      where: { needId: acceptance.needId, status: { not: "cancelled" } },
+    });
+    if (liveContractOnNeed) {
+      throw new Error("This need already has a contract in progress");
     }
 
     // Archive need messages for the contract

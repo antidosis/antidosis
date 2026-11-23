@@ -5,6 +5,7 @@ import { auditLog, getClientInfo } from "@/lib/audit";
 import { sendContractSignedEmail } from "@/lib/email";
 import { logger } from "@/lib/logger";
 import { createNotification } from "@/lib/notifications";
+import { requireActiveAccount } from "@/lib/participation";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { signContractSchema } from "@/lib/schemas";
@@ -35,6 +36,9 @@ export const POST = withApiHandler(
     if (!profile) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
+
+    const active = await requireActiveAccount(user.id);
+    if (!active.ok) return active.response;
 
     const limit = await rateLimit(
       getRateLimitIdentifier(req, user.id),

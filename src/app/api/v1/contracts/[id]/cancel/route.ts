@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { withApiHandler } from "@/lib/api-handler";
 import { auditLog, getClientInfo } from "@/lib/audit";
+import { requireActiveAccount } from "@/lib/participation";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
@@ -33,6 +34,9 @@ export const POST = withApiHandler(
     if (!profile) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
+
+    const active = await requireActiveAccount(user.id);
+    if (!active.ok) return active.response;
 
     const limit = await rateLimit(
       getRateLimitIdentifier(req, user.id),

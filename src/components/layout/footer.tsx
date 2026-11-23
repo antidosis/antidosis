@@ -31,7 +31,7 @@ const linkGroups: {
   },
   {
     title: "Support",
-    links: [{ email: "official.antidosis@gmail.com", label: "Contact" }],
+    links: [{ email: "support@antidosis.com", label: "Contact" }],
   },
 ];
 

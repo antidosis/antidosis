@@ -66,7 +66,7 @@ After every exchange, leave a rating. The system defaults to 10 (everything went
 
 ## 6. Report Problems Immediately
 
-If a trade goes sideways, use the platform messaging to document everything. Screenshots, timestamps, and clear communication help resolve disputes. For serious issues, contact official.antidosis@gmail.com.
+If a trade goes sideways, use the platform messaging to document everything. Screenshots, timestamps, and clear communication help resolve disputes. For serious issues, contact support@antidosis.com.
 
 ---
 
@@ -581,7 +581,7 @@ The expansion roadmap doesn't start with a venture capital pitch. It starts with
 
 ---
 
-**Where do you think antidosis should expand next?** Email us at official.antidosis@gmail.com with your nomination and why. Every suggestion gets read.
+**Where do you think antidosis should expand next?** Email us at support@antidosis.com with your nomination and why. Every suggestion gets read.
     `.trim(),
   },
   {
@@ -1246,7 +1246,7 @@ Use this data. A verified user with 12 completed trades and a 9.8 average rating
 
 ---
 
-**Where do you meet for trades?** Email us at official.antidosis@gmail.com with your favourite Central Coast meeting spot and we'll add it to the list.
+**Where do you meet for trades?** Email us at support@antidosis.com with your favourite Central Coast meeting spot and we'll add it to the list.
     `.trim(),
   },
   {
@@ -1786,7 +1786,7 @@ The good review tells the next person exactly what to watch for. The bad review 
 
 ### Step 3: Contact Support
 
-If the trade involved significant value (over $500 equivalent) or there are signs of fraud, email official.antidosis@gmail.com with:
+If the trade involved significant value (over $500 equivalent) or there are signs of fraud, email support@antidosis.com with:
 - The other person's username
 - The need/exchange ID
 - A timeline of what happened
@@ -1903,7 +1903,7 @@ We think ours does.
 
 ---
 
-**Have a dispute to report?** Email official.antidosis@gmail.com with the details. We read every message and respond within 48 hours.
+**Have a dispute to report?** Email support@antidosis.com with the details. We read every message and respond within 48 hours.
     `.trim(),
   },
   {

@@ -293,6 +293,28 @@ describe("POST /api/v1/contracts/[id]/respond-cancel", () => {
     expect(body.error).toBe("You cannot respond to your own cancellation request.");
   });
 
+  it("returns 400 when the contract is no longer in a cancellable stage", async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: makeAuthUser() },
+      error: null,
+    });
+    mockProfileFindUnique.mockResolvedValue({ id: "profile-b" });
+    mockContractFindUnique.mockResolvedValue(makeContract({ status: "completed" }));
+
+    const res = await POST(
+      makeRequest("http://localhost/api/v1/contracts/contract-1/respond-cancel", {
+        method: "POST",
+        body: JSON.stringify({ agree: true }),
+        headers: { "Content-Type": "application/json" },
+      }),
+      { params: { id: "contract-1" } }
+    );
+
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe("The contract is no longer in a cancellable stage.");
+  });
+
   it("returns 400 when no pending cancellation request", async () => {
     mockGetUser.mockResolvedValue({
       data: { user: makeAuthUser() },

@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { withApiHandler } from "@/lib/api-handler";
 import { logger } from "@/lib/logger";
+import { requireActiveAccount } from "@/lib/participation";
 import { generateContractPdf } from "@/lib/pdf-contract";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
@@ -158,6 +159,9 @@ export const PATCH = withApiHandler(
     if (!profile) {
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
+
+    const active = await requireActiveAccount(user.id);
+    if (!active.ok) return active.response;
 
     const limit = await rateLimit(
       getRateLimitIdentifier(req, user.id),

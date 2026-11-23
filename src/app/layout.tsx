@@ -179,7 +179,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               description:
                 "A reciprocal exchange network on the Central Coast, NSW. Barter, gift, and trade anything with verified locals.",
               image: `${siteUrl}/opengraph-image`,
-              email: "official.antidosis@gmail.com",
+              email: "support@antidosis.com",
               areaServed: {
                 "@type": "City",
                 name: "Central Coast",

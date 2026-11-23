@@ -25,6 +25,11 @@ export default function LoginPage() {
   const supabase = createClient();
   const justRegistered = searchParams.get("registered") === "true";
 
+  // Internal-path-only redirect target for post-login (set by the proxy when
+  // a protected page bounced an unauthenticated user here)
+  const next = searchParams.get("next");
+  const redirectTarget = next && next.startsWith("/") && !next.startsWith("//") ? next : "/needs";
+
   // Handle email verification callback from Supabase
   useEffect(() => {
     const urlError = searchParams.get("error");
@@ -40,7 +45,7 @@ export default function LoginPage() {
           setError("Verification failed: " + error.message);
           setLoading(false);
         } else {
-          router.push("/needs");
+          router.push(redirectTarget);
           router.refresh();
         }
       });
@@ -69,7 +74,7 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/needs");
+    router.push(redirectTarget);
     router.refresh();
   }
 
@@ -147,6 +152,11 @@ export default function LoginPage() {
                 </button>
               </div>
             </div>
+            {searchParams.get("next") && !error && (
+              <p className="text-sm text-ash border border-line bg-inset/50 p-3">
+                your session expired — sign in to continue where you left off.
+              </p>
+            )}
             {error && <p className="text-sm text-bad">{error}</p>}
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Logging in..." : "Log in"}

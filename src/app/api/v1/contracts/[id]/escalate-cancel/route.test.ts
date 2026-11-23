@@ -86,6 +86,7 @@ function makeContract(overrides?: Record<string, unknown>) {
     partyAId: "profile-a",
     partyBId: "profile-b",
     status: "active",
+    cancelRequestedById: "profile-a",
     cancelResponse: "declined",
     cancelEscalatedAt: null,
     need: { title: "Test Need" },
@@ -314,7 +315,7 @@ describe("POST /api/v1/contracts/[id]/escalate-cancel", () => {
       error: null,
     });
     mockProfileFindUnique.mockResolvedValue({ id: "profile-b" });
-    mockContractFindUnique.mockResolvedValue(makeContract());
+    mockContractFindUnique.mockResolvedValue(makeContract({ cancelRequestedById: "profile-b" }));
 
     const escalated = makeContract({ cancelEscalatedAt: new Date() });
     mockContractUpdate.mockResolvedValue(escalated);
@@ -333,6 +334,48 @@ describe("POST /api/v1/contracts/[id]/escalate-cancel", () => {
         type: "contract_cancel_escalated",
       })
     );
+  });
+
+  it("returns 403 when the caller is not the one who requested cancellation", async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: makeAuthUser() },
+      error: null,
+    });
+    mockProfileFindUnique.mockResolvedValue({ id: "profile-b" });
+    mockContractFindUnique.mockResolvedValue(makeContract());
+
+    const res = await POST(
+      makeRequest("http://localhost/api/v1/contracts/contract-1/escalate-cancel", {
+        method: "POST",
+      }),
+      { params: { id: "contract-1" } }
+    );
+
+    expect(res.status).toBe(403);
+    const body = await res.json();
+    expect(body.error).toBe("Only the party who requested cancellation can escalate.");
+    expect(mockContractUpdate).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when the contract is no longer in a cancellable stage", async () => {
+    mockGetUser.mockResolvedValue({
+      data: { user: makeAuthUser() },
+      error: null,
+    });
+    mockProfileFindUnique.mockResolvedValue({ id: "profile-a" });
+    mockContractFindUnique.mockResolvedValue(makeContract({ status: "completed" }));
+
+    const res = await POST(
+      makeRequest("http://localhost/api/v1/contracts/contract-1/escalate-cancel", {
+        method: "POST",
+      }),
+      { params: { id: "contract-1" } }
+    );
+
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toBe("The contract is no longer in a cancellable stage.");
+    expect(mockContractUpdate).not.toHaveBeenCalled();
   });
 
   it("includes x-request-id header", async () => {

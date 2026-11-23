@@ -4,6 +4,7 @@ import { createContractFromAcceptance } from "./contract-formation";
 
 const mockFindUnique = vi.fn();
 const mockFindMany = vi.fn();
+const mockFindFirst = vi.fn();
 const mockCreate = vi.fn();
 const mockUpdate = vi.fn();
 const mockDelete = vi.fn();
@@ -11,7 +12,13 @@ const mockDeleteMany = vi.fn();
 
 const mockTx = {
   acceptance: { findUnique: mockFindUnique, update: mockUpdate },
-  contract: { findUnique: mockFindUnique, create: mockCreate, delete: mockDelete },
+  contract: {
+    findUnique: mockFindUnique,
+    findFirst: mockFindFirst,
+    create: mockCreate,
+    delete: mockDelete,
+    update: mockUpdate,
+  },
   need: { findUnique: mockFindUnique },
   needMessage: { findMany: mockFindMany },
   review: { deleteMany: mockDeleteMany },
@@ -67,6 +74,9 @@ describe("createContractFromAcceptance", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockFindUnique.mockReset();
+    mockFindMany.mockReset();
+    mockFindFirst.mockReset();
+    mockFindFirst.mockResolvedValue(null);
     mockCreate.mockReset();
     mockUpdate.mockReset();
     mockDelete.mockReset();
@@ -134,20 +144,35 @@ describe("createContractFromAcceptance", () => {
     );
   });
 
-  it("deletes existing cancelled contract before creating new one", async () => {
+  it("throws when the need already has a live contract", async () => {
+    mockFindUnique.mockResolvedValueOnce(mockAcceptance).mockResolvedValueOnce(null);
+    mockFindFirst.mockResolvedValueOnce({ id: "other-contract", status: "draft" });
+
+    await expect(createContractFromAcceptance("accept-1", "poster-1")).rejects.toThrow(
+      "already has a contract in progress"
+    );
+    expect(mockCreate).not.toHaveBeenCalled();
+  });
+
+  it("preserves cancelled contract history when re-forming", async () => {
     mockFindUnique
       .mockResolvedValueOnce(mockAcceptance)
-      .mockResolvedValueOnce({ id: "old-contract", status: "cancelled" })
+      .mockResolvedValueOnce({ id: "old-contract", status: "cancelled", acceptanceId: "accept-1" })
       .mockResolvedValueOnce(mockAcceptance.need);
     mockFindMany.mockResolvedValueOnce([]);
     mockCreate.mockResolvedValueOnce({ id: "new-contract" });
-    mockUpdate.mockResolvedValueOnce({});
+    mockUpdate.mockResolvedValue({});
 
     const result = await createContractFromAcceptance("accept-1", "poster-1");
 
     expect(result.id).toBe("new-contract");
-    expect(mockDeleteMany).toHaveBeenCalledTimes(2);
-    expect(mockDelete).toHaveBeenCalledWith({ where: { id: "old-contract" } });
+    // Old contract is kept for audit trail; only its acceptance link is cleared
+    expect(mockUpdate).toHaveBeenCalledWith({
+      where: { id: "old-contract" },
+      data: { acceptanceId: null },
+    });
+    expect(mockDelete).not.toHaveBeenCalled();
+    expect(mockDeleteMany).not.toHaveBeenCalled();
   });
 
   it("archives need messages in contract", async () => {

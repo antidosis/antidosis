@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { withApiHandler } from "@/lib/api-handler";
 import { auditLog, getClientInfo } from "@/lib/audit";
 import { createNotification } from "@/lib/notifications";
+import { requireActiveAccount } from "@/lib/participation";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
@@ -35,6 +36,9 @@ export const POST = withApiHandler(
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
+    const active = await requireActiveAccount(user.id);
+    if (!active.ok) return active.response;
+
     const limit = await rateLimit(
       getRateLimitIdentifier(req, user.id),
       {
@@ -65,6 +69,22 @@ export const POST = withApiHandler(
 
     if (!isPartyA && !isPartyB) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    // Escalation is the requester's remedy after a decline — only they can escalate,
+    // and only while the contract is still in a cancellable stage.
+    if (contract.cancelRequestedById !== profile.id) {
+      return NextResponse.json(
+        { error: "Only the party who requested cancellation can escalate." },
+        { status: 403 }
+      );
+    }
+
+    if (contract.status !== "pending_terms" && contract.status !== "active") {
+      return NextResponse.json(
+        { error: "The contract is no longer in a cancellable stage." },
+        { status: 400 }
+      );
     }
 
     if (contract.cancelResponse !== "declined") {
