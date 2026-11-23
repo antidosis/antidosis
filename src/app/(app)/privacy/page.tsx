@@ -25,7 +25,7 @@ export default function PrivacyPage() {
       <p className="text-[12px] text-ash mb-4">$ cat /etc/antidosis/privacy-policy.md</p>
       <h1 className="text-3xl font-bold mb-2 text-gold">Privacy Policy</h1>
       <p className="text-[13px] text-ash/70 mb-10">
-        Last updated: 17 October 2026 &middot; Applies to the antidosis website and mobile
+        Last updated: 24 November 2026 &middot; Applies to the antidosis website and mobile
         application
       </p>
 
@@ -126,7 +126,7 @@ export default function PrivacyPage() {
             </li>
             <li>
               <strong>Directory visibility preference</strong> — whether your profile appears in the
-              public Pro directory
+              public directory
             </li>
           </ul>
 
@@ -144,8 +144,10 @@ export default function PrivacyPage() {
               expressing interest in a need
             </li>
             <li>
-              <strong>Contracts</strong> — terms, signatures, status updates, completion
-              confirmations, cancellation requests and reasons, escalation records
+              <strong>Contracts and direct agreements</strong> — titles, scope, terms, optional
+              agreed cash amount, signatures, status updates, completion confirmations, cancellation
+              requests and reasons, and escalation records. Direct invitations also store a hashed
+              single-use token, expiry and optional recipient email until claimed
             </li>
             <li>
               <strong>Messages</strong> — content of messages sent through need discussions,
@@ -190,9 +192,8 @@ export default function PrivacyPage() {
               <strong>Request paths and timestamps</strong> — for audit logging and rate limiting
             </li>
             <li>
-              <strong>Push notification tokens</strong> — device tokens required to send push
-              notifications to your mobile device (stored locally on the device; not stored on our
-              servers)
+              <strong>Push notification tokens</strong> — device identifiers and platform tokens
+              stored on our servers so we can deliver push notifications to your registered devices
             </li>
           </ul>
 
@@ -312,12 +313,19 @@ export default function PrivacyPage() {
               discussions, relay channels, and direct messages
             </li>
             <li>
-              <strong>Contract information</strong>: terms, signatures, and status shared between
-              the contract parties
+              <strong>Contract information</strong>: direct invitations reveal only the agreement
+              title and creator before acceptance. After acceptance, scope, terms, signatures,
+              messages and status are shared between the contract parties
             </li>
             <li>
-              <strong>Reviews</strong>: ratings and comments you leave about other users (private
-              feedback is not shared)
+              <strong>Redacted credential summaries</strong>: if you explicitly copy and paste one
+              into a conversation, it can include the title, issuer, expiry and masked reference.
+              Private documents and full document numbers are not included
+            </li>
+            <li>
+              <strong>Reviews</strong>: ratings and public comments you leave about other users.
+              Private feedback is visible only to its recipient and authorised trust-and-safety
+              staff, not on the public profile
             </li>
           </ul>
 
@@ -440,6 +448,11 @@ export default function PrivacyPage() {
               business purposes (e.g., anonymised transaction records for fraud prevention)
             </li>
             <li>
+              <strong>Notifications and community activity</strong> — the dashboard inbox displays
+              notifications for 30 days before moving them to an archive; Relay activity is shown
+              for 30 days. Archiving does not delete the underlying safety or contract record
+            </li>
+            <li>
               <strong>Audit logs</strong> — retained for 12 months for security and compliance
               purposes
             </li>
@@ -466,12 +479,13 @@ export default function PrivacyPage() {
             identity documents). Your auth login is destroyed and can no longer be used.
           </p>
           <p>
-            <strong>What is kept (anonymised):</strong> your profile is irreversibly anonymised
-            (&quot;Deleted User&quot;), and needs, messages, reviews, and contract records you were
-            part of are kept in anonymised form so the other party&apos;s history stays intact — no
-            personal identifiers remain attached to them. Contract records and audit logs may be
-            retained in anonymised form for fraud prevention, dispute resolution, and legal
-            compliance, for up to 12 months.
+            <strong>What is kept (anonymised):</strong> your profile becomes &quot;Deleted
+            User&quot;, and your handle, stored signatures and outstanding invitations are removed.
+            Needs, messages, reviews and contract records remain attached to that tombstone so the
+            other party&apos;s history stays intact. Free-text content may still contain personal
+            information you or another user chose to include; contact us if you need that content
+            reviewed. Contract records may be retained for fraud prevention, dispute resolution and
+            legal compliance; audit logs are retained for up to 12 months.
           </p>
           <p>
             To request deletion of any other personal data, contact us at{" "}
@@ -559,9 +573,10 @@ export default function PrivacyPage() {
             <li>Account security alerts</li>
           </ul>
           <p className="mb-3">
-            Push notification device tokens are managed by the Capacitor Push Notifications plugin
-            and stored locally on your device. We do not store these tokens on our servers. You can
-            disable push notifications at any time through your device settings.
+            Push notification device tokens are registered through the Capacitor Push Notifications
+            plugin and stored on our servers with your profile and device platform. They are deleted
+            when you delete your account. You can disable push notifications through your device
+            settings.
           </p>
         </section>
 
@@ -646,7 +661,7 @@ export default function PrivacyPage() {
         </section>
 
         <p className="text-[13px] text-ash/50 pt-6 border-t border-leather/10">
-          Last updated: 17 May 2026
+          Last updated: 24 November 2026
         </p>
       </article>
     </div>

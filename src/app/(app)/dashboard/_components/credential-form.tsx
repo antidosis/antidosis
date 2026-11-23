@@ -7,6 +7,7 @@ import { FileUpload } from "@/components/ui/file-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { QUALIFICATION_SUGGESTIONS } from "@/lib/qualifications";
 
 import { getFieldConfig, ID_SUBTYPES, TYPE_OPTIONS } from "./credential-config";
 import type { CredentialData } from "./credential-list";
@@ -199,7 +200,17 @@ export function CredentialForm({
             onChange={(e) => setCredForm({ ...credForm, title: e.target.value })}
             placeholder={config.titlePlaceholder}
             required={config.titleRequired}
+            list="qualification-suggestions"
           />
+          <datalist id="qualification-suggestions">
+            {QUALIFICATION_SUGGESTIONS.map((qualification) => (
+              <option key={qualification} value={qualification} />
+            ))}
+          </datalist>
+          <p className="text-xs text-ash">
+            Start typing for common Australian qualifications, licences and insurance. You can also
+            enter a custom title. Adding an item does not mark it as verified.
+          </p>
         </div>
 
         {/* Description */}

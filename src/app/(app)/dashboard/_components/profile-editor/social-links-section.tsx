@@ -18,7 +18,17 @@ import { cn } from "@/lib/utils";
 import { SectionCard } from "./section-card";
 import type { ProfileFormData } from "./types";
 
-const PLATFORMS = ["instagram", "facebook", "linkedin", "twitter", "website", "github", "other"];
+const PLATFORMS = [
+  "website",
+  "instagram",
+  "facebook",
+  "linkedin",
+  "tiktok",
+  "youtube",
+  "twitter",
+  "github",
+  "other",
+];
 
 const SELECT_CLASS =
   "h-10 rounded border border-line bg-inset px-3 text-sm text-gold outline-none transition-colors focus:border-sun disabled:cursor-not-allowed disabled:opacity-50";
@@ -45,7 +55,7 @@ export function SocialLinksSection({
   return (
     <SectionCard
       title="Social links"
-      description="Public links appear on your profile and in the directory. Private links are shared when you message someone about a need."
+      description="Public links appear on your profile and in the directory. Private links stay visible only in your own editor and are not shared automatically."
     >
       {fields.length === 0 && (
         <p className="mb-4 text-xs text-ash">No links yet — add your first below.</p>
@@ -115,7 +125,7 @@ function LinkRow({ index, control, register, removing, onMarkRemoving, urlError 
           type="button"
           onClick={() => visibility.onChange(!isPublic)}
           disabled={removing}
-          title={isPublic ? "Public — shown on your profile" : "Private — shared when messaging"}
+          title={isPublic ? "Public — shown on your profile" : "Private — visible only to you"}
           aria-label={isPublic ? "Make link private" : "Make link public"}
           aria-pressed={isPublic}
           className={cn(

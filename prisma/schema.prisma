@@ -180,10 +180,20 @@ model Acceptance {
 
 model Contract {
   id                     String    @id @default(uuid())
-  needId                 String    @map("need_id")
+  needId                 String?   @map("need_id")
   acceptanceId           String?   @unique @map("acceptance_id")
   partyAId               String    @map("party_a_id")
-  partyBId               String    @map("party_b_id")
+  partyBId               String?   @map("party_b_id")
+  kind                   String    @default("exchange")
+  title                  String?
+  description            String?
+  considerationType      String?   @map("consideration_type")
+  considerationValue     Float?    @map("consideration_value")
+  inviteEmail            String?   @map("invite_email")
+  inviteTokenHash        String?   @unique @map("invite_token_hash")
+  invitedAt              DateTime? @map("invited_at")
+  inviteExpiresAt        DateTime? @map("invite_expires_at")
+  claimedAt              DateTime? @map("claimed_at")
   terms                  String
   partyATerms            String?   @map("party_a_terms")
   partyBTerms            String?   @map("party_b_terms")
@@ -219,9 +229,9 @@ model Contract {
   createdAt              DateTime  @default(now()) @map("created_at")
   updatedAt              DateTime  @updatedAt @map("updated_at")
 
-  need     Need      @relation(fields: [needId], references: [id], onDelete: Cascade)
+  need     Need?     @relation(fields: [needId], references: [id], onDelete: Cascade)
   partyA   Profile   @relation("ContractPartyA", fields: [partyAId], references: [id], onDelete: Cascade)
-  partyB   Profile   @relation("ContractPartyB", fields: [partyBId], references: [id], onDelete: Cascade)
+  partyB   Profile?  @relation("ContractPartyB", fields: [partyBId], references: [id], onDelete: Cascade)
   messages Message[]
   reviews  Review[]
 
@@ -229,6 +239,7 @@ model Contract {
   @@index([partyAId])
   @@index([partyBId])
   @@index([status])
+  @@index([kind, createdAt])
   @@map("contracts")
 }
 
@@ -329,13 +340,15 @@ model Notification {
   type      String
   title     String
   body      String
-  data      Json?
-  isRead    Boolean  @default(false) @map("is_read")
-  createdAt DateTime @default(now()) @map("created_at")
+  data       Json?
+  isRead     Boolean   @default(false) @map("is_read")
+  archivedAt DateTime? @map("archived_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
 
   user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, isRead])
+  @@index([userId, archivedAt, createdAt])
   @@index([createdAt])
   @@map("notifications")
 }

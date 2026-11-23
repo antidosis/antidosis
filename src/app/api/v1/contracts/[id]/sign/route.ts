@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { withApiHandler } from "@/lib/api-handler";
 import { auditLog, getClientInfo } from "@/lib/audit";
+import { contractTitle } from "@/lib/direct-contract";
 import { sendContractSignedEmail } from "@/lib/email";
 import { logger } from "@/lib/logger";
 import { createNotification } from "@/lib/notifications";
@@ -30,7 +31,7 @@ export const POST = withApiHandler(
 
     const profile = await prisma.profile.findUnique({
       where: { userId: user.id },
-      select: { id: true },
+      select: { id: true, fullName: true },
     });
 
     if (!profile) {
@@ -76,6 +77,13 @@ export const POST = withApiHandler(
       );
     }
     const { signature } = parsed.data;
+    const normaliseName = (value: string) => value.trim().replace(/\s+/g, " ").toLowerCase();
+    if (!profile.fullName || normaliseName(signature) !== normaliseName(profile.fullName)) {
+      return NextResponse.json(
+        { error: "Type the full name on your profile exactly as shown to sign" },
+        { status: 400 }
+      );
+    }
 
     if (!contract.termsLockedAt) {
       return NextResponse.json(
@@ -103,7 +111,11 @@ export const POST = withApiHandler(
       const signatureTextField = isPartyA ? "partyASignature" : "partyBSignature";
       await tx.contract.update({
         where: { id: params.id },
-        data: { [signatureField]: new Date(), [signatureTextField]: signature },
+        data: {
+          [signatureField]: new Date(),
+          [signatureTextField]: signature.trim().replace(/\s+/g, " "),
+          pdfUrl: null,
+        },
       });
 
       const fresh = await tx.contract.findUnique({
@@ -118,7 +130,7 @@ export const POST = withApiHandler(
           where: { id: params.id },
           select: { needId: true },
         });
-        if (c) {
+        if (c?.needId) {
           await tx.need.update({
             where: { id: c.needId },
             data: { status: "active" },
@@ -146,15 +158,15 @@ export const POST = withApiHandler(
             need: { select: { title: true } },
           },
         });
-        if (contractWithParties) {
+        if (contractWithParties?.partyB) {
           await sendContractSignedEmail(
             contractWithParties.partyA.email,
-            contractWithParties.need.title,
+            contractTitle(contractWithParties),
             contractWithParties.partyB.fullName || "the other party"
           );
           await sendContractSignedEmail(
             contractWithParties.partyB.email,
-            contractWithParties.need.title,
+            contractTitle(contractWithParties),
             contractWithParties.partyA.fullName || "the other party"
           );
           // In-app notifications
@@ -162,14 +174,14 @@ export const POST = withApiHandler(
             userId: contractWithParties.partyA.id,
             type: "contract_signed",
             title: "Contract signed",
-            body: `Your contract for "${contractWithParties.need.title}" is now active.`,
+            body: `Your contract for "${contractTitle(contractWithParties)}" is now active.`,
             data: { contractId: params.id },
           });
           await createNotification({
             userId: contractWithParties.partyB.id,
             type: "contract_signed",
             title: "Contract signed",
-            body: `Your contract for "${contractWithParties.need.title}" is now active.`,
+            body: `Your contract for "${contractTitle(contractWithParties)}" is now active.`,
             data: { contractId: params.id },
           });
         }

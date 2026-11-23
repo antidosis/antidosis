@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { withApiHandler } from "@/lib/api-handler";
 import { auditLog, getClientInfo } from "@/lib/audit";
+import { contractTitle } from "@/lib/direct-contract";
 import { createNotification } from "@/lib/notifications";
 import { requireActiveAccount } from "@/lib/participation";
 import { prisma } from "@/lib/prisma";
@@ -70,6 +71,9 @@ export const POST = withApiHandler(
     if (!isPartyA && !isPartyB) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
+    if (!contract.partyB) {
+      return NextResponse.json({ error: "The invited party has not joined" }, { status: 409 });
+    }
 
     // Escalation is the requester's remedy after a decline — only they can escalate,
     // and only while the contract is still in a cancellable stage.
@@ -117,7 +121,7 @@ export const POST = withApiHandler(
       userId: otherParty.id,
       type: "contract_cancel_escalated",
       title: "Cancellation escalated to admin",
-      body: `${isPartyA ? contract.partyA.fullName || "The poster" : contract.partyB.fullName || "The fulfiller"} has escalated the cancellation request for "${contract.need.title}" to an admin for review.`,
+      body: `${isPartyA ? contract.partyA.fullName || "The poster" : contract.partyB.fullName || "The fulfiller"} has escalated the cancellation request for "${contractTitle(contract)}" to an admin for review.`,
       data: { contractId: params.id },
     });
 

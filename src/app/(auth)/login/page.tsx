@@ -11,6 +11,7 @@ import { TerminalCursor } from "@/components/effects/terminal-cursor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { safeInternalPath } from "@/lib/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
@@ -27,8 +28,7 @@ export default function LoginPage() {
 
   // Internal-path-only redirect target for post-login (set by the proxy when
   // a protected page bounced an unauthenticated user here)
-  const next = searchParams.get("next");
-  const redirectTarget = next && next.startsWith("/") && !next.startsWith("//") ? next : "/needs";
+  const redirectTarget = safeInternalPath(searchParams.get("next"));
 
   // Handle email verification callback from Supabase
   useEffect(() => {

@@ -105,7 +105,7 @@ export function TerminalActivityFeed() {
       <div className="px-5 py-4 border-b border-line/60 flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-gold">Community Activity</p>
-          <p className="text-[11px] text-ash">Recent messages, DMs, and mentions</p>
+          <p className="text-xs text-ash">Messages, DMs and mentions from the last 30 days</p>
         </div>
         <Link href="/terminal" className="text-xs text-sun hover:text-gold transition-colors">
           Open Relay →

@@ -1,7 +1,11 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { EmailLink } from "@/components/email-link";
+import { cn } from "@/lib/utils";
 
 const linkGroups: {
   title: string;
@@ -37,9 +41,16 @@ const linkGroups: {
 
 export function Footer() {
   const year = new Date().getFullYear();
+  const pathname = usePathname();
+  const hasDashboardSidebar = pathname.startsWith("/dashboard");
 
   return (
-    <footer className="border-t border-line bg-void">
+    <footer
+      className={cn(
+        "relative z-10 border-t border-line bg-void",
+        hasDashboardSidebar && "lg:pl-64"
+      )}
+    >
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         {/* Main footer content */}
         <div className="py-12 md:py-16">

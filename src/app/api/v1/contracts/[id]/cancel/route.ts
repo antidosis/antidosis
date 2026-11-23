@@ -115,8 +115,12 @@ export const POST = withApiHandler(
         },
       });
 
-      // Archive the need so the poster can review, edit, and re-post
-      if (["negotiating", "contracted", "active", "open"].includes(contract.need.status)) {
+      // Marketplace contracts archive their need; direct agreements have no listing.
+      if (
+        contract.need &&
+        contract.needId &&
+        ["negotiating", "contracted", "active", "open"].includes(contract.need.status)
+      ) {
         await tx.need.update({
           where: { id: contract.needId },
           data: { status: "archived" },
@@ -133,14 +137,16 @@ export const POST = withApiHandler(
 
       // Revert only declined acceptances that were declined for THIS contract
       // (we scope by checking if they were declined after this contract was created)
-      await tx.acceptance.updateMany({
-        where: {
-          needId: contract.needId,
-          status: "declined",
-          updatedAt: { gte: contract.createdAt },
-        },
-        data: { status: "pending" },
-      });
+      if (contract.needId) {
+        await tx.acceptance.updateMany({
+          where: {
+            needId: contract.needId,
+            status: "declined",
+            updatedAt: { gte: contract.createdAt },
+          },
+          data: { status: "pending" },
+        });
+      }
 
       return updated;
     });

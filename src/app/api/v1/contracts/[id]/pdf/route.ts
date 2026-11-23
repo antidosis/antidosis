@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import { withApiHandler } from "@/lib/api-handler";
+import { contractTitle } from "@/lib/direct-contract";
 import { logger } from "@/lib/logger";
 import { generateContractPdf } from "@/lib/pdf-contract";
 import { prisma } from "@/lib/prisma";
@@ -95,6 +96,10 @@ export const POST = withApiHandler(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    if (!contract.partyB) {
+      return NextResponse.json({ error: "The invited party has not joined" }, { status: 409 });
+    }
+
     // Terms must be locked before PDF generation
     if (!contract.termsLockedAt) {
       return NextResponse.json(
@@ -114,15 +119,17 @@ export const POST = withApiHandler(
 
     const pdfBytes = await generateContractPdf({
       contractId: contract.id,
+      kind: contract.kind,
       generatedAt: new Date().toISOString(),
-      needTitle: contract.need.title,
-      needDescription: contract.need.description,
-      needDeadline: contract.need.deadline?.toISOString() || null,
-      needTimeRange: contract.need.timeRange,
-      needLocation: contract.need.locationName,
-      offerType: contract.need.offerType,
-      offerDescription: contract.need.offerDescription,
-      offerValue: contract.need.offerValue,
+      needTitle: contractTitle(contract),
+      needDescription: contract.need?.description || contract.description || "Direct agreement",
+      needDeadline: contract.need?.deadline?.toISOString() || null,
+      needTimeRange: contract.need?.timeRange || null,
+      needLocation: contract.need?.locationName || null,
+      offerType: contract.need?.offerType || "direct",
+      offerDescription:
+        contract.need?.offerDescription || "As recorded in both parties' agreed terms.",
+      offerValue: contract.need?.offerValue ?? contract.considerationValue ?? null,
       terms: {
         startDate: terms.startDate,
         deadline: terms.deadline,

@@ -71,7 +71,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
   }
   const parseResult = createSchema.safeParse(body);
   if (!parseResult.success) {
-    return NextResponse.json({ error: parseResult.error.errors }, { status: 400 });
+    return NextResponse.json({ error: parseResult.error.issues }, { status: 400 });
   }
   const { needId, message } = parseResult.data;
 

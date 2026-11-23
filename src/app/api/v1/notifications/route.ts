@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { withApiHandler } from "@/lib/api-handler";
 import { prisma } from "@/lib/prisma";
+import { daysAgo, NOTIFICATION_INBOX_DAYS } from "@/lib/retention";
 import { createClient } from "@/lib/supabase/server";
 
 export const GET = withApiHandler(async (req: NextRequest) => {
@@ -22,18 +23,31 @@ export const GET = withApiHandler(async (req: NextRequest) => {
   }
 
   const unreadOnly = req.nextUrl.searchParams.get("unreadOnly") === "true";
+  const archived = req.nextUrl.searchParams.get("archived") === "true";
+
+  if (!archived) {
+    await prisma.notification.updateMany({
+      where: {
+        userId: profile.id,
+        archivedAt: null,
+        createdAt: { lt: daysAgo(NOTIFICATION_INBOX_DAYS) },
+      },
+      data: { archivedAt: new Date() },
+    });
+  }
 
   const notifications = await prisma.notification.findMany({
     where: {
       userId: profile.id,
-      ...(unreadOnly ? { isRead: false } : {}),
+      archivedAt: archived ? { not: null } : null,
+      ...(unreadOnly && !archived ? { isRead: false } : {}),
     },
     orderBy: { createdAt: "desc" },
-    take: 50,
+    take: archived ? 100 : 50,
   });
 
   const unreadCount = await prisma.notification.count({
-    where: { userId: profile.id, isRead: false },
+    where: { userId: profile.id, isRead: false, archivedAt: null },
   });
 
   return NextResponse.json({ notifications, unreadCount });

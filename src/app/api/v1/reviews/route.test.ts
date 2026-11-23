@@ -71,9 +71,9 @@ function makeRequest(body: Record<string, unknown>): NextRequest {
 const C1 = "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d";
 const A1 = "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d";
 const R1 = "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d";
-const PROF1 = "11111111-1111-1111-1111-111111111111";
-const PROF2 = "22222222-2222-2222-2222-222222222222";
-const PROF3 = "33333333-3333-3333-3333-333333333333";
+const PROF1 = "11111111-1111-4111-8111-111111111111";
+const PROF2 = "22222222-2222-4222-8222-222222222222";
+const PROF3 = "33333333-3333-4333-8333-333333333333";
 
 function makeAuthUser(
   overrides?: Partial<{ id: string; email: string; email_confirmed_at: string | null }>

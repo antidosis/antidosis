@@ -53,6 +53,10 @@ export const GET = withApiHandler(async (req: NextRequest) => {
       id: true,
       acceptanceId: true,
       completedAt: true,
+      kind: true,
+      title: true,
+      considerationType: true,
+      considerationValue: true,
       need: { select: { title: true, offerType: true, offerValue: true } },
       partyB: { select: SELLER_SELECT },
     },
@@ -78,7 +82,8 @@ export const GET = withApiHandler(async (req: NextRequest) => {
   });
 
   const sellersById = new Map<string, SerrSeller>();
-  const sellerFor = (p: (typeof contracts)[number]["partyB"]): SerrSeller => {
+  const sellerFor = (p: (typeof contracts)[number]["partyB"]): SerrSeller | null => {
+    if (!p) return null;
     let seller = sellersById.get(p.id);
     if (!seller) {
       seller = {
@@ -98,17 +103,26 @@ export const GET = withApiHandler(async (req: NextRequest) => {
     need.offerType === "money" ? (need.offerValue ?? 0) : 0;
 
   for (const c of contracts) {
-    sellerFor(c.partyB).transactions.push({
+    const seller = sellerFor(c.partyB);
+    if (!seller) continue;
+    const offerType = c.need?.offerType ?? c.considerationType ?? "direct";
+    seller.transactions.push({
       source: "contract",
       id: c.id,
       completedAt: c.completedAt as Date,
-      needTitle: c.need.title,
-      offerType: c.need.offerType,
-      cashAmountAud: cashAmount(c.need),
+      needTitle: c.need?.title ?? c.title ?? "Direct agreement",
+      offerType,
+      cashAmountAud: c.need
+        ? cashAmount(c.need)
+        : c.considerationType === "money"
+          ? (c.considerationValue ?? 0)
+          : 0,
     });
   }
   for (const a of acceptances) {
-    sellerFor(a.user).transactions.push({
+    const seller = sellerFor(a.user);
+    if (!seller) continue;
+    seller.transactions.push({
       source: "acceptance",
       id: a.id,
       completedAt: a.updatedAt,

@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { withApiHandler } from "@/lib/api-handler";
 import { auditLog, getClientInfo } from "@/lib/audit";
+import { contractTitle } from "@/lib/direct-contract";
 import { createNotification } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
 
@@ -44,7 +45,11 @@ export const POST = withApiHandler(
         },
       });
 
-      if (["negotiating", "contracted", "active", "open"].includes(contract.need.status)) {
+      if (
+        contract.need &&
+        contract.needId &&
+        ["negotiating", "contracted", "active", "open"].includes(contract.need.status)
+      ) {
         await tx.need.update({
           where: { id: contract.needId },
           data: { status: "archived" },
@@ -58,33 +63,42 @@ export const POST = withApiHandler(
         });
       }
 
-      await tx.acceptance.updateMany({
-        where: {
-          needId: contract.needId,
-          status: "declined",
-          updatedAt: { gte: contract.createdAt },
-        },
-        data: { status: "pending" },
-      });
+      if (contract.needId) {
+        await tx.acceptance.updateMany({
+          where: {
+            needId: contract.needId,
+            status: "declined",
+            updatedAt: { gte: contract.createdAt },
+          },
+          data: { status: "pending" },
+        });
+      }
 
       return updated;
     });
+
+    const title = contractTitle(contract);
+    const outcome = contract.needId
+      ? "The need has been archived."
+      : "No Exchange listing was involved.";
 
     // Notify both parties
     await createNotification({
       userId: contract.partyA.id,
       type: "contract_cancelled_by_admin",
       title: "Contract cancelled by admin",
-      body: `An admin has cancelled the contract for "${contract.need.title}". The need has been archived.`,
+      body: `An admin has cancelled the contract for "${title}". ${outcome}`,
       data: { contractId: params.id },
     });
-    await createNotification({
-      userId: contract.partyB.id,
-      type: "contract_cancelled_by_admin",
-      title: "Contract cancelled by admin",
-      body: `An admin has cancelled the contract for "${contract.need.title}". The need has been archived.`,
-      data: { contractId: params.id },
-    });
+    if (contract.partyB) {
+      await createNotification({
+        userId: contract.partyB.id,
+        type: "contract_cancelled_by_admin",
+        title: "Contract cancelled by admin",
+        body: `An admin has cancelled the contract for "${title}". ${outcome}`,
+        data: { contractId: params.id },
+      });
+    }
 
     const { ip, userAgent } = getClientInfo(req);
     await auditLog({

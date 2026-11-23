@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   BUSINESS_PAYMENT_NOTICE,
+  CONTRACT_TEMPLATE_NOTICE,
   formatPartyIdentityLine,
   generateContractPdf,
   isBusinessContract,
@@ -83,6 +84,13 @@ describe("BUSINESS_PAYMENT_NOTICE", () => {
   });
 });
 
+describe("CONTRACT_TEMPLATE_NOTICE", () => {
+  it("disclaims tailored advice and guarantees of enforceability", () => {
+    expect(CONTRACT_TEMPLATE_NOTICE).toContain("does not provide legal advice");
+    expect(CONTRACT_TEMPLATE_NOTICE).toContain("guarantee enforceability");
+  });
+});
+
 describe("generateContractPdf", () => {
   function baseData() {
     return {
@@ -128,6 +136,20 @@ describe("generateContractPdf", () => {
     });
     expect(bytes.byteLength).toBeGreaterThan(500);
     expect(bytes[0]).toBe(0x25); // "%" — PDF magic
+  });
+
+  it("produces a direct agreement with multiline and unbroken terms", async () => {
+    const bytes = await generateContractPdf({
+      ...baseData(),
+      kind: "direct",
+      needTitle: "Private design agreement",
+      offerType: "direct",
+      partyATerms: `First line\nSecond line\n${"x".repeat(800)}`,
+      partyA: individual,
+      partyB: { ...individual, fullName: "Dave Kowalski", email: "dave@example.com" },
+    });
+    expect(bytes.byteLength).toBeGreaterThan(500);
+    expect(bytes[0]).toBe(0x25);
   });
 
   it("produces a non-empty PDF when a business is a party", async () => {

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { Radio } from "lucide-react";
+import { Activity, FileCheck2, Users } from "lucide-react";
 
 import { useApi } from "@/lib/swr-config";
 
@@ -12,48 +12,77 @@ interface Stats {
   nodesOnAir: number;
 }
 
-function Stat({ label, value, pulse }: { label: string; value: number; pulse?: boolean }) {
+function Stat({
+  label,
+  value,
+  icon: Icon,
+  loading,
+}: {
+  label: string;
+  value: number | undefined;
+  icon: typeof Activity;
+  loading: boolean;
+}) {
   return (
-    <div className="flex items-center gap-2.5">
-      <span className="relative flex h-2 w-2">
-        {pulse && (
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-ok opacity-60" />
-        )}
-        <span className="relative inline-flex h-2 w-2 rounded-full bg-ok" />
+    <div className="flex min-w-0 flex-1 items-center gap-3 px-4 py-3">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-line bg-inset text-mercury">
+        <Icon className="h-4 w-4" />
       </span>
-      <p className="font-mono text-sm text-parchment">
-        {value}
-        <span className="ml-1.5 text-xs text-ash">{label}</span>
-      </p>
+      <div className="min-w-0">
+        <p className="font-mono text-lg leading-none text-parchment">
+          {loading ? <span className="text-ash">—</span> : value?.toLocaleString("en-AU")}
+        </p>
+        <p className="mt-1 truncate text-xs text-ash">{label}</p>
+      </div>
     </div>
   );
 }
 
-/** The heartbeat strip above the bands — proof the network is alive. */
 export function StatusBoard() {
-  const { data } = useApi<Stats>("/api/v1/exchange/stats", {
-    refreshInterval: 60000,
-  });
+  const { data } = useApi<Stats>("/api/v1/exchange/stats", { refreshInterval: 60000 });
   const [stale, setStale] = useState(false);
+
   useEffect(() => {
-    const t = setTimeout(() => setStale(true), 15000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setStale(true), 15000);
+    return () => clearTimeout(timer);
   }, []);
 
+  const loading = !data;
+
   return (
-    <div
-      aria-label="Network status"
-      className="mb-6 flex flex-wrap items-center gap-x-6 gap-y-2 border border-line bg-surface/40 px-4 py-3"
+    <section
+      aria-label="Exchange activity"
+      className="mb-6 rounded-lg border border-line bg-surface/40"
     >
-      <p className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.2em] text-ash">
-        <Radio className="h-3.5 w-3.5 text-mercury" /> network status
-        <span className={stale && !data ? "text-alert" : "text-ok"}>
-          {data ? "on air" : "tuning…"}
-        </span>
-      </p>
-      <Stat label="open needs" value={data?.openNeeds ?? 0} pulse />
-      <Stat label="contracts this week" value={data?.contractsThisWeek ?? 0} />
-      <Stat label="nodes on the air" value={data?.nodesOnAir ?? 0} pulse />
-    </div>
+      <div className="flex items-center justify-between border-b border-line/60 px-4 py-2.5">
+        <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-ash">Live activity</p>
+        <p className="flex items-center gap-2 text-xs text-ash">
+          <span className="relative flex h-2 w-2">
+            {!!data && (
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-ok opacity-50" />
+            )}
+            <span
+              className={`relative h-2 w-2 rounded-full ${data ? "bg-ok" : stale ? "bg-alert" : "bg-ash"}`}
+            />
+          </span>
+          {data ? "updated just now" : stale ? "reconnecting" : "connecting"}
+        </p>
+      </div>
+      <div className="grid sm:grid-cols-3 sm:divide-x sm:divide-line/60">
+        <Stat label="open needs" value={data?.openNeeds} icon={Activity} loading={loading} />
+        <Stat
+          label="agreements this week"
+          value={data?.contractsThisWeek}
+          icon={FileCheck2}
+          loading={loading}
+        />
+        <Stat
+          label="members active recently"
+          value={data?.nodesOnAir}
+          icon={Users}
+          loading={loading}
+        />
+      </div>
+    </section>
   );
 }

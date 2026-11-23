@@ -1,5 +1,7 @@
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 
+import { DIRECT_AGREEMENT_NOTICE, DIRECT_AGREEMENT_PREAMBLE } from "./direct-contract";
+
 export interface ContractPartyPdfData {
   fullName: string | null;
   email: string;
@@ -55,8 +57,12 @@ export const CONTRACT_PREAMBLE =
   "Where a party supplies goods or services in trade or commerce, the consumer guarantees of the Australian Consumer Law apply to that supplier as they would to any business. " +
   "Where an exchange involves promotion or reviews, the publisher must disclose any consideration received, as required by Australian consumer law.";
 
+export const CONTRACT_TEMPLATE_NOTICE =
+  "Document notice: this general-purpose record is generated from information and terms supplied by the parties. Antidosis does not provide legal advice, assess suitability, or represent either party. Each party is responsible for its capacity, authority, licensing, insurance, tax obligations and independent legal advice. An electronic signature records assent; it does not by itself prove identity or guarantee enforceability.";
+
 export interface ContractPdfData {
   contractId: string;
+  kind?: string;
   generatedAt: string;
   needTitle: string;
   needDescription: string;
@@ -140,10 +146,25 @@ export async function generateContractPdf(data: ContractPdfData): Promise<Uint8A
   }
 
   function wrapText(text: string, maxWidth: number, size: number): string[] {
-    const words = text.split(" ");
+    const words = text.replace(/\r/g, "").split(/\s+/).filter(Boolean);
     const lines: string[] = [];
     let currentLine = "";
-    for (const word of words) {
+    for (let word of words) {
+      while (helvetica.widthOfTextAtSize(word, size) > maxWidth) {
+        let end = 1;
+        while (
+          end < word.length &&
+          helvetica.widthOfTextAtSize(word.slice(0, end + 1), size) <= maxWidth
+        ) {
+          end += 1;
+        }
+        if (currentLine) {
+          lines.push(currentLine);
+          currentLine = "";
+        }
+        lines.push(word.slice(0, end));
+        word = word.slice(end);
+      }
       const testLine = currentLine ? currentLine + " " + word : word;
       const lineWidth = helvetica.widthOfTextAtSize(testLine, size);
       if (lineWidth > maxWidth && currentLine) {
@@ -164,10 +185,15 @@ export async function generateContractPdf(data: ContractPdfData): Promise<Uint8A
     }
   }
 
+  const isDirect = data.kind === "direct";
+
   // Header
   drawText("ANTIDOSIS", { size: 24, bold: true, color: rgb(0.15, 0.15, 0.15) });
   y -= 18;
-  drawText("Binding Exchange Contract", { size: 12, color: rgb(0.4, 0.4, 0.4) });
+  drawText(isDirect ? "Direct Agreement" : "Binding Exchange Contract", {
+    size: 12,
+    color: rgb(0.4, 0.4, 0.4),
+  });
   y -= 30;
 
   // Contract metadata
@@ -189,17 +215,39 @@ export async function generateContractPdf(data: ContractPdfData): Promise<Uint8A
   y -= 20;
 
   // Preamble — the legal and philosophical frame of every contract
-  const preambleLines = wrapText(CONTRACT_PREAMBLE, contentWidth, 8.5);
+  const preambleLines = wrapText(
+    isDirect ? DIRECT_AGREEMENT_PREAMBLE : CONTRACT_PREAMBLE,
+    contentWidth,
+    8.5
+  );
   for (const line of preambleLines) {
     newPageIfNeeded(11);
     drawText(line, { size: 8.5, color: rgb(0.42, 0.42, 0.42) });
     y -= 11;
   }
+  y -= 8;
+  if (isDirect) {
+    for (const line of wrapText(DIRECT_AGREEMENT_NOTICE, contentWidth, 8.5)) {
+      newPageIfNeeded(11);
+      drawText(line, { size: 8.5, bold: true, color: rgb(0.32, 0.32, 0.32) });
+      y -= 11;
+    }
+    y -= 8;
+  }
+  for (const line of wrapText(CONTRACT_TEMPLATE_NOTICE, contentWidth, 8)) {
+    newPageIfNeeded(11);
+    drawText(line, { size: 8, color: rgb(0.42, 0.42, 0.42) });
+    y -= 11;
+  }
   y -= 14;
   newPageIfNeeded(100);
 
-  // Section 1: Need Details
-  drawText("1. NEED DETAILS", { size: 13, bold: true, color: rgb(0.2, 0.2, 0.2) });
+  // Section 1: Need or direct-agreement details
+  drawText(isDirect ? "1. AGREEMENT DETAILS" : "1. NEED DETAILS", {
+    size: 13,
+    bold: true,
+    color: rgb(0.2, 0.2, 0.2),
+  });
   y -= 18;
   drawText("Title:", { size: 9, bold: true, color: rgb(0.4, 0.4, 0.4) });
   y -= 12;
@@ -230,9 +278,15 @@ export async function generateContractPdf(data: ContractPdfData): Promise<Uint8A
   newPageIfNeeded(100);
 
   // Section 2: Offer Details
-  drawText("2. OFFER IN EXCHANGE", { size: 13, bold: true, color: rgb(0.2, 0.2, 0.2) });
+  drawText(isDirect ? "2. EXCHANGE AND CONSIDERATION" : "2. OFFER IN EXCHANGE", {
+    size: 13,
+    bold: true,
+    color: rgb(0.2, 0.2, 0.2),
+  });
   y -= 18;
-  drawText(`Type: ${data.offerType.toUpperCase()}`, { size: 10 });
+  drawText(isDirect ? "Form: direct private agreement" : `Type: ${data.offerType.toUpperCase()}`, {
+    size: 10,
+  });
   y -= 14;
   const offerLines = wrapText(data.offerDescription, contentWidth, 10);
   for (const line of offerLines) {

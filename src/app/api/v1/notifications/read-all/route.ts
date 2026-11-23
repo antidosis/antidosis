@@ -22,7 +22,7 @@ export const PATCH = withApiHandler(async (req: NextRequest) => {
   }
 
   await prisma.notification.updateMany({
-    where: { userId: profile.id, isRead: false },
+    where: { userId: profile.id, isRead: false, archivedAt: null },
     data: { isRead: true },
   });
 

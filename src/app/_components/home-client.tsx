@@ -33,6 +33,7 @@ import { Button } from "@/components/ui/button";
 import { useInView } from "@/hooks/use-in-view";
 import { cn } from "@/lib/utils";
 
+import { DirectAgreementVisual } from "./direct-agreement-visual";
 import { OffgridVision } from "./offgrid-vision";
 
 // Lazy-load below-the-fold components to reduce initial JS bundle
@@ -250,6 +251,49 @@ export default function HomePage() {
                 />
               </Reveal>
             </div>
+          </div>
+        </section>
+
+        <div className="divider" />
+
+        {/* DIRECT AGREEMENTS — private contracts are a product, not an afterthought */}
+        <section className="border-t border-line py-20 md:py-28">
+          <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 md:grid-cols-2 md:px-8">
+            <Reveal>
+              <p className="mb-3 font-mono text-xs text-mercury">
+                DIRECT AGREEMENTS — NO LISTING REQUIRED
+              </p>
+              <h2 className="heading-display text-3xl text-gold md:text-4xl">
+                Already know who you&apos;re working with?
+              </h2>
+              <p className="mt-5 max-w-lg text-base leading-relaxed text-parchment">
+                Skip the public marketplace. Create a private agreement, send one secure invitation,
+                and make the scope, exchange and expectations clear before either of you signs.
+              </p>
+              <ul className="mt-6 space-y-3 text-sm text-ash">
+                <li className="flex items-center gap-2.5">
+                  <ShieldCheck className="h-4 w-4 text-ok" /> Both parties contribute and accept the
+                  terms
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <FileText className="h-4 w-4 text-sun" /> Messages, signatures and completion stay
+                  together
+                </li>
+                <li className="flex items-center gap-2.5">
+                  <Star className="h-4 w-4 text-sun" /> Completed agreements support genuine
+                  bilateral reviews
+                </li>
+              </ul>
+              <Button asChild className="mt-7">
+                <Link href="/dashboard?tab=contracts">
+                  Create a direct agreement <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+              <p className="mt-3 text-xs text-ash">Free. General-purpose tool, not legal advice.</p>
+            </Reveal>
+            <Reveal delay={150}>
+              <DirectAgreementVisual />
+            </Reveal>
           </div>
         </section>
 

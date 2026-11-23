@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { withApiHandler } from "@/lib/api-handler";
 import { auditLog, getClientInfo } from "@/lib/audit";
+import { contractTitle } from "@/lib/direct-contract";
 import { sendContractCompletedEmail } from "@/lib/email";
 import { logger } from "@/lib/logger";
 import { createNotification } from "@/lib/notifications";
@@ -100,10 +101,13 @@ export const POST = withApiHandler(
       if (!fresh) throw new Error("Contract not found during transaction");
 
       if (fresh.aMarkedComplete && fresh.bMarkedComplete && fresh.status !== "completed") {
-        await tx.need.update({
-          where: { id: fresh.needId },
-          data: { status: "completed" },
-        });
+        if (!fresh.partyBId) throw new Error("Cannot complete an unclaimed direct agreement");
+        if (fresh.needId) {
+          await tx.need.update({
+            where: { id: fresh.needId },
+            data: { status: "completed" },
+          });
+        }
         await tx.profile.update({
           where: { id: fresh.partyAId },
           data: { jobsCompleted: { increment: 1 } },
@@ -134,28 +138,28 @@ export const POST = withApiHandler(
             need: { select: { title: true } },
           },
         });
-        if (contractWithParties) {
+        if (contractWithParties?.partyB) {
           await sendContractCompletedEmail(
             contractWithParties.partyA.email,
-            contractWithParties.need.title
+            contractTitle(contractWithParties)
           );
           await sendContractCompletedEmail(
             contractWithParties.partyB.email,
-            contractWithParties.need.title
+            contractTitle(contractWithParties)
           );
           // In-app notifications
           await createNotification({
             userId: contractWithParties.partyA.id,
             type: "contract_complete",
             title: "Contract completed",
-            body: `Your contract for "${contractWithParties.need.title}" has been completed. Leave a review!`,
+            body: `Your contract for "${contractTitle(contractWithParties)}" has been completed. Leave a review!`,
             data: { contractId: params.id },
           });
           await createNotification({
             userId: contractWithParties.partyB.id,
             type: "contract_complete",
             title: "Contract completed",
-            body: `Your contract for "${contractWithParties.need.title}" has been completed. Leave a review!`,
+            body: `Your contract for "${contractTitle(contractWithParties)}" has been completed. Leave a review!`,
             data: { contractId: params.id },
           });
         }

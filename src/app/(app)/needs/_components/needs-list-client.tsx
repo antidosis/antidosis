@@ -188,7 +188,7 @@ export default function NeedsPage({ embedded = false }: NeedsListClientProps) {
   ).length;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 md:px-8">
+    <div className={embedded ? "" : "mx-auto max-w-5xl px-4 md:px-8"}>
       {!embedded && (
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 py-10">
           <div>
@@ -207,7 +207,7 @@ export default function NeedsPage({ embedded = false }: NeedsListClientProps) {
       )}
       {embedded && (
         <p className="mb-6 text-sm text-ash">
-          <span className="font-mono text-parchment">{total}</span> open signals on the board
+          <span className="font-mono text-parchment">{total}</span> open needs
         </p>
       )}
 
@@ -470,7 +470,7 @@ export default function NeedsPage({ embedded = false }: NeedsListClientProps) {
               : "be the first to create an exchange."
           }
           action={
-            activeFiltersCount === 0 ? (
+            !embedded && activeFiltersCount === 0 ? (
               <Button asChild variant="default">
                 <Link href="/needs/new">Post Need</Link>
               </Button>

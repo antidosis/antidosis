@@ -43,7 +43,7 @@ export const GET = withApiHandler(async () => {
         orderBy: { createdAt: "desc" },
         include: {
           giver: { select: { fullName: true, avatarUrl: true } },
-          contract: { select: { need: { select: { title: true } } } },
+          contract: { select: { kind: true, title: true, need: { select: { title: true } } } },
         },
         take: 10,
       },
@@ -66,7 +66,7 @@ export const GET = withApiHandler(async () => {
           orderBy: { createdAt: "desc" },
           include: {
             giver: { select: { fullName: true, avatarUrl: true } },
-            contract: { select: { need: { select: { title: true } } } },
+            contract: { select: { kind: true, title: true, need: { select: { title: true } } } },
           },
           take: 10,
         },
@@ -105,7 +105,7 @@ export const PATCH = withApiHandler(async (req: NextRequest) => {
     data = updateProfileSchema.parse(body);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const first = error.errors[0];
+      const first = error.issues[0];
       return NextResponse.json(
         { error: first ? `${first.path.join(".")}: ${first.message}` : "Invalid profile data" },
         { status: 400 }
@@ -354,6 +354,26 @@ export const DELETE = withApiHandler(async () => {
   await prisma.mobileVerificationCode.deleteMany({ where: { profileId: profile.id } });
   await prisma.deviceToken.deleteMany({ where: { profileId: profile.id } });
 
+  // Remove replayable invitations and stored handwritten/typed signatures.
+  // The agreement record remains for the counterparty, under a tombstoned profile.
+  await prisma.contract.updateMany({
+    where: { partyAId: profile.id },
+    data: { partyASignature: null, inviteEmail: null },
+  });
+  await prisma.contract.updateMany({
+    where: { partyBId: profile.id },
+    data: { partyBSignature: null },
+  });
+  await prisma.contract.updateMany({
+    where: { partyAId: profile.id, kind: "direct", partyBId: null, status: "draft" },
+    data: {
+      status: "cancelled",
+      cancelledAt: new Date(),
+      inviteTokenHash: null,
+      inviteEmail: null,
+    },
+  });
+
   // Anonymize the profile instead of hard-deleting it. Hard delete cascades
   // through every FK and would wipe the counterparty's contracts, reviews,
   // needs, and message history. The tombstone keeps those records intact;
@@ -363,6 +383,7 @@ export const DELETE = withApiHandler(async () => {
     where: { id: profile.id },
     data: {
       fullName: "Deleted User",
+      handle: null,
       email: `deleted+${profile.id}@deleted.invalid`,
       bio: null,
       avatarUrl: null,
@@ -385,7 +406,10 @@ export const DELETE = withApiHandler(async () => {
       playStoreProductId: null,
       playStoreAutoRenewing: null,
       abn: null,
+      abnVerified: false,
+      accountType: "individual",
       audienceSize: null,
+      preferences: null,
       bannedAt: null,
       bannedReason: null,
     },

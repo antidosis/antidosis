@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import { withApiHandler } from "@/lib/api-handler";
+import { contractTitle } from "@/lib/direct-contract";
 import { sendContractSignReminderEmail } from "@/lib/email";
 import { createNotification } from "@/lib/notifications";
 import { requireActiveAccount } from "@/lib/participation";
@@ -55,6 +56,9 @@ export const POST = withApiHandler(
     if (!isPartyA && !isPartyB) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
+    if (!contract.partyB) {
+      return NextResponse.json({ error: "The invited party has not joined" }, { status: 409 });
+    }
 
     // Can only remind if terms are locked and contract is pending signatures
     if (
@@ -94,7 +98,7 @@ export const POST = withApiHandler(
     if (otherParty.email) {
       await sendContractSignReminderEmail(
         otherParty.email,
-        contract.need.title,
+        contractTitle(contract),
         profile.fullName || "the other party",
         contract.id
       );
@@ -104,7 +108,7 @@ export const POST = withApiHandler(
       userId: otherParty.id,
       type: "contract_sign_reminder",
       title: "Reminder: sign contract",
-      body: `${profile.fullName || "The other party"} is waiting for you to sign the contract for "${contract.need.title}"`,
+      body: `${profile.fullName || "The other party"} is waiting for you to sign the contract for "${contractTitle(contract)}"`,
       data: { contractId: contract.id, needId: contract.needId },
     });
 

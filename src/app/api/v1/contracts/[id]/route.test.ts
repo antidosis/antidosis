@@ -122,6 +122,13 @@ function makeContract(overrides?: Record<string, unknown>) {
     id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
     partyAId: "profile-a",
     partyBId: "profile-b",
+    kind: "exchange",
+    title: null,
+    description: null,
+    considerationType: null,
+    considerationValue: null,
+    inviteTokenHash: "secret-hash",
+    inviteEmail: "private@example.com",
     status: "draft",
     termsLockedAt: null,
     partyASubmittedAt: null,
@@ -257,6 +264,8 @@ describe("GET /api/v1/contracts/[id]", () => {
     const body = await res.json();
     expect(body.contract).toBeDefined();
     expect(body.contract.id).toBe("c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d");
+    expect(body.contract.inviteTokenHash).toBeUndefined();
+    expect(body.contract.inviteEmail).toBeUndefined();
   });
 
   it("returns 200 with contract for party B", async () => {
@@ -271,6 +280,8 @@ describe("GET /api/v1/contracts/[id]", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.contract.id).toBe("c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d");
+    expect(body.contract.inviteTokenHash).toBeUndefined();
+    expect(body.contract.inviteEmail).toBeUndefined();
   });
 
   it("respects messagesLimit and messagesSkip query params", async () => {
@@ -449,6 +460,23 @@ describe("PATCH /api/v1/contracts/[id]", () => {
     expect(updateCall.data.status).toBe("draft");
   });
 
+  it("forbids a party from editing the other party's terms", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({ id: "profile-a" });
+    mockContractFindUnique.mockResolvedValue(makeContract());
+
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/contracts/contract-1", {
+        method: "PATCH",
+        body: JSON.stringify({ partyBTerms: "Terms written by the wrong party" }),
+      }),
+      { params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
+    );
+
+    expect(res.status).toBe(403);
+    expect(mockContractUpdate).not.toHaveBeenCalled();
+  });
+
   it("returns 400 when terms are locked and trying to update terms", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
     mockProfileFindUnique.mockResolvedValue({ id: "profile-a" });
@@ -470,7 +498,7 @@ describe("PATCH /api/v1/contracts/[id]", () => {
   it("submits terms for party A", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
     mockProfileFindUnique.mockResolvedValue({ id: "profile-a" });
-    mockContractFindUnique.mockResolvedValue(makeContract());
+    mockContractFindUnique.mockResolvedValue(makeContract({ partyATerms: "My written terms" }));
     mockContractUpdate.mockResolvedValue(makeContract({ partyASubmittedAt: new Date() }));
 
     const res = await PATCH(
@@ -484,6 +512,23 @@ describe("PATCH /api/v1/contracts/[id]", () => {
     expect(res.status).toBe(200);
     const updateCall = mockContractUpdate.mock.calls[0][0];
     expect(updateCall.data.partyASubmittedAt).toBeInstanceOf(Date);
+  });
+
+  it("rejects empty terms even when the client bypasses the disabled button", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({ id: "profile-a" });
+    mockContractFindUnique.mockResolvedValue(makeContract({ partyATerms: "   " }));
+
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/contracts/contract-1", {
+        method: "PATCH",
+        body: JSON.stringify({ submitTerms: true }),
+      }),
+      { params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
+    );
+
+    expect(res.status).toBe(400);
+    expect(mockContractUpdate).not.toHaveBeenCalled();
   });
 
   it("returns 400 when submitting terms but already locked", async () => {
@@ -575,6 +620,49 @@ describe("PATCH /api/v1/contracts/[id]", () => {
     expect(res.status).toBe(400);
     const body = await res.json();
     expect(body.code).toBe("NOT_READY_FOR_REVIEW");
+  });
+
+  it("locks a direct agreement without updating marketplace records", async () => {
+    const direct = makeContract({
+      kind: "direct",
+      title: "Private design agreement",
+      description: "Scope supplied directly by the parties",
+      needId: null,
+      need: null,
+      acceptanceId: null,
+      partyASubmittedAt: new Date(),
+      partyBSubmittedAt: new Date(),
+    });
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({ id: "profile-a" });
+    mockContractFindUnique.mockResolvedValue(direct);
+    mockTx.contract.update
+      .mockResolvedValueOnce(direct)
+      .mockResolvedValueOnce({ ...direct, termsLockedAt: new Date(), status: "pending_terms" });
+    mockTx.contract.findUnique.mockResolvedValueOnce({
+      partyAAgreedAt: new Date(),
+      partyBAgreedAt: new Date(),
+      termsLockedAt: null,
+      needId: null,
+    });
+    mockGenerateContractPdf.mockResolvedValue(new Uint8Array([1, 2, 3]));
+    mockUpload.mockResolvedValue({ error: null });
+    mockContractUpdate.mockResolvedValue({ ...direct, pdfUrl: "https://example.com/direct.pdf" });
+
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/contracts/contract-1", {
+        method: "PATCH",
+        body: JSON.stringify({ agree: true }),
+      }),
+      { params: { id: "c1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
+    );
+
+    expect(res.status).toBe(200);
+    expect(mockTx.need.update).not.toHaveBeenCalled();
+    expect(mockTx.acceptance.updateMany).not.toHaveBeenCalled();
+    expect(mockGenerateContractPdf).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: "direct", needTitle: "Private design agreement" })
+    );
   });
 
   it("locks terms when both parties agree and generates PDF", async () => {

@@ -102,7 +102,7 @@ describe("PATCH /api/v1/notifications/read-all", () => {
     expect(body.success).toBe(true);
     expect(mockNotificationUpdateMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { userId: "profile-1", isRead: false },
+        where: { userId: "profile-1", isRead: false, archivedAt: null },
         data: { isRead: true },
       })
     );

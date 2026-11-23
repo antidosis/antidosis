@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import { withApiHandler } from "@/lib/api-handler";
+import { presentContract } from "@/lib/contract-presenter";
+import { contractTitle } from "@/lib/direct-contract";
 import { logger } from "@/lib/logger";
 import { requireActiveAccount } from "@/lib/participation";
 import { generateContractPdf } from "@/lib/pdf-contract";
@@ -129,7 +131,11 @@ export const GET = withApiHandler(
     // Contract PDFs live in the private bucket: serve a short-lived signed
     // URL (falls back to the stored URL for pre-migration objects).
     return NextResponse.json({
-      contract: { ...contract, pdfUrl: await createSignedUrlOrFallback(contract.pdfUrl) },
+      contract: {
+        ...presentContract(contract),
+        negotiationMessages: contract.negotiationMessages ?? [],
+        pdfUrl: await createSignedUrlOrFallback(contract.pdfUrl),
+      },
     });
   }
 );
@@ -237,6 +243,13 @@ export const PATCH = withApiHandler(
       partyBUseMessageTerms,
     } = parsed.data;
 
+    if (
+      (isPartyA && (partyBTerms !== undefined || partyBUseMessageTerms !== undefined)) ||
+      (isPartyB && (partyATerms !== undefined || partyAUseMessageTerms !== undefined))
+    ) {
+      return NextResponse.json({ error: "You can only edit your own terms" }, { status: 403 });
+    }
+
     // Check if any term field was provided
     const termFieldsProvided = [
       terms,
@@ -280,13 +293,22 @@ export const PATCH = withApiHandler(
         data: updateData,
       });
 
-      return NextResponse.json({ contract: updated });
+      return NextResponse.json({ contract: presentContract(updated) });
     }
 
     // Submit terms flow
     if (submitTerms) {
       if (contract.termsLockedAt) {
         return NextResponse.json({ error: "Terms are already locked" }, { status: 400 });
+      }
+      const hasTerms = isPartyA
+        ? contract.partyAUseMessageTerms || !!contract.partyATerms?.trim()
+        : contract.partyBUseMessageTerms || !!contract.partyBTerms?.trim();
+      if (!hasTerms) {
+        return NextResponse.json(
+          { error: "Write and save your terms before submitting them" },
+          { status: 400 }
+        );
       }
 
       const submissionField = isPartyA ? "partyASubmittedAt" : "partyBSubmittedAt";
@@ -299,11 +321,17 @@ export const PATCH = withApiHandler(
         },
       });
 
-      return NextResponse.json({ contract: updated });
+      return NextResponse.json({ contract: presentContract(updated) });
     }
 
     // Agreement flow (accept terms during review phase)
     if (agree) {
+      if (!contract.partyBId || !contract.partyB) {
+        return NextResponse.json(
+          { error: "The invited party must accept the invitation before terms can be agreed" },
+          { status: 409 }
+        );
+      }
       if (contract.termsLockedAt) {
         return NextResponse.json({ error: "Terms are already locked" }, { status: 400 });
       }
@@ -348,22 +376,24 @@ export const PATCH = withApiHandler(
 
         // If both agreed and not yet locked, lock terms
         if (fresh.partyAAgreedAt && fresh.partyBAgreedAt && !fresh.termsLockedAt) {
-          await tx.need.update({
-            where: { id: fresh.needId },
-            data: { status: "contracted" },
-          });
-          // Decline all other pending/accepted acceptances for this need
-          const otherAcceptanceFilter = contract.acceptanceId
-            ? { id: { not: contract.acceptanceId } }
-            : {};
-          await tx.acceptance.updateMany({
-            where: {
-              needId: fresh.needId,
-              status: { in: ["pending", "accepted"] },
-              ...otherAcceptanceFilter,
-            },
-            data: { status: "declined" },
-          });
+          if (fresh.needId) {
+            await tx.need.update({
+              where: { id: fresh.needId },
+              data: { status: "contracted" },
+            });
+            // Decline all other pending/accepted acceptances for this need
+            const otherAcceptanceFilter = contract.acceptanceId
+              ? { id: { not: contract.acceptanceId } }
+              : {};
+            await tx.acceptance.updateMany({
+              where: {
+                needId: fresh.needId,
+                status: { in: ["pending", "accepted"] },
+                ...otherAcceptanceFilter,
+              },
+              data: { status: "declined" },
+            });
+          }
           return await tx.contract.update({
             where: { id: params.id },
             data: { termsLockedAt: new Date(), status: "pending_terms" },
@@ -388,15 +418,18 @@ export const PATCH = withApiHandler(
 
           const pdfBytes = await generateContractPdf({
             contractId: contract.id,
+            kind: contract.kind,
             generatedAt: new Date().toISOString(),
-            needTitle: contract.need.title,
-            needDescription: contract.need.description,
-            needDeadline: contract.need.deadline?.toISOString() || null,
-            needTimeRange: contract.need.timeRange,
-            needLocation: contract.need.locationName,
-            offerType: contract.need.offerType,
-            offerDescription: contract.need.offerDescription,
-            offerValue: contract.need.offerValue,
+            needTitle: contractTitle(contract),
+            needDescription:
+              contract.need?.description || contract.description || "Direct agreement",
+            needDeadline: contract.need?.deadline?.toISOString() || null,
+            needTimeRange: contract.need?.timeRange || null,
+            needLocation: contract.need?.locationName || null,
+            offerType: contract.need?.offerType || "direct",
+            offerDescription:
+              contract.need?.offerDescription || "As recorded in both parties' agreed terms.",
+            offerValue: contract.need?.offerValue ?? contract.considerationValue ?? null,
             terms: {
               startDate: termsParsed.startDate,
               deadline: termsParsed.deadline,
@@ -448,13 +481,20 @@ export const PATCH = withApiHandler(
 
       return NextResponse.json({
         contract: finalContract
-          ? { ...finalContract, pdfUrl: await createSignedUrlOrFallback(finalContract.pdfUrl) }
+          ? {
+              ...presentContract(finalContract),
+              pdfUrl: await createSignedUrlOrFallback(finalContract.pdfUrl),
+            }
           : finalContract,
       });
     }
 
     return NextResponse.json({
-      contract: { ...contract, pdfUrl: await createSignedUrlOrFallback(contract.pdfUrl) },
+      contract: {
+        ...presentContract(contract),
+        negotiationMessages: contract.negotiationMessages ?? [],
+        pdfUrl: await createSignedUrlOrFallback(contract.pdfUrl),
+      },
     });
   }
 );

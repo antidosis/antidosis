@@ -25,7 +25,7 @@ export default function TermsPage() {
       <p className="text-[12px] text-ash mb-4">$ cat /etc/antidosis/terms-of-service.md</p>
       <h1 className="text-3xl font-bold mb-2 text-gold">Terms of Service</h1>
       <p className="text-[13px] text-ash/70 mb-10">
-        Last updated: 16 October 2026 &middot; Please read these terms carefully before using
+        Last updated: 24 November 2026 &middot; Please read these terms carefully before using
         antidosis
       </p>
 
@@ -35,9 +35,9 @@ export default function TermsPage() {
           <h2 className="text-lg font-semibold text-gold mb-3">1. Agreement to Terms</h2>
           <p className="mb-3">
             These Terms of Service (&quot;Terms&quot;) constitute a legally binding agreement
-            between you and <strong>Antidosis Pty Ltd</strong> (&quot;we&quot;, &quot;us&quot;,
-            &quot;our&quot;, or &quot;antidosis&quot;) governing your access to and use of the
-            antidosis platform, including our website at{" "}
+            between you and <strong>Martin Khoury trading as antidosis (ABN 96 557 008 393)</strong>{" "}
+            (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;, or &quot;antidosis&quot;) governing
+            your access to and use of the antidosis platform, including our website at{" "}
             <Link href="https://www.antidosis.com" className="text-gold hover:underline">
               www.antidosis.com
             </Link>{" "}
@@ -77,7 +77,11 @@ export default function TermsPage() {
             <li>
               Express interest in other users&apos; needs and communicate through the platform
             </li>
-            <li>Form binding exchange contracts with other users using our contract tools</li>
+            <li>Form exchange contracts linked to a marketplace need</li>
+            <li>
+              Create direct agreements without a public listing, invite another person privately,
+              negotiate terms, sign, complete and review them
+            </li>
             <li>Build reputation through a review and rating system</li>
             <li>Participate in community relay channels and direct messaging</li>
           </ul>
@@ -287,9 +291,17 @@ export default function TermsPage() {
             7. Contracts and Binding Agreements
           </h2>
           <p className="mb-3">
-            The Service provides tools to facilitate the creation of binding exchange contracts
-            between users. These contracts may include terms of exchange, deadlines, completion
-            methods, and digital signatures.
+            The Service provides general-purpose tools to record exchange contracts linked to needs
+            and direct agreements formed without a public listing. They may include party-supplied
+            terms, clause starters, deadlines, completion methods, messages and electronic
+            signatures.
+          </p>
+          <p className="mb-3">
+            <strong>Direct invitations:</strong> creating or accepting an invitation only grants
+            access to the private agreement workspace. It does not constitute acceptance of the
+            proposed terms or a signature. Both parties must separately submit and accept the terms,
+            then sign, before the agreement is marked active. Invitation links expire, are
+            single-use, and may be replaced by the creator before acceptance.
           </p>
           <p className="mb-3">
             <strong>Critical disclaimers:</strong>
@@ -299,21 +311,21 @@ export default function TermsPage() {
               <strong>We are not a party to any contract</strong> formed between users. Contracts
               are solely between the participating users
             </li>
+            <li>We do not guarantee performance, payment, quality, safety, legality or delivery</li>
             <li>
-              We do not guarantee that any party will fulfil their obligations under a contract
+              We do not provide legal advice or act for either party. Templates and clause starters
+              are general-purpose aids, not advice tailored to your circumstances. Seek independent
+              legal advice for significant, regulated, employment-related or high-value arrangements
             </li>
             <li>
-              We do not guarantee the quality, safety, legality, or deliverability of any service,
-              item, or monetary exchange
+              A record marked as a contract may be legally binding where the required legal elements
+              are present, but no label, template, verification badge or electronic signature
+              guarantees validity or enforceability
             </li>
             <li>
-              We do not provide legal advice. The contract tools are provided for convenience and do
-              not constitute legal documents unless the parties independently choose to treat them
-              as such under applicable law
-            </li>
-            <li>
-              Users are solely responsible for ensuring that their exchanges comply with all
-              applicable laws, including taxation, licensing, and consumer protection laws
+              Each party is responsible for its legal capacity, authority to contract, accurate
+              information, suitable terms, licensing, insurance, tax, consumer-law obligations and
+              any required written form or witnessing
             </li>
           </ul>
           <p className="mb-3">
@@ -469,8 +481,9 @@ export default function TermsPage() {
               are found to be false or misleading, or for abuse of the Service
             </li>
             <li>
-              <strong>No charge, ever</strong> — because the Service is free, no cancellation,
-              refund, or price-change terms apply
+              <strong>No charge for current core features</strong> — joining, posting, contracting
+              and reviewing are free, so no subscription cancellation or refund terms currently
+              apply
             </li>
             <li>
               <strong>Future paid features</strong> — if Antidosis introduces paid features in
@@ -487,8 +500,8 @@ export default function TermsPage() {
           <p className="mb-3">
             <strong>Our content:</strong> The Service and its original content (excluding
             user-generated content), features, and functionality are and will remain the exclusive
-            property of Antidosis Pty Ltd and its licensors. The Service is protected by copyright,
-            trademark, and other laws of Australia and foreign countries.
+            property of Martin Khoury trading as antidosis and its licensors. The Service is
+            protected by copyright, trademark, and other laws of Australia and foreign countries.
           </p>
           <p className="mb-3">
             <strong>Your content:</strong> You retain ownership of any content you post, upload, or
@@ -601,8 +614,8 @@ export default function TermsPage() {
         <section>
           <h2 className="text-lg font-semibold text-gold mb-3">17. Indemnification</h2>
           <p>
-            You agree to indemnify, defend, and hold harmless Antidosis Pty Ltd, its directors,
-            officers, employees, agents, and affiliates from and against any and all claims,
+            You agree to indemnify, defend, and hold harmless Martin Khoury trading as antidosis,
+            its officers, employees, agents, and affiliates from and against any and all claims,
             liabilities, damages, losses, costs, and expenses (including reasonable legal fees)
             arising out of or in any way connected with: (a) your access to or use of the Service;
             (b) your User Content; (c) your violation of these Terms; (d) your violation of any
@@ -652,9 +665,9 @@ export default function TermsPage() {
             <Link href="/privacy" className="text-gold hover:underline">
               Privacy Policy
             </Link>
-            , constitute the entire agreement between you and Antidosis Pty Ltd regarding the
-            Service and supersede all prior agreements, understandings, and communications, whether
-            written or oral.
+            , constitute the entire agreement between you and Martin Khoury trading as antidosis
+            regarding the Service and supersede all prior agreements, understandings, and
+            communications, whether written or oral.
           </p>
         </section>
 
@@ -670,7 +683,7 @@ export default function TermsPage() {
               </EmailLink>
             </p>
             <p>
-              <strong>Entity:</strong> Antidosis Pty Ltd
+              <strong>Entity:</strong> Martin Khoury trading as antidosis
             </p>
             <p>
               <strong>Website:</strong>{" "}
@@ -682,7 +695,7 @@ export default function TermsPage() {
         </section>
 
         <p className="text-[13px] text-ash/50 pt-6 border-t border-leather/10">
-          Last updated: 16 October 2026
+          Last updated: 24 November 2026
         </p>
       </article>
     </div>

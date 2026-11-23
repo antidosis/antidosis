@@ -3,15 +3,19 @@
 import { useEffect, useState } from "react";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 import { Mail, RefreshCw, ArrowLeft, Shield } from "lucide-react";
 
 import { TerminalCursor } from "@/components/effects/terminal-cursor";
 import { Button } from "@/components/ui/button";
+import { safeInternalPath } from "@/lib/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function VerifyEmailPage() {
   const supabase = createClient();
+  const searchParams = useSearchParams();
+  const redirectTarget = safeInternalPath(searchParams.get("next"));
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [resent, setResent] = useState(false);
@@ -35,7 +39,9 @@ export default function VerifyEmailPage() {
     const { error: resendError } = await supabase.auth.resend({
       type: "signup",
       email,
-      options: { emailRedirectTo: `${appUrl}/login` },
+      options: {
+        emailRedirectTo: `${appUrl}/login?next=${encodeURIComponent(redirectTarget)}`,
+      },
     });
     if (resendError) {
       setError(resendError.message);
@@ -103,7 +109,10 @@ export default function VerifyEmailPage() {
           </Button>
 
           <Button variant="ghost" size="sm" asChild className="px-0">
-            <Link href="/login" className="inline-flex items-center">
+            <Link
+              href={`/login?next=${encodeURIComponent(redirectTarget)}`}
+              className="inline-flex items-center"
+            >
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to login
             </Link>

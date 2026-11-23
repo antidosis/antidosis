@@ -26,7 +26,10 @@ export function PreferencesSection({
   errors,
 }: PreferencesSectionProps) {
   return (
-    <SectionCard title="Directory & preferences">
+    <SectionCard
+      title="Directory presence"
+      description="Choose whether locals and businesses can discover you, then add the details they need to evaluate your work."
+    >
       <button
         type="button"
         aria-pressed={showInDirectory}
@@ -37,7 +40,7 @@ export function PreferencesSection({
         )}
       >
         <span>
-          <span className="block text-sm text-parchment">Show in the pros directory</span>
+          <span className="block text-sm text-parchment">Show in the public directory</span>
           <span className="mt-0.5 block text-xs text-ash">
             Anyone on the platform can find and contact you.
           </span>

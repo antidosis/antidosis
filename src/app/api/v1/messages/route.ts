@@ -167,6 +167,12 @@ export const POST = withApiHandler(async (req: NextRequest) => {
     if (contract.partyAId !== profile.id && contract.partyBId !== profile.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
+    if (!contract.partyBId) {
+      return NextResponse.json(
+        { error: "The invited party must accept before messaging begins" },
+        { status: 409 }
+      );
+    }
 
     const message = await prisma.message.create({
       data: {
@@ -217,7 +223,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
     return NextResponse.json({ message }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors }, { status: 400 });
+      return NextResponse.json({ error: error.issues }, { status: 400 });
     }
     throw error;
   }

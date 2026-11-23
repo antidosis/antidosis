@@ -6,6 +6,7 @@ import {
   respondCancelSchema,
   cancelContractSchema,
   patchContractSchema,
+  createDirectContractSchema,
 } from "./contracts";
 
 describe("signContractSchema", () => {
@@ -94,6 +95,40 @@ describe("cancelContractSchema", () => {
   it("rejects reason over 500 chars", () => {
     const result = cancelContractSchema.safeParse({ cancelReason: "x".repeat(501) });
     expect(result.success).toBe(false);
+  });
+});
+
+describe("createDirectContractSchema", () => {
+  const valid = {
+    title: "Private design work",
+    description: "A defined piece of work between two people.",
+    terms: "Complete by Friday; payment on delivery",
+  };
+
+  it("accepts a non-cash direct agreement", () => {
+    expect(createDirectContractSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("accepts a structured cash amount and recipient email", () => {
+    const result = createDirectContractSchema.safeParse({
+      ...valid,
+      paymentAmount: 250.5,
+      inviteEmail: "person@example.com",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it.each([-1, Number.NaN, Number.POSITIVE_INFINITY, 10_000_001])(
+    "rejects invalid payment amount %s",
+    (paymentAmount) => {
+      expect(createDirectContractSchema.safeParse({ ...valid, paymentAmount }).success).toBe(false);
+    }
+  );
+
+  it("requires meaningful title, scope and terms", () => {
+    expect(
+      createDirectContractSchema.safeParse({ title: "", description: "", terms: "" }).success
+    ).toBe(false);
   });
 });
 

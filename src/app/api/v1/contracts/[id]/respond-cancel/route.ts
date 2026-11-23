@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { withApiHandler } from "@/lib/api-handler";
 import { auditLog, getClientInfo } from "@/lib/audit";
+import { contractTitle } from "@/lib/direct-contract";
 import { createNotification } from "@/lib/notifications";
 import { requireActiveAccount } from "@/lib/participation";
 import { prisma } from "@/lib/prisma";
@@ -86,6 +87,9 @@ export const POST = withApiHandler(
     if (!isPartyA && !isPartyB) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
+    if (!contract.partyB) {
+      return NextResponse.json({ error: "The invited party has not joined" }, { status: 409 });
+    }
 
     // Must be the party who was asked (not the requester)
     if (contract.cancelRequestedById === profile.id) {
@@ -125,7 +129,11 @@ export const POST = withApiHandler(
           },
         });
 
-        if (["negotiating", "contracted", "active", "open"].includes(contract.need.status)) {
+        if (
+          contract.need &&
+          contract.needId &&
+          ["negotiating", "contracted", "active", "open"].includes(contract.need.status)
+        ) {
           await tx.need.update({
             where: { id: contract.needId },
             data: { status: "archived" },
@@ -139,14 +147,16 @@ export const POST = withApiHandler(
           });
         }
 
-        await tx.acceptance.updateMany({
-          where: {
-            needId: contract.needId,
-            status: "declined",
-            updatedAt: { gte: contract.createdAt },
-          },
-          data: { status: "pending" },
-        });
+        if (contract.needId) {
+          await tx.acceptance.updateMany({
+            where: {
+              needId: contract.needId,
+              status: "declined",
+              updatedAt: { gte: contract.createdAt },
+            },
+            data: { status: "pending" },
+          });
+        }
 
         return updated;
       });
@@ -156,7 +166,7 @@ export const POST = withApiHandler(
         userId: contract.cancelRequestedById!,
         type: "contract_cancel_agreed",
         title: "Cancellation agreed",
-        body: `${isPartyA ? contract.partyA.fullName || "The poster" : contract.partyB.fullName || "The fulfiller"} has agreed to cancel the contract for "${contract.need.title}". The contract is now cancelled.`,
+        body: `${isPartyA ? contract.partyA.fullName || "The poster" : contract.partyB.fullName || "The fulfiller"} has agreed to cancel the contract for "${contractTitle(contract)}". The contract is now cancelled.`,
         data: { contractId: params.id },
       });
 
@@ -187,7 +197,7 @@ export const POST = withApiHandler(
         userId: contract.cancelRequestedById!,
         type: "contract_cancel_declined",
         title: "Cancellation declined",
-        body: `${isPartyA ? contract.partyA.fullName || "The poster" : contract.partyB.fullName || "The fulfiller"} has declined to cancel the contract for "${contract.need.title}". The contract will continue.`,
+        body: `${isPartyA ? contract.partyA.fullName || "The poster" : contract.partyB.fullName || "The fulfiller"} has declined to cancel the contract for "${contractTitle(contract)}". The contract will continue.`,
         data: { contractId: params.id },
       });
 

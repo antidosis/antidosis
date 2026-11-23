@@ -14,7 +14,6 @@ import { useApi } from "@/lib/swr-config";
 import { AnalyticsPanel } from "./_components/analytics-panel";
 import { CommunityPanel } from "./_components/community-panel";
 import { ContractsPanel } from "./_components/contracts-panel";
-import { CredentialsSection } from "./_components/credentials-section";
 import { DASHBOARD_TABS, type DashboardTabId } from "./_components/dashboard-nav";
 import { DashboardShell } from "./_components/dashboard-shell";
 import { NeedsPanel } from "./_components/needs-panel";
@@ -169,19 +168,13 @@ function DashboardPageInner() {
           {tab === "profile" && (
             <ProfileSection
               initialProfile={profile}
+              credentials={credentials}
+              onCredentialsUpdate={setCredentials}
               onUpdate={() => {
                 // Revalidate SWR cache so the saved profile renders immediately
                 mutate("/api/v1/profiles/me");
               }}
             />
-          )}
-          {tab === "credentials" && (
-            <div id="credentials-section">
-              <CredentialsSection
-                initialCredentials={credentials}
-                onUpdate={(creds) => setCredentials(creds)}
-              />
-            </div>
           )}
           {tab === "community" && <CommunityPanel />}
           {tab === "settings" && <SettingsPanel profile={profile} onNavigate={setTab} />}

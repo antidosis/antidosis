@@ -39,7 +39,7 @@ export const PATCH = withApiHandler(
     const body = await req.json();
     const parseResult = updateSchema.safeParse(body);
     if (!parseResult.success) {
-      return NextResponse.json({ error: parseResult.error.errors }, { status: 400 });
+      return NextResponse.json({ error: parseResult.error.issues }, { status: 400 });
     }
     const { status } = parseResult.data;
 

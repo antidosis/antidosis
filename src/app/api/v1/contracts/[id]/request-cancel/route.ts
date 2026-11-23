@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { withApiHandler } from "@/lib/api-handler";
 import { auditLog, getClientInfo } from "@/lib/audit";
+import { contractTitle } from "@/lib/direct-contract";
 import { createNotification } from "@/lib/notifications";
 import { requireActiveAccount } from "@/lib/participation";
 import { prisma } from "@/lib/prisma";
@@ -91,6 +92,9 @@ export const POST = withApiHandler(
     if (!isPartyA && !isPartyB) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
+    if (!contract.partyB) {
+      return NextResponse.json({ error: "The invited party has not joined" }, { status: 409 });
+    }
 
     if (contract.status !== "pending_terms" && contract.status !== "active") {
       return NextResponse.json(
@@ -124,7 +128,7 @@ export const POST = withApiHandler(
       userId: otherParty.id,
       type: "contract_cancel_request",
       title: "Contract cancellation requested",
-      body: `${isPartyA ? contract.partyA.fullName || "The poster" : contract.partyB.fullName || "The fulfiller"} has requested to cancel the contract for "${contract.need.title}".${reason ? ` Reason: ${reason}` : ""}`,
+      body: `${isPartyA ? contract.partyA.fullName || "The poster" : contract.partyB.fullName || "The fulfiller"} has requested to cancel the contract for "${contractTitle(contract)}".${reason ? ` Reason: ${reason}` : ""}`,
       data: { contractId: params.id },
     });
 

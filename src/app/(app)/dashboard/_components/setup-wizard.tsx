@@ -85,7 +85,7 @@ export function computeWizardSteps(
       description: "A government-issued document. Unlocks the verified badge.",
       done: hasIdentification,
       href: null,
-      tab: "credentials" as DashboardTabId,
+      tab: "profile" as DashboardTabId,
       action: "Upload ID",
     },
     {
@@ -147,7 +147,7 @@ export function SetupWizard({ profileId, profile, emailVerified, onNavigate }: S
             profile={profile}
             emailVerified={emailVerified}
             compact
-            onNavigateToCredentials={() => onNavigate("credentials")}
+            onNavigateToCredentials={() => onNavigate("profile")}
           />
         </div>
 

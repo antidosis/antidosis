@@ -88,6 +88,10 @@ function appendClause(current: string, clause: string): string {
 
 type ContractData = {
   id: string;
+  kind: "exchange" | "direct";
+  title: string | null;
+  description: string | null;
+  inviteExpiresAt: string | null;
   status: string;
   terms: string;
   partyATerms: string | null;
@@ -125,7 +129,7 @@ type ContractData = {
     offerDescription: string;
     images: string[];
     poster: { fullName: string | null };
-  };
+  } | null;
   partyA: {
     id: string;
     fullName: string | null;
@@ -147,7 +151,7 @@ type ContractData = {
     locationName: string | null;
     isVerified: boolean;
     skills: { id: string; name: string }[];
-  };
+  } | null;
   messages: {
     id: string;
     content: string;
@@ -167,6 +171,31 @@ type ContractData = {
     createdAt: string;
   }>;
 };
+
+const INVITED_PARTY_PLACEHOLDER: NonNullable<ContractData["partyB"]> = {
+  id: "invited",
+  fullName: "Invited party",
+  avatarUrl: null,
+  bio: null,
+  ratingAvg: 0,
+  ratingCount: 0,
+  locationName: null,
+  isVerified: false,
+  skills: [],
+};
+
+function displayNeed(contract: ContractData): NonNullable<ContractData["need"]> {
+  if (contract.need) return contract.need;
+  return {
+    id: "",
+    title: contract.title || "Direct agreement",
+    description: contract.description || "Terms agreed directly between the parties.",
+    offerType: "direct",
+    offerDescription: "As recorded in both parties' agreed terms.",
+    images: [],
+    poster: { fullName: contract.partyA.fullName },
+  };
+}
 
 export default function ContractPage() {
   const params = useParams();
@@ -202,6 +231,7 @@ export default function ContractPage() {
   const [generatingPdf, setGeneratingPdf] = useState(false);
   const [showNeedDetails, setShowNeedDetails] = useState(true);
   const [reminding, setReminding] = useState(false);
+  const [copyingInvite, setCopyingInvite] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Local term state
@@ -367,6 +397,25 @@ export default function ContractPage() {
     setAgreeing(false);
   }
 
+  async function copyInvitation() {
+    setCopyingInvite(true);
+    try {
+      const response = await fetch(`/api/v1/contracts/${contractId}/invite`, { method: "POST" });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || typeof data.inviteUrl !== "string") {
+        toast(data.error || "Couldn't create an invitation link", "error");
+        return;
+      }
+      await navigator.clipboard.writeText(data.inviteUrl);
+      toast("Fresh invitation link copied — previous links no longer work", "success");
+      await fetchContract();
+    } catch {
+      toast("Couldn't copy the invitation link", "error");
+    } finally {
+      setCopyingInvite(false);
+    }
+  }
+
   async function generatePdf() {
     setGeneratingPdf(true);
     await fetch(`/api/v1/contracts/${contractId}/pdf`, { method: "POST" });
@@ -519,7 +568,7 @@ export default function ContractPage() {
     if (!contract) return;
     setSubmittingReview(true);
     const isPartyA = contract.partyA.id === profileId;
-    const receiverId = isPartyA ? contract.partyB.id : contract.partyA.id;
+    const receiverId = isPartyA ? partyB.id : contract.partyA.id;
     const res = await fetch("/api/v1/reviews", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -550,9 +599,13 @@ export default function ContractPage() {
       <div className="max-w-3xl mx-auto py-24 text-center text-bad">error: contract not found</div>
     );
 
+  const isDirect = contract.kind === "direct";
+  const need = displayNeed(contract);
+  const partyB = contract.partyB ?? INVITED_PARTY_PLACEHOLDER;
+  const awaitingInvite = isDirect && !contract.partyB;
   const isPartyA = contract.partyA.id === profileId;
-  const isPartyB = contract.partyB.id === profileId;
-  const otherParty = isPartyA ? contract.partyB : contract.partyA;
+  const isPartyB = partyB.id === profileId;
+  const otherParty = isPartyA ? partyB : contract.partyA;
   const bothSigned = contract.partyASignedAt && contract.partyBSignedAt;
   const iSigned = isPartyA ? !!contract.partyASignedAt : !!contract.partyBSignedAt;
   const iMarkedComplete = isPartyA ? contract.aMarkedComplete : contract.bMarkedComplete;
@@ -605,11 +658,11 @@ export default function ContractPage() {
       <div className="print-hidden bg-void border-b border-line">
         <div className="max-w-3xl mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
           <Link
-            href={`/needs/${contract.need.id}`}
+            href={isDirect ? "/dashboard?tab=contracts" : `/needs/${need.id}`}
             className="inline-flex items-center text-sm text-ash hover:text-gold transition-colors"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Need
+            {isDirect ? "Back to contracts" : "Back to need"}
           </Link>
           <Button variant="secondary" size="sm" onClick={() => window.print()}>
             <Printer className="h-3.5 w-3.5 mr-1.5" />
@@ -622,7 +675,14 @@ export default function ContractPage() {
         {/* Contract Document Header */}
         <div className="text-center pb-6 border-b border-paperline">
           <div className="contract-seal mb-4">Antidosis</div>
-          <h1 className="contract-heading text-3xl md:text-4xl mb-2">Binding Exchange Contract</h1>
+          <h1 className="contract-heading text-3xl md:text-4xl mb-2">
+            {isDirect ? "Direct Agreement" : "Binding Exchange Contract"}
+          </h1>
+          {isDirect && (
+            <p className="contract-body mx-auto mb-3 max-w-xl text-sm text-linestrong">
+              Created directly between the parties without an Exchange listing.
+            </p>
+          )}
           <p className="contract-body text-sm text-linestrong">
             Contract Reference:{" "}
             <span className="font-mono text-xs">{contract.id.slice(0, 8).toUpperCase()}</span>
@@ -643,13 +703,44 @@ export default function ContractPage() {
           </div>
         </div>
 
+        <div className="contract-page p-4 text-xs leading-relaxed text-linestrong">
+          <strong>Document notice:</strong> This general-purpose agreement records information and
+          terms supplied by the parties. Antidosis does not provide legal advice, assess suitability
+          or represent either party. Each party is responsible for capacity, authority, licensing,
+          insurance, tax obligations and independent advice. Signing records assent; it does not by
+          itself prove identity or guarantee enforceability.
+        </div>
+
         {/* Cancelled banner */}
         {contract.status === "cancelled" && (
           <div className="contract-page p-4 print-hidden border-l-2 border-l-bad bg-bad/5">
             <p className="text-sm font-medium text-bad">This contract has been cancelled</p>
             <p className="text-xs text-ash mt-1">
-              No further actions can be taken. The need is available for new interest.
+              No further actions can be taken.
+              {!isDirect && " The need is available for new interest."}
             </p>
+          </div>
+        )}
+
+        {awaitingInvite && isPartyA && (
+          <div className="contract-page border-l-2 border-l-sun p-5 print-hidden">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-medium text-paperhead">Invite the other party</p>
+                <p className="mt-1 text-xs leading-relaxed text-linestrong">
+                  They will create an account, verify their mobile and accept the invitation before
+                  reviewing these terms. The private link expires after 30 days.
+                </p>
+              </div>
+              <Button
+                onClick={copyInvitation}
+                disabled={copyingInvite}
+                size="sm"
+                className="shrink-0"
+              >
+                {copyingInvite ? "Creating link…" : "Copy invitation link"}
+              </Button>
+            </div>
           </div>
         )}
 
@@ -704,11 +795,11 @@ export default function ContractPage() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <p className="text-sm font-medium text-bad">
-                    Waiting for {contract.partyB.fullName || "the fulfiller"} to sign
+                    Waiting for {partyB.fullName || "the fulfiller"} to sign
                   </p>
                   <p className="text-xs text-ash mt-0.5">
-                    You can cancel this contract at any time before both parties sign. The need will
-                    be archived so you can edit and re-post it.
+                    You can cancel before both parties sign.
+                    {!isDirect && " The need will be archived so you can edit and re-post it."}
                   </p>
                 </div>
                 <Button
@@ -732,7 +823,7 @@ export default function ContractPage() {
             className="w-full flex items-center justify-between text-left hover:bg-raise transition-colors"
           >
             <span className="text-xs font-medium uppercase tracking-wide text-ash">
-              Original Need Post
+              {isDirect ? "Agreement overview" : "Original need post"}
             </span>
             {showNeedDetails ? (
               <ChevronUp className="h-4 w-4 text-ash" />
@@ -743,19 +834,19 @@ export default function ContractPage() {
           {showNeedDetails && (
             <div className="pt-4 space-y-4">
               <p className="text-sm text-parchment leading-relaxed whitespace-pre-line">
-                {contract.need.description}
+                {need.description}
               </p>
               <div className="flex items-start gap-3">
                 <div className="text-sm text-parchment">
                   <span className="text-xs uppercase tracking-wide text-ash block mb-1">
-                    Offering In Exchange
+                    {isDirect ? "Agreed value or consideration" : "Offering In Exchange"}
                   </span>
-                  {contract.need.offerDescription}
+                  {need.offerDescription}
                 </div>
               </div>
-              {contract.need.images.length > 0 && (
+              {need.images.length > 0 && (
                 <div className="flex flex-wrap gap-3">
-                  {contract.need.images.map((url, i) => (
+                  {need.images.map((url, i) => (
                     <img
                       key={i}
                       src={url}
@@ -773,8 +864,16 @@ export default function ContractPage() {
         <div className="contract-page p-6">
           <p className="contract-label mb-4">Parties to this Agreement</p>
           <div className="grid sm:grid-cols-2 gap-6">
-            <PartySection party={contract.partyA} label="Party A — Need Poster" isMe={isPartyA} />
-            <PartySection party={contract.partyB} label="Party B — Fulfiller" isMe={isPartyB} />
+            <PartySection
+              party={contract.partyA}
+              label={isDirect ? "Party A — Agreement creator" : "Party A — Need Poster"}
+              isMe={isPartyA}
+            />
+            <PartySection
+              party={partyB}
+              label={isDirect ? "Party B — Invited party" : "Party B — Fulfiller"}
+              isMe={isPartyB}
+            />
           </div>
         </div>
 
@@ -1012,7 +1111,7 @@ export default function ContractPage() {
                 </div>
                 <div className="border border-paperline p-5 bg-paper">
                   <p className="text-xs font-medium uppercase tracking-wide text-ash mb-3">
-                    {contract.partyB.fullName || "Party B"}&apos;s Terms
+                    {partyB.fullName || "Party B"}&apos;s Terms
                   </p>
                   {contract.partyBUseMessageTerms ? (
                     <p className="text-sm text-ash italic">using message thread as terms</p>
@@ -1032,7 +1131,7 @@ export default function ContractPage() {
                   </p>
                   <div className="space-y-3">
                     <AgreementRow name={contract.partyA.fullName} agreed={aAgreed} />
-                    <AgreementRow name={contract.partyB.fullName} agreed={bAgreed} />
+                    <AgreementRow name={partyB.fullName} agreed={bAgreed} />
                   </div>
                   {!iAgreed && (
                     <div className="mt-5 space-y-3">
@@ -1116,7 +1215,7 @@ export default function ContractPage() {
               />
               <div className="border-t border-line" />
               <SignatureRow
-                name={contract.partyB.fullName}
+                name={partyB.fullName}
                 signed={!!contract.partyBSignedAt}
                 signedAt={contract.partyBSignedAt}
                 signatureText={contract.partyBSignature}
@@ -1173,9 +1272,7 @@ export default function ContractPage() {
               </div>
               <div className="border-t border-line" />
               <div className="flex items-center justify-between py-3">
-                <span className="text-sm text-parchment">
-                  {contract.partyB.fullName || "party_b"}
-                </span>
+                <span className="text-sm text-parchment">{partyB.fullName || "party_b"}</span>
                 {contract.bMarkedComplete ? (
                   <Badge variant="success">done</Badge>
                 ) : (
@@ -1235,20 +1332,22 @@ export default function ContractPage() {
             ))}
             <div ref={messagesEndRef} />
           </div>
-          {contract.status !== "completed" && contract.status !== "cancelled" && (
-            <form onSubmit={sendMessage} className="mt-4 flex gap-2">
-              <Input
-                placeholder="type a message..."
-                value={messageInput}
-                onChange={(e) => setMessageInput(e.target.value)}
-                disabled={sendingMsg}
-                className="bg-paper border-paperline text-paperink placeholder:text-ash2"
-              />
-              <Button type="submit" size="icon" disabled={sendingMsg}>
-                <Send className="h-4 w-4" />
-              </Button>
-            </form>
-          )}
+          {!awaitingInvite &&
+            contract.status !== "completed" &&
+            contract.status !== "cancelled" && (
+              <form onSubmit={sendMessage} className="mt-4 flex gap-2">
+                <Input
+                  placeholder="type a message..."
+                  value={messageInput}
+                  onChange={(e) => setMessageInput(e.target.value)}
+                  disabled={sendingMsg}
+                  className="bg-paper border-paperline text-paperink placeholder:text-ash2"
+                />
+                <Button type="submit" size="icon" disabled={sendingMsg}>
+                  <Send className="h-4 w-4" />
+                </Button>
+              </form>
+            )}
         </div>
 
         {/* Reviews */}
@@ -1347,7 +1446,7 @@ export default function ContractPage() {
         )}
 
         {/* Cancellation UI */}
-        {contract.status !== "cancelled" && !cancelAgreed && (
+        {contract.status !== "cancelled" && contract.status !== "completed" && !cancelAgreed && (
           <div className="space-y-4 py-8">
             {/* Escalated banner */}
             {cancelEscalated && (
@@ -1375,7 +1474,7 @@ export default function ContractPage() {
                 <p className="text-sm font-medium text-bad">
                   {contract.cancelRequestedById === contract.partyA.id
                     ? contract.partyA.fullName || "The poster"
-                    : contract.partyB.fullName || "The fulfiller"}{" "}
+                    : partyB.fullName || "The fulfiller"}{" "}
                   requested to cancel this contract
                 </p>
                 {contract.cancelReason && (
@@ -1446,8 +1545,8 @@ export default function ContractPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
             <div className="bg-surface border border-line p-6 rounded-md max-w-sm w-full mx-4">
               <p className="text-sm text-gold mb-4">
-                Cancel this contract? The need will be archived so you can edit and re-post it
-                later.
+                Cancel this contract?
+                {!isDirect && " The need will be archived so you can edit and re-post it later."}
               </p>
               <div className="flex gap-3">
                 <Button
@@ -1544,7 +1643,7 @@ export default function ContractPage() {
               <p className="text-xs text-ash mb-4">
                 {contract?.cancelRequestedById === contract?.partyA.id
                   ? contract?.partyA.fullName || "The poster"
-                  : contract?.partyB.fullName || "The fulfiller"}{" "}
+                  : partyB.fullName || "The fulfiller"}{" "}
                 requested to cancel this contract.
                 {contract?.cancelReason && ` Reason: "${contract.cancelReason}"`}
               </p>
@@ -1585,13 +1684,13 @@ export default function ContractPage() {
               <div className="bg-paper border border-paperline p-3 mb-4 text-xs text-linestrong">
                 <p className="font-medium mb-1">Contract Summary:</p>
                 <p>
-                  <strong>Need:</strong> {contract.need.title}
+                  <strong>{isDirect ? "Agreement" : "Need"}:</strong> {need.title}
                 </p>
                 <p>
                   <strong>Party A:</strong> {contract.partyA.fullName}
                 </p>
                 <p>
-                  <strong>Party B:</strong> {contract.partyB.fullName}
+                  <strong>Party B:</strong> {partyB.fullName}
                 </p>
               </div>
 
@@ -1603,7 +1702,7 @@ export default function ContractPage() {
                   <Input
                     value={signatureInput}
                     onChange={(e) => setSignatureInput(e.target.value)}
-                    placeholder={`e.g. ${isPartyA ? contract.partyA.fullName : contract.partyB.fullName}`}
+                    placeholder={`e.g. ${isPartyA ? contract.partyA.fullName : partyB.fullName}`}
                     className="bg-paper border-paperline text-paperink placeholder:text-ash2"
                   />
                 </div>
@@ -1617,8 +1716,8 @@ export default function ContractPage() {
                   />
                   <span className="text-xs text-linestrong leading-relaxed">
                     I have read and understood the terms of this contract. I agree to be legally
-                    bound by both parties&apos; terms as shown above. I understand this constitutes
-                    a digital signature under the <em>Electronic Transactions Act 1999</em> (Cth).
+                    bound by both parties&apos; terms as shown above. I intend this typed name to
+                    record my electronic signature under applicable electronic-transactions law.
                   </span>
                 </label>
               </div>

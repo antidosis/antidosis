@@ -16,6 +16,7 @@ const mockSkillDeleteMany = vi.fn();
 const mockSocialLinkDeleteMany = vi.fn();
 const mockNotificationDeleteMany = vi.fn();
 const mockDeviceTokenDeleteMany = vi.fn();
+const mockContractUpdateMany = vi.fn();
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
@@ -45,6 +46,9 @@ vi.mock("@/lib/prisma", () => ({
     },
     deviceToken: {
       deleteMany: (...args: unknown[]) => mockDeviceTokenDeleteMany(...args),
+    },
+    contract: {
+      updateMany: (...args: unknown[]) => mockContractUpdateMany(...args),
     },
   },
 }));
@@ -800,6 +804,7 @@ describe("DELETE /api/v1/profiles/me", () => {
       where: { id: "profile-1" },
       data: expect.objectContaining({
         fullName: "Deleted User",
+        handle: null,
         email: "deleted+profile-1@deleted.invalid",
         mobile: null,
         mobileVerified: false,
@@ -824,6 +829,24 @@ describe("DELETE /api/v1/profiles/me", () => {
     });
     expect(mockDeviceTokenDeleteMany).toHaveBeenCalledWith({
       where: { profileId: "profile-1" },
+    });
+
+    expect(mockContractUpdateMany).toHaveBeenCalledWith({
+      where: { partyAId: "profile-1" },
+      data: { partyASignature: null, inviteEmail: null },
+    });
+    expect(mockContractUpdateMany).toHaveBeenCalledWith({
+      where: { partyBId: "profile-1" },
+      data: { partyBSignature: null },
+    });
+    expect(mockContractUpdateMany).toHaveBeenCalledWith({
+      where: { partyAId: "profile-1", kind: "direct", partyBId: null, status: "draft" },
+      data: {
+        status: "cancelled",
+        cancelledAt: expect.any(Date),
+        inviteTokenHash: null,
+        inviteEmail: null,
+      },
     });
 
     // Auth user still deleted so the tombstone cannot be logged into

@@ -211,7 +211,7 @@ export const PATCH = withApiHandler(
     const body = await req.json();
     const parseResult = updateNeedSchema.safeParse(body);
     if (!parseResult.success) {
-      const messages = parseResult.error.errors.map((e) => `${e.path.join(".")}: ${e.message}`);
+      const messages = parseResult.error.issues.map((e) => `${e.path.join(".")}: ${e.message}`);
       return NextResponse.json({ error: messages.join("; ") }, { status: 400 });
     }
     const data = parseResult.data;

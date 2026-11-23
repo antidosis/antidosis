@@ -165,7 +165,7 @@ describe("POST /api/v1/contracts/[id]/sign", () => {
 
   it("returns 429 when rate limited", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-a" });
+    mockProfileFindUnique.mockResolvedValue({ id: "profile-a", fullName: "Alice Smith" });
     mockRateLimit.mockResolvedValue({ allowed: false, remaining: 0, resetAt: Date.now() + 60_000 });
 
     const res = await POST(
@@ -183,7 +183,7 @@ describe("POST /api/v1/contracts/[id]/sign", () => {
 
   it("returns 404 when contract not found", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-a" });
+    mockProfileFindUnique.mockResolvedValue({ id: "profile-a", fullName: "Alice Smith" });
     mockContractFindUnique.mockResolvedValue(null);
 
     const res = await POST(
@@ -201,7 +201,7 @@ describe("POST /api/v1/contracts/[id]/sign", () => {
 
   it("returns 403 when user is not a party to the contract", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-other" });
+    mockProfileFindUnique.mockResolvedValue({ id: "profile-other", fullName: "Alice Smith" });
     mockContractFindUnique.mockResolvedValue(makeContract());
 
     const res = await POST(
@@ -219,7 +219,7 @@ describe("POST /api/v1/contracts/[id]/sign", () => {
 
   it("returns 400 for invalid signature input", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-a" });
+    mockProfileFindUnique.mockResolvedValue({ id: "profile-a", fullName: "Alice Smith" });
     mockContractFindUnique.mockResolvedValue(makeContract());
 
     const res = await POST(
@@ -237,7 +237,7 @@ describe("POST /api/v1/contracts/[id]/sign", () => {
 
   it("returns 400 when terms are not locked", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-a" });
+    mockProfileFindUnique.mockResolvedValue({ id: "profile-a", fullName: "Alice Smith" });
     mockContractFindUnique.mockResolvedValue(makeContract({ termsLockedAt: null }));
 
     const res = await POST(
@@ -255,7 +255,7 @@ describe("POST /api/v1/contracts/[id]/sign", () => {
 
   it("returns 400 when contract cannot be signed at this stage", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-a" });
+    mockProfileFindUnique.mockResolvedValue({ id: "profile-a", fullName: "Alice Smith" });
     mockContractFindUnique.mockResolvedValue(makeContract({ status: "active" }));
 
     const res = await POST(
@@ -273,7 +273,7 @@ describe("POST /api/v1/contracts/[id]/sign", () => {
 
   it("returns 400 when party A already signed", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-a" });
+    mockProfileFindUnique.mockResolvedValue({ id: "profile-a", fullName: "Alice Smith" });
     mockContractFindUnique.mockResolvedValue(makeContract({ partyASignedAt: new Date() }));
 
     const res = await POST(
@@ -291,7 +291,7 @@ describe("POST /api/v1/contracts/[id]/sign", () => {
 
   it("returns 400 when party B already signed", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-b" });
+    mockProfileFindUnique.mockResolvedValue({ id: "profile-b", fullName: "Bob Smith" });
     mockContractFindUnique.mockResolvedValue(makeContract({ partyBSignedAt: new Date() }));
 
     const res = await POST(
@@ -307,9 +307,26 @@ describe("POST /api/v1/contracts/[id]/sign", () => {
     expect(body.error).toBe("Already signed");
   });
 
+  it("rejects a signature that does not match the profile name", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({ id: "profile-a", fullName: "Alice Smith" });
+    mockContractFindUnique.mockResolvedValue(makeContract());
+
+    const res = await POST(
+      makeRequest("http://localhost/api/v1/contracts/contract-1/sign", {
+        method: "POST",
+        body: JSON.stringify({ signature: "Someone Else" }),
+      }),
+      { params: { id: "contract-1" } }
+    );
+
+    expect(res.status).toBe(400);
+    expect(mockTransaction).not.toHaveBeenCalled();
+  });
+
   it("signs contract as first party (not yet active)", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-a" });
+    mockProfileFindUnique.mockResolvedValue({ id: "profile-a", fullName: "Alice Smith" });
     mockContractFindUnique.mockResolvedValue(makeContract());
 
     mockTx.contract.update.mockResolvedValue(makeContract({ partyASignedAt: new Date() }));
@@ -332,6 +349,11 @@ describe("POST /api/v1/contracts/[id]/sign", () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.contract).toBeDefined();
+    expect(mockTx.contract.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ partyASignature: "Alice Smith", pdfUrl: null }),
+      })
+    );
     expect(mockSendContractSignedEmail).not.toHaveBeenCalled();
     expect(mockCreateNotification).not.toHaveBeenCalled();
     expect(mockAuditLog).toHaveBeenCalledWith(
@@ -344,7 +366,7 @@ describe("POST /api/v1/contracts/[id]/sign", () => {
 
   it("signs contract as second party and activates contract", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-b" });
+    mockProfileFindUnique.mockResolvedValue({ id: "profile-b", fullName: "Bob Smith" });
 
     const activeContract = makeContract({
       partyASignedAt: new Date(),
@@ -392,7 +414,7 @@ describe("POST /api/v1/contracts/[id]/sign", () => {
 
   it("includes x-request-id header", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    mockProfileFindUnique.mockResolvedValue({ id: "profile-a" });
+    mockProfileFindUnique.mockResolvedValue({ id: "profile-a", fullName: "Alice Smith" });
     mockContractFindUnique.mockResolvedValue(makeContract());
 
     mockTx.contract.update.mockResolvedValue(makeContract({ partyASignedAt: new Date() }));

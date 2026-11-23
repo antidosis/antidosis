@@ -37,3 +37,13 @@ export const patchContractSchema = z.object({
 });
 
 export type PatchContractInput = z.infer<typeof patchContractSchema>;
+
+export const createDirectContractSchema = z.object({
+  title: z.string().trim().min(3).max(160),
+  description: z.string().trim().min(10).max(5000),
+  terms: z.string().trim().min(3).max(5000),
+  paymentAmount: z.number().finite().min(0).max(10_000_000).optional(),
+  inviteEmail: z.string().trim().email().max(320).optional(),
+});
+
+export type CreateDirectContractInput = z.infer<typeof createDirectContractSchema>;

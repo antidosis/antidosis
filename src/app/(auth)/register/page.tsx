@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { Check, X, Eye, EyeOff, Smartphone } from "lucide-react";
 
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { isValidAustralianMobile, normalizeMobile } from "@/lib/mobile";
+import { safeInternalPath } from "@/lib/navigation";
 import { validatePassword, getPasswordStrength } from "@/lib/security/password";
 import { createClient } from "@/lib/supabase/client";
 
@@ -28,7 +29,9 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
+  const redirectTarget = safeInternalPath(searchParams.get("next"));
 
   const validation = validatePassword(password);
   const strength = getPasswordStrength(password);
@@ -90,7 +93,7 @@ export default function RegisterPage() {
         password,
         options: {
           data: { full_name: fullName },
-          emailRedirectTo: `${appUrl}/login`,
+          emailRedirectTo: `${appUrl}/login?next=${encodeURIComponent(redirectTarget)}`,
         },
       });
       authData = res.data;
@@ -124,7 +127,7 @@ export default function RegisterPage() {
       }
     }
 
-    router.push("/verify-email");
+    router.push(`/verify-email?next=${encodeURIComponent(redirectTarget)}`);
   }
 
   return (
@@ -326,7 +329,7 @@ export default function RegisterPage() {
           <p className="mt-12 text-sm text-ash">
             Already have an account?{" "}
             <Button variant="link" size="sm" asChild>
-              <Link href="/login">Log in</Link>
+              <Link href={`/login?next=${encodeURIComponent(redirectTarget)}`}>Log in</Link>
             </Button>
           </p>
         </div>

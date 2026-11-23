@@ -21,30 +21,34 @@ type Band = "needs" | "directory" | "relay";
 const BANDS: {
   id: Band;
   label: string;
-  freq: string;
+  code: string;
   icon: typeof Briefcase;
   subtitle: string;
+  description: string;
 }[] = [
   {
     id: "needs",
-    label: "needs",
-    freq: "146.550 MHz",
+    label: "Needs",
+    code: "01",
     icon: Briefcase,
-    subtitle: "open signals on the local board",
+    subtitle: "Local requests and offers",
+    description: "Find someone who can help, or post what you need in return for value.",
   },
   {
     id: "directory",
-    label: "directory",
-    freq: "146.400 MHz",
+    label: "Directory",
+    code: "02",
     icon: BookUser,
-    subtitle: "verified people and business base-stations",
+    subtitle: "People and local businesses",
+    description: "Compare skills, credentials and reputation before you start a conversation.",
   },
   {
     id: "relay",
-    label: "relay",
-    freq: "146.700 MHz",
+    label: "Relay",
+    code: "03",
     icon: Radio,
-    subtitle: "live community channels",
+    subtitle: "Community conversations",
+    description: "Join local channels and direct messages with other verified members.",
   },
 ];
 
@@ -54,7 +58,9 @@ function parseBand(value: string | null): Band {
 
 export default function ExchangePage() {
   return (
-    <Suspense fallback={<div className="py-24 text-center text-sm text-ash">tuning in…</div>}>
+    <Suspense
+      fallback={<div className="py-24 text-center text-sm text-ash">Loading exchange…</div>}
+    >
       <ExchangeClient />
     </Suspense>
   );
@@ -78,64 +84,104 @@ function ExchangeClient() {
   }, []);
 
   useEffect(() => {
-    setBand(parseBand(searchParams.get("band")));
+    const next = parseBand(searchParams.get("band"));
+    setBand(next);
+    setVisited((current) => ({ ...current, [next]: true }));
   }, [searchParams]);
 
   function tune(next: Band) {
     setBand(next);
-    setVisited((v) => ({ ...v, [next]: true }));
+    setVisited((current) => ({ ...current, [next]: true }));
     const params = new URLSearchParams(searchParams.toString());
     if (next === "needs") params.delete("band");
     else params.set("band", next);
     router.replace(`/exchange${params.size ? `?${params}` : ""}`, { scroll: false });
   }
 
-  const active = BANDS.find((b) => b.id === band) ?? BANDS[0];
+  const active = BANDS.find((item) => item.id === band) ?? BANDS[0];
   const relayLocked = band === "relay" && !user;
+  const relayLogin = `/login?next=${encodeURIComponent("/exchange?band=relay")}`;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 md:px-8 pb-16">
-      <div className="py-8">
-        <p className="text-xs text-ash mb-3">» THE EXCHANGE — LOCAL MESH MARKET</p>
-        <h1 className="heading-display text-3xl md:text-4xl text-gold">the exchange</h1>
-      </div>
+    <div className="mx-auto max-w-[1440px] px-4 pb-16 md:px-6 lg:px-8">
+      <header className="flex flex-col gap-6 py-8 sm:flex-row sm:items-end sm:justify-between md:py-10">
+        <div className="max-w-2xl">
+          <p className="mb-3 font-mono text-xs uppercase tracking-[0.18em] text-mercury">
+            Central Coast exchange
+          </p>
+          <h1 className="heading-display text-3xl text-gold md:text-4xl">
+            One network. Every local exchange.
+          </h1>
+          <p className="mt-3 max-w-xl text-base leading-relaxed text-ash">
+            Requests, trusted people and community conversation—without jumping between products.
+          </p>
+        </div>
+        {band === "needs" && (
+          <Button asChild className="w-full sm:w-auto">
+            <Link href="/needs/new">
+              <Plus className="mr-2 h-4 w-4" /> Post a need
+            </Link>
+          </Button>
+        )}
+        {band === "directory" && (
+          <Button asChild variant="secondary" className="w-full sm:w-auto">
+            <Link href="/dashboard?tab=profile&profileTab=directory">Edit directory profile</Link>
+          </Button>
+        )}
+      </header>
 
-      <div className="flex flex-col gap-8 lg:flex-row">
-        {/* Band sidebar — desktop. Frequencies are radio channels, labelled. */}
-        <aside className="lg:w-56 lg:shrink-0">
+      <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-8">
+        <aside className="min-w-0">
           <nav
-            aria-label="Exchange bands"
-            className="flex gap-1 overflow-x-auto lg:sticky lg:top-24 lg:flex-col lg:gap-1.5"
+            aria-label="Exchange sections"
+            className="flex snap-x gap-2 overflow-x-auto pb-2 lg:sticky lg:top-24 lg:flex-col lg:gap-0 lg:overflow-visible lg:rounded-lg lg:border lg:border-line lg:bg-surface/45 lg:p-2 lg:pb-2"
           >
-            {BANDS.map((b) => {
-              const isActive = band === b.id;
-              const locked = b.id === "relay" && !user;
+            {BANDS.map((item) => {
+              const isActive = band === item.id;
+              const locked = item.id === "relay" && !user;
               return (
                 <button
-                  key={b.id}
-                  onClick={() => tune(b.id)}
-                  aria-selected={isActive}
+                  key={item.id}
+                  onClick={() => tune(item.id)}
+                  aria-current={isActive ? "page" : undefined}
                   className={cn(
-                    "flex min-w-[9rem] items-center gap-3 border px-4 py-3 text-left transition-all lg:min-w-0",
+                    "group flex min-w-[210px] snap-start items-center gap-3 rounded-md border px-4 py-3.5 text-left transition-colors lg:min-w-0 lg:border-transparent",
                     isActive
-                      ? "border-sun/50 bg-surface shadow-[0_0_20px_rgba(245,166,35,0.08)]"
-                      : "border-line bg-surface/40 hover:border-linehi hover:bg-surface/70"
+                      ? "border-sun/35 bg-sun/[0.07] lg:border-sun/20"
+                      : "border-line bg-surface/35 hover:border-linehi hover:bg-surface/70"
                   )}
                 >
-                  <b.icon className={cn("h-4 w-4 shrink-0", isActive ? "text-sun" : "text-ash")} />
+                  <span
+                    className={cn(
+                      "flex h-9 w-9 shrink-0 items-center justify-center rounded-md border",
+                      isActive
+                        ? "border-sun/30 bg-sun/10 text-sun"
+                        : "border-line bg-inset text-ash group-hover:text-parchment"
+                    )}
+                  >
+                    <item.icon className="h-4 w-4" />
+                  </span>
                   <span className="min-w-0 flex-1">
                     <span
                       className={cn(
-                        "flex items-center gap-1.5 text-sm",
+                        "flex items-center gap-1.5 text-sm font-medium",
                         isActive ? "text-gold" : "text-parchment"
                       )}
                     >
-                      {b.label}
+                      {item.label}
                       {locked && <Lock className="h-3 w-3 text-ash" />}
                     </span>
-                    <span className="block font-mono text-[10px] tracking-wider text-ash">
-                      {b.freq}
+                    <span className="mt-0.5 block text-xs leading-snug text-ash">
+                      {item.subtitle}
                     </span>
+                  </span>
+                  <span
+                    className={cn(
+                      "hidden font-mono text-[11px] lg:block",
+                      isActive ? "text-sun" : "text-ash/50"
+                    )}
+                  >
+                    {item.code}
                   </span>
                 </button>
               );
@@ -143,48 +189,32 @@ function ExchangeClient() {
           </nav>
         </aside>
 
-        {/* Content column */}
-        <div className="min-w-0 flex-1">
-          {/* Band topbar */}
-          <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
-            <div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ash">
-                channel {active.freq}
-              </p>
-              <h2 className="heading-display text-xl text-gold">{active.label}</h2>
-              <p className="text-xs text-ash">{active.subtitle}</p>
-            </div>
-            {band === "needs" && (
-              <Button asChild size="sm">
-                <Link href="/needs/new">
-                  <Plus className="mr-1.5 h-4 w-4" /> Broadcast a need
-                </Link>
-              </Button>
-            )}
-            {band === "directory" && (
-              <Button asChild variant="secondary" size="sm">
-                <Link href="/dashboard?tab=profile">Appear here</Link>
-              </Button>
-            )}
+        <main className="min-w-0">
+          <div className="mb-5 border-b border-line pb-5">
+            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-ash">
+              Exchange / {active.code}
+            </p>
+            <h2 className="heading-display mt-1 text-2xl text-gold">{active.label}</h2>
+            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-ash">{active.description}</p>
           </div>
 
           <StatusBoard />
 
           {relayLocked ? (
-            <div className="vessel flex flex-col items-center gap-4 p-10 text-center">
+            <div className="vessel flex flex-col items-center gap-4 rounded-lg p-8 text-center md:p-12">
               <div className="flex h-12 w-12 items-center justify-center rounded-full border border-mercury/30 bg-mercury/10">
                 <Lock className="h-5 w-5 text-mercury" />
               </div>
               <div>
-                <p className="heading-display text-xl text-gold">members only channel</p>
-                <p className="mt-1 max-w-sm text-sm text-ash">
-                  The relay is where the community talks. Log in to listen in and transmit — it
-                  unlocks the moment you&apos;re signed in.
+                <p className="heading-display text-xl text-gold">Relay is for members</p>
+                <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-ash">
+                  Log in to read local channels and join the conversation. Participation requires a
+                  verified mobile number.
                 </p>
               </div>
               <Button asChild>
-                <Link href="/login?redirect=/exchange?band=relay">
-                  Log in to tune in <ArrowRight className="ml-1.5 h-4 w-4" />
+                <Link href={relayLogin}>
+                  Log in to open Relay <ArrowRight className="ml-1.5 h-4 w-4" />
                 </Link>
               </Button>
             </div>
@@ -205,7 +235,7 @@ function ExchangeClient() {
               )}
             </>
           )}
-        </div>
+        </main>
       </div>
     </div>
   );

@@ -8,6 +8,7 @@ import { GET } from "./route";
 const mockProfileFindUnique = vi.fn();
 const mockNotificationFindMany = vi.fn();
 const mockNotificationCount = vi.fn();
+const mockNotificationUpdateMany = vi.fn();
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
@@ -15,6 +16,7 @@ vi.mock("@/lib/prisma", () => ({
     notification: {
       findMany: (...args: unknown[]) => mockNotificationFindMany(...args),
       count: (...args: unknown[]) => mockNotificationCount(...args),
+      updateMany: (...args: unknown[]) => mockNotificationUpdateMany(...args),
     },
   },
 }));
@@ -71,6 +73,7 @@ describe("GET /api/v1/notifications", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockRateLimit.mockResolvedValue({ allowed: true, remaining: 10, resetAt: Date.now() + 60_000 });
+    mockNotificationUpdateMany.mockResolvedValue({ count: 0 });
   });
 
   it("returns 401 when unauthenticated", async () => {
@@ -111,7 +114,7 @@ describe("GET /api/v1/notifications", () => {
     expect(body.unreadCount).toBe(1);
     expect(mockNotificationFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { userId: "profile-1" },
+        where: { userId: "profile-1", archivedAt: null },
         orderBy: { createdAt: "desc" },
         take: 50,
       })
@@ -133,7 +136,42 @@ describe("GET /api/v1/notifications", () => {
     expect(body.notifications).toHaveLength(1);
     expect(mockNotificationFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { userId: "profile-1", isRead: false },
+        where: { userId: "profile-1", isRead: false, archivedAt: null },
+      })
+    );
+  });
+
+  it("moves notifications older than 30 days into the archive", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
+    mockNotificationFindMany.mockResolvedValue([]);
+    mockNotificationCount.mockResolvedValue(0);
+
+    await GET(makeRequest("http://localhost/api/v1/notifications"));
+
+    expect(mockNotificationUpdateMany).toHaveBeenCalledWith({
+      where: {
+        userId: "profile-1",
+        archivedAt: null,
+        createdAt: { lt: expect.any(Date) },
+      },
+      data: { archivedAt: expect.any(Date) },
+    });
+  });
+
+  it("returns archived history without auto-archiving it again", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({ id: "profile-1" });
+    mockNotificationFindMany.mockResolvedValue([]);
+    mockNotificationCount.mockResolvedValue(0);
+
+    await GET(makeRequest("http://localhost/api/v1/notifications?archived=true"));
+
+    expect(mockNotificationUpdateMany).not.toHaveBeenCalled();
+    expect(mockNotificationFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { userId: "profile-1", archivedAt: { not: null } },
+        take: 100,
       })
     );
   });

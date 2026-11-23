@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { withApiHandler } from "@/lib/api-handler";
 import { prisma } from "@/lib/prisma";
+import { COMMUNITY_ACTIVITY_DAYS, daysAgo } from "@/lib/retention";
 import { createClient } from "@/lib/supabase/server";
 
 export const GET = withApiHandler(async (req: NextRequest) => {
@@ -26,6 +27,8 @@ export const GET = withApiHandler(async (req: NextRequest) => {
     Math.min(parseInt(req.nextUrl.searchParams.get("limit") || "20", 10) || 20, 50)
   );
 
+  const recentActivity = { gte: daysAgo(COMMUNITY_ACTIVITY_DAYS) };
+
   // 1. Recent DMs sent to user
   const dmMessages = await prisma.directMessage.findMany({
     where: {
@@ -34,6 +37,7 @@ export const GET = withApiHandler(async (req: NextRequest) => {
       },
       senderId: { not: profile.id },
       deletedAt: null,
+      createdAt: recentActivity,
     },
     orderBy: { createdAt: "desc" },
     take: 10,
@@ -53,6 +57,7 @@ export const GET = withApiHandler(async (req: NextRequest) => {
       content: { contains: mentionPattern, mode: "insensitive" },
       senderId: { not: profile.id },
       deletedAt: null,
+      createdAt: recentActivity,
       channel: { type: { not: "staff" } },
     },
     orderBy: { createdAt: "desc" },
@@ -75,6 +80,7 @@ export const GET = withApiHandler(async (req: NextRequest) => {
       content: { contains: mentionPattern, mode: "insensitive" },
       senderId: { not: profile.id },
       deletedAt: null,
+      createdAt: recentActivity,
     },
     orderBy: { createdAt: "desc" },
     take: 5,
@@ -93,6 +99,7 @@ export const GET = withApiHandler(async (req: NextRequest) => {
       channel: { type: { not: "staff" } },
       senderId: { not: profile.id },
       deletedAt: null,
+      createdAt: recentActivity,
     },
     orderBy: { createdAt: "desc" },
     take: 5,

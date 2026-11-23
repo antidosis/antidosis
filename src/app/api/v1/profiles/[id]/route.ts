@@ -124,7 +124,7 @@ export const GET = withApiHandler(
             comment: true,
             createdAt: true,
             giver: { select: { id: true, fullName: true, avatarUrl: true } },
-            contract: { select: { need: { select: { title: true } } } },
+            contract: { select: { kind: true, title: true, need: { select: { title: true } } } },
           },
           take: 10,
         },

@@ -5,7 +5,6 @@ import {
   HandHelping,
   FileText,
   User,
-  Star,
   Users,
   Settings,
 } from "lucide-react";
@@ -17,7 +16,6 @@ export type DashboardTabId =
   | "offers"
   | "contracts"
   | "profile"
-  | "credentials"
   | "community"
   | "settings";
 
@@ -71,13 +69,6 @@ export const DASHBOARD_TABS: DashboardTab[] = [
     icon: User,
     section: "account",
     subtitle: "How you appear to the network",
-  },
-  {
-    id: "credentials",
-    label: "Proof & ID",
-    icon: Star,
-    section: "account",
-    subtitle: "Identity documents and verified credentials",
   },
   {
     id: "community",
