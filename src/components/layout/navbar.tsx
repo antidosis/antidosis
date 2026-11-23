@@ -54,13 +54,11 @@ export function Navbar() {
   }, [mobileOpen]);
 
   const navItems = [
-    { href: "/how-it-works", label: "how it works" },
-    { href: "/needs", label: "browse needs" },
-    { href: "/needs/new", label: "post" },
+    { href: "/needs", label: "exchange" },
     { href: "/pros", label: "directory" },
-    { href: "/blog", label: "blog" },
-    { href: "/demo", label: "demo" },
     ...(user ? [{ href: "/terminal", label: "relay", isTerminal: true as const }] : []),
+    { href: "/blog", label: "blog" },
+    { href: "/how-it-works", label: "how it works" },
     ...(user ? [{ href: "/dashboard", label: "dashboard" }] : []),
   ];
 
@@ -82,7 +80,8 @@ export function Navbar() {
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-6" aria-label="Main navigation">
             {navItems.map((item) => {
-              const isActive = pathname === item.href;
+              const isActive =
+                item.href === "/needs" ? pathname.startsWith("/needs") : pathname === item.href;
               const isDashboard = item.href === "/dashboard";
               const isTerminal = item.href === "/terminal";
               return (
@@ -157,7 +156,8 @@ export function Navbar() {
         <div className="md:hidden fixed left-0 right-0 top-20 h-[calc(100dvh-5rem)] bg-void z-[60] border-t border-line">
           <div className="flex flex-col p-6 space-y-1">
             {navItems.map((item) => {
-              const isActive = pathname === item.href;
+              const isActive =
+                item.href === "/needs" ? pathname.startsWith("/needs") : pathname === item.href;
               const isDashboard = item.href === "/dashboard";
               const isTerminal = item.href === "/terminal";
               return (

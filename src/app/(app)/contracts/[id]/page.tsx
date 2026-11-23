@@ -36,6 +36,56 @@ const ebGaramond = EB_Garamond({
   display: "swap",
 });
 
+/** Click-to-insert clause starters — plain-language terms that cover the
+ * deals the platform actually sees. Clicking appends a bullet to the terms
+ * box; members edit the [brackets] to fit. */
+const CLAUSE_PRESETS: { group: string; clauses: string[] }[] = [
+  {
+    group: "Payment",
+    clauses: [
+      "Payment of $[amount] to be made within 7 days of completion",
+      "50% deposit payable before work begins; balance on completion",
+      "Payment by cash or bank transfer on the day of completion",
+    ],
+  },
+  {
+    group: "Scope",
+    clauses: [
+      "Includes one round of revisions",
+      "Materials supplied by the poster",
+      "Work to be performed at: [location]",
+    ],
+  },
+  {
+    group: "Timing",
+    clauses: [
+      "To be completed by: [date]",
+      "Work to commence within 7 days of both parties signing",
+    ],
+  },
+  {
+    group: "Exchange",
+    clauses: [
+      "Exchange items handed over on completion of the work",
+      "Pickup at: [location], by prior arrangement",
+    ],
+  },
+  {
+    group: "Promo & reviews",
+    clauses: [
+      "Content published within 7 days of receiving the product or experience",
+      "One feed post and one story on the creator's main account",
+      "Sponsored content disclosed as required by Australian consumer law",
+    ],
+  },
+];
+
+function appendClause(current: string, clause: string): string {
+  const line = `- ${clause}`;
+  const trimmed = current.trimEnd();
+  return trimmed ? `${trimmed}\n${line}` : line;
+}
+
 type ContractData = {
   id: string;
   status: string;
@@ -821,13 +871,42 @@ export default function ContractPage() {
                           your terms will be derived from the message thread.
                         </p>
                       ) : (
-                        <Textarea
-                          value={myTerms}
-                          onChange={(e) => setMyTerms(e.target.value)}
-                          placeholder="describe your terms, expectations, requirements..."
-                          rows={4}
-                          className="bg-paper border-paperline text-paperink placeholder:text-ash2"
-                        />
+                        <>
+                          <Textarea
+                            value={myTerms}
+                            onChange={(e) => setMyTerms(e.target.value)}
+                            placeholder="scope, timing, payment or exchange details, pickup, revisions — or tap a clause below to start"
+                            rows={4}
+                            className="bg-paper border-paperline text-paperink placeholder:text-paperlabel"
+                          />
+                          {/* Click-to-insert clause starters */}
+                          <div className="mt-3 space-y-2">
+                            {CLAUSE_PRESETS.map((preset) => (
+                              <div key={preset.group}>
+                                <p className="text-[10px] font-medium uppercase tracking-wide text-paperlabel mb-1">
+                                  {preset.group}
+                                </p>
+                                <div className="flex flex-wrap gap-1.5">
+                                  {preset.clauses.map((clause) => (
+                                    <button
+                                      key={clause}
+                                      type="button"
+                                      onClick={() =>
+                                        setMyTerms((prev) => appendClause(prev, clause))
+                                      }
+                                      className="rounded border border-paperline bg-paperbg/60 px-2 py-1 text-left text-[11px] leading-snug text-paperhead transition-colors hover:border-paperlabel hover:bg-paperbg"
+                                    >
+                                      + {clause}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                            <p className="text-[10px] italic text-paperlabel">
+                              Tap to insert — replace anything in [brackets] with your details.
+                            </p>
+                          </div>
+                        </>
                       )}
                       <div className="flex gap-2 mt-3">
                         <Button onClick={saveTerms} disabled={savingTerms} size="sm">

@@ -169,7 +169,7 @@ export default function NeedsPage() {
     <div className="max-w-5xl mx-auto px-4 md:px-8">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 py-10">
         <div>
-          <h1 className="heading-display text-2xl text-gold">Browse Needs</h1>
+          <h1 className="heading-display text-2xl text-gold">The Exchange</h1>
           <p className="text-xs text-ash mt-3">$ ls ~/needs/</p>
           <p className="text-sm text-parchment mt-2">
             find needs you can fulfill — for services, items, or money in return

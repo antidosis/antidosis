@@ -300,11 +300,11 @@
 
   /* Sage - botanical whites, moss ink, forest accents. */
   :root[data-theme="sage"] {
-    --c-void: 243 246 241;
-    --c-surface: 250 252 247;
+    --c-void: 232 242 228;
+    --c-surface: 242 248 238;
     --c-raise: 255 255 255;
-    --c-inset: 236 241 233;
-    --c-line: 213 222 207;
+    --c-inset: 226 236 220;
+    --c-line: 198 216 190;
     --c-linehi: 185 197 176;
     --c-linestrong: 158 172 148;
     --c-gold: 25 38 27;
@@ -343,11 +343,11 @@
 
   /* Linen - warm beige, umber ink, terracotta warmth. */
   :root[data-theme="linen"] {
-    --c-void: 245 239 229;
-    --c-surface: 251 246 238;
+    --c-void: 244 234 219;
+    --c-surface: 250 242 230;
     --c-raise: 255 255 255;
-    --c-inset: 238 230 216;
-    --c-line: 219 207 187;
+    --c-inset: 238 226 208;
+    --c-line: 214 196 168;
     --c-linehi: 193 177 150;
     --c-linestrong: 168 148 118;
     --c-gold: 43 33 23;
@@ -386,11 +386,11 @@
 
   /* Skyline - pale ice blue, navy ink, harbour accents. */
   :root[data-theme="skyline"] {
-    --c-void: 238 243 248;
-    --c-surface: 246 250 253;
+    --c-void: 228 239 248;
+    --c-surface: 238 246 252;
     --c-raise: 255 255 255;
-    --c-inset: 231 238 246;
-    --c-line: 205 216 228;
+    --c-inset: 222 234 246;
+    --c-line: 190 212 232;
     --c-linehi: 175 190 207;
     --c-linestrong: 145 163 185;
     --c-gold: 22 32 46;
@@ -429,11 +429,11 @@
 
   /* Rosewater - blush whites, plum ink, rose accents. */
   :root[data-theme="rosewater"] {
-    --c-void: 249 241 240;
-    --c-surface: 253 247 246;
+    --c-void: 248 234 232;
+    --c-surface: 252 242 240;
     --c-raise: 255 255 255;
-    --c-inset: 243 232 230;
-    --c-line: 226 208 205;
+    --c-inset: 244 226 222;
+    --c-line: 222 196 190;
     --c-linehi: 201 175 171;
     --c-linestrong: 176 143 138;
     --c-gold: 48 28 30;
@@ -472,11 +472,11 @@
 
   /* Lavender - pale violet, aubergine ink, orchid accents. */
   :root[data-theme="lavender"] {
-    --c-void: 245 242 249;
-    --c-surface: 250 247 253;
+    --c-void: 239 233 247;
+    --c-surface: 246 241 252;
     --c-raise: 255 255 255;
-    --c-inset: 239 233 246;
-    --c-line: 214 204 228;
+    --c-inset: 232 224 244;
+    --c-line: 202 188 226;
     --c-linehi: 188 173 208;
     --c-linestrong: 162 143 188;
     --c-gold: 35 27 50;
@@ -515,11 +515,11 @@
 
   /* Citrus - cream pages, olive ink, lime zest accents. */
   :root[data-theme="citrus"] {
-    --c-void: 247 245 232;
-    --c-surface: 252 250 240;
+    --c-void: 246 242 214;
+    --c-surface: 251 248 228;
     --c-raise: 255 255 255;
-    --c-inset: 240 237 219;
-    --c-line: 221 216 190;
+    --c-inset: 240 234 204;
+    --c-line: 216 208 164;
     --c-linehi: 196 188 155;
     --c-linestrong: 170 159 120;
     --c-gold: 38 36 18;
@@ -630,49 +630,6 @@ body::after {
   }
 }
 
-/* ─── Signal rail ───
-   A dashed relay line running down the left edge of major marketing
-   sections, with a pulsing node at its head — sections read as stations
-   on one route. Hidden on small screens where horizontal space is tight. */
-.signal-rail {
-  position: relative;
-}
-
-@media (min-width: 768px) {
-  .signal-rail::before {
-    content: "";
-    position: absolute;
-    top: 3rem;
-    bottom: 3rem;
-    left: 1.25rem;
-    width: 0;
-    border-left: 1px dashed rgb(var(--c-mercury) / 0.35);
-  }
-
-  .signal-rail::after {
-    content: "";
-    position: absolute;
-    top: 2.4rem;
-    left: calc(1.25rem - 4px);
-    height: 9px;
-    width: 9px;
-    border-radius: 9999px;
-    background: rgb(var(--c-mercury));
-    box-shadow: 0 0 10px rgb(var(--c-mercury) / 0.8);
-    animation: rail-node-blink 2.6s ease-in-out infinite;
-  }
-}
-
-@keyframes rail-node-blink {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.35;
-  }
-}
-
 /* ─── Vessel hover: signal glow, not just a border shift ─── */
 .vessel {
   position: relative;
@@ -700,40 +657,19 @@ body::after {
 
 /* ─── Reduced motion: the field goes still ─── */
 @media (prefers-reduced-motion: reduce) {
-  body::after,
-  .signal-rail::after {
+  body::after {
     animation: none;
   }
 }
 
-/* ─── Section treatments — NO TWO SECTIONS SHARE A TREATMENT ───
-   Every pattern is built from --c-* tokens at whisper alpha (0.03–0.12) so
-   all 16 palettes (dark and light) render it as an elegant tint. Scale is
-   large; contrast is low; the text always owns the foreground. */
+/* ─── Section treatments — SELECTIVE BY DESIGN ───
+   Three treatments exist; apply at most one per page, only where a section
+   genuinely needs to break the plain rhythm. All are token-driven so every
+   palette renders them correctly, and all stay below ~0.14 alpha so text
+   always owns the foreground. */
 
-/* 1 · Scanfield — slow terminal scanlines for data-dense bands */
-.section-scanfield {
-  background-image:
-    repeating-linear-gradient(0deg, rgb(var(--c-line) / 0.28) 0 1px, transparent 1px 5px),
-    linear-gradient(180deg, rgb(var(--c-void)), rgb(var(--c-surface)));
-}
-
-/* 2 · Blueprint — engineering grid, minor + major lines */
-.section-blueprint {
-  background-color: rgb(var(--c-surface));
-  background-image:
-    linear-gradient(rgb(var(--c-line) / 0.32) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(var(--c-line) / 0.32) 1px, transparent 1px),
-    linear-gradient(rgb(var(--c-line) / 0.5) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(var(--c-line) / 0.5) 1px, transparent 1px);
-  background-size:
-    44px 44px,
-    44px 44px,
-    220px 220px,
-    220px 220px;
-}
-
-/* 3 · Carbon — fibre weave, softened */
+/* Carbon — fibre weave. For the trust/feature grid: strength through weave,
+   strands interlocked the way a community carries load. */
 .section-carbon {
   background-color: rgb(var(--c-inset));
   background-image:
@@ -745,15 +681,34 @@ body::after {
   background-position: 0 6px, 12px 0, 12px 12px, 0 0;
 }
 
-/* 4 · Aurora — vast twin accent washes */
+/* Aurora — the sky answering back. The two accent glows drift on a 26s
+   cycle, so the section feels alive without a single line of JS. */
 .section-aurora {
+  background-color: rgb(var(--c-void));
   background-image:
     radial-gradient(72rem 36rem at 10% -10%, rgb(var(--c-mercury) / 0.1), transparent 62%),
     radial-gradient(60rem 32rem at 95% 115%, rgb(var(--c-quint) / 0.11), transparent 62%),
     linear-gradient(180deg, rgb(var(--c-void)), rgb(var(--c-surface)) 150%);
+  animation: aurora-drift 26s ease-in-out infinite alternate;
 }
 
-/* 5 · Radar — concentric ranging rings from a station corner */
+@keyframes aurora-drift {
+  0% {
+    background-position:
+      0% 0%,
+      0% 0%,
+      0 0;
+  }
+  100% {
+    background-position:
+      4% 3%,
+      -4% -3%,
+      0 0;
+  }
+}
+
+/* Radar — trust verified at range. Reputation reaches further than any
+   voice; the rings keep sounding. */
 .section-radar {
   background-color: rgb(var(--c-void));
   background-image:
@@ -766,89 +721,7 @@ body::after {
     linear-gradient(180deg, rgb(var(--c-void)), rgb(var(--c-inset)) 170%);
 }
 
-/* 6 · Hexloom — fine diagonal cross-hatch, loom-woven */
-.section-hexloom {
-  background-color: rgb(var(--c-surface));
-  background-image:
-    repeating-linear-gradient(45deg, rgb(var(--c-line) / 0.22) 0 1px, transparent 1px 14px),
-    repeating-linear-gradient(-45deg, rgb(var(--c-line) / 0.22) 0 1px, transparent 1px 14px);
-}
-
-/* 7 · Forge — heat rising from below */
-.section-forge {
-  background-image:
-    radial-gradient(52rem 28rem at 50% 118%, rgb(var(--c-sun) / 0.13), transparent 66%),
-    radial-gradient(34rem 20rem at 88% -8%, rgb(var(--c-ember) / 0.08), transparent 60%),
-    linear-gradient(180deg, rgb(var(--c-void)), rgb(var(--c-inset)) 170%);
-}
-
-/* 8 · Lattice — sparse node field */
-.section-lattice {
-  background-color: rgb(var(--c-surface));
-  background-image:
-    radial-gradient(rgb(var(--c-linehi) / 0.4) 1.2px, transparent 1.8px),
-    radial-gradient(rgb(var(--c-linehi) / 0.25) 1px, transparent 1.6px);
-  background-size:
-    34px 34px,
-    34px 34px;
-  background-position:
-    0 0,
-    17px 17px;
-}
-
-/* 9 · Contours — topographic rings drifting through the section */
-.section-contours {
-  background-color: rgb(var(--c-void));
-  background-image:
-    radial-gradient(circle at 18% 24%, transparent 0 5rem, rgb(var(--c-linehi) / 0.28) 5rem calc(5rem + 1px), transparent calc(5rem + 2px)),
-    radial-gradient(circle at 18% 24%, transparent 0 9rem, rgb(var(--c-linehi) / 0.22) 9rem calc(9rem + 1px), transparent calc(9rem + 2px)),
-    radial-gradient(circle at 82% 78%, transparent 0 6rem, rgb(var(--c-linehi) / 0.26) 6rem calc(6rem + 1px), transparent calc(6rem + 2px)),
-    radial-gradient(circle at 82% 78%, transparent 0 11rem, rgb(var(--c-linehi) / 0.2) 11rem calc(11rem + 1px), transparent calc(11rem + 2px)),
-    linear-gradient(180deg, rgb(var(--c-void)), rgb(var(--c-surface)) 160%);
-}
-
-/* 10 · Columns — vertical data lines with an edge fade */
-.section-columns {
-  background-color: rgb(var(--c-surface));
-  background-image:
-    repeating-linear-gradient(90deg, rgb(var(--c-line) / 0.3) 0 1px, transparent 1px 76px),
-    linear-gradient(90deg, rgb(var(--c-surface)) 0%, transparent 12%, transparent 88%, rgb(var(--c-surface)) 100%);
-}
-
-/* 11 · Hazard — bold diagonal cadence, kept faint */
-.section-hazard {
-  background-color: rgb(var(--c-void));
-  background-image:
-    repeating-linear-gradient(-45deg, transparent 0 22px, rgb(var(--c-sun) / 0.05) 22px 44px),
-    linear-gradient(180deg, rgb(var(--c-void)), rgb(var(--c-inset)) 160%);
-}
-
-/* 12 · Spotlight — a single soft beam from above centre */
-.section-spotlight {
-  background-image:
-    radial-gradient(64rem 34rem at 50% -12%, rgb(var(--c-mercury) / 0.09), transparent 60%),
-    radial-gradient(40rem 26rem at 50% -20%, rgb(var(--c-raise) / 0.55), transparent 70%),
-    linear-gradient(180deg, rgb(var(--c-surface)), rgb(var(--c-void)) 140%);
-}
-
-/* 13 · Crossmarks — grid with marked intersections */
-.section-crossmarks {
-  background-color: rgb(var(--c-surface));
-  background-image:
-    radial-gradient(rgb(var(--c-mercury) / 0.3) 1.4px, transparent 2px),
-    linear-gradient(rgb(var(--c-line) / 0.3) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(var(--c-line) / 0.3) 1px, transparent 1px);
-  background-size:
-    64px 64px,
-    64px 64px,
-    64px 64px;
-  background-position:
-    32px 32px,
-    0 0,
-    0 0;
-}
-
-  /* ─── Font packs (Settings → Appearance) ───
+/* ─── Font packs (Settings → Appearance) ───
      Selected via <html data-font="...">; the init script in root layout sets
      it pre-paint from localStorage ("antidosis-font"). */
   :root[data-font="system"] {
@@ -866,6 +739,46 @@ body::after {
      (gold, parchment, bronze, glows) recomputes from these. */
 
   /* Chrome — liquid metal. Cold gunmetal, platinum text, icy blue accents. */
+  /* Gaia — Mother Earth. The default dark palette: deep forest floor, emerald
+     signal (the logo's green) and aqua water. Reciprocity is nature's own
+     economy — everything given is returned somewhere else. */
+  :root[data-theme="gaia"] {
+    --c-void: 7 12 9;
+    --c-surface: 11 19 14;
+    --c-raise: 16 27 20;
+    --c-inset: 9 15 11;
+    --c-line: 26 44 33;
+    --c-linehi: 39 66 50;
+    --c-linestrong: 58 96 72;
+    --c-gold: 216 230 206;
+    --c-goldsoft: 192 212 182;
+    --c-goldhi: 234 244 226;
+    --c-parchment: 168 192 162;
+    --c-ash: 122 148 120;
+    --c-ash2: 118 143 116;
+    --c-leather: 106 132 106;
+    --c-faint: 186 206 180;
+    --c-sun: 30 210 130;
+    --c-sunhi: 86 232 162;
+    --c-sundim: 20 152 96;
+    --c-ember: 210 122 52;
+    --c-alert: 202 172 44;
+    --c-ok: 22 212 126;
+    --c-termgreen: 40 235 150;
+    --c-bad: 240 96 96;
+    --c-mercury: 42 212 200;
+    --c-mercdim: 32 182 174;
+    --c-aero: 48 198 186;
+    --c-quint: 140 222 92;
+    --c-quintdim: 122 202 80;
+    --c-orchid: 152 222 172;
+    --c-magenta: 232 122 164;
+    --c-aqua: 40 210 200;
+    --c-quintbg: 10 30 18;
+    --c-mercurybg: 6 26 24;
+    --c-okbg: 4 28 16;
+  }
+
   :root[data-theme="chrome"] {
     --c-void: 12 14 17;
     --c-surface: 18 21 26;

@@ -82,6 +82,8 @@ mobile/                   # Capacitor mobile app
 - **Site themes**: `data-theme` on `<html>` selects the palette — `dark` (default), `light`, and named dark themes `chrome|ember|phosphor|ultraviolet|glacier|regal|rose` (CSS blocks in `globals.css`, registry in `src/lib/themes.ts`, picker in Dashboard → Settings → Appearance). Persisted as `antidosis-theme`; init script in root layout runs pre-paint. **Font packs**: `data-font` on `<html>` (`terminal|system|editorial|typewriter`) switches the body font via `--font-body`; persisted as `antidosis-font`
 - Light/dark themes: default follows `prefers-color-scheme`, overridden by the navbar toggle (persisted as `antidosis-theme` in localStorage; init script runs pre-paint in `layout.tsx`). Inline-style accent colors use hex-valued `--x-*` vars so `` `${color}15` `` alpha suffixes keep working
 - Contract parchment (`paper*` tokens) and terminal named skins (cyberpunk/matrix/minimal) are constants — identical in both themes by design
+- **Section treatments are SELECTIVE**: only three exist (`section-carbon`, `section-aurora` — animated drift, `section-radar`), all token-driven for any palette; apply at most one per page, only where a section must break the plain rhythm. Plain background is the default and correct most of the time
+- **Main nav order**: exchange (`/needs`, first — post lives inside it) → directory → relay (auth) → blog → how-it-works → dashboard (auth). Demo/post are not header items
 - Custom class: `vessel` = card container with border/bg
 - Custom class: `heading-display` = display font stack
 

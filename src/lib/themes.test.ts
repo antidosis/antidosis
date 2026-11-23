@@ -12,9 +12,12 @@ import {
 } from "./themes";
 
 describe("SITE_THEMES", () => {
-  it("ships 8 dark and 8 light themes", () => {
-    expect(SITE_THEMES.filter((t) => t.brightness === "dark")).toHaveLength(8);
+  it("ships 9 dark and 8 light themes, default first in each side", () => {
+    expect(SITE_THEMES.filter((t) => t.brightness === "dark")).toHaveLength(9);
     expect(SITE_THEMES.filter((t) => t.brightness === "light")).toHaveLength(8);
+    // The default theme leads its brightness group in the picker
+    expect(SITE_THEMES.find((t) => t.brightness === "dark")?.id).toBe("gaia");
+    expect(SITE_THEMES.find((t) => t.brightness === "light")?.id).toBe("light");
   });
 
   it("has unique ids, labels, and complete metadata", () => {
@@ -91,16 +94,16 @@ describe("applySiteTheme", () => {
 });
 
 describe("getThemePair", () => {
-  it("defaults to Chrome + Daybreak", () => {
+  it("defaults to Gaia + Daybreak", () => {
     localStorage.removeItem("antidosis-pair");
-    expect(getThemePair()).toEqual({ dark: "chrome", light: "light" });
+    expect(getThemePair()).toEqual({ dark: "gaia", light: "light" });
   });
 
   it("repairs invalid or wrong-brightness slots", () => {
     localStorage.setItem("antidosis-pair", JSON.stringify({ dark: "porcelain", light: "ember" }));
-    expect(getThemePair()).toEqual({ dark: "chrome", light: "light" });
+    expect(getThemePair()).toEqual({ dark: "gaia", light: "light" });
 
     localStorage.setItem("antidosis-pair", JSON.stringify({ dark: "chrome", light: "bogus" }));
-    expect(getThemePair()).toEqual({ dark: "chrome", light: "light" });
+    expect(getThemePair()).toEqual({ dark: "chrome", light: "light" }); // valid dark kept, bogus light repaired
   });
 });

@@ -6,6 +6,7 @@
  */
 
 export type SiteThemeId =
+  | "gaia"
   | "dark"
   | "chrome"
   | "ember"
@@ -36,6 +37,13 @@ export interface SiteTheme {
 
 export const SITE_THEMES: SiteTheme[] = [
   // ─── Dark ───
+  {
+    id: "gaia",
+    label: "Gaia",
+    description: "Mother Earth — emerald signal, aqua water",
+    swatch: ["#070c09", "#1ed282"],
+    brightness: "dark",
+  },
   {
     id: "dark",
     label: "Obsidian",
@@ -175,7 +183,7 @@ export interface ThemePair {
   light: SiteThemeId;
 }
 
-export const DEFAULT_THEME_PAIR: ThemePair = { dark: "chrome", light: "light" };
+export const DEFAULT_THEME_PAIR: ThemePair = { dark: "gaia", light: "light" };
 
 export function getThemePair(): ThemePair {
   try {
@@ -183,7 +191,7 @@ export function getThemePair(): ThemePair {
     if (raw) {
       const parsed = JSON.parse(raw) as Partial<ThemePair>;
       return {
-        dark: isSiteThemeId(parsed.dark) && !isLightThemeId(parsed.dark) ? parsed.dark : "chrome",
+        dark: isSiteThemeId(parsed.dark) && !isLightThemeId(parsed.dark) ? parsed.dark : "gaia",
         light: isSiteThemeId(parsed.light) && isLightThemeId(parsed.light) ? parsed.light : "light",
       };
     }

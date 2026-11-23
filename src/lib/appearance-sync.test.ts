@@ -29,7 +29,7 @@ describe("pairFromPreferences", () => {
 
   it("maps the legacy single-theme shape onto its brightness slot", () => {
     expect(pairFromPreferences({ theme: "glacier" })).toEqual({ light: "light", dark: "glacier" });
-    expect(pairFromPreferences({ theme: "linen" })).toEqual({ light: "linen", dark: "chrome" });
+    expect(pairFromPreferences({ theme: "linen" })).toEqual({ light: "linen", dark: "gaia" });
   });
 
   it("prefers explicit slots over the legacy theme", () => {
