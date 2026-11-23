@@ -155,11 +155,12 @@ test.describe("Relay chat", () => {
 
     await page.goto("/terminal");
 
-    // Wait for sidebar and click the general channel
-    await page.locator("text=#general").click();
+    // Wait for sidebar and click the general channel (#general appears in
+    // the sidebar, the header, and the subtitle — use the sidebar link)
+    await page.locator("text=#general").first().click();
 
     // Wait for channel header to update
-    await expect(page.locator("text=#general")).toBeVisible();
+    await expect(page.locator("text=#general").first()).toBeVisible();
 
     // Dismiss public channel warning if shown
     const dismissBtn = page.locator("text=Dismiss");

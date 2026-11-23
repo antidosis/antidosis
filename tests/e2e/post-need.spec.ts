@@ -117,8 +117,9 @@ test.describe("Post a need", () => {
       .locator('textarea[placeholder="describe what you are offering..."]')
       .fill("Offering a coffee and a thank you note in exchange.");
 
-    // Ensure "service" offer type is selected (default)
-    await expect(page.locator("button:has-text('service')")).toBeVisible();
+    // Ensure "service" offer type is selected (default). Exact match — the
+    // sub-category chips also contain the word "service".
+    await expect(page.getByRole("button", { name: "service", exact: true })).toBeVisible();
 
     await page.locator('button[type="submit"]').click();
 

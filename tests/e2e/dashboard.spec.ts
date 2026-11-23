@@ -12,12 +12,51 @@ test.describe("Dashboard", () => {
     test.skip(!hasAuthCredentials(), "E2E auth credentials not configured");
 
     await login(page);
+
+    // Mock profile so the dashboard renders fully
+    await page.route("/api/v1/profiles/me", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          id: "test-user-id",
+          fullName: "E2E Test User",
+          email: "e2e-test-user@antidosis.test",
+          bio: null,
+          avatarUrl: null,
+          locationName: null,
+          publicPhone: null,
+          privatePhone: null,
+          mobile: null,
+          mobileVerified: true,
+          isVerified: false,
+          isPro: false,
+          ratingAvg: 0,
+          ratingCount: 0,
+          jobsCompleted: 0,
+          skills: [],
+          socialLinks: [],
+          credentials: [],
+        }),
+      });
+    });
+
+    await page.route("/api/v1/needs/mine", async (route) => {
+      await route.fulfill({ status: 200, contentType: "application/json", body: "[]" });
+    });
+    await page.route("/api/v1/contracts/mine", async (route) => {
+      await route.fulfill({ status: 200, contentType: "application/json", body: "[]" });
+    });
+    await page.route("/api/v1/acceptances/mine", async (route) => {
+      await route.fulfill({ status: 200, contentType: "application/json", body: "[]" });
+    });
+
     await page.goto("/dashboard");
 
     await expect(page.locator("text=Dashboard").first()).toBeVisible({
       timeout: 10_000,
     });
-    await expect(page.locator("text=$ whoami")).toBeVisible();
+    await expect(page.getByText("$ whoami")).toBeVisible();
   });
 
   test("shows credentials section", async ({ page }) => {
