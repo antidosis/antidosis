@@ -256,7 +256,7 @@ export default function HomePage() {
         <div className="divider" />
 
         {/* FEATURES — one compact grid */}
-        <section className="section-carbon py-20 md:py-28 border-t border-line">
+        <section className="section-plateau py-20 md:py-28 border-t border-line">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-8 font-mono">
@@ -279,7 +279,7 @@ export default function HomePage() {
         <div className="divider" />
 
         {/* COMMUNITY RELAY */}
-        <section className="section-aurora py-20 md:py-28 border-t border-line">
+        <section className="section-constellation py-20 md:py-28 border-t border-line">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <Reveal>

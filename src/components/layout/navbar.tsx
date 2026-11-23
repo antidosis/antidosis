@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { Menu, X, Radio } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -53,10 +53,9 @@ export function Navbar() {
     };
   }, [mobileOpen]);
 
+  // The directory and relay live inside the exchange (bands), not on the top bar.
   const navItems = [
     { href: "/exchange", label: "exchange" },
-    { href: "/pros", label: "directory" },
-    ...(user ? [{ href: "/terminal", label: "relay", isTerminal: true as const }] : []),
     { href: "/store", label: "store" },
     { href: "/blog", label: "blog" },
     { href: "/how-it-works", label: "how it works" },
@@ -85,9 +84,10 @@ export function Navbar() {
               .map((item) => {
                 const isActive =
                   item.href === "/exchange"
-                    ? pathname.startsWith("/needs") || pathname.startsWith("/exchange")
+                    ? ["/needs", "/exchange", "/pros", "/terminal"].some((p) =>
+                        pathname.startsWith(p)
+                      )
                     : pathname === item.href;
-                const isTerminal = item.href === "/terminal";
                 return (
                   <Link
                     key={item.href}
@@ -98,7 +98,6 @@ export function Navbar() {
                       isActive ? "text-sun glow-gold-subtle" : "text-ash hover:text-gold"
                     )}
                   >
-                    {isTerminal && <Radio className="h-3.5 w-3.5" />}
                     {item.label}
                     {isActive && (
                       <span className="absolute -bottom-1 left-0 right-0 h-px bg-sun shadow-[0_0_8px_rgba(245,166,35,0.5)]" />
@@ -168,7 +167,6 @@ export function Navbar() {
               const isActive =
                 item.href === "/needs" ? pathname.startsWith("/needs") : pathname === item.href;
               const isDashboard = item.href === "/dashboard";
-              const isTerminal = item.href === "/terminal";
               return (
                 <Link
                   key={item.href}
@@ -178,14 +176,11 @@ export function Navbar() {
                     "py-3 text-base transition-colors border-b border-line/50 flex items-center gap-2",
                     isDashboard
                       ? "text-sun font-medium"
-                      : isTerminal
-                        ? "text-mercury font-medium"
-                        : isActive
-                          ? "text-sun glow-gold-subtle"
-                          : "text-ash hover:text-gold"
+                      : isActive
+                        ? "text-sun glow-gold-subtle"
+                        : "text-ash hover:text-gold"
                   )}
                 >
-                  {isTerminal && <Radio className="h-4 w-4" />}
                   {item.label}
                 </Link>
               );

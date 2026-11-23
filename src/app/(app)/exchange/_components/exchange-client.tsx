@@ -5,7 +5,7 @@ import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { ArrowRight, Briefcase, Lock, Plus, Radio, Users } from "lucide-react";
+import { ArrowRight, BookUser, Briefcase, Lock, Plus, Radio } from "lucide-react";
 
 import NeedsListClient from "@/app/(app)/needs/_components/needs-list-client";
 import ProsDirectoryPage from "@/app/(app)/pros/_components/pros-client";
@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 import { RelayPreview } from "./relay-preview";
 import { StatusBoard } from "./status-board";
 
-type Band = "needs" | "nodes" | "relay";
+type Band = "needs" | "directory" | "relay";
 
 const BANDS: {
   id: Band;
@@ -33,10 +33,10 @@ const BANDS: {
     subtitle: "open signals on the local board",
   },
   {
-    id: "nodes",
-    label: "nodes",
+    id: "directory",
+    label: "directory",
     freq: "146.400 MHz",
-    icon: Users,
+    icon: BookUser,
     subtitle: "verified people and business base-stations",
   },
   {
@@ -67,7 +67,7 @@ function ExchangeClient() {
   const [band, setBand] = useState<Band>(() => parseBand(searchParams.get("band")));
   const [visited, setVisited] = useState<Record<Band, boolean>>({
     needs: true,
-    nodes: false,
+    directory: false,
     relay: false,
   });
   const [user, setUser] = useState<{ id: string } | null>(null);
@@ -161,7 +161,7 @@ function ExchangeClient() {
                 </Link>
               </Button>
             )}
-            {band === "nodes" && (
+            {band === "directory" && (
               <Button asChild variant="secondary" size="sm">
                 <Link href="/dashboard?tab=profile">Appear here</Link>
               </Button>
@@ -193,8 +193,8 @@ function ExchangeClient() {
               <div className={cn(band !== "needs" && "hidden")}>
                 <NeedsListClient embedded />
               </div>
-              {visited.nodes && (
-                <div className={cn(band !== "nodes" && "hidden")}>
+              {visited.directory && (
+                <div className={cn(band !== "directory" && "hidden")}>
                   <ProsDirectoryPage embedded />
                 </div>
               )}

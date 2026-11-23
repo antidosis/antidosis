@@ -206,16 +206,9 @@ export default function NeedsPage({ embedded = false }: NeedsListClientProps) {
         </div>
       )}
       {embedded && (
-        <div className="mb-6 flex items-center justify-between gap-3">
-          <p className="text-sm text-ash">
-            <span className="font-mono text-parchment">{total}</span> open signals on the board
-          </p>
-          <Button asChild variant="default" size="sm">
-            <Link href="/needs/new">
-              Broadcast a need <ArrowRight className="ml-1 h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
+        <p className="mb-6 text-sm text-ash">
+          <span className="font-mono text-parchment">{total}</span> open signals on the board
+        </p>
       )}
 
       <div className="bg-mercury/10 border border-mercury/30 p-4 mb-6">

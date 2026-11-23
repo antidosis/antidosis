@@ -353,7 +353,7 @@ export default function HowItWorksPage() {
         <div className="divider" />
 
         {/* TRUST BY DESIGN */}
-        <section className="section-radar py-20 md:py-28">
+        <section className="section-plateau py-20 md:py-28">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
               <div>

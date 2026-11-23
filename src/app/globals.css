@@ -663,62 +663,38 @@ body::after {
 }
 
 /* ─── Section treatments — SELECTIVE BY DESIGN ───
-   Three treatments exist; apply at most one per page, only where a section
-   genuinely needs to break the plain rhythm. All are token-driven so every
-   palette renders them correctly, and all stay below ~0.14 alpha so text
-   always owns the foreground. */
+   Exactly two exist; apply at most one per page, only where a section
+   genuinely needs to break the plain rhythm. Both are token-driven so every
+   palette renders them correctly, both are static gradients (no animation,
+   no images — near-zero paint cost), and both stay faint enough that text
+   always owns the foreground.
 
-/* Carbon — fibre weave. For the trust/feature grid: strength through weave,
-   strands interlocked the way a community carries load. */
-.section-carbon {
+   section-plateau — TRUST. Trust is a raised floor, not a decoration: the
+   ground lifts a few inches and holds. No pattern, no weave — the structure
+   is load-bearing, so it stays invisible.
+
+   section-constellation — THE MESH AT REST. A field of faint dots, each one
+   a neighbour still awake; the glow low on the horizon is the relay. Used
+   only for community/signal sections: you are never the only light on. */
+
+.section-plateau {
   background-color: rgb(var(--c-inset));
   background-image:
-    linear-gradient(27deg, rgb(var(--c-line) / 0.45) 5px, transparent 5px),
-    linear-gradient(207deg, rgb(var(--c-line) / 0.45) 5px, transparent 5px),
-    linear-gradient(27deg, rgb(var(--c-raise) / 0.65) 5px, transparent 5px),
-    linear-gradient(207deg, rgb(var(--c-raise) / 0.65) 5px, transparent 5px);
-  background-size: 24px 24px;
-  background-position: 0 6px, 12px 0, 12px 12px, 0 0;
+    linear-gradient(180deg, rgb(var(--c-gold) / 0.035), transparent 18%),
+    linear-gradient(180deg, rgb(var(--c-void)), rgb(var(--c-inset)) 60%);
 }
 
-/* Aurora — the sky answering back. The two accent glows drift on a 26s
-   cycle, so the section feels alive without a single line of JS. */
-.section-aurora {
+.section-constellation {
   background-color: rgb(var(--c-void));
   background-image:
-    radial-gradient(72rem 36rem at 10% -10%, rgb(var(--c-mercury) / 0.1), transparent 62%),
-    radial-gradient(60rem 32rem at 95% 115%, rgb(var(--c-quint) / 0.11), transparent 62%),
-    linear-gradient(180deg, rgb(var(--c-void)), rgb(var(--c-surface)) 150%);
-  animation: aurora-drift 26s ease-in-out infinite alternate;
-}
-
-@keyframes aurora-drift {
-  0% {
-    background-position:
-      0% 0%,
-      0% 0%,
-      0 0;
-  }
-  100% {
-    background-position:
-      4% 3%,
-      -4% -3%,
-      0 0;
-  }
-}
-
-/* Radar — trust verified at range. Reputation reaches further than any
-   voice; the rings keep sounding. */
-.section-radar {
-  background-color: rgb(var(--c-void));
-  background-image:
-    repeating-radial-gradient(
-      circle at 88% 12%,
-      rgb(var(--c-mercury) / 0.14) 0 1px,
-      transparent 1px 84px
-    ),
-    radial-gradient(circle at 88% 12%, rgb(var(--c-mercury) / 0.2) 0 3px, transparent 4px),
-    linear-gradient(180deg, rgb(var(--c-void)), rgb(var(--c-inset)) 170%);
+    radial-gradient(circle at 50% 120%, rgb(var(--c-mercury) / 0.07), transparent 55%),
+    radial-gradient(
+      rgb(var(--c-parchment) / 0.075) 1px,
+      transparent 1px
+    );
+  background-size:
+    100% 100%,
+    30px 30px;
 }
 
 /* ─── Font packs (Settings → Appearance) ───
