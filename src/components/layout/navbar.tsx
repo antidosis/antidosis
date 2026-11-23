@@ -57,6 +57,7 @@ export function Navbar() {
     { href: "/exchange", label: "exchange" },
     { href: "/pros", label: "directory" },
     ...(user ? [{ href: "/terminal", label: "relay", isTerminal: true as const }] : []),
+    { href: "/store", label: "store" },
     { href: "/blog", label: "blog" },
     { href: "/how-it-works", label: "how it works" },
     ...(user ? [{ href: "/dashboard", label: "dashboard" }] : []),
