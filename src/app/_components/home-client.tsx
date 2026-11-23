@@ -194,7 +194,7 @@ export default function HomePage() {
         </section>
 
         {/* LIVE SIGNALS — example exchanges first, concept second */}
-        <section className="signal-rail section-dots py-16 md:py-20 border-t border-line">
+        <section className="signal-rail section-scanfield py-16 md:py-20 border-t border-line">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-3 font-mono">» LIVE SIGNALS — ON THE AIR</p>
@@ -213,7 +213,7 @@ export default function HomePage() {
         <div className="divider" />
 
         {/* HOW IT WORKS — 3 Steps */}
-        <section className="signal-rail section-grid py-20 md:py-28 border-t border-line">
+        <section className="signal-rail section-blueprint py-20 md:py-28 border-t border-line">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-12 font-mono">» SIGNAL PATH — THREE STEPS</p>
@@ -308,7 +308,7 @@ export default function HomePage() {
         <div className="divider" />
 
         {/* FOR BUSINESSES */}
-        <section className="signal-rail section-carbon py-20 md:py-28 border-t border-line">
+        <section className="signal-rail section-hexloom py-20 md:py-28 border-t border-line">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-8 font-mono">» TRADE DESK — FOR BUSINESSES</p>
@@ -365,7 +365,7 @@ export default function HomePage() {
         <div className="divider" />
 
         {/* FOR CREATORS & INFLUENCERS */}
-        <section className="signal-rail section-aurora py-20 md:py-28 border-t border-line">
+        <section className="signal-rail section-contours py-20 md:py-28 border-t border-line">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-8 font-mono">

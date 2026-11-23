@@ -55,6 +55,13 @@ const config: Config = {
         paperhead: "#1a0f08",
         paperlabel: "#8a7050",
       },
+      fontSize: {
+        xs: ["13px", { lineHeight: "1.5" }],
+        sm: ["15px", { lineHeight: "1.55" }],
+        base: ["16px", { lineHeight: "1.6" }],
+        lg: ["19px", { lineHeight: "1.5" }],
+        xl: ["22px", { lineHeight: "1.4" }],
+      },
       fontFamily: {
         sans: [
           "var(--font-sans)",
