@@ -16,6 +16,8 @@ import {
   Building2,
   FileText,
   Handshake,
+  Megaphone,
+  Camera,
 } from "lucide-react";
 
 import { BootSequence } from "@/components/effects/boot-sequence";
@@ -354,6 +356,65 @@ export default function HomePage() {
               <Button asChild variant="secondary" size="sm" className="mt-6">
                 <Link href="/pros">
                   Browse the directory <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </Reveal>
+          </div>
+        </section>
+
+        <div className="divider" />
+
+        {/* FOR CREATORS & INFLUENCERS */}
+        <section className="py-20 md:py-28 border-t border-line">
+          <div className="max-w-6xl mx-auto px-4 md:px-8">
+            <Reveal>
+              <p className="text-xs text-ash mb-8 font-mono">
+                ◈ CREATOR DESK — FOR INFLUENCERS &amp; REVIEWERS
+              </p>
+              <h2 className="heading-display text-3xl md:text-4xl text-gold mb-6">
+                Post It. <span className="text-orchid">Eat Free.</span>
+              </h2>
+              <p className="text-sm text-ash leading-relaxed max-w-2xl mb-12">
+                Food reviewers, local creators, and anyone with an audience — local businesses will
+                trade meals, products, and paid gigs for a post or a review. Your reach is your
+                currency.
+              </p>
+            </Reveal>
+            <div className="grid md:grid-cols-3 gap-8">
+              <Reveal delay={0}>
+                <StepCard
+                  num="C1"
+                  title="Show Your Reach"
+                  desc="Add your audience size and social links to your profile. Businesses can see exactly what a collab with you is worth."
+                  illustration={<Camera className="w-24 h-24 text-orchid opacity-60" />}
+                />
+              </Reveal>
+              <Reveal delay={150}>
+                <StepCard
+                  num="C2"
+                  title="Take Promo Deals"
+                  desc="Browse Promo / Review needs from local cafés, shops, and tradies. A free meal, a product, or cash — in exchange for content."
+                  illustration={<Megaphone className="w-24 h-24 text-mercury opacity-60" />}
+                />
+              </Reveal>
+              <Reveal delay={300}>
+                <StepCard
+                  num="C3"
+                  title="Get Rated Like a Pro"
+                  desc="Every collab is a contract with the exchange recorded. Deliver, get reviewed, and watch your creator reputation grow."
+                  illustration={<Star className="w-24 h-24 text-sun opacity-60" />}
+                />
+              </Reveal>
+            </div>
+            <Reveal delay={400}>
+              <p className="text-xs text-ash/70 mt-10 max-w-2xl leading-relaxed">
+                Sponsorships and free products are exchanges between you and the business — recorded
+                in the contract terms, never processed by antidosis. Always disclose sponsored
+                content under Australian consumer law.
+              </p>
+              <Button asChild variant="secondary" size="sm" className="mt-6">
+                <Link href="/needs">
+                  Browse promo needs <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
             </Reveal>

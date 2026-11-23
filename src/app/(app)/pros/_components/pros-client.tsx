@@ -38,6 +38,7 @@ interface ProProfile {
   accountType: string;
   abn: string | null;
   abnVerified: boolean;
+  audienceSize: number | null;
   skills: { name: string }[];
   credentials: { id: string }[];
 }
@@ -190,6 +191,12 @@ export default function ProsDirectoryPage() {
                           <Shield className="h-3 w-3" /> verified
                         </span>
                       )}
+                    </p>
+                  )}
+
+                  {pro.accountType === "individual" && pro.audienceSize != null && (
+                    <p className="text-[11px] text-orchid mt-1">
+                      reaches ~{pro.audienceSize.toLocaleString()} people
                     </p>
                   )}
 

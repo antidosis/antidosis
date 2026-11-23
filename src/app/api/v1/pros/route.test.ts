@@ -110,4 +110,44 @@ describe("GET /api/v1/pros", () => {
     const call = mockProfileFindMany.mock.calls[0][0];
     expect(call.where.accountType).toBeUndefined();
   });
+
+  it("hides an individual's ABN and keeps their audience size", async () => {
+    mockProfileFindMany.mockResolvedValue([
+      {
+        id: "i1",
+        fullName: "Creator",
+        accountType: "individual",
+        abn: "51824753556",
+        abnVerified: true,
+        audienceSize: 3200,
+        skills: [],
+        credentials: [],
+      },
+    ]);
+    const res = await GET(makeRequest("http://localhost/api/v1/pros"));
+    const json = await res.json();
+    expect(json[0].abn).toBeNull();
+    expect(json[0].abnVerified).toBe(false);
+    expect(json[0].audienceSize).toBe(3200);
+  });
+
+  it("keeps a business's ABN and hides audience size", async () => {
+    mockProfileFindMany.mockResolvedValue([
+      {
+        id: "b1",
+        fullName: "Acme",
+        accountType: "business",
+        abn: "51824753556",
+        abnVerified: true,
+        audienceSize: 99000,
+        skills: [],
+        credentials: [],
+      },
+    ]);
+    const res = await GET(makeRequest("http://localhost/api/v1/pros"));
+    const json = await res.json();
+    expect(json[0].abn).toBe("51824753556");
+    expect(json[0].abnVerified).toBe(true);
+    expect(json[0].audienceSize).toBeNull();
+  });
 });

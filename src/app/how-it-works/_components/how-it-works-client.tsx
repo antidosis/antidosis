@@ -17,6 +17,8 @@ import {
   ArrowRight,
   GitFork,
   Package,
+  Megaphone,
+  Camera,
 } from "lucide-react";
 
 import { Footer } from "@/components/layout/footer";
@@ -499,6 +501,57 @@ export default function HowItWorksPage() {
                     Every completed job feeds the same reputation system. Payment terms are recorded
                     in the contract; money moves directly between the parties — never through
                     antidosis.
+                  </p>
+                </div>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+
+        <div className="divider" />
+
+        {/* CREATOR DESK */}
+        <section className="py-20 md:py-28">
+          <div className="max-w-6xl mx-auto px-4 md:px-8">
+            <Reveal>
+              <p className="text-xs text-ash mb-6 font-mono">
+                ◈ CREATOR DESK — INFLUENCERS &amp; REVIEWERS
+              </p>
+              <h2 className="heading-display text-3xl md:text-4xl text-gold mb-4">
+                Your Audience Is
+                <br />
+                <span className="text-orchid">An Exchange.</span>
+              </h2>
+              <p className="text-sm text-ash leading-relaxed max-w-2xl mb-10">
+                Food reviewers, local creators, and micro-influencers trade posts and reviews for
+                meals, products, and paid gigs — the same rails as every other exchange:
+              </p>
+            </Reveal>
+            <Reveal delay={150}>
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="vessel p-6">
+                  <Camera className="h-5 w-5 text-orchid mb-3" />
+                  <p className="text-sm font-medium text-gold mb-2">Put your reach on the record</p>
+                  <p className="text-xs text-ash leading-relaxed">
+                    Add your audience size and social links to your profile. Businesses browsing the
+                    directory can see exactly what a collab with you is worth.
+                  </p>
+                </div>
+                <div className="vessel p-6">
+                  <Megaphone className="h-5 w-5 text-sun mb-3" />
+                  <p className="text-sm font-medium text-gold mb-2">Promo / Review needs</p>
+                  <p className="text-xs text-ash leading-relaxed">
+                    A dedicated exchange mode for promotion deals: a café trades a free meal for a
+                    reel, a shop trades product for an honest review, a tradie pays cash for a
+                    shout- out. Browse them like any other need.
+                  </p>
+                </div>
+                <div className="vessel p-6">
+                  <Star className="h-5 w-5 text-mercury mb-3" />
+                  <p className="text-sm font-medium text-gold mb-2">Reputation that compounds</p>
+                  <p className="text-xs text-ash leading-relaxed">
+                    Every collab runs through the same contract flow with the exchange recorded in
+                    the terms. Deliver, get reviewed, and your next deal is easier to land.
                   </p>
                 </div>
               </div>

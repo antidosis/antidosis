@@ -299,6 +299,11 @@ export default function PrivacyPage() {
               for ATO sharing-economy reporting) are never displayed publicly
             </li>
             <li>
+              <strong>Audience size (individual accounts)</strong>: if you choose to list one, your
+              audience size is shown on your public profile and in the directory so businesses can
+              gauge promotion collaborations. It is never shown on business profiles
+            </li>
+            <li>
               <strong>Need details</strong>: everything you include in a need post (title,
               description, photos, offer details, location, required skills)
             </li>

@@ -35,6 +35,7 @@ function toFormValues(profile: EditorProfile): ProfileFormData {
     mobile: profile.mobile ?? undefined,
     abn: profile.abn ?? undefined,
     accountType: profile.accountType ?? "individual",
+    audienceSize: profile.audienceSize ?? undefined,
     showInDirectory: profile.showInDirectory ?? undefined,
     socialLinks: (profile.socialLinks ?? []).map((l) => ({
       id: l.id,
@@ -201,7 +202,6 @@ export function ProfileSection({ initialProfile, onUpdate }: ProfileSectionProps
         abnVerified={initialProfile.abnVerified}
         errors={errors}
       />
-
       {errors.root?.message && (
         <p className="text-sm text-bad" role="alert">
           {errors.root.message}

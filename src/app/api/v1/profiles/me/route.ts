@@ -353,6 +353,7 @@ export const DELETE = withApiHandler(async () => {
       playStoreProductId: null,
       playStoreAutoRenewing: null,
       abn: null,
+      audienceSize: null,
       bannedAt: null,
       bannedReason: null,
     },

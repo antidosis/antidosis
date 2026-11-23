@@ -50,6 +50,7 @@ export const updateProfileSchema = z.object({
     .optional()
     .nullable(),
   accountType: z.enum(["individual", "business"]).optional().nullable(),
+  audienceSize: z.number().int().min(0).max(2_000_000_000).optional().nullable(),
   socialLinks: z.array(socialLinkSchema).optional(),
 });
 

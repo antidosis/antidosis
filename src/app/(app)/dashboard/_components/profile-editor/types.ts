@@ -17,6 +17,7 @@ export interface EditorProfile {
   abn: string | null;
   accountType: "individual" | "business";
   abnVerified: boolean;
+  audienceSize: number | null;
   handle: string | null;
   showInDirectory: boolean;
   mobileVerified: boolean;

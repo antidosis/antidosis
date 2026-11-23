@@ -114,6 +114,26 @@ export default function TermsPage() {
             parties. Antidosis never holds, transfers, or guarantees funds, and payment terms are
             recorded in the contract for the parties&apos; own records.
           </p>
+          <h3 className="text-base font-semibold text-parchment mt-6 mb-3">
+            Creators, influencers &amp; promotion deals
+          </h3>
+          <p className="mb-3">
+            Individual users may list an <strong>audience size</strong> and social links on their
+            profile so businesses can gauge promotion and review collaborations. Promo / Review
+            exchanges (for example a free meal, product, or cash in exchange for a post or review)
+            are ordinary exchanges between the parties:
+          </p>
+          <ul className="list-disc pl-5 space-y-1 mb-3">
+            <li>
+              The agreed exchange (product, meal, or payment) is recorded in the contract terms and
+              delivered directly between the parties — never through Antidosis
+            </li>
+            <li>The same review and reputation system applies to creators and businesses alike</li>
+            <li>
+              Creators are responsible for complying with Australian consumer law and the AANA Code
+              of Ethics regarding disclosure of sponsored content
+            </li>
+          </ul>
         </section>
 
         {/* ── 3. Eligibility ── */}

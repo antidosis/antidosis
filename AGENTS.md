@@ -215,7 +215,7 @@ needs/[id]/_components/
 - `Acceptance` — expressions of interest on a need
 - `Contract` — formalized agreements between parties
 - `Review` — ratings and feedback after completion
-- `Profile` — extended user profile (skills, credentials, etc.). Business accounts: `accountType` ("individual" | "business"), `abn` + `abnVerified` (ABN checksum in `src/lib/abn.ts`; ABR live lookup when `ABR_LOOKUP_GUID` is set). Individual ABNs are never public — the public profile route gates ABN to business accounts.
+- `Profile` — extended user profile (skills, credentials, etc.); `accountType` (`individual`|`business`), `abn`/`abnVerified` (business accounts), `audienceSize` (individuals, public creator metric) — ABN only public on business profiles, audience size only on individual. Business accounts: `accountType` ("individual" | "business"), `abn` + `abnVerified` (ABN checksum in `src/lib/abn.ts`; ABR live lookup when `ABR_LOOKUP_GUID` is set). Individual ABNs are never public — the public profile route gates ABN to business accounts.
 - `NeedMessage` — messages on needs (public + private threads)
 - `TerminalMessage` — real-time relay chat messages
 - `Channel` — relay channels

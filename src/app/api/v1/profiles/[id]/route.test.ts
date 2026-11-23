@@ -109,6 +109,7 @@ describe("GET /api/v1/profiles/[id]", () => {
       accountType: "individual",
       abn: "51824753556",
       abnVerified: true,
+      audienceSize: 3200,
       skills: [],
       socialLinks: [],
       credentials: [],
@@ -125,6 +126,7 @@ describe("GET /api/v1/profiles/[id]", () => {
     expect(body.accountType).toBe("individual");
     expect(body.abn).toBeNull();
     expect(body.abnVerified).toBe(false);
+    expect(body.audienceSize).toBe(3200);
   });
 
   it("shows the ABN of business accounts", async () => {
@@ -136,6 +138,7 @@ describe("GET /api/v1/profiles/[id]", () => {
       accountType: "business",
       abn: "51824753556",
       abnVerified: true,
+      audienceSize: 99000,
       skills: [],
       socialLinks: [],
       credentials: [],
@@ -152,6 +155,7 @@ describe("GET /api/v1/profiles/[id]", () => {
     expect(body.accountType).toBe("business");
     expect(body.abn).toBe("51824753556");
     expect(body.abnVerified).toBe(true);
+    expect(body.audienceSize).toBeNull();
   });
 
   it("resolves a profile by @handle", async () => {

@@ -172,4 +172,18 @@ describe("updateProfileSchema", () => {
     const result = updateProfileSchema.safeParse({ abn: "ABN 51824753556" });
     expect(result.success).toBe(false);
   });
+
+  it("accepts audienceSize as an integer or null", () => {
+    expect(updateProfileSchema.safeParse({ audienceSize: 3200 }).success).toBe(true);
+    expect(updateProfileSchema.safeParse({ audienceSize: 0 }).success).toBe(true);
+    expect(updateProfileSchema.safeParse({ audienceSize: null }).success).toBe(true);
+    expect(updateProfileSchema.safeParse({}).success).toBe(true);
+  });
+
+  it("rejects non-integer, negative, or absurd audienceSize values", () => {
+    expect(updateProfileSchema.safeParse({ audienceSize: 3.5 }).success).toBe(false);
+    expect(updateProfileSchema.safeParse({ audienceSize: -1 }).success).toBe(false);
+    expect(updateProfileSchema.safeParse({ audienceSize: 3_000_000_000 }).success).toBe(false);
+    expect(updateProfileSchema.safeParse({ audienceSize: "3200" }).success).toBe(false);
+  });
 });

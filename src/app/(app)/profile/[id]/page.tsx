@@ -85,6 +85,7 @@ interface ProfileData {
   accountType?: string;
   abn?: string | null;
   abnVerified?: boolean;
+  audienceSize?: number | null;
   skills: Skill[];
   socialLinks: SocialLink[];
   credentials: Credential[];
@@ -169,6 +170,11 @@ export default function ProfilePage() {
                     <Shield className="h-3 w-3" /> verified
                   </span>
                 )}
+              </p>
+            )}
+            {profile.accountType !== "business" && profile.audienceSize != null && (
+              <p className="mt-1.5 text-xs text-orchid">
+                reaches ~{profile.audienceSize.toLocaleString()} people
               </p>
             )}
             {profile.handle && <p className="mt-1 font-mono text-sm text-sun">@{profile.handle}</p>}

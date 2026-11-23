@@ -75,6 +75,7 @@ export const GET = withApiHandler(
         accountType: true,
         abn: true,
         abnVerified: true,
+        audienceSize: true,
         ratingAvg: true,
         ratingCount: true,
         jobsCompleted: true,
@@ -142,6 +143,9 @@ export const GET = withApiHandler(
       // never public.
       abn: profile.accountType === "business" ? profile.abn : null,
       abnVerified: profile.accountType === "business" ? profile.abnVerified : false,
+      // Audience size is a creator (individual) marketing metric — never
+      // surfaced on business profiles.
+      audienceSize: profile.accountType === "individual" ? profile.audienceSize : null,
     };
 
     return NextResponse.json(safeProfile, {

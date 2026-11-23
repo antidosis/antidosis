@@ -16,6 +16,7 @@ describe("EXCHANGE_MODES", () => {
     expect(values).toContain("community-help");
     expect(values).toContain("creative");
     expect(values).toContain("eccentric");
+    expect(values).toContain("promotion");
   });
 
   it("has unique values", () => {
@@ -81,6 +82,12 @@ describe("INCOMPATIBLE_EXCHANGE_MODES", () => {
   it("money incompatibles include swap modes", () => {
     expect(INCOMPATIBLE_EXCHANGE_MODES.money).toContain("goods-swap");
     expect(INCOMPATIBLE_EXCHANGE_MODES.money).toContain("skill-swap");
+  });
+
+  it("promotion mode is available for every offer type", () => {
+    for (const modes of Object.values(INCOMPATIBLE_EXCHANGE_MODES)) {
+      expect(modes).not.toContain("promotion");
+    }
   });
 
   it("all incompatible values are valid exchange modes", () => {

@@ -50,11 +50,20 @@ export const GET = withCors(
         accountType: true,
         abn: true,
         abnVerified: true,
+        audienceSize: true,
         skills: { select: { name: true } },
         credentials: { where: { isPublic: true }, select: { id: true } },
       },
     });
-    return NextResponse.json(pros, {
+    // Privacy gates mirror /api/v1/profiles/[id]: an individual's ABN (SERR
+    // data) is never public, and audience size only makes sense for creators.
+    const safePros = pros.map((pro) => ({
+      ...pro,
+      abn: pro.accountType === "business" ? pro.abn : null,
+      abnVerified: pro.accountType === "business" ? pro.abnVerified : false,
+      audienceSize: pro.accountType === "individual" ? pro.audienceSize : null,
+    }));
+    return NextResponse.json(safePros, {
       headers: {
         "Cache-Control": "public, s-maxage=120, stale-while-revalidate=600",
       },

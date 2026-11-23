@@ -39,6 +39,7 @@ model Profile {
   abn                    String?
   accountType            String    @default("individual") @map("account_type")
   abnVerified            Boolean   @default(false) @map("abn_verified")
+  audienceSize           Int?      @map("audience_size")
   bannedAt               DateTime? @map("banned_at")
   bannedReason           String?   @map("banned_reason")
   lastSeenAt             DateTime? @map("last_seen_at")

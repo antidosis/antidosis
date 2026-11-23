@@ -122,6 +122,28 @@ export function PreferencesSection({
           reports and on business contracts.
         </p>
       </div>
+
+      {accountType === "individual" && (
+        <div className="mt-5 space-y-2">
+          <Label htmlFor="profile-audience">Audience size (optional)</Label>
+          <Input
+            id="profile-audience"
+            {...register("audienceSize", {
+              setValueAs: (v) => (v === "" || v === null || v === undefined ? null : Number(v)),
+            })}
+            placeholder="e.g. 3200"
+            inputMode="numeric"
+            type="number"
+            min={0}
+            className="text-base"
+          />
+          {errors.audienceSize && <p className="text-xs text-bad">{errors.audienceSize.message}</p>}
+          <p className="text-xs text-ash">
+            Roughly how many people your posts reach. Shown on your public profile and in the
+            directory so businesses can gauge promo and review deals.
+          </p>
+        </div>
+      )}
     </SectionCard>
   );
 }

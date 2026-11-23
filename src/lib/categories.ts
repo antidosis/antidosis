@@ -186,6 +186,15 @@ export const EXCHANGE_MODES = [
     twBg: "bg-orchid/5",
     twBgSolid: "bg-orchid",
   },
+  {
+    value: "promotion",
+    label: "Promo / Review",
+    color: "var(--x-dc6df2)",
+    twText: "text-orchid",
+    twBorder: "border-orchid/30",
+    twBg: "bg-orchid/5",
+    twBgSolid: "bg-orchid",
+  },
 
   /* ─── Wildcard ─── */
   {

@@ -547,6 +547,67 @@ describe("PATCH /api/v1/profiles/me", () => {
       })
     );
   });
+
+  it("persists audienceSize and allows clearing it with null", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobile: null,
+      mobileVerified: false,
+      abn: null,
+      accountType: "individual",
+    });
+    mockProfileUpdate.mockResolvedValue({ id: "profile-1", audienceSize: 3200 });
+
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/profiles/me", {
+        method: "PATCH",
+        body: JSON.stringify({ audienceSize: 3200 }),
+      })
+    );
+    expect(res.status).toBe(200);
+    expect(mockProfileUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ audienceSize: 3200 }),
+      })
+    );
+
+    vi.clearAllMocks();
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobile: null,
+      mobileVerified: false,
+      abn: null,
+      accountType: "individual",
+    });
+    mockProfileUpdate.mockResolvedValue({ id: "profile-1", audienceSize: null });
+
+    const clearRes = await PATCH(
+      makeRequest("http://localhost/api/v1/profiles/me", {
+        method: "PATCH",
+        body: JSON.stringify({ audienceSize: null }),
+      })
+    );
+    expect(clearRes.status).toBe(200);
+    expect(mockProfileUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ audienceSize: null }),
+      })
+    );
+  });
+
+  it("rejects a non-integer audienceSize", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/profiles/me", {
+        method: "PATCH",
+        body: JSON.stringify({ audienceSize: "lots" }),
+      })
+    );
+    expect(res.status).toBe(400);
+    expect(mockProfileUpdate).not.toHaveBeenCalled();
+  });
 });
 
 describe("DELETE /api/v1/profiles/me", () => {
