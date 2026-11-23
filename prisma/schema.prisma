@@ -119,6 +119,11 @@ model Need {
   timeRange        String?   @map("time_range")
   images           String[]
   offerImages      String[]  @map("offer_images")
+  // Gumtree-style monetisation: listing is always free; boostTier +
+  // boostedUntil reserve paid top-placement / highlight slots. Nothing is
+  // boosted today — readers treat a null boostedUntil as a normal listing.
+  boostTier        String?   @map("boost_tier")
+  boostedUntil     DateTime? @map("boosted_until")
   createdAt        DateTime  @default(now()) @map("created_at")
   updatedAt        DateTime  @updatedAt @map("updated_at")
 

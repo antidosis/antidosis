@@ -17,6 +17,7 @@ import {
   Building2,
 } from "lucide-react";
 
+import { SponsoredSlot } from "@/components/ads/sponsored-slot";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -129,6 +130,9 @@ export default function ProsDirectoryPage() {
           </button>
         ))}
       </div>
+
+      {/* Sponsored placement (reserved for Phase 2 featured listings) */}
+      <SponsoredSlot placement="directory-banner" className="mb-6" />
 
       {isLoading && !pros ? (
         <div className="py-12 text-center">

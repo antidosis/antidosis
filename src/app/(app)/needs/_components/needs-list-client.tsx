@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 
 import Link from "next/link";
 
@@ -15,10 +15,12 @@ import {
   Info,
   ChevronLeft,
   ChevronRight,
+  Megaphone,
   Sparkles,
   Zap,
 } from "lucide-react";
 
+import { SponsoredSlot } from "@/components/ads/sponsored-slot";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -26,6 +28,7 @@ import { Input } from "@/components/ui/input";
 import { EXCHANGE_MODES, INCOMPATIBLE_EXCHANGE_MODES, getExchangeMode } from "@/lib/categories";
 import { searchSkills } from "@/lib/skills-taxonomy";
 import { useApi } from "@/lib/swr-config";
+import { cn } from "@/lib/utils";
 
 type NeedItem = {
   id: string;
@@ -46,7 +49,13 @@ type NeedItem = {
   };
   requiredSkills: { id: string; name: string }[];
   _count: { acceptances: number };
+  boostedUntil?: string | null;
+  boostTier?: string | null;
 };
+
+function isBoosted(need: NeedItem): boolean {
+  return !!need.boostedUntil && new Date(need.boostedUntil).getTime() > Date.now();
+}
 
 const offerTypes = [
   { value: "", label: "All" },
@@ -446,67 +455,81 @@ export default function NeedsPage() {
               showing {startItem}–{endItem} of {total}
             </p>
           </div>
-          {needs.map((need) => (
-            <div key={need.id} className="vessel p-5 mb-4">
-              <Link href={`/needs/${need.id}`} className="block group">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="text-base font-medium text-gold group-hover:text-sun transition-colors">
-                        {need.title}
-                      </h3>
-                      {need.needCategory &&
-                        (() => {
-                          const mode = getExchangeMode(need.needCategory);
-                          if (!mode) return null;
-                          return (
-                            <span
-                              className={`shrink-0 text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border ${mode.twText} ${mode.twBorder} ${mode.twBg}`}
-                            >
-                              {mode.label}
-                            </span>
-                          );
-                        })()}
+          {needs.map((need, idx) => (
+            <Fragment key={need.id}>
+              <div
+                className={cn(
+                  "vessel p-5 mb-4",
+                  isBoosted(need) && "border-sun/50 shadow-[0_0_24px_rgba(245,166,35,0.08)]"
+                )}
+              >
+                {isBoosted(need) && (
+                  <p className="mb-3 flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-sun">
+                    <Megaphone className="h-3 w-3" /> top listing
+                  </p>
+                )}
+                <Link href={`/needs/${need.id}`} className="block group">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="text-base font-medium text-gold group-hover:text-sun transition-colors">
+                          {need.title}
+                        </h3>
+                        {need.needCategory &&
+                          (() => {
+                            const mode = getExchangeMode(need.needCategory);
+                            if (!mode) return null;
+                            return (
+                              <span
+                                className={`shrink-0 text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded border ${mode.twText} ${mode.twBorder} ${mode.twBg}`}
+                              >
+                                {mode.label}
+                              </span>
+                            );
+                          })()}
+                      </div>
+                      <p className="text-sm text-parchment mt-1 line-clamp-2">{need.description}</p>
+                      <div className="flex flex-wrap items-center gap-2 mt-3">
+                        {need.requiredSkills.map((skill) => (
+                          <span
+                            key={skill.id}
+                            className="px-2 py-0.5 text-xs text-ash bg-raise border border-line rounded"
+                          >
+                            {skill.name}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                    <p className="text-sm text-parchment mt-1 line-clamp-2">{need.description}</p>
-                    <div className="flex flex-wrap items-center gap-2 mt-3">
-                      {need.requiredSkills.map((skill) => (
-                        <span
-                          key={skill.id}
-                          className="px-2 py-0.5 text-xs text-ash bg-raise border border-line rounded"
-                        >
-                          {skill.name}
+                    <span className="shrink-0 text-xs text-ash uppercase tracking-wide ml-2">
+                      {need._count.acceptances} interested
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between mt-4 pt-3 border-t border-line">
+                    <Link
+                      href={`/profile/${need.poster.id}`}
+                      className="flex items-center gap-3 group"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Avatar src={need.poster.avatarUrl} name={need.poster.fullName} size="sm" />
+                      <div className="text-sm text-parchment">
+                        <span className="text-gold group-hover:text-sun transition-colors">
+                          {need.poster.fullName || "anonymous"}
                         </span>
-                      ))}
+                        {need.poster.ratingCount > 0 && (
+                          <span className="ml-2">{need.poster.ratingAvg.toFixed(1)}</span>
+                        )}
+                      </div>
+                    </Link>
+                    <div className="flex items-center gap-1.5 text-xs text-ash">
+                      {offerIcons[need.offerType as keyof typeof offerIcons]}
+                      <span className="truncate max-w-xs">{need.offerDescription}</span>
                     </div>
                   </div>
-                  <span className="shrink-0 text-xs text-ash uppercase tracking-wide ml-2">
-                    {need._count.acceptances} interested
-                  </span>
-                </div>
-                <div className="flex items-center justify-between mt-4 pt-3 border-t border-line">
-                  <Link
-                    href={`/profile/${need.poster.id}`}
-                    className="flex items-center gap-3 group"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Avatar src={need.poster.avatarUrl} name={need.poster.fullName} size="sm" />
-                    <div className="text-sm text-parchment">
-                      <span className="text-gold group-hover:text-sun transition-colors">
-                        {need.poster.fullName || "anonymous"}
-                      </span>
-                      {need.poster.ratingCount > 0 && (
-                        <span className="ml-2">{need.poster.ratingAvg.toFixed(1)}</span>
-                      )}
-                    </div>
-                  </Link>
-                  <div className="flex items-center gap-1.5 text-xs text-ash">
-                    {offerIcons[need.offerType as keyof typeof offerIcons]}
-                    <span className="truncate max-w-xs">{need.offerDescription}</span>
-                  </div>
-                </div>
-              </Link>
-            </div>
+                </Link>
+              </div>
+              {/* Inline sponsored placement, reserved for Phase 2 (after the third card) */}
+              {idx === 2 && <SponsoredSlot placement="needs-inline" className="mb-4" />}
+            </Fragment>
           ))}
 
           {/* Pagination */}

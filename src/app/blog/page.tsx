@@ -1,8 +1,11 @@
+import { Fragment } from "react";
+
 import Link from "next/link";
 
 import { ArrowRight, Clock, Calendar } from "lucide-react";
 import type { Metadata } from "next";
 
+import { SponsoredSlot } from "@/components/ads/sponsored-slot";
 import { EmailLink } from "@/components/email-link";
 import { Footer } from "@/components/layout/footer";
 import { Navbar } from "@/components/layout/navbar";
@@ -134,112 +137,121 @@ export default function BlogIndexPage() {
               const wide = i > 0 && i % 7 === 6;
               const featured = i === 0;
               return (
-                <article
-                  key={post.slug}
-                  className={cn(
-                    "group relative border bg-surface/40 p-5 md:p-6 flex flex-col transition-all duration-200",
-                    "hover:bg-surface/70 hover:-translate-y-0.5 hover:border-linehi",
-                    wide ? "md:col-span-2" : "",
-                    featured ? "lg:col-span-2 lg:row-span-1" : "",
-                    accent.border
-                  )}
-                >
-                  {/* Registration corners */}
-                  <CornerMark
-                    pos="left-0 top-0 border-l border-t"
-                    className={cn(accent.border, "-translate-x-px -translate-y-px")}
-                  />
-                  <CornerMark
-                    pos="right-0 top-0 border-r border-t"
-                    className={cn(accent.border, "translate-x-px -translate-y-px")}
-                  />
-                  <CornerMark
-                    pos="left-0 bottom-0 border-l border-b"
-                    className={cn(accent.border, "-translate-x-px translate-y-px")}
-                  />
-                  <CornerMark
-                    pos="right-0 bottom-0 border-r border-b"
-                    className={cn(accent.border, "translate-x-px translate-y-px")}
-                  />
+                <Fragment key={post.slug}>
+                  <article
+                    className={cn(
+                      "group relative border bg-surface/40 p-5 md:p-6 flex flex-col transition-all duration-200",
+                      "hover:bg-surface/70 hover:-translate-y-0.5 hover:border-linehi",
+                      wide ? "md:col-span-2" : "",
+                      featured ? "lg:col-span-2 lg:row-span-1" : "",
+                      accent.border
+                    )}
+                  >
+                    {/* Registration corners */}
+                    <CornerMark
+                      pos="left-0 top-0 border-l border-t"
+                      className={cn(accent.border, "-translate-x-px -translate-y-px")}
+                    />
+                    <CornerMark
+                      pos="right-0 top-0 border-r border-t"
+                      className={cn(accent.border, "translate-x-px -translate-y-px")}
+                    />
+                    <CornerMark
+                      pos="left-0 bottom-0 border-l border-b"
+                      className={cn(accent.border, "-translate-x-px translate-y-px")}
+                    />
+                    <CornerMark
+                      pos="right-0 bottom-0 border-r border-b"
+                      className={cn(accent.border, "translate-x-px translate-y-px")}
+                    />
 
-                  <Link href={`/blog/${post.slug}`} className="flex h-full flex-col">
-                    {/* Index row */}
-                    <div className="flex items-center justify-between mb-4">
-                      <span className={cn("font-mono text-[10px] tracking-widest", accent.ghost)}>
-                        {txId(i + 1)}
-                      </span>
-                      <span
-                        aria-hidden
-                        className={cn("font-mono text-[10px] tracking-widest", accent.ghost)}
-                      >
-                        ━━━
-                      </span>
-                    </div>
-
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-1.5 mb-3">
-                      {post.tags.map((tag) => (
+                    <Link href={`/blog/${post.slug}`} className="flex h-full flex-col">
+                      {/* Index row */}
+                      <div className="flex items-center justify-between mb-4">
+                        <span className={cn("font-mono text-[11px] tracking-widest", accent.ghost)}>
+                          {txId(i + 1)}
+                        </span>
                         <span
-                          key={tag}
+                          aria-hidden
+                          className={cn("font-mono text-[11px] tracking-widest", accent.ghost)}
+                        >
+                          ━━━
+                        </span>
+                      </div>
+
+                      {/* Tags */}
+                      <div className="flex flex-wrap gap-1.5 mb-3">
+                        {post.tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className={cn(
+                              "text-xs font-mono uppercase tracking-wider px-1.5 py-1 border",
+                              accent.border,
+                              accent.bg,
+                              accent.text
+                            )}
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+
+                      <h2
+                        className={cn(
+                          "heading-display text-gold group-hover:text-parchment transition-colors mb-2",
+                          featured
+                            ? "text-2xl md:text-3xl"
+                            : wide
+                              ? "text-xl md:text-2xl"
+                              : "text-lg"
+                        )}
+                      >
+                        {post.title}
+                      </h2>
+                      <p
+                        className={cn(
+                          "text-sm text-parchment/85 leading-relaxed mb-5",
+                          featured ? "" : "line-clamp-3"
+                        )}
+                      >
+                        {post.excerpt}
+                      </p>
+
+                      <div className="mt-auto flex items-center justify-between gap-3 border-t border-line/60 pt-3">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ash">
+                          <span className="flex items-center gap-1.5">
+                            <Calendar className="h-3 w-3" />
+                            {formatDate(post.publishedAt)}
+                          </span>
+                          <span className="flex items-center gap-1.5">
+                            <Clock className="h-3 w-3" />
+                            {post.readingTime}
+                          </span>
+                        </div>
+                        <span
                           className={cn(
-                            "text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 border",
-                            accent.border,
-                            accent.bg,
+                            "flex shrink-0 items-center gap-1.5 font-mono text-[11px] tracking-wider",
                             accent.text
                           )}
                         >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-
-                    <h2
-                      className={cn(
-                        "heading-display text-gold group-hover:text-parchment transition-colors mb-2",
-                        featured ? "text-2xl md:text-3xl" : wide ? "text-xl md:text-2xl" : "text-lg"
-                      )}
-                    >
-                      {post.title}
-                    </h2>
-                    <p
-                      className={cn(
-                        "text-sm text-ash leading-relaxed mb-5",
-                        featured ? "" : "line-clamp-3"
-                      )}
-                    >
-                      {post.excerpt}
-                    </p>
-
-                    <div className="mt-auto flex items-center justify-between gap-3 border-t border-line/60 pt-3">
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-ash">
-                        <span className="flex items-center gap-1.5">
-                          <Calendar className="h-3 w-3" />
-                          {formatDate(post.publishedAt)}
-                        </span>
-                        <span className="flex items-center gap-1.5">
-                          <Clock className="h-3 w-3" />
-                          {post.readingTime}
+                          READ
+                          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
                         </span>
                       </div>
-                      <span
-                        className={cn(
-                          "flex shrink-0 items-center gap-1.5 font-mono text-[11px] tracking-wider",
-                          accent.text
-                        )}
-                      >
-                        READ
-                        <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-                      </span>
-                    </div>
-                  </Link>
-                </article>
+                    </Link>
+                  </article>
+                  {/* In-feed sponsored placement (reserved for Phase 2 featured listings) */}
+                  {i === 5 && (
+                    <SponsoredSlot placement="blog-feed" className="md:col-span-2 lg:col-span-3" />
+                  )}
+                </Fragment>
               );
             })}
           </div>
 
           {/* CTA */}
           <div className="mt-16 border border-line bg-surface/40 p-6 md:p-8 text-center">
-            <p className="text-sm text-ash mb-4">Want to share your exchange story?</p>
+            <p className="text-sm text-parchment mb-4">Want to share your exchange story?</p>
             <EmailLink
               email="support@antidosis.com"
               subject="Blog Submission"

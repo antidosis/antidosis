@@ -54,6 +54,7 @@ function toFormValues(profile: EditorProfile): ProfileFormData {
 export function ProfileSection({ initialProfile, onUpdate }: ProfileSectionProps) {
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
+  const [importingAvatarFrom, setImportingAvatarFrom] = useState<string | null>(null);
   // Rows the user has marked for removal. They stay visible (disabled, with a
   // spinner) until the save either persists the removal or fails — on failure
   // they are restored. Keyed by the field-array row id, never by URL.
@@ -83,6 +84,31 @@ export function ProfileSection({ initialProfile, onUpdate }: ProfileSectionProps
 
   function markRemoving(fieldId: string) {
     setRemovingIds((prev) => new Set(prev).add(fieldId));
+  }
+
+  async function importAvatarFromSocial(url: string) {
+    setImportingAvatarFrom(url);
+    try {
+      const res = await fetch("/api/v1/profiles/avatar-from-social", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || typeof data.url !== "string") {
+        toast(
+          typeof data.error === "string" ? data.error : "Couldn't import a profile picture",
+          "error"
+        );
+        return;
+      }
+      setValue("avatarUrl", data.url, { shouldDirty: true });
+      toast("Profile picture imported — press Save to keep it", "success");
+    } catch {
+      toast("Couldn't import a profile picture — try again", "error");
+    } finally {
+      setImportingAvatarFrom(null);
+    }
   }
 
   async function onSave() {
@@ -176,6 +202,12 @@ export function ProfileSection({ initialProfile, onUpdate }: ProfileSectionProps
         isVerified={initialProfile.isVerified}
         mobileVerified={initialProfile.mobileVerified}
         mobile={initialProfile.mobile}
+        socialLinks={(initialProfile.socialLinks ?? []).map((l) => ({
+          platform: l.platform,
+          url: l.url,
+        }))}
+        importingFromSocial={importingAvatarFrom}
+        onImportFromSocial={importAvatarFromSocial}
       />
 
       <HandleSection handle={initialProfile.handle} />

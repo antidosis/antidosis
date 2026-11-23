@@ -56,7 +56,11 @@ export const GET = withApiHandler(async (req: NextRequest) => {
     await Promise.all([
       prisma.need.findMany({
         where,
-        orderBy: { createdAt: "desc" },
+        // Boosted (paid top-placement) listings sort first. Correctness
+        // invariant: expired boosts must be clamped to NULL (boost-expiry
+        // sweep) so a stale date never outranks a fresh free listing. No
+        // boosts exist yet — this is the reserved hook for monetisation.
+        orderBy: [{ boostedUntil: { sort: "desc", nulls: "last" } }, { createdAt: "desc" }],
         skip,
         take: limit,
         include: {

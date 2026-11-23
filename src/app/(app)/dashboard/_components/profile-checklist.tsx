@@ -102,12 +102,15 @@ interface ProfileChecklistProps {
   };
   emailVerified: boolean;
   onNavigateToCredentials?: () => void;
+  /** Donut-only rendering for embedding inside the setup wizard. */
+  compact?: boolean;
 }
 
 export function ProfileChecklist({
   profile,
   emailVerified,
   onNavigateToCredentials,
+  compact = false,
 }: ProfileChecklistProps) {
   const hasIdentification = profile.credentials?.some((c) => c.type === "identification") ?? false;
   const profileComplete = !!(
@@ -142,12 +145,19 @@ export function ProfileChecklist({
 
   return (
     <div
-      className={`flex items-center gap-6 sm:gap-8 mb-6 ${allDone ? "justify-center" : "flex-col sm:flex-row"}`}
+      className={
+        compact
+          ? "flex justify-center"
+          : `flex items-center gap-6 sm:gap-8 mb-6 ${allDone ? "justify-center" : "flex-col sm:flex-row"}`
+      }
     >
       {/* ─── Circular Tracker ─── */}
       <div
         className="relative shrink-0"
-        style={{ width: allDone ? 120 : 220, height: allDone ? 120 : 220 }}
+        style={{
+          width: compact ? 160 : allDone ? 120 : 220,
+          height: compact ? 160 : allDone ? 120 : 220,
+        }}
       >
         <svg
           viewBox="0 0 200 200"
@@ -245,8 +255,8 @@ export function ProfileChecklist({
           })}
       </div>
 
-      {/* ─── Step list (hidden when complete) ─── */}
-      {!allDone && (
+      {/* ─── Step list (hidden when complete or compact) ─── */}
+      {!allDone && !compact && (
         <div className="flex-1 min-w-0 w-full">
           <p className="text-xs text-ash uppercase tracking-wider mb-3">profile setup</p>
           <div className="space-y-2">

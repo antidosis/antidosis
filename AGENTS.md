@@ -10,6 +10,8 @@ Antidosis is a local needs-exchange platform ("help your neighbour" marketplace)
 
 **Monetization**: None — the platform is entirely free. The "Pro" tier was retired (2026-07-23): verification (identity + mobile) is the trust layer, not a membership. Legacy `isPro`/`proSource` DB columns and the `/api/v1/pro/claim` route remain as no-ops for old mobile builds; do not surface them in UI. The paid billing stack (`src/app/api/v1/billing/` — Stripe checkout, Play Store verify/RTDN webhook, `src/lib/play-store.ts`) is **parked**: routes stay live and secured for legacy accounts and possible future paid features (e.g. hardware), but nothing links to them. Do not wire them back up without a product decision. Recorded future direction: a gated business side (B2C barter offers + B2B trades, monthly advertising subscription for businesses, core usage stays free) — see `docs/FUTURE_EXPANSION_VISION.md`. Vision only; do not implement without a product decision.
 
+**Reserved monetisation surfaces (Gumtree-style, Phase 2 — do not remove)**: listings stay free forever; the future revenue is paid _boosts_ and featured placements. `Need.boostTier`/`Need.boostedUntil` reserve paid top-placement/highlight slots (needs list already sorts boosted-first — expired boosts must be clamped to NULL by the boost-expiry sweep so stale dates never outrank fresh listings). `src/components/ads/sponsored-slot.tsx` reserves display positions (`blog-feed`, `directory-banner`, `needs-inline`, `dashboard-overview`), enabled via `NEXT_PUBLIC_SPONSORED_PLACEMENTS`; slots render nothing until enabled.
+
 ## 2. Tech Stack
 
 | Layer         | Technology                                                     |
@@ -211,7 +213,7 @@ needs/[id]/_components/
 
 ### Key Models
 
-- `Need` — posted needs with title, description, offer, status
+- `Need` — posted needs with title, description, offer, status; `boostTier`/`boostedUntil` reserve paid top-placement slots (see monetisation note)
 - `Acceptance` — expressions of interest on a need
 - `Contract` — formalized agreements between parties
 - `Review` — ratings and feedback after completion
