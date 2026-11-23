@@ -4,34 +4,32 @@ import { useEffect, useState } from "react";
 
 import { Moon, Sun } from "lucide-react";
 
-import { isSiteThemeId } from "@/lib/themes";
-
-type Brightness = "dark" | "light";
+import { isLightThemeId, type SiteThemeId, type ThemeBrightness } from "@/lib/themes";
 
 /**
- * Quick brightness toggle. Named themes (chrome, ember, …) count as dark —
- * toggling switches to Daybreak, and back to Obsidian (the default dark).
- * Pick specific themes in Dashboard → Settings → Appearance.
+ * Quick brightness toggle — treats every named theme by its actual
+ * brightness: any light palette (Daybreak, Porcelain, …) flips to Obsidian,
+ * any dark palette flips to Daybreak. Pick specific themes in Dashboard →
+ * Settings → Appearance.
  */
 export function ThemeToggle({ className = "" }: { className?: string }) {
-  const [brightness, setBrightness] = useState<Brightness>("dark");
+  const [brightness, setBrightness] = useState<ThemeBrightness>("dark");
 
   useEffect(() => {
     const value = document.documentElement.dataset.theme;
-    setBrightness(value === "light" ? "light" : "dark");
+    setBrightness(isLightThemeId(value) ? "light" : "dark");
 
     function sync(e: Event) {
       const detail = (e as CustomEvent<string>).detail;
-      setBrightness(detail === "light" ? "light" : "dark");
+      setBrightness(isLightThemeId(detail) ? "light" : "dark");
     }
     window.addEventListener("antidosis-theme", sync);
     return () => window.removeEventListener("antidosis-theme", sync);
   }, []);
 
   function toggle() {
-    const next: Brightness = brightness === "dark" ? "light" : "dark";
-    setBrightness(next);
-    const theme = isSiteThemeId(next) ? next : "dark";
+    const theme: SiteThemeId = brightness === "dark" ? "light" : "dark";
+    setBrightness(theme === "light" ? "light" : "dark");
     document.documentElement.dataset.theme = theme;
     try {
       localStorage.setItem("antidosis-theme", theme);

@@ -206,7 +206,364 @@
 
   /* Brand logo is bright emerald artwork — deepen it on light backgrounds
      so it keeps the same contrast it has on the dark void. */
-  :root[data-theme="light"] .brand-logo {
+  
+  /* --- Light theme chrome, shared by every light palette ---
+     The --x-* accent hexes must darken on any light background,
+     so they live here once instead of being remapped per theme. */
+  :root[data-theme="light"],
+  :root[data-theme="porcelain"],
+  :root[data-theme="sage"],
+  :root[data-theme="linen"],
+  :root[data-theme="skyline"],
+  :root[data-theme="rosewater"],
+  :root[data-theme="lavender"],
+  :root[data-theme="citrus"] {
+    color-scheme: light;
+    --x-00e5ff: #03707d;
+    --x-00e676: #03703a;
+    --x-0a0806: #f6f1e7;
+    --x-0f0c0a: #efe8d9;
+    --x-1a1714: #ffffff;
+    --x-1ec4b8: #157770;
+    --x-24d6a3: #198264;
+    --x-2a2420: #ddd2bd;
+    --x-2ce090: #188e5a;
+    --x-33d4f5: #0d90ab;
+    --x-35c2f0: #1081a5;
+    --x-35e87a: #169b49;
+    --x-3aadf0: #1170a8;
+    --x-4896f0: #135baf;
+    --x-7a6b5a: #6e5f4b;
+    --x-8f7f6e: #6f5e47;
+    --x-b24bf5: #750fb8;
+    --x-b8a078: #5b4a35;
+    --x-d0d040: #858524;
+    --x-d76bf5: #a013c8;
+    --x-e06df0: #ab19c0;
+    --x-e0d62e: #8f8819;
+    --x-e86ee6: #b321b1;
+    --x-e89e38: #9d6416;
+    --x-e8b830: #997615;
+    --x-e8d5a3: #2e2318;
+    --x-f08a35: #a55410;
+    --x-f0cc33: #a48810;
+    --x-f54d99: #b90f5c;
+    --x-f57633: #ab430d;
+    --x-f5a623: #8a5a08;
+    --x-ff5252: #cc0505;
+    --x-ff6b6b: #db0606;
+    --x-ffb84d: #c97b05;
+  }
+
+  /* Porcelain - crisp white, cool slate ink, deep blue accents. */
+  :root[data-theme="porcelain"] {
+    --c-void: 247 248 250;
+    --c-surface: 255 255 255;
+    --c-raise: 255 255 255;
+    --c-inset: 240 242 245;
+    --c-line: 218 222 228;
+    --c-linehi: 190 196 205;
+    --c-linestrong: 160 168 180;
+    --c-gold: 26 32 44;
+    --c-goldsoft: 40 48 62;
+    --c-goldhi: 15 20 30;
+    --c-parchment: 71 82 101;
+    --c-ash: 100 112 130;
+    --c-ash2: 96 108 126;
+    --c-leather: 88 99 116;
+    --c-faint: 51 60 75;
+    --c-sun: 2 108 180;
+    --c-sunhi: 3 95 160;
+    --c-sundim: 25 110 165;
+    --c-ember: 200 70 20;
+    --c-alert: 170 110 0;
+    --c-ok: 6 130 70;
+    --c-termgreen: 6 130 70;
+    --c-bad: 200 45 45;
+    --c-mercury: 5 125 155;
+    --c-mercdim: 8 118 145;
+    --c-aero: 12 105 160;
+    --c-quint: 120 50 190;
+    --c-quintdim: 110 55 200;
+    --c-orchid: 150 45 175;
+    --c-magenta: 185 20 95;
+    --c-aqua: 6 125 110;
+    --c-quintbg: 242 234 250;
+    --c-mercurybg: 226 240 245;
+    --c-okbg: 228 242 232;
+
+    --mercury-glow: rgba(5, 125, 155, 0.25);
+    --quintessence-glow: rgba(120, 50, 190, 0.25);
+    --quintessence-soft: rgba(120, 50, 190, 0.08);
+    --bronze-accent: rgba(2, 108, 180, 0.25);
+  }
+
+  /* Sage - botanical whites, moss ink, forest accents. */
+  :root[data-theme="sage"] {
+    --c-void: 243 246 241;
+    --c-surface: 250 252 247;
+    --c-raise: 255 255 255;
+    --c-inset: 236 241 233;
+    --c-line: 213 222 207;
+    --c-linehi: 185 197 176;
+    --c-linestrong: 158 172 148;
+    --c-gold: 25 38 27;
+    --c-goldsoft: 38 52 40;
+    --c-goldhi: 18 28 20;
+    --c-parchment: 65 84 68;
+    --c-ash: 92 110 94;
+    --c-ash2: 88 105 90;
+    --c-leather: 82 98 84;
+    --c-faint: 50 64 52;
+    --c-sun: 140 110 10;
+    --c-sunhi: 125 98 8;
+    --c-sundim: 120 100 15;
+    --c-ember: 190 80 25;
+    --c-alert: 150 105 0;
+    --c-ok: 20 120 65;
+    --c-termgreen: 20 120 65;
+    --c-bad: 195 50 50;
+    --c-mercury: 10 120 140;
+    --c-mercdim: 10 115 135;
+    --c-aero: 15 105 145;
+    --c-quint: 125 55 185;
+    --c-quintdim: 115 60 195;
+    --c-orchid: 155 55 180;
+    --c-magenta: 190 30 100;
+    --c-aqua: 10 120 100;
+    --c-quintbg: 238 242 250;
+    --c-mercurybg: 224 240 244;
+    --c-okbg: 226 242 230;
+
+    --mercury-glow: rgba(10, 120, 140, 0.25);
+    --quintessence-glow: rgba(125, 55, 185, 0.25);
+    --quintessence-soft: rgba(125, 55, 185, 0.08);
+    --bronze-accent: rgba(140, 110, 10, 0.25);
+  }
+
+  /* Linen - warm beige, umber ink, terracotta warmth. */
+  :root[data-theme="linen"] {
+    --c-void: 245 239 229;
+    --c-surface: 251 246 238;
+    --c-raise: 255 255 255;
+    --c-inset: 238 230 216;
+    --c-line: 219 207 187;
+    --c-linehi: 193 177 150;
+    --c-linestrong: 168 148 118;
+    --c-gold: 43 33 23;
+    --c-goldsoft: 58 46 33;
+    --c-goldhi: 30 22 14;
+    --c-parchment: 92 76 56;
+    --c-ash: 110 94 72;
+    --c-ash2: 115 98 74;
+    --c-leather: 108 92 70;
+    --c-faint: 72 58 42;
+    --c-sun: 175 95 15;
+    --c-sunhi: 155 82 12;
+    --c-sundim: 145 85 20;
+    --c-ember: 190 75 20;
+    --c-alert: 160 105 0;
+    --c-ok: 15 120 65;
+    --c-termgreen: 15 120 65;
+    --c-bad: 200 50 45;
+    --c-mercury: 10 120 150;
+    --c-mercdim: 10 115 142;
+    --c-aero: 15 105 155;
+    --c-quint: 130 55 195;
+    --c-quintdim: 120 60 200;
+    --c-orchid: 160 55 185;
+    --c-magenta: 195 30 100;
+    --c-aqua: 10 120 105;
+    --c-quintbg: 243 235 250;
+    --c-mercurybg: 225 239 244;
+    --c-okbg: 227 241 231;
+
+    --mercury-glow: rgba(10, 120, 150, 0.25);
+    --quintessence-glow: rgba(130, 55, 195, 0.25);
+    --quintessence-soft: rgba(130, 55, 195, 0.08);
+    --bronze-accent: rgba(175, 95, 15, 0.25);
+  }
+
+  /* Skyline - pale ice blue, navy ink, harbour accents. */
+  :root[data-theme="skyline"] {
+    --c-void: 238 243 248;
+    --c-surface: 246 250 253;
+    --c-raise: 255 255 255;
+    --c-inset: 231 238 246;
+    --c-line: 205 216 228;
+    --c-linehi: 175 190 207;
+    --c-linestrong: 145 163 185;
+    --c-gold: 22 32 46;
+    --c-goldsoft: 35 48 64;
+    --c-goldhi: 14 22 34;
+    --c-parchment: 62 79 102;
+    --c-ash: 88 105 128;
+    --c-ash2: 84 100 122;
+    --c-leather: 78 93 114;
+    --c-faint: 48 60 78;
+    --c-sun: 5 105 175;
+    --c-sunhi: 5 92 155;
+    --c-sundim: 30 105 160;
+    --c-ember: 195 75 25;
+    --c-alert: 165 110 0;
+    --c-ok: 10 125 70;
+    --c-termgreen: 10 125 70;
+    --c-bad: 200 50 50;
+    --c-mercury: 0 125 155;
+    --c-mercdim: 5 118 148;
+    --c-aero: 10 110 165;
+    --c-quint: 125 50 195;
+    --c-quintdim: 115 55 205;
+    --c-orchid: 155 50 185;
+    --c-magenta: 190 25 100;
+    --c-aqua: 5 125 115;
+    --c-quintbg: 240 233 250;
+    --c-mercurybg: 222 240 246;
+    --c-okbg: 226 242 232;
+
+    --mercury-glow: rgba(0, 125, 155, 0.25);
+    --quintessence-glow: rgba(125, 50, 195, 0.25);
+    --quintessence-soft: rgba(125, 50, 195, 0.08);
+    --bronze-accent: rgba(5, 105, 175, 0.25);
+  }
+
+  /* Rosewater - blush whites, plum ink, rose accents. */
+  :root[data-theme="rosewater"] {
+    --c-void: 249 241 240;
+    --c-surface: 253 247 246;
+    --c-raise: 255 255 255;
+    --c-inset: 243 232 230;
+    --c-line: 226 208 205;
+    --c-linehi: 201 175 171;
+    --c-linestrong: 176 143 138;
+    --c-gold: 48 28 30;
+    --c-goldsoft: 62 40 42;
+    --c-goldhi: 34 18 20;
+    --c-parchment: 99 62 64;
+    --c-ash: 118 82 84;
+    --c-ash2: 122 86 88;
+    --c-leather: 112 78 80;
+    --c-faint: 78 48 50;
+    --c-sun: 180 95 20;
+    --c-sunhi: 160 82 15;
+    --c-sundim: 150 85 30;
+    --c-ember: 195 70 30;
+    --c-alert: 165 108 0;
+    --c-ok: 20 120 70;
+    --c-termgreen: 20 120 70;
+    --c-bad: 200 48 52;
+    --c-mercury: 10 120 150;
+    --c-mercdim: 12 114 142;
+    --c-aero: 18 105 155;
+    --c-quint: 130 55 190;
+    --c-quintdim: 120 58 200;
+    --c-orchid: 160 55 180;
+    --c-magenta: 200 25 105;
+    --c-aqua: 15 120 110;
+    --c-quintbg: 246 236 250;
+    --c-mercurybg: 226 240 245;
+    --c-okbg: 230 242 234;
+
+    --mercury-glow: rgba(10, 120, 150, 0.25);
+    --quintessence-glow: rgba(130, 55, 190, 0.25);
+    --quintessence-soft: rgba(130, 55, 190, 0.08);
+    --bronze-accent: rgba(180, 95, 20, 0.25);
+  }
+
+  /* Lavender - pale violet, aubergine ink, orchid accents. */
+  :root[data-theme="lavender"] {
+    --c-void: 245 242 249;
+    --c-surface: 250 247 253;
+    --c-raise: 255 255 255;
+    --c-inset: 239 233 246;
+    --c-line: 214 204 228;
+    --c-linehi: 188 173 208;
+    --c-linestrong: 162 143 188;
+    --c-gold: 35 27 50;
+    --c-goldsoft: 48 39 64;
+    --c-goldhi: 24 18 38;
+    --c-parchment: 78 65 104;
+    --c-ash: 101 88 128;
+    --c-ash2: 97 84 124;
+    --c-leather: 92 79 118;
+    --c-faint: 61 50 84;
+    --c-sun: 160 105 15;
+    --c-sunhi: 142 92 12;
+    --c-sundim: 135 95 25;
+    --c-ember: 190 80 30;
+    --c-alert: 158 108 0;
+    --c-ok: 18 122 68;
+    --c-termgreen: 18 122 68;
+    --c-bad: 198 50 55;
+    --c-mercury: 15 115 155;
+    --c-mercdim: 18 110 148;
+    --c-aero: 20 105 160;
+    --c-quint: 125 45 200;
+    --c-quintdim: 118 52 210;
+    --c-orchid: 150 45 190;
+    --c-magenta: 195 25 115;
+    --c-aqua: 15 118 120;
+    --c-quintbg: 240 231 250;
+    --c-mercurybg: 224 238 246;
+    --c-okbg: 228 242 232;
+
+    --mercury-glow: rgba(15, 115, 155, 0.25);
+    --quintessence-glow: rgba(125, 45, 200, 0.25);
+    --quintessence-soft: rgba(125, 45, 200, 0.08);
+    --bronze-accent: rgba(160, 105, 15, 0.25);
+  }
+
+  /* Citrus - cream pages, olive ink, lime zest accents. */
+  :root[data-theme="citrus"] {
+    --c-void: 247 245 232;
+    --c-surface: 252 250 240;
+    --c-raise: 255 255 255;
+    --c-inset: 240 237 219;
+    --c-line: 221 216 190;
+    --c-linehi: 196 188 155;
+    --c-linestrong: 170 159 120;
+    --c-gold: 38 36 18;
+    --c-goldsoft: 52 50 28;
+    --c-goldhi: 26 24 12;
+    --c-parchment: 86 83 47;
+    --c-ash: 108 105 66;
+    --c-ash2: 112 109 68;
+    --c-leather: 102 99 62;
+    --c-faint: 68 65 36;
+    --c-sun: 145 125 5;
+    --c-sunhi: 128 110 4;
+    --c-sundim: 125 115 20;
+    --c-ember: 185 85 20;
+    --c-alert: 152 112 0;
+    --c-ok: 55 125 30;
+    --c-termgreen: 55 125 30;
+    --c-bad: 195 55 40;
+    --c-mercury: 5 120 140;
+    --c-mercdim: 8 115 135;
+    --c-aero: 12 110 150;
+    --c-quint: 120 60 185;
+    --c-quintdim: 112 62 195;
+    --c-orchid: 148 62 175;
+    --c-magenta: 185 35 100;
+    --c-aqua: 20 120 95;
+    --c-quintbg: 241 238 250;
+    --c-mercurybg: 223 240 242;
+    --c-okbg: 229 242 224;
+
+    --mercury-glow: rgba(5, 120, 140, 0.25);
+    --quintessence-glow: rgba(120, 60, 185, 0.25);
+    --quintessence-soft: rgba(120, 60, 185, 0.08);
+    --bronze-accent: rgba(145, 125, 5, 0.25);
+  }
+
+:root[data-theme="light"] .brand-logo,
+  :root[data-theme="porcelain"] .brand-logo,
+  :root[data-theme="sage"] .brand-logo,
+  :root[data-theme="linen"] .brand-logo,
+  :root[data-theme="skyline"] .brand-logo,
+  :root[data-theme="rosewater"] .brand-logo,
+  :root[data-theme="lavender"] .brand-logo,
+  :root[data-theme="citrus"] .brand-logo {
     filter: brightness(0.62) saturate(1.35);
   }
 

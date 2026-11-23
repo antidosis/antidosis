@@ -96,10 +96,11 @@ describe("SkillAutocomplete", () => {
     const onChange = vi.fn();
     render(<SkillAutocomplete value={[]} onChange={onChange} />);
     const input = screen.getByRole("textbox");
-    fireEvent.change(input, { target: { value: "Electrical" } });
+    // ArrowDown moves highlight 0 → 1, Enter picks the second suggestion.
+    fireEvent.change(input, { target: { value: "electric" } });
     fireEvent.keyDown(input, { key: "ArrowDown" });
     fireEvent.keyDown(input, { key: "Enter" });
-    expect(onChange).toHaveBeenCalledWith(["Electrical"]);
+    expect(onChange).toHaveBeenCalledWith(["Auto Electrician"]);
   });
 
   it("closes dropdown with Escape", () => {

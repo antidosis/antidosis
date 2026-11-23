@@ -128,7 +128,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Theme init — must run before first paint to avoid a flash of the wrong theme */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var v=["dark","light","chrome","ember","phosphor","ultraviolet","glacier","regal","rose"];var t=localStorage.getItem("antidosis-theme");if(v.indexOf(t)<0){t=window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"}}catch(e){t="dark"}document.documentElement.dataset.theme=t;try{var f=localStorage.getItem("antidosis-font");if(["terminal","system","editorial","typewriter"].indexOf(f)>=0){document.documentElement.dataset.font=f}}catch(e){}})()`,
+            __html: `(function(){try{var v=["dark","light","chrome","ember","phosphor","ultraviolet","glacier","regal","rose","porcelain","sage","linen","skyline","rosewater","lavender","citrus"];var t=localStorage.getItem("antidosis-theme");if(v.indexOf(t)<0){t=window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"}}catch(e){t="dark"}document.documentElement.dataset.theme=t;try{var f=localStorage.getItem("antidosis-font");if(["terminal","system","editorial","typewriter"].indexOf(f)>=0){document.documentElement.dataset.font=f}}catch(e){}})()`,
           }}
         />
         <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
