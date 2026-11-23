@@ -33,6 +33,8 @@ import { Button } from "@/components/ui/button";
 import { useInView } from "@/hooks/use-in-view";
 import { cn } from "@/lib/utils";
 
+import { OffgridVision } from "./offgrid-vision";
+
 // Lazy-load below-the-fold components to reduce initial JS bundle
 const TerminalPreview = dynamic(() =>
   import("@/components/terminal-preview").then((mod) => ({ default: mod.TerminalPreview }))
@@ -304,6 +306,10 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        <div className="divider" />
+
+        <OffgridVision />
 
         <div className="divider" />
 
