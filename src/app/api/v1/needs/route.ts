@@ -76,7 +76,7 @@ export const GET = withApiHandler(async (req: NextRequest) => {
           },
           requiredSkills: true,
           _count: {
-            select: { acceptances: true },
+            select: { acceptances: true, views: true, watches: true },
           },
         },
       }),

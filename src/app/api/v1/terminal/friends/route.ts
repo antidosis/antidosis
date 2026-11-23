@@ -51,13 +51,27 @@ export const POST = withApiHandler(async (req: NextRequest) => {
   if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 });
 
   const body = await req.json();
-  const friendId = body.userId as string;
-  if (!friendId) return NextResponse.json({ error: "userId required" }, { status: 400 });
-  if (friendId === profile.id)
+  // Accept either a user id or an @handle — the community UI adds by handle.
+  const friendId = body.userId as string | undefined;
+  const handle = (body.handle as string | undefined)?.trim().replace(/^@/, "").toLowerCase();
+
+  let targetId = friendId;
+  if (!targetId && handle) {
+    const byHandle = await prisma.profile.findUnique({
+      where: { handle },
+      select: { id: true },
+    });
+    if (!byHandle) {
+      return NextResponse.json({ error: "No profile found with that handle" }, { status: 404 });
+    }
+    targetId = byHandle.id;
+  }
+  if (!targetId) return NextResponse.json({ error: "userId or handle required" }, { status: 400 });
+  if (targetId === profile.id)
     return NextResponse.json({ error: "Cannot friend yourself" }, { status: 400 });
 
   const target = await prisma.profile.findUnique({
-    where: { id: friendId },
+    where: { id: targetId },
     select: { id: true },
   });
   if (!target) return NextResponse.json({ error: "User not found" }, { status: 404 });
@@ -66,8 +80,8 @@ export const POST = withApiHandler(async (req: NextRequest) => {
   const isBlocked = await prisma.block.findFirst({
     where: {
       OR: [
-        { blockerId: profile.id, blockedId: friendId },
-        { blockerId: friendId, blockedId: profile.id },
+        { blockerId: profile.id, blockedId: targetId },
+        { blockerId: targetId, blockedId: profile.id },
       ],
     },
   });
@@ -75,8 +89,8 @@ export const POST = withApiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: "Cannot friend a blocked user" }, { status: 403 });
 
   // Ordered pair for uniqueness
-  const userAId = profile.id < friendId ? profile.id : friendId;
-  const userBId = profile.id < friendId ? friendId : profile.id;
+  const userAId = profile.id < targetId ? profile.id : targetId;
+  const userBId = profile.id < targetId ? targetId : profile.id;
 
   const existing = await prisma.friend.findUnique({
     where: { userAId_userBId: { userAId, userBId } },

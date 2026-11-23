@@ -79,6 +79,7 @@ mobile/                   # Capacitor mobile app
 
 - Tailwind utility classes only
 - **Theme tokens, not hex values**: use the semantic colors from `tailwind.config.ts` (e.g. `text-gold`, `bg-void`, `border-line`, `text-sun`, `text-ok`, `text-bad`). Values come from `--c-*` CSS vars in `globals.css`; `[data-theme="light"]` overrides them. Never introduce new `[#rrggbb]` arbitrary values — add a token instead
+- **Site themes**: `data-theme` on `<html>` selects the palette — `dark` (default), `light`, and named dark themes `chrome|ember|phosphor|ultraviolet|glacier|regal|rose` (CSS blocks in `globals.css`, registry in `src/lib/themes.ts`, picker in Dashboard → Settings → Appearance). Persisted as `antidosis-theme`; init script in root layout runs pre-paint. **Font packs**: `data-font` on `<html>` (`terminal|system|editorial|typewriter`) switches the body font via `--font-body`; persisted as `antidosis-font`
 - Light/dark themes: default follows `prefers-color-scheme`, overridden by the navbar toggle (persisted as `antidosis-theme` in localStorage; init script runs pre-paint in `layout.tsx`). Inline-style accent colors use hex-valued `--x-*` vars so `` `${color}15` `` alpha suffixes keep working
 - Contract parchment (`paper*` tokens) and terminal named skins (cyberpunk/matrix/minimal) are constants — identical in both themes by design
 - Custom class: `vessel` = card container with border/bg
@@ -219,6 +220,8 @@ needs/[id]/_components/
 - `Review` — ratings and feedback after completion
 - `Profile` — extended user profile (skills, credentials, etc.); `accountType` (`individual`|`business`), `abn`/`abnVerified` (business accounts), `audienceSize` (individuals, public creator metric) — ABN only public on business profiles, audience size only on individual. Business accounts: `accountType` ("individual" | "business"), `abn` + `abnVerified` (ABN checksum in `src/lib/abn.ts`; ABR live lookup when `ABR_LOOKUP_GUID` is set). Individual ABNs are never public — the public profile route gates ABN to business accounts.
 - `NeedMessage` — messages on needs (public + private threads)
+- `NeedView` / `NeedWatch` — per-need analytics: views are deduped 24h per viewer/IP-hash via `POST /api/v1/needs/[id]/view` (fired by the detail page); watchers follow a post via `POST/DELETE /api/v1/needs/[id]/watch` and surface in dashboard analytics
+- `Friend` / `Block` — friendships and blocks (`/api/v1/terminal/friends|blocks`, both accept `userId`/`blockedId` or `handle`); blocking removes the friendship and blocks DMs
 - `TerminalMessage` — real-time relay chat messages
 - `Channel` — relay channels
 - `DmThread` / `DmMessage` — direct messages

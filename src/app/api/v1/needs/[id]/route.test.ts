@@ -11,6 +11,7 @@ const mockNeedDelete = vi.fn();
 const mockProfileFindUnique = vi.fn();
 const mockTransaction = vi.fn();
 const mockNeedSkillDeleteMany = vi.fn();
+const mockNeedWatchFindUnique = vi.fn();
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
@@ -18,6 +19,9 @@ vi.mock("@/lib/prisma", () => ({
       findUnique: (...args: unknown[]) => mockNeedFindUnique(...args),
       update: (...args: unknown[]) => mockNeedUpdate(...args),
       delete: (...args: unknown[]) => mockNeedDelete(...args),
+    },
+    needWatch: {
+      findUnique: (...args: unknown[]) => mockNeedWatchFindUnique(...args),
     },
     profile: {
       findUnique: (...args: unknown[]) => mockProfileFindUnique(...args),

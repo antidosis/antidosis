@@ -5,7 +5,9 @@ import Link from "next/link";
 import {
   ArrowRight,
   BarChart3,
+  Bell,
   CheckCircle2,
+  Eye,
   FileText,
   HandHelping,
   Star,
@@ -25,7 +27,7 @@ interface NeedItem {
   title: string;
   status: string;
   createdAt: string;
-  _count?: { acceptances?: number };
+  _count?: { acceptances?: number; views?: number; watches?: number };
   acceptances?: unknown[];
 }
 
@@ -62,6 +64,8 @@ export function AnalyticsPanel({ profile }: { profile: AnalyticsProfile }) {
   const activeNeeds = allNeeds.filter((n) => n.status !== "archived");
 
   const interestReceived = allNeeds.reduce((sum, n) => sum + (n._count?.acceptances ?? 0), 0);
+  const totalViews = allNeeds.reduce((sum, n) => sum + (n._count?.views ?? 0), 0);
+  const totalWatchers = allNeeds.reduce((sum, n) => sum + (n._count?.watches ?? 0), 0);
   const needsWithInterest = allNeeds.filter((n) => (n._count?.acceptances ?? 0) > 0).length;
   const responseRate = allNeeds.length > 0 ? (needsWithInterest / allNeeds.length) * 100 : null;
   const readyToContract = allNeeds.reduce((sum, n) => sum + (n.acceptances?.length ?? 0), 0);
@@ -126,7 +130,7 @@ export function AnalyticsPanel({ profile }: { profile: AnalyticsProfile }) {
       )}
 
       {/* Reputation row */}
-      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {[
           {
             label: "Rating",
@@ -155,6 +159,20 @@ export function AnalyticsPanel({ profile }: { profile: AnalyticsProfile }) {
             sub: `${offersAccepted} accepted · ${offersPending} pending`,
             icon: HandHelping,
             cls: "text-orchid border-orchid/20 bg-orchid/5",
+          },
+          {
+            label: "Post views",
+            value: String(totalViews),
+            sub: "across everything you posted",
+            icon: Eye,
+            cls: "text-mercury border-mercury/20 bg-mercury/5",
+          },
+          {
+            label: "Watchers",
+            value: String(totalWatchers),
+            sub: "people following your posts",
+            icon: Bell,
+            cls: "text-sun border-sun/20 bg-sun/5",
           },
         ].map((stat) => (
           <div key={stat.label} className={cn("rounded border p-3.5", stat.cls)}>
@@ -205,11 +223,13 @@ export function AnalyticsPanel({ profile }: { profile: AnalyticsProfile }) {
             <BarChart3 className="h-3.5 w-3.5 text-ash" />
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[560px] text-left text-sm">
+            <table className="w-full min-w-[680px] text-left text-sm">
               <thead>
                 <tr className="border-b border-line/60 text-xs uppercase tracking-wider text-ash">
                   <th className="px-5 py-2.5 font-medium">post</th>
                   <th className="px-3 py-2.5 font-medium">status</th>
+                  <th className="px-3 py-2.5 text-right font-medium">views</th>
+                  <th className="px-3 py-2.5 text-right font-medium">watchers</th>
                   <th className="px-3 py-2.5 text-right font-medium">interested</th>
                   <th className="px-3 py-2.5 text-right font-medium">ready</th>
                   <th className="px-3 py-2.5 text-right font-medium">age</th>
@@ -224,6 +244,12 @@ export function AnalyticsPanel({ profile }: { profile: AnalyticsProfile }) {
                     </td>
                     <td className="px-3 py-3">
                       <Badge variant={statusBadgeVariant(need.status)}>{need.status}</Badge>
+                    </td>
+                    <td className="px-3 py-3 text-right font-mono text-ash">
+                      {need._count?.views ?? 0}
+                    </td>
+                    <td className="px-3 py-3 text-right font-mono text-sun">
+                      {need._count?.watches ?? 0}
                     </td>
                     <td className="px-3 py-3 text-right font-mono text-ash">
                       {need._count?.acceptances ?? 0}

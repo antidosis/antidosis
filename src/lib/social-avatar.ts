@@ -33,6 +33,19 @@ export const FETCH_TIMEOUT_MS = 8_000;
 const USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36 antidosis-avatar-bot/1.0";
 
+/** Fetch fallbacks per platform — main-site pages often 400/302 bots to a login wall. */
+function pageVariants(pageUrl: string, host: string): string[] {
+  const url = new URL(pageUrl);
+  const variants = [pageUrl];
+  if (!url.hostname.startsWith("www.")) {
+    variants.push(pageUrl.replace(url.hostname, `www.${url.hostname}`));
+  }
+  if (host === "facebook.com") {
+    variants.push(`https://mbasic.facebook.com${url.pathname}${url.search}`);
+  }
+  return variants;
+}
+
 export interface SocialAvatarTarget {
   /** Canonical page URL that will be fetched. */
   pageUrl: string;
@@ -125,21 +138,42 @@ export async function fetchOgImage(
   pageUrl: string,
   fetchImpl: typeof fetch = fetch
 ): Promise<string> {
-  const res = await fetchImpl(pageUrl, {
-    headers: {
-      "User-Agent": USER_AGENT,
-      Accept: "text/html,application/xhtml+xml",
-    },
-    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-    redirect: "follow",
-  });
-  if (!res.ok) throw new Error(`Profile page returned ${res.status}`);
-  const html = await res.text();
-  const og = extractOgImage(html);
-  if (!og) {
+  const target = parseSocialAvatarTarget(pageUrl);
+  const variants = target ? pageVariants(pageUrl, target.host) : [pageUrl];
+  let lastError: unknown = null;
+
+  for (const variant of variants) {
+    try {
+      const res = await fetchImpl(variant, {
+        headers: {
+          "User-Agent": USER_AGENT,
+          Accept: "text/html,application/xhtml+xml",
+          "Accept-Language": "en-US,en;q=0.9",
+        },
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+        redirect: "follow",
+      });
+      if (!res.ok) {
+        lastError = new Error(`Profile page returned ${res.status}`);
+        continue;
+      }
+      const html = await res.text();
+      const og = extractOgImage(html);
+      if (og) return og;
+      lastError = new Error("no-og-image");
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  if (lastError instanceof Error && lastError.message === "no-og-image") {
     throw new Error(
-      "No public profile picture found — the profile may be private or the platform may require login (Instagram commonly does)"
+      "No public profile picture found — the profile may be private, or the platform requires login (Instagram commonly does)"
     );
   }
-  return og;
+  const status =
+    lastError instanceof Error ? lastError.message.replace("Profile page returned ", "HTTP ") : "";
+  throw new Error(
+    `That platform blocked the automated lookup${status ? ` (${status})` : ""}. Facebook and Instagram often refuse automated requests — the reliable path is to download your profile picture and upload it directly with "Change avatar".`
+  );
 }

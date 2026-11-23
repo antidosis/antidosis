@@ -68,6 +68,7 @@ model Profile {
   friendsAsB       Friend[]              @relation("friendsAsB")
   reportsFiled     Report[]
   deviceTokens     DeviceToken[]
+  needWatches      NeedWatch[]
 
   @@index([isPro])
   @@index([stripeCustomerId])
@@ -132,6 +133,8 @@ model Need {
   acceptances    Acceptance[]
   contracts      Contract[]
   messages       NeedMessage[]
+  views          NeedView[]
+  watches        NeedWatch[]
 
   @@index([status, createdAt])
   @@index([posterId])
@@ -540,6 +543,37 @@ model Friend {
   @@unique([userAId, userBId])
   @@index([userBId])
   @@map("friends")
+}
+
+model NeedView {
+  id        String   @id @default(uuid())
+  needId    String   @map("need_id")
+  // Nullable: anonymous visitors count too. No FK — view history must survive
+  // account anonymisation, and counts are aggregated from rows.
+  viewerId  String?  @map("viewer_id")
+  ipHash    String?  @map("ip_hash")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  need Need @relation(fields: [needId], references: [id], onDelete: Cascade)
+
+  @@index([needId, createdAt])
+  @@index([needId, viewerId])
+  @@index([needId, ipHash])
+  @@map("need_views")
+}
+
+model NeedWatch {
+  id        String   @id @default(uuid())
+  needId    String   @map("need_id")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  need Need    @relation(fields: [needId], references: [id], onDelete: Cascade)
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([needId, userId])
+  @@index([userId])
+  @@map("need_watches")
 }
 
 // Note: Additional Profile indexes

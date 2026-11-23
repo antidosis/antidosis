@@ -46,8 +46,23 @@ export const POST = withApiHandler(async (req: NextRequest) => {
   if (!profile) return NextResponse.json({ error: "Profile not found" }, { status: 404 });
 
   const body = await req.json();
-  const blockedId = body.blockedId as string;
-  if (!blockedId) return NextResponse.json({ error: "blockedId required" }, { status: 400 });
+  // Accept either a user id or an @handle.
+  const blockedIdRaw = body.blockedId as string | undefined;
+  const handle = (body.handle as string | undefined)?.trim().replace(/^@/, "").toLowerCase();
+
+  let blockedId = blockedIdRaw;
+  if (!blockedId && handle) {
+    const byHandle = await prisma.profile.findUnique({
+      where: { handle },
+      select: { id: true },
+    });
+    if (!byHandle) {
+      return NextResponse.json({ error: "No profile found with that handle" }, { status: 404 });
+    }
+    blockedId = byHandle.id;
+  }
+  if (!blockedId)
+    return NextResponse.json({ error: "blockedId or handle required" }, { status: 400 });
   if (blockedId === profile.id)
     return NextResponse.json({ error: "Cannot block yourself" }, { status: 400 });
 

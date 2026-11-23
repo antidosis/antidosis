@@ -6,6 +6,8 @@
   :root {
     color-scheme: dark;
 
+    --font-body: var(--font-mono);
+
     /* Theme tokens — RGB triplets consumed by Tailwind (see tailwind.config.ts).
        Dark values are the original palette; [data-theme="light"] overrides below. */
     --c-void: 10 8 6; /* #0a0806 */
@@ -208,6 +210,289 @@
     filter: brightness(0.62) saturate(1.35);
   }
 
+  /* ─── Font packs (Settings → Appearance) ───
+     Selected via <html data-font="...">; the init script in root layout sets
+     it pre-paint from localStorage ("antidosis-font"). */
+  :root[data-font="system"] {
+    --font-body: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  }
+  :root[data-font="editorial"] {
+    --font-body: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+  }
+  :root[data-font="typewriter"] {
+    --font-body: "Courier New", Courier, "Lucida Console", monospace;
+  }
+
+  /* ─── Named dark themes (Settings → Appearance) ───
+     Each overrides only the --c-* triplets; every derived token in :root
+     (gold, parchment, bronze, glows) recomputes from these. */
+
+  /* Chrome — liquid metal. Cold gunmetal, platinum text, icy blue accents. */
+  :root[data-theme="chrome"] {
+    --c-void: 12 14 17;
+    --c-surface: 18 21 26;
+    --c-raise: 26 30 36;
+    --c-inset: 14 16 20;
+    --c-line: 44 50 58;
+    --c-linehi: 66 74 84;
+    --c-linestrong: 100 112 126;
+    --c-gold: 226 232 240;
+    --c-goldsoft: 196 206 218;
+    --c-goldhi: 240 246 252;
+    --c-parchment: 176 188 202;
+    --c-ash: 132 144 158;
+    --c-ash2: 128 140 154;
+    --c-leather: 116 128 142;
+    --c-faint: 200 210 222;
+    --c-sun: 120 200 255;
+    --c-sunhi: 160 220 255;
+    --c-sundim: 80 150 210;
+    --c-ember: 255 140 80;
+    --c-alert: 255 196 60;
+    --c-ok: 60 220 160;
+    --c-termgreen: 60 255 190;
+    --c-bad: 255 100 110;
+    --c-mercury: 120 210 255;
+    --c-mercdim: 90 170 220;
+    --c-aero: 100 190 245;
+    --c-quint: 150 170 255;
+    --c-quintdim: 120 140 230;
+    --c-orchid: 190 160 255;
+    --c-magenta: 255 130 200;
+    --c-aqua: 90 210 220;
+    --c-quintbg: 16 18 40;
+    --c-mercurybg: 6 20 34;
+    --c-okbg: 0 20 14;
+  }
+
+  /* Ember — molten forge. Charred umber, ember-orange heat. */
+  :root[data-theme="ember"] {
+    --c-void: 14 8 6;
+    --c-surface: 22 13 10;
+    --c-raise: 30 18 13;
+    --c-inset: 17 10 8;
+    --c-line: 52 30 22;
+    --c-linehi: 76 44 30;
+    --c-linestrong: 110 66 40;
+    --c-gold: 240 205 160;
+    --c-goldsoft: 218 176 132;
+    --c-goldhi: 248 222 180;
+    --c-parchment: 196 150 110;
+    --c-ash: 158 116 92;
+    --c-ash2: 150 112 86;
+    --c-leather: 132 96 76;
+    --c-faint: 210 176 140;
+    --c-sun: 255 150 40;
+    --c-sunhi: 255 180 90;
+    --c-sundim: 210 110 20;
+    --c-ember: 255 90 20;
+    --c-alert: 255 170 0;
+    --c-ok: 120 230 120;
+    --c-termgreen: 100 255 120;
+    --c-bad: 255 90 90;
+    --c-mercury: 120 210 255;
+    --c-mercdim: 90 170 210;
+    --c-aero: 90 180 235;
+    --c-quint: 200 120 255;
+    --c-quintdim: 160 100 240;
+    --c-orchid: 230 130 245;
+    --c-magenta: 255 110 160;
+    --c-aqua: 60 200 190;
+    --c-quintbg: 30 8 24;
+    --c-mercurybg: 0 18 28;
+    --c-okbg: 0 20 6;
+  }
+
+  /* Phosphor — the old green screen. Near-black with terminal glow. */
+  :root[data-theme="phosphor"] {
+    --c-void: 4 10 6;
+    --c-surface: 7 16 10;
+    --c-raise: 10 24 14;
+    --c-inset: 5 13 8;
+    --c-line: 18 40 24;
+    --c-linehi: 28 60 36;
+    --c-linestrong: 40 86 50;
+    --c-gold: 190 240 200;
+    --c-goldsoft: 160 220 175;
+    --c-goldhi: 210 250 220;
+    --c-parchment: 150 210 170;
+    --c-ash: 100 160 120;
+    --c-ash2: 96 150 116;
+    --c-leather: 86 134 102;
+    --c-faint: 170 225 190;
+    --c-sun: 120 255 150;
+    --c-sunhi: 160 255 190;
+    --c-sundim: 60 200 110;
+    --c-ember: 120 255 120;
+    --c-alert: 190 255 120;
+    --c-ok: 0 255 120;
+    --c-termgreen: 0 255 65;
+    --c-bad: 255 100 100;
+    --c-mercury: 0 255 200;
+    --c-mercdim: 0 210 170;
+    --c-aero: 40 230 190;
+    --c-quint: 120 255 140;
+    --c-quintdim: 90 220 120;
+    --c-orchid: 150 255 170;
+    --c-magenta: 90 255 160;
+    --c-aqua: 0 230 180;
+    --c-quintbg: 0 20 8;
+    --c-mercurybg: 0 22 18;
+    --c-okbg: 0 20 8;
+  }
+
+  /* Ultraviolet — synthwave dusk. Deep violet with neon orchid. */
+  :root[data-theme="ultraviolet"] {
+    --c-void: 12 8 20;
+    --c-surface: 19 13 30;
+    --c-raise: 27 19 42;
+    --c-inset: 15 10 25;
+    --c-line: 44 32 66;
+    --c-linehi: 66 48 96;
+    --c-linestrong: 96 70 136;
+    --c-gold: 226 205 250;
+    --c-goldsoft: 204 178 238;
+    --c-goldhi: 240 224 255;
+    --c-parchment: 190 164 226;
+    --c-ash: 148 128 178;
+    --c-ash2: 142 122 170;
+    --c-leather: 126 108 152;
+    --c-faint: 205 188 235;
+    --c-sun: 255 170 90;
+    --c-sunhi: 255 200 130;
+    --c-sundim: 220 130 50;
+    --c-ember: 255 110 120;
+    --c-alert: 255 190 60;
+    --c-ok: 90 235 190;
+    --c-termgreen: 80 255 210;
+    --c-bad: 255 100 120;
+    --c-mercury: 150 180 255;
+    --c-mercdim: 120 150 240;
+    --c-aero: 110 160 250;
+    --c-quint: 178 75 245;
+    --c-quintdim: 150 90 246;
+    --c-orchid: 215 107 245;
+    --c-magenta: 245 77 190;
+    --c-aqua: 80 200 220;
+    --c-quintbg: 24 6 40;
+    --c-mercurybg: 10 12 40;
+    --c-okbg: 4 24 20;
+  }
+
+  /* Glacier — arctic terminal. Blue-black ice, cyan instrumentation. */
+  :root[data-theme="glacier"] {
+    --c-void: 6 12 18;
+    --c-surface: 10 19 28;
+    --c-raise: 15 27 39;
+    --c-inset: 8 15 23;
+    --c-line: 24 44 62;
+    --c-linehi: 36 64 88;
+    --c-linestrong: 52 92 122;
+    --c-gold: 205 230 245;
+    --c-goldsoft: 175 205 228;
+    --c-goldhi: 225 242 252;
+    --c-parchment: 160 195 220;
+    --c-ash: 118 150 175;
+    --c-ash2: 114 144 168;
+    --c-leather: 100 128 150;
+    --c-faint: 185 212 232;
+    --c-sun: 120 200 255;
+    --c-sunhi: 160 222 255;
+    --c-sundim: 70 150 215;
+    --c-ember: 255 140 90;
+    --c-alert: 255 196 60;
+    --c-ok: 60 225 170;
+    --c-termgreen: 70 255 200;
+    --c-bad: 255 100 110;
+    --c-mercury: 0 229 255;
+    --c-mercdim: 0 184 212;
+    --c-aero: 53 194 240;
+    --c-quint: 130 160 255;
+    --c-quintdim: 110 130 240;
+    --c-orchid: 170 150 255;
+    --c-magenta: 230 120 220;
+    --c-aqua: 30 196 184;
+    --c-quintbg: 12 14 40;
+    --c-mercurybg: 0 21 32;
+    --c-okbg: 0 20 16;
+  }
+
+  /* Regal — black and gold. The members' lounge: obsidian, brass, amber. */
+  :root[data-theme="regal"] {
+    --c-void: 9 8 5;
+    --c-surface: 16 14 9;
+    --c-raise: 23 20 13;
+    --c-inset: 13 11 7;
+    --c-line: 45 38 22;
+    --c-linehi: 68 57 34;
+    --c-linestrong: 100 84 48;
+    --c-gold: 240 215 140;
+    --c-goldsoft: 220 190 120;
+    --c-goldhi: 250 230 170;
+    --c-parchment: 200 172 110;
+    --c-ash: 155 135 92;
+    --c-ash2: 148 128 88;
+    --c-leather: 130 112 78;
+    --c-faint: 210 190 140;
+    --c-sun: 250 180 40;
+    --c-sunhi: 255 205 90;
+    --c-sundim: 205 140 15;
+    --c-ember: 240 120 30;
+    --c-alert: 255 180 0;
+    --c-ok: 120 225 130;
+    --c-termgreen: 100 255 140;
+    --c-bad: 255 95 95;
+    --c-mercury: 90 200 240;
+    --c-mercdim: 70 165 205;
+    --c-aero: 80 180 230;
+    --c-quint: 190 130 250;
+    --c-quintdim: 160 110 240;
+    --c-orchid: 220 140 250;
+    --c-magenta: 250 110 170;
+    --c-aqua: 60 200 185;
+    --c-quintbg: 24 12 34;
+    --c-mercurybg: 4 16 26;
+    --c-okbg: 4 20 8;
+  }
+
+  /* Rose Noir — crimson darkroom. Black cherry with magenta neon. */
+  :root[data-theme="rose"] {
+    --c-void: 14 7 10;
+    --c-surface: 22 11 16;
+    --c-raise: 31 16 22;
+    --c-inset: 17 9 13;
+    --c-line: 52 26 36;
+    --c-linehi: 78 38 52;
+    --c-linestrong: 112 54 72;
+    --c-gold: 245 210 205;
+    --c-goldsoft: 228 182 178;
+    --c-goldhi: 252 228 224;
+    --c-parchment: 215 170 165;
+    --c-ash: 170 128 125;
+    --c-ash2: 162 122 119;
+    --c-leather: 142 106 104;
+    --c-faint: 225 185 180;
+    --c-sun: 255 150 90;
+    --c-sunhi: 255 185 130;
+    --c-sundim: 220 115 60;
+    --c-ember: 255 95 60;
+    --c-alert: 255 180 60;
+    --c-ok: 110 230 150;
+    --c-termgreen: 90 255 170;
+    --c-bad: 255 90 100;
+    --c-mercury: 255 140 190;
+    --c-mercdim: 235 100 160;
+    --c-aero: 240 120 190;
+    --c-quint: 200 110 250;
+    --c-quintdim: 170 95 240;
+    --c-orchid: 235 120 250;
+    --c-magenta: 245 77 153;
+    --c-aqua: 240 130 170;
+    --c-quintbg: 30 8 26;
+    --c-mercurybg: 30 6 18;
+    --c-okbg: 8 20 10;
+  }
+
   * {
     border-color: var(--bronze);
   }
@@ -215,7 +500,7 @@
   body {
     background: var(--void);
     color: var(--gold);
-    font-family: var(--font-mono), "SF Mono", "Fira Code", "Cascadia Code", "Consolas", monospace;
+    font-family: var(--font-body), "SF Mono", "Fira Code", "Cascadia Code", "Consolas", monospace;
     font-size: 14px;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;

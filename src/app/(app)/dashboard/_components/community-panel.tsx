@@ -10,6 +10,7 @@ import { mutate } from "swr";
 import { Button } from "@/components/ui/button";
 import { useApi } from "@/lib/swr-config";
 
+import { FriendsManager } from "./friends-manager";
 import { SocialSection } from "./social-section";
 import { TerminalActivityFeed } from "./terminal-activity-feed";
 
@@ -117,6 +118,7 @@ export function CommunityPanel() {
       </section>
 
       <NotificationsFeed />
+      <FriendsManager />
       <SocialSection />
       <TerminalActivityFeed />
     </div>

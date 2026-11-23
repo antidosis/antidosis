@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 
 import "./globals.css";
 import { ErrorReporterInit } from "@/components/error-reporter-init";
+import { InstallPrompt } from "@/components/pwa/install-prompt";
 import { ToastProvider } from "@/components/ui/toast";
 
 const inter = Inter({
@@ -127,7 +128,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Theme init — must run before first paint to avoid a flash of the wrong theme */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem("antidosis-theme");if(t!=="light"&&t!=="dark"){t=window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"}}catch(e){t="dark"}document.documentElement.dataset.theme=t})()`,
+            __html: `(function(){try{var v=["dark","light","chrome","ember","phosphor","ultraviolet","glacier","regal","rose"];var t=localStorage.getItem("antidosis-theme");if(v.indexOf(t)<0){t=window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"}}catch(e){t="dark"}document.documentElement.dataset.theme=t;try{var f=localStorage.getItem("antidosis-font");if(["terminal","system","editorial","typewriter"].indexOf(f)>=0){document.documentElement.dataset.font=f}}catch(e){}})()`,
           }}
         />
         <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
@@ -225,6 +226,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${inter.variable} ${jetbrainsMono.variable} antialiased bg-void text-gold`}>
         <ErrorReporterInit />
         <ToastProvider>{children}</ToastProvider>
+        <InstallPrompt />
       </body>
     </html>
   );

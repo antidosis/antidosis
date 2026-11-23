@@ -153,7 +153,7 @@ describe("POST /api/v1/terminal/blocks", () => {
     const body = await res.json();
 
     expect(res.status).toBe(400);
-    expect(body.error).toBe("blockedId required");
+    expect(body.error).toBe("blockedId or handle required");
   });
 
   it("returns 400 when blocking yourself", async () => {

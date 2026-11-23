@@ -77,6 +77,7 @@ export type NeedDetail = {
     };
   }[];
   contracts: { id: string; status: string }[];
+  _count?: { watches?: number };
 };
 
 export type NeedMessage = {
@@ -147,6 +148,11 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
   /* free-form completion */
   const [markingComplete, setMarkingComplete] = useState(false);
 
+  /* watching */
+  const [isWatching, setIsWatching] = useState(false);
+  const [watchCount, setWatchCount] = useState(0);
+  const [togglingWatch, setTogglingWatch] = useState(false);
+
   /* review form */
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [posterReviewAcceptanceId, setPosterReviewAcceptanceId] = useState<string | null>(null);
@@ -183,6 +189,41 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  /* record a view once per page load — the API dedupes within 24h */
+  useEffect(() => {
+    if (!needId) return;
+    fetch(`/api/v1/needs/${needId}/view`, { method: "POST", keepalive: true }).catch(() => {});
+  }, [needId]);
+
+  async function toggleWatch() {
+    if (!profileId) {
+      handleAuthRequired();
+      return;
+    }
+    setTogglingWatch(true);
+    try {
+      const res = await fetch(`/api/v1/needs/${needId}/watch`, {
+        method: isWatching ? "DELETE" : "POST",
+      });
+      if (res.ok) {
+        setIsWatching(!isWatching);
+        setWatchCount((c) => Math.max(0, c + (isWatching ? -1 : 1)));
+      } else {
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 403 && data.code === "MOBILE_NOT_VERIFIED") {
+          toast("Verify your mobile number to watch needs", "error");
+          router.push("/verify-mobile");
+          return;
+        }
+        toast(data.error || "Couldn't update watch", "error");
+      }
+    } catch {
+      toast("Couldn't update watch — try again", "error");
+    } finally {
+      setTogglingWatch(false);
+    }
+  }
 
   useEffect(() => {
     if (!needId) return;
@@ -255,6 +296,8 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
             }
           : null;
         setNeed(normalized);
+        setIsWatching(!!data.isWatching);
+        setWatchCount(data.need?._count?.watches ?? 0);
       }
     } catch (err) {
       console.error("Failed to fetch need:", err);
@@ -493,6 +536,25 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
           descExpanded={descExpanded}
           onToggleDesc={() => setDescExpanded(!descExpanded)}
         />
+
+        {/* Watch bar — anyone logged in except the poster can follow the post */}
+        {profileId && !isPoster && need.status === "open" && (
+          <div className="mb-6 flex items-center justify-between border border-line bg-surface/40 px-4 py-3">
+            <p className="text-xs text-ash">
+              <span className="font-mono text-parchment">{watchCount}</span>{" "}
+              {watchCount === 1 ? "person is" : "people are"} watching this post
+            </p>
+            <Button
+              size="sm"
+              variant={isWatching ? "secondary" : "default"}
+              onClick={toggleWatch}
+              disabled={togglingWatch}
+            >
+              {togglingWatch && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              {isWatching ? "Watching ✓" : "Watch"}
+            </Button>
+          </div>
+        )}
 
         {/* ========== POSTER PROFILE (collapsible) ========== */}
         <PosterProfileCard

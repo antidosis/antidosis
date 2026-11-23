@@ -11,6 +11,8 @@ import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 import type { DashboardTabId } from "./dashboard-nav";
+import { FontPicker } from "./font-picker";
+import { ThemePicker } from "./theme-picker";
 
 interface SettingsProfile {
   id: string;
@@ -57,6 +59,21 @@ export function SettingsPanel({ profile, onNavigate }: SettingsPanelProps) {
 
   return (
     <div className="space-y-6">
+      <section className="vessel p-5">
+        <p className="mb-1 font-mono text-[10px] uppercase tracking-[0.2em] text-ash/60">
+          appearance
+        </p>
+        <h3 className="heading-display mb-1 text-lg text-gold">Theme</h3>
+        <p className="mb-4 text-xs text-ash">
+          Applies site-wide, on this device only. The navbar toggle still flips between dark and
+          Daybreak.
+        </p>
+        <ThemePicker />
+        <h3 className="heading-display mb-1 mt-6 text-lg text-gold">Font</h3>
+        <p className="mb-4 text-xs text-ash">How the body text reads. Headings keep their style.</p>
+        <FontPicker />
+      </section>
+
       <section className="vessel p-5">
         <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.2em] text-ash/60">
           account summary

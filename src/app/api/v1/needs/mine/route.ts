@@ -32,7 +32,7 @@ export const GET = withApiHandler(async (req: NextRequest) => {
       title: true,
       status: true,
       createdAt: true,
-      _count: { select: { acceptances: true } },
+      _count: { select: { acceptances: true, views: true, watches: true } },
       acceptances: {
         where: { status: "accepted" },
         select: { id: true },

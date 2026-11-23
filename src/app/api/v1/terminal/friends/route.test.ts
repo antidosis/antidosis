@@ -153,7 +153,7 @@ describe("POST /api/v1/terminal/friends", () => {
     const body = await res.json();
 
     expect(res.status).toBe(400);
-    expect(body.error).toBe("userId required");
+    expect(body.error).toBe("userId or handle required");
   });
 
   it("returns 400 when friending yourself", async () => {

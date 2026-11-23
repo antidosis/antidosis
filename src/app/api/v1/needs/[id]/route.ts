@@ -142,11 +142,22 @@ export const GET = withApiHandler(
               },
             }
           : false,
+        _count: { select: { watches: true } },
       },
     });
 
     if (!need) {
       return NextResponse.json({ error: "Need not found" }, { status: 404 });
+    }
+
+    // Watch state for the signed-in viewer (drives the watch toggle).
+    let isWatching = false;
+    if (profileId) {
+      const watch = await prisma.needWatch.findUnique({
+        where: { needId_userId: { needId: need.id, userId: profileId } },
+        select: { id: true },
+      });
+      isWatching = !!watch;
     }
 
     // Normalize poster fields for guests so the client doesn't crash
@@ -161,7 +172,7 @@ export const GET = withApiHandler(
       (need.poster as any).socialLinks = [];
     }
 
-    return NextResponse.json({ need });
+    return NextResponse.json({ need, isWatching });
   }
 );
 

@@ -92,8 +92,9 @@ export function CredentialsSection({ initialCredentials, onUpdate }: Credentials
             <p>
               Upload a government-issued ID (driver&apos;s licence, passport, etc.) as an{" "}
               <strong>&ldquo;identification&rdquo;</strong> type credential. Our team reviews and
-              approves it within 24 hours. Once approved, your profile is verified and you can claim{" "}
-              <strong>free Pro</strong> for life.
+              approves it within 24 hours. Once approved you carry the{" "}
+              <strong>verified badge everywhere</strong> — on your profile, your posts, and in the
+              directory. Verification is the trust layer: there are no tiers and nothing to pay.
             </p>
             <p>
               You can also add qualifications, licenses, certifications, WWCC, police checks, and

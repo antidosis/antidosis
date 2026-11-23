@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { withApiHandler } from "@/lib/api-handler";
+import { isReservedHandle, RESERVED_HANDLE_MESSAGE } from "@/lib/handles";
 import { prisma } from "@/lib/prisma";
 import { claimHandleSchema } from "@/lib/schemas";
 import { createClient } from "@/lib/supabase/server";
@@ -45,6 +46,14 @@ export const POST = withApiHandler(async (req: NextRequest) => {
     return NextResponse.json(
       { error: "Handle is permanent and cannot be changed", code: "HANDLE_LOCKED" },
       { status: 409 }
+    );
+  }
+
+  // Anti-impersonation: handles that look official can never be claimed.
+  if (isReservedHandle(handle)) {
+    return NextResponse.json(
+      { error: RESERVED_HANDLE_MESSAGE, code: "HANDLE_RESERVED" },
+      { status: 400 }
     );
   }
 
