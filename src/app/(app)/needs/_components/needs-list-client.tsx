@@ -33,6 +33,7 @@ import { cn } from "@/lib/utils";
 type NeedItem = {
   id: string;
   title: string;
+  createdAt: string;
   description: string;
   needCategory: string | null;
   offerType: string;
@@ -48,10 +49,26 @@ type NeedItem = {
     locationName: string | null;
   };
   requiredSkills: { id: string; name: string }[];
-  _count: { acceptances: number };
+  _count: { acceptances: number; views: number; watches: number };
   boostedUntil?: string | null;
   boostTier?: string | null;
 };
+
+/** Node vitality: fresh posts pulse, hot posts burn amber. */
+function nodeState(need: NeedItem): "fresh" | "hot" | "steady" {
+  const interested = need._count.acceptances;
+  if (interested >= 3) return "hot";
+  if (Date.now() - new Date(need.createdAt).getTime() < 24 * 60 * 60 * 1000) return "fresh";
+  return "steady";
+}
+
+/** Four-bar signal meter from honest activity: views, watchers, interest. */
+function signalLevel(need: NeedItem): number {
+  const views = need._count.views ?? 0;
+  const watchers = need._count.watches ?? 0;
+  const interested = need._count.acceptances ?? 0;
+  return Math.min(4, Math.ceil(views / 15) + (watchers > 0 ? 1 : 0) + (interested > 0 ? 1 : 0));
+}
 
 function isBoosted(need: NeedItem): boolean {
   return !!need.boostedUntil && new Date(need.boostedUntil).getTime() > Date.now();
@@ -66,7 +83,12 @@ const offerTypes = [
 
 const PAGE_SIZE = 12;
 
-export default function NeedsPage() {
+interface NeedsListClientProps {
+  /** Rendered inside the exchange console — the page chrome lives there. */
+  embedded?: boolean;
+}
+
+export default function NeedsPage({ embedded = false }: NeedsListClientProps) {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
@@ -167,20 +189,34 @@ export default function NeedsPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 md:px-8">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 py-10">
-        <div>
-          <h1 className="heading-display text-2xl text-gold">The Exchange</h1>
-          <p className="text-xs text-ash mt-3">$ ls ~/needs/</p>
-          <p className="text-sm text-parchment mt-2">
-            find needs you can fulfill — for services, items, or money in return
-          </p>
+      {!embedded && (
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 py-10">
+          <div>
+            <h1 className="heading-display text-2xl text-gold">The Exchange</h1>
+            <p className="text-xs text-ash mt-3">$ ls ~/needs/</p>
+            <p className="text-sm text-parchment mt-2">
+              find needs you can fulfill — for services, items, or money in return
+            </p>
+          </div>
+          <Button asChild variant="default">
+            <Link href="/needs/new">
+              Broadcast a need <ArrowRight className="ml-1 h-4 w-4" />
+            </Link>
+          </Button>
         </div>
-        <Button asChild variant="default">
-          <Link href="/needs/new">
-            Post Need <ArrowRight className="ml-1 h-4 w-4" />
-          </Link>
-        </Button>
-      </div>
+      )}
+      {embedded && (
+        <div className="mb-6 flex items-center justify-between gap-3">
+          <p className="text-sm text-ash">
+            <span className="font-mono text-parchment">{total}</span> open signals on the board
+          </p>
+          <Button asChild variant="default" size="sm">
+            <Link href="/needs/new">
+              Broadcast a need <ArrowRight className="ml-1 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+      )}
 
       <div className="bg-mercury/10 border border-mercury/30 p-4 mb-6">
         <div className="flex items-start gap-3">
@@ -500,8 +536,43 @@ export default function NeedsPage() {
                         ))}
                       </div>
                     </div>
-                    <span className="shrink-0 text-xs text-ash uppercase tracking-wide ml-2">
-                      {need._count.acceptances} interested
+                    <span className="flex shrink-0 items-center gap-2 ml-2">
+                      <span
+                        title={
+                          nodeState(need) === "fresh"
+                            ? "new signal — posted in the last 24h"
+                            : nodeState(need) === "hot"
+                              ? "hot signal — 3+ interested"
+                              : "steady signal"
+                        }
+                        className={
+                          nodeState(need) === "hot"
+                            ? "h-2 w-2 rounded-full bg-sun shadow-[0_0_8px_rgba(245,166,35,0.8)]"
+                            : nodeState(need) === "fresh"
+                              ? "h-2 w-2 animate-pulse rounded-full bg-ok shadow-[0_0_8px_rgba(0,230,118,0.8)]"
+                              : "h-2 w-2 rounded-full bg-linehi"
+                        }
+                      />
+                      <span
+                        title={`${need._count.views ?? 0} views · ${need._count.watches ?? 0} watching · ${need._count.acceptances} interested`}
+                        className="flex items-end gap-px"
+                        aria-label={`signal strength ${signalLevel(need)} of 4`}
+                      >
+                        {[1, 2, 3, 4].map((bar) => (
+                          <span
+                            key={bar}
+                            className={
+                              bar <= signalLevel(need)
+                                ? "w-1 rounded-sm bg-mercury"
+                                : "w-1 rounded-sm bg-line"
+                            }
+                            style={{ height: `${4 + bar * 2}px` }}
+                          />
+                        ))}
+                      </span>
+                      <span className="text-xs text-ash uppercase tracking-wide">
+                        {need._count.acceptances} interested
+                      </span>
                     </span>
                   </div>
                   <div className="flex items-center justify-between mt-4 pt-3 border-t border-line">

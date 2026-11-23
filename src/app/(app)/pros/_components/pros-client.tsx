@@ -17,8 +17,8 @@ import {
   Building2,
 } from "lucide-react";
 
+import { NodeAvatar } from "@/app/(app)/exchange/_components/node-avatar";
 import { SponsoredSlot } from "@/components/ads/sponsored-slot";
-import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
@@ -52,7 +52,12 @@ const TABS: { value: DirectoryTab; label: string }[] = [
   { value: "businesses", label: "businesses" },
 ];
 
-export default function ProsDirectoryPage() {
+interface ProsDirectoryProps {
+  /** Rendered inside the exchange console — the page chrome lives there. */
+  embedded?: boolean;
+}
+
+export default function ProsDirectoryPage({ embedded = false }: ProsDirectoryProps) {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [tab, setTab] = useState<DirectoryTab>("all");
@@ -73,16 +78,18 @@ export default function ProsDirectoryPage() {
   const { data: pros, isLoading, error } = useApi<ProProfile[]>(key);
 
   return (
-    <div className="max-w-5xl mx-auto px-4 md:px-8">
-      <div className="py-10">
-        <p className="text-xs text-ash mb-4">» DIRECTORY — VERIFIED LOCALS</p>
-        <h1 className="heading-display text-2xl text-gold">
-          the <span className="text-sun">directory</span>
-        </h1>
-        <p className="text-sm text-ash max-w-lg mt-4">
-          verified people and local businesses on the network. browse, connect, trade.
-        </p>
-      </div>
+    <div className={embedded ? "" : "max-w-5xl mx-auto px-4 md:px-8"}>
+      {!embedded && (
+        <div className="py-10">
+          <p className="text-xs text-ash mb-4">» DIRECTORY — VERIFIED LOCALS</p>
+          <h1 className="heading-display text-2xl text-gold">
+            the <span className="text-sun">directory</span>
+          </h1>
+          <p className="text-sm text-ash max-w-lg mt-4">
+            verified people and local businesses on the network. browse, connect, trade.
+          </p>
+        </div>
+      )}
 
       {/* Search */}
       <div className="vessel p-4 mb-8">
@@ -170,11 +177,13 @@ export default function ProsDirectoryPage() {
               className="block vessel p-6 hover:bg-raise transition-colors"
             >
               <div className="flex items-start gap-4">
-                <Avatar
-                  src={pro.avatarUrl}
+                <NodeAvatar
+                  avatarUrl={pro.avatarUrl}
                   name={pro.fullName}
-                  size="lg"
-                  className="flex-shrink-0"
+                  ratingAvg={pro.ratingAvg}
+                  ratingCount={pro.ratingCount}
+                  accountType={pro.accountType}
+                  size={52}
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">

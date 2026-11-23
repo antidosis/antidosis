@@ -1,5 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async redirects() {
+    return [
+      // The exchange console absorbed the plain needs index; detail/new pages keep their routes
+      { source: "/needs", destination: "/exchange", permanent: false },
+    ];
+  },
   poweredByHeader: false,
   eslint: {
     ignoreDuringBuilds: true,

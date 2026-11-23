@@ -54,7 +54,7 @@ export function Navbar() {
   }, [mobileOpen]);
 
   const navItems = [
-    { href: "/needs", label: "exchange" },
+    { href: "/exchange", label: "exchange" },
     { href: "/pros", label: "directory" },
     ...(user ? [{ href: "/terminal", label: "relay", isTerminal: true as const }] : []),
     { href: "/blog", label: "blog" },
@@ -77,43 +77,51 @@ export function Navbar() {
             />
           </Link>
 
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-6" aria-label="Main navigation">
-            {navItems.map((item) => {
-              const isActive =
-                item.href === "/needs" ? pathname.startsWith("/needs") : pathname === item.href;
-              const isDashboard = item.href === "/dashboard";
-              const isTerminal = item.href === "/terminal";
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  aria-current={isActive ? "page" : undefined}
-                  className={cn(
-                    "relative transition-colors py-1 flex items-center gap-1.5",
-                    isDashboard
-                      ? "px-3 py-1.5 rounded border border-sun/40 text-sun hover:bg-sun/10 hover:text-sun"
-                      : isTerminal
-                        ? "px-3 py-1.5 rounded border border-mercury/30 text-mercury hover:bg-mercury/10 hover:text-mercury"
-                        : isActive
-                          ? "text-sun glow-gold-subtle"
-                          : "text-ash hover:text-gold"
-                  )}
-                >
-                  {isTerminal && <Radio className="h-3 w-3" />}
-                  {item.label}
-                  {!isDashboard && !isTerminal && isActive && (
-                    <span className="absolute -bottom-1 left-0 right-0 h-px bg-sun shadow-[0_0_8px_rgba(245,166,35,0.5)]" />
-                  )}
-                </Link>
-              );
-            })}
+          {/* Desktop nav — one visual system: word links, functional-first */}
+          <nav className="hidden md:flex items-center gap-7" aria-label="Main navigation">
+            {navItems
+              .filter((item) => item.href !== "/dashboard")
+              .map((item) => {
+                const isActive =
+                  item.href === "/exchange"
+                    ? pathname.startsWith("/needs") || pathname.startsWith("/exchange")
+                    : pathname === item.href;
+                const isTerminal = item.href === "/terminal";
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    aria-current={isActive ? "page" : undefined}
+                    className={cn(
+                      "relative transition-colors py-1 flex items-center gap-1.5 text-[15px]",
+                      isActive ? "text-sun glow-gold-subtle" : "text-ash hover:text-gold"
+                    )}
+                  >
+                    {isTerminal && <Radio className="h-3.5 w-3.5" />}
+                    {item.label}
+                    {isActive && (
+                      <span className="absolute -bottom-1 left-0 right-0 h-px bg-sun shadow-[0_0_8px_rgba(245,166,35,0.5)]" />
+                    )}
+                  </Link>
+                );
+              })}
           </nav>
 
-          {/* Desktop auth + notifications */}
+          {/* Desktop actions: dashboard is an action, not a nav word */}
           <div className="hidden md:flex items-center gap-4">
             <ThemeToggle />
             {user && <NotificationBell />}
+            {user && (
+              <Button
+                asChild
+                size="sm"
+                className={cn(
+                  pathname === "/dashboard" && "shadow-[0_0_15px_rgba(245,166,35,0.3)]"
+                )}
+              >
+                <Link href="/dashboard">dashboard</Link>
+              </Button>
+            )}
             {!user ? (
               <>
                 <Link href="/login" className="text-ash hover:text-gold transition-colors text-sm">
