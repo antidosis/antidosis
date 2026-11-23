@@ -158,7 +158,7 @@ export default function HomePage() {
                 <p className="text-xs text-ash mb-8 font-mono">
                   ◉ ON AIR — CHANNEL 01 · CENTRAL COAST
                 </p>
-                <h1 className="heading-display text-5xl md:text-7xl text-gold mb-8">
+                <h1 className="heading-display hero-title text-5xl md:text-7xl mb-8">
                   your neighbourhood,
                   <br />
                   <span className="text-sun">on the air.</span>
@@ -194,7 +194,7 @@ export default function HomePage() {
         </section>
 
         {/* LIVE SIGNALS — example exchanges first, concept second */}
-        <section className="py-16 md:py-20 border-t border-line">
+        <section className="signal-rail section-dots py-16 md:py-20 border-t border-line">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-3 font-mono">» LIVE SIGNALS — ON THE AIR</p>
@@ -213,7 +213,7 @@ export default function HomePage() {
         <div className="divider" />
 
         {/* HOW IT WORKS — 3 Steps */}
-        <section className="py-20 md:py-28 border-t border-line">
+        <section className="signal-rail section-grid py-20 md:py-28 border-t border-line">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-12 font-mono">» SIGNAL PATH — THREE STEPS</p>
@@ -254,7 +254,7 @@ export default function HomePage() {
         <div className="divider" />
 
         {/* FEATURES — one compact grid */}
-        <section className="py-20 md:py-28 border-t border-line">
+        <section className="signal-rail section-carbon py-20 md:py-28 border-t border-line">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-8 font-mono">
@@ -277,7 +277,7 @@ export default function HomePage() {
         <div className="divider" />
 
         {/* COMMUNITY RELAY */}
-        <section className="py-20 md:py-28 border-t border-line">
+        <section className="signal-rail section-aurora py-20 md:py-28 border-t border-line">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <div className="grid md:grid-cols-2 gap-12 items-center">
               <Reveal>
@@ -308,7 +308,7 @@ export default function HomePage() {
         <div className="divider" />
 
         {/* FOR BUSINESSES */}
-        <section className="py-20 md:py-28 border-t border-line">
+        <section className="signal-rail section-carbon py-20 md:py-28 border-t border-line">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-8 font-mono">» TRADE DESK — FOR BUSINESSES</p>
@@ -365,7 +365,7 @@ export default function HomePage() {
         <div className="divider" />
 
         {/* FOR CREATORS & INFLUENCERS */}
-        <section className="py-20 md:py-28 border-t border-line">
+        <section className="signal-rail section-aurora py-20 md:py-28 border-t border-line">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-8 font-mono">
@@ -424,7 +424,7 @@ export default function HomePage() {
         <div className="divider" />
 
         {/* CTA */}
-        <section className="py-20 md:py-28 border-t border-line">
+        <section className="signal-rail section-forge py-20 md:py-28 border-t border-line">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-8 font-mono">◉ JOIN THE NETWORK</p>

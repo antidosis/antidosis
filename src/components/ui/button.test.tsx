@@ -52,8 +52,8 @@ describe("Button", () => {
     render(<Button size="sm">Size Small</Button>);
     const button = screen.getByRole("button", { name: "Size Small" });
     expect(button).toHaveClass("px-3");
-    expect(button).toHaveClass("py-1.5");
-    expect(button).toHaveClass("text-xs");
+    expect(button).toHaveClass("py-2");
+    expect(button).toHaveClass("text-[13px]");
   });
 
   it("applies lg size classes", () => {

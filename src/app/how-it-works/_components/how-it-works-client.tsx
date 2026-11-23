@@ -179,7 +179,7 @@ export default function HowItWorksPage() {
         <div className="divider" />
 
         {/* TWO PATHS */}
-        <section className="py-20 md:py-28">
+        <section className="signal-rail section-dots py-20 md:py-28">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <div className="flex items-center gap-3 mb-4">
@@ -232,7 +232,7 @@ export default function HowItWorksPage() {
         <div className="divider" />
 
         {/* THE JOURNEY */}
-        <section className="py-20 md:py-28">
+        <section className="signal-rail section-grid py-20 md:py-28">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-8 font-mono">» TRANSMISSION SEQUENCE</p>
@@ -353,7 +353,7 @@ export default function HowItWorksPage() {
         <div className="divider" />
 
         {/* TRUST BY DESIGN */}
-        <section className="py-20 md:py-28">
+        <section className="signal-rail section-aurora py-20 md:py-28">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
               <div>
@@ -460,7 +460,7 @@ export default function HowItWorksPage() {
         <div className="divider" />
 
         {/* BUSINESS DESK */}
-        <section className="py-20 md:py-28">
+        <section className="signal-rail section-carbon py-20 md:py-28">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-6 font-mono">
@@ -511,7 +511,7 @@ export default function HowItWorksPage() {
         <div className="divider" />
 
         {/* CREATOR DESK */}
-        <section className="py-20 md:py-28">
+        <section className="signal-rail section-aurora py-20 md:py-28">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-6 font-mono">
@@ -562,7 +562,7 @@ export default function HowItWorksPage() {
         <div className="divider" />
 
         {/* CTA */}
-        <section className="py-20 md:py-28">
+        <section className="signal-rail section-forge py-20 md:py-28">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-8 font-mono">◉ TUNE IN</p>

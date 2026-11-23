@@ -567,6 +567,195 @@
     filter: brightness(0.62) saturate(1.35);
   }
 
+/* ════════════════════════════════════════════════════════════════════
+   RELAY CHARACTER LAYER — the meshtastic identity: every page sits inside
+   a living signal field. All treatments are token-driven so every theme
+   (dark and light) inherits correct contrast automatically.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ─── Ambient mesh backdrop ───
+   A fixed, non-interactive field of faint node dots with two slow signal
+   rings emanating from opposite corners. It paints a whisper over the
+   whole page (4–7% alpha) — content stays crisp, the site feels on-air. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 92% 4%, rgb(var(--c-mercury) / 0.07) 0 2px, transparent 3px),
+    radial-gradient(circle at 6% 96%, rgb(var(--c-quint) / 0.07) 0 2px, transparent 3px),
+    radial-gradient(rgb(var(--c-linehi) / 0.22) 1px, transparent 1.5px);
+  background-size:
+    100% 100%,
+    100% 100%,
+    26px 26px;
+}
+
+/* Pulsing signal rings from the two corner nodes */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      circle at 92% 4%,
+      transparent 0,
+      transparent 6rem,
+      rgb(var(--c-mercury) / 0.05) 6.2rem,
+      transparent 6.6rem
+    ),
+    radial-gradient(
+      circle at 6% 96%,
+      transparent 0,
+      transparent 9rem,
+      rgb(var(--c-quint) / 0.05) 9.2rem,
+      transparent 9.7rem
+    );
+  animation: mesh-ring-pulse 9s ease-in-out infinite;
+}
+
+@keyframes mesh-ring-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.035);
+  }
+}
+
+/* ─── Signal rail ───
+   A dashed relay line running down the left edge of major marketing
+   sections, with a pulsing node at its head — sections read as stations
+   on one route. Hidden on small screens where horizontal space is tight. */
+.signal-rail {
+  position: relative;
+}
+
+@media (min-width: 768px) {
+  .signal-rail::before {
+    content: "";
+    position: absolute;
+    top: 3rem;
+    bottom: 3rem;
+    left: 1.25rem;
+    width: 0;
+    border-left: 1px dashed rgb(var(--c-mercury) / 0.35);
+  }
+
+  .signal-rail::after {
+    content: "";
+    position: absolute;
+    top: 2.4rem;
+    left: calc(1.25rem - 4px);
+    height: 9px;
+    width: 9px;
+    border-radius: 9999px;
+    background: rgb(var(--c-mercury));
+    box-shadow: 0 0 10px rgb(var(--c-mercury) / 0.8);
+    animation: rail-node-blink 2.6s ease-in-out infinite;
+  }
+}
+
+@keyframes rail-node-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* ─── Vessel hover: signal glow, not just a border shift ─── */
+.vessel {
+  position: relative;
+}
+
+.vessel:hover {
+  box-shadow:
+    0 0 0 1px rgb(var(--c-linehi) / 0.5),
+    0 0 28px rgb(var(--c-mercury) / 0.06);
+}
+
+/* ─── Hero title: molten gold gradient ─── */
+.hero-title {
+  background: linear-gradient(
+    100deg,
+    rgb(var(--c-gold)) 0%,
+    rgb(var(--c-sunhi)) 45%,
+    rgb(var(--c-goldhi)) 70%,
+    rgb(var(--c-gold)) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ─── Reduced motion: the field goes still ─── */
+@media (prefers-reduced-motion: reduce) {
+  body::after,
+  .signal-rail::after {
+    animation: none;
+  }
+}
+
+/* ─── Section treatments — theme-aware via --c-* tokens, so every palette
+   (dark or light) gets correct contrast automatically. Apply one per
+   <section> to give neighbouring blocks distinct, intuitive characters. ─── */
+
+/* Carbon fibre weave — deep technical sections */
+.section-carbon {
+  background-color: rgb(var(--c-inset));
+  background-image:
+    linear-gradient(27deg, rgb(var(--c-line) / 0.6) 5px, transparent 5px),
+    linear-gradient(207deg, rgb(var(--c-line) / 0.6) 5px, transparent 5px),
+    linear-gradient(27deg, rgb(var(--c-raise) / 0.8) 5px, transparent 5px),
+    linear-gradient(207deg, rgb(var(--c-raise) / 0.8) 5px, transparent 5px);
+  background-size: 20px 20px;
+  background-position: 0 5px, 10px 0, 10px 10px, 0 0;
+}
+
+/* Blueprint grid — structured/process sections */
+.section-grid {
+  background-color: rgb(var(--c-surface));
+  background-image:
+    linear-gradient(rgb(var(--c-line) / 0.4) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--c-line) / 0.4) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+/* Aurora — dual radial glows drifting from the theme's accent hues */
+.section-aurora {
+  background-color: rgb(var(--c-void));
+  background-image:
+    radial-gradient(60rem 30rem at 12% 0%, rgb(var(--c-mercury) / 0.09), transparent 60%),
+    radial-gradient(52rem 28rem at 88% 100%, rgb(var(--c-quint) / 0.1), transparent 60%),
+    linear-gradient(180deg, rgb(var(--c-void)), rgb(var(--c-surface)) 140%);
+}
+
+/* Forge — warm central glow for high-energy sections */
+.section-forge {
+  background-color: rgb(var(--c-void));
+  background-image:
+    radial-gradient(46rem 24rem at 50% 110%, rgb(var(--c-sun) / 0.1), transparent 65%),
+    radial-gradient(30rem 18rem at 85% 0%, rgb(var(--c-ember) / 0.08), transparent 60%),
+    linear-gradient(180deg, rgb(var(--c-void)), rgb(var(--c-inset)) 160%);
+}
+
+/* Dot matrix — quiet data/textured sections */
+.section-dots {
+  background-color: rgb(var(--c-surface));
+  background-image: radial-gradient(rgb(var(--c-linehi) / 0.55) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
   /* ─── Font packs (Settings → Appearance) ───
      Selected via <html data-font="...">; the init script in root layout sets
      it pre-paint from localStorage ("antidosis-font"). */
@@ -858,7 +1047,7 @@
     background: var(--void);
     color: var(--gold);
     font-family: var(--font-body), "SF Mono", "Fira Code", "Cascadia Code", "Consolas", monospace;
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
