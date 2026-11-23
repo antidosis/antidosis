@@ -26,7 +26,7 @@ export function Topbar({
 }: TopbarProps) {
   const tab = DASHBOARD_TABS.find((t) => t.id === activeTab) ?? DASHBOARD_TABS[0];
   return (
-    <header className="sticky top-20 z-30 -mx-4 mb-6 flex h-16 items-center gap-3 border-b border-line bg-void/80 px-4 backdrop-blur md:-mx-8 md:px-8">
+    <header className="sticky top-20 z-30 flex h-16 items-center gap-3 border-b border-line bg-void/80 px-4 backdrop-blur md:px-8">
       <button
         onClick={onOpenMobileNav}
         className="rounded p-2 text-ash hover:text-gold lg:hidden"
