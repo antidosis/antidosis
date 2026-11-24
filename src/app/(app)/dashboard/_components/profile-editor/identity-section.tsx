@@ -37,12 +37,21 @@ export function IdentitySection({
   importingFromSocial = null,
   onImportFromSocial,
 }: IdentitySectionProps) {
-  const importable = socialLinks
-    .map((link) => ({ ...link, target: parseSocialAvatarTarget(link.url) }))
-    .filter((link): link is typeof link & { target: NonNullable<typeof link.target> } =>
-      Boolean(link.target)
+  const linkedTargets = socialLinks.map((link) => ({
+    ...link,
+    target: parseSocialAvatarTarget(link.url),
+  }));
+  const importable = linkedTargets
+    .filter(
+      (link): link is typeof link & { target: NonNullable<typeof link.target> } =>
+        Boolean(link.target) &&
+        link.target?.host !== "facebook.com" &&
+        link.target?.host !== "instagram.com"
     )
     .slice(0, 4);
+  const needsConnectedImport = linkedTargets.some(
+    (link) => link.target?.host === "facebook.com" || link.target?.host === "instagram.com"
+  );
 
   return (
     <SectionCard tone="identity" title="Identity" description="How you appear to other locals.">
@@ -79,9 +88,15 @@ export function IdentitySection({
                 ))}
               </div>
               <p className="mt-1 text-[11px] leading-snug text-ash">
-                Uses the public profile picture on that link.
+                Tries the public profile picture on that link; no social login is initiated.
               </p>
             </div>
+          )}
+          {needsConnectedImport && (
+            <p className="max-w-[190px] text-[11px] leading-snug text-ash">
+              Facebook and Instagram block reliable public imports. Download your picture there,
+              then use Change avatar. Account-connected import requires Meta app approval.
+            </p>
           )}
         </div>
         <div className="min-w-0 flex-1 space-y-2">

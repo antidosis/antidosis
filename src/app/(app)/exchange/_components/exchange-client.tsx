@@ -107,7 +107,7 @@ function ExchangeClient() {
       <header className="flex flex-col gap-6 py-8 sm:flex-row sm:items-end sm:justify-between md:py-10">
         <div className="max-w-2xl">
           <p className="mb-3 font-mono text-xs uppercase tracking-[0.18em] text-mercury">
-            Central Coast exchange
+            Community exchange network
           </p>
           <h1 className="heading-display text-3xl text-gold md:text-4xl">
             One network. Every local exchange.
@@ -125,7 +125,9 @@ function ExchangeClient() {
         )}
         {band === "directory" && (
           <Button asChild variant="secondary" className="w-full sm:w-auto">
-            <Link href="/dashboard?tab=profile&profileTab=directory">Edit directory profile</Link>
+            <Link href="/dashboard?tab=profile&profileSection=directory">
+              Edit directory profile
+            </Link>
           </Button>
         )}
       </header>

@@ -26,9 +26,11 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { EXCHANGE_MODES, INCOMPATIBLE_EXCHANGE_MODES, getExchangeMode } from "@/lib/categories";
+import { displayLocation } from "@/lib/data/central-coast-suburbs";
 import type { PublicNeedItem, PublicNeedsResponse } from "@/lib/public-content";
 import { searchSkills } from "@/lib/skills-taxonomy";
 import { useApi } from "@/lib/swr-config";
+import { getUrgencyLabel } from "@/lib/urgency";
 import { cn } from "@/lib/utils";
 
 type NeedItem = PublicNeedItem;
@@ -488,8 +490,28 @@ export default function NeedsPage({ embedded = false, initialData }: NeedsListCl
                             );
                           })()}
                       </div>
-                      <p className="text-sm text-parchment mt-1 line-clamp-2">{need.description}</p>
-                      <div className="flex flex-wrap items-center gap-2 mt-3">
+                      <p className="mt-1 line-clamp-2 text-sm text-parchment">{need.description}</p>
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                        {need.urgency >= 5 && (
+                          <span
+                            className={cn(
+                              "rounded border px-2 py-0.5 text-[11px] font-medium",
+                              need.urgency >= 7
+                                ? "border-alert/40 bg-alert/10 text-alert"
+                                : "border-sun/30 bg-sun/5 text-sun"
+                            )}
+                          >
+                            {need.urgency}/9 · {getUrgencyLabel(need.urgency)}
+                          </span>
+                        )}
+                        {need.locationName && (
+                          <span className="text-xs text-ash">
+                            {displayLocation(need.locationName)}
+                            {need.destinationName ? ` → ${need.destinationName}` : ""}
+                          </span>
+                        )}
+                      </div>
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
                         {need.requiredSkills.map((skill) => (
                           <span
                             key={skill.id}

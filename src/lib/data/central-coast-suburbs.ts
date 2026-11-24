@@ -184,3 +184,10 @@ export function findSuburb(query: string): Suburb[] {
 export function isValidCentralCoastSuburb(formatted: string): boolean {
   return CENTRAL_COAST_SUBURBS.some((s) => s.formatted === formatted);
 }
+
+export function displayLocation(value: string): string {
+  const suburb = CENTRAL_COAST_SUBURBS.find((item) => item.formatted === value);
+  if (suburb) return `${suburb.name.toUpperCase()}, NSW, ${suburb.postcode}`;
+  const cleaned = value.replace(/_/g, " ").trim();
+  return cleaned ? cleaned.toUpperCase() : "";
+}

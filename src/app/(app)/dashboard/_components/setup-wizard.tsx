@@ -205,7 +205,14 @@ export function SetupWizard({ profileId, profile, emailVerified, onNavigate }: S
                   onClick={() => {
                     if (step.href) window.location.href = step.href;
                     else if (step.tab) {
-                      onNavigate(step.tab, step.id === "profile" ? "public" : "directory");
+                      onNavigate(
+                        step.tab,
+                        step.id === "profile"
+                          ? "public"
+                          : step.id === "credentials"
+                            ? "trust"
+                            : "directory"
+                      );
                     }
                   }}
                   className="mt-auto inline-flex min-h-8 items-center gap-1 self-start pt-2 text-[11px] font-medium text-parchment transition-colors hover:text-sun"

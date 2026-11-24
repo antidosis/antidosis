@@ -40,7 +40,7 @@ export const DEMO_NEED = {
   offerDescription: "Licensed NSW electrical work — up to 2 hours of labour",
   offerValue: 280,
   location: "Terrigal, NSW",
-  deadline: "2025-06-15",
+  deadline: "Next Saturday",
   timeRange: "1-2 days",
   requiredSkills: ["gardening", "landscaping"],
   images: 0,

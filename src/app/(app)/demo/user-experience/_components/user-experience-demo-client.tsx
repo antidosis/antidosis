@@ -69,7 +69,7 @@ export default function UserExperienceDemoClient() {
   const [state, setState] = useState<DemoState>({
     stepIdx: 0,
     posted: false,
-    useContract: true,
+    useContract: false,
     interestSent: false,
     interestAccepted: false,
     messagesRevealed: 0,
@@ -196,7 +196,7 @@ export default function UserExperienceDemoClient() {
     setState({
       stepIdx: 0,
       posted: false,
-      useContract: true,
+      useContract: false,
       interestSent: false,
       interestAccepted: false,
       messagesRevealed: 0,
@@ -365,11 +365,19 @@ function ScenePostNeed({
             <ArrowLeft className="mr-2 h-4 w-4" />$ cd ~/needs/
           </span>
         </div>
-        <h1 className="heading-display text-2xl text-gold">Post Need</h1>
-        <p className="text-xs text-ash mt-3">$ nano new_need.conf</p>
-        <p className="text-sm text-parchment mb-2">
-          describe what you need and what you are offering in exchange
+        <h1 className="heading-display text-3xl text-gold">Post a need</h1>
+        <p className="mt-3 text-sm text-parchment">
+          Start with the essentials. Add detail only when it helps someone say yes.
         </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 rounded-lg border border-line bg-surface/40 p-2">
+        <div className="rounded-md border border-transparent px-4 py-3 text-sm text-ash">
+          Quick post · essentials only
+        </div>
+        <div className="rounded-md border border-mercury/40 bg-mercury/[0.08] px-4 py-3 text-sm text-gold">
+          Detailed post · shown in this demo
+        </div>
       </div>
 
       <div className="bg-sun/10 border border-sun/30 p-4">
@@ -405,6 +413,15 @@ function ScenePostNeed({
                 rows={5}
                 className="bg-inset border-line text-xs"
               />
+            </div>
+            <div className="rounded-lg border border-line bg-inset/45 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <Label>Urgency</Label>
+                <span className="text-sm text-sun">3/9 · Soon</span>
+              </div>
+              <div className="mt-3 h-1.5 rounded-full bg-line">
+                <div className="h-full w-1/3 rounded-full bg-sun" />
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -544,7 +561,7 @@ function ScenePostNeed({
           </button>
 
           <button
-            onClick={() => !useContract && onToggleContract()}
+            onClick={() => (window.location.href = "/demo/contract-flow")}
             className={`text-left p-5 rounded border transition-all ${
               useContract ? "border-sun bg-sun/5" : "border-line bg-inset hover:border-linehi"
             }`}
@@ -555,9 +572,9 @@ function ScenePostNeed({
               </div>
               <div>
                 <p className={`text-sm font-medium ${useContract ? "text-sun" : "text-gold"}`}>
-                  Formal Contract
+                  Written Agreement Demo
                 </p>
-                <p className="text-[10px] text-ash">structured terms</p>
+                <p className="text-[10px] text-ash">opens the dedicated terms and signature flow</p>
               </div>
             </div>
             <p className="text-xs text-ash">

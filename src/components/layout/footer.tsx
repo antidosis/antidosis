@@ -9,33 +9,41 @@ import { cn } from "@/lib/utils";
 
 const linkGroups: {
   title: string;
-  links: { href?: string; email?: string; label: string; external?: boolean }[];
+  links: { href?: string; email?: string; label: string }[];
 }[] = [
   {
-    title: "Product",
+    title: "Exchange",
     links: [
-      { href: "/needs", label: "Browse Needs", external: false },
-      { href: "/needs/new", label: "Post a Need", external: false },
-      { href: "/how-it-works", label: "How It Works", external: false },
-      { href: "/examples", label: "Examples", external: false },
-      { href: "/demo", label: "Demo", external: false },
-      { href: "/blog", label: "Blog", external: false },
+      { href: "/exchange", label: "Browse needs" },
+      { href: "/needs/new", label: "Post a need" },
+      { href: "/exchange?band=directory", label: "People & businesses" },
+      { href: "/exchange?band=relay", label: "Community Relay" },
     ],
   },
   {
-    title: "Directory",
-    links: [{ href: "/pros", label: "Directory", external: false }],
-  },
-  {
-    title: "Legal",
+    title: "Off-grid",
     links: [
-      { href: "/terms", label: "Terms of Service", external: false },
-      { href: "/privacy", label: "Privacy Policy", external: false },
+      { href: "/store", label: "Mesh store" },
+      { href: "/store/interest", label: "Express interest" },
+      { href: "/store/builders", label: "For mesh builders" },
     ],
   },
   {
-    title: "Support",
-    links: [{ email: "support@antidosis.com", label: "Contact" }],
+    title: "Learn",
+    links: [
+      { href: "/how-it-works", label: "How it works" },
+      { href: "/demo", label: "Interactive demos" },
+      { href: "/examples", label: "Exchange ideas" },
+      { href: "/blog", label: "Journal" },
+    ],
+  },
+  {
+    title: "Trust & support",
+    links: [
+      { email: "support@antidosis.com", label: "Contact" },
+      { href: "/terms", label: "Terms of Service" },
+      { href: "/privacy", label: "Privacy Policy" },
+    ],
   },
 ];
 
@@ -92,13 +100,6 @@ export function Footer() {
                         >
                           {link.label}
                         </EmailLink>
-                      ) : link.external ? (
-                        <a
-                          href={link.href}
-                          className="text-sm text-ash hover:text-gold transition-colors"
-                        >
-                          {link.label}
-                        </a>
                       ) : (
                         <Link
                           href={link.href ?? "/"}

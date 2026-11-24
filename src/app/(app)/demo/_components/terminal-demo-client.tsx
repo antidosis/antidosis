@@ -159,7 +159,7 @@ const SIGN_OUTPUT = `🎉 Contract Signed! ✅ 🎉
   │  DRAFT  ✅  │     │  TERMS  ✅  │     │ ACTIVE  🔄  │     │  DONE     │
   └─────────┘     └─────────┘     └─────────┘     └─────────┘
 
-The contract is now active. Both parties are bound by the agreed terms.`;
+The agreement is now active. Both signatures have been recorded.`;
 
 const COMPLETE_OUTPUT = `       ___________
       '._==_==_=_.'

@@ -7,13 +7,16 @@ import { GET, POST } from "./route";
 const mockFindMany = vi.fn();
 const mockCount = vi.fn();
 const mockQueryRaw = vi.fn();
+const mockNeedCreate = vi.fn();
 const mockProfileFindUnique = vi.fn();
+const mockAuditLog = vi.fn();
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     need: {
       findMany: (...args: unknown[]) => mockFindMany(...args),
       count: (...args: unknown[]) => mockCount(...args),
+      create: (...args: unknown[]) => mockNeedCreate(...args),
     },
     profile: {
       findUnique: (...args: unknown[]) => mockProfileFindUnique(...args),
@@ -35,6 +38,11 @@ const mockRateLimit = vi.fn();
 vi.mock("@/lib/rate-limit", () => ({
   rateLimit: (...args: unknown[]) => mockRateLimit(...args),
   getRateLimitIdentifier: () => "test-id",
+}));
+
+vi.mock("@/lib/audit", () => ({
+  auditLog: (...args: unknown[]) => mockAuditLog(...args),
+  getClientInfo: () => ({ ip: "127.0.0.1", userAgent: "test" }),
 }));
 
 function makeRequest(url: string): NextRequest {
@@ -222,5 +230,69 @@ describe("POST /api/v1/needs (participation gate)", () => {
     expect(res.status).toBe(403);
     expect(body.code).toBe("ACCOUNT_SUSPENDED");
     expect(mockRateLimit).not.toHaveBeenCalled();
+  });
+
+  it("stores urgency and opt-in contact without copying the phone number", async () => {
+    mockRateLimit.mockResolvedValue({ allowed: true });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+      mobile: "+61400000000",
+    });
+    mockNeedCreate.mockImplementation(({ data }) => ({
+      id: "need-1",
+      ...data,
+      requiredSkills: [],
+    }));
+
+    const res = await POST(
+      makePost({
+        title: "Broken down on the roadside",
+        description: "My car will not start and I need a jump start.",
+        offerType: "money",
+        offerDescription: "$50 for your time",
+        isLocal: true,
+        locationName: "terrigal_2260",
+        urgency: 9,
+        allowUrgentContact: true,
+        requiredSkills: [],
+        images: [],
+        offerImages: [],
+      })
+    );
+
+    expect(res.status).toBe(201);
+    expect(mockNeedCreate).toHaveBeenCalledOnce();
+    const createData = mockNeedCreate.mock.calls[0][0].data;
+    expect(createData.urgency).toBe(9);
+    expect(createData.allowUrgentContact).toBe(true);
+    expect(createData).not.toHaveProperty("mobile");
+  });
+
+  it("rejects urgent contact when no verified mobile is available", async () => {
+    mockRateLimit.mockResolvedValue({ allowed: true });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+      mobile: null,
+    });
+
+    const res = await POST(
+      makePost({
+        title: "Urgent roadside help",
+        description: "I need somebody nearby to help with my vehicle.",
+        offerType: "money",
+        offerDescription: "$50",
+        isLocal: true,
+        locationName: "terrigal_2260",
+        urgency: 8,
+        allowUrgentContact: true,
+      })
+    );
+
+    expect(res.status).toBe(400);
+    expect(mockNeedCreate).not.toHaveBeenCalled();
   });
 });

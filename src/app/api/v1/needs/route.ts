@@ -84,6 +84,16 @@ export const POST = withApiHandler(async (req: NextRequest) => {
   }
   const data = parsed.data;
 
+  if (data.allowUrgentContact && (!profile.mobileVerified || !profile.mobile)) {
+    return NextResponse.json(
+      {
+        error: "Verify your mobile before offering direct urgent contact.",
+        code: "URGENT_CONTACT_NOT_AVAILABLE",
+      },
+      { status: 400 }
+    );
+  }
+
   // Trial restriction: Central Coast NSW only
   if (!data.isLocal || !data.locationName || !isValidCentralCoastSuburb(data.locationName)) {
     return NextResponse.json(
@@ -103,8 +113,11 @@ export const POST = withApiHandler(async (req: NextRequest) => {
       offerValue: data.offerValue,
       isLocal: data.isLocal,
       locationName: data.locationName ? sanitizePlainText(data.locationName) : undefined,
+      destinationName: data.destinationName ? sanitizePlainText(data.destinationName) : null,
       latitude: data.latitude,
       longitude: data.longitude,
+      urgency: data.urgency,
+      allowUrgentContact: data.allowUrgentContact,
       deadline: data.deadline ? new Date(data.deadline) : null,
       timeRange: data.timeRange ? sanitizePlainText(data.timeRange) : null,
       images: sanitizeUrlArray(data.images),

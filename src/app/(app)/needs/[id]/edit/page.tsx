@@ -23,6 +23,7 @@ import {
 import { useForm, Controller } from "react-hook-form";
 import type { z } from "zod";
 
+import { UrgencyField } from "@/components/needs/urgency-field";
 import { Button } from "@/components/ui/button";
 import { ImageGallery } from "@/components/ui/image-gallery";
 import { Input } from "@/components/ui/input";
@@ -34,6 +35,7 @@ import { EXCHANGE_MODES, INCOMPATIBLE_EXCHANGE_MODES } from "@/lib/categories";
 import { detectRegulatedTrade } from "@/lib/regulated-trades";
 import { updateNeedSchema } from "@/lib/schemas";
 import { createClient } from "@/lib/supabase/client";
+import { URGENT_CONTACT_MIN } from "@/lib/urgency";
 
 type FormData = z.input<typeof updateNeedSchema>;
 
@@ -45,6 +47,7 @@ export default function EditNeedPage() {
 
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [verifiedMobile, setVerifiedMobile] = useState<string | null>(null);
 
   const {
     register,
@@ -62,11 +65,14 @@ export default function EditNeedPage() {
       requiredSkills: [],
       images: [],
       offerImages: [],
+      urgency: 0,
+      allowUrgentContact: false,
     },
   });
 
   const offerType = watch("offerType");
   const exchangeMode = watch("needCategory");
+  const urgency = watch("urgency") ?? 0;
   const watchedTitle = watch("title") ?? "";
   const watchedSkills = watch("requiredSkills") ?? [];
   const regulatedTrade = detectRegulatedTrade({ title: watchedTitle, skills: watchedSkills });
@@ -78,6 +84,11 @@ export default function EditNeedPage() {
       setValue("needCategory", undefined);
     }
   }, [offerType, exchangeMode, setValue]);
+
+  useEffect(() => {
+    if (exchangeMode !== "rideshare") setValue("destinationName", undefined);
+    if (urgency < URGENT_CONTACT_MIN) setValue("allowUrgentContact", false);
+  }, [exchangeMode, urgency, setValue]);
 
   // Fetch need data
   useEffect(() => {
@@ -106,6 +117,7 @@ export default function EditNeedPage() {
         }
         const profileRes = await fetch("/api/v1/profiles/me");
         const profile = profileRes.ok ? await profileRes.json() : null;
+        if (profile?.mobileVerified && profile.mobile) setVerifiedMobile(profile.mobile);
         if (need.poster.id !== profile?.id) {
           router.push(`/needs/${needId}`);
           return;
@@ -123,6 +135,9 @@ export default function EditNeedPage() {
           needCategory: need.needCategory || undefined,
           offerValue: need.offerValue || undefined,
           locationName: need.locationName || undefined,
+          destinationName: need.destinationName || undefined,
+          urgency: need.urgency ?? 0,
+          allowUrgentContact: need.allowUrgentContact ?? false,
           requiredSkills: need.requiredSkills?.map((s: { name: string }) => s.name) || [],
           images: need.images || [],
           offerImages: need.offerImages || [],
@@ -216,6 +231,30 @@ export default function EditNeedPage() {
                   <p className="text-xs text-bad">{errors.description.message}</p>
                 )}
               </div>
+              <Controller
+                name="urgency"
+                control={control}
+                render={({ field }) => (
+                  <UrgencyField
+                    id="edit-need-urgency"
+                    value={field.value ?? 0}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+              {urgency >= URGENT_CONTACT_MIN && verifiedMobile && (
+                <label className="flex min-h-11 cursor-pointer items-start gap-3 rounded border border-alert/30 bg-alert/5 p-3">
+                  <input
+                    type="checkbox"
+                    className="mt-1 h-4 w-4 accent-[var(--c-sun)]"
+                    {...register("allowUrgentContact")}
+                  />
+                  <span className="text-sm text-parchment">
+                    Allow verified members to reveal and call {verifiedMobile}. The number is not
+                    included in public post data.
+                  </span>
+                </label>
+              )}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 mb-1">
@@ -456,19 +495,35 @@ export default function EditNeedPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Suburb</Label>
+              <Label htmlFor="edit-need-location">
+                {exchangeMode === "rideshare" ? "Pickup suburb" : "Suburb"}
+              </Label>
               <Controller
                 name="locationName"
                 control={control}
                 render={({ field }) => (
                   <LocationAutocomplete
+                    id="edit-need-location"
                     value={field.value || ""}
                     onChange={field.onChange}
-                    placeholder="type_suburb_name..."
+                    placeholder="Search suburb or postcode…"
                   />
                 )}
               />
             </div>
+            {exchangeMode === "rideshare" && (
+              <div className="space-y-2">
+                <Label htmlFor="edit-need-destination">Destination</Label>
+                <Input
+                  id="edit-need-destination"
+                  placeholder="e.g. Sydney Central, NSW"
+                  {...register("destinationName")}
+                />
+                {errors.destinationName && (
+                  <p className="text-xs text-bad">{errors.destinationName.message}</p>
+                )}
+              </div>
+            )}
           </div>
         </section>
 

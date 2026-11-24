@@ -78,7 +78,7 @@ function parseTab(value: string | null): DashboardTabId {
 }
 
 function parseProfileTab(value: string | null): ProfileTab {
-  return ["public", "directory", "social", "private"].includes(value ?? "")
+  return ["public", "directory", "social", "trust", "private"].includes(value ?? "")
     ? (value as ProfileTab)
     : "public";
 }
@@ -209,7 +209,10 @@ function DashboardPageInner() {
                 onCredentialsUpdate={() => mutate("/api/v1/profiles/me")}
                 onUpdate={() => mutate("/api/v1/profiles/me")}
                 activeTab={profileTab}
-                onTabChange={setProfileTab}
+                onTabChange={(section) => {
+                  setProfileTab(section);
+                  setTab("profile", section);
+                }}
               />
             </DashboardPanel>
             <DashboardPanel id="settings" activeTab={tab} mounted={visited.has("settings")}>

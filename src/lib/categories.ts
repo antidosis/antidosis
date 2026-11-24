@@ -157,6 +157,42 @@ export const EXCHANGE_MODES = [
     twBg: "bg-sun/5",
     twBgSolid: "bg-sun",
   },
+  {
+    value: "rideshare",
+    label: "Rideshare / Lifts",
+    color: "var(--x-e89e38)",
+    twText: "text-sun",
+    twBorder: "border-sun/30",
+    twBg: "bg-sun/5",
+    twBgSolid: "bg-sun",
+  },
+  {
+    value: "errands-delivery",
+    label: "Errands & Delivery",
+    color: "var(--x-f08a35)",
+    twText: "text-ember",
+    twBorder: "border-ember/30",
+    twBg: "bg-ember/5",
+    twBgSolid: "bg-ember",
+  },
+  {
+    value: "care-support",
+    label: "Care & Support",
+    color: "var(--x-f57633)",
+    twText: "text-ember",
+    twBorder: "border-ember/30",
+    twBg: "bg-ember/5",
+    twBgSolid: "bg-ember",
+  },
+  {
+    value: "learning-mentoring",
+    label: "Learning & Mentoring",
+    color: "var(--x-33d4f5)",
+    twText: "text-mercury",
+    twBorder: "border-mercury/30",
+    twBg: "bg-mercury/5",
+    twBgSolid: "bg-mercury",
+  },
 
   /* ─── Lifestyle family (purples) ─── */
   {

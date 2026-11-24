@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { Globe, Lock, Phone, Smartphone } from "lucide-react";
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
 
@@ -10,11 +12,12 @@ import type { ProfileFormData } from "./types";
 interface ContactSectionProps {
   register: UseFormRegister<ProfileFormData>;
   errors: FieldErrors<ProfileFormData>;
+  mobileVerified: boolean;
 }
 
 const INPUT_CLASS = "text-base";
 
-export function ContactSection({ register, errors }: ContactSectionProps) {
+export function ContactSection({ register, errors, mobileVerified }: ContactSectionProps) {
   return (
     <SectionCard
       tone="privacy"
@@ -35,7 +38,16 @@ export function ContactSection({ register, errors }: ContactSectionProps) {
           />
         </div>
         {errors.mobile && <p className="text-xs text-bad">{errors.mobile.message}</p>}
-        <p className="text-xs text-ash">Used for account security and verification. Never shown.</p>
+        <p className="text-xs text-ash">
+          Used for account security and verification. Never shown. Changing it requires fresh
+          verification.
+        </p>
+        <Link
+          href="/verify-mobile?next=/dashboard?tab=profile%26profileSection=private"
+          className="inline-block min-h-8 pt-1 text-xs font-medium text-sun hover:underline"
+        >
+          {mobileVerified ? "Mobile verified · manage verification" : "Verify this mobile →"}
+        </Link>
       </div>
 
       <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2">

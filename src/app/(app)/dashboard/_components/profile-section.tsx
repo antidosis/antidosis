@@ -11,6 +11,7 @@ import {
   Loader2,
   LockKeyhole,
   Share2,
+  ShieldCheck,
   UserRound,
 } from "lucide-react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -53,7 +54,7 @@ const PROFILE_TABS = [
   {
     id: "directory" as const,
     label: "Directory profile",
-    description: "Skills, business details, qualifications and proof",
+    description: "Skills, business details and your public web presence",
     icon: BriefcaseBusiness,
     activeClass: "border-aero/30 bg-aero/[0.08] text-aero",
   },
@@ -65,9 +66,16 @@ const PROFILE_TABS = [
     activeClass: "border-orchid/30 bg-orchid/[0.08] text-orchid",
   },
   {
+    id: "trust" as const,
+    label: "Trust & ID",
+    description: "Private documents, verification and shareable credential summaries",
+    icon: ShieldCheck,
+    activeClass: "border-ok/30 bg-ok/[0.08] text-ok",
+  },
+  {
     id: "private" as const,
     label: "Contact & privacy",
-    description: "Private contact details and sharing controls",
+    description: "Account mobile, public and private contact controls",
     icon: LockKeyhole,
     activeClass: "border-mercury/30 bg-mercury/[0.08] text-mercury",
   },
@@ -257,7 +265,7 @@ export function ProfileSection({
       <div
         role="tablist"
         aria-label="Profile sections"
-        className="mb-5 grid grid-cols-2 gap-2 rounded-lg border border-line bg-surface/35 p-2 lg:grid-cols-4"
+        className="mb-5 grid grid-cols-2 gap-2 rounded-lg border border-line bg-surface/35 p-2 sm:grid-cols-3 lg:grid-cols-5"
       >
         {PROFILE_TABS.map((tab) => (
           <button
@@ -314,10 +322,20 @@ export function ProfileSection({
               abnVerified={initialProfile.abnVerified}
               errors={errors}
             />
+            {accountType === "business" && (
+              <SocialLinksSection
+                control={control}
+                register={register}
+                fields={fields}
+                removingIds={removingIds}
+                onMarkRemoving={markRemoving}
+                append={append}
+                errors={errors}
+                showAudience={false}
+                variant="business"
+              />
+            )}
             <SkillsSection skills={initialProfile.skills} />
-            <div id="credentials-section">
-              <CredentialsSection initialCredentials={credentials} onUpdate={onCredentialsUpdate} />
-            </div>
           </div>
         )}
 
@@ -340,23 +358,49 @@ export function ProfileSection({
           </div>
         )}
 
+        {activeTab === "trust" && (
+          <div role="tabpanel" className="space-y-4">
+            <section className="rounded-lg border border-ok/25 bg-ok/[0.04] p-5">
+              <div className="flex items-start gap-3">
+                <LockKeyhole className="mt-0.5 h-5 w-5 shrink-0 text-ok" />
+                <div>
+                  <h3 className="text-base font-medium text-gold">
+                    Your documents are not directory content
+                  </h3>
+                  <p className="mt-1 text-sm leading-relaxed text-parchment">
+                    ID and licence files stay in this private workspace. They are never published in
+                    the directory. Only a redacted summary you explicitly choose to share leaves
+                    this area.
+                  </p>
+                </div>
+              </div>
+            </section>
+            <div id="credentials-section">
+              <CredentialsSection initialCredentials={credentials} onUpdate={onCredentialsUpdate} />
+            </div>
+          </div>
+        )}
+
         {activeTab === "private" && (
           <div role="tabpanel" className="grid items-start gap-4 xl:grid-cols-2">
-            <ContactSection register={register} errors={errors} />
+            <ContactSection
+              register={register}
+              errors={errors}
+              mobileVerified={initialProfile.mobileVerified}
+            />
             <section className="rounded-lg border border-ok/20 bg-ok/[0.035] p-5 sm:p-6">
               <div className="flex items-start gap-3">
                 <LockKeyhole className="mt-0.5 h-5 w-5 shrink-0 text-ok" />
                 <div>
                   <h3 className="text-sm font-medium text-gold">Private means private</h3>
                   <p className="mt-2 text-sm leading-relaxed text-parchment">
-                    Private phone numbers, identity documents and full document numbers are never
-                    included in public profile responses. Public credential cards show only the
-                    details you choose, with references masked.
+                    Your account mobile and private phone are never included in public profile
+                    responses. Public phone is optional and clearly labelled before you save.
                   </p>
                   <p className="mt-3 text-sm leading-relaxed text-ash">
                     To share a qualification without sharing the file, use its redacted summary
-                    action in Directory profile → Proof &amp; ID, then paste it into your chosen
-                    conversation. Nothing is sent automatically when you express interest.
+                    action in Trust &amp; ID, then paste it into your chosen conversation. Nothing
+                    is sent automatically when you express interest.
                   </p>
                 </div>
               </div>

@@ -43,6 +43,7 @@ interface SocialLinksSectionProps {
   append: UseFieldArrayAppend<ProfileFormData, "socialLinks">;
   errors: FieldErrors<ProfileFormData>;
   showAudience: boolean;
+  variant?: "social" | "business";
 }
 
 export function SocialLinksSection({
@@ -54,12 +55,17 @@ export function SocialLinksSection({
   append,
   errors,
   showAudience,
+  variant = "social",
 }: SocialLinksSectionProps) {
   return (
     <SectionCard
       tone="social"
-      title="Social profiles"
-      description="Connect the places where people already know you. Public links appear on your profile and directory listing; private links stay in this editor."
+      title={variant === "business" ? "Business web presence" : "Social profiles"}
+      description={
+        variant === "business"
+          ? "Add your business website and as many business social profiles as you need. Public links appear on your directory profile."
+          : "Connect the places where people already know you. Public links appear on your profile and directory listing; private links stay in this editor."
+      }
     >
       {fields.length === 0 && (
         <p className="mb-4 text-xs text-ash">No links yet — add your first below.</p>
@@ -81,7 +87,10 @@ export function SocialLinksSection({
         </ul>
       )}
 
-      <AddLinkRow append={append} />
+      <AddLinkRow
+        append={append}
+        defaultPlatform={variant === "business" ? "website" : "instagram"}
+      />
 
       {showAudience && (
         <div className="mt-5 border-t border-orchid/20 pt-4">
@@ -197,10 +206,11 @@ function LinkRow({ index, control, register, removing, onMarkRemoving, urlError 
 
 interface AddLinkRowProps {
   append: UseFieldArrayAppend<ProfileFormData, "socialLinks">;
+  defaultPlatform: string;
 }
 
-function AddLinkRow({ append }: AddLinkRowProps) {
-  const [platform, setPlatform] = useState("instagram");
+function AddLinkRow({ append, defaultPlatform }: AddLinkRowProps) {
+  const [platform, setPlatform] = useState(defaultPlatform);
   const [url, setUrl] = useState("");
   const [isPublic, setIsPublic] = useState(true);
   const [error, setError] = useState<string | null>(null);

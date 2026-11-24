@@ -106,31 +106,34 @@ model Skill {
 }
 
 model Need {
-  id               String    @id @default(uuid())
-  posterId         String    @map("poster_id")
-  title            String
-  description      String
-  needCategory     String?   @map("need_category")
-  offerType        String    @map("offer_type")
-  offerDescription String    @map("offer_description")
-  offerValue       Float?    @map("offer_value")
-  isLocal          Boolean   @default(true) @map("is_local")
-  locationName     String?   @map("location_name")
-  latitude         Float?
-  longitude        Float?
-  status           String    @default("open")
-  requiresContract Boolean   @default(false) @map("requires_contract")
-  deadline         DateTime?
-  timeRange        String?   @map("time_range")
-  images           String[]
-  offerImages      String[]  @map("offer_images")
+  id                 String    @id @default(uuid())
+  posterId           String    @map("poster_id")
+  title              String
+  description        String
+  needCategory       String?   @map("need_category")
+  offerType          String    @map("offer_type")
+  offerDescription   String    @map("offer_description")
+  offerValue         Float?    @map("offer_value")
+  isLocal            Boolean   @default(true) @map("is_local")
+  locationName       String?   @map("location_name")
+  destinationName    String?   @map("destination_name")
+  latitude           Float?
+  longitude          Float?
+  urgency            Int       @default(0)
+  allowUrgentContact Boolean   @default(false) @map("allow_urgent_contact")
+  status             String    @default("open")
+  requiresContract   Boolean   @default(false) @map("requires_contract")
+  deadline           DateTime?
+  timeRange          String?   @map("time_range")
+  images             String[]
+  offerImages        String[]  @map("offer_images")
   // Gumtree-style monetisation: listing is always free; boostTier +
   // boostedUntil reserve paid top-placement / highlight slots. Nothing is
   // boosted today — readers treat a null boostedUntil as a normal listing.
-  boostTier        String?   @map("boost_tier")
-  boostedUntil     DateTime? @map("boosted_until")
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
+  boostTier          String?   @map("boost_tier")
+  boostedUntil       DateTime? @map("boosted_until")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
 
   poster         Profile       @relation("NeedPoster", fields: [posterId], references: [id], onDelete: Cascade)
   requiredSkills NeedSkill[]
@@ -335,11 +338,11 @@ model Credential {
 }
 
 model Notification {
-  id        String   @id @default(uuid())
-  userId    String   @map("user_id")
-  type      String
-  title     String
-  body      String
+  id         String    @id @default(uuid())
+  userId     String    @map("user_id")
+  type       String
+  title      String
+  body       String
   data       Json?
   isRead     Boolean   @default(false) @map("is_read")
   archivedAt DateTime? @map("archived_at")

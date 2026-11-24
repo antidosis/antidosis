@@ -11,6 +11,7 @@ import { TerminalCursor } from "@/components/effects/terminal-cursor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { maskMobile } from "@/lib/mobile";
+import { safeInternalPath } from "@/lib/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function VerifyMobilePage() {
@@ -27,6 +28,7 @@ export default function VerifyMobilePage() {
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [returnTo, setReturnTo] = useState("/dashboard");
   const [countdown, setCountdown] = useState(600); // 10 minutes in seconds
   const [resendTimer, setResendTimer] = useState(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -40,6 +42,9 @@ export default function VerifyMobilePage() {
         router.push("/login");
         return;
       }
+      setReturnTo(
+        safeInternalPath(new URLSearchParams(window.location.search).get("next"), "/dashboard")
+      );
       const res = await fetch("/api/v1/profiles/me");
       if (res.ok) {
         const p = await res.json();
@@ -143,11 +148,11 @@ export default function VerifyMobilePage() {
     <div className="min-h-screen bg-void text-gold">
       <div className="px-4 md:px-8 py-4 border-b border-line">
         <Link
-          href="/dashboard"
+          href={returnTo}
           className="flex items-center gap-2 text-sm text-ash hover:text-gold transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Dashboard
+          {returnTo === "/dashboard" ? "Back to Dashboard" : "Back to your draft"}
         </Link>
       </div>
 
@@ -175,7 +180,11 @@ export default function VerifyMobilePage() {
                   </p>
                 </div>
                 <Button asChild className="w-full">
-                  <Link href="/dashboard">Return to Dashboard</Link>
+                  <Link href={returnTo}>
+                    {returnTo === "/dashboard"
+                      ? "Return to Dashboard"
+                      : "Continue where I left off"}
+                  </Link>
                 </Button>
               </div>
             ) : !profile?.mobile ? (

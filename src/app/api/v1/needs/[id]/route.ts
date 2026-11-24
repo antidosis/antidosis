@@ -196,7 +196,13 @@ export const PATCH = withApiHandler(
 
     const existingNeed = await prisma.need.findUnique({
       where: { id: needId },
-      select: { posterId: true, status: true, isLocal: true },
+      select: {
+        posterId: true,
+        status: true,
+        isLocal: true,
+        urgency: true,
+        allowUrgentContact: true,
+      },
     });
     if (!existingNeed) {
       return NextResponse.json({ error: "Need not found" }, { status: 404 });
@@ -215,6 +221,25 @@ export const PATCH = withApiHandler(
       return NextResponse.json({ error: messages.join("; ") }, { status: 400 });
     }
     const data = parseResult.data;
+    const nextUrgency = data.urgency ?? existingNeed.urgency;
+    if (data.allowUrgentContact && nextUrgency < 7) {
+      return NextResponse.json(
+        { error: "Direct contact is available only for urgency 7 or higher" },
+        { status: 400 }
+      );
+    }
+    if (data.allowUrgentContact) {
+      const poster = await prisma.profile.findUnique({
+        where: { id: participation.profileId },
+        select: { mobile: true, mobileVerified: true },
+      });
+      if (!poster?.mobileVerified || !poster.mobile) {
+        return NextResponse.json(
+          { error: "Verify your mobile before offering direct urgent contact." },
+          { status: 400 }
+        );
+      }
+    }
 
     // Trial restriction: Central Coast NSW only
     const isLocal = data.isLocal ?? existingNeed.isLocal ?? true;
@@ -239,8 +264,18 @@ export const PATCH = withApiHandler(
     if (data.isLocal !== undefined) updateData.isLocal = data.isLocal;
     if (data.locationName !== undefined)
       updateData.locationName = data.locationName ? sanitizePlainText(data.locationName) : null;
+    if (data.destinationName !== undefined)
+      updateData.destinationName = data.destinationName
+        ? sanitizePlainText(data.destinationName)
+        : null;
+    if (data.needCategory !== undefined && data.needCategory !== "rideshare")
+      updateData.destinationName = null;
     if (data.latitude !== undefined) updateData.latitude = data.latitude;
     if (data.longitude !== undefined) updateData.longitude = data.longitude;
+    if (data.urgency !== undefined) updateData.urgency = data.urgency;
+    if (data.allowUrgentContact !== undefined)
+      updateData.allowUrgentContact = data.allowUrgentContact;
+    if (nextUrgency < 7) updateData.allowUrgentContact = false;
     if (data.deadline !== undefined)
       updateData.deadline = data.deadline ? new Date(data.deadline) : null;
     if (data.timeRange !== undefined)

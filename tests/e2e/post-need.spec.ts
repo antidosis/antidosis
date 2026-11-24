@@ -14,10 +14,13 @@ test.describe("Post a need", () => {
     await login(page);
     await page.goto("/needs/new");
 
-    await expect(page.locator("text=Post Need").first()).toBeVisible({
+    await expect(page.getByRole("heading", { name: "Post a need" })).toBeVisible({
       timeout: 10_000,
     });
-    await expect(page.locator("text=$ nano new_need.conf")).toBeVisible();
+    await expect(page.getByRole("button", { name: /Quick post/ })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
   });
 
   test("form validation works — title too short", async ({ page }) => {
@@ -26,13 +29,9 @@ test.describe("Post a need", () => {
     await login(page);
     await page.goto("/needs/new");
 
-    await page.locator('input[placeholder="e.g. electrical_work_1hr"]').fill("ab");
-    await page
-      .locator('textarea[placeholder="describe the work, timeline, requirements..."]')
-      .fill("Valid long description here");
-    await page
-      .locator('textarea[placeholder="describe what you are offering..."]')
-      .fill("Valid offer description");
+    await page.getByLabel("Title", { exact: true }).fill("ab");
+    await page.getByLabel("Description", { exact: true }).fill("Valid long description here");
+    await page.getByLabel("Offer", { exact: true }).fill("Valid offer description");
 
     await page.locator('button[type="submit"]').click();
 
@@ -47,13 +46,9 @@ test.describe("Post a need", () => {
     await login(page);
     await page.goto("/needs/new");
 
-    await page.locator('input[placeholder="e.g. electrical_work_1hr"]').fill("Valid title");
-    await page
-      .locator('textarea[placeholder="describe the work, timeline, requirements..."]')
-      .fill("short");
-    await page
-      .locator('textarea[placeholder="describe what you are offering..."]')
-      .fill("Valid offer description");
+    await page.getByLabel("Title", { exact: true }).fill("Valid title");
+    await page.getByLabel("Description", { exact: true }).fill("short");
+    await page.getByLabel("Offer", { exact: true }).fill("Valid offer description");
 
     await page.locator('button[type="submit"]').click();
 
@@ -68,11 +63,9 @@ test.describe("Post a need", () => {
     await login(page);
     await page.goto("/needs/new");
 
-    await page.locator('input[placeholder="e.g. electrical_work_1hr"]').fill("Valid title");
-    await page
-      .locator('textarea[placeholder="describe the work, timeline, requirements..."]')
-      .fill("This is a valid long description");
-    await page.locator('textarea[placeholder="describe what you are offering..."]').fill("ab");
+    await page.getByLabel("Title", { exact: true }).fill("Valid title");
+    await page.getByLabel("Description", { exact: true }).fill("This is a valid long description");
+    await page.getByLabel("Offer", { exact: true }).fill("ab");
 
     await page.locator('button[type="submit"]').click();
 
@@ -109,12 +102,12 @@ test.describe("Post a need", () => {
     await page.goto("/needs/new");
 
     // Fill out the form
-    await page.locator('input[placeholder="e.g. electrical_work_1hr"]').fill("E2E Test Need");
+    await page.getByLabel("Title", { exact: true }).fill("E2E Test Need");
     await page
-      .locator('textarea[placeholder="describe the work, timeline, requirements..."]')
+      .getByLabel("Description", { exact: true })
       .fill("Looking for help with an end-to-end test. This is a detailed description.");
     await page
-      .locator('textarea[placeholder="describe what you are offering..."]')
+      .getByLabel("Offer", { exact: true })
       .fill("Offering a coffee and a thank you note in exchange.");
 
     // Ensure "service" offer type is selected (default). Exact match — the

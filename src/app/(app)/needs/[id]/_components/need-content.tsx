@@ -19,7 +19,9 @@ import { ReportButton } from "@/components/report-button";
 import { Badge } from "@/components/ui/badge";
 import { CopyLinkButton } from "@/components/ui/copy-link";
 import { getExchangeMode } from "@/lib/categories";
+import { displayLocation } from "@/lib/data/central-coast-suburbs";
 import { detectRegulatedTrade, detectBuildingWork } from "@/lib/regulated-trades";
+import { getUrgencyLabel } from "@/lib/urgency";
 
 interface NeedContentProps {
   need: {
@@ -30,6 +32,9 @@ interface NeedContentProps {
     offerType: string;
     offerDescription: string;
     offerValue: number | null;
+    locationName: string | null;
+    destinationName: string | null;
+    urgency: number;
     status: string;
     requiresContract: boolean;
     deadline: string | null;
@@ -122,8 +127,21 @@ export function NeedContent({ need, descExpanded, onToggleDesc }: NeedContentPro
               </span>
             );
           })()}
-        <span className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-line text-ash bg-raise rounded flex items-center gap-1">
-          <MapPin className="h-3 w-3" /> local
+        <span className="flex items-center gap-1 rounded border border-line bg-raise px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-ash">
+          <MapPin className="h-3 w-3" />
+          {need.locationName ? displayLocation(need.locationName) : "Local"}
+          {need.destinationName ? ` → ${need.destinationName}` : ""}
+        </span>
+        <span
+          className={`rounded border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${
+            need.urgency >= 7
+              ? "border-alert/40 bg-alert/10 text-alert"
+              : need.urgency >= 5
+                ? "border-sun/30 bg-sun/5 text-sun"
+                : "border-line bg-raise text-ash"
+          }`}
+        >
+          Urgency {need.urgency}/9 · {getUrgencyLabel(need.urgency)}
         </span>
         {need.deadline && (
           <span className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-line text-ash bg-raise rounded flex items-center gap-1">
@@ -194,7 +212,7 @@ export function NeedContent({ need, descExpanded, onToggleDesc }: NeedContentPro
         <div className="flex items-start gap-2">
           <Info className="h-3.5 w-3.5 text-mercury mt-0.5 flex-shrink-0" />
           <p className="text-xs text-ash">
-            Central Coast NSW trial region — all needs are local during the pilot.
+            Central Coast NSW trial — needs and rideshare pickups start in the pilot region.
           </p>
         </div>
       </div>

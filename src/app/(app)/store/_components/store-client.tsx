@@ -74,13 +74,18 @@ const SHOPPING_LIST = [
   },
 ];
 
-function NotifyButton({ subject, label }: { subject: string; label: string }) {
+function NotifyButton({ subject, label, href }: { subject: string; label: string; href?: string }) {
+  const className =
+    "inline-flex items-center gap-2 rounded bg-sun px-4 py-2 text-[15px] font-medium text-void transition-colors hover:bg-sunhi";
+  if (href) {
+    return (
+      <Link href={href} className={className}>
+        {label}
+      </Link>
+    );
+  }
   return (
-    <EmailLink
-      email="support@antidosis.com"
-      subject={subject}
-      className="inline-flex items-center gap-2 rounded bg-sun px-4 py-2 text-[15px] font-medium text-void transition-colors hover:bg-sunhi"
-    >
+    <EmailLink email="support@antidosis.com" subject={subject} className={className}>
       {label}
     </EmailLink>
   );
@@ -194,7 +199,11 @@ export function StoreClient() {
                 Price TBC — pilot batch pricing soon
               </p>
               <div className="mt-auto">
-                <NotifyButton subject="Node notify" label="Notify me at launch" />
+                <NotifyButton
+                  subject="Node notify"
+                  label="Express interest"
+                  href="/store/interest"
+                />
               </div>
             </section>
 
@@ -214,7 +223,11 @@ export function StoreClient() {
                 <li>· Channel QR distributed to verified members</li>
               </ul>
               <div className="mt-auto">
-                <NotifyButton subject="Channel access" label="Get channel access" />
+                <NotifyButton
+                  subject="Channel access"
+                  label="Get channel access"
+                  href="/store/interest"
+                />
               </div>
             </section>
           </div>
@@ -286,7 +299,11 @@ export function StoreClient() {
                   builders get listed here and receive buyer referrals from the platform.
                 </p>
               </div>
-              <NotifyButton subject="Node builder application" label="Become a builder" />
+              <NotifyButton
+                subject="Node builder application"
+                label="For mesh builders"
+                href="/store/builders"
+              />
             </div>
             <p className="mt-5 border-t border-line/60 pt-4 text-sm italic text-ash">
               No builders listed yet — the pilot is sourcing its first three. Range-test results

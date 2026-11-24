@@ -22,6 +22,7 @@ import { Input, Textarea, Button, Vessel, Badge } from "@mobile/components/ui";
 import { SkillAutocomplete } from "@mobile/components/SkillAutocomplete";
 import { LocationAutocomplete } from "@mobile/components/LocationAutocomplete";
 import { EXCHANGE_MODES, INCOMPATIBLE_EXCHANGE_MODES } from "@/lib/categories";
+import { getUrgencyLabel, URGENT_CONTACT_MIN } from "@/lib/urgency";
 
 /* ═══════════════════════════════════════════════════════════════
    POST NEED SCREEN — Terminal Wizard (v2)
@@ -53,10 +54,13 @@ export function PostNeedScreen() {
     description: "",
     deadline: "",
     timeRange: "",
+    urgency: 0,
+    allowUrgentContact: false,
     offerType: "service" as "service" | "item" | "money",
     offerDescription: "",
     offerValue: "",
     locationName: "",
+    destinationName: "",
     requiredSkills: [] as string[],
     requiresContract: false,
     needCategory: "" as string,
@@ -64,7 +68,7 @@ export function PostNeedScreen() {
   const [images, setImages] = useState<string[]>([]);
   const [offerImages, setOfferImages] = useState<string[]>([]);
 
-  const update = (key: string, value: string | boolean | string[]) => {
+  const update = (key: string, value: string | number | boolean | string[]) => {
     setForm((f) => ({ ...f, [key]: value }));
   };
 
@@ -121,6 +125,9 @@ export function PostNeedScreen() {
         offerDescription: form.offerDescription.trim(),
         offerValue: form.offerValue ? parseFloat(form.offerValue) : null,
         locationName: form.locationName.trim(),
+        destinationName: form.destinationName.trim() || null,
+        urgency: form.urgency,
+        allowUrgentContact: form.allowUrgentContact,
         isLocal: true,
         deadline: form.deadline ? new Date(form.deadline).toISOString() : null,
         timeRange: form.timeRange.trim() || null,
@@ -261,6 +268,52 @@ export function PostNeedScreen() {
               onChange={(e) => update("timeRange", e.target.value)}
               placeholder="e.g. 2 hours, 1 weekend"
             />
+            <div className="rounded-md border border-[var(--bronze)]/30 bg-[var(--void-raised)] p-3">
+              <div className="flex items-center justify-between gap-3">
+                <label htmlFor="mobile-need-urgency" className="text-xs text-[var(--gold)]">
+                  Urgency
+                </label>
+                <span className="text-xs text-[var(--sun)]">
+                  {form.urgency}/9 · {getUrgencyLabel(form.urgency)}
+                </span>
+              </div>
+              <input
+                id="mobile-need-urgency"
+                type="range"
+                min={0}
+                max={9}
+                step={1}
+                value={form.urgency}
+                onChange={(e) => {
+                  const value = Number(e.target.value);
+                  setForm((current) => ({
+                    ...current,
+                    urgency: value,
+                    allowUrgentContact:
+                      value >= URGENT_CONTACT_MIN ? current.allowUrgentContact : false,
+                  }));
+                }}
+                className="mt-3 w-full accent-[var(--sun)]"
+              />
+              <div className="mt-1 flex justify-between text-[10px] text-[var(--leather)]">
+                <span>Whenever</span>
+                <span>ASAP</span>
+              </div>
+            </div>
+            {form.urgency >= URGENT_CONTACT_MIN && (
+              <button
+                type="button"
+                onClick={() => update("allowUrgentContact", !form.allowUrgentContact)}
+                aria-pressed={form.allowUrgentContact}
+                className="w-full rounded-md border border-[var(--bronze)]/30 p-3 text-left"
+              >
+                <p className="text-xs text-[var(--gold)]">Optional urgent phone contact</p>
+                <p className="mt-1 text-[10px] leading-relaxed text-[var(--leather)]">
+                  {form.allowUrgentContact ? "Enabled" : "Disabled"} · verified members can reveal
+                  your verified mobile after a protected click. Never included in public post data.
+                </p>
+              </button>
+            )}
           </>
         )}
 
@@ -315,10 +368,14 @@ export function PostNeedScreen() {
                     key={mode.value}
                     onClick={() => {
                       hapticImpact("light");
-                      setForm((f) => ({
-                        ...f,
-                        needCategory: f.needCategory === mode.value ? "" : mode.value,
-                      }));
+                      setForm((f) => {
+                        const needCategory = f.needCategory === mode.value ? "" : mode.value;
+                        return {
+                          ...f,
+                          needCategory,
+                          destinationName: needCategory === "rideshare" ? f.destinationName : "",
+                        };
+                      });
                     }}
                     className={`px-2.5 py-1.5 rounded-md font-mono text-[10px] font-medium uppercase tracking-wide border tap-highlight-none transition-all ${
                       form.needCategory === mode.value
@@ -377,6 +434,15 @@ export function PostNeedScreen() {
               </p>
             </div>
 
+            {form.needCategory === "rideshare" && (
+              <Input
+                label="Destination"
+                value={form.destinationName}
+                onChange={(e) => update("destinationName", e.target.value)}
+                placeholder="e.g. Sydney Central, NSW"
+              />
+            )}
+
             {/* Contract Toggle */}
             <button
               onClick={() => {
@@ -390,7 +456,7 @@ export function PostNeedScreen() {
                 <div className="text-left">
                   <p className="text-xs font-medium text-[var(--mercury)]">Require Contract</p>
                   <p className="text-[10px] text-[var(--leather)]">
-                    Both parties must sign a binding agreement
+                    Written terms and signatures are required before starting
                   </p>
                 </div>
               </div>
@@ -480,7 +546,12 @@ export function PostNeedScreen() {
             <Button
               className="flex-1"
               onClick={handleSubmit}
-              disabled={!canProceed() || isMutating || uploading}
+              disabled={
+                !canProceed() ||
+                isMutating ||
+                uploading ||
+                (form.needCategory === "rideshare" && !form.destinationName.trim())
+              }
               haptic={false}
             >
               {isMutating || uploading ? "Posting..." : "Post Need"}

@@ -70,7 +70,7 @@ test.describe("Dashboard", () => {
     await expect(page.getByText("E2E Test User").first()).toBeVisible();
   });
 
-  test("opens proof and ID directly in the directory profile", async ({ page }) => {
+  test("opens proof and ID in the private trust workspace", async ({ page }) => {
     test.skip(!hasAuthCredentials(), "E2E auth credentials not configured");
     await login(page);
     await mockDashboard(page, {
@@ -92,9 +92,9 @@ test.describe("Dashboard", () => {
         },
       ],
     });
-    await page.goto("/dashboard?tab=profile&profileSection=directory");
+    await page.goto("/dashboard?tab=profile&profileSection=trust");
 
-    await expect(page.getByRole("tab", { name: "Directory profile" })).toHaveAttribute(
+    await expect(page.getByRole("tab", { name: "Trust & ID" })).toHaveAttribute(
       "aria-selected",
       "true"
     );

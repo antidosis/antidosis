@@ -86,6 +86,9 @@ export interface Need {
   offerValue: number | null;
   isLocal: boolean;
   locationName: string | null;
+  destinationName: string | null;
+  urgency: number;
+  allowUrgentContact: boolean;
   latitude: number | null;
   longitude: number | null;
   status: string;

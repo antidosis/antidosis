@@ -52,6 +52,40 @@ describe("createNeedSchema", () => {
     expect(result.success).toBe(true);
   });
 
+  it("defaults to flexible urgency and no public phone contact", () => {
+    const result = createNeedSchema.safeParse(valid);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.urgency).toBe(0);
+      expect(result.data.allowUrgentContact).toBe(false);
+    }
+  });
+
+  it("accepts urgent contact only at urgency 7 or above", () => {
+    expect(
+      createNeedSchema.safeParse({ ...valid, urgency: 7, allowUrgentContact: true }).success
+    ).toBe(true);
+    expect(
+      createNeedSchema.safeParse({ ...valid, urgency: 6, allowUrgentContact: true }).success
+    ).toBe(false);
+  });
+
+  it("rejects urgency outside the 0–9 scale", () => {
+    expect(createNeedSchema.safeParse({ ...valid, urgency: -1 }).success).toBe(false);
+    expect(createNeedSchema.safeParse({ ...valid, urgency: 10 }).success).toBe(false);
+  });
+
+  it("requires a destination for rideshare posts", () => {
+    expect(createNeedSchema.safeParse({ ...valid, needCategory: "rideshare" }).success).toBe(false);
+    expect(
+      createNeedSchema.safeParse({
+        ...valid,
+        needCategory: "rideshare",
+        destinationName: "Sydney Central, NSW",
+      }).success
+    ).toBe(true);
+  });
+
   it("rejects negative offerValue", () => {
     const result = createNeedSchema.safeParse({ ...valid, offerValue: -1 });
     expect(result.success).toBe(false);

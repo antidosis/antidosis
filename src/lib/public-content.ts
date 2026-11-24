@@ -13,6 +13,9 @@ export interface PublicNeedItem {
   offerDescription: string;
   isLocal: boolean;
   locationName: string | null;
+  destinationName: string | null;
+  urgency: number;
+  allowUrgentContact: boolean;
   poster: {
     id: string;
     fullName: string | null;
@@ -75,7 +78,11 @@ export async function getPublicNeeds({
     await Promise.all([
       prisma.need.findMany({
         where,
-        orderBy: [{ boostedUntil: { sort: "desc", nulls: "last" } }, { createdAt: "desc" }],
+        orderBy: [
+          { boostedUntil: { sort: "desc", nulls: "last" } },
+          { urgency: "desc" },
+          { createdAt: "desc" },
+        ],
         skip: (page - 1) * limit,
         take: limit,
         include: {

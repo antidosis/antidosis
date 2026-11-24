@@ -33,6 +33,8 @@ import { ImageLightbox } from "@mobile/components/ImageLightbox";
 import { useState } from "react";
 import { hapticImpact } from "@mobile/lib/native";
 import { getExchangeMode } from "@/lib/categories";
+import { displayLocation } from "@/lib/data/central-coast-suburbs";
+import { getUrgencyLabel } from "@/lib/urgency";
 import { Vessel, Badge, Button, Textarea, Avatar, Divider } from "@mobile/components/ui";
 import type { BadgeVariant } from "@mobile/components/ui";
 
@@ -584,9 +586,13 @@ export function NeedDetailScreen() {
           {need.locationName && (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[var(--void-hover)] border border-[var(--bronze)] text-[10px] text-[var(--leather)] uppercase tracking-wider">
               <MapPin size={8} />
-              {need.locationName}
+              {displayLocation(need.locationName)}
+              {need.destinationName ? ` → ${need.destinationName}` : ""}
             </span>
           )}
+          <span className="inline-flex items-center gap-1 rounded border border-[var(--bronze)] bg-[var(--void-hover)] px-2 py-0.5 text-[10px] uppercase tracking-wider text-[var(--leather)]">
+            Urgency {need.urgency}/9 · {getUrgencyLabel(need.urgency)}
+          </span>
           {need.deadline && (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[var(--void-hover)] border border-[var(--bronze)] text-[10px] text-[var(--leather)] uppercase tracking-wider">
               <Clock size={8} />

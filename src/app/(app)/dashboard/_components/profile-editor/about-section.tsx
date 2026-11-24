@@ -37,6 +37,7 @@ export function AboutSection({ register, control, errors }: AboutSectionProps) {
           control={control}
           render={({ field }) => (
             <LocationAutocomplete
+              id="profile-location"
               value={field.value || ""}
               onChange={field.onChange}
               placeholder="Search suburb…"

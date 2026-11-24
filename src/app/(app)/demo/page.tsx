@@ -14,16 +14,16 @@ export const metadata: Metadata = {
 const DEMOS = [
   {
     id: "user-experience",
-    title: "Full User Journey",
+    title: "Free-form Exchange Journey",
     description:
-      "Walk through the entire exchange lifecycle from both sides. Watch Sarah post a need, Marcus find it, negotiate, and complete the exchange — with reviews.",
+      "Walk through the current free-form lifecycle from both sides. Sarah posts, Marcus responds, they agree in messages, complete the exchange and leave reviews.",
     icon: ArrowRightLeft,
     href: "/demo/user-experience",
     color: "var(--x-f5a623)",
     bg: "#f5a62308",
     border: "#f5a62320",
     lessons: [
-      "Posting a need and setting expectations",
+      "Quick and detailed posting, including urgency",
       "How the browse feed and search works",
       "Expressing interest and getting accepted",
       "Negotiation, completion, and bilateral reviews",
@@ -33,7 +33,7 @@ const DEMOS = [
     id: "terminal",
     title: "Community Relay",
     description:
-      "Watch a live replay of real relay usage. See how community members find each other, negotiate deals, and build trust in public channels and DMs.",
+      "Watch a scripted Relay scenario. See how members can find each other, discuss exchanges and build trust in channels and direct messages.",
     icon: MessageSquare,
     href: "/demo/terminal",
     color: "var(--x-00e5ff)",
@@ -159,8 +159,8 @@ export default function DemoIndexPage() {
             <div>
               <p className="text-sm text-gold font-medium">Prefer learning by watching?</p>
               <p className="text-xs text-ash mt-1">
-                The Relay demo auto-plays a realistic conversation between community members. Just
-                hit play and watch how deals get made.
+                The Relay demo plays a scripted conversation between fictional community members.
+                Start it to see how channel and direct-message interactions work.
               </p>
             </div>
           </div>

@@ -18,6 +18,7 @@ import { InterestedList } from "./interested-list";
 import { MessageThread } from "./message-thread";
 import { NeedContent } from "./need-content";
 import { PosterProfileCard } from "./poster-profile-card";
+import { UrgentContactCard } from "./urgent-contact-card";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -47,6 +48,9 @@ export type NeedDetail = {
   offerValue: number | null;
   isLocal: boolean;
   locationName: string | null;
+  destinationName: string | null;
+  urgency: number;
+  allowUrgentContact: boolean;
   status: string;
   requiresContract: boolean;
   deadline: string | null;
@@ -536,6 +540,14 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
           descExpanded={descExpanded}
           onToggleDesc={() => setDescExpanded(!descExpanded)}
         />
+
+        {need.urgency >= 7 && (
+          <UrgentContactCard
+            needId={need.id}
+            allowContact={need.allowUrgentContact}
+            isPoster={isPoster}
+          />
+        )}
 
         {/* Watch bar — anyone logged in except the poster can follow the post */}
         {profileId && !isPoster && need.status === "open" && (

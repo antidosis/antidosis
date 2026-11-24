@@ -16,31 +16,32 @@ describe("LocationAutocomplete", () => {
 
   it("shows suburb suggestions when typing", () => {
     render(<LocationAutocomplete value="" onChange={vi.fn()} />);
-    const input = screen.getByRole("textbox");
+    const input = screen.getByRole("combobox");
     fireEvent.change(input, { target: { value: "Terrigal" } });
     expect(screen.getByText("Terrigal")).toBeInTheDocument();
-    expect(screen.getByText("2260")).toBeInTheDocument();
+    expect(screen.getByText("NSW 2260")).toBeInTheDocument();
   });
 
   it("calls onChange when a suburb is selected", () => {
     const onChange = vi.fn();
     render(<LocationAutocomplete value="" onChange={onChange} />);
-    const input = screen.getByRole("textbox");
+    const input = screen.getByRole("combobox");
     fireEvent.change(input, { target: { value: "Terrigal" } });
     const option = screen.getByRole("button", { name: /Terrigal/ });
     fireEvent.click(option);
     expect(onChange).toHaveBeenCalledWith("terrigal_2260", "Terrigal");
   });
 
-  it("displays stored value when value prop is set and dropdown is closed", () => {
-    render(<LocationAutocomplete value="terrigal_2260" onChange={vi.fn()} />);
-    expect(screen.getByText("stored as:")).toBeInTheDocument();
-    expect(screen.getByText("terrigal_2260")).toHaveClass("text-sun");
+  it("shows a saved suburb as a readable location instead of its database value", () => {
+    render(<LocationAutocomplete value="noraville_2263" onChange={vi.fn()} />);
+    expect(screen.getByRole("combobox")).toHaveValue("NORAVILLE, NSW, 2263");
+    expect(screen.getByText("Saved suburb · search above to change it")).toBeInTheDocument();
+    expect(screen.queryByText("noraville_2263")).not.toBeInTheDocument();
   });
 
   it("closes dropdown when clicking outside", () => {
     render(<LocationAutocomplete value="" onChange={vi.fn()} />);
-    const input = screen.getByRole("textbox");
+    const input = screen.getByRole("combobox");
     fireEvent.change(input, { target: { value: "Terrigal" } });
     expect(screen.getByText("Terrigal")).toBeInTheDocument();
     fireEvent.mouseDown(document.body);
@@ -49,7 +50,7 @@ describe("LocationAutocomplete", () => {
 
   it("opens dropdown on focus when results exist", () => {
     render(<LocationAutocomplete value="" onChange={vi.fn()} />);
-    const input = screen.getByRole("textbox");
+    const input = screen.getByRole("combobox");
     fireEvent.change(input, { target: { value: "Terrigal" } });
     fireEvent.mouseDown(document.body);
     expect(screen.queryByText("Terrigal")).not.toBeInTheDocument();
@@ -59,14 +60,14 @@ describe("LocationAutocomplete", () => {
 
   it("does not show dropdown for empty query", () => {
     render(<LocationAutocomplete value="" onChange={vi.fn()} />);
-    const input = screen.getByRole("textbox");
+    const input = screen.getByRole("combobox");
     fireEvent.change(input, { target: { value: "" } });
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 
   it("shows multiple matching suburbs", () => {
     render(<LocationAutocomplete value="" onChange={vi.fn()} />);
-    const input = screen.getByRole("textbox");
+    const input = screen.getByRole("combobox");
     fireEvent.change(input, { target: { value: "Gosford" } });
     expect(screen.getByText("Gosford")).toBeInTheDocument();
     expect(screen.getByText("North Gosford")).toBeInTheDocument();
@@ -74,16 +75,16 @@ describe("LocationAutocomplete", () => {
 
   it("applies custom className", () => {
     render(<LocationAutocomplete value="" onChange={vi.fn()} className="my-location" />);
-    const wrapper = screen.getByRole("textbox").closest("div.relative");
+    const wrapper = screen.getByRole("combobox").closest("div.relative");
     expect(wrapper).toHaveClass("my-location");
   });
 
-  it("updates query text to selected suburb name", () => {
+  it("updates query text to the selected full suburb", () => {
     render(<LocationAutocomplete value="" onChange={vi.fn()} />);
-    const input = screen.getByRole("textbox");
+    const input = screen.getByRole("combobox");
     fireEvent.change(input, { target: { value: "Terrigal" } });
     const option = screen.getByRole("button", { name: /Terrigal/ });
     fireEvent.click(option);
-    expect(input).toHaveValue("Terrigal");
+    expect(input).toHaveValue("TERRIGAL, NSW, 2260");
   });
 });

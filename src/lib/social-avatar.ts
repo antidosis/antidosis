@@ -6,10 +6,10 @@
  * a copy in our own storage (never hotlink — the remote URL would rot).
  *
  * Platform reality:
- *   • Facebook — og:image is public; works reliably.
- *   • TikTok, YouTube, X, LinkedIn — og:image generally public.
- *   • Instagram — login-walls most profile pages; import usually fails with a
- *     clear error. Best-effort by design.
+ *   • Facebook and Instagram commonly block automated profile-page reads. Their
+ *     import controls are hidden until account-connected Meta OAuth is available.
+ *   • TikTok, YouTube, X, LinkedIn — og:image is generally public, best-effort.
+ *   • This flow never initiates social login or requests private profile data.
  *
  * Security: only hosts on the allowlist below are ever fetched (SSRF guard),
  * and only http(s) URLs. Everything else is rejected before any network call.
