@@ -17,6 +17,7 @@ const INPUT_CLASS = "text-base";
 export function ContactSection({ register, errors }: ContactSectionProps) {
   return (
     <SectionCard
+      tone="privacy"
       title="Contact"
       description="Control exactly who sees each number — nothing is public unless you make it."
     >

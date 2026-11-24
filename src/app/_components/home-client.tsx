@@ -78,7 +78,7 @@ function Reveal({
     <div
       ref={ref}
       className={cn(
-        "transition-all duration-700",
+        "reveal transition-all duration-700",
         isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8",
         className
       )}
@@ -105,7 +105,7 @@ const FEATURES = [
   {
     icon: Star,
     title: "Reputation Engine",
-    desc: "Bilateral reviews on every exchange. Your history becomes your passport.",
+    desc: "Bilateral reviews after completed exchanges. Your history becomes your passport.",
     color: "var(--x-f5a623)",
   },
   {
@@ -153,15 +153,15 @@ export default function HomePage() {
 
       <main className="flex-1">
         {/* HERO */}
-        <section className="relative pt-32 pb-24 md:pt-40 md:pb-32 overflow-hidden">
+        <section className="relative overflow-hidden pb-16 pt-28 md:pb-28 md:pt-40">
           <ParticleField />
           <div className="relative max-w-6xl mx-auto px-4 md:px-8">
-            <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="grid items-center gap-8 md:grid-cols-2 md:gap-12">
               <div>
                 <p className="text-xs text-ash mb-8 font-mono">
                   ◉ ON AIR — CHANNEL 01 · CENTRAL COAST
                 </p>
-                <h1 className="heading-display hero-title text-5xl md:text-7xl mb-8">
+                <h1 className="heading-display hero-title mb-6 text-4xl leading-[1.08] sm:text-5xl md:mb-8 md:text-7xl">
                   your neighbourhood,
                   <br />
                   <span className="text-sun">on the air.</span>
@@ -190,7 +190,7 @@ export default function HomePage() {
                 </div>
               </div>
               <div className="mt-10 md:mt-0">
-                <NetworkMap className="w-full h-[220px] md:h-[340px]" />
+                <NetworkMap className="h-[180px] w-full sm:h-[240px] md:h-[340px]" />
               </div>
             </div>
           </div>
@@ -218,12 +218,12 @@ export default function HomePage() {
         <div className="divider" />
 
         {/* HOW IT WORKS — 3 Steps */}
-        <section className="py-20 md:py-28 border-t border-line">
+        <section className="py-14 md:py-24 border-t border-line">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-12 font-mono">» SIGNAL PATH — THREE STEPS</p>
             </Reveal>
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6">
               <Reveal delay={0}>
                 <StepCard
                   num="01"
@@ -259,7 +259,7 @@ export default function HomePage() {
         <div className="divider" />
 
         {/* DIRECT AGREEMENTS — private contracts are a product, not an afterthought */}
-        <section className="border-t border-line py-20 md:py-28">
+        <section className="border-t border-line py-14 md:py-24">
           <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 md:grid-cols-2 md:px-8">
             <Reveal>
               <p className="mb-3 font-mono text-xs text-mercury">
@@ -302,7 +302,7 @@ export default function HomePage() {
         <div className="divider" />
 
         {/* FEATURES — one compact grid */}
-        <section className="section-plateau py-20 md:py-28 border-t border-line">
+        <section className="section-plateau py-14 md:py-24 border-t border-line">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-8 font-mono">
@@ -325,9 +325,9 @@ export default function HomePage() {
         <div className="divider" />
 
         {/* COMMUNITY RELAY */}
-        <section className="section-constellation py-20 md:py-28 border-t border-line">
+        <section className="section-constellation py-14 md:py-24 border-t border-line">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
-            <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="grid items-center gap-8 md:grid-cols-2 md:gap-12">
               <Reveal>
                 <p className="text-xs text-ash mb-8 font-mono">◉ RELAY — COMMUNITY COMMS</p>
                 <div className="flex items-center gap-3 mb-4">
@@ -360,7 +360,7 @@ export default function HomePage() {
         <div className="divider" />
 
         {/* FOR BUSINESSES */}
-        <section className="py-20 md:py-28 border-t border-line">
+        <section className="py-14 md:py-24 border-t border-line">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-8 font-mono">» TRADE DESK — FOR BUSINESSES</p>
@@ -373,12 +373,12 @@ export default function HomePage() {
                 stays free.
               </p>
             </Reveal>
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6">
               <Reveal delay={0}>
                 <StepCard
                   num="B1"
                   title="Claim Your Business Profile"
-                  desc="Flip your account to business, add your ABN, and show up in the directory with a verified badge."
+                  desc="Switch to a business account, add your ABN, and appear in the directory with a business badge and your chosen trust credentials."
                   illustration={<Building2 className="w-24 h-24 text-sun opacity-60" />}
                 />
               </Reveal>
@@ -386,7 +386,7 @@ export default function HomePage() {
                 <StepCard
                   num="B2"
                   title="Post Tasks & Jobs"
-                  desc="Need a hand on a job, a delivery run, or weekend cover? Post it like any need and pick from verified locals."
+                  desc="Need a hand on a job, a delivery run, or weekend cover? Post it like any need and review each local's trust signals."
                   illustration={<Handshake className="w-24 h-24 text-mercury opacity-60" />}
                 />
               </Reveal>
@@ -417,7 +417,7 @@ export default function HomePage() {
         <div className="divider" />
 
         {/* FOR CREATORS & INFLUENCERS */}
-        <section className="py-20 md:py-28 border-t border-line">
+        <section className="py-14 md:py-24 border-t border-line">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-8 font-mono">
@@ -432,7 +432,7 @@ export default function HomePage() {
                 currency.
               </p>
             </Reveal>
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6">
               <Reveal delay={0}>
                 <StepCard
                   num="C1"
@@ -453,7 +453,7 @@ export default function HomePage() {
                 <StepCard
                   num="C3"
                   title="Get Rated Like a Pro"
-                  desc="Every collab is a contract with the exchange recorded. Deliver, get reviewed, and watch your creator reputation grow."
+                  desc="Add a written agreement when it helps. Deliver the exchange, leave genuine reviews, and grow your creator reputation."
                   illustration={<Star className="w-24 h-24 text-sun opacity-60" />}
                 />
               </Reveal>
@@ -476,7 +476,7 @@ export default function HomePage() {
         <div className="divider" />
 
         {/* CTA */}
-        <section className="py-20 md:py-28 border-t border-line">
+        <section className="py-14 md:py-24 border-t border-line">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-8 font-mono">◉ JOIN THE NETWORK</p>
@@ -486,8 +486,8 @@ export default function HomePage() {
                 <span className="text-sun">Your Reputation.</span>
               </h2>
               <p className="text-base text-ash max-w-md mb-10 leading-relaxed">
-                Join the Central Coast trial. Verify your identity, and help build a network that
-                keeps working when everything else doesn&apos;t.
+                Join the Central Coast trial. Verify your identity, strengthen local exchange, and
+                help build the path to off-grid coordination.
               </p>
               <div className="flex flex-wrap items-center gap-3">
                 <Button asChild size="lg">
@@ -524,13 +524,17 @@ function StepCard({
   illustration: React.ReactNode;
 }) {
   return (
-    <div className="bg-surface border border-line p-8 hover:border-sun/30 transition-colors group">
-      <div className="flex items-center justify-between mb-6">
-        <span className="text-4xl font-bold text-ash">{num}</span>
-        {illustration}
+    <div className="group h-full rounded-lg border border-line bg-surface p-3 transition-colors hover:border-sun/30 sm:p-5 md:p-6">
+      <div className="mb-3 flex items-center justify-between gap-1 sm:mb-5">
+        <span className="text-xl font-bold text-ash sm:text-2xl md:text-3xl">{num}</span>
+        <div className="[&>svg]:h-10 [&>svg]:w-10 sm:[&>svg]:h-14 sm:[&>svg]:w-14 md:[&>svg]:h-20 md:[&>svg]:w-20">
+          {illustration}
+        </div>
       </div>
-      <h3 className="heading-display text-xl md:text-2xl mb-3">{title}</h3>
-      <p className="text-sm text-ash leading-relaxed">{desc}</p>
+      <h3 className="heading-display mb-2 text-sm leading-tight sm:text-lg md:mb-3 md:text-xl">
+        {title}
+      </h3>
+      <p className="text-xs leading-relaxed text-ash sm:text-sm">{desc}</p>
     </div>
   );
 }

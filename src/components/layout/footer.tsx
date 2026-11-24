@@ -48,7 +48,7 @@ export function Footer() {
     <footer
       className={cn(
         "relative z-10 border-t border-line bg-void",
-        hasDashboardSidebar && "lg:pl-64"
+        hasDashboardSidebar && "pl-20 lg:pl-64"
       )}
     >
       <div className="max-w-6xl mx-auto px-4 md:px-8">

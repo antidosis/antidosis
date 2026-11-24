@@ -89,7 +89,7 @@ function NodeIcon({ status }: { status: PhaseStatus }) {
  */
 export function OffgridVision() {
   return (
-    <section className="py-20 md:py-28 border-t border-line">
+    <section className="border-t border-line py-14 md:py-24">
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         <div>
           <p className="text-xs text-ash mb-8 font-mono">
@@ -99,7 +99,7 @@ export function OffgridVision() {
             Designed for a future where the internet{" "}
             <span className="text-sun">isn&apos;t required.</span>
           </h2>
-          <p className="text-sm md:text-base text-ash leading-relaxed max-w-2xl mb-14">
+          <p className="text-sm md:text-base text-ash mb-8 max-w-2xl leading-relaxed">
             Every antidosis layer exists for one reason: the local economy shouldn&apos;t die when
             infrastructure does. The exchange, the contracts, the relay — and ultimately long-range
             radio nodes across the Central Coast. Here is where we are on the path, honestly.
@@ -116,9 +116,12 @@ export function OffgridVision() {
                 "linear-gradient(90deg, rgb(var(--c-ok)) 0%, rgb(var(--c-sun)) 45%, rgb(var(--c-linehi)) 70%, rgb(var(--c-linehi)) 100%)",
             }}
           />
-          <div className="grid gap-8 md:grid-cols-5 md:gap-4">
-            {PHASES.map((phase, i) => (
-              <div key={phase.node}>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-5 md:gap-4">
+            {PHASES.map((phase) => (
+              <div
+                key={phase.node}
+                className="h-full rounded-lg border border-line bg-surface/45 p-3 last:col-span-2 md:last:col-span-1 md:p-4"
+              >
                 <div className="relative">
                   <div className="mb-3 flex items-center gap-3 md:block">
                     <NodeIcon status={phase.status} />

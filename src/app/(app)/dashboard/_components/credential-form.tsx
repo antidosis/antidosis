@@ -88,7 +88,13 @@ function defaultTitleForSubType(subType: string): string {
   }
 }
 
-export function CredentialForm({
+export function CredentialForm(props: CredentialFormProps) {
+  if (!props.isOpen) return null;
+  const formKey = `${props.editingId ?? "new"}-${props.initialData?.id ?? "none"}`;
+  return <CredentialFormContent key={formKey} {...props} />;
+}
+
+function CredentialFormContent({
   isOpen,
   editingId,
   initialData,
@@ -97,14 +103,6 @@ export function CredentialForm({
 }: CredentialFormProps) {
   const [credForm, setCredForm] = useState(() => buildInitialForm(initialData));
   const [saving, setSaving] = useState(false);
-
-  // Reset form when initialData changes
-  const formKey = `${editingId ?? "new"}-${initialData?.id ?? "none"}`;
-  useMemo(() => {
-    setCredForm(buildInitialForm(initialData));
-    setSaving(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formKey]);
 
   const config = useMemo(
     () => getFieldConfig(credForm.type, credForm.subType),
@@ -148,8 +146,11 @@ export function CredentialForm({
       backFileUrl: credForm.backFileUrl || undefined,
       isPublic: config.forcePrivate ? false : credForm.isPublic,
     };
-    await onSave(payload, editingId);
-    setSaving(false);
+    try {
+      await onSave(payload, editingId);
+    } finally {
+      setSaving(false);
+    }
   }
 
   if (!isOpen) return null;
@@ -194,8 +195,9 @@ export function CredentialForm({
 
         {/* Title */}
         <div className="space-y-2">
-          <Label>{config.titleLabel}</Label>
+          <Label htmlFor="credential-title">{config.titleLabel}</Label>
           <Input
+            id="credential-title"
             value={credForm.title}
             onChange={(e) => setCredForm({ ...credForm, title: e.target.value })}
             placeholder={config.titlePlaceholder}

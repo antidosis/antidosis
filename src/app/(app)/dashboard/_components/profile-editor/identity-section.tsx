@@ -45,7 +45,7 @@ export function IdentitySection({
     .slice(0, 4);
 
   return (
-    <SectionCard title="Identity" description="How you appear to other locals.">
+    <SectionCard tone="identity" title="Identity" description="How you appear to other locals.">
       <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
         <div className="flex flex-col gap-2">
           <Avatar

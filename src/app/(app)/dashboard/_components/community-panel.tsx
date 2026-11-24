@@ -45,7 +45,7 @@ function timeAgo(iso: string): string {
   });
 }
 
-function NotificationsFeed() {
+export function NotificationsFeed() {
   const [view, setView] = useState<"inbox" | "archive">("inbox");
   const endpoint =
     view === "archive" ? "/api/v1/notifications?archived=true" : "/api/v1/notifications";
@@ -223,7 +223,6 @@ export function CommunityPanel() {
         </Button>
       </section>
 
-      <NotificationsFeed />
       <FriendsManager />
       <TerminalActivityFeed />
     </div>

@@ -11,144 +11,163 @@ interface Particle {
   opacity: number;
 }
 
+function token(name: string, fallback: string) {
+  const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return value ? value.split(/\s+/).join(", ") : fallback;
+}
+
 export function ParticleField() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const mouseRef = useRef({ x: -1000, y: -1000 });
-  const particlesRef = useRef<Particle[]>([]);
-  const rafRef = useRef<number>(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
 
-    const isMobile = window.matchMedia("(pointer: coarse)").matches;
+    const mobile = window.matchMedia("(pointer: coarse)").matches;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const mouse = { x: -1000, y: -1000 };
+    let particles: Particle[] = [];
+    let width = 1;
+    let height = 1;
+    let raf = 0;
+    let visible = true;
+    let lastFrame = 0;
+    let pointColour = token("--c-gold", "232, 213, 163");
+    let linkColour = token("--c-mercury", "0, 229, 255");
 
     function resize() {
-      if (!canvas) return;
-      const dpr = Math.min(window.devicePixelRatio, 2);
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
+      const rect = canvas!.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      width = Math.max(1, rect.width);
+      height = Math.max(1, rect.height);
+      canvas!.width = Math.floor(width * dpr);
+      canvas!.height = Math.floor(height * dpr);
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const count = Math.min(Math.floor((width * height) / 16000), mobile ? 18 : 64);
+      particles = Array.from({ length: count }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.22,
+        vy: (Math.random() - 0.5) * 0.22,
+        radius: Math.random() * 1.3 + 0.5,
+        opacity: Math.random() * 0.4 + 0.2,
+      }));
+      if (reducedMotion) drawFrame(0);
     }
-    resize();
 
-    const particleCount = Math.min(
-      Math.floor((window.innerWidth * window.innerHeight) / 12000),
-      isMobile ? 30 : 120
-    );
-    const particles: Particle[] = [];
-    for (let i = 0; i < particleCount; i++) {
-      particles.push({
-        x: Math.random() * window.innerWidth,
-        y: Math.random() * window.innerHeight,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: (Math.random() - 0.5) * 0.3,
-        radius: Math.random() * 1.5 + 0.5,
-        opacity: Math.random() * 0.5 + 0.2,
-      });
-    }
-    particlesRef.current = particles;
-
-    function draw() {
+    function drawFrame(now: number) {
       if (!ctx || !canvas) return;
-      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      ctx.clearRect(0, 0, width, height);
+      const connectDistance = mobile ? 0 : 110;
 
-      const mouse = mouseRef.current;
-      const connectDistance = 120;
-      const mouseRepelRadius = 150;
-
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i];
-
-        // Mouse repulsion
-        const dx = p.x - mouse.x;
-        const dy = p.y - mouse.y;
-        const distMouse = Math.sqrt(dx * dx + dy * dy);
-        if (distMouse < mouseRepelRadius) {
-          const force = (mouseRepelRadius - distMouse) / mouseRepelRadius;
-          p.vx += (dx / distMouse) * force * 0.5;
-          p.vy += (dy / distMouse) * force * 0.5;
+      for (let index = 0; index < particles.length; index += 1) {
+        const particle = particles[index];
+        if (!reducedMotion) {
+          const dx = particle.x - mouse.x;
+          const dy = particle.y - mouse.y;
+          const distance = Math.hypot(dx, dy) || 1;
+          if (distance < 130) {
+            const force = ((130 - distance) / 130) * 0.035;
+            particle.vx += (dx / distance) * force;
+            particle.vy += (dy / distance) * force;
+          }
+          particle.x += particle.vx;
+          particle.y += particle.vy;
+          particle.vx *= 0.995;
+          particle.vy *= 0.995;
+          if (particle.x < 0) particle.x = width;
+          if (particle.x > width) particle.x = 0;
+          if (particle.y < 0) particle.y = height;
+          if (particle.y > height) particle.y = 0;
         }
 
-        // Apply velocity with damping
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vx *= 0.99;
-        p.vy *= 0.99;
-
-        // Gentle ambient motion
-        p.vx += (Math.random() - 0.5) * 0.02;
-        p.vy += (Math.random() - 0.5) * 0.02;
-
-        // Wrap around
-        if (p.x < 0) p.x = window.innerWidth;
-        if (p.x > window.innerWidth) p.x = 0;
-        if (p.y < 0) p.y = window.innerHeight;
-        if (p.y > window.innerHeight) p.y = 0;
-
-        // Draw particle
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity * 0.4})`;
+        ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${pointColour}, ${particle.opacity * 0.42})`;
         ctx.fill();
 
-        // Draw connections (skipped on mobile to save CPU)
-        if (!isMobile) {
-          for (let j = i + 1; j < particles.length; j++) {
-            const p2 = particles[j];
-            const ddx = p.x - p2.x;
-            const ddy = p.y - p2.y;
-            const dist = Math.sqrt(ddx * ddx + ddy * ddy);
-            if (dist < connectDistance) {
-              const alpha = (1 - dist / connectDistance) * 0.15;
-              ctx.beginPath();
-              ctx.moveTo(p.x, p.y);
-              ctx.lineTo(p2.x, p2.y);
-              ctx.strokeStyle = `rgba(124, 92, 255, ${alpha})`;
-              ctx.lineWidth = 0.5;
-              ctx.stroke();
-            }
-          }
+        for (let otherIndex = index + 1; otherIndex < particles.length; otherIndex += 1) {
+          const other = particles[otherIndex];
+          const distance = Math.hypot(particle.x - other.x, particle.y - other.y);
+          if (distance >= connectDistance) continue;
+          ctx.beginPath();
+          ctx.moveTo(particle.x, particle.y);
+          ctx.lineTo(other.x, other.y);
+          ctx.strokeStyle = `rgba(${linkColour}, ${(1 - distance / connectDistance) * 0.12})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
         }
       }
 
-      rafRef.current = requestAnimationFrame(draw);
+      if (!reducedMotion && visible && now - lastFrame >= 32) lastFrame = now;
     }
 
-    const onMouseMove = (e: MouseEvent) => {
-      mouseRef.current = { x: e.clientX, y: e.clientY };
+    function loop(now: number) {
+      raf = 0;
+      if (!visible || document.hidden) return;
+      if (now - lastFrame >= 32) {
+        drawFrame(now);
+        lastFrame = now;
+      }
+      raf = requestAnimationFrame(loop);
+    }
+
+    function start() {
+      if (!reducedMotion && visible && !document.hidden && !raf) raf = requestAnimationFrame(loop);
+    }
+
+    const intersection = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      if (visible) start();
+      else {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      }
+    });
+    const resizeObserver = new ResizeObserver(resize);
+    const onVisibility = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      } else start();
+    };
+    const onMouseMove = (event: MouseEvent) => {
+      const rect = canvas!.getBoundingClientRect();
+      mouse.x = event.clientX - rect.left;
+      mouse.y = event.clientY - rect.top;
     };
     const onMouseLeave = () => {
-      mouseRef.current = { x: -1000, y: -1000 };
+      mouse.x = -1000;
+      mouse.y = -1000;
     };
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseleave", onMouseLeave);
-    window.addEventListener("resize", resize);
+    const onTheme = () => {
+      pointColour = token("--c-gold", "232, 213, 163");
+      linkColour = token("--c-mercury", "0, 229, 255");
+      if (reducedMotion) drawFrame(0);
+    };
 
-    // Defer animation start on mobile to let paint happen first
-    let startTimer: ReturnType<typeof setTimeout> | undefined;
-    if (isMobile) {
-      startTimer = setTimeout(() => draw(), 150);
-    } else {
-      draw();
+    intersection.observe(canvas);
+    resizeObserver.observe(canvas);
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("antidosis-theme", onTheme);
+    if (!mobile) {
+      canvas.parentElement?.addEventListener("mousemove", onMouseMove);
+      canvas.parentElement?.addEventListener("mouseleave", onMouseLeave);
     }
+    resize();
+    start();
 
     return () => {
-      if (startTimer) clearTimeout(startTimer);
-      cancelAnimationFrame(rafRef.current);
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseleave", onMouseLeave);
-      window.removeEventListener("resize", resize);
+      cancelAnimationFrame(raf);
+      intersection.disconnect();
+      resizeObserver.disconnect();
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("antidosis-theme", onTheme);
+      canvas.parentElement?.removeEventListener("mousemove", onMouseMove);
+      canvas.parentElement?.removeEventListener("mouseleave", onMouseLeave);
     };
   }, []);
 
-  return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 w-full h-full"
-      style={{ pointerEvents: "none" }}
-    />
-  );
+  return <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" aria-hidden />;
 }

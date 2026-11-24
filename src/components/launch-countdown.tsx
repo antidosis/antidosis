@@ -37,6 +37,9 @@ export function LaunchCountdown() {
           </p>
         </div>
 
+        <p className="mb-3 text-xs font-medium uppercase tracking-wider text-parchment">
+          Proposed expansion targets — not current platform metrics
+        </p>
         <div className="mb-10 grid max-w-3xl grid-cols-2 gap-3 md:mb-12 md:grid-cols-4 md:gap-4">
           {MILESTONES.map((milestone) => (
             <div key={milestone.label} className="vessel-lit p-4 md:p-5">

@@ -7,7 +7,7 @@ import { CheckCircle2, ArrowRight, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import { wizardKey, type DashboardTabId } from "./dashboard-nav";
-import { ProfileChecklist } from "./profile-checklist";
+import type { ProfileTab } from "./profile-editor/types";
 
 interface WizardProfile {
   fullName: string | null;
@@ -25,7 +25,7 @@ interface SetupWizardProps {
   profileId: string;
   profile: WizardProfile;
   emailVerified: boolean;
-  onNavigate: (tab: DashboardTabId) => void;
+  onNavigate: (tab: DashboardTabId, profileSection?: ProfileTab) => void;
 }
 
 interface WizardStep {
@@ -139,95 +139,85 @@ export function SetupWizard({ profileId, profile, emailVerified, onNavigate }: S
   const nextStep = steps.find((s) => !s.done);
 
   return (
-    <section className="relative border border-sun/25 bg-surface/40 p-5 md:p-6">
-      <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-        {/* Donut tracker (compact anchor) */}
-        <div className="mx-auto shrink-0 sm:mx-0">
-          <ProfileChecklist
-            profile={profile}
-            emailVerified={emailVerified}
-            compact
-            onNavigateToCredentials={() => onNavigate("profile")}
-          />
-        </div>
-
-        {/* Stepper */}
+    <section className="relative rounded-xl border border-sun/25 bg-sun/[0.025] p-4 md:p-5">
+      <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <div className="mb-4 flex items-start justify-between gap-3">
-            <div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-sun">
-                setup wizard
-              </p>
-              <h2 className="heading-display text-xl text-gold">Get network-ready</h2>
-              <p className="mt-1 text-xs text-ash">
-                {doneCount} of {total} core steps done
-                {nextStep ? ` — next: ${nextStep.label.toLowerCase()}` : ""}
-              </p>
-            </div>
-            <button
-              onClick={dismiss}
-              className="rounded p-1.5 text-ash transition-colors hover:text-gold"
-              aria-label="Dismiss setup wizard"
-              title="I'll finish this later"
-            >
-              <X className="h-4 w-4" />
-            </button>
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-sun">Setup guide</p>
+          <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <h2 className="heading-display text-xl text-gold">Get network-ready</h2>
+            <p className="text-xs text-ash">
+              {doneCount}/{total} core steps
+              {nextStep ? ` · Next: ${nextStep.label.toLowerCase()}` : ""}
+            </p>
           </div>
+          <div className="mt-3 h-1 overflow-hidden rounded-full bg-line/60" aria-hidden>
+            <div
+              className="h-full rounded-full bg-sun transition-[width]"
+              style={{ width: `${(doneCount / total) * 100}%` }}
+            />
+          </div>
+        </div>
+        <button
+          onClick={dismiss}
+          className="rounded p-2 text-ash transition-colors hover:text-gold"
+          aria-label="Dismiss setup wizard"
+          title="Finish this later"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
 
-          <ol className="space-y-1.5">
-            {steps.map((step) => (
-              <li key={step.id}>
-                <div
+      <ol className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-3">
+        {steps.map((step, index) => (
+          <li key={step.id}>
+            <div
+              className={cn(
+                "flex h-full min-h-28 flex-col rounded-lg border p-3 transition-colors",
+                step.done
+                  ? "border-ok/15 bg-ok/[0.025] opacity-65"
+                  : step.id === nextStep?.id
+                    ? "border-sun/40 bg-sun/[0.055]"
+                    : "border-line bg-surface/40 hover:border-linehi"
+              )}
+            >
+              <div className="flex items-center gap-2">
+                <span
                   className={cn(
-                    "flex items-center gap-3 rounded border px-3 py-2 transition-colors",
-                    step.done
-                      ? "border-transparent opacity-55"
-                      : step.id === nextStep?.id
-                        ? "border-sun/40 bg-sun/5"
-                        : "border-line hover:border-linehi"
+                    "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border",
+                    step.done ? "border-ok/40 bg-ok/10 text-ok" : "border-line text-ash"
                   )}
                 >
-                  <span
-                    className={cn(
-                      "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border",
-                      step.done ? "border-ok/40 bg-ok/10 text-ok" : "border-line text-ash"
-                    )}
-                  >
-                    {step.done ? (
-                      <CheckCircle2 className="h-3.5 w-3.5" />
-                    ) : (
-                      <span className="font-mono text-[10px]">{steps.indexOf(step) + 1}</span>
-                    )}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className={cn("text-sm", step.done ? "text-ash line-through" : "text-gold")}>
-                      {step.label}
-                    </p>
-                    <p className="truncate text-xs text-ash">{step.description}</p>
-                  </div>
-                  {!step.done && step.action && (
-                    <button
-                      onClick={() => {
-                        if (step.href) window.location.href = step.href;
-                        else if (step.tab) onNavigate(step.tab);
-                      }}
-                      className="flex shrink-0 items-center gap-1 rounded border border-line px-2 py-1 text-[11px] text-parchment transition-colors hover:border-sun/40 hover:text-sun"
-                    >
-                      {step.action}
-                      <ArrowRight className="h-3 w-3" />
-                    </button>
+                  {step.done ? (
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                  ) : (
+                    <span className="font-mono text-[10px]">{index + 1}</span>
                   )}
-                </div>
-              </li>
-            ))}
-          </ol>
-
-          <p className="mt-3 text-xs text-ash">
-            Verified members get the badge — and the replies. You can reopen this wizard from the
-            overview any time.
-          </p>
-        </div>
-      </div>
+                </span>
+                <p className={cn("text-sm leading-tight", step.done ? "text-ash" : "text-gold")}>
+                  {step.label}
+                </p>
+              </div>
+              <p className="mt-2 line-clamp-2 text-[11px] leading-relaxed text-ash sm:text-xs">
+                {step.description}
+              </p>
+              {!step.done && step.action && (
+                <button
+                  onClick={() => {
+                    if (step.href) window.location.href = step.href;
+                    else if (step.tab) {
+                      onNavigate(step.tab, step.id === "profile" ? "public" : "directory");
+                    }
+                  }}
+                  className="mt-auto inline-flex min-h-8 items-center gap-1 self-start pt-2 text-[11px] font-medium text-parchment transition-colors hover:text-sun"
+                >
+                  {step.action}
+                  <ArrowRight className="h-3 w-3" />
+                </button>
+              )}
+            </div>
+          </li>
+        ))}
+      </ol>
     </section>
   );
 }

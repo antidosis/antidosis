@@ -17,7 +17,7 @@ interface AboutSectionProps {
 
 export function AboutSection({ register, control, errors }: AboutSectionProps) {
   return (
-    <SectionCard title="About" description="A short intro and where you're based.">
+    <SectionCard tone="identity" title="About" description="A short intro and where you're based.">
       <div className="space-y-2">
         <Label htmlFor="profile-bio">Bio</Label>
         <Textarea

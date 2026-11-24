@@ -7,6 +7,7 @@ import { CheckCircle2, Flag, Loader2, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useToast } from "@/components/ui/toast";
 
 type ReportItem = {
   id: string;
@@ -28,6 +29,7 @@ const REASON_VARIANT: Record<string, string> = {
 };
 
 export function ReportsSection() {
+  const { toast } = useToast();
   const [reports, setReports] = useState<ReportItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [actioning, setActioning] = useState<string | null>(null);
@@ -36,29 +38,36 @@ export function ReportsSection() {
     async function load() {
       try {
         const res = await fetch("/api/v1/admin/reports?status=open");
-        if (res.ok) {
-          const data = await res.json();
-          setReports(data.reports || []);
-        }
+        if (!res.ok) throw new Error("Reports could not be loaded");
+        const data = await res.json();
+        setReports(data.reports || []);
       } catch (err) {
-        console.error(err);
+        toast(err instanceof Error ? err.message : "Reports could not be loaded", "error");
       }
       setLoading(false);
     }
     load();
-  }, []);
+  }, [toast]);
 
   async function setStatus(id: string, status: "resolved" | "dismissed") {
     setActioning(id);
-    const res = await fetch(`/api/v1/admin/reports/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }),
-    });
-    if (res.ok) {
-      setReports((prev) => prev.filter((r) => r.id !== id));
+    try {
+      const response = await fetch(`/api/v1/admin/reports/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || "Report update failed");
+      }
+      setReports((previous) => previous.filter((report) => report.id !== id));
+      toast(`Report ${status}`, "success");
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Report update failed", "error");
+    } finally {
+      setActioning(null);
     }
-    setActioning(null);
   }
 
   return (
@@ -79,8 +88,11 @@ export function ReportsSection() {
       ) : (
         <div className="space-y-4">
           {reports.map((report) => (
-            <div key={report.id} className="vessel p-5 hover:bg-raise transition-colors">
-              <div className="flex items-start justify-between gap-4">
+            <div
+              key={report.id}
+              className="vessel rounded-lg p-4 transition-colors hover:bg-raise sm:p-5"
+            >
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-2">
                     <Flag className={`h-4 w-4 ${REASON_VARIANT[report.reason] || "text-ash"}`} />
@@ -102,7 +114,7 @@ export function ReportsSection() {
                   </p>
                   {report.details && <p className="text-sm text-gold mt-2">{report.details}</p>}
                 </div>
-                <div className="flex flex-col gap-2 shrink-0">
+                <div className="flex shrink-0 gap-2 sm:flex-col">
                   <Button
                     size="sm"
                     onClick={() => setStatus(report.id, "resolved")}

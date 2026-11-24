@@ -43,10 +43,15 @@ export function UserManagementSection() {
       const res = await fetch(
         `/api/v1/admin/users?limit=50${query ? `&q=${encodeURIComponent(query)}` : ""}`
       );
-      if (res.ok) {
-        const data = await res.json();
-        setUsers(data.users || []);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Users could not be loaded");
       }
+      const data = await res.json();
+      setUsers(data.users || []);
+      setError(null);
+    } catch (loadError) {
+      setError(loadError instanceof Error ? loadError.message : "Users could not be loaded");
     } finally {
       setLoading(false);
     }
@@ -120,7 +125,7 @@ export function UserManagementSection() {
             const banned = !!u.bannedAt;
             return (
               <div key={u.id} className={`vessel p-4 ${banned ? "border-bad/30" : ""}`}>
-                <div className="flex items-start gap-3">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
                   <Avatar src={null} name={u.fullName} size="sm" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -164,7 +169,7 @@ export function UserManagementSection() {
                         unban
                       </Button>
                     ) : banningId === u.id ? (
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <input
                           value={banReason}
                           onChange={(e) => setBanReason(e.target.value)}

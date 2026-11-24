@@ -12,6 +12,7 @@ import { useController } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { isHttpUrl } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
 
@@ -41,6 +42,7 @@ interface SocialLinksSectionProps {
   onMarkRemoving: (fieldId: string) => void;
   append: UseFieldArrayAppend<ProfileFormData, "socialLinks">;
   errors: FieldErrors<ProfileFormData>;
+  showAudience: boolean;
 }
 
 export function SocialLinksSection({
@@ -51,11 +53,13 @@ export function SocialLinksSection({
   onMarkRemoving,
   append,
   errors,
+  showAudience,
 }: SocialLinksSectionProps) {
   return (
     <SectionCard
-      title="Social links"
-      description="Public links appear on your profile and in the directory. Private links stay visible only in your own editor and are not shared automatically."
+      tone="social"
+      title="Social profiles"
+      description="Connect the places where people already know you. Public links appear on your profile and directory listing; private links stay in this editor."
     >
       {fields.length === 0 && (
         <p className="mb-4 text-xs text-ash">No links yet — add your first below.</p>
@@ -78,6 +82,31 @@ export function SocialLinksSection({
       )}
 
       <AddLinkRow append={append} />
+
+      {showAudience && (
+        <div className="mt-5 border-t border-orchid/20 pt-4">
+          <Label htmlFor="profile-audience">Audience size (optional)</Label>
+          <Input
+            id="profile-audience"
+            {...register("audienceSize", {
+              setValueAs: (value) =>
+                value === "" || value === null || value === undefined ? null : Number(value),
+            })}
+            placeholder="e.g. 3200"
+            inputMode="numeric"
+            type="number"
+            min={0}
+            className="mt-2 max-w-xs text-base"
+          />
+          {errors.audienceSize && (
+            <p className="mt-2 text-xs text-bad">{errors.audienceSize.message}</p>
+          )}
+          <p className="mt-2 text-xs leading-relaxed text-ash">
+            Your approximate total reach. This helps businesses understand the audience for promo
+            and review exchanges; it is not independently verified.
+          </p>
+        </div>
+      )}
     </SectionCard>
   );
 }
@@ -100,12 +129,17 @@ function LinkRow({ index, control, register, removing, onMarkRemoving, urlError 
 
   return (
     <li>
-      <div className={cn("flex items-center gap-2", removing && "opacity-50")}>
+      <div
+        className={cn(
+          "grid grid-cols-[minmax(0,1fr)_2.5rem_2.5rem] items-center gap-2 sm:flex",
+          removing && "opacity-50"
+        )}
+      >
         <select
           {...register(`socialLinks.${index}.platform`)}
           disabled={removing}
           aria-label={`Link ${index + 1} platform`}
-          className={cn(SELECT_CLASS, "w-28 shrink-0 capitalize")}
+          className={cn(SELECT_CLASS, "col-span-3 w-full shrink-0 capitalize sm:w-28")}
         >
           {PLATFORMS.map((p) => (
             <option key={p} value={p}>

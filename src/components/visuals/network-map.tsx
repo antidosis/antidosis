@@ -76,6 +76,7 @@ export function NetworkMap({ className = "" }: { className?: string }) {
     let raf = 0;
     let lastPulseAt = 0;
     let running = true;
+    let inView = true;
 
     let GOLD = readToken("--c-sun", "245, 166, 35");
     let CYAN = readToken("--c-mercury", "0, 229, 255");
@@ -166,10 +167,30 @@ export function NetworkMap({ className = "" }: { className?: string }) {
     }
 
     function loop(now: number) {
-      if (!running) return;
+      raf = 0;
+      if (!running || !inView || document.hidden) return;
       drawFrame(now);
       raf = requestAnimationFrame(loop);
     }
+
+    const intersection = new IntersectionObserver(([entry]) => {
+      inView = entry.isIntersecting;
+      if (inView && !reduced && !raf) raf = requestAnimationFrame(loop);
+      if (!inView) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      }
+    });
+    const onVisibility = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      } else if (inView && !reduced && !raf) {
+        raf = requestAnimationFrame(loop);
+      }
+    };
+    intersection.observe(canvas);
+    document.addEventListener("visibilitychange", onVisibility);
 
     resize();
     if (reduced) {
@@ -188,6 +209,8 @@ export function NetworkMap({ className = "" }: { className?: string }) {
       running = false;
       cancelAnimationFrame(raf);
       observer.disconnect();
+      intersection.disconnect();
+      document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("antidosis-theme", refreshColors);
     };
   }, []);

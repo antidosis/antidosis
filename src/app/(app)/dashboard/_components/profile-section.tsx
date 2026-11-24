@@ -5,7 +5,14 @@ import { useState } from "react";
 import Link from "next/link";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowUpRight, BriefcaseBusiness, Loader2, LockKeyhole, UserRound } from "lucide-react";
+import {
+  ArrowUpRight,
+  BriefcaseBusiness,
+  Loader2,
+  LockKeyhole,
+  Share2,
+  UserRound,
+} from "lucide-react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { mutate } from "swr";
 
@@ -23,7 +30,7 @@ import { IdentitySection } from "./profile-editor/identity-section";
 import { PreferencesSection } from "./profile-editor/preferences-section";
 import { SkillsSection } from "./profile-editor/skills-section";
 import { SocialLinksSection } from "./profile-editor/social-links-section";
-import type { EditorProfile, ProfileFormData } from "./profile-editor/types";
+import type { EditorProfile, ProfileFormData, ProfileTab } from "./profile-editor/types";
 import { ShareProfileCard } from "./share-profile-card";
 
 interface ProfileSectionProps {
@@ -31,28 +38,38 @@ interface ProfileSectionProps {
   credentials: CredentialData[];
   onCredentialsUpdate: (credentials: CredentialData[]) => void;
   onUpdate: (updated: unknown) => void;
+  activeTab: ProfileTab;
+  onTabChange: (tab: ProfileTab) => void;
 }
 
-type ProfileTab = "public" | "directory" | "private";
-
 const PROFILE_TABS = [
+  {
+    id: "public" as const,
+    label: "Public profile",
+    description: "Your name, story, photo and permanent handle",
+    icon: UserRound,
+    activeClass: "border-sun/30 bg-sun/[0.08] text-sun",
+  },
   {
     id: "directory" as const,
     label: "Directory profile",
     description: "Skills, business details, qualifications and proof",
     icon: BriefcaseBusiness,
+    activeClass: "border-aero/30 bg-aero/[0.08] text-aero",
   },
   {
-    id: "public" as const,
-    label: "Public profile",
-    description: "Your name, story, photo and public links",
-    icon: UserRound,
+    id: "social" as const,
+    label: "Social profiles",
+    description: "Connected links, creator reach and your invitation card",
+    icon: Share2,
+    activeClass: "border-orchid/30 bg-orchid/[0.08] text-orchid",
   },
   {
     id: "private" as const,
     label: "Contact & privacy",
     description: "Private contact details and sharing controls",
     icon: LockKeyhole,
+    activeClass: "border-mercury/30 bg-mercury/[0.08] text-mercury",
   },
 ];
 
@@ -83,9 +100,10 @@ export function ProfileSection({
   credentials,
   onCredentialsUpdate,
   onUpdate,
+  activeTab,
+  onTabChange,
 }: ProfileSectionProps) {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState<ProfileTab>("directory");
   const [isSaving, setIsSaving] = useState(false);
   const [importingAvatarFrom, setImportingAvatarFrom] = useState<string | null>(null);
   const [removingIds, setRemovingIds] = useState<ReadonlySet<string>>(new Set());
@@ -162,7 +180,7 @@ export function ProfileSection({
       const [section, row, field] = first?.path ?? [];
       if (section === "socialLinks" && typeof row === "number" && field === "url") {
         setError(`socialLinks.${row}.url`, { message: first.message });
-        setActiveTab("public");
+        onTabChange("social");
       } else if (first) {
         setError("root", { message: first.message });
       }
@@ -223,7 +241,7 @@ export function ProfileSection({
   }
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="mx-auto max-w-6xl">
       <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-lg font-medium text-gold">{activeTabMeta.label}</h2>
@@ -239,7 +257,7 @@ export function ProfileSection({
       <div
         role="tablist"
         aria-label="Profile sections"
-        className="mb-6 grid gap-2 rounded-lg border border-line bg-surface/35 p-2 sm:grid-cols-3"
+        className="mb-5 grid grid-cols-2 gap-2 rounded-lg border border-line bg-surface/35 p-2 lg:grid-cols-4"
       >
         {PROFILE_TABS.map((tab) => (
           <button
@@ -247,12 +265,12 @@ export function ProfileSection({
             type="button"
             role="tab"
             aria-selected={activeTab === tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => onTabChange(tab.id)}
             className={cn(
-              "flex min-h-11 items-center justify-center gap-2 rounded-md px-3 py-2.5 text-sm transition-colors",
+              "flex min-h-11 items-center justify-center gap-2 rounded-md border px-2 py-2.5 text-center text-xs leading-tight transition-colors sm:px-3 sm:text-sm",
               activeTab === tab.id
-                ? "border border-sun/25 bg-sun/[0.08] text-gold"
-                : "border border-transparent text-ash hover:bg-surface hover:text-parchment"
+                ? tab.activeClass
+                : "border-transparent text-ash hover:bg-surface hover:text-parchment"
             )}
           >
             <tab.icon className="h-4 w-4" /> {tab.label}
@@ -262,35 +280,27 @@ export function ProfileSection({
 
       <div className="space-y-5">
         {activeTab === "public" && (
-          <div role="tabpanel" className="space-y-5">
-            <IdentitySection
-              register={register}
-              setValue={setValue}
-              avatarUrl={avatarUrl ?? undefined}
-              fullName={fullName ?? undefined}
-              nameError={errors.fullName?.message}
-              isVerified={initialProfile.isVerified}
-              mobileVerified={initialProfile.mobileVerified}
-              mobile={initialProfile.mobile}
-              socialLinks={(initialProfile.socialLinks ?? []).map((link) => ({
-                platform: link.platform,
-                url: link.url,
-              }))}
-              importingFromSocial={importingAvatarFrom}
-              onImportFromSocial={importAvatarFromSocial}
-            />
-            <HandleSection handle={initialProfile.handle} />
-            <ShareProfileCard profile={initialProfile} />
+          <div role="tabpanel" className="space-y-4">
+            <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(300px,1fr)]">
+              <IdentitySection
+                register={register}
+                setValue={setValue}
+                avatarUrl={avatarUrl ?? undefined}
+                fullName={fullName ?? undefined}
+                nameError={errors.fullName?.message}
+                isVerified={initialProfile.isVerified}
+                mobileVerified={initialProfile.mobileVerified}
+                mobile={initialProfile.mobile}
+                socialLinks={(initialProfile.socialLinks ?? []).map((link) => ({
+                  platform: link.platform,
+                  url: link.url,
+                }))}
+                importingFromSocial={importingAvatarFrom}
+                onImportFromSocial={importAvatarFromSocial}
+              />
+              <HandleSection handle={initialProfile.handle} />
+            </div>
             <AboutSection register={register} control={control} errors={errors} />
-            <SocialLinksSection
-              control={control}
-              register={register}
-              fields={fields}
-              removingIds={removingIds}
-              onMarkRemoving={markRemoving}
-              append={append}
-              errors={errors}
-            />
           </div>
         )}
 
@@ -311,8 +321,27 @@ export function ProfileSection({
           </div>
         )}
 
+        {activeTab === "social" && (
+          <div
+            role="tabpanel"
+            className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(320px,1fr)]"
+          >
+            <SocialLinksSection
+              control={control}
+              register={register}
+              fields={fields}
+              removingIds={removingIds}
+              onMarkRemoving={markRemoving}
+              append={append}
+              errors={errors}
+              showAudience={accountType !== "business"}
+            />
+            <ShareProfileCard profile={initialProfile} />
+          </div>
+        )}
+
         {activeTab === "private" && (
-          <div role="tabpanel" className="space-y-5">
+          <div role="tabpanel" className="grid items-start gap-4 xl:grid-cols-2">
             <ContactSection register={register} errors={errors} />
             <section className="rounded-lg border border-ok/20 bg-ok/[0.035] p-5 sm:p-6">
               <div className="flex items-start gap-3">

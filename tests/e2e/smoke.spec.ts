@@ -23,7 +23,7 @@ test.describe("Smoke tests", () => {
 
   test("needs page is accessible", async ({ page }) => {
     await page.goto("/needs");
-    await expect(page.getByRole("heading", { name: "Browse Needs" })).toBeVisible({
+    await expect(page.getByRole("heading", { name: "Needs", exact: true })).toBeVisible({
       timeout: 10_000,
     });
   });

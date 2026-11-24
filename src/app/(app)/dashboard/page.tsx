@@ -1,26 +1,32 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { Loader2 } from "lucide-react";
 import { mutate } from "swr";
 
+import { Button } from "@/components/ui/button";
 import { applyAccountPreferences } from "@/lib/appearance-sync";
 import { createClient } from "@/lib/supabase/client";
 import { useApi } from "@/lib/swr-config";
 
-import { AnalyticsPanel } from "./_components/analytics-panel";
-import { CommunityPanel } from "./_components/community-panel";
+import { CommunityPanel, NotificationsFeed } from "./_components/community-panel";
 import { ContractsPanel } from "./_components/contracts-panel";
 import { DASHBOARD_TABS, type DashboardTabId } from "./_components/dashboard-nav";
 import { DashboardShell } from "./_components/dashboard-shell";
+import type {
+  DashboardContract,
+  DashboardNeed,
+  DashboardOffer,
+} from "./_components/dashboard-types";
 import { NeedsPanel } from "./_components/needs-panel";
 import { OffersPanel } from "./_components/offers-panel";
 import { OverviewPanel } from "./_components/overview-panel";
+import type { ProfileTab } from "./_components/profile-editor/types";
 import { ProfileSection } from "./_components/profile-section";
 import { SettingsPanel } from "./_components/settings-panel";
+import { WatchlistPanel } from "./_components/watchlist-panel";
 
 type ProfileData = {
   id: string;
@@ -50,10 +56,6 @@ type ProfileData = {
   credentials?: CredentialData[];
 };
 
-type NeedItem = { id: string; status: string };
-type ContractItem = { id: string; status: string };
-type OfferItem = { id: string; status: string };
-
 type CredentialData = {
   id: string;
   type: string;
@@ -71,19 +73,19 @@ type CredentialData = {
 };
 
 function parseTab(value: string | null): DashboardTabId {
-  return (DASHBOARD_TABS.some((t) => t.id === value) ? value : "overview") as DashboardTabId;
+  if (value === "analytics") return "needs";
+  return (DASHBOARD_TABS.some((tab) => tab.id === value) ? value : "overview") as DashboardTabId;
+}
+
+function parseProfileTab(value: string | null): ProfileTab {
+  return ["public", "directory", "social", "private"].includes(value ?? "")
+    ? (value as ProfileTab)
+    : "public";
 }
 
 export default function DashboardPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="py-24 text-center">
-          <Loader2 className="mx-auto mb-4 h-6 w-6 animate-spin text-parchment" />
-          <p className="text-sm text-ash">Loading...</p>
-        </div>
-      }
-    >
+    <Suspense fallback={<DashboardSkeleton />}>
       <DashboardPageInner />
     </Suspense>
   );
@@ -92,94 +94,166 @@ export default function DashboardPage() {
 function DashboardPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const supabase = createClient();
+  const [supabase] = useState(() => createClient());
   const [emailVerified, setEmailVerified] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
+  const [profileTab, setProfileTab] = useState<ProfileTab>(() =>
+    parseProfileTab(searchParams.get("profileSection"))
+  );
+  const visitedTabs = useRef<Set<DashboardTabId>>(new Set());
+  const initialTab = parseTab(searchParams.get("tab"));
 
   const { data: profile, isLoading: profileLoading } = useApi<ProfileData>(
     authChecked ? "/api/v1/profiles/me" : null
   );
-  const { data: needs } = useApi<NeedItem[]>(authChecked ? "/api/v1/needs/mine" : null);
-  const { data: contracts } = useApi<ContractItem[]>(authChecked ? "/api/v1/contracts/mine" : null);
-  const { data: offers } = useApi<OfferItem[]>(authChecked ? "/api/v1/acceptances/mine" : null);
-
-  const [credentials, setCredentials] = useState<CredentialData[]>(profile?.credentials || []);
+  const { data: needs } = useApi<DashboardNeed[]>(authChecked ? "/api/v1/needs/mine" : null, {
+    revalidateOnFocus: false,
+  });
+  const { data: contracts } = useApi<DashboardContract[]>(
+    authChecked ? "/api/v1/contracts/mine" : null,
+    { revalidateOnFocus: false }
+  );
+  const { data: offers } = useApi<DashboardOffer[]>(
+    authChecked ? "/api/v1/acceptances/mine" : null,
+    { revalidateOnFocus: false }
+  );
 
   useEffect(() => {
-    if (profile?.credentials) {
-      setCredentials(profile.credentials);
-    }
-  }, [profile?.credentials]);
-
-  /* Cross-device appearance: adopt the account's theme/font on this device
-     only when the member hasn't chosen locally yet. */
-  useEffect(() => {
-    if (profile?.preferences) {
-      applyAccountPreferences(profile.preferences);
-    }
+    if (profile?.preferences) applyAccountPreferences(profile.preferences);
   }, [profile?.preferences]);
 
   useEffect(() => {
+    let active = true;
     supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!active) return;
       if (!user) {
-        router.push("/login");
+        router.replace("/login?next=/dashboard");
         return;
       }
-      setEmailVerified(!!user.email_confirmed_at);
+      setEmailVerified(Boolean(user.email_confirmed_at));
       setAuthChecked(true);
     });
+    return () => {
+      active = false;
+    };
   }, [router, supabase]);
 
   const isLoading = profileLoading || !authChecked;
-
-  if (isLoading)
-    return (
-      <div className="py-24 text-center">
-        <Loader2 className="mx-auto mb-4 h-6 w-6 animate-spin text-parchment" />
-        <p className="text-sm text-ash">Loading...</p>
-      </div>
-    );
-
-  if (!profile) return <div className="py-24 text-center text-bad">Failed to load profile</div>;
-
   const counts = {
-    needs: needs?.filter((n) => n.status !== "archived").length,
-    offers: offers?.filter((o) => o.status === "pending").length,
-    contracts: contracts?.filter((c) => c.status === "active").length,
+    needs: needs?.filter((need) => need.status !== "archived").length,
+    offers: offers?.filter((offer) => offer.status === "pending").length,
+    contracts: contracts?.filter((contract) => contract.status === "active").length,
   };
 
   return (
     <DashboardShell
-      initialTab={parseTab(searchParams.get("tab"))}
-      isBusiness={profile.accountType === "business"}
-      fullName={profile.fullName}
-      avatarUrl={profile.avatarUrl}
+      initialTab={initialTab}
+      isBusiness={profile?.accountType === "business"}
+      fullName={profile?.fullName ?? null}
+      avatarUrl={profile?.avatarUrl ?? null}
       counts={counts}
     >
-      {(tab, setTab) => (
-        <>
-          {tab === "overview" && (
-            <OverviewPanel profile={profile} emailVerified={emailVerified} onNavigate={setTab} />
-          )}
-          {tab === "analytics" && <AnalyticsPanel profile={profile} />}
-          {tab === "needs" && <NeedsPanel isBusiness={profile.accountType === "business"} />}
-          {tab === "offers" && <OffersPanel />}
-          {tab === "contracts" && <ContractsPanel profileId={profile.id} />}
-          {tab === "profile" && (
-            <ProfileSection
-              initialProfile={profile}
-              credentials={credentials}
-              onCredentialsUpdate={setCredentials}
-              onUpdate={() => {
-                // Revalidate SWR cache so the saved profile renders immediately
-                mutate("/api/v1/profiles/me");
-              }}
-            />
-          )}
-          {tab === "community" && <CommunityPanel />}
-          {tab === "settings" && <SettingsPanel profile={profile} onNavigate={setTab} />}
-        </>
-      )}
+      {(tab, setTab) => {
+        if (isLoading) return <DashboardSkeleton />;
+        if (!profile) {
+          return (
+            <div className="vessel mx-auto max-w-lg p-6 text-center">
+              <p className="text-base text-gold">We couldn&apos;t load your dashboard</p>
+              <p className="mt-2 text-sm text-ash">Your connection or session may have expired.</p>
+              <Button className="mt-4" onClick={() => mutate("/api/v1/profiles/me")}>
+                Try again
+              </Button>
+            </div>
+          );
+        }
+
+        visitedTabs.current.add(tab);
+        const visited = visitedTabs.current;
+        const navigate = (target: DashboardTabId, profileSection?: ProfileTab) => {
+          if (profileSection) setProfileTab(profileSection);
+          setTab(target, profileSection);
+        };
+        return (
+          <>
+            <DashboardPanel id="overview" activeTab={tab} mounted={visited.has("overview")}>
+              <OverviewPanel
+                profile={profile}
+                emailVerified={emailVerified}
+                needs={needs}
+                contracts={contracts}
+                onNavigate={navigate}
+              />
+            </DashboardPanel>
+            <DashboardPanel id="needs" activeTab={tab} mounted={visited.has("needs")}>
+              <NeedsPanel isBusiness={profile.accountType === "business"} needs={needs} />
+            </DashboardPanel>
+            <DashboardPanel id="offers" activeTab={tab} mounted={visited.has("offers")}>
+              <OffersPanel offers={offers} />
+            </DashboardPanel>
+            <DashboardPanel id="contracts" activeTab={tab} mounted={visited.has("contracts")}>
+              <ContractsPanel profileId={profile.id} contracts={contracts} />
+            </DashboardPanel>
+            <DashboardPanel id="watchlist" activeTab={tab} mounted={visited.has("watchlist")}>
+              <WatchlistPanel />
+            </DashboardPanel>
+            <DashboardPanel id="inbox" activeTab={tab} mounted={visited.has("inbox")}>
+              <NotificationsFeed />
+            </DashboardPanel>
+            <DashboardPanel id="community" activeTab={tab} mounted={visited.has("community")}>
+              <CommunityPanel />
+            </DashboardPanel>
+            <DashboardPanel id="profile" activeTab={tab} mounted={visited.has("profile")}>
+              <ProfileSection
+                initialProfile={profile}
+                credentials={profile.credentials ?? []}
+                onCredentialsUpdate={() => mutate("/api/v1/profiles/me")}
+                onUpdate={() => mutate("/api/v1/profiles/me")}
+                activeTab={profileTab}
+                onTabChange={setProfileTab}
+              />
+            </DashboardPanel>
+            <DashboardPanel id="settings" activeTab={tab} mounted={visited.has("settings")}>
+              <SettingsPanel profile={profile} onNavigate={navigate} />
+            </DashboardPanel>
+          </>
+        );
+      }}
     </DashboardShell>
+  );
+}
+
+function DashboardPanel({
+  id,
+  activeTab,
+  mounted,
+  children,
+}: {
+  id: DashboardTabId;
+  activeTab: DashboardTabId;
+  mounted: boolean;
+  children: ReactNode;
+}) {
+  if (!mounted) return null;
+  return (
+    <div id={`dashboard-panel-${id}`} hidden={activeTab !== id} aria-hidden={activeTab !== id}>
+      {children}
+    </div>
+  );
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-4" aria-label="Loading dashboard">
+      <div className="vessel h-40 animate-pulse bg-surface/50" />
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {[0, 1, 2, 3].map((item) => (
+          <div
+            key={item}
+            className="h-24 animate-pulse rounded-lg border border-line bg-surface/35"
+          />
+        ))}
+      </div>
+      <div className="vessel h-48 animate-pulse bg-surface/35" />
+    </div>
   );
 }

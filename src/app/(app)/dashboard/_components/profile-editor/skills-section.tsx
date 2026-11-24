@@ -85,6 +85,7 @@ export function SkillsSection({ skills }: { skills: Skill[] }) {
 
   return (
     <SectionCard
+      tone="directory"
       title="Skills and services"
       description="Tag what you can help with. These are searchable in the directory and improve need recommendations."
     >

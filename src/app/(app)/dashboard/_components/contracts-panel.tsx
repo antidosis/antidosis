@@ -10,30 +10,23 @@ import { mutate } from "swr";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { useApi } from "@/lib/swr-config";
 import { cn } from "@/lib/utils";
 
 import { statusBadgeVariant } from "./dashboard-nav";
+import type { DashboardContract } from "./dashboard-types";
 import { DirectContractForm } from "./direct-contract-form";
 
-interface ContractItem {
-  id: string;
-  kind: "exchange" | "direct";
-  title: string | null;
-  status: string;
-  partyAId?: string;
-  partyBId?: string | null;
-  partyA?: { id: string };
-  partyBSignedAt?: string | null;
-  need?: { title: string } | null;
-}
-
-export function ContractsPanel({ profileId }: { profileId: string }) {
-  const { data: contracts } = useApi<ContractItem[]>("/api/v1/contracts/mine");
+export function ContractsPanel({
+  profileId,
+  contracts,
+}: {
+  profileId: string;
+  contracts?: DashboardContract[];
+}) {
   const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [creatingDirect, setCreatingDirect] = useState(false);
 
-  async function handleCancelContract(contract: ContractItem) {
+  async function handleCancelContract(contract: DashboardContract) {
     const consequence = contract.need
       ? " The need will be archived for you to re-post later."
       : " No Exchange listing is involved.";
@@ -84,7 +77,9 @@ export function ContractsPanel({ profileId }: { profileId: string }) {
 
       {creatingDirect && <DirectContractForm onClose={() => setCreatingDirect(false)} />}
 
-      {!contracts || contracts.length === 0 ? (
+      {!contracts ? (
+        <div className="vessel h-32 animate-pulse bg-surface/40" aria-label="Loading agreements" />
+      ) : contracts.length === 0 ? (
         <EmptyState
           title="No contracts yet"
           description="Accept interest on a need, or create a direct agreement above without posting to the Exchange."

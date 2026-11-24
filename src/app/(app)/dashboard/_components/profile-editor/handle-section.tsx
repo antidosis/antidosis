@@ -85,7 +85,7 @@ export function HandleSection({ handle }: HandleSectionProps) {
 
   if (handle) {
     return (
-      <section className="vessel p-5 sm:p-6">
+      <section className="vessel rounded-lg border-sun/20 bg-sun/[0.025] p-4 sm:p-6">
         <header className="mb-4">
           <h3 className="text-sm font-medium uppercase tracking-wider text-gold">Handle</h3>
         </header>
@@ -107,7 +107,7 @@ export function HandleSection({ handle }: HandleSectionProps) {
   }
 
   return (
-    <section className="vessel p-5 sm:p-6">
+    <section className="vessel rounded-lg border-sun/20 bg-sun/[0.025] p-4 sm:p-6">
       <header className="mb-4">
         <h3 className="text-sm font-medium uppercase tracking-wider text-gold">Handle</h3>
         <p className="mt-1.5 text-xs leading-relaxed text-ash">

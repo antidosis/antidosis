@@ -667,6 +667,14 @@
   box-shadow: 0 0 24px 5px rgb(var(--c-mercury) / 0.18);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
 @media (max-width: 767px) {
   .section-constellation::before {
     right: -22rem;

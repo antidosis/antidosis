@@ -7,22 +7,19 @@ import { ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { useApi } from "@/lib/swr-config";
 import { cn } from "@/lib/utils";
 
 import { statusBadgeVariant } from "./dashboard-nav";
+import type { DashboardOffer } from "./dashboard-types";
 
-interface OfferItem {
-  id: string;
-  status: string;
-  message?: string | null;
-  need?: { id: string; title: string };
-}
+export function OffersPanel({ offers }: { offers?: DashboardOffer[] }) {
+  if (!offers) {
+    return (
+      <div className="vessel h-32 animate-pulse bg-surface/40" aria-label="Loading interests" />
+    );
+  }
 
-export function OffersPanel() {
-  const { data: offers } = useApi<OfferItem[]>("/api/v1/acceptances/mine");
-
-  if (!offers || offers.length === 0) {
+  if (offers.length === 0) {
     return (
       <EmptyState
         title="No interests expressed"
@@ -42,7 +39,7 @@ export function OffersPanel() {
         <div
           key={offer.id}
           className={cn(
-            "vessel flex items-center justify-between gap-3 p-5 transition-colors hover:bg-raise/40",
+            "vessel flex items-center justify-between gap-3 rounded-lg p-4 transition-colors hover:bg-raise/40 sm:p-5",
             offer.status === "selected" || offer.status === "accepted"
               ? "border-l-2 border-l-ok/40"
               : offer.status === "declined"

@@ -1,27 +1,30 @@
 import {
-  LayoutDashboard,
-  BarChart3,
+  Bookmark,
   Briefcase,
-  HandHelping,
   FileText,
+  HandHelping,
+  Inbox,
+  LayoutDashboard,
+  Settings,
   User,
   Users,
-  Settings,
 } from "lucide-react";
 
 export type DashboardTabId =
   | "overview"
-  | "analytics"
   | "needs"
   | "offers"
   | "contracts"
+  | "watchlist"
   | "profile"
+  | "inbox"
   | "community"
   | "settings";
 
 export interface DashboardTab {
   id: DashboardTabId;
   label: string;
+  shortLabel: string;
   icon: typeof LayoutDashboard;
   section: string;
   subtitle: string;
@@ -31,64 +34,81 @@ export const DASHBOARD_TABS: DashboardTab[] = [
   {
     id: "overview",
     label: "Overview",
+    shortLabel: "Overview",
     icon: LayoutDashboard,
     section: "command",
-    subtitle: "Your position on the network at a glance",
-  },
-  {
-    id: "analytics",
-    label: "Analytics",
-    icon: BarChart3,
-    section: "exchange",
-    subtitle: "How your posts and offers are performing",
+    subtitle: "Your next actions, exchange activity and reputation in one place",
   },
   {
     id: "needs",
     label: "My Needs",
+    shortLabel: "Needs",
     icon: Briefcase,
     section: "exchange",
-    subtitle: "Everything you have posted",
+    subtitle: "Manage your posts and open their individual performance",
   },
   {
     id: "offers",
     label: "My Interests",
+    shortLabel: "Interests",
     icon: HandHelping,
     section: "exchange",
     subtitle: "Offers you have made on other people's needs",
   },
   {
     id: "contracts",
-    label: "Contracts",
+    label: "Agreements",
+    shortLabel: "Agreements",
     icon: FileText,
     section: "exchange",
-    subtitle: "Formal agreements you are party to",
+    subtitle: "Exchange contracts and private direct agreements",
   },
   {
-    id: "profile",
-    label: "Profile",
-    icon: User,
-    section: "account",
-    subtitle: "How you appear to the network",
+    id: "watchlist",
+    label: "Watchlist",
+    shortLabel: "Watching",
+    icon: Bookmark,
+    section: "exchange",
+    subtitle: "Needs you are following, without expressing interest yet",
+  },
+  {
+    id: "inbox",
+    label: "Inbox",
+    shortLabel: "Inbox",
+    icon: Inbox,
+    section: "network",
+    subtitle: "Recent notifications and your notification archive",
   },
   {
     id: "community",
-    label: "Community",
+    label: "Connections",
+    shortLabel: "People",
     icon: Users,
+    section: "network",
+    subtitle: "Friends, blocked members and recent Relay activity",
+  },
+  {
+    id: "profile",
+    label: "Profile & Presence",
+    shortLabel: "Profile",
+    icon: User,
     section: "account",
-    subtitle: "Directory presence and relay activity",
+    subtitle: "Your public identity, directory presence, social profiles and privacy",
   },
   {
     id: "settings",
     label: "Settings",
+    shortLabel: "Settings",
     icon: Settings,
     section: "account",
-    subtitle: "Account type, directory preferences, danger zone",
+    subtitle: "Appearance, account details and privacy controls",
   },
 ];
 
 export const DASHBOARD_SECTIONS: { id: string; label: string }[] = [
   { id: "command", label: "command" },
   { id: "exchange", label: "exchange" },
+  { id: "network", label: "network" },
   { id: "account", label: "account" },
 ];
 
