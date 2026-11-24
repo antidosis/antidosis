@@ -44,10 +44,18 @@ export async function proxy(request: NextRequest) {
 
   const pathname = request.nextUrl.pathname;
 
+  // Direct invitations must be discoverable before the recipient has an account.
+  // Only the read-only preview is public; claiming still requires authentication.
+  const isDirectInvitePage = pathname.startsWith("/contracts/join/");
+  const isPublicInvitePreview =
+    request.method === "GET" && pathname.startsWith("/api/v1/contracts/invite/");
+
   // Check if this is a protected route
-  const isProtectedPage = PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
+  const isProtectedPage =
+    !isDirectInvitePage && PROTECTED_ROUTES.some((route) => pathname.startsWith(route));
   const isProtectedApi = PROTECTED_API_PREFIXES.some((prefix) => pathname.startsWith(prefix));
-  const isPublicApi = PUBLIC_API_ROUTES.some((route) => pathname === route);
+  const isPublicApi =
+    isPublicInvitePreview || PUBLIC_API_ROUTES.some((route) => pathname === route);
 
   if (isPublicApi) {
     return response;
