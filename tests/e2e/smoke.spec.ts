@@ -1,12 +1,20 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("Smoke tests", () => {
-  test("homepage loads with boot sequence or main content", async ({ page }) => {
+  test("homepage completes the boot handoff and renders the shared scene", async ({ page }) => {
     await page.goto("/");
-    // Either the boot sequence or the hero is visible
-    await expect(
-      page.locator("text=exchange everything").or(page.locator("text=initializing"))
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole("heading", { name: /your neighbourhood/i })).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(page.locator("[data-signal-journey='home'] .signal-field-canvas")).toBeVisible();
+    await expect(page.locator(".signal-journey-booting")).toHaveCount(0);
+  });
+
+  test("homepage bypasses the intro for reduced motion", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    await expect(page.getByRole("heading", { name: /your neighbourhood/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Enter the Antidosis network" })).toHaveCount(0);
   });
 
   test("navigation links work", async ({ page }) => {

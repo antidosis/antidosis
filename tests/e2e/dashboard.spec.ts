@@ -14,7 +14,7 @@ const profile = {
   accountType: "individual",
   abn: null,
   abnVerified: false,
-  audienceSize: null,
+  audienceSize: 4200,
   handle: "e2e-user",
   showInDirectory: false,
   mobile: null,
@@ -68,6 +68,20 @@ test.describe("Dashboard", () => {
     await expect(page.getByRole("heading", { name: "Overview", exact: true })).toBeVisible();
     await expect(page.getByRole("navigation", { name: "Dashboard sections" })).toBeVisible();
     await expect(page.getByText("E2E Test User").first()).toBeVisible();
+  });
+
+  test("creator reach opens the social profile editor", async ({ page }) => {
+    test.skip(!hasAuthCredentials(), "E2E auth credentials not configured");
+    await login(page);
+    await mockDashboard(page);
+    await page.goto("/dashboard");
+
+    await page.getByRole("button", { name: "Manage presence", exact: true }).click();
+    await expect(page.getByRole("tab", { name: "Social profiles" })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    );
+    await expect(page.getByLabel("Audience size (optional)")).toHaveValue("4200");
   });
 
   test("opens proof and ID in the private trust workspace", async ({ page }) => {

@@ -584,6 +584,12 @@ export default function HowItWorksPage() {
                   <Link href="/needs">Browse Needs</Link>
                 </Button>
               </div>
+              <p className="mt-8 text-sm text-ash">
+                For our team:{" "}
+                <Link href="/brief" className="text-gold underline underline-offset-4">
+                  read the Antidosis employee brief <ArrowRight className="inline h-3.5 w-3.5" />
+                </Link>
+              </p>
             </Reveal>
           </div>
         </section>

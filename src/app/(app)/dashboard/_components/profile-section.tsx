@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Link from "next/link";
 
@@ -113,6 +113,7 @@ export function ProfileSection({
 }: ProfileSectionProps) {
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [importingAvatarFrom, setImportingAvatarFrom] = useState<string | null>(null);
   const [removingIds, setRemovingIds] = useState<ReadonlySet<string>>(new Set());
 
@@ -138,7 +139,25 @@ export function ProfileSection({
   const accountType = watch("accountType");
   const activeTabMeta = PROFILE_TABS.find((tab) => tab.id === activeTab) ?? PROFILE_TABS[0];
 
+  useEffect(() => {
+    const subscription = watch((_values, { type }) => {
+      if (type === "change") setHasUnsavedChanges(true);
+    });
+    return () => subscription.unsubscribe();
+  }, [watch]);
+
+  function setChangedValue(...args: Parameters<typeof setValue>) {
+    setHasUnsavedChanges(true);
+    setValue(...args);
+  }
+
+  function addSocialLink(...args: Parameters<typeof append>) {
+    setHasUnsavedChanges(true);
+    append(...args);
+  }
+
   function markRemoving(fieldId: string) {
+    setHasUnsavedChanges(true);
     setRemovingIds((previous) => new Set(previous).add(fieldId));
   }
 
@@ -158,7 +177,7 @@ export function ProfileSection({
         );
         return;
       }
-      setValue("avatarUrl", data.url, { shouldDirty: true });
+      setChangedValue("avatarUrl", data.url, { shouldDirty: true });
       toast("Profile picture imported — press Save to keep it", "success");
     } catch {
       toast("Couldn't import a profile picture — try again", "error");
@@ -217,21 +236,9 @@ export function ProfileSection({
       }
 
       const updated = await response.json();
-      if (Array.isArray(updated.socialLinks)) {
-        setValue(
-          "socialLinks",
-          updated.socialLinks.map(
-            (link: { id: string; platform: string; url: string; isPublic: boolean }) => ({
-              id: link.id,
-              platform: link.platform,
-              url: link.url,
-              isPublic: link.isPublic,
-            })
-          ),
-          { shouldDirty: false }
-        );
-      }
       setRemovingIds(new Set());
+      reset(toFormValues(updated as EditorProfile));
+      setHasUnsavedChanges(false);
       await mutate("/api/v1/profiles/me");
       onUpdate(updated);
       toast("Profile saved", "success");
@@ -246,6 +253,7 @@ export function ProfileSection({
   function onCancel() {
     setRemovingIds(new Set());
     reset(toFormValues(initialProfile));
+    setHasUnsavedChanges(false);
   }
 
   return (
@@ -292,7 +300,7 @@ export function ProfileSection({
             <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(300px,1fr)]">
               <IdentitySection
                 register={register}
-                setValue={setValue}
+                setValue={setChangedValue}
                 avatarUrl={avatarUrl ?? undefined}
                 fullName={fullName ?? undefined}
                 nameError={errors.fullName?.message}
@@ -316,7 +324,7 @@ export function ProfileSection({
           <div role="tabpanel" className="space-y-5">
             <PreferencesSection
               register={register}
-              setValue={setValue}
+              setValue={setChangedValue}
               showInDirectory={!!showInDirectory}
               accountType={accountType === "business" ? "business" : "individual"}
               abnVerified={initialProfile.abnVerified}
@@ -329,7 +337,7 @@ export function ProfileSection({
                 fields={fields}
                 removingIds={removingIds}
                 onMarkRemoving={markRemoving}
-                append={append}
+                append={addSocialLink}
                 errors={errors}
                 showAudience={false}
                 variant="business"
@@ -350,7 +358,7 @@ export function ProfileSection({
               fields={fields}
               removingIds={removingIds}
               onMarkRemoving={markRemoving}
-              append={append}
+              append={addSocialLink}
               errors={errors}
               showAudience={accountType !== "business"}
             />
@@ -415,18 +423,25 @@ export function ProfileSection({
         </p>
       )}
 
-      <div className="vessel sticky bottom-4 z-20 mt-5 flex items-center gap-3 rounded-lg bg-surface/95 p-3 shadow-lg backdrop-blur">
-        <Button type="button" onClick={onSave} disabled={isSaving} className="flex-1 sm:flex-none">
-          {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {isSaving ? "Saving…" : "Save profile"}
-        </Button>
-        <Button type="button" variant="ghost" onClick={onCancel} disabled={isSaving}>
-          Cancel
-        </Button>
-        <p className="ml-auto hidden text-xs text-ash md:block">
-          Skills and proof save separately.
-        </p>
-      </div>
+      {(hasUnsavedChanges || isSaving) && (
+        <div className="vessel sticky bottom-4 z-20 mt-5 flex items-center gap-3 rounded-lg bg-surface/95 p-3 shadow-lg backdrop-blur">
+          <Button
+            type="button"
+            onClick={onSave}
+            disabled={isSaving}
+            className="flex-1 sm:flex-none"
+          >
+            {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isSaving ? "Saving…" : "Save profile"}
+          </Button>
+          <Button type="button" variant="ghost" onClick={onCancel} disabled={isSaving}>
+            Cancel
+          </Button>
+          <p className="ml-auto hidden text-xs text-ash md:block">
+            Skills and proof save separately.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

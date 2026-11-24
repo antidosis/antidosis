@@ -1,160 +1,116 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import { ShieldCheck, Lock, Users } from "lucide-react";
-
-import { TerminalCursor } from "./terminal-cursor";
-
-const BOOT_LINES = [
-  { text: "initializing antidosis relay network...", delay: 60 },
-  { text: "", delay: 110 },
-  { text: "[OK] verifying network integrity", delay: 160 },
-  { text: "[OK] loading trust protocol v2.1", delay: 210 },
-  { text: "[OK] opening secure exchange channels", delay: 260 },
-  { text: "[OK] linking to local mesh node", delay: 310 },
-  { text: "", delay: 360 },
-  { text: "on air.", delay: 410 },
-];
-
-const TRUST_SIGNALS = [
-  { icon: ShieldCheck, label: "verified identities" },
-  { icon: Lock, label: "signed agreements" },
-  { icon: Users, label: "peer-to-peer exchange" },
+const MESSAGES = [
+  "Every exchange begins as a signal.",
+  "A need. A skill. Something to offer.",
+  "One local connection changes the pattern.",
+  "Antidosis — the exchange network.",
 ];
 
 export function BootSequence({ onComplete }: { onComplete: () => void }) {
-  const [visibleLines, setVisibleLines] = useState<number>(0);
-  const [showCursor, setShowCursor] = useState(true);
-  const [done, setDone] = useState(false);
-  const [logoVisible, setLogoVisible] = useState(false);
-  const [signalsVisible, setSignalsVisible] = useState(false);
+  const [step, setStep] = useState(0);
+  const [leaving, setLeaving] = useState(false);
+  const completeRef = useRef(onComplete);
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const leavingRef = useRef(false);
 
   useEffect(() => {
-    // Logo fade in immediately
-    const logoTimer = setTimeout(() => setLogoVisible(true), 100);
-
-    // Trust signals fade in after logo
-    const signalsTimer = setTimeout(() => setSignalsVisible(true), 300);
-
-    const timeouts: ReturnType<typeof setTimeout>[] = [];
-
-    BOOT_LINES.forEach((line, i) => {
-      const t = setTimeout(() => {
-        setVisibleLines(i + 1);
-        if (i === BOOT_LINES.length - 1) {
-          setTimeout(() => {
-            setShowCursor(false);
-            setTimeout(() => {
-              setDone(true);
-              setTimeout(onComplete, 150);
-            }, 120);
-          }, 220);
-        }
-      }, line.delay);
-      timeouts.push(t);
-    });
-
-    function skip() {
-      timeouts.forEach(clearTimeout);
-      clearTimeout(logoTimer);
-      clearTimeout(signalsTimer);
-      setDone(true);
-      onComplete();
-    }
-    window.addEventListener("pointerdown", skip, { once: true });
-    window.addEventListener("keydown", skip, { once: true });
-
-    return () => {
-      clearTimeout(logoTimer);
-      clearTimeout(signalsTimer);
-      timeouts.forEach(clearTimeout);
-      window.removeEventListener("pointerdown", skip);
-      window.removeEventListener("keydown", skip);
-    };
+    completeRef.current = onComplete;
   }, [onComplete]);
 
-  if (done) return null;
+  useEffect(() => {
+    const compact = window.matchMedia("(pointer: coarse)").matches;
+    const timings = compact ? [0, 230, 460, 690] : [0, 360, 760, 1160];
+    const leaveAt = compact ? 940 : 1620;
+    const completeAt = compact ? 1240 : 2020;
+
+    function finish() {
+      if (leavingRef.current) return;
+      leavingRef.current = true;
+      setLeaving(true);
+      timersRef.current.push(setTimeout(() => completeRef.current(), compact ? 260 : 400));
+    }
+
+    timersRef.current = MESSAGES.map((_, index) =>
+      setTimeout(() => setStep(index), timings[index])
+    );
+    timersRef.current.push(setTimeout(finish, leaveAt));
+    if (!compact) timersRef.current.push(setTimeout(finish, completeAt));
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (["Enter", "Escape", " "].includes(event.key)) finish();
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      timersRef.current.forEach(clearTimeout);
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, []);
 
   return (
     <div
-      className="fixed inset-0 z-40 bg-void flex flex-col items-center justify-center p-6 cursor-pointer"
+      className={`fixed inset-0 z-40 flex min-h-dvh cursor-pointer flex-col bg-void/15 p-6 text-center transition-opacity duration-400 ${
+        leaving ? "pointer-events-none opacity-0" : "opacity-100"
+      }`}
       role="button"
-      aria-label="Skip intro"
+      tabIndex={0}
+      aria-label="Enter the Antidosis network"
+      onClick={() => {
+        if (!leavingRef.current) {
+          leavingRef.current = true;
+          setLeaving(true);
+          timersRef.current.push(setTimeout(() => completeRef.current(), 300));
+        }
+      }}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          event.currentTarget.click();
+        }
+      }}
     >
-      {/* Logo + Brand */}
-      <div
-        className={`flex flex-col items-center transition-all duration-700 ${
-          logoVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-        }`}
-      >
-        <img
-          src="/images/logo.webp"
-          alt="Antidosis"
-          width={160}
-          height={65}
-          className="brand-logo opacity-80 mb-4"
-          fetchPriority="high"
-        />
-        <h1 className="heading-display text-2xl md:text-3xl text-gold tracking-tight">antidosis</h1>
-        <p className="text-xs text-ash mt-2 tracking-widest uppercase">the exchange network.</p>
+      <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.2em] text-ash">
+        <span>Central Coast / Node 01</span>
+        <span>First contact</span>
       </div>
 
-      {/* Trust Signals */}
-      <div
-        className={`flex items-center gap-6 mt-8 mb-10 transition-all duration-700 delay-200 ${
-          signalsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-        }`}
-      >
-        {TRUST_SIGNALS.map((signal, i) => (
-          <div key={i} className="flex items-center gap-2">
-            <signal.icon className="h-3.5 w-3.5 text-sun" />
-            <span className="text-[10px] md:text-xs text-ash uppercase tracking-wider">
-              {signal.label}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {/* Boot Lines */}
-      <div
-        className={`w-full max-w-md transition-opacity duration-500 ${
-          visibleLines > 0 ? "opacity-100" : "opacity-0"
-        }`}
-      >
-        <div className="border border-line bg-surface p-4 md:p-5">
-          <div className="text-[11px] md:text-[13px] leading-relaxed font-mono">
-            {BOOT_LINES.slice(0, visibleLines).map((line, i) => (
-              <div
-                key={i}
-                className={`${
-                  line.text.startsWith("[OK]")
-                    ? "text-ok"
-                    : line.text === "on air."
-                      ? "text-sun font-semibold"
-                      : "text-ash"
-                }`}
-              >
-                {line.text || "\u00A0"}
-              </div>
-            ))}
-            {showCursor && visibleLines > 0 && (
-              <div className="text-sun">
-                <TerminalCursor />
-              </div>
-            )}
-          </div>
+      <div className="flex flex-1 flex-col items-center justify-center">
+        <div className="h-[28vh] min-h-32" aria-hidden />
+        <p className="font-mono text-[10px] uppercase tracking-[0.28em] text-ok">
+          Local exchange protocol
+        </p>
+        <div className="mt-5 flex min-h-16 max-w-lg items-center justify-center">
+          {MESSAGES.map((message, index) => (
+            <p
+              key={message}
+              className={`absolute text-balance text-lg leading-relaxed transition-all duration-500 md:text-xl ${
+                step === index
+                  ? "translate-y-0 text-parchment opacity-100"
+                  : "translate-y-2 text-parchment opacity-0"
+              } ${index === MESSAGES.length - 1 ? "heading-display text-2xl text-gold md:text-3xl" : ""}`}
+              aria-hidden={step !== index}
+            >
+              {message}
+            </p>
+          ))}
+        </div>
+        <div className="mt-8 flex gap-2" aria-hidden>
+          {MESSAGES.map((_, index) => (
+            <span
+              key={index}
+              className={`h-px w-8 transition-colors duration-500 ${index <= step ? "bg-ok" : "bg-line"}`}
+            />
+          ))}
         </div>
       </div>
 
-      {/* Bottom hint */}
-      <p
-        className={`text-[10px] text-ash/50 mt-6 transition-opacity duration-1000 ${
-          logoVisible ? "opacity-100" : "opacity-0"
-        }`}
-      >
-        acquiring signal — secure exchange network
-      </p>
+      <div className="flex flex-col items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-ash">
+        <span className="text-parchment">Click or press Enter to step inside</span>
+        <span>A network is only waiting for its next node.</span>
+      </div>
     </div>
   );
 }

@@ -15,14 +15,11 @@ import {
   Radio,
   Building2,
   FileText,
-  Handshake,
   Megaphone,
-  Camera,
 } from "lucide-react";
 
 import { BootSequence } from "@/components/effects/boot-sequence";
-import { ParticleField } from "@/components/effects/particle-field";
-import { ScanLines } from "@/components/effects/scanlines";
+import { SignalField } from "@/components/effects/signal-field";
 import { TerminalCursor } from "@/components/effects/terminal-cursor";
 import { ExchangeExamples } from "@/components/exchange-examples";
 import { LaunchCountdown, LaunchBanner } from "@/components/launch-countdown";
@@ -133,28 +130,36 @@ export default function HomePage() {
 
   useEffect(() => {
     const bootedBefore = sessionStorage.getItem("antidosis-booted");
-    const isMobile = window.matchMedia("(pointer: coarse)").matches;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (bootedBefore || isMobile || reducedMotion) {
+    if (bootedBefore || reducedMotion) {
       setHasBooted(true);
     }
   }, []);
 
   function handleBootComplete() {
     sessionStorage.setItem("antidosis-booted", "true");
+    setHasBooted(true);
   }
 
   return (
-    <div className="min-h-screen bg-void text-gold flex flex-col relative">
-      <ScanLines />
+    <div
+      className={cn(
+        "signal-journey min-h-screen bg-void text-gold flex flex-col relative",
+        !hasBooted && "signal-journey-booting"
+      )}
+      data-signal-journey="home"
+    >
+      <SignalField booting={!hasBooted} />
       {!hasBooted && <BootSequence onComplete={handleBootComplete} />}
       <Navbar />
       <LaunchBanner />
 
       <main className="flex-1">
         {/* HERO */}
-        <section className="relative overflow-hidden pb-16 pt-28 md:pb-28 md:pt-40">
-          <ParticleField />
+        <section
+          data-signal-scene="hero"
+          className="relative overflow-hidden pb-16 pt-28 md:pb-28 md:pt-40"
+        >
           <div className="relative max-w-6xl mx-auto px-4 md:px-8">
             <div className="grid items-center gap-8 md:grid-cols-2 md:gap-12">
               <div>
@@ -197,7 +202,7 @@ export default function HomePage() {
         </section>
 
         {/* LIVE SIGNALS — example exchanges first, concept second */}
-        <section className="py-16 md:py-20 border-t border-line">
+        <section data-signal-scene="exchange" className="py-16 md:py-20 border-t border-line">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-3 font-mono">
@@ -211,14 +216,12 @@ export default function HomePage() {
           </div>
         </section>
 
-        <LaunchCountdown />
-
         <TickerBanner />
 
         <div className="divider" />
 
         {/* HOW IT WORKS — 3 Steps */}
-        <section className="py-14 md:py-24 border-t border-line">
+        <section data-signal-scene="path" className="py-14 md:py-24 border-t border-line">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-12 font-mono">» SIGNAL PATH — THREE STEPS</p>
@@ -259,7 +262,7 @@ export default function HomePage() {
         <div className="divider" />
 
         {/* DIRECT AGREEMENTS — private contracts are a product, not an afterthought */}
-        <section className="border-t border-line py-14 md:py-24">
+        <section data-signal-scene="direct" className="border-t border-line py-14 md:py-24">
           <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 md:grid-cols-2 md:px-8">
             <Reveal>
               <p className="mb-3 font-mono text-xs text-mercury">
@@ -302,7 +305,10 @@ export default function HomePage() {
         <div className="divider" />
 
         {/* FEATURES — one compact grid */}
-        <section className="section-plateau py-14 md:py-24 border-t border-line">
+        <section
+          data-signal-scene="trust"
+          className="section-plateau py-14 md:py-24 border-t border-line"
+        >
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-8 font-mono">
@@ -325,7 +331,10 @@ export default function HomePage() {
         <div className="divider" />
 
         {/* COMMUNITY RELAY */}
-        <section className="section-constellation py-14 md:py-24 border-t border-line">
+        <section
+          data-signal-scene="relay"
+          className="section-constellation py-14 md:py-24 border-t border-line"
+        >
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <div className="grid items-center gap-8 md:grid-cols-2 md:gap-12">
               <Reveal>
@@ -355,128 +364,74 @@ export default function HomePage() {
 
         <div className="divider" />
 
+        {/* BUSINESSES + CREATORS — two audiences, the same trust rails */}
+        <section data-signal-scene="communities" className="py-14 md:py-24 border-t border-line">
+          <div className="max-w-6xl mx-auto px-4 md:px-8">
+            <Reveal>
+              <p className="text-xs text-ash mb-6 font-mono">» ONE NETWORK — EVERY KIND OF VALUE</p>
+              <h2 className="heading-display text-3xl md:text-4xl text-gold mb-5">
+                A place for business. <span className="text-orchid">A place for influence.</span>
+              </h2>
+              <p className="max-w-2xl text-sm leading-relaxed text-ash md:text-base">
+                Different people bring different value. The directory, messaging, agreements and
+                reputation system give both a common, trusted foundation.
+              </p>
+            </Reveal>
+            <div className="mt-10 grid gap-5 lg:grid-cols-2">
+              <Reveal>
+                <PathwayCard
+                  icon={Building2}
+                  eyebrow="For businesses"
+                  title="Local business, verified."
+                  description="Post tasks, find skilled locals and build a public record of reliable work."
+                  points={[
+                    "Business profile with ABN and chosen trust credentials",
+                    "Tasks, jobs and direct agreements on the same exchange flow",
+                    "Free to join and post; featured placement is a future option",
+                  ]}
+                  href="/pros"
+                  linkLabel="Explore the business directory"
+                  className="border-sun/25 bg-sun/[0.025]"
+                  iconClass="text-sun"
+                />
+              </Reveal>
+              <Reveal delay={140}>
+                <PathwayCard
+                  icon={Megaphone}
+                  eyebrow="For creators & reviewers"
+                  title="Your reach is an exchange."
+                  description="Share your audience, find local collaborations and build a reputation for delivering what you promise."
+                  points={[
+                    "Audience size, social links and niche skills in one profile",
+                    "Products, meals, experiences or payment for genuine content",
+                    "Clear terms and honest disclosure for sponsored exchanges",
+                  ]}
+                  href="/needs"
+                  linkLabel="Find promo and review exchanges"
+                  className="border-orchid/25 bg-orchid/[0.025]"
+                  iconClass="text-orchid"
+                />
+              </Reveal>
+            </div>
+            <p className="mt-6 max-w-3xl text-xs leading-relaxed text-ash">
+              Payments and sponsored benefits are arranged directly between the parties; Antidosis
+              never holds funds. Sponsored content must be disclosed under Australian consumer law.
+            </p>
+          </div>
+        </section>
+
+        <div className="divider" />
+
+        <LaunchCountdown />
+
+        <div className="divider" />
+
         <OffgridVision />
 
         <div className="divider" />
 
-        {/* FOR BUSINESSES */}
-        <section className="py-14 md:py-24 border-t border-line">
-          <div className="max-w-6xl mx-auto px-4 md:px-8">
-            <Reveal>
-              <p className="text-xs text-ash mb-8 font-mono">» TRADE DESK — FOR BUSINESSES</p>
-              <h2 className="heading-display text-3xl md:text-4xl text-gold mb-6">
-                Local Business, <span className="text-sun">Verified.</span>
-              </h2>
-              <p className="text-sm text-ash leading-relaxed max-w-2xl mb-12">
-                Tradies, shops, and local services join the same network as everyone else. Post a
-                task, find help, and put your name on it — free during the pilot, and core usage
-                stays free.
-              </p>
-            </Reveal>
-            <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6">
-              <Reveal delay={0}>
-                <StepCard
-                  num="B1"
-                  title="Claim Your Business Profile"
-                  desc="Switch to a business account, add your ABN, and appear in the directory with a business badge and your chosen trust credentials."
-                  illustration={<Building2 className="w-24 h-24 text-sun opacity-60" />}
-                />
-              </Reveal>
-              <Reveal delay={150}>
-                <StepCard
-                  num="B2"
-                  title="Post Tasks & Jobs"
-                  desc="Need a hand on a job, a delivery run, or weekend cover? Post it like any need and review each local's trust signals."
-                  illustration={<Handshake className="w-24 h-24 text-mercury opacity-60" />}
-                />
-              </Reveal>
-              <Reveal delay={300}>
-                <StepCard
-                  num="B3"
-                  title="Contract With Your ABN On It"
-                  desc="The same written-agreement flow, with your legal name and ABN on the document. Reviews build your business reputation."
-                  illustration={<FileText className="w-24 h-24 text-quint opacity-60" />}
-                />
-              </Reveal>
-            </div>
-            <Reveal delay={400}>
-              <p className="text-xs text-ash/70 mt-10 max-w-2xl leading-relaxed">
-                Payments are arranged directly between the parties and recorded in the contract
-                terms — antidosis never holds or transfers money. A monthly featured-placement
-                subscription is planned for later; joining and posting stays free.
-              </p>
-              <Button asChild variant="secondary" size="sm" className="mt-6">
-                <Link href="/pros">
-                  Browse the directory <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-            </Reveal>
-          </div>
-        </section>
-
-        <div className="divider" />
-
-        {/* FOR CREATORS & INFLUENCERS */}
-        <section className="py-14 md:py-24 border-t border-line">
-          <div className="max-w-6xl mx-auto px-4 md:px-8">
-            <Reveal>
-              <p className="text-xs text-ash mb-8 font-mono">
-                ◈ CREATOR DESK — FOR INFLUENCERS &amp; REVIEWERS
-              </p>
-              <h2 className="heading-display text-3xl md:text-4xl text-gold mb-6">
-                Post It. <span className="text-orchid">Eat Free.</span>
-              </h2>
-              <p className="text-sm text-ash leading-relaxed max-w-2xl mb-12">
-                Food reviewers, local creators, and anyone with an audience — local businesses will
-                trade meals, products, and paid gigs for a post or a review. Your reach is your
-                currency.
-              </p>
-            </Reveal>
-            <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6">
-              <Reveal delay={0}>
-                <StepCard
-                  num="C1"
-                  title="Show Your Reach"
-                  desc="Add your audience size and social links to your profile. Businesses can see exactly what a collab with you is worth."
-                  illustration={<Camera className="w-24 h-24 text-orchid opacity-60" />}
-                />
-              </Reveal>
-              <Reveal delay={150}>
-                <StepCard
-                  num="C2"
-                  title="Take Promo Deals"
-                  desc="Browse Promo / Review needs from local cafés, shops, and tradies. A free meal, a product, or cash — in exchange for content."
-                  illustration={<Megaphone className="w-24 h-24 text-mercury opacity-60" />}
-                />
-              </Reveal>
-              <Reveal delay={300}>
-                <StepCard
-                  num="C3"
-                  title="Get Rated Like a Pro"
-                  desc="Add a written agreement when it helps. Deliver the exchange, leave genuine reviews, and grow your creator reputation."
-                  illustration={<Star className="w-24 h-24 text-sun opacity-60" />}
-                />
-              </Reveal>
-            </div>
-            <Reveal delay={400}>
-              <p className="text-xs text-ash/70 mt-10 max-w-2xl leading-relaxed">
-                Sponsorships and free products are exchanges between you and the business — recorded
-                in the contract terms, never processed by antidosis. Always disclose sponsored
-                content under Australian consumer law.
-              </p>
-              <Button asChild variant="secondary" size="sm" className="mt-6">
-                <Link href="/needs">
-                  Browse promo needs <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-            </Reveal>
-          </div>
-        </section>
-
-        <div className="divider" />
-
         {/* CTA */}
-        <section className="py-14 md:py-24 border-t border-line">
+        <section data-signal-scene="join" className="py-14 md:py-24 border-t border-line">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-8 font-mono">◉ JOIN THE NETWORK</p>
@@ -535,6 +490,55 @@ function StepCard({
         {title}
       </h3>
       <p className="text-xs leading-relaxed text-ash sm:text-sm">{desc}</p>
+    </div>
+  );
+}
+
+function PathwayCard({
+  icon: Icon,
+  eyebrow,
+  title,
+  description,
+  points,
+  href,
+  linkLabel,
+  className,
+  iconClass,
+}: {
+  icon: React.ElementType;
+  eyebrow: string;
+  title: string;
+  description: string;
+  points: string[];
+  href: string;
+  linkLabel: string;
+  className: string;
+  iconClass: string;
+}) {
+  return (
+    <div className={cn("vessel flex h-full flex-col rounded-xl p-6 sm:p-8", className)}>
+      <div className="flex items-center justify-between gap-4">
+        <p className="font-mono text-xs uppercase tracking-[0.18em] text-ash">{eyebrow}</p>
+        <Icon className={cn("h-6 w-6", iconClass)} />
+      </div>
+      <h3 className="heading-display mt-7 text-2xl text-gold md:text-3xl">{title}</h3>
+      <p className="mt-3 text-sm leading-relaxed text-ash">{description}</p>
+      <ul className="mt-6 space-y-3">
+        {points.map((point) => (
+          <li
+            key={point}
+            className="flex items-start gap-2.5 text-sm leading-relaxed text-parchment"
+          >
+            <ShieldCheck className={cn("mt-0.5 h-4 w-4 shrink-0", iconClass)} />
+            <span>{point}</span>
+          </li>
+        ))}
+      </ul>
+      <Button asChild variant="secondary" size="sm" className="mt-7 w-fit">
+        <Link href={href}>
+          {linkLabel} <ArrowRight className="ml-2 h-4 w-4" />
+        </Link>
+      </Button>
     </div>
   );
 }

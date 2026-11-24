@@ -3,9 +3,9 @@ import { test, expect } from "@playwright/test";
 test.describe("Public pages", () => {
   test("homepage loads", async ({ page }) => {
     await page.goto("/");
-    await expect(
-      page.locator("text=exchange everything").or(page.locator("text=initializing"))
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole("heading", { name: /your neighbourhood/i })).toBeVisible({
+      timeout: 15_000,
+    });
   });
 
   test("how it works page loads", async ({ page }) => {

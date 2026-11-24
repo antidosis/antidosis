@@ -89,7 +89,7 @@ function NodeIcon({ status }: { status: PhaseStatus }) {
  */
 export function OffgridVision() {
   return (
-    <section className="border-t border-line py-14 md:py-24">
+    <section data-signal-scene="offgrid" className="border-t border-line py-14 md:py-24">
       <div className="max-w-6xl mx-auto px-4 md:px-8">
         <div>
           <p className="text-xs text-ash mb-8 font-mono">

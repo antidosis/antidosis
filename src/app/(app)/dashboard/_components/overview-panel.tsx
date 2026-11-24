@@ -192,7 +192,7 @@ export function OverviewPanel({
               </span>
               <button
                 type="button"
-                onClick={() => onNavigate("profile")}
+                onClick={() => onNavigate("profile", isBusiness ? "directory" : "social")}
                 className="min-h-8 px-1 font-medium text-gold hover:text-sun"
               >
                 Manage presence

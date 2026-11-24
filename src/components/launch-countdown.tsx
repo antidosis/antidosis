@@ -13,7 +13,10 @@ const MILESTONES = [
 
 export function LaunchCountdown() {
   return (
-    <section className="relative w-full overflow-hidden border-y border-sun/15 bg-inset">
+    <section
+      data-signal-scene="expansion"
+      className="relative w-full overflow-hidden border-y border-sun/15 bg-inset"
+    >
       <div className="mx-auto max-w-6xl px-4 py-14 md:px-8 md:py-20">
         <p className="mb-8 font-mono text-xs text-ash">» NEW REGIONS — EVIDENCE BEFORE EXPANSION</p>
         <div className="mb-10 grid gap-8 md:mb-14 md:grid-cols-2 md:items-end">
@@ -71,7 +74,7 @@ export function LaunchCountdown() {
 
 export function LaunchBanner() {
   return (
-    <div className="w-full border-b border-sun/15 bg-inset">
+    <div className="launch-banner w-full border-b border-sun/15 bg-inset">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-2.5 md:px-8">
         <div className="flex min-w-0 items-center gap-3">
           <span className="h-2 w-2 shrink-0 rounded-full bg-sun" />
