@@ -33,11 +33,9 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  // Network-first for navigations and API — always fresh, never cached.
-  if (request.mode === "navigate" || url.pathname.startsWith("/api/")) {
-    event.respondWith(fetch(request));
-    return;
-  }
+  // Network-only for navigations and API — always fresh, never cached or
+  // intercepted, so browser-level API mocking and request tracing still work.
+  if (request.mode === "navigate" || url.pathname.startsWith("/api/")) return;
 
   // Cache-first for immutable static assets only.
   if (STATIC_PREFIXES.some((p) => url.pathname.startsWith(p))) {

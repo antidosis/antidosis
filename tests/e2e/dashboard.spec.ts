@@ -32,14 +32,14 @@ async function mockDashboard(
   page: Page,
   options: { needs?: unknown[]; credentials?: unknown[] } = {}
 ) {
-  await page.route("/api/v1/profiles/me", async (route) => {
+  await page.route("**/api/v1/profiles/me", async (route) => {
     await route.fulfill({
       status: 200,
       contentType: "application/json",
       body: JSON.stringify({ ...profile, credentials: options.credentials ?? [] }),
     });
   });
-  await page.route("/api/v1/needs/mine", async (route) => {
+  await page.route("**/api/v1/needs/mine", async (route) => {
     await route.fulfill({
       status: 200,
       contentType: "application/json",
@@ -47,7 +47,7 @@ async function mockDashboard(
     });
   });
   for (const endpoint of ["/api/v1/contracts/mine", "/api/v1/acceptances/mine"]) {
-    await page.route(endpoint, async (route) => {
+    await page.route(`**${endpoint}`, async (route) => {
       await route.fulfill({ status: 200, contentType: "application/json", body: "[]" });
     });
   }

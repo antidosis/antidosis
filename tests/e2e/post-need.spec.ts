@@ -80,7 +80,7 @@ test.describe("Post a need", () => {
     await login(page);
 
     // Mock the POST endpoint so we do not pollute the real database
-    await page.route("/api/v1/needs", async (route) => {
+    await page.route("**/api/v1/needs", async (route) => {
       if (route.request().method() === "POST") {
         await route.fulfill({
           status: 200,

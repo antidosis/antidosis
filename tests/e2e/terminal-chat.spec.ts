@@ -24,7 +24,7 @@ test.describe("Relay chat", () => {
 
     await login(page);
 
-    await page.route("/api/v1/terminal/channels", async (route) => {
+    await page.route("**/api/v1/terminal/channels", async (route) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
@@ -51,7 +51,7 @@ test.describe("Relay chat", () => {
       });
     });
 
-    await page.route("/api/v1/terminal/dm/threads", async (route) => {
+    await page.route("**/api/v1/terminal/dm/threads", async (route) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
@@ -59,7 +59,7 @@ test.describe("Relay chat", () => {
       });
     });
 
-    await page.route("/api/v1/terminal/presence", async (route) => {
+    await page.route("**/api/v1/terminal/presence", async (route) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
@@ -80,7 +80,7 @@ test.describe("Relay chat", () => {
     await login(page);
 
     // Mock channels
-    await page.route("/api/v1/terminal/channels", async (route) => {
+    await page.route("**/api/v1/terminal/channels", async (route) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
@@ -100,7 +100,7 @@ test.describe("Relay chat", () => {
     });
 
     // Mock DM threads
-    await page.route("/api/v1/terminal/dm/threads", async (route) => {
+    await page.route("**/api/v1/terminal/dm/threads", async (route) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
@@ -109,7 +109,7 @@ test.describe("Relay chat", () => {
     });
 
     // Mock presence
-    await page.route("/api/v1/terminal/presence", async (route) => {
+    await page.route("**/api/v1/terminal/presence", async (route) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
@@ -118,7 +118,7 @@ test.describe("Relay chat", () => {
     });
 
     // Mock messages list
-    await page.route("/api/v1/terminal/messages?**", async (route) => {
+    await page.route("**/api/v1/terminal/messages?**", async (route) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
@@ -127,7 +127,7 @@ test.describe("Relay chat", () => {
     });
 
     // Mock sending a message
-    await page.route("/api/v1/terminal/messages", async (route) => {
+    await page.route("**/api/v1/terminal/messages", async (route) => {
       if (route.request().method() === "POST") {
         const body = await route.request().postDataJSON();
         await route.fulfill({
@@ -155,7 +155,7 @@ test.describe("Relay chat", () => {
 
     await page.goto("/terminal");
 
-    await page.getByRole("button", { name: "#general", exact: true }).click();
+    await page.getByRole("button", { name: "# general", exact: true }).click();
 
     const input = page.getByPlaceholder("Broadcast to general...");
     await expect(input).toBeVisible();
