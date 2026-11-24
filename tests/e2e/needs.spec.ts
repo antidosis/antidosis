@@ -3,7 +3,8 @@ import { test, expect } from "@playwright/test";
 test.describe("Needs marketplace", () => {
   test("needs list page loads", async ({ page }) => {
     await page.goto("/needs");
-    await expect(page.getByRole("heading", { name: "Browse Needs" })).toBeVisible({
+    await expect(page).toHaveURL(/\/exchange$/, { timeout: 10_000 });
+    await expect(page.getByRole("heading", { name: "Needs", exact: true })).toBeVisible({
       timeout: 10_000,
     });
   });

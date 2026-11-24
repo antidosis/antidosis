@@ -139,6 +139,7 @@ test.describe("Dashboard", () => {
     });
     await page.goto("/dashboard?tab=needs");
 
+    await expect(page.getByRole("link", { name: "Garden help", exact: true })).toBeVisible();
     await page.getByRole("button", { name: /Post performance/i }).click();
     await expect(page.getByText("View → interest")).toBeVisible();
     await expect(page.getByText("25%")).toBeVisible();

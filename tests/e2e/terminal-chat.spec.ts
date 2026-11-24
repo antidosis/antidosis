@@ -69,7 +69,7 @@ test.describe("Relay chat", () => {
 
     await page.goto("/terminal");
 
-    await expect(page.locator("text=Channels")).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText("Channels", { exact: true })).toBeVisible({ timeout: 10_000 });
     await expect(page.locator("text=#general")).toBeVisible();
     await expect(page.locator("text=#help")).toBeVisible();
   });
@@ -155,12 +155,10 @@ test.describe("Relay chat", () => {
 
     await page.goto("/terminal");
 
-    // Wait for sidebar and click the general channel (#general appears in
-    // the sidebar, the header, and the subtitle — use the sidebar link)
-    await page.locator("text=#general").first().click();
+    await page.getByRole("button", { name: "#general", exact: true }).click();
 
-    // Wait for channel header to update
-    await expect(page.locator("text=#general").first()).toBeVisible();
+    const input = page.getByPlaceholder("Broadcast to general...");
+    await expect(input).toBeVisible();
 
     // Dismiss public channel warning if shown
     const dismissBtn = page.locator("text=Dismiss");
@@ -168,13 +166,16 @@ test.describe("Relay chat", () => {
       await dismissBtn.click();
     }
 
-    // Type and send a message
-    const input = page.locator('form input[type="text"]');
     await input.fill("Hello from E2E tests!");
+    const sentResponse = page.waitForResponse(
+      (response) =>
+        response.url().endsWith("/api/v1/terminal/messages") &&
+        response.request().method() === "POST"
+    );
     await page.locator('form button[type="submit"]').click();
+    expect((await sentResponse).ok()).toBe(true);
 
-    // The message should appear in the message list
-    await expect(page.locator("text=Hello from E2E tests!")).toBeVisible({
+    await expect(page.getByText("Hello from E2E tests!", { exact: true })).toBeVisible({
       timeout: 10_000,
     });
   });
