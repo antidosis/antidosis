@@ -37,7 +37,7 @@ export const DEMO_NEED = {
     "Looking for someone to help refresh my front garden. Tasks include weeding, mulching, planting native shrubs, and laying a small stone path (about 3m). I have all tools but you'll need to bring your own gloves.\n\nIdeally done over a weekend. The garden is roughly 8x5m. Happy to discuss specifics.",
   offerType: "service" as const,
   needCategory: "skill-swap" as const,
-  offerDescription: "Professional electrical work — up to 2 hours of labour",
+  offerDescription: "Licensed NSW electrical work — up to 2 hours of labour",
   offerValue: 280,
   location: "Terrigal, NSW",
   deadline: "2025-06-15",

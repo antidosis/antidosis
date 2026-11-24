@@ -17,7 +17,7 @@ const TICKER_ITEMS = [
   },
   {
     icon: ShieldCheck,
-    text: "Verified identities. Binding contracts. Reputation you can trust.",
+    text: "Verified identities. Signed written agreements. Reputation built through real exchanges.",
     accent: "var(--x-00e676)",
   },
   {
@@ -27,7 +27,7 @@ const TICKER_ITEMS = [
   },
   {
     icon: Lock,
-    text: "No middlemen. No hidden fees. Just people exchanging what they have for what they need.",
+    text: "No commissions. No hidden fees. Just people exchanging what they have for what they need.",
     accent: "var(--x-f5a623)",
   },
   {

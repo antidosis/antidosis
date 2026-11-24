@@ -25,8 +25,8 @@ const SIGNALS: Signal[] = [
     suburb: "Woy Woy",
   },
   {
-    need: "Leaking kitchen tap — probably just the washer",
-    offer: "$80 cash on completion",
+    need: "Licensed plumber for a leaking kitchen tap",
+    offer: "$80 cash on completion — licence checked first",
     suburb: "Umina Beach",
   },
 ];
@@ -61,7 +61,7 @@ export function ExchangeExamples() {
           href="/examples"
           className="text-xs text-ash hover:text-sun transition-colors inline-flex items-center gap-1.5 font-mono"
         >
-          60+ more real exchanges <ArrowRight className="h-3 w-3" />
+          Explore 60+ illustrative exchanges <ArrowRight className="h-3 w-3" />
         </Link>
       </div>
     </div>

@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 
+import { getPublicNeeds } from "@/lib/public-content";
+
 import NeedsListClient from "./_components/needs-list-client";
+
+export const dynamic = "force-dynamic";
 
 const siteUrl = "https://antidosis.com";
 
@@ -37,6 +41,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function NeedsPage() {
-  return <NeedsListClient />;
+export default async function NeedsPage() {
+  const initialData = await getPublicNeeds({ page: 1, limit: 12 }).catch(() => undefined);
+  return <NeedsListClient initialData={initialData} />;
 }

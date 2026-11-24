@@ -93,13 +93,13 @@ const FEATURES = [
   {
     icon: ShieldCheck,
     title: "Verified Identities",
-    desc: "Email, mobile, and credential checks. Know who you're dealing with before you commit.",
+    desc: "Confirmed email, verified mobile, and reviewed identity documents. Professional credentials are shown separately.",
     color: "var(--x-00e676)",
   },
   {
     icon: ScrollText,
     title: "Optional Contracts",
-    desc: "Binding terms when the exchange is valuable. A handshake when it isn't. You choose.",
+    desc: "A signed written record when the exchange is valuable. A handshake when it isn't. You choose.",
     color: "var(--x-00e5ff)",
   },
   {
@@ -172,8 +172,8 @@ export default function HomePage() {
                   back. Connect with verified locals you can trust.
                 </p>
                 <p className="text-sm text-ash/90 max-w-md leading-relaxed mb-10">
-                  Contracts optional. No middlemen, no hidden fees. Built to keep working when the
-                  internet doesn&apos;t.
+                  Contracts optional. No commissions or hidden fees. Online today, with a long-term
+                  vision for radio-mesh coordination during internet outages.
                 </p>
                 <div className="flex flex-wrap items-center gap-3">
                   <Button asChild size="lg">
@@ -200,7 +200,9 @@ export default function HomePage() {
         <section className="py-16 md:py-20 border-t border-line">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
-              <p className="text-xs text-ash mb-3 font-mono">» LIVE SIGNALS — ON THE AIR</p>
+              <p className="text-xs text-ash mb-3 font-mono">
+                » EXAMPLE SIGNALS — WHAT YOU COULD EXCHANGE
+              </p>
               <h2 className="heading-display text-2xl md:text-4xl text-gold mb-10">
                 Your Need Is <span className="text-sun">Someone Else&apos;s Want.</span>
               </h2>
@@ -339,8 +341,8 @@ export default function HomePage() {
                   /dm. Get notified when someone mentions you. The community stays on the air.
                 </p>
                 <Button asChild variant="secondary" size="sm">
-                  <Link href="/terminal">
-                    Open Relay <ArrowRight className="ml-2 h-4 w-4" />
+                  <Link href="/demo/terminal">
+                    Watch the Relay demo <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
               </Reveal>
@@ -392,7 +394,7 @@ export default function HomePage() {
                 <StepCard
                   num="B3"
                   title="Contract With Your ABN On It"
-                  desc="The same binding contract flow, with your legal name and ABN on the document. Reviews build your business reputation."
+                  desc="The same written-agreement flow, with your legal name and ABN on the document. Reviews build your business reputation."
                   illustration={<FileText className="w-24 h-24 text-quint opacity-60" />}
                 />
               </Reveal>

@@ -355,7 +355,7 @@ const SCRIPT: ScriptEvent[] = [
   {
     type: "annotation",
     title: "Contracts are optional but recommended",
-    text: "Free-form exchanges work great for small jobs. For anything over ~$100 or multi-day work, a binding contract protects both parties.",
+    text: "Free-form exchanges work well for small jobs. For valuable or multi-day work, a signed written agreement records what both parties expect.",
     delay: 100,
   },
   { type: "pause", duration: 400 },
@@ -381,8 +381,8 @@ const SCRIPT: ScriptEvent[] = [
   { type: "pause", duration: 500 },
   {
     type: "annotation",
-    title: "Digital signatures — binding and secure",
-    text: "Both parties sign with typed names. The contract becomes legally active. All terms, messages, and signatures are permanently recorded.",
+    title: "Digital signatures — a shared record",
+    text: "Both parties sign with typed names. The agreement becomes active in Antidosis, with its terms, messages, and signatures recorded. Enforceability still depends on applicable law.",
     delay: 100,
   },
   { type: "pause", duration: 400 },
@@ -1067,7 +1067,7 @@ export default function TerminalDemoClient() {
               <h2 className="heading-display text-xl text-gold">Watch Demo</h2>
               <p className="text-sm max-w-sm mx-auto" style={{ color: "var(--term-muted)" }}>
                 See how community members chat in public channels, run commands in private Console,
-                negotiate in DMs, and form binding contracts.
+                negotiate in DMs, and create signed written agreements.
               </p>
               <Button size="lg" onClick={startDemo}>
                 <Play className="h-4 w-4 mr-2" />

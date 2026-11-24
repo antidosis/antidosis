@@ -1,13 +1,17 @@
 import type { Metadata } from "next";
 
+import { getDirectoryProfiles } from "@/lib/public-content";
+
 import ProsClient from "./_components/pros-client";
+
+export const dynamic = "force-dynamic";
 
 const siteUrl = "https://antidosis.com";
 
 export const metadata: Metadata = {
   title: "Directory",
   description:
-    "Browse verified members on the Central Coast, NSW. Find skilled locals with verified credentials in trades, services, creative arts, and more.",
+    "Browse identity-verified members on the Central Coast, NSW. Review experience, ratings, and separately verified credentials in trades, services, creative arts, and more.",
   openGraph: {
     type: "website",
     locale: "en_AU",
@@ -37,6 +41,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ProsDirectoryPage() {
-  return <ProsClient />;
+export default async function ProsDirectoryPage() {
+  const initialData = await getDirectoryProfiles().catch(() => undefined);
+  return <ProsClient initialData={initialData} />;
 }

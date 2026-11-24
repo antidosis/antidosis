@@ -323,6 +323,16 @@ export default async function BlogPostPage({ params }: Props) {
                 year: "numeric",
               })}
             </span>
+            {post.updatedAt && (
+              <span>
+                Updated{" "}
+                {new Date(post.updatedAt).toLocaleDateString("en-AU", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                })}
+              </span>
+            )}
             <span className="flex items-center gap-1.5">
               <Clock className="h-3 w-3" />
               {post.readingTime}

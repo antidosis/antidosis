@@ -45,7 +45,7 @@ const MOCK_NEED = {
   description:
     "Looking for someone to help refresh my front garden. Tasks include weeding, mulching, planting native shrubs, and laying a small stone path (about 3m). I have all tools but you'll need to bring your own gloves.\n\nIdeally done over a weekend. The garden is roughly 8x5m. Happy to discuss specifics.",
   offerType: "service" as const,
-  offerDescription: "Professional electrical work — up to 2 hours of labour",
+  offerDescription: "Licensed NSW electrical work — up to 2 hours of labour",
   offerValue: 280,
   locationName: "Terrigal, NSW",
   deadline: "2025-06-15",
@@ -426,7 +426,7 @@ function StepGuide({
     if (isPartyA) {
       title = "Step 3: Form Contract";
       text =
-        "Click 'Contract' to create a binding agreement. Both parties will write terms, review them, and digitally sign.";
+        "Click 'Contract' to create a written agreement. Both parties will write terms, review them, and digitally sign.";
     } else {
       title = "Waiting for contract";
       text =
@@ -446,7 +446,7 @@ function StepGuide({
     title = "Step 6: Sign the Contract";
     text = iSigned
       ? "You have signed. Waiting for the other party to sign. Once both sign, the contract becomes active."
-      : "Terms are locked. Type your full name as a digital signature and click 'Sign Contract'. This creates a legally binding agreement.";
+      : "Terms are locked. Type your full name as a digital signature and click 'Sign Contract'. This records your acceptance; legal enforceability depends on the agreement and applicable law.";
   } else if (!completed) {
     title = "Step 7: Mark Complete";
     text =
@@ -930,7 +930,6 @@ export default function ContractFlowDemoPage() {
         status: "pending_terms",
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contracts, selectedAcceptanceId]);
 
   // Mark contract as completed when both parties have marked complete
@@ -944,7 +943,6 @@ export default function ContractFlowDemoPage() {
         completedAt: new Date().toISOString(),
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contracts, selectedAcceptanceId]);
 
   function sendMessage(e: React.FormEvent) {
@@ -1823,9 +1821,7 @@ export default function ContractFlowDemoPage() {
               {/* Document Header */}
               <div className="text-center pb-6 border-b border-paperline">
                 <div className="contract-seal mb-4">Antidosis</div>
-                <h1 className="contract-heading text-3xl md:text-4xl mb-2">
-                  Binding Exchange Contract
-                </h1>
+                <h1 className="contract-heading text-3xl md:text-4xl mb-2">Exchange Agreement</h1>
                 <p className="contract-body text-sm text-linestrong">
                   Ref:{" "}
                   <span className="font-mono text-xs">{MOCK_NEED.id.slice(-6).toUpperCase()}</span>
@@ -2712,7 +2708,7 @@ export default function ContractFlowDemoPage() {
                 <div className="contract-seal text-lg mb-2">Antidosis</div>
                 <h3 className="contract-heading text-xl text-paperhead">Digital Signature</h3>
                 <p className="text-xs text-linestrong mt-1">
-                  You are about to sign a legally binding contract
+                  Sign to record your acceptance of this agreement
                 </p>
               </div>
 

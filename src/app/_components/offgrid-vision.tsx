@@ -12,7 +12,7 @@ const PHASES: {
   {
     node: "app",
     title: "The platform",
-    body: "Exchange, verified identities, binding contracts, and the relay — the economy, online.",
+    body: "Exchange, verified identities, signed written agreements, and the relay—the economy, online.",
     status: "live",
     statusLabel: "live",
   },
@@ -26,9 +26,9 @@ const PHASES: {
   {
     node: "lora",
     title: "LoRa mesh pilot",
-    body: "Long-range radio nodes across the Central Coast — messages and matches that survive internet outage.",
+    body: "Planning and compatibility work for long-range radio nodes. The marketplace still requires internet access; no offline exchange service is available today.",
     status: "building",
-    statusLabel: "in progress",
+    statusLabel: "design stage",
   },
   {
     node: "repeater",
@@ -40,7 +40,7 @@ const PHASES: {
   {
     node: "autonomous",
     title: "The off-grid economy",
-    body: "Needs, contracts, and reputation fully operational with zero internet. Built to keep working when everything else doesn't.",
+    body: "The long-term goal: needs, agreements, and reputation available through a local radio mesh during internet outages. Not available today.",
     status: "vision",
     statusLabel: "the vision",
   },
@@ -96,7 +96,8 @@ export function OffgridVision() {
             » THE LONG GAME — FROM APP TO AUTONOMOUS MESH
           </p>
           <h2 className="heading-display text-3xl md:text-4xl text-gold mb-6 max-w-3xl">
-            Built to keep working when the internet <span className="text-sun">doesn&apos;t.</span>
+            Designed for a future where the internet{" "}
+            <span className="text-sun">isn&apos;t required.</span>
           </h2>
           <p className="text-sm md:text-base text-ash leading-relaxed max-w-2xl mb-14">
             Every antidosis layer exists for one reason: the local economy shouldn&apos;t die when

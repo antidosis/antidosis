@@ -2,10 +2,10 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { withApiHandler } from "@/lib/api-handler";
 import { auditLog, getClientInfo } from "@/lib/audit";
-import { EXCHANGE_MODE_VALUES } from "@/lib/categories";
 import { isValidCentralCoastSuburb } from "@/lib/data/central-coast-suburbs";
 import { requireVerifiedParticipation } from "@/lib/participation";
 import { prisma } from "@/lib/prisma";
+import { getPublicNeeds } from "@/lib/public-content";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { createNeedSchema } from "@/lib/schemas";
 import { sanitizePlainText } from "@/lib/security/sanitize";
@@ -14,110 +14,23 @@ import { createClient } from "@/lib/supabase/server";
 
 export const GET = withApiHandler(async (req: NextRequest) => {
   const { searchParams } = new URL(req.url);
-  const q = searchParams.get("q")?.slice(0, 100);
-  const skill = searchParams.get("skill")?.slice(0, 50);
-  const offerType = searchParams.get("type");
-  const location = searchParams.get("location")?.slice(0, 100);
-  const category = searchParams.get("category")?.slice(0, 50);
-  const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
-  const limit = Math.min(50, Math.max(1, parseInt(searchParams.get("limit") || "12", 10)));
-  const skip = (page - 1) * limit;
+  const requestedPage = Number.parseInt(searchParams.get("page") || "1", 10);
+  const requestedLimit = Number.parseInt(searchParams.get("limit") || "12", 10);
+  const data = await getPublicNeeds({
+    q: searchParams.get("q")?.slice(0, 100),
+    skill: searchParams.get("skill")?.slice(0, 50),
+    offerType: searchParams.get("type") ?? undefined,
+    location: searchParams.get("location")?.slice(0, 100),
+    category: searchParams.get("category")?.slice(0, 50),
+    page: Number.isFinite(requestedPage) ? Math.max(1, requestedPage) : 1,
+    limit: Number.isFinite(requestedLimit) ? Math.min(50, Math.max(1, requestedLimit)) : 12,
+  });
 
-  const where: Record<string, any> = { status: "open" };
-
-  if (q) {
-    where.OR = [
-      { title: { contains: q, mode: "insensitive" } },
-      { description: { contains: q, mode: "insensitive" } },
-    ];
-  }
-
-  if (offerType) {
-    where.offerType = offerType;
-  }
-
-  if (location) {
-    where.locationName = { contains: location, mode: "insensitive" };
-  }
-
-  if (category && EXCHANGE_MODE_VALUES.includes(category)) {
-    where.needCategory = category;
-  }
-
-  if (skill) {
-    where.requiredSkills = {
-      some: {
-        name: { contains: skill, mode: "insensitive" },
-      },
-    };
-  }
-
-  const [needs, total, offerTypesWithNeeds, categoriesWithNeeds, skillsWithNeeds] =
-    await Promise.all([
-      prisma.need.findMany({
-        where,
-        // Boosted (paid top-placement) listings sort first. Correctness
-        // invariant: expired boosts must be clamped to NULL (boost-expiry
-        // sweep) so a stale date never outranks a fresh free listing. No
-        // boosts exist yet — this is the reserved hook for monetisation.
-        orderBy: [{ boostedUntil: { sort: "desc", nulls: "last" } }, { createdAt: "desc" }],
-        skip,
-        take: limit,
-        include: {
-          poster: {
-            select: {
-              id: true,
-              fullName: true,
-              avatarUrl: true,
-              ratingAvg: true,
-              ratingCount: true,
-              locationName: true,
-            },
-          },
-          requiredSkills: true,
-          _count: {
-            select: { acceptances: true, views: true, watches: true },
-          },
-        },
-      }),
-      prisma.need.count({ where }),
-      prisma.need.findMany({
-        where: { status: "open" },
-        select: { offerType: true },
-        distinct: ["offerType"],
-      }),
-      prisma.need.findMany({
-        where: { status: "open", needCategory: { not: null } },
-        select: { needCategory: true },
-        distinct: ["needCategory"],
-      }),
-      prisma.$queryRaw<{ name: string }[]>`
-        SELECT DISTINCT ns.name
-        FROM need_skills ns
-        INNER JOIN needs n ON ns.need_id = n.id
-        WHERE n.status = 'open'
-      `,
-    ]);
-
-  return NextResponse.json(
-    {
-      needs,
-      total,
-      page,
-      totalPages: Math.ceil(total / limit),
-      limit,
-      availableFilters: {
-        offerTypes: offerTypesWithNeeds.map((n) => n.offerType),
-        categories: categoriesWithNeeds.map((n) => n.needCategory).filter(Boolean) as string[],
-        skills: skillsWithNeeds.map((s) => s.name),
-      },
+  return NextResponse.json(data, {
+    headers: {
+      "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
     },
-    {
-      headers: {
-        "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
-      },
-    }
-  );
+  });
 });
 
 export const POST = withApiHandler(async (req: NextRequest) => {

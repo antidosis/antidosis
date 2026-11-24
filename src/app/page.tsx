@@ -7,7 +7,7 @@ const siteUrl = "https://antidosis.com";
 export const metadata: Metadata = {
   title: "antidosis — the exchange network.",
   description:
-    "A reciprocal exchange network on the Central Coast, NSW. Post what you need. Say what you'll give back. Connect with verified locals you can trust. Running on the internet today — built to keep working when everything else doesn't.",
+    "A reciprocal exchange network on the Central Coast, NSW. Post what you need. Say what you'll give back. Connect with verified locals you can trust. Running on the internet today, with a long-term vision for local radio-mesh coordination during outages.",
   openGraph: {
     type: "website",
     locale: "en_AU",

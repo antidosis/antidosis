@@ -23,26 +23,10 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { formatAbn } from "@/lib/abn";
+import type { DirectoryProfile } from "@/lib/public-content";
 import { useApi } from "@/lib/swr-config";
 import { cn } from "@/lib/utils";
-interface ProProfile {
-  id: string;
-  fullName: string | null;
-  avatarUrl: string | null;
-  bio: string | null;
-  locationName: string | null;
-  publicPhone: string | null;
-  ratingAvg: number;
-  ratingCount: number;
-  jobsCompleted: number;
-  isVerified: boolean;
-  accountType: string;
-  abn: string | null;
-  abnVerified: boolean;
-  audienceSize: number | null;
-  skills: { name: string }[];
-  credentials: { id: string }[];
-}
+type ProProfile = DirectoryProfile;
 
 type DirectoryTab = "all" | "people" | "businesses";
 
@@ -55,9 +39,10 @@ const TABS: { value: DirectoryTab; label: string }[] = [
 interface ProsDirectoryProps {
   /** Rendered inside the exchange console — the page chrome lives there. */
   embedded?: boolean;
+  initialData?: DirectoryProfile[];
 }
 
-export default function ProsDirectoryPage({ embedded = false }: ProsDirectoryProps) {
+export default function ProsDirectoryPage({ embedded = false, initialData }: ProsDirectoryProps) {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [tab, setTab] = useState<DirectoryTab>("all");
@@ -75,7 +60,13 @@ export default function ProsDirectoryPage({ embedded = false }: ProsDirectoryPro
     return `/api/v1/pros?${params.toString()}`;
   })();
 
-  const { data: pros, isLoading, error } = useApi<ProProfile[]>(key);
+  const {
+    data: pros,
+    isLoading,
+    error,
+  } = useApi<ProProfile[]>(key, {
+    fallbackData: key === "/api/v1/pros?" ? initialData : undefined,
+  });
 
   return (
     <div className={embedded ? "" : "max-w-5xl mx-auto px-4 md:px-8"}>

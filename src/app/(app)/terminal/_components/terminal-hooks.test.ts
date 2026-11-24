@@ -92,7 +92,9 @@ describe("useNotificationSound", () => {
     };
     vi.stubGlobal(
       "AudioContext",
-      vi.fn(() => audioCtxMock)
+      vi.fn(function () {
+        return audioCtxMock;
+      })
     );
   });
 
@@ -150,7 +152,7 @@ describe("useNotificationSound", () => {
   it("handles AudioContext creation error gracefully", () => {
     vi.stubGlobal(
       "AudioContext",
-      vi.fn(() => {
+      vi.fn(function () {
         throw new Error("Not allowed");
       })
     );

@@ -50,7 +50,13 @@ describe("GET /api/v1/needs", () => {
 
   it("returns needs list with pagination", async () => {
     mockFindMany.mockResolvedValueOnce([
-      { id: "1", title: "Need plumber", poster: { fullName: "John" } },
+      {
+        id: "1",
+        title: "Need plumber",
+        createdAt: new Date("2026-11-20T00:00:00Z"),
+        boostedUntil: null,
+        poster: { fullName: "John" },
+      },
     ]);
     mockCount.mockResolvedValueOnce(1);
     mockFindMany.mockResolvedValueOnce([{ offerType: "service" }]);

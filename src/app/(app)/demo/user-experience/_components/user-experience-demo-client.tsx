@@ -376,7 +376,9 @@ function ScenePostNeed({
         <div className="flex items-start gap-3">
           <Lightbulb className="h-4 w-4 text-sun mt-0.5 shrink-0" />
           <div>
-            <p className="text-sm text-gold font-medium">posts with images get 3x more responses</p>
+            <p className="text-sm text-gold font-medium">
+              clear photos help people understand what you need
+            </p>
             <p className="text-xs text-ash mt-1">
               add photos of what you need and what you are offering. it builds instant trust.
             </p>
@@ -1390,8 +1392,8 @@ function SceneMarkComplete({ marked, useContract }: { marked: boolean; useContra
         </p>
         <p className="text-sm text-parchment mb-6">
           {useContract
-            ? "In return, you will provide professional electrical work (up to 2 hours) as agreed in the contract."
-            : "In return, you will provide professional electrical work (up to 2 hours) as discussed."}
+            ? "In return, the verified licensed electrician will provide electrical work (up to 2 hours) as agreed in the contract."
+            : "In return, the verified licensed electrician will provide electrical work (up to 2 hours) as discussed."}
         </p>
         <Button disabled={!marked}>
           {marked ? (

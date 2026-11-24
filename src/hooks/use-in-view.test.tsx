@@ -26,8 +26,8 @@ describe("useInView", () => {
     disconnectMock = vi.fn();
     unobserveMock = vi.fn();
 
-    global.IntersectionObserver = vi.fn((callback) => {
-      intersectionCallback = callback;
+    global.IntersectionObserver = vi.fn(function (callback: IntersectionObserverCallback) {
+      intersectionCallback = callback as unknown as (entries: IntersectionObserverEntry[]) => void;
       return {
         observe: observeMock,
         disconnect: disconnectMock,

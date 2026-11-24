@@ -275,8 +275,9 @@ export default function TermsPage() {
               You are solely responsible for the accuracy and legality of the content you post
             </li>
             <li>
-              We do not verify, endorse, or guarantee the accuracy of any need, offer, or user
-              profile information
+              Beyond the specific verification checks described in section 12 and any individually
+              verified credentials shown on a profile, we do not verify, endorse, or guarantee the
+              accuracy of any need, offer, or user profile information
             </li>
             <li>
               You are responsible for assessing the suitability, reliability, and trustworthiness of
@@ -467,9 +468,11 @@ export default function TermsPage() {
           <h2 className="text-lg font-semibold text-gold mb-3">12. Verification</h2>
           <p className="mb-3">
             The Service is <strong>free</strong> for everyone: there are no fees, subscriptions,
-            recurring billing, or payment details collected. Users may optionally complete
-            verification to unlock a trust badge, directory listing, and participation features
-            (posting needs, expressing interest, messaging).
+            recurring billing, or payment details collected. A verified Australian mobile number is
+            required for participation (posting needs, expressing interest, and messaging). The main
+            verified badge additionally requires identity-document review. Eligible users may opt in
+            to the public directory; individual licences and qualifications have separate credential
+            statuses.
           </p>
           <ul className="list-disc pl-5 space-y-1 mb-3">
             <li>

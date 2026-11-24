@@ -26,33 +26,12 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { EXCHANGE_MODES, INCOMPATIBLE_EXCHANGE_MODES, getExchangeMode } from "@/lib/categories";
+import type { PublicNeedItem, PublicNeedsResponse } from "@/lib/public-content";
 import { searchSkills } from "@/lib/skills-taxonomy";
 import { useApi } from "@/lib/swr-config";
 import { cn } from "@/lib/utils";
 
-type NeedItem = {
-  id: string;
-  title: string;
-  createdAt: string;
-  description: string;
-  needCategory: string | null;
-  offerType: string;
-  offerDescription: string;
-  isLocal: boolean;
-  locationName: string | null;
-  poster: {
-    id: string;
-    fullName: string | null;
-    avatarUrl: string | null;
-    ratingAvg: number;
-    ratingCount: number;
-    locationName: string | null;
-  };
-  requiredSkills: { id: string; name: string }[];
-  _count: { acceptances: number; views: number; watches: number };
-  boostedUntil?: string | null;
-  boostTier?: string | null;
-};
+type NeedItem = PublicNeedItem;
 
 /** Node vitality: fresh posts pulse, hot posts burn amber. */
 function nodeState(need: NeedItem): "fresh" | "hot" | "steady" {
@@ -86,9 +65,10 @@ const PAGE_SIZE = 12;
 interface NeedsListClientProps {
   /** Rendered inside the exchange console — the page chrome lives there. */
   embedded?: boolean;
+  initialData?: PublicNeedsResponse;
 }
 
-export default function NeedsPage({ embedded = false }: NeedsListClientProps) {
+export default function NeedsPage({ embedded = false, initialData }: NeedsListClientProps) {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
@@ -131,18 +111,9 @@ export default function NeedsPage({ embedded = false }: NeedsListClientProps) {
     return `/api/v1/needs?${params.toString()}`;
   })();
 
-  const { data: needsData, isLoading: loading } = useApi<{
-    needs: NeedItem[];
-    total: number;
-    page: number;
-    totalPages: number;
-    limit: number;
-    availableFilters: {
-      offerTypes: string[];
-      categories: string[];
-      skills: string[];
-    };
-  }>(needsKey);
+  const { data: needsData, isLoading: loading } = useApi<PublicNeedsResponse>(needsKey, {
+    fallbackData: needsKey === "/api/v1/needs?page=1&limit=12" ? initialData : undefined,
+  });
 
   const { data: recData } = useApi<{
     needs: NeedItem[];
@@ -217,8 +188,8 @@ export default function NeedsPage({ embedded = false }: NeedsListClientProps) {
           <div>
             <p className="text-sm text-gold font-medium">Central Coast NSW pilot</p>
             <p className="text-xs text-ash mt-1">
-              all needs are local to the Central Coast region during the trial. remote exchanges
-              will be available soon.
+              All needs are local to the Central Coast region during the pilot. Other regions will
+              open only after the expansion milestones are met.
             </p>
           </div>
         </div>

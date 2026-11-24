@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     template: "%s — antidosis",
   },
   description:
-    "A reciprocal exchange network on the Central Coast, NSW. Post what you need. Say what you'll give back. Connect with verified locals you can trust. Running on the internet today — built to keep working when everything else doesn't.",
+    "A reciprocal exchange network on the Central Coast, NSW. Post what you need. Say what you'll give back. Connect with verified locals you can trust. Running on the internet today, with a long-term vision for local radio-mesh coordination during outages.",
   keywords: [
     "barter",
     "exchange",
@@ -167,13 +167,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             }),
           }}
         />
-        {/* Structured Data: LocalBusiness / Place for Central Coast */}
+        {/* Structured Data: online service operator and Central Coast coverage */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
-              "@type": ["LocalBusiness", "Organization"],
+              "@type": "Organization",
               name: "antidosis",
               alternateName: "Antidosis Exchange",
               url: siteUrl,
@@ -204,21 +204,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 latitude: -33.3208,
                 longitude: 151.2335,
               },
-              priceRange: "$$",
-              openingHoursSpecification: {
-                "@type": "OpeningHoursSpecification",
-                dayOfWeek: [
-                  "Monday",
-                  "Tuesday",
-                  "Wednesday",
-                  "Thursday",
-                  "Friday",
-                  "Saturday",
-                  "Sunday",
-                ],
-                opens: "00:00",
-                closes: "23:59",
-              },
+              priceRange: "Free",
             }),
           }}
         />

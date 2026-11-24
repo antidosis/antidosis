@@ -190,8 +190,8 @@ export default function HowItWorksPage() {
                 Two Ways to Exchange
               </h2>
               <p className="text-sm text-ash max-w-md mb-14">
-                Every need can be fulfilled with or without a binding contract. Choose what feels
-                right for the exchange.
+                Every need can be fulfilled with or without a signed written agreement. Choose what
+                feels right for the exchange.
               </p>
             </Reveal>
 
@@ -213,8 +213,8 @@ export default function HowItWorksPage() {
               <Reveal delay={300}>
                 <PathCard
                   icon={ScrollText}
-                  title="Binding Contract"
-                  desc="For higher-stakes or new connections. Negotiate terms, sign digitally, and track fulfillment with a formal agreement."
+                  title="Written Agreement"
+                  desc="For higher-stakes or new connections. Negotiate terms, sign digitally, and keep a formal record of what both parties agreed."
                   items={[
                     "Both parties write their terms",
                     "Review, accept, and lock terms",
@@ -238,7 +238,8 @@ export default function HowItWorksPage() {
               <p className="text-xs text-ash mb-8 font-mono">» TRANSMISSION SEQUENCE</p>
               <h2 className="heading-display text-3xl md:text-4xl text-gold mb-4">The Journey</h2>
               <p className="text-sm text-ash max-w-md mb-16">
-                From account creation to review. Three phases. Ten minutes to start.
+                From account creation to review. Three phases. Registration and mobile setup usually
+                take minutes; identity and credential reviews require manual approval.
               </p>
             </Reveal>
 
@@ -250,7 +251,7 @@ export default function HowItWorksPage() {
                   <span className="text-xs font-mono text-ash">PHASE 01 — SETUP</span>
                   <div className="h-px flex-1 bg-line" />
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
                   <JourneyStep
                     icon={UserPlus}
                     title="Create Account"
@@ -269,12 +270,6 @@ export default function HowItWorksPage() {
                     color="var(--x-f5a623)"
                     delay={200}
                   />
-                  <JourneyStep
-                    icon={PenTool}
-                    title="Optional Contract"
-                    color="var(--x-b24bf5)"
-                    delay={300}
-                  />
                 </div>
               </div>
             </Reveal>
@@ -287,7 +282,7 @@ export default function HowItWorksPage() {
                   <span className="text-xs font-mono text-ash">PHASE 02 — CONNECT</span>
                   <div className="h-px flex-1 bg-line" />
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
                   <JourneyStep
                     icon={Search}
                     title="Browse & Find"
@@ -311,6 +306,12 @@ export default function HowItWorksPage() {
                     title="Accept"
                     color="var(--x-f5a623)"
                     delay={300}
+                  />
+                  <JourneyStep
+                    icon={PenTool}
+                    title="Optional Agreement"
+                    color="var(--x-b24bf5)"
+                    delay={400}
                   />
                 </div>
               </div>
@@ -374,8 +375,8 @@ export default function HowItWorksPage() {
                       <div>
                         <p className="text-sm font-medium text-gold mb-1">Verified Identities</p>
                         <p className="text-xs text-ash">
-                          Email, mobile, and credential verification. Know who you&apos;re dealing
-                          with.
+                          Confirmed email, verified mobile, and reviewed identity documents.
+                          Professional credentials are shown separately.
                         </p>
                       </div>
                     </div>
@@ -410,8 +411,8 @@ export default function HowItWorksPage() {
                       <div>
                         <p className="text-sm font-medium text-gold mb-1">Optional Contracts</p>
                         <p className="text-xs text-ash">
-                          Use binding contracts when you want formal terms. Skip them when you
-                          don&apos;t.
+                          Use a signed written agreement when you want formal terms. Skip it when
+                          you don&apos;t.
                         </p>
                       </div>
                     </div>

@@ -190,7 +190,7 @@ export async function generateContractPdf(data: ContractPdfData): Promise<Uint8A
   // Header
   drawText("ANTIDOSIS", { size: 24, bold: true, color: rgb(0.15, 0.15, 0.15) });
   y -= 18;
-  drawText(isDirect ? "Direct Agreement" : "Binding Exchange Contract", {
+  drawText(isDirect ? "Direct Agreement" : "Exchange Agreement", {
     size: 12,
     color: rgb(0.4, 0.4, 0.4),
   });

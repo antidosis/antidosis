@@ -7,7 +7,7 @@ const siteUrl = "https://antidosis.com";
 export const metadata: Metadata = {
   title: "How It Works",
   description:
-    "Learn how antidosis works. Create a need, connect with verified locals on the Central Coast, exchange anything, build your reputation. Free form or binding contract — you choose. One network, every node a neighbour.",
+    "Learn how antidosis works. Create a need, connect with verified locals on the Central Coast, exchange anything, build your reputation. Free form or signed written agreement — you choose. One network, every node a neighbour.",
   openGraph: {
     type: "website",
     locale: "en_AU",

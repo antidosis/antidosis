@@ -15,8 +15,9 @@ export const blogPosts: BlogPost[] = [
     slug: "barter-safely-central-coast",
     title: "How to Barter Safely on the Central Coast",
     excerpt:
-      "A practical guide to safe exchanges — from first contact to completion. What to verify, what to document, and when to use a binding contract.",
+      "A practical guide to safe exchanges — from first contact to completion. What to verify, what to document, and when to use a signed written agreement.",
     publishedAt: "2026-05-07",
+    updatedAt: "2026-11-24",
     author: "antidosis",
     tags: ["safety", "guide", "central coast"],
     readingTime: "5 min read",
@@ -32,7 +33,7 @@ Every antidosis profile shows verification status. Look for:
 - **Email verified** — Confirms the account is real
 - **Mobile verified** — SMS confirmation via Twilio
 - **Identity credentials** — Optional but strong signal of trustworthiness
-- **Verified badge** — Means the user has verified credentials in their field
+- **Verified badge** — Means identity documentation and an Australian mobile number have been verified; professional credentials are listed separately
 
 Don't skip this step. A verified profile isn't a guarantee, but it's a strong foundation.
 
@@ -40,15 +41,15 @@ Don't skip this step. A verified profile isn't a guarantee, but it's a strong fo
 
 Use the public wall on a need to ask questions before expressing interest. This lets others see the conversation too, which builds transparency. Once you're ready, express interest and move to a private thread.
 
-## 3. Use a Binding Contract When It Matters
+## 3. Use a Written Agreement When It Matters
 
-Not every exchange needs paperwork. But for high-value trades, time-sensitive commitments, or when you're meeting someone for the first time, the optional binding contract feature gives both parties legal clarity. It covers:
+Not every exchange needs paperwork. But for high-value trades, time-sensitive commitments, or when you're meeting someone for the first time, the optional agreement feature creates a signed written record of what both parties expect. It covers:
 
 - What each party agrees to provide
 - Deadlines and deliverables
 - Dispute resolution terms
 
-Both parties sign digitally. It's simple, fast, and creates accountability.
+Both parties sign digitally. The record can help resolve disagreements and may be useful evidence, but Antidosis does not guarantee legal validity or enforceability.
 
 ## 4. Meet in Public First
 
@@ -234,7 +235,7 @@ The ancient concept maps surprisingly well onto modern exchange:
 | Civic obligation to give back | Community obligation to help each other |
 | Property exchange as accountability | Skill/goods exchange as trust-building |
 | Reputation determined by participation | Reputation score determined by completed trades |
-| Legal framework (Athenian courts) | Optional binding contracts |
+| Legal framework (Athenian courts) | Optional signed written agreements |
 
 Both systems share a core belief: **exchange creates obligation, and obligation creates community.**
 
@@ -357,7 +358,7 @@ This isn't theoretical. History proves it:
 - **Argentina 2001–2002**: After economic collapse, barter clubs exploded. By 2002, an estimated **2 million Argentinians** were trading goods and services through informal networks
 - **Greece 2010–2015**: During the debt crisis, barter networks like TEM (Local Alternative Unit) processed millions of euros worth of trades
 - **Cuba 1990s**: The "Special Period" saw widespread barter of food, repairs, and skills
-- **COVID-19 2020**: Facebook barter groups grew 300% in the first three months of lockdowns
+- **COVID-19 2020**: Community barter and mutual-aid groups became important coordination channels during lockdowns
 
 The pattern is clear: **when formal economies seize up, informal exchange fills the gaps.**
 
@@ -391,6 +392,7 @@ Post your first need today. The safety net you build might catch someone else fi
     excerpt:
       "Why we started on the Central Coast, what we need to prove before expanding, and which regions are next. A transparent look at the growth plan behind Australia's newest exchange marketplace.",
     publishedAt: "2026-05-09",
+    updatedAt: "2026-11-24",
     author: "antidosis",
     tags: ["roadmap", "expansion", "central coast", "community"],
     readingTime: "8 min read",
@@ -460,7 +462,7 @@ We're not there yet. That's fine. The trial is called a trial for a reason.
 When we look at new regions, we score them on the same five factors:
 
 ### Population & Geography
-- **Ideal**: 200,000–500,000 people in a contained area
+- **Ideal**: roughly 200,000–700,000 people in a contained area, with suburb-level rollout for larger populations
 - **Too small**: <100,000 (not enough diversity)
 - **Too big**: >1,000,000 (anonymity kills trust)
 
@@ -590,6 +592,7 @@ The expansion roadmap doesn't start with a venture capital pitch. It starts with
     excerpt:
       "Most barter platforms collapse because they treat money as the enemy. Here's the counter-intuitive truth: money is just liquid barter. Denying it doesn't make you pure — it makes you impractical.",
     publishedAt: "2026-05-09",
+    updatedAt: "2026-11-24",
     author: "antidosis",
     tags: ["economy", "barter", "philosophy", "guide"],
     readingTime: "8 min read",
@@ -682,38 +685,17 @@ Pure barter platforms follow a predictable lifecycle:
 | Phase | What Happens |
 |---|---|
 | **Launch** | Idealists join. Early trades happen. Optimism is high. |
-| **Month 3** | Users start hitting coincidence-of-wants walls. Frustration builds. |
-| **Month 6** | Power users — the ones driving 80% of trades — leave because they can't scale. |
-| **Month 9** | New users find empty marketplaces. No one to trade with. |
-| **Month 12** | Platform is 90% inactive accounts. Founders pivot or shut down. |
+| **Early growth** | Users hit coincidence-of-wants walls. Frustration builds. |
+| **Stagnation** | Active participants struggle to find compatible exchanges and return less often. |
+| **Decline** | New users find an empty marketplace; the platform loses the density it needs. |
 
-You've seen this movie before. It doesn't have a happy ending.
+That cycle is a design risk to avoid, not a claim about measured Antidosis results.
 
-## Real-World Examples
+## What We Can Learn Without Inventing Case Studies
 
-### The Failures
+We don't need unsourced company histories or precise-looking numbers to understand the design choice. A platform that permits only direct swaps must find two people who want exactly what the other offers. A platform that also permits cash or mixed exchanges gives those people another way to reach agreement.
 
-**BarterQuest (USA, 2008–2012)**
-
-Launched with $2M in funding. Enforced pure barter. Grew to 50,000 users quickly. Collapsed within 18 months when users realised they couldn't trade their specialised skills for what they actually needed. The founders later admitted: *"We should have allowed partial cash from day one."*
-
-**Swapaskill (UK, 2011–2014)**
-
-Skill-swapping platform with no cash option. Peaked at 30,000 users. Died when trades became 90% negotiation, 10% actual exchange. Users spent more time haggling over relative value than trading.
-
-**Various "Time Bank" Platforms**
-
-Time banks (1 hour = 1 hour regardless of skill) are philosophically beautiful and practically broken. A heart surgeon's hour equals a dog walker's hour. Surgeons leave immediately. What's left is a marketplace of low-skill trades that don't create real value.
-
-### The Successes (That Allow Cash)
-
-**Bunz (Canada)**
-
-Started as pure barter. Nearly died. Pivoted to allow cash top-ups — e.g., trade your old jacket + $20 for someone's bike. Exploded to 1M+ users. Now owned by a major retail chain.
-
-**Facebook Marketplace / Gumtree**
-
-These aren't "barter platforms" in the ideological sense. But they're where most actual bartering happens in Australia. Why? Because they allow mixed transactions. Cash, swap, or partial swap. Users choose.
+The lesson is structural: keep pure barter available, but do not force it. Antidosis lets the parties choose goods, services, cash, or a combination and record that choice clearly.
 
 ## The Philosophical Truth
 
@@ -770,15 +752,15 @@ You can also combine them: "I'll give you my old bike + $50 for your guitar."
 - Farmer gets her fence. Fencer gets dinner + rent money.
 - Everyone wins.
 
-### The Binding Contract Feature
+### The Written Agreement Feature
 
-When cash is involved, trust matters more. Our optional binding contracts let you document:
+When cash is involved, clarity matters more. Our optional agreements let you document:
 
 - What each party provides (goods, services, cash, or mix)
 - Delivery timelines
 - Dispute resolution
 
-This protects cash transactions without adding friction to simple barters.
+This creates a shared record without adding paperwork to simple barters. It does not guarantee payment, performance, or legal enforceability.
 
 ## When to Barter, When to Cash, When to Mix
 
@@ -797,19 +779,11 @@ There's no universal rule. But here's a practical framework:
 
 A barter marketplace shouldn't be measured by how pure it is. It should be measured by **how many successful exchanges it facilitates.**
 
-If banning cash reduces successful trades by 70%, you've built a philosophy project, not a marketplace.
-
-If welcoming cash increases successful trades by 300%, you've built infrastructure that actually helps people.
+If banning cash prevents otherwise willing parties from reaching agreement, you've built a philosophy project, not a useful marketplace. The test is whether people can complete suitable exchanges safely and clearly—not whether every exchange fits one ideology.
 
 ## The Central Coast Experiment
 
-We're running this experiment in real time. Our early data shows:
-
-- **~40% of trades** are pure barter (skill for skill, item for item)
-- **~35% of trades** involve cash (either full payment or top-up)
-- **~25% of trades** are mixed (some barter, some cash)
-
-If we banned cash, we'd eliminate **60% of successful exchanges.** That's not principled. That's cruel to the people who need those exchanges to happen.
+We're testing that principle during the pilot. We do not yet have a large enough, well-documented sample to publish trustworthy exchange-mode percentages. Until we do, we won't present guesses as trial data. The product simply keeps all three options available: pure barter, cash, and mixed exchange.
 
 ## The Bottom Line
 
@@ -836,6 +810,7 @@ If you want to give your old bike + $50 for a guitar, do it.
     excerpt:
       "Most platforms train you to look for flaws. We train you to expect quality. Here's why a 10-point default rating system builds better exchanges than the 5-star suspicion model.",
     publishedAt: "2026-05-09",
+    updatedAt: "2026-11-24",
     author: "antidosis",
     tags: ["philosophy", "ratings", "trust", "guide"],
     readingTime: "6 min read",
@@ -928,14 +903,7 @@ Three mechanisms:
 
 ## The Real Test: Do People Actually Use Lower Ratings?
 
-Early data from the Central Coast trial shows something interesting:
-
-- **~85% of ratings are 10/10**
-- **~10% are 9/10**
-- **~4% are 8/10**
-- **~1% are 7 or below**
-
-Some platforms would see this as "rating inflation" and panic. We see it as **reality matching the default.** Most people who voluntarily join a barter marketplace are decent humans who want to help each other. The rating system should reflect that, not fight it.
+A default should never prevent an honest lower rating. We will evaluate that question using review distributions once the pilot has a sufficiently large and clearly reported sample. We are not publishing a percentage breakdown yet: precise numbers from a tiny trial would create false confidence.
 
 ## What We Tell New Users
 
@@ -958,6 +926,7 @@ Just humans rating humans the way humans actually behave when they're not being 
     excerpt:
       "Most needs get zero replies because they're vague, demanding, or forgettable. Here's the exact formula for writing a post that makes people want to help you — with real examples that work.",
     publishedAt: "2026-05-10",
+    updatedAt: "2026-11-24",
     author: "antidosis",
     tags: ["guide", "central coast", "how-to"],
     readingTime: "7 min read",
@@ -968,7 +937,7 @@ You post a need. You wait. Three days pass. Nothing. You refresh. Still nothing.
 
 The problem usually isn't the platform. It's the post.
 
-After reviewing hundreds of needs across barter marketplaces, the pattern is clear: **the posts that get responses follow a formula.** The ones that don't break at least one of five rules.
+Clear posts are easier to assess and answer. These five practical rules remove common ambiguity; they are writing guidance, not a claim based on measured Antidosis response rates.
 
 Here are those rules — with real examples that work on the Central Coast.
 
@@ -1255,6 +1224,7 @@ Use this data. A verified user with 12 completed trades and a 9.8 average rating
     excerpt:
       "In a barter economy, your rating isn't vanity — it's your credit score, your reference check, and your networking power all in one. Here's how a high reputation unlocks better trades than money ever could.",
     publishedAt: "2026-05-12",
+    updatedAt: "2026-11-24",
     author: "antidosis",
     tags: ["reputation", "trust", "guide", "central coast"],
     readingTime: "7 min read",
@@ -1330,18 +1300,11 @@ On antidosis, where the default is 10/10, reputation becomes an **offensive game
 - The barrier to entry for new traders is low
 - The ceiling for experienced traders is high
 
-## The Trust Threshold
+## Reading a Reputation Profile
 
-After reviewing early trade data from the Central Coast, we've noticed a pattern:
+A new profile has no track record, so assess the person and proposed exchange on their other merits. As genuine reviews accumulate, look at the written feedback, recency, rating count, and verification signals together. A high average from one or two trades is not equivalent to the same average across many trades.
 
-| Reputation Level | Response Rate | Trade Quality |
-|---|---|---|
-| **0 trades** | ~20% response rate | High variance — some great, some risky |
-| **1–3 trades, 9.5+ avg** | ~45% response rate | Generally good |
-| **4–10 trades, 9.5+ avg** | ~70% response rate | Consistently positive |
-| **10+ trades, 9.5+ avg** | ~90% response rate | Elite tier — people seek you out |
-
-The jump from 0 to 1 trade is the hardest. After that, each trade makes the next one easier.
+We are not publishing response-rate tiers yet; the pilot sample is not large enough to support them.
 
 ## How to Build Reputation Fast (Without Being Fake)
 
@@ -1387,8 +1350,9 @@ On the Central Coast, where community ties run deeper than in anonymous cities, 
     slug: "how-we-verify-identities",
     title: "How Antidosis Verifies Identities — And Why Scammers Hate Every Layer",
     excerpt:
-      "A behind-the-scenes look at SMS, email, and credential verification. Why we built three layers of trust, what each layer stops, and how verified profiles get 3x more responses than unverified ones.",
+      "A behind-the-scenes look at email, Australian mobile, identity, and credential verification—and what each check does and does not prove.",
     publishedAt: "2026-05-13",
+    updatedAt: "2026-11-24",
     author: "antidosis",
     tags: ["safety", "verification", "trust", "guide"],
     readingTime: "6 min read",
@@ -1397,9 +1361,9 @@ On the Central Coast, where community ties run deeper than in anonymous cities, 
 
 Every marketplace has a scammer problem. The difference between a platform that survives and one that dies is how seriously it takes verification.
 
-At antidosis, we built three distinct verification layers. Not because we love bureaucracy — because each layer stops a different type of bad actor. Together, they create a barrier that's annoying for scammers and invisible for honest users.
+At antidosis, email, mobile, identity, and credential checks answer different questions. Together they add friction for fake accounts, but no check proves that a person is honest or safe.
 
-Here's how each layer works, what it stops, and why verified profiles get three times more trade responses than unverified ones.
+Here is what each layer does and where its limits are.
 
 ## Layer 1: Email Verification
 
@@ -1429,19 +1393,15 @@ Here's how each layer works, what it stops, and why verified profiles get three 
 
 ## Layer 3: Credential Verification
 
-**What it is:** Users upload photos of real credentials — trade licenses, certificates, driver's licenses, Working With Children Checks, RSA cards, and more. Admins review the documents manually and either verify or reject them.
+**What it is:** Users upload credentials such as trade licences, certificates, Working With Children Checks, or RSA cards. Admins review the submitted documents manually and either verify or reject the credential. Government-issued identity documentation is handled as a separate identity-verification check.
 
-**What it stops:** Almost everything that Layers 1 and 2 miss.
+**What it adds:** Evidence about a specific licence or qualification—not a blanket endorsement of every skill, identity, or future interaction.
 
-**Why it matters:** Credential verification is the real trust layer. It proves three things simultaneously:
-
-1. **You have a real skill** — A verified plumbing license means you actually know plumbing
-2. **You're willing to be accountable** — Only someone with real skills would upload proof
-3. **You have a real identity** — Fake documents are possible but expensive and risky
+**Why it matters:** A verified plumbing licence is relevant when assessing someone for plumbing work. It does not prove good character, guarantee workmanship, or replace checking the official register.
 
 **The process:**
 1. User uploads credential photo(s)
-2. Admin reviews within 24–48 hours
+2. Admin manually reviews the submission; timing varies with the review queue
 3. If valid, the credential shows as "verified" on the profile
 4. If invalid, admin rejects with a reason
 5. Rejected credentials don't show publicly
@@ -1450,73 +1410,31 @@ Here's how each layer works, what it stops, and why verified profiles get three 
 
 **What users see:** A green shield icon next to verified credentials. This is the strongest trust signal on the platform.
 
-## The Verification Multiplier Effect
-
-Data from the Central Coast trial shows a clear pattern:
-
-| Verification Level | Avg Response Rate | Trade Success Rate |
-|---|---|---|
-| No verification | ~15% | ~60% |
-| Email only | ~25% | ~70% |
-| Email + Mobile | ~40% | ~80% |
-| Email + Mobile + Credentials | ~70% | ~92% |
-
-Each layer you add roughly doubles your response rate. Not because the platform rewards you — because **other users choose to engage with verified profiles.**
-
 ## What Verification Doesn't Do
 
-Let's be honest about limitations:
+Verification does not guarantee honesty, character, workmanship, safety, or a successful exchange. A verified person can still overpromise or behave badly. Documents can be forged, accounts can be compromised, and checks have limits.
 
-**Verification doesn't guarantee honesty.** A verified plumber can still overpromise. A verified teacher can still be unreliable. Verification proves identity and skill — it doesn't prove character.
+Use the available signals together: read written reviews, check the relevant official licence register, communicate clearly, meet in public where practical, and consider a signed written agreement for valuable exchanges.
 
-**Verification doesn't replace judgement.** You should still meet in public for first trades. You should still use binding contracts for high-value exchanges. You should still trust your gut.
+## What the Verified Badge Means
 
-**Verification isn't foolproof.** Determined scammers can fake documents, buy SIM cards, and create elaborate personas. No system stops 100% of fraud. Our goal is to stop 95% of it — which is enough to make scamming unprofitable.
+The main verified badge means government-issued identity documentation has been reviewed and the Australian mobile number has been verified. Email confirmation is a separate account requirement. Individual licences and qualifications receive their own credential status; uploading any certificate does not grant the identity badge.
 
-## How Scammers Think (And Why They Avoid Us)
+Eligible members can opt in to the directory. Verification is free, and participation still requires your own judgement.
 
-Professional scammers operate like businesses. They calculate:
+## How to Get Verified
 
-> *"How much can I make per account before it gets banned, divided by the time and cost to create each account?"*
+1. **Sign up** with an email address you control and confirm it
+2. **Enter your Australian mobile** and submit the SMS code
+3. **Upload government-issued identity documentation** for review
+4. **Add any relevant professional credentials** as separate submissions
+5. **Wait for manual review**—submission may take minutes, but review timing depends on the queue and whether clearer documents are needed
 
-On platforms with zero verification, the answer is high. Create account → scam someone → get banned → create new account. Repeat.
-
-On antidosis, the math changes:
-
-| Step | Time/Cost | Scammer Pain Point |
-|---|---|---|
-| Create email | 2 minutes | Low |
-| Verify email | 1 minute | Low |
-| Get Australian mobile | $2–$30 or stolen identity | Medium |
-| Verify mobile | 2 minutes | Low |
-| Upload fake credential | 30–60 minutes + Photoshop skills | High |
-| Wait for admin review | 24–48 hours | High (delays payout) |
-| Get rejected | 100% time loss | Very high |
-| Get accepted | Rare, but possible | Still need to complete a real trade first |
-
-**The scammer's hourly wage on antidosis is roughly zero.** They can make more money begging at Gosford Station.
-
-## For Honest Users: Verification Is Everything
-
-Here's something we don't advertise enough: **verification is the whole trust layer.**
-
-Verified members get a badge, directory listing, and credential checks. An email-verified, mobile-verified user with one uploaded credential carries real trust on the network.
-
-There's nothing to buy and nothing to claim. Verify once and you're in.
-
-## How to Get Fully Verified in 10 Minutes
-
-1. **Sign up** with your real email
-2. **Click the verification link** in your inbox
-3. **Enter your Australian mobile** and type the SMS code
-4. **Upload one credential** — any license, certificate, or ID you're comfortable sharing
-5. **Wait for admin approval** (usually same day)
-
-That's it. Ten minutes of effort for a 3x response rate increase.
+We will publish response or outcome statistics only when we can accompany them with a meaningful sample size, date range, and method.
 
 ---
 
-**Not verified yet?** Go to your dashboard now. Add your mobile. Upload a credential. See what happens to your response rate in the next 48 hours.
+**Ready to verify?** Open your dashboard to complete mobile and identity verification, then add any credentials relevant to your work.
     `.trim(),
   },
   {
@@ -1691,8 +1609,9 @@ All without a single extra shift at Woolworths.
     slug: "what-happens-when-trade-goes-wrong",
     title: "What Happens When a Trade Goes Wrong? Antidosis Dispute Process Explained",
     excerpt:
-      "Nobody wants to talk about failed trades. We do. Here's exactly what happens when things go sideways — from first contact to resolution — and how our optional binding contracts protect both parties before problems start.",
+      "What to do when an exchange goes wrong—from direct communication and written records to platform reports and external escalation.",
     publishedAt: "2026-05-15",
+    updatedAt: "2026-11-24",
     author: "antidosis",
     tags: ["safety", "contracts", "guide", "dispute"],
     readingTime: "8 min read",
@@ -1726,9 +1645,9 @@ Every message on antidosis is stored. This isn't Big Brother — it's your insur
 - "Trust me, it'll be fine" — trust is good, clarity is better
 - Off-platform communication — keep it on antidosis so there's a record
 
-### 2. Optional Binding Contracts
+### 2. Optional Written Agreements
 
-For trades above a certain value or complexity, use the binding contract feature. It's not dramatic. It's not corporate. It's just a simple digital agreement that both parties sign.
+For valuable or complex trades, use the agreement feature to create a clear digital record that both parties sign.
 
 **What the contract covers:**
 - What Party A agrees to provide (goods, services, cash)
@@ -1737,7 +1656,7 @@ For trades above a certain value or complexity, use the binding contract feature
 - What happens if either party doesn't deliver
 - How disputes will be resolved
 
-**Why it works:** Most people won't sign a contract they intend to break. The act of signing creates psychological commitment. And if someone does break it, you have a written agreement to point to.
+**Why it helps:** Signing makes both parties review the same terms. If something goes wrong, the written record can clarify the disagreement and may be useful evidence. Antidosis does not guarantee enforceability or outcomes.
 
 ### 3. The Public Profile Check
 
@@ -1770,7 +1689,7 @@ The good message:
 - Names a specific harm
 - Leaves room for conversation
 
-About 60% of disputes are resolved at this stage. Most people don't want conflict. They want to fix things. Give them the chance.
+Start here before escalating. A factual, non-accusatory message gives the other person a clear opportunity to respond and resolve the issue.
 
 ### Step 2: Leave an Honest Review
 
@@ -1793,12 +1712,13 @@ If the trade involved significant value (over $500 equivalent) or there are sign
 - Screenshots of relevant messages
 - What resolution you're seeking
 
-We review every dispute within 48 hours. What we can do:
-- Review the message history
-- Check both parties' trade history
-- Suspend accounts with patterns of bad behaviour
-- Ban repeat offenders
-- Provide a written summary of findings
+Support will assess the report as resources and safety priorities allow; we do not promise a fixed review or resolution deadline. Where appropriate, we may:
+- Review available platform records
+- Consider relevant account and exchange history
+- Restrict or suspend accounts under our Terms
+- Explain the platform actions we take
+
+We do not act as a court, determine legal liability, or guarantee a negotiated outcome.
 
 What we **can't** do:
 - Force someone to complete a trade (we're not a court)
@@ -1853,7 +1773,7 @@ For serious fraud (theft, significant financial loss, threats), contact NSW Poli
 - If pattern exists, permanent ban
 - Support police reports if requested
 
-**Prevention:** Use binding contracts for high-value trades. Don't hand over your item until you've received theirs. Meet in public.
+**Prevention:** Use a signed written agreement for high-value trades. Don't hand over your item until you've received theirs unless the agreed process explicitly accounts for that risk. Meet in public where practical.
 
 ### Type 4: Communication Breakdown
 
@@ -1876,18 +1796,9 @@ We can't fix every bad trade. No platform can. What we can do is:
 3. **Make prevention easy** — Contracts, messaging, and verification exist specifically to reduce disputes
 4. **Make resolution fair** — We don't automatically side with the person who complains first. We look at evidence.
 
-## Our Track Record (So Far)
+## Our Approach to Measurement
 
-From the Central Coast trial:
-
-| Dispute Type | Frequency | Resolution Rate |
-|---|---|---|
-| No-show | ~3% of trades | 70% resolved directly |
-| Quality dispute | ~2% of trades | 55% resolved directly |
-| Non-delivery | ~0.5% of trades | 40% resolved directly |
-| Communication breakdown | ~1.5% of trades | 80% resolved directly |
-
-**Total dispute rate: ~7%.** That means 93% of trades go smoothly. Of the 7% that don't, most are resolved by the traders themselves without platform intervention.
+We are not publishing dispute percentages yet. A trustworthy figure needs a defined period, a meaningful number of completed exchanges, and a consistent definition of what counts as a dispute. Until those are available, precise-looking rates would be misleading.
 
 ## What We Ask of You
 
@@ -1903,7 +1814,7 @@ We think ours does.
 
 ---
 
-**Have a dispute to report?** Email support@antidosis.com with the details. We read every message and respond within 48 hours.
+**Have a dispute to report?** Email support@antidosis.com with the details. Include the exchange or agreement reference and preserve the relevant messages and records.
     `.trim(),
   },
   {

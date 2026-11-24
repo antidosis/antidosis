@@ -361,7 +361,7 @@ export async function generateAgentResponse(
 
   // Need help
   if (q.includes("need") && (q.includes("how") || q.includes("post") || q.includes("create"))) {
-    return `📖 Posting a Need\n\n  /post launches an interactive wizard. You'll need:\n  • A clear title and description\n  • What you're offering in return\n  • Your location (Central Coast only)\n  • Optional: skills needed, deadline, contract requirement\n\n  Tips:\n  • Specific needs get more responses\n  • Adding a value estimate helps people gauge fairness\n  • Verified profiles get 3x more interest`;
+    return `📖 Posting a Need\n\n  /post launches an interactive wizard. You'll need:\n  • A clear title and description\n  • What you're offering in return\n  • Your location (Central Coast only)\n  • Optional: skills needed, deadline, contract requirement\n\n  Tips:\n  • Specific needs get more responses\n  • Adding a value estimate helps people gauge fairness\n  • Verification helps others assess your profile`;
   }
 
   // Rating/reputation help

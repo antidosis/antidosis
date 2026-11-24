@@ -137,7 +137,9 @@ export default function CreateNeedPage() {
         <div className="flex items-start gap-3">
           <Lightbulb className="h-4 w-4 text-sun mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-sm text-gold font-medium">posts with images get 3x more responses</p>
+            <p className="text-sm text-gold font-medium">
+              clear photos help people understand what you need
+            </p>
             <p className="text-xs text-ash mt-1">
               add photos of what you need and what you are offering. it builds instant trust.
             </p>

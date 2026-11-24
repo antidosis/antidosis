@@ -3,11 +3,13 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const mockSend = vi.fn();
 
 vi.mock("resend", () => ({
-  Resend: vi.fn(() => ({
-    emails: {
-      send: (...args: unknown[]) => mockSend(...args),
-    },
-  })),
+  Resend: vi.fn(function () {
+    return {
+      emails: {
+        send: (...args: unknown[]) => mockSend(...args),
+      },
+    };
+  }),
 }));
 
 async function loadEmail() {

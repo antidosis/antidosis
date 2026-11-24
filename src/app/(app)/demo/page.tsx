@@ -50,7 +50,7 @@ const DEMOS = [
     id: "contract-flow",
     title: "Contract Flow",
     description:
-      "Experience the full lifecycle of a formal exchange. Post a need, receive interest, negotiate terms, sign a binding contract, and leave reviews.",
+      "Experience the full lifecycle of a formal exchange. Post a need, receive interest, negotiate terms, sign a written agreement, and leave reviews.",
     icon: FileText,
     href: "/demo/contract-flow",
     color: "var(--x-00e676)",

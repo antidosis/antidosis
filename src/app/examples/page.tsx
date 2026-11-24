@@ -333,9 +333,9 @@ const examples: Example[] = [
   // ── Cash Offers ──
   {
     id: 24,
-    needTitle: "Leaking kitchen tap",
+    needTitle: "Licensed plumber for a leaking kitchen tap",
     needDescription:
-      "Dripping constantly for a week. Pretty sure it's just the washer. Parts supplied, just need someone who knows what they're doing.",
+      "Dripping constantly for a week. Seeking a currently licensed NSW plumber; verify the licence independently before work starts. Parts supplied, with scope and price recorded in an agreement.",
     offerType: "money",
     offerDescription: "$80 cash on completion",
     location: "Umina Beach",
@@ -401,9 +401,9 @@ const examples: Example[] = [
   },
   {
     id: 30,
-    needTitle: "Check on my dad — I'll bake you a cake",
+    needTitle: "Social visit for my dad — checked helper required",
     needDescription:
-      "Dad lives alone in Woy Woy, early dementia. I live in Sydney and can't visit weekly. Need someone to pop in for 30 mins, make a cuppa, check he's okay. Weekly.",
+      "Dad lives alone in Woy Woy and would enjoy a weekly 30-minute social visit. No personal or medical care. Identity, references and any legally required checks must be verified, with scope and emergency contacts recorded in a written agreement.",
     offerType: "service",
     offerDescription: "A freshly baked cake every fortnight (your choice)",
     location: "Woy Woy",
@@ -412,9 +412,9 @@ const examples: Example[] = [
   },
   {
     id: 31,
-    needTitle: "Emergency babysitter — date nights",
+    needTitle: "Evening babysitter — WWCC and references required",
     needDescription:
-      "Need a reliable sitter for occasional Friday/Saturday evenings. Two kids, 5 and 7, asleep by 8pm usually. We rarely get out. Happy to return the favour or pay.",
+      "Seeking a reliable sitter for occasional evenings with two children, 5 and 7. A valid Working with Children Check and references must be verified; responsibilities, pay or exchange, and emergency contacts go in a written agreement.",
     offerType: "service",
     offerDescription: "We'll babysit your kids in return (qualified teacher)",
     location: "Terrigal",
@@ -649,11 +649,11 @@ const examples: Example[] = [
   },
   {
     id: 52,
-    needTitle: "Cafe needs a barista — meals + $15/hr",
+    needTitle: "Cafe seeking a casual barista — lawful employment",
     needDescription:
-      "Small beachside cafe needs a casual barista for 3-4 shifts a week. Can train you if you're keen. Perks: free coffee, staff meals, and $15/hr cash. Perfect for a traveller who wants to settle in for a month.",
+      "Small beachside cafe seeking a casual barista. This is employment, not a cash-in-hand exchange: the applicable award, casual loading, superannuation and other entitlements apply, with written pay and shift terms.",
     offerType: "money",
-    offerDescription: "$15/hr + free meals + all the coffee you can drink",
+    offerDescription: "Lawful award wages and entitlements through payroll, plus staff meals",
     location: "Avoca Beach",
     category: "backpacker-life",
     icon: <Coffee className="h-4 w-4" />,
@@ -770,9 +770,9 @@ const examples: Example[] = [
   },
   {
     id: 63,
-    needTitle: "Babysit in the evenings — I'll clean your house",
+    needTitle: "Checked babysitter seeking short accommodation exchange",
     needDescription:
-      "Former nanny, travelling Australia. Need accommodation for 2-3 weeks. Offering evening babysitting (so parents can go out) plus general house cleaning. Happy to do meal prep too. References from 3 families.",
+      "Former nanny travelling Australia. Offering evening babysitting and house cleaning for short accommodation. Valid Working with Children Check, identity and references must be verified; child-care duties, hours, value and house rules require a written agreement.",
     offerType: "service",
     offerDescription: "Evening babysitting + house cleaning + meal prep",
     location: "Anywhere on the Coast",
@@ -781,11 +781,11 @@ const examples: Example[] = [
   },
   {
     id: 64,
-    needTitle: "Hostel needs a handyman — free dorm + $20/hr",
+    needTitle: "Hostel seeking an insured maintenance contractor",
     needDescription:
-      "Old hostel needs fixing up — leaky taps, broken screens, painting touch-ups, furniture repair. 3-4 hours a day, flexible timing. Free dorm bed and $20/hr cash. Perfect for a tradie on holiday.",
+      "Old hostel needs broken screens, painting touch-ups and furniture repairs. Plumbing and electrical work are excluded unless separately licensed. Agree insurance, scope, hours and a lawful contractor rate in writing; accommodation can form part of the recorded exchange.",
     offerType: "money",
-    offerDescription: "$20/hr cash + free dorm bed + free breakfast",
+    offerDescription: "Agreed lawful contractor rate plus accommodation, all recorded in writing",
     location: "Terrigal",
     category: "backpacker-life",
     icon: <Hammer className="h-4 w-4" />,
@@ -860,7 +860,9 @@ export default function ExamplesPage() {
         {/* Hero */}
         <section className="pt-32 pb-16 md:pt-40 md:pb-20">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
-            <p className="text-xs text-ash mb-8 font-mono">» SIGNAL LOG — REAL EXCHANGES</p>
+            <p className="text-xs text-ash mb-8 font-mono">
+              » EXAMPLE CATALOGUE — ILLUSTRATIONS ONLY
+            </p>
             <h1 className="heading-display text-4xl md:text-6xl text-gold mb-6">
               What Can You
               <br />
@@ -868,8 +870,8 @@ export default function ExamplesPage() {
             </h1>
             <p className="text-base text-ash max-w-xl leading-relaxed mb-6">
               Antidosis is built on a simple idea: everyone has something worth broadcasting. A
-              skill. An item. Time. A favour. Here are real exchanges happening on the network right
-              now.
+              skill. An item. Time. A favour. These are illustrative examples to help you write a
+              need—not live listings or completed exchanges.
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <Button asChild size="lg">

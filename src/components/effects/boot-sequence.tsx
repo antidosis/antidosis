@@ -19,7 +19,7 @@ const BOOT_LINES = [
 
 const TRUST_SIGNALS = [
   { icon: ShieldCheck, label: "verified identities" },
-  { icon: Lock, label: "binding contracts" },
+  { icon: Lock, label: "signed agreements" },
   { icon: Users, label: "peer-to-peer exchange" },
 ];
 

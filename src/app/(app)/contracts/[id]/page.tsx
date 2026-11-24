@@ -1677,7 +1677,7 @@ export default function ContractPage() {
                 <div className="contract-seal text-lg mb-2">Antidosis</div>
                 <h3 className="contract-heading text-xl text-paperhead">Digital Signature</h3>
                 <p className="text-xs text-linestrong mt-1">
-                  You are about to sign a legally binding contract
+                  Sign to record your acceptance of this agreement
                 </p>
               </div>
 

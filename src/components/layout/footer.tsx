@@ -118,7 +118,9 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="border-t border-line py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-xs text-ash">&copy; {year} Antidosis. All rights reserved.</p>
+            <p className="text-xs text-ash">
+              &copy; {year} Martin Khoury trading as antidosis · ABN 96 557 008 393
+            </p>
             <p className="text-xs text-ash">Crafted with intention on the Central Coast, NSW.</p>
             <p className="text-xs text-ash">
               Built by{" "}

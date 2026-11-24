@@ -55,7 +55,9 @@ describe("FileUpload", () => {
     };
     vi.stubGlobal(
       "FileReader",
-      vi.fn(() => mockFileReader)
+      vi.fn(function () {
+        return mockFileReader;
+      })
     );
 
     fireEvent.change(input, { target: { files: [file] } });
@@ -84,7 +86,9 @@ describe("FileUpload", () => {
     };
     vi.stubGlobal(
       "FileReader",
-      vi.fn(() => mockFileReader)
+      vi.fn(function () {
+        return mockFileReader;
+      })
     );
 
     fireEvent.change(input, { target: { files: [file] } });
@@ -131,7 +135,9 @@ describe("FileUpload", () => {
     };
     vi.stubGlobal(
       "FileReader",
-      vi.fn(() => mockFileReader)
+      vi.fn(function () {
+        return mockFileReader;
+      })
     );
 
     fireEvent.change(input, { target: { files: [file] } });
@@ -167,7 +173,9 @@ describe("FileUpload", () => {
     };
     vi.stubGlobal(
       "FileReader",
-      vi.fn(() => mockFileReader)
+      vi.fn(function () {
+        return mockFileReader;
+      })
     );
 
     fireEvent.change(input, { target: { files: [file] } });
@@ -218,7 +226,9 @@ describe("FileUpload", () => {
     };
     vi.stubGlobal(
       "FileReader",
-      vi.fn(() => mockFileReader)
+      vi.fn(function () {
+        return mockFileReader;
+      })
     );
 
     fireEvent.change(input, { target: { files: [file] } });

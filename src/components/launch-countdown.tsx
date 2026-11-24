@@ -1,286 +1,86 @@
-"use client";
-
-import { useState, useEffect } from "react";
-
 import Link from "next/link";
 
-import { ArrowRight, MapPin, Clock } from "lucide-react";
+import { ArrowRight, MapPin } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
-// ═══════════════════════════════════════════════════════════════
-//  CONFIGURE YOUR REGIONAL LAUNCH DATE HERE
-//  Format: YYYY-MM-DDTHH:mm:ss
-//  The countdown automatically adjusts to the user's timezone.
-// ═══════════════════════════════════════════════════════════════
-const REGIONAL_LAUNCH_DATE = new Date("2027-01-01T00:00:00+11:00");
+const MILESTONES = [
+  { value: "500+", label: "active members" },
+  { value: "100+", label: "monthly exchanges" },
+  { value: "50+", label: "verified members" },
+  { value: "5+", label: "participating suburbs" },
+];
 
-export function getLaunchDate() {
-  return REGIONAL_LAUNCH_DATE;
-}
-
-interface TimeLeft {
-  days: number;
-  hours: number;
-  minutes: number;
-  seconds: number;
-  total: number;
-}
-
-function calculateTimeLeft(target: Date): TimeLeft {
-  const difference = +target - +new Date();
-  if (difference <= 0) {
-    return { days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 };
-  }
-  return {
-    days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-    hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-    minutes: Math.floor((difference / 1000 / 60) % 60),
-    seconds: Math.floor((difference / 1000) % 60),
-    total: difference,
-  };
-}
-
-function pad(n: number) {
-  return n.toString().padStart(2, "0");
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  FULL HOMEPAGE COUNTDOWN SECTION
-// ═══════════════════════════════════════════════════════════════
 export function LaunchCountdown() {
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>(() => calculateTimeLeft(REGIONAL_LAUNCH_DATE));
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft(REGIONAL_LAUNCH_DATE));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const hasLaunched = timeLeft.total <= 0;
-
   return (
-    <section
-      className="relative w-full overflow-hidden border-y border-sun/15"
-      style={{
-        background:
-          "linear-gradient(180deg, rgb(var(--c-inset)) 0%, rgb(var(--c-void)) 50%, rgb(var(--c-inset)) 100%)",
-        boxShadow: "inset 0 0 60px rgba(245,166,35,0.03), 0 0 30px rgba(245,166,35,0.04)",
-      }}
-    >
-      {/* Top glow line */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-sun/30 to-transparent" />
-
-      <div className="max-w-6xl mx-auto px-4 md:px-8 py-14 md:py-20">
-        {/* Terminal prompt */}
-        <p className="text-xs text-ash mb-8 font-mono">» NEW NODES COMING ONLINE — COUNTDOWN</p>
-
-        {/* Header */}
-        <div className="mb-10 md:mb-14">
-          <div className="flex items-center gap-3 mb-4">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sun opacity-75" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-sun" />
-            </span>
-            <span className="text-xs font-medium tracking-widest text-sun uppercase">
-              Trial in progress
-            </span>
+    <section className="relative w-full overflow-hidden border-y border-sun/15 bg-inset">
+      <div className="mx-auto max-w-6xl px-4 py-14 md:px-8 md:py-20">
+        <p className="mb-8 font-mono text-xs text-ash">» NEW REGIONS — EVIDENCE BEFORE EXPANSION</p>
+        <div className="mb-10 grid gap-8 md:mb-14 md:grid-cols-2 md:items-end">
+          <div>
+            <div className="mb-4 flex items-center gap-3">
+              <span className="h-2.5 w-2.5 rounded-full bg-sun" />
+              <span className="text-xs font-medium uppercase tracking-widest text-sun">
+                Central Coast pilot active
+              </span>
+            </div>
+            <h2 className="heading-display mb-4 text-3xl text-gold md:text-5xl">
+              Earn density.
+              <br />
+              <span className="text-sun">Then expand.</span>
+            </h2>
           </div>
-
-          <h2 className="heading-display text-3xl md:text-5xl text-gold mb-4">
-            The Trial Ends.
-            <br />
-            <span className="text-sun glow-gold-subtle">The Network Grows.</span>
-          </h2>
-
-          <p className="text-sm md:text-base text-ash max-w-lg leading-relaxed">
-            The Central Coast is just the first node. On{" "}
-            <span className="text-gold">
-              {REGIONAL_LAUNCH_DATE.toLocaleDateString("en-AU", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-                timeZone: "Australia/Sydney",
-              })}
-            </span>
-            , Wollongong, Newcastle, and the Gold Coast join the network. Verify now — free for
-            everyone, no matter how far the signal reaches.
+          <p className="max-w-lg text-sm leading-relaxed text-ash md:text-base">
+            Wollongong, Newcastle and the Gold Coast are on the shortlist—not on a countdown.
+            Expansion follows real participation, successful exchanges and trusted local density.
+            There is no fixed launch date.
           </p>
         </div>
 
-        {/* Countdown grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-10 md:mb-14 max-w-2xl">
-          <CountdownBox
-            value={mounted ? pad(timeLeft.days) : "--"}
-            label="Days"
-            accent="var(--x-f5a623)"
-          />
-          <CountdownBox
-            value={mounted ? pad(timeLeft.hours) : "--"}
-            label="Hours"
-            accent="var(--x-00e5ff)"
-          />
-          <CountdownBox
-            value={mounted ? pad(timeLeft.minutes) : "--"}
-            label="Minutes"
-            accent="var(--x-b24bf5)"
-          />
-          <CountdownBox
-            value={mounted ? pad(timeLeft.seconds) : "--"}
-            label="Seconds"
-            accent="var(--x-00e676)"
-          />
+        <div className="mb-10 grid max-w-3xl grid-cols-2 gap-3 md:mb-12 md:grid-cols-4 md:gap-4">
+          {MILESTONES.map((milestone) => (
+            <div key={milestone.label} className="vessel-lit p-4 md:p-5">
+              <p className="font-mono text-2xl font-bold text-sun md:text-3xl">{milestone.value}</p>
+              <p className="mt-1 text-xs uppercase tracking-wider text-ash">{milestone.label}</p>
+            </div>
+          ))}
         </div>
 
-        {/* CTA row */}
         <div className="flex flex-wrap items-center gap-3">
-          {hasLaunched ? (
-            <Button asChild size="lg">
-              <Link href="/register">
-                <MapPin className="mr-2 h-4 w-4" />
-                Join Your Region
-              </Link>
-            </Button>
-          ) : (
-            <Button asChild size="lg">
-              <Link href="/register">
-                <Clock className="mr-2 h-4 w-4" />
-                Get Verified Early
-              </Link>
-            </Button>
-          )}
+          <Button asChild size="lg">
+            <Link href="/register">
+              <MapPin className="mr-2 h-4 w-4" /> Join the Central Coast pilot
+            </Link>
+          </Button>
           <Button asChild variant="secondary" size="lg">
             <Link href="/blog/regional-expansion-plan">
-              Read the Plan <ArrowRight className="ml-2 h-4 w-4" />
+              Read the roadmap <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
         </div>
-
-        {/* Footer note */}
         <p className="mt-6 text-xs text-ash/90">
-          Free for everyone — yours to keep as long as the network runs. No credit card required.
+          Joining, posting, contracting and reviewing are free. No credit card required.
         </p>
       </div>
-
-      {/* Bottom glow line */}
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-sun/20 to-transparent" />
     </section>
   );
 }
 
-function CountdownBox({ value, label, accent }: { value: string; label: string; accent: string }) {
-  return (
-    <div
-      className="relative vessel-lit p-4 md:p-5 text-center group"
-      style={{ borderTop: `1px solid ${accent}25` }}
-    >
-      <div
-        className="text-3xl md:text-5xl font-mono font-bold tracking-tight mb-1"
-        style={{ color: accent, textShadow: `0 0 20px ${accent}30` }}
-      >
-        {value}
-      </div>
-      <div className="text-[10px] md:text-xs text-ash uppercase tracking-widest">{label}</div>
-      {/* Subtle accent glow on hover */}
-      <div
-        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-        style={{
-          boxShadow: `inset 0 0 30px ${accent}08`,
-        }}
-      />
-    </div>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  THIN GLOBAL BANNER (appears below navbar on all pages)
-// ═══════════════════════════════════════════════════════════════
 export function LaunchBanner() {
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>(() => calculateTimeLeft(REGIONAL_LAUNCH_DATE));
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft(REGIONAL_LAUNCH_DATE));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const hasLaunched = timeLeft.total <= 0;
-
-  if (hasLaunched) {
-    return (
-      <div className="w-full bg-ok/10 border-b border-ok/20">
-        <div className="max-w-6xl mx-auto px-4 md:px-8 py-2 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-ok opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-ok" />
-            </span>
-            <span className="text-xs text-ok font-medium">
-              Antidosis is now regional — Wollongong, Newcastle & Gold Coast are live.
-            </span>
-          </div>
-          <Link
-            href="/register"
-            className="text-xs text-ok hover:text-gold transition-colors font-medium underline underline-offset-2 shrink-0"
-          >
-            Join your region →
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div
-      className="w-full border-b border-sun/15 relative overflow-hidden"
-      style={{
-        background:
-          "linear-gradient(90deg, rgb(var(--c-inset)) 0%, rgb(var(--c-surface)) 50%, rgb(var(--c-inset)) 100%)",
-      }}
-    >
-      {/* Subtle animated shimmer line */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-sun/40 to-transparent" />
-
-      <div className="max-w-6xl mx-auto px-4 md:px-8 py-2.5 flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3 min-w-0">
-          {/* Pulsing dot */}
-          <span className="relative flex h-2 w-2 shrink-0">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sun opacity-60" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-sun" />
-          </span>
-
-          {/* Message */}
-          <span className="text-xs text-ash truncate hidden sm:inline">
-            Central Coast trial active.
-          </span>
-
-          {/* Countdown */}
-          <span className="text-xs font-mono text-sun shrink-0">
-            {mounted ? (
-              <>
-                {pad(timeLeft.days)}d:{pad(timeLeft.hours)}h:
-                {pad(timeLeft.minutes)}m:{pad(timeLeft.seconds)}s
-              </>
-            ) : (
-              "--d:--h:--m:--s"
-            )}
-          </span>
-
-          <span className="text-xs text-ash truncate hidden md:inline">until regional launch.</span>
+    <div className="w-full border-b border-sun/15 bg-inset">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-2.5 md:px-8">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="h-2 w-2 shrink-0 rounded-full bg-sun" />
+          <p className="truncate text-xs text-ash">
+            Central Coast pilot active. Expansion follows milestones, not a fixed date.
+          </p>
         </div>
-
-        {/* CTA */}
         <Link
-          href="/register"
-          className="text-xs text-sun hover:text-gold transition-colors font-medium underline underline-offset-2 shrink-0"
+          href="/blog/regional-expansion-plan"
+          className="shrink-0 text-xs font-medium text-sun underline underline-offset-2 transition-colors hover:text-gold"
         >
-          Get verified →
+          Roadmap →
         </Link>
       </div>
     </div>

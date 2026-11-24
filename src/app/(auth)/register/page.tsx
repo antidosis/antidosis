@@ -190,7 +190,10 @@ export default function RegisterPage() {
                   className="pl-10"
                 />
               </div>
-              <p className="text-xs text-ash">Optional. Australian mobiles only.</p>
+              <p className="text-xs text-ash">
+                Optional now — required before you can post, respond, or message. Australian mobiles
+                only.
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>

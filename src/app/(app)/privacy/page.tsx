@@ -80,8 +80,8 @@ export default function PrivacyPage() {
               <strong>Full name</strong> — optional, displayed on your public profile
             </li>
             <li>
-              <strong>Mobile phone number</strong> — optional, used for account verification and
-              optional two-factor authentication
+              <strong>Mobile phone number</strong> — optional at registration, but required and
+              verified before posting, expressing interest, or messaging
             </li>
             <li>
               <strong>Email verification status</strong> — whether you have confirmed your email
@@ -356,6 +356,20 @@ export default function PrivacyPage() {
               .
             </li>
             <li>
+              <strong>Twilio</strong> — Australian mobile-number verification. Twilio Verify
+              processes your mobile number, verification codes and related delivery/security
+              metadata to send and validate SMS one-time codes. See{" "}
+              <Link
+                href="https://www.twilio.com/en-us/legal/privacy"
+                className="text-gold hover:underline"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Twilio&apos;s Privacy Policy
+              </Link>
+              .
+            </li>
+            <li>
               <strong>Resend</strong> — transactional email delivery (e.g., contract notifications,
               interest alerts). Resend processes your email address and message content. See{" "}
               <Link
@@ -599,12 +613,12 @@ export default function PrivacyPage() {
         <section>
           <h2 className="text-lg font-semibold text-gold mb-3">12. International Data Transfers</h2>
           <p>
-            Our service providers (Supabase, Stripe, Resend) may store and process your information
-            in countries outside of Australia, including the United States. By using the Service,
-            you consent to the transfer of your information to these countries. We ensure that such
-            transfers are protected by appropriate safeguards, including contractual commitments
-            from our service providers to protect your data in accordance with this Privacy Policy
-            and applicable laws.
+            Our service providers (Supabase, Stripe, Twilio, Resend) may store and process your
+            information in countries outside of Australia, including the United States. By using the
+            Service, you consent to the transfer of your information to these countries. We ensure
+            that such transfers are protected by appropriate safeguards, including contractual
+            commitments from our service providers to protect your data in accordance with this
+            Privacy Policy and applicable laws.
           </p>
         </section>
 
@@ -638,7 +652,7 @@ export default function PrivacyPage() {
               </EmailLink>
             </p>
             <p>
-              <strong>Entity:</strong> Antidosis Pty Ltd
+              <strong>Entity:</strong> Martin Khoury trading as antidosis (ABN 96 557 008 393)
             </p>
             <p>
               <strong>Website:</strong>{" "}
