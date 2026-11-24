@@ -41,6 +41,17 @@ test.describe("Smoke tests", () => {
     ).toBeVisible();
   });
 
+  test("social preview uses the branded PNG", async ({ page, request }) => {
+    await page.goto("/");
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
+      "content",
+      /\/images\/social-card\.png$/
+    );
+    const response = await request.get("/images/social-card.png");
+    expect(response.ok()).toBe(true);
+    expect(response.headers()["content-type"]).toContain("image/png");
+  });
+
   test("terminal page requires auth", async ({ page }) => {
     await page.goto("/terminal");
     // Should redirect to login

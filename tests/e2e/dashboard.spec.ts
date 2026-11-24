@@ -99,7 +99,7 @@ test.describe("Dashboard", () => {
       "true"
     );
     await expect(page.locator("#credentials-section")).toBeVisible();
-    await expect(page.getByText("Driver's Licence")).toBeVisible();
+    await expect(page.getByText("Driver's Licence", { exact: true })).toBeVisible();
   });
 
   test("keeps dashboard navigation visible and separates social settings on mobile", async ({
@@ -120,6 +120,10 @@ test.describe("Dashboard", () => {
     await page.getByRole("tab", { name: "Social profiles" }).click();
     await expect(page.getByLabel("Audience size (optional)")).toBeVisible();
     await expect(page.getByText("Social profiles", { exact: true }).last()).toBeVisible();
+    const downloadEvent = page.waitForEvent("download");
+    await page.getByRole("button", { name: "Download card", exact: true }).click();
+    const download = await downloadEvent;
+    expect(download.suggestedFilename()).toBe("antidosis-e2e-user-card.png");
   });
 
   test("shows analytics within each need instead of a separate tab", async ({ page }) => {

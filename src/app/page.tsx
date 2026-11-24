@@ -18,7 +18,7 @@ export const metadata: Metadata = {
       "A reciprocal exchange network on the Central Coast, NSW. Post what you need. Say what you'll give back. Connect with verified locals you can trust.",
     images: [
       {
-        url: "/opengraph-image",
+        url: "/images/social-card.png",
         width: 1200,
         height: 630,
         alt: "antidosis — the exchange network.",
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     title: "antidosis — the exchange network.",
     description:
       "A reciprocal exchange network on the Central Coast, NSW. Post what you need. Say what you'll give back. Connect with verified locals you can trust.",
-    images: ["/opengraph-image"],
+    images: ["/images/social-card.png"],
   },
   alternates: {
     canonical: siteUrl,

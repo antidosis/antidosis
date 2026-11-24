@@ -22,7 +22,7 @@ export const metadata: Metadata = {
       "Browse verified members on the Central Coast, NSW. Find skilled locals with verified credentials.",
     images: [
       {
-        url: "/opengraph-image",
+        url: "/images/social-card.png",
         width: 1200,
         height: 630,
         alt: "Directory on antidosis — Central Coast, NSW",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     title: "Directory — antidosis",
     description:
       "Browse verified members on the Central Coast, NSW. Find skilled locals with verified credentials.",
-    images: ["/opengraph-image"],
+    images: ["/images/social-card.png"],
   },
   alternates: {
     canonical: `${siteUrl}/pros`,

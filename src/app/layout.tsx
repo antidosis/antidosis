@@ -72,7 +72,7 @@ export const metadata: Metadata = {
       "A reciprocal exchange network on the Central Coast, NSW. Post what you need. Say what you'll give back. Connect with verified locals you can trust.",
     images: [
       {
-        url: "/opengraph-image",
+        url: "/images/social-card.png",
         width: 1200,
         height: 630,
         alt: "antidosis — the exchange network.",
@@ -84,7 +84,7 @@ export const metadata: Metadata = {
     title: "antidosis — the exchange network.",
     description:
       "A reciprocal exchange network on the Central Coast, NSW. Post what you need. Say what you'll give back. Connect with verified locals you can trust.",
-    images: ["/opengraph-image"],
+    images: ["/images/social-card.png"],
     creator: "@antidosis",
   },
   alternates: {
@@ -179,7 +179,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               url: siteUrl,
               description:
                 "A reciprocal exchange network on the Central Coast, NSW. Barter, gift, and trade anything with verified locals.",
-              image: `${siteUrl}/opengraph-image`,
+              image: `${siteUrl}/images/social-card.png`,
               email: "support@antidosis.com",
               areaServed: {
                 "@type": "City",

@@ -18,7 +18,7 @@ export const metadata: Metadata = {
       "Learn how antidosis works. Create a need, connect with verified locals on the Central Coast, exchange anything, build your reputation.",
     images: [
       {
-        url: "/opengraph-image",
+        url: "/images/social-card.png",
         width: 1200,
         height: 630,
         alt: "How antidosis works — the exchange network.",
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     title: "How It Works — antidosis",
     description:
       "Learn how antidosis works. Create a need, connect with verified locals on the Central Coast, exchange anything, build your reputation.",
-    images: ["/opengraph-image"],
+    images: ["/images/social-card.png"],
   },
   alternates: {
     canonical: `${siteUrl}/how-it-works`,

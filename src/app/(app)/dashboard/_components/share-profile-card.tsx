@@ -60,7 +60,7 @@ export function ShareProfileCard({ profile }: ShareProfileCardProps) {
     }
   }
 
-  function downloadCard() {
+  async function downloadCard() {
     const skillText = profile.skills
       .slice(0, 3)
       .map((skill) => skill.name)
@@ -82,14 +82,40 @@ export function ShareProfileCard({ profile }: ShareProfileCardProps) {
   <text x="88" y="510" fill="#9fb5aa" font-family="Arial, sans-serif" font-size="22">People · skills · direct agreements · genuine reviews</text>
   <text x="88" y="552" fill="#65e2a1" font-family="monospace" font-size="20">antidosis.com/connect/${xml(profile.handle || profile.id)}</text>
 </svg>`;
-    const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement("a");
-    anchor.href = url;
-    anchor.download = `antidosis-${profile.handle || "profile"}-card.svg`;
-    anchor.click();
-    URL.revokeObjectURL(url);
-    toast("Share card downloaded", "success");
+    const svgUrl = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }));
+    try {
+      const image = new window.Image();
+      await new Promise<void>((resolve, reject) => {
+        image.onload = () => resolve();
+        image.onerror = () => reject(new Error("Could not render the share card"));
+        image.src = svgUrl;
+      });
+      const canvas = document.createElement("canvas");
+      canvas.width = 1200;
+      canvas.height = 630;
+      const context = canvas.getContext("2d");
+      if (!context) throw new Error("Canvas is unavailable");
+      context.drawImage(image, 0, 0, 1200, 630);
+      const png = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob(
+          (result) => (result ? resolve(result) : reject(new Error("Could not create the PNG"))),
+          "image/png"
+        );
+      });
+      const downloadUrl = URL.createObjectURL(png);
+      const anchor = document.createElement("a");
+      anchor.href = downloadUrl;
+      anchor.download = `antidosis-${profile.handle || "profile"}-card.png`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+      toast("Share card downloaded as PNG", "success");
+    } catch {
+      toast("Couldn't create the card — please try another browser", "error");
+    } finally {
+      URL.revokeObjectURL(svgUrl);
+    }
   }
 
   return (

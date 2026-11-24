@@ -16,7 +16,9 @@ export const metadata: Metadata = {
     title: "Store — antidosis mesh nodes",
     description:
       "The antidosis node, verified node builders, and the setup runbook for the off-grid mesh.",
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "antidosis mesh store" }],
+    images: [
+      { url: "/images/social-card.png", width: 1200, height: 630, alt: "antidosis mesh store" },
+    ],
   },
   alternates: { canonical: `${siteUrl}/store` },
 };

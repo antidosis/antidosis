@@ -22,7 +22,7 @@ export const metadata: Metadata = {
       "Browse needs posted by verified locals on the Central Coast, NSW. Find skills, goods, and services people are looking for.",
     images: [
       {
-        url: "/opengraph-image",
+        url: "/images/social-card.png",
         width: 1200,
         height: 630,
         alt: "Browse needs on antidosis — Central Coast, NSW",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     title: "Browse Needs — antidosis",
     description:
       "Browse needs posted by verified locals on the Central Coast, NSW. Find skills, goods, and services people are looking for.",
-    images: ["/opengraph-image"],
+    images: ["/images/social-card.png"],
   },
   alternates: {
     canonical: `${siteUrl}/needs`,

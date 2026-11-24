@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       tags: post.tags,
       images: [
         {
-          url: "/opengraph-image",
+          url: "/images/social-card.png",
           width: 1200,
           height: 630,
           alt: post.title,
@@ -56,7 +56,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: "summary_large_image",
       title: `${post.title} — antidosis`,
       description: post.excerpt,
-      images: ["/opengraph-image"],
+      images: ["/images/social-card.png"],
     },
     alternates: {
       canonical: `${siteUrl}/blog/${post.slug}`,
