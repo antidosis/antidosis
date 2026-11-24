@@ -10,7 +10,6 @@ const STATIC_LAST_MODIFIED = "2026-11-24";
 const STATIC_ROUTES = [
   { path: "/", changeFrequency: "daily", priority: 1 },
   { path: "/exchange", changeFrequency: "hourly", priority: 0.9 },
-  { path: "/needs", changeFrequency: "hourly", priority: 0.9 },
   { path: "/pros", changeFrequency: "daily", priority: 0.7 },
   { path: "/examples", changeFrequency: "monthly", priority: 0.7 },
   { path: "/how-it-works", changeFrequency: "monthly", priority: 0.8 },
