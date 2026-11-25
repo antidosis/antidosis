@@ -19,7 +19,13 @@ interface Skill {
   isVerified: boolean;
 }
 
-export function SkillsSection({ skills }: { skills: Skill[] }) {
+interface SkillsSectionProps {
+  skills: Skill[];
+  /** Render without the surrounding card — for embedding inside About. */
+  embedded?: boolean;
+}
+
+export function SkillsSection({ skills, embedded = false }: SkillsSectionProps) {
   const { toast } = useToast();
   const [value, setValue] = useState("");
   const [busy, setBusy] = useState(false);
@@ -83,13 +89,9 @@ export function SkillsSection({ skills }: { skills: Skill[] }) {
     }
   }
 
-  return (
-    <SectionCard
-      tone="identity"
-      title="Skills and services"
-      description="Tag what you can help with. Shown on your public profile, searchable in the directory, and used to match you with relevant needs."
-    >
-      <Label htmlFor="profile-skill">Add a skill or service</Label>
+  const body = (
+    <>
+      <Label htmlFor="profile-skill">Skills and services</Label>
       <div className="mt-2 flex gap-2">
         <Input
           id="profile-skill"
@@ -165,6 +167,14 @@ export function SkillsSection({ skills }: { skills: Skill[] }) {
           </ul>
         )}
       </div>
+    </>
+  );
+
+  if (embedded) return body;
+
+  return (
+    <SectionCard tone="identity" title="Skills and services">
+      {body}
     </SectionCard>
   );
 }

@@ -156,6 +156,24 @@ export const PATCH = withApiHandler(async (req: NextRequest) => {
     }
   }
 
+  // The only phone number that may appear on a public profile is the account's
+  // own verified mobile. Anything else is rejected rather than silently
+  // dropped, so members know their choice didn't stick.
+  if (typeof cleanedData.publicPhone === "string" && cleanedData.publicPhone) {
+    const normalisedPublic = normalizeMobile(cleanedData.publicPhone);
+    if (
+      !currentProfile?.mobileVerified ||
+      !currentProfile.mobile ||
+      normalizeMobile(currentProfile.mobile) !== normalisedPublic
+    ) {
+      return NextResponse.json(
+        { error: "Only your verified mobile number can be shown publicly" },
+        { status: 400 }
+      );
+    }
+    cleanedData.publicPhone = currentProfile.mobile;
+  }
+
   // Business account rules: an ABN is mandatory and must pass the ATO
   // checksum. ABR confirmation (when ABR_LOOKUP_GUID is configured) flips
   // abnVerified; otherwise it stays false. Clients cannot set abnVerified
@@ -191,6 +209,22 @@ export const PATCH = withApiHandler(async (req: NextRequest) => {
 
   if (wantsBusiness && !effectiveAbn) {
     return NextResponse.json({ error: "Business accounts require an ABN" }, { status: 400 });
+  }
+
+  // Directory listings are business listings: holding a specialty slot
+  // requires an ABN, and holding both derives the business account type
+  // automatically (the dashboard no longer exposes the toggle).
+  const specialtyCount = await prisma.directorySpecialty.count({
+    where: { profile: { userId: user.id } },
+  });
+  if (specialtyCount > 0 && !effectiveAbn) {
+    return NextResponse.json(
+      { error: "Directory listings require an ABN — add yours in the directory profile" },
+      { status: 400 }
+    );
+  }
+  if (specialtyCount > 0 && effectiveAbn) {
+    cleanedData.accountType = "business";
   }
 
   // Appearance preferences: validate against the shipped theme/font

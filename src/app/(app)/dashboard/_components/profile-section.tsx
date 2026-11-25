@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import Link from "next/link";
 
@@ -23,8 +23,6 @@ import { HandleSection } from "./profile-editor/handle-section";
 import { IdentitySection } from "./profile-editor/identity-section";
 import { KnowledgeBox } from "./profile-editor/knowledge-box";
 import { PreferencesSection } from "./profile-editor/preferences-section";
-import { PublicContactSection } from "./profile-editor/public-contact-section";
-import { SkillsSection } from "./profile-editor/skills-section";
 import { SocialLinksSection } from "./profile-editor/social-links-section";
 import type { EditorProfile, ProfileFormData, ProfileTab } from "./profile-editor/types";
 import { ShareProfileCard } from "./share-profile-card";
@@ -96,6 +94,7 @@ export function ProfileSection({
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [hasSpecialty, setHasSpecialty] = useState(initialProfile.accountType === "business");
   const [importingAvatarFrom, setImportingAvatarFrom] = useState<string | null>(null);
   const [removingIds, setRemovingIds] = useState<ReadonlySet<string>>(new Set());
 
@@ -146,6 +145,20 @@ export function ProfileSection({
     onTabChange(tab);
   }
 
+  // Directory listings are business listings: claiming slot 1 upgrades the
+  // form's account type silently. Releasing a slot never auto-downgrades —
+  // staying business with an ABN on file is harmless and matches the server.
+  const handleSlotChange = useCallback(
+    (hasSlot: boolean) => {
+      setHasSpecialty(hasSlot);
+      if (hasSlot) {
+        clearErrors("root");
+        setValue("accountType", "business", { shouldDirty: false });
+      }
+    },
+    [clearErrors, setValue]
+  );
+
   function markRemoving(fieldId: string) {
     setHasUnsavedChanges(true);
     setRemovingIds((previous) => new Set(previous).add(fieldId));
@@ -179,6 +192,17 @@ export function ProfileSection({
   async function onSave() {
     clearErrors();
     const values = getValues();
+
+    // Directory listings require an ABN — stop early with the member on the
+    // directory tab rather than letting the server reject the whole save.
+    const effectiveAbn = values.abn || initialProfile.abn || null;
+    if (hasSpecialty && !effectiveAbn) {
+      const message = "Directory listings require an ABN — add yours below to stay live.";
+      setError("root", { message });
+      onTabChange("directory");
+      toast(message, "error");
+      return;
+    }
     const keptLinks = fields
       .filter((field) => !removingIds.has(field.id))
       .map((field) => values.socialLinks?.[fields.indexOf(field)])
@@ -293,9 +317,7 @@ export function ProfileSection({
           <div role="tabpanel" className="space-y-4">
             <KnowledgeBox>
               This is <strong className="text-gold">you, publicly</strong> — what anyone sees when
-              they open your profile page from a need, a message or your shared link. Your photo,
-              story, skills, socials and public phone live here. Your account mobile, email and ID
-              documents never appear on this page.
+              they open your profile. Your account mobile, email and ID documents never appear here.
             </KnowledgeBox>
             <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(300px,1fr)]">
               <IdentitySection
@@ -319,23 +341,24 @@ export function ProfileSection({
                 <ShareProfileCard profile={initialProfile} compact />
               </div>
             </div>
-            <AboutSection register={register} control={control} errors={errors} />
-            <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(300px,1fr)]">
-              <SocialLinksSection
-                control={control}
-                register={register}
-                fields={fields}
-                removingIds={removingIds}
-                onMarkRemoving={markRemoving}
-                append={addSocialLink}
-                errors={errors}
-                showAudience={accountType !== "business"}
-              />
-              <div className="space-y-4">
-                <PublicContactSection register={register} errors={errors} />
-                <SkillsSection skills={initialProfile.skills} />
-              </div>
-            </div>
+            <AboutSection
+              register={register}
+              control={control}
+              errors={errors}
+              skills={initialProfile.skills}
+              mobile={initialProfile.mobile}
+              mobileVerified={initialProfile.mobileVerified}
+            />
+            <SocialLinksSection
+              control={control}
+              register={register}
+              fields={fields}
+              removingIds={removingIds}
+              onMarkRemoving={markRemoving}
+              append={addSocialLink}
+              errors={errors}
+              showAudience={accountType !== "business"}
+            />
           </div>
         )}
 
@@ -343,21 +366,21 @@ export function ProfileSection({
           <div role="tabpanel" className="space-y-5">
             <KnowledgeBox>
               This is <strong className="text-gold">your listing in the public directory</strong> —
-              a separate, professional space from your personal profile. People and businesses
-              filter the directory to find someone for a job: your specialty slots, business contact
-              and credentials decide whether you show up. Listing is free; your personal phone and
-              personal socials stay out of it.
+              a separate, professional space from your personal profile. Claim a specialty to be
+              discovered and filtered by; listings are business listings, so an ABN is required.
+              Your personal phone and personal socials stay out of it.
             </KnowledgeBox>
-            <DirectorySlotsSection />
+            <DirectorySlotsSection onSlotChange={handleSlotChange} />
             <PreferencesSection
               register={register}
               setValue={setChangedValue}
               showInDirectory={!!showInDirectory}
-              accountType={accountType === "business" ? "business" : "individual"}
+              hasSpecialty={hasSpecialty}
               abnVerified={initialProfile.abnVerified}
               errors={errors}
+              handle={initialProfile.handle}
             />
-            {accountType === "business" && (
+            {(accountType === "business" || hasSpecialty) && (
               <>
                 <BusinessContactSection register={register} errors={errors} />
                 <SocialLinksSection

@@ -6,18 +6,34 @@ import { Label } from "@/components/ui/label";
 import { LocationAutocomplete } from "@/components/ui/location-autocomplete";
 import { Textarea } from "@/components/ui/textarea";
 
+import { PublicContactSection } from "./public-contact-section";
 import { SectionCard } from "./section-card";
+import { SkillsSection } from "./skills-section";
 import type { ProfileFormData } from "./types";
 
 interface AboutSectionProps {
   register: UseFormRegister<ProfileFormData>;
   control: Control<ProfileFormData>;
   errors: FieldErrors<ProfileFormData>;
+  skills: { id: string; name: string; isVerified: boolean }[];
+  mobile: string | null;
+  mobileVerified: boolean;
 }
 
-export function AboutSection({ register, control, errors }: AboutSectionProps) {
+export function AboutSection({
+  register,
+  control,
+  errors,
+  skills,
+  mobile,
+  mobileVerified,
+}: AboutSectionProps) {
   return (
-    <SectionCard tone="identity" title="About" description="A short intro and where you're based.">
+    <SectionCard
+      tone="identity"
+      title="About"
+      description="Your story, where you're based, what you can help with, and how people reach you."
+    >
       <div className="space-y-2">
         <Label htmlFor="profile-bio">Bio</Label>
         <Textarea
@@ -53,6 +69,14 @@ export function AboutSection({ register, control, errors }: AboutSectionProps) {
             </p>
           </div>
         </div>
+      </div>
+
+      <div className="mt-6 border-t border-line/40 pt-5">
+        <SkillsSection skills={skills} embedded />
+      </div>
+
+      <div className="mt-6 border-t border-line/40 pt-5">
+        <PublicContactSection control={control} mobile={mobile} mobileVerified={mobileVerified} />
       </div>
     </SectionCard>
   );

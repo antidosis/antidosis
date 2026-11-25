@@ -34,11 +34,12 @@ const profile: EditorProfile = {
   socialLinks: [],
 };
 
-function renderProfile(onUpdate = vi.fn()) {
+function renderProfile(onUpdate = vi.fn(), overrides: Partial<EditorProfile> = {}) {
+  const initial = { ...profile, ...overrides };
   render(
     <ToastProvider>
       <ProfileSection
-        initialProfile={profile}
+        initialProfile={initial}
         credentials={[]}
         onCredentialsUpdate={vi.fn()}
         onUpdate={onUpdate}
@@ -87,5 +88,28 @@ describe("ProfileSection save controls", () => {
       expect(screen.queryByRole("button", { name: "Save profile" })).not.toBeInTheDocument()
     );
     expect(screen.getByLabelText("Full name")).toHaveValue("Updated Name");
+  });
+});
+
+describe("public phone visibility", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.stubGlobal("fetch", vi.fn());
+  });
+
+  it("shows a hidden-state toggle for the verified mobile", () => {
+    renderProfile(vi.fn(), { mobile: "0400123456", mobileVerified: true });
+    expect(screen.getByText("Public phone")).toBeInTheDocument();
+    const toggle = screen.getByRole("button", { name: /verified mobile/i });
+    expect(toggle).toHaveAttribute("aria-pressed", "false");
+    expect(toggle.textContent).toContain("0400123456");
+  });
+
+  it("prompts to verify instead of offering a phone input when unverified", () => {
+    renderProfile();
+    expect(screen.getByText("Public phone")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /verified mobile/i })).not.toBeInTheDocument();
+    const prompt = screen.getByRole("link", { name: /settings & security/i });
+    expect(prompt).toHaveAttribute("href", "/dashboard?tab=settings");
   });
 });

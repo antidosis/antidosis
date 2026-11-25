@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   ArrowRight,
@@ -40,6 +40,11 @@ interface SpecialtyRecord {
   slot: number;
 }
 
+interface DirectorySlotsSectionProps {
+  /** Fired whenever slot-1 occupancy changes (claim or release). */
+  onSlotChange?: (hasSlot: boolean) => void;
+}
+
 const CATEGORY_LABEL: Record<string, string> = {
   trades: "Trades & hands-on",
   creative: "Creative",
@@ -51,7 +56,7 @@ const CATEGORY_LABEL: Record<string, string> = {
 
 const SLOT_NAMES = ["Primary specialty", "Second specialty", "Third specialty"];
 
-export function DirectorySlotsSection() {
+export function DirectorySlotsSection({ onSlotChange }: DirectorySlotsSectionProps) {
   const { toast } = useToast();
   const { data, isLoading } = useApi<{ specialties: SpecialtyRecord[] }>(
     "/api/v1/profiles/me/specialties"
@@ -64,28 +69,23 @@ export function DirectorySlotsSection() {
   const specialties = useMemo(() => data?.specialties ?? [], [data]);
   const slotOne = specialties.find((specialty) => specialty.slot === 1) ?? null;
 
+  useEffect(() => {
+    onSlotChange?.(Boolean(slotOne));
+  }, [slotOne, onSlotChange]);
+
   const suggestions = useMemo(() => {
     const needle = query.trim().toLowerCase();
     const taken = new Set(specialties.map((specialty) => specialty.profession));
     const pool = PROFESSIONS.filter((profession) => !taken.has(profession.key));
-    if (!needle) return pool;
-    return pool.filter(
+    if (!needle) return pool.slice(0, 7);
+    const matches = pool.filter(
       (profession) =>
         profession.label.toLowerCase().includes(needle) ||
         profession.category.includes(needle) ||
         profession.pitch.toLowerCase().includes(needle)
     );
+    return matches.slice(0, 7);
   }, [query, specialties]);
-
-  const grouped = useMemo(() => {
-    const groups = new Map<string, typeof suggestions>();
-    for (const profession of suggestions) {
-      const list = groups.get(profession.category) ?? [];
-      list.push(profession);
-      groups.set(profession.category, list);
-    }
-    return Array.from(groups.entries());
-  }, [suggestions]);
 
   async function claim(professionKey: string) {
     const profession = getProfession(professionKey);
@@ -208,22 +208,25 @@ export function DirectorySlotsSection() {
         ))}
       </div>
 
-      {/* Profession picker */}
+      {/* Profession picker — type-to-search autocomplete, same pattern as the
+          skills box in the public profile */}
       {pickerOpen && (
         <div
           className="border-t border-line/60 bg-inset/30 p-4 sm:p-5"
           role="dialog"
           aria-label="Choose a profession"
         >
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <Input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search professions — plumber, influencer, tutor…"
-              autoComplete="off"
-              className="max-w-md text-base"
-              autoFocus
-            />
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="relative w-full max-w-md">
+              <Input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Type a profession — plumber, influencer, tutor…"
+                autoComplete="off"
+                className="text-base"
+                autoFocus
+              />
+            </div>
             <button
               type="button"
               onClick={() => {
@@ -236,36 +239,32 @@ export function DirectorySlotsSection() {
               <X className="h-4 w-4" />
             </button>
           </div>
-          {grouped.length === 0 ? (
+          {suggestions.length === 0 ? (
             <p className="py-6 text-center text-sm text-ash">
               No professions match &ldquo;{query}&rdquo; — the taxonomy grows with the network.
             </p>
           ) : (
-            <div className="space-y-4">
-              {grouped.map(([category, professions]) => (
-                <div key={category}>
-                  <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-ash">
-                    {CATEGORY_LABEL[category] ?? category}
-                  </p>
-                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                    {professions.map((profession) => (
-                      <button
-                        key={profession.key}
-                        type="button"
-                        onClick={() => claim(profession.key)}
-                        className="group rounded-lg border border-line/70 bg-surface/40 p-3 text-left transition-colors hover:border-aero/50 hover:bg-aero/[0.05]"
-                      >
-                        <span className="flex items-center justify-between gap-2">
-                          <span className="text-sm font-medium text-gold">{profession.label}</span>
-                          <Plus className="h-3.5 w-3.5 text-ash transition-colors group-hover:text-aero" />
-                        </span>
-                        <span className="mt-1 block text-xs text-ash">{profession.pitch}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
+            <ul className="max-w-md divide-y divide-line/50 rounded-md border border-line/70 bg-surface/40">
+              {suggestions.map((profession) => (
+                <li key={profession.key}>
+                  <button
+                    type="button"
+                    onClick={() => claim(profession.key)}
+                    className="flex w-full items-center justify-between gap-3 px-3.5 py-2.5 text-left transition-colors hover:bg-aero/[0.06]"
+                  >
+                    <span className="min-w-0">
+                      <span className="block text-sm font-medium text-gold">
+                        {profession.label}
+                      </span>
+                      <span className="block truncate text-xs text-ash">{profession.pitch}</span>
+                    </span>
+                    <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-ash">
+                      {CATEGORY_LABEL[profession.category] ?? profession.category}
+                    </span>
+                  </button>
+                </li>
               ))}
-            </div>
+            </ul>
           )}
         </div>
       )}

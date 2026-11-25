@@ -9,6 +9,7 @@ const mockProfileFindUnique = vi.fn();
 const mockProfileCreate = vi.fn();
 const mockProfileUpdate = vi.fn();
 const mockProfileDelete = vi.fn();
+const mockDirectorySpecialtyCount = vi.fn();
 const mockAuditLogDeleteMany = vi.fn();
 const mockMobileVerificationCodeDeleteMany = vi.fn();
 const mockCredentialDeleteMany = vi.fn();
@@ -25,6 +26,9 @@ vi.mock("@/lib/prisma", () => ({
       create: (...args: unknown[]) => mockProfileCreate(...args),
       update: (...args: unknown[]) => mockProfileUpdate(...args),
       delete: (...args: unknown[]) => mockProfileDelete(...args),
+    },
+    directorySpecialty: {
+      count: (...args: unknown[]) => mockDirectorySpecialtyCount(...args),
     },
     auditLog: {
       deleteMany: (...args: unknown[]) => mockAuditLogDeleteMany(...args),
@@ -203,6 +207,7 @@ describe("GET /api/v1/profiles/me", () => {
 describe("PATCH /api/v1/profiles/me", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockDirectorySpecialtyCount.mockResolvedValue(0);
   });
 
   it("returns 401 when unauthenticated", async () => {
@@ -613,6 +618,131 @@ describe("PATCH /api/v1/profiles/me", () => {
         data: expect.objectContaining({ abn: null, abnVerified: false }),
       })
     );
+  });
+
+  describe("publicPhone — verified mobile only", () => {
+    it("rejects a public phone that is not the account's verified mobile", async () => {
+      mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+      mockProfileFindUnique.mockResolvedValue({
+        id: "profile-1",
+        mobile: "0400123456",
+        mobileVerified: true,
+        abn: null,
+        accountType: "individual",
+      });
+
+      const res = await PATCH(
+        makeRequest("http://localhost/api/v1/profiles/me", {
+          method: "PATCH",
+          body: JSON.stringify({ publicPhone: "0499777666" }),
+        })
+      );
+      const body = await res.json();
+
+      expect(res.status).toBe(400);
+      expect(body.error).toBe("Only your verified mobile number can be shown publicly");
+      expect(mockProfileUpdate).not.toHaveBeenCalled();
+    });
+
+    it("rejects a public phone when the account mobile is not verified", async () => {
+      mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+      mockProfileFindUnique.mockResolvedValue({
+        id: "profile-1",
+        mobile: "0400123456",
+        mobileVerified: false,
+        abn: null,
+        accountType: "individual",
+      });
+
+      const res = await PATCH(
+        makeRequest("http://localhost/api/v1/profiles/me", {
+          method: "PATCH",
+          body: JSON.stringify({ publicPhone: "0400123456" }),
+        })
+      );
+
+      expect(res.status).toBe(400);
+      expect(mockProfileUpdate).not.toHaveBeenCalled();
+    });
+
+    it("accepts the verified mobile and stores it in canonical form", async () => {
+      mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+      mockProfileFindUnique.mockResolvedValue({
+        id: "profile-1",
+        mobile: "+61400123456",
+        mobileVerified: true,
+        abn: null,
+        accountType: "individual",
+      });
+      mockProfileUpdate.mockResolvedValue({ id: "profile-1", publicPhone: "+61400123456" });
+
+      const res = await PATCH(
+        makeRequest("http://localhost/api/v1/profiles/me", {
+          method: "PATCH",
+          body: JSON.stringify({ publicPhone: "0400 123 456" }),
+        })
+      );
+
+      expect(res.status).toBe(200);
+      expect(mockProfileUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ publicPhone: "+61400123456" }),
+        })
+      );
+    });
+  });
+
+  describe("directory specialty — business derivation", () => {
+    it("rejects saves while a specialty is held without an ABN", async () => {
+      mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+      mockProfileFindUnique.mockResolvedValue({
+        id: "profile-1",
+        mobile: null,
+        mobileVerified: false,
+        abn: null,
+        accountType: "individual",
+      });
+      mockDirectorySpecialtyCount.mockResolvedValue(1);
+
+      const res = await PATCH(
+        makeRequest("http://localhost/api/v1/profiles/me", {
+          method: "PATCH",
+          body: JSON.stringify({ bio: "Just updating my bio" }),
+        })
+      );
+      const body = await res.json();
+
+      expect(res.status).toBe(400);
+      expect(body.error).toContain("Directory listings require an ABN");
+      expect(mockProfileUpdate).not.toHaveBeenCalled();
+    });
+
+    it("derives the business account type when a specialty and ABN are both present", async () => {
+      mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+      mockProfileFindUnique.mockResolvedValue({
+        id: "profile-1",
+        mobile: null,
+        mobileVerified: false,
+        abn: "51824753556",
+        accountType: "individual",
+      });
+      mockDirectorySpecialtyCount.mockResolvedValue(1);
+      mockProfileUpdate.mockResolvedValue({ id: "profile-1", accountType: "business" });
+
+      const res = await PATCH(
+        makeRequest("http://localhost/api/v1/profiles/me", {
+          method: "PATCH",
+          body: JSON.stringify({ bio: "Listed in the directory" }),
+        })
+      );
+
+      expect(res.status).toBe(200);
+      expect(mockProfileUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ accountType: "business" }),
+        })
+      );
+    });
   });
 
   it("persists audienceSize and allows clearing it with null", async () => {
