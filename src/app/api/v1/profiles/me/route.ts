@@ -302,7 +302,13 @@ export const PATCH = withApiHandler(async (req: NextRequest) => {
     },
   });
 
-  return NextResponse.json(profile);
+  // The stored column is a JSON string — clients (and the dashboard editor's
+  // form reset) expect the parsed array, same as the GET response.
+  const { businessSocialLinks: rawBusinessLinks, ...profileRest } = profile;
+  return NextResponse.json({
+    ...profileRest,
+    businessSocialLinks: parseBusinessSocialLinks(rawBusinessLinks),
+  });
 });
 
 export const DELETE = withApiHandler(async () => {

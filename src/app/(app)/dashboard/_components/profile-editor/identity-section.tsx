@@ -136,15 +136,25 @@ export function IdentitySection({
           </div>
         </div>
 
-        {/* Right — handle, public phone, connection card */}
-        <div className="space-y-4">
-          <HandleSection handle={handle} />
-          <PublicContactSection
-            control={phoneControl}
-            mobile={mobile}
-            mobileVerified={mobileVerified}
-          />
-          <ShareProfileCard profile={shareProfile} compact />
+        {/* Right — profile link, public phone and connection card share one
+            tidy panel so the identity card reads as a single composed unit */}
+        <div className="vessel divide-y divide-line/50 rounded-xl border-sun/20">
+          <div className="p-4 sm:p-5">
+            <HandleSection handle={handle} />
+          </div>
+          <div className="p-4 sm:p-5">
+            <PublicContactSection
+              control={phoneControl}
+              mobile={mobile}
+              mobileVerified={mobileVerified}
+            />
+          </div>
+          <div className="p-4 sm:p-5">
+            <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.2em] text-ash">
+              Invite people to connect
+            </p>
+            <ShareProfileCard profile={shareProfile} />
+          </div>
         </div>
       </div>
     </SectionCard>

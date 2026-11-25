@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { AtSign, Loader2, Lock, TriangleAlert } from "lucide-react";
+import { AtSign, Link2, Loader2, Lock, TriangleAlert } from "lucide-react";
 import { mutate } from "swr";
 
 import { Button } from "@/components/ui/button";
@@ -85,55 +85,47 @@ export function HandleSection({ handle }: HandleSectionProps) {
 
   if (handle) {
     return (
-      <section className="vessel rounded-lg border-sun/20 bg-sun/[0.025] p-4 sm:p-6">
-        <header className="mb-4">
-          <h3 className="text-sm font-medium uppercase tracking-wider text-gold">Handle</h3>
-        </header>
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="heading-display truncate text-2xl text-sun">@{handle}</p>
-            <p className="mt-1.5 flex items-center gap-1.5 text-xs text-ash">
-              <Lock className="h-3 w-3 shrink-0" /> Handles are permanent — yours forever, and they
-              can&rsquo;t be changed.
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ash">
+              Profile link
+            </p>
+            <p className="heading-display mt-1 truncate text-lg leading-tight text-sun">
+              @{handle}
             </p>
           </div>
-          <CopyLinkButton
-            url={`${window.location.origin}/profile/@${handle}`}
-            label="Copy profile link"
-          />
+          <CopyLinkButton url={`${window.location.origin}/profile/@${handle}`} label="Copy link" />
         </div>
-      </section>
+        <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-ash">
+          <Lock className="h-3 w-3 shrink-0" /> Permanent — can&rsquo;t be changed.
+        </p>
+      </div>
     );
   }
 
   return (
-    <section className="vessel rounded-lg border-sun/20 bg-sun/[0.025] p-4 sm:p-6">
-      <header className="mb-4">
-        <h3 className="text-sm font-medium uppercase tracking-wider text-gold">Handle</h3>
-        <p className="mt-1.5 text-xs leading-relaxed text-ash">
-          Claim your unique <span className="text-parchment">@handle</span> — a short, memorable
-          link to your public profile. {FORMAT_HINT}
-        </p>
-      </header>
+    <div>
+      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-ash">Profile link</p>
 
       {confirming ? (
         /* Step 2 — confirmation. Handles are permanent, so the member must
            explicitly confirm the exact handle before anything is claimed. */
         <div
-          className="border border-sun/30 bg-sun/5 p-4"
+          className="mt-3 border border-sun/30 bg-sun/5 p-3"
           role="alertdialog"
           aria-label="Confirm handle"
         >
           <p className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.2em] text-sun">
             <TriangleAlert className="h-3.5 w-3.5" /> confirm your handle
           </p>
-          <p className="heading-display mt-2 text-3xl text-gold">@{confirming}</p>
-          <ul className="mt-3 space-y-1 text-xs text-parchment">
+          <p className="heading-display mt-2 text-2xl text-gold">@{confirming}</p>
+          <ul className="mt-2 space-y-1 text-xs text-parchment">
             <li>· This handle is permanent — it can never be changed or transferred.</li>
             <li>· Your public profile link will be antidosis.com/profile/@{confirming}.</li>
             <li>· Typos can&rsquo;t be undone — double-check every character.</li>
           </ul>
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-3 flex flex-wrap gap-2">
             <Button onClick={claim} disabled={pending} size="sm">
               {pending && <Loader2 className="h-4 w-4 animate-spin" />}
               Yes, claim @{confirming}
@@ -151,7 +143,7 @@ export function HandleSection({ handle }: HandleSectionProps) {
       ) : (
         /* Step 1 — enter the desired handle */
         <>
-          <div className="flex flex-col gap-2 sm:flex-row">
+          <div className="mt-2 flex flex-col gap-2 sm:flex-row">
             <div className="relative flex-1">
               <AtSign className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ash" />
               <Input
@@ -169,20 +161,20 @@ export function HandleSection({ handle }: HandleSectionProps) {
                 placeholder="your_handle"
                 aria-label="Handle"
                 autoComplete="off"
-                className="pl-9 font-mono text-base lowercase"
+                className="pl-9 font-mono text-sm lowercase"
               />
             </div>
-            <Button onClick={requestClaim} disabled={pending} className="sm:w-auto">
-              Check &amp; claim
+            <Button onClick={requestClaim} disabled={pending} size="sm" className="sm:w-auto">
+              <Link2 className="mr-1.5 h-3.5 w-3.5" /> Check &amp; claim
             </Button>
           </div>
           {error && <p className="mt-2 text-xs text-bad">{error}</p>}
-          <p className="mt-3 flex items-center gap-1.5 text-xs text-ash">
-            <Lock className="h-3 w-3 shrink-0" /> Handles are permanent — you&rsquo;ll be asked to
-            confirm before claiming.
+          <p className="mt-2 flex items-center gap-1.5 text-[11px] text-ash">
+            <Lock className="h-3 w-3 shrink-0" /> {FORMAT_HINT} You&rsquo;ll confirm before
+            claiming.
           </p>
         </>
       )}
-    </section>
+    </div>
   );
 }

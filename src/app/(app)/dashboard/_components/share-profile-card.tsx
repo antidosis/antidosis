@@ -8,7 +8,6 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CopyLinkButton } from "@/components/ui/copy-link";
 import { useToast } from "@/components/ui/toast";
-import { cn } from "@/lib/utils";
 
 interface ShareProfileCardProps {
   profile: {
@@ -25,8 +24,6 @@ interface ShareProfileCardProps {
     isVerified: boolean;
     skills: { id: string; name: string }[];
   };
-  /** Tighter rendering for embedding next to the handle card. */
-  compact?: boolean;
 }
 
 function xml(value: string): string {
@@ -35,7 +32,7 @@ function xml(value: string): string {
   });
 }
 
-export function ShareProfileCard({ profile, compact = false }: ShareProfileCardProps) {
+export function ShareProfileCard({ profile }: ShareProfileCardProps) {
   const { toast } = useToast();
   const [sharing, setSharing] = useState(false);
   const name = profile.fullName || "Antidosis member";
@@ -122,60 +119,33 @@ export function ShareProfileCard({ profile, compact = false }: ShareProfileCardP
   }
 
   return (
-    <section className="vessel overflow-hidden rounded-xl">
-      <div className="border-b border-line/60 px-5 py-4">
-        <h3 className="text-sm font-medium text-gold">Your connection card</h3>
-        {!compact && (
-          <p className="mt-1 text-xs text-ash">
-            Invite someone to join Antidosis and connect with you. They choose whether to accept.
-          </p>
-        )}
-      </div>
-      <div
-        className={cn(
-          "relative overflow-hidden bg-void text-parchment",
-          compact ? "p-5" : "p-6 sm:p-8"
-        )}
-      >
-        <div className="absolute -right-24 -top-32 h-72 w-72 rounded-full border border-mercury/20 shadow-[0_0_0_48px_rgb(var(--c-mercury)/0.035),0_0_0_96px_rgb(var(--c-mercury)/0.025)]" />
-        <div className="relative">
+    <div>
+      <div className="relative overflow-hidden rounded-lg bg-void text-parchment">
+        <div className="absolute -right-16 -top-24 h-56 w-56 rounded-full border border-mercury/20 shadow-[0_0_0_40px_rgb(var(--c-mercury)/0.035),0_0_0_80px_rgb(var(--c-mercury)/0.025)]" />
+        <div className="relative p-4">
           <div className="flex items-center justify-between gap-4">
-            <p className="font-mono text-xs uppercase tracking-[0.22em] text-ok">Antidosis</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-ok">Antidosis</p>
             {profile.isVerified && (
-              <span className="flex items-center gap-1 text-xs text-ok">
-                <ShieldCheck className="h-3.5 w-3.5" /> Verified
+              <span className="flex items-center gap-1 text-[11px] text-ok">
+                <ShieldCheck className="h-3 w-3" /> Verified
               </span>
             )}
           </div>
-          <div className={cn("flex items-center gap-4", compact ? "mt-4" : "mt-8")}>
+          <div className="mt-3 flex items-center gap-3">
             <Avatar
               src={profile.avatarUrl}
               name={profile.fullName}
               size="lg"
-              className={compact ? "h-12 w-12" : "h-16 w-16"}
+              className="h-11 w-11"
             />
             <div className="min-w-0">
-              <p className={cn("truncate font-semibold", compact ? "text-lg" : "text-2xl")}>
-                {name}
-              </p>
-              <p className="mt-1 truncate font-mono text-sm text-ok">{handle}</p>
+              <p className="truncate text-base font-semibold">{name}</p>
+              <p className="truncate font-mono text-xs text-ok">{handle}</p>
             </div>
           </div>
-          {!compact && (
-            <>
-              <p className="mt-7 max-w-md text-lg font-medium leading-snug">
-                Connect with me on the local exchange network.
-              </p>
-              <p className="mt-2 text-sm text-ash">
-                {[profile.locationName, ...profile.skills.slice(0, 2).map((skill) => skill.name)]
-                  .filter(Boolean)
-                  .join(" · ") || "People · skills · direct agreements · genuine reviews"}
-              </p>
-            </>
-          )}
         </div>
       </div>
-      <div className="flex flex-wrap gap-2 p-4">
+      <div className="mt-3 flex flex-wrap gap-2">
         <CopyLinkButton url={inviteUrl} label="Copy invitation" />
         <Button
           type="button"
@@ -191,12 +161,10 @@ export function ShareProfileCard({ profile, compact = false }: ShareProfileCardP
           )}
           Share
         </Button>
-        {!compact && (
-          <Button type="button" variant="ghost" size="sm" onClick={downloadCard}>
-            <Download className="mr-1.5 h-3.5 w-3.5" /> Download card
-          </Button>
-        )}
+        <Button type="button" variant="ghost" size="sm" onClick={downloadCard}>
+          <Download className="mr-1.5 h-3.5 w-3.5" /> Card image
+        </Button>
       </div>
-    </section>
+    </div>
   );
 }

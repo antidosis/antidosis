@@ -30,6 +30,7 @@ export interface EditorProfile {
   jobsCompleted: number;
   skills: { id: string; name: string; isVerified: boolean }[];
   socialLinks: { id: string; platform: string; url: string; isPublic: boolean }[];
-  /** Business web presence — independent from personal socialLinks. */
-  businessSocialLinks?: { platform: string; url: string; isPublic?: boolean }[];
+  /** Business web presence — independent from personal socialLinks.
+   *  Raw rows may carry the stored JSON string; always normalise via toFormValues. */
+  businessSocialLinks?: { platform: string; url: string; isPublic?: boolean }[] | string | null;
 }

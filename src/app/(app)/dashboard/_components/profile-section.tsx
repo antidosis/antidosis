@@ -11,6 +11,7 @@ import { mutate } from "swr";
 
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
+import { parseBusinessSocialLinks } from "@/lib/business-links";
 import { updateProfileSchema } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
 
@@ -78,12 +79,23 @@ function toFormValues(profile: EditorProfile): ProfileFormData {
       url: link.url,
       isPublic: link.isPublic,
     })),
-    businessSocialLinks: (profile.businessSocialLinks ?? []).map((link) => ({
+    businessSocialLinks: businessLinksFrom(profile.businessSocialLinks).map((link) => ({
       platform: link.platform,
       url: link.url,
-      isPublic: link.isPublic ?? true,
+      isPublic: true,
     })),
   };
+}
+
+/** Normalise the raw business-links value (array from the API, or the stored
+ *  JSON string from any row-shaped response) into a plain link list. */
+function businessLinksFrom(
+  raw: EditorProfile["businessSocialLinks"]
+): { platform: string; url: string }[] {
+  if (Array.isArray(raw)) {
+    return raw.map((link) => ({ platform: link.platform, url: link.url }));
+  }
+  return parseBusinessSocialLinks(typeof raw === "string" ? raw : undefined);
 }
 
 export function ProfileSection({
@@ -348,7 +360,8 @@ export function ProfileSection({
           <div role="tabpanel" className="space-y-4">
             <KnowledgeBox>
               This is <strong className="text-gold">you, publicly</strong> — what anyone sees when
-              they open your profile. Your account mobile, email and ID documents never appear here.
+              they open your profile. Your email and ID documents never appear here, and your mobile
+              number only shows if you switch it on in the Identity panel.
             </KnowledgeBox>
             <IdentitySection
               register={register}

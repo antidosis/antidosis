@@ -312,7 +312,15 @@ describe("PATCH /api/v1/profiles/me", () => {
       abn: null,
       accountType: "business",
     });
-    mockProfileUpdate.mockResolvedValue({ id: "profile-1" });
+    mockProfileUpdate.mockResolvedValue({
+      id: "profile-1",
+      // The stored column is a JSON string on the raw row — the response must
+      // present it parsed (the dashboard editor maps over this value).
+      businessSocialLinks: JSON.stringify([
+        { platform: "website", url: "https://acme.com.au" },
+        { platform: "instagram", url: "https://instagram.com/acme" },
+      ]),
+    });
 
     const res = await PATCH(
       makeRequest("http://localhost/api/v1/profiles/me", {
@@ -334,6 +342,14 @@ describe("PATCH /api/v1/profiles/me", () => {
     ]);
     // Personal links untouched
     expect(mockProfileUpdate.mock.calls[0][0].data.socialLinks).toBeUndefined();
+
+    // Response shape: parsed array, not the raw JSON string (regression —
+    // a string here crashed the dashboard form reset after saving).
+    const body = await res.json();
+    expect(body.businessSocialLinks).toEqual([
+      { platform: "website", url: "https://acme.com.au" },
+      { platform: "instagram", url: "https://instagram.com/acme" },
+    ]);
   });
 
   it("persists business contact details and clears them on empty string", async () => {
