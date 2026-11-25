@@ -2,8 +2,6 @@
 
 import { useEffect, useRef } from "react";
 
-import { cn } from "@/lib/utils";
-
 type RGB = [number, number, number];
 type SceneName =
   | "hero"
@@ -145,14 +143,9 @@ function createLinks(nodes: MeshNode[]): [number, number][] {
   return links;
 }
 
-export function SignalField({ booting = false }: { booting?: boolean }) {
+export function SignalField() {
   const rootRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const bootingRef = useRef(booting);
-
-  useEffect(() => {
-    bootingRef.current = booting;
-  }, [booting]);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -253,11 +246,11 @@ export function SignalField({ booting = false }: { booting?: boolean }) {
       if (reducedMotion) drawFrame(performance.now());
     }
 
-    function drawLogo(strength: number, boot: boolean) {
+    function drawLogo(strength: number) {
       if (strength <= 0.01) return;
-      const centerX = boot || coarse ? width * 0.5 : width * 0.74;
-      const centerY = boot ? height * 0.36 : height * 0.46;
-      const scale = Math.min(width, height) * (boot ? 0.19 : 0.22);
+      const centerX = coarse ? width * 0.5 : width * 0.74;
+      const centerY = height * 0.46;
+      const scale = Math.min(width, height) * 0.22;
       ctx!.save();
       ctx!.strokeStyle = `rgba(${palette["--c-ok"].join(",")},${strength * 0.48})`;
       ctx!.lineWidth = 1.2;
@@ -271,11 +264,8 @@ export function SignalField({ booting = false }: { booting?: boolean }) {
     }
 
     function drawFrame(now: number) {
-      const elapsed = now - startedAt;
       const scene = currentScene();
-      const isBooting = bootingRef.current;
-      const bootStrength = isBooting ? ease(elapsed / 1050) : 0;
-      const logoStrength = Math.max(bootStrength, scene.spec.logo * (1 - scene.local * 0.72));
+      const logoStrength = scene.spec.logo * (1 - scene.local * 0.72);
       const documentProgress = clamp(scroll / maxScroll);
       const rotation = documentProgress * 0.62 + pointerX * 0.055;
       const cos = Math.cos(rotation);
@@ -283,9 +273,9 @@ export function SignalField({ booting = false }: { booting?: boolean }) {
       const rgb = scene.colour.map(Math.round).join(",");
       const centreX = width * (coarse ? 0.54 : 0.58);
       const centreY = height * 0.5;
-      const logoCentreX = isBooting || coarse ? width * 0.5 : width * 0.74;
-      const logoCentreY = isBooting ? height * 0.36 : height * 0.46;
-      const logoScale = Math.min(width, height) * (isBooting ? 0.19 : 0.22);
+      const logoCentreX = coarse ? width * 0.5 : width * 0.74;
+      const logoCentreY = height * 0.46;
+      const logoScale = Math.min(width, height) * 0.22;
       const linkCount = Math.floor(links.length * scene.spec.links);
 
       ctx!.clearRect(0, 0, width, height);
@@ -393,7 +383,7 @@ export function SignalField({ booting = false }: { booting?: boolean }) {
         }
       }
 
-      drawLogo(logoStrength, isBooting);
+      drawLogo(logoStrength);
       if (now - lastAmbient > 250) {
         root!.style.setProperty("--signal-rgb", rgb.replaceAll(",", " "));
         lastAmbient = now;
@@ -459,11 +449,7 @@ export function SignalField({ booting = false }: { booting?: boolean }) {
   }, []);
 
   return (
-    <div
-      ref={rootRef}
-      className={cn("signal-field", booting && "signal-field-booting")}
-      aria-hidden
-    >
+    <div ref={rootRef} className="signal-field" aria-hidden>
       <div className="signal-field-ambient" />
       <canvas ref={canvasRef} className="signal-field-canvas" />
       <div className="signal-field-vignette" />

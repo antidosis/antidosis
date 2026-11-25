@@ -15,7 +15,7 @@ export function LaunchCountdown() {
   return (
     <section
       data-signal-scene="expansion"
-      className="relative w-full overflow-hidden border-y border-sun/15 bg-inset"
+      className="home-chapter home-expansion relative w-full overflow-hidden py-14 md:py-20"
     >
       <div className="mx-auto max-w-6xl px-4 py-14 md:px-8 md:py-20">
         <p className="mb-8 font-mono text-xs text-ash">» NEW REGIONS — EVIDENCE BEFORE EXPANSION</p>

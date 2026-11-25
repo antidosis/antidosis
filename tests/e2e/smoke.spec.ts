@@ -3,6 +3,7 @@ import { test, expect } from "@playwright/test";
 test.describe("Smoke tests", () => {
   test("homepage completes the boot handoff and renders the shared scene", async ({ page }) => {
     await page.goto("/");
+    await expect(page.getByRole("dialog", { name: "Antidosis network startup" })).toBeVisible();
     await expect(page.getByRole("heading", { name: /your neighbourhood/i })).toBeVisible({
       timeout: 15_000,
     });
@@ -14,7 +15,18 @@ test.describe("Smoke tests", () => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
     await expect(page.getByRole("heading", { name: /your neighbourhood/i })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Enter the Antidosis network" })).toHaveCount(0);
+    await expect(page.getByRole("dialog", { name: "Antidosis network startup" })).toHaveCount(0);
+  });
+
+  test("skipping the intro reveals the page without a blank handoff", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Skip intro" }).click();
+    await expect(page.locator("main")).toBeVisible();
+    await expect(page.getByRole("heading", { name: /your neighbourhood/i })).toBeVisible();
+    await expect(page.getByRole("dialog", { name: "Antidosis network startup" })).toHaveCount(0);
+    await page.reload();
+    await expect(page.getByRole("dialog", { name: "Antidosis network startup" })).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: /your neighbourhood/i })).toBeVisible();
   });
 
   test("navigation links work", async ({ page }) => {

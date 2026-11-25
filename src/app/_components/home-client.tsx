@@ -127,18 +127,20 @@ const FEATURES = [
 
 export default function HomePage() {
   const [hasBooted, setHasBooted] = useState(false);
+  const [showBoot, setShowBoot] = useState(true);
 
   useEffect(() => {
     const bootedBefore = sessionStorage.getItem("antidosis-booted");
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (bootedBefore || reducedMotion) {
       setHasBooted(true);
+      setShowBoot(false);
     }
   }, []);
 
   function handleBootComplete() {
     sessionStorage.setItem("antidosis-booted", "true");
-    setHasBooted(true);
+    setShowBoot(false);
   }
 
   return (
@@ -149,8 +151,10 @@ export default function HomePage() {
       )}
       data-signal-journey="home"
     >
-      <SignalField booting={!hasBooted} />
-      {!hasBooted && <BootSequence onComplete={handleBootComplete} />}
+      {hasBooted && <SignalField />}
+      {showBoot && (
+        <BootSequence onExitStart={() => setHasBooted(true)} onComplete={handleBootComplete} />
+      )}
       <Navbar />
       <LaunchBanner />
 
@@ -158,7 +162,7 @@ export default function HomePage() {
         {/* HERO */}
         <section
           data-signal-scene="hero"
-          className="relative overflow-hidden pb-16 pt-28 md:pb-28 md:pt-40"
+          className="home-chapter home-hero relative overflow-hidden pb-16 pt-28 md:pb-28 md:pt-40"
         >
           <div className="relative max-w-6xl mx-auto px-4 md:px-8">
             <div className="grid items-center gap-8 md:grid-cols-2 md:gap-12">
@@ -194,15 +198,27 @@ export default function HomePage() {
                   </Button>
                 </div>
               </div>
-              <div className="mt-10 md:mt-0">
-                <NetworkMap className="h-[180px] w-full sm:h-[240px] md:h-[340px]" />
+              <div className="home-hero-visual mt-10 md:mt-0">
+                <div className="home-hero-visual-bar">
+                  <span>
+                    <i /> Exchange topology
+                  </span>
+                  <span>Illustrative network</span>
+                </div>
+                <NetworkMap className="h-[210px] w-full sm:h-[270px] md:h-[340px]" />
+                <div className="home-hero-visual-footer">
+                  <span>Needs</span>
+                  <span>Skills</span>
+                  <span>Trust</span>
+                  <span>Reciprocity</span>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
         {/* LIVE SIGNALS — example exchanges first, concept second */}
-        <section data-signal-scene="exchange" className="py-16 md:py-20 border-t border-line">
+        <section data-signal-scene="exchange" className="home-chapter home-exchange py-16 md:py-24">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-3 font-mono">
@@ -218,10 +234,8 @@ export default function HomePage() {
 
         <TickerBanner />
 
-        <div className="divider" />
-
         {/* HOW IT WORKS — 3 Steps */}
-        <section data-signal-scene="path" className="py-14 md:py-24 border-t border-line">
+        <section data-signal-scene="path" className="home-chapter home-path py-16 md:py-24">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-12 font-mono">» SIGNAL PATH — THREE STEPS</p>
@@ -259,10 +273,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        <div className="divider" />
-
         {/* DIRECT AGREEMENTS — private contracts are a product, not an afterthought */}
-        <section data-signal-scene="direct" className="border-t border-line py-14 md:py-24">
+        <section data-signal-scene="direct" className="home-chapter home-direct py-16 md:py-28">
           <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 md:grid-cols-2 md:px-8">
             <Reveal>
               <p className="mb-3 font-mono text-xs text-mercury">
@@ -302,13 +314,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        <div className="divider" />
-
         {/* FEATURES — one compact grid */}
-        <section
-          data-signal-scene="trust"
-          className="section-plateau py-14 md:py-24 border-t border-line"
-        >
+        <section data-signal-scene="trust" className="home-chapter home-trust py-16 md:py-24">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-8 font-mono">
@@ -328,13 +335,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        <div className="divider" />
-
         {/* COMMUNITY RELAY */}
-        <section
-          data-signal-scene="relay"
-          className="section-constellation py-14 md:py-24 border-t border-line"
-        >
+        <section data-signal-scene="relay" className="home-chapter home-relay py-16 md:py-28">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <div className="grid items-center gap-8 md:grid-cols-2 md:gap-12">
               <Reveal>
@@ -362,10 +364,11 @@ export default function HomePage() {
           </div>
         </section>
 
-        <div className="divider" />
-
         {/* BUSINESSES + CREATORS — two audiences, the same trust rails */}
-        <section data-signal-scene="communities" className="py-14 md:py-24 border-t border-line">
+        <section
+          data-signal-scene="communities"
+          className="home-chapter home-communities py-16 md:py-24"
+        >
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-6 font-mono">» ONE NETWORK — EVERY KIND OF VALUE</p>
@@ -420,18 +423,15 @@ export default function HomePage() {
           </div>
         </section>
 
-        <div className="divider" />
-
         <LaunchCountdown />
-
-        <div className="divider" />
 
         <OffgridVision />
 
-        <div className="divider" />
-
         {/* CTA */}
-        <section data-signal-scene="join" className="py-14 md:py-24 border-t border-line">
+        <section
+          data-signal-scene="join"
+          className="home-chapter home-join overflow-hidden py-20 md:py-32"
+        >
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-8 font-mono">◉ JOIN THE NETWORK</p>
