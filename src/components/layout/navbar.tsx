@@ -124,7 +124,7 @@ export function Navbar() {
 
   return (
     <>
-      <header className="fixed left-0 right-0 top-0 z-50 border-b border-line bg-void/95 backdrop-blur-sm">
+      <header className="fixed left-0 right-0 top-0 z-50 border-b border-line bg-void">
         <div className="flex h-20 items-center justify-between px-4 text-sm md:px-8">
           <Link href="/" className="group flex items-center gap-3" aria-label="Antidosis home">
             <img

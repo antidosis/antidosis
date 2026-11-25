@@ -70,7 +70,7 @@ export function NetworkMap({ className = "" }: { className?: string }) {
     if (!ctx || !staticCtx) return;
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
 
     let nodes: Node[] = [];
     let links: Array<[number, number]> = [];

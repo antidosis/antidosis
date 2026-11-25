@@ -173,6 +173,11 @@ export function SignalField() {
     let frame = 0;
     let lastFrame = 0;
     let lastAmbient = 0;
+    // Full-screen fixed canvas: repaint at full rate only briefly after the
+    // user interacts (scroll/pointer/theme), then settle to an ambient rate.
+    // The scene is rotation-on-scroll + slow pulses, so 15fps idle looks
+    // identical in character while roughly halving sustained canvas work.
+    let hiResUntil = 0;
     let ambientRgb = "";
     let maxScroll = 1;
     let scroll = window.scrollY;
@@ -239,7 +244,9 @@ export function SignalField() {
       const rect = canvas!.getBoundingClientRect();
       width = Math.max(1, rect.width);
       height = Math.max(1, rect.height);
-      dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      // Ambient backdrop: soft particles at 72% opacity — DPR 1 is
+      // imperceptible here and ~36% fewer pixels per repaint than 1.25.
+      dpr = 1;
       canvas!.width = Math.round(width * dpr);
       canvas!.height = Math.round(height * dpr);
       ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -395,21 +402,32 @@ export function SignalField() {
     function loop(now: number) {
       frame = 0;
       if (document.hidden) return;
-      if (now - lastFrame >= 1000 / 24) {
+      const interval = now < hiResUntil ? 1000 / 24 : 1000 / 15;
+      if (now - lastFrame >= interval) {
         drawFrame(now);
         lastFrame = now;
       }
       frame = requestAnimationFrame(loop);
     }
 
+    let lastMeasuredAt = 0;
     function onScroll() {
       scroll = window.scrollY;
+      hiResUntil = performance.now() + 1200;
+      // content-visibility:auto estimates off-screen chapter sizes, so
+      // re-measure positions periodically while scrolling.
+      const now = performance.now();
+      if (now - lastMeasuredAt > 600) {
+        lastMeasuredAt = now;
+        measureSections();
+      }
       if (reducedMotion) drawFrame(performance.now());
     }
 
     function onPointerMove(event: PointerEvent) {
       pointerX = (event.clientX / width - 0.5) * 2;
       pointerY = (event.clientY / height - 0.5) * 2;
+      hiResUntil = performance.now() + 400;
     }
 
     function onVisibility() {
