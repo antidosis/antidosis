@@ -67,7 +67,7 @@ export function SocialLinksSection({
   return (
     <SectionCard
       tone="social"
-      title={variant === "business" ? "Business web presence" : "Social profiles"}
+      title={variant === "business" ? "Business web & social presence" : "Social profiles"}
     >
       {fields.length === 0 && (
         <p className="mb-4 text-xs text-ash">No links yet — add your first below.</p>

@@ -30,6 +30,7 @@ import {
   INDUSTRY_ORDER,
   attributeHighlights,
   getProfession,
+  industryOfProfession,
   parseAttributes,
   professionDisplayLabel,
   professionKeyFromInput,
@@ -54,6 +55,16 @@ interface DirectorySlotsSectionProps {
 }
 
 const SLOT_NAMES = ["Primary specialty", "Second specialty", "Third specialty"];
+
+function industryLabel(slotOne: SpecialtyRecord[]): string {
+  const industries = new Set(
+    slotOne
+      .map((specialty) => industryOfProfession(specialty.profession))
+      .filter((key): key is keyof typeof INDUSTRIES => key !== null)
+  );
+  if (industries.size === 0) return "Custom professions";
+  return [...industries].map((key) => INDUSTRIES[key].label).join(" · ");
+}
 
 export function DirectorySlotsSection({ onSlotChange }: DirectorySlotsSectionProps) {
   const { data, isLoading } = useApi<{ specialties: SpecialtyRecord[] }>(
@@ -85,8 +96,7 @@ export function DirectorySlotsSection({ onSlotChange }: DirectorySlotsSectionPro
               What do you want to be found for?
             </h3>
             <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-ash">
-              Pick an industry, then the professions you offer within it — web developer and app
-              developer share one slot, for example. Your first slot is free, forever.
+              Your slots in the public directory. The first is free, forever — claim it below.
             </p>
           </div>
           <Badge variant="quintessence" className="text-xs">
@@ -96,97 +106,129 @@ export function DirectorySlotsSection({ onSlotChange }: DirectorySlotsSectionPro
       </div>
 
       <div className="p-4 sm:p-5">
-        {/* Slot 1 — the free live slot, holding one industry's professions */}
-        {slotOne.length > 0 ? (
-          <div className="rounded-lg border border-aero/40 bg-aero/[0.04]">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-aero/20 px-4 py-3">
-              <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-aero">
-                <BriefcaseBusiness className="h-3.5 w-3.5" /> Slot 01 · Free · Live
-              </span>
-              {!slotOneFull && !pickerOpen && (
-                <button
-                  type="button"
-                  onClick={() => setPickerOpen(true)}
-                  className="inline-flex items-center gap-1 text-xs font-medium text-aero transition-colors hover:text-gold"
-                >
-                  <Plus className="h-3.5 w-3.5" /> Add another
-                </button>
-              )}
-            </div>
-            <div className="divide-y divide-line/40">
-              {slotOne.map((specialty) => (
-                <SpecialtyRow key={specialty.id} specialty={specialty} />
-              ))}
-            </div>
-            {slotOneFull && (
-              <p className="border-t border-aero/20 px-4 py-2.5 text-xs text-ash">
-                This slot is full — extra slots unlock soon for another industry.
-              </p>
+        {/* Slot strip — the three slots always visible up top */}
+        <div className="grid gap-3 sm:grid-cols-3">
+          {/* Slot 1 — free, live */}
+          <div
+            className={cn(
+              "rounded-lg border p-3.5",
+              slotOne.length > 0
+                ? "border-aero/40 bg-aero/[0.05]"
+                : "border-dashed border-aero/30 bg-aero/[0.03]"
             )}
-          </div>
-        ) : (
-          !pickerOpen && (
-            <button
-              type="button"
-              onClick={() => setPickerOpen(true)}
-              disabled={isLoading}
-              className={cn(
-                "group flex w-full flex-col items-start justify-between gap-4 rounded-lg border-2 border-dashed border-aero/30 bg-aero/[0.03] p-5 text-left transition-colors sm:flex-row sm:items-center",
-                "hover:border-aero/60 hover:bg-aero/[0.06] disabled:opacity-50"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-aero">
+                <BriefcaseBusiness className="h-3.5 w-3.5" /> Slot 01 · Free
+              </span>
+              {slotOne.length > 0 ? (
+                <span className="h-2 w-2 rounded-full bg-ok shadow-[0_0_6px_rgba(61,220,151,0.8)]" />
+              ) : (
+                <Badge variant="quintessence" className="text-[10px]">
+                  empty
+                </Badge>
               )}
-            >
-              <span>
-                <span className="block text-base font-medium text-gold">Claim your specialty</span>
-                <span className="mt-1 block max-w-xl text-sm text-ash">
-                  Browse industries — trades, tech, creative, care and more — then pick the
-                  professions you offer. Free, forever.
-                </span>
-              </span>
-              <span className="inline-flex shrink-0 items-center gap-1.5 text-sm font-medium text-aero">
-                <Sparkles className="h-4 w-4" /> Browse industries
-              </span>
-            </button>
-          )
-        )}
+            </div>
+            <p className="mt-2 text-sm font-medium text-gold">
+              {slotOne.length > 0
+                ? `${slotOne.length} of ${FREE_SLOT_PROFESSIONS} professions live`
+                : "Claim your specialty"}
+            </p>
+            <p className="mt-0.5 text-xs leading-relaxed text-ash">
+              {slotOne.length > 0
+                ? industryLabel(slotOne)
+                : "One industry, up to 4 professions — free forever."}
+            </p>
+          </div>
 
-        {/* Slots 2–3 — locked until paid unlocks land */}
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          {/* Slots 2–3 — locked until paid unlocks land */}
           {[2, 3].map((slot) => (
             <div
               key={slot}
-              className="relative flex min-h-32 flex-col justify-between rounded-lg border border-line/60 bg-surface/25 p-4"
+              className="relative flex flex-col justify-between rounded-lg border border-line/60 bg-surface/25 p-3.5"
             >
-              <span className="flex w-full items-center justify-between">
+              <div className="flex items-center justify-between gap-2">
                 <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ash">
                   Slot 0{slot}
                 </span>
                 <span className="inline-flex items-center gap-1 rounded-full border border-line px-2 py-0.5 text-[10px] uppercase tracking-wider text-ash">
                   <Lock className="h-3 w-3" /> Locked
                 </span>
-              </span>
+              </div>
               <div>
-                <p className="text-base font-medium text-ash">{SLOT_NAMES[slot - 1]}</p>
-                <p className="mt-1 text-sm text-ash/80">
+                <p className="mt-2 text-sm font-medium text-ash">{SLOT_NAMES[slot - 1]}</p>
+                <p className="mt-0.5 text-xs leading-relaxed text-ash/80">
                   Advertise another industry — for example a plumber who also does lawn care.
                 </p>
               </div>
               {lockedInfo === slot ? (
-                <p className="mt-3 rounded-md border border-sun/25 bg-sun/[0.06] p-2.5 text-xs leading-relaxed text-sun">
+                <p className="mt-2 rounded-md border border-sun/25 bg-sun/[0.06] p-2 text-xs leading-relaxed text-sun">
                   Paid slot unlocks are coming soon — a small one-off fee opens an extra industry
-                  slot. Your first slot stays free, forever.
+                  slot.
                 </p>
               ) : (
                 <button
                   type="button"
                   onClick={() => setLockedInfo(lockedInfo === slot ? null : slot)}
-                  className="mt-3 inline-flex items-center gap-1.5 self-start text-sm font-medium text-ash transition-colors hover:text-sun"
+                  className="mt-2 inline-flex items-center gap-1 self-start text-xs font-medium text-ash transition-colors hover:text-sun"
                 >
-                  Notify me <ArrowRight className="h-3.5 w-3.5" />
+                  Notify me <ArrowRight className="h-3 w-3" />
                 </button>
               )}
             </div>
           ))}
         </div>
+
+        {/* Claim CTA when slot 1 is empty */}
+        {slotOne.length === 0 && !pickerOpen && (
+          <button
+            type="button"
+            onClick={() => setPickerOpen(true)}
+            disabled={isLoading}
+            className={cn(
+              "group mt-3 flex w-full items-center justify-between gap-4 rounded-lg border-2 border-dashed border-aero/30 bg-aero/[0.03] p-4 text-left transition-colors",
+              "hover:border-aero/60 hover:bg-aero/[0.06] disabled:opacity-50"
+            )}
+          >
+            <span>
+              <span className="block text-sm font-medium text-gold">
+                Pick an industry, then the professions you offer
+              </span>
+              <span className="mt-0.5 block text-xs text-ash">
+                Web developer and app developer share one slot, for example.
+              </span>
+            </span>
+            <span className="inline-flex shrink-0 items-center gap-1.5 text-sm font-medium text-aero">
+              <Sparkles className="h-4 w-4" /> Browse industries
+            </span>
+          </button>
+        )}
+
+        {/* Claimed professions — compact rows, expand to edit */}
+        {slotOne.length > 0 && (
+          <div className="mt-3 divide-y divide-line/40 rounded-lg border border-line/70 bg-surface/20">
+            {slotOne.map((specialty) => (
+              <SpecialtyRow key={specialty.id} specialty={specialty} />
+            ))}
+            {!slotOneFull && !pickerOpen && (
+              <div className="px-4 py-2.5">
+                <button
+                  type="button"
+                  onClick={() => setPickerOpen(true)}
+                  className="inline-flex items-center gap-1 text-xs font-medium text-aero transition-colors hover:text-gold"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add another profession (
+                  {FREE_SLOT_PROFESSIONS - slotOne.length} left in this slot)
+                </button>
+              </div>
+            )}
+            {slotOneFull && (
+              <p className="px-4 py-2.5 text-xs text-ash">
+                This slot is full — extra slots unlock soon for another industry.
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {pickerOpen && (
@@ -465,13 +507,95 @@ function ProfessionPicker({
 
 function SpecialtyRow({ specialty }: { specialty: SpecialtyRecord }) {
   const [editing, setEditing] = useState(false);
+  if (editing) {
+    return (
+      <div className="px-4 py-3">
+        <SpecialtyEditor specialty={specialty} editing onToggleEdit={() => setEditing(false)} />
+      </div>
+    );
+  }
+  return <CompactSpecialtyRow specialty={specialty} onEdit={() => setEditing(true)} />;
+}
+
+/** Dense single-line summary — details expand only while editing. */
+function CompactSpecialtyRow({
+  specialty,
+  onEdit,
+}: {
+  specialty: SpecialtyRecord;
+  onEdit: () => void;
+}) {
+  const profession = getProfession(specialty.profession);
+  const professionLabel = professionDisplayLabel(specialty.profession);
+  const attributes = useMemo(() => parseAttributes(specialty.attributes), [specialty.attributes]);
+  const highlights = profession ? attributeHighlights(profession, attributes) : [];
+  const [removing, setRemoving] = useState(false);
+  const { toast } = useToast();
+
+  async function remove() {
+    setRemoving(true);
+    try {
+      const response = await fetch(`/api/v1/profiles/me/specialties/${specialty.id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) {
+        toast("Couldn't remove the specialty", "error");
+        return;
+      }
+      await mutate("/api/v1/profiles/me/specialties");
+      toast(`${professionLabel} removed — space freed in your slot`, "success");
+    } catch {
+      toast("Couldn't remove the specialty", "error");
+    } finally {
+      setRemoving(false);
+    }
+  }
+
+  const complete = highlights.length > 0 || !!specialty.headline;
+
   return (
-    <div className="px-4 py-3">
-      <SpecialtyEditor
-        specialty={specialty}
-        editing={editing}
-        onToggleEdit={() => setEditing(!editing)}
-      />
+    <div className="group flex items-center gap-3 px-4 py-2.5">
+      <div className="flex min-w-0 flex-1 items-baseline gap-2">
+        <span className="shrink-0 text-sm font-medium text-gold">{professionLabel}</span>
+        {specialty.headline && (
+          <span className="truncate text-xs text-parchment">{specialty.headline}</span>
+        )}
+        {!complete && <span className="shrink-0 text-xs italic text-ash/70">no details yet</span>}
+      </div>
+      {highlights.length > 0 && (
+        <div className="hidden min-w-0 flex-wrap items-center gap-1.5 md:flex">
+          {highlights.slice(0, 3).map((highlight) => (
+            <span
+              key={highlight}
+              className="inline-flex shrink-0 items-center gap-1 rounded border border-line/70 bg-inset/60 px-1.5 py-0.5 text-[11px] text-parchment"
+            >
+              <Award className="h-3 w-3 text-aero" /> {highlight}
+            </span>
+          ))}
+        </div>
+      )}
+      <div className="flex shrink-0 items-center gap-2.5">
+        <button
+          type="button"
+          onClick={onEdit}
+          className="text-xs font-medium text-ash transition-colors hover:text-gold"
+        >
+          {complete ? "Edit" : "Add details"}
+        </button>
+        <button
+          type="button"
+          onClick={remove}
+          disabled={removing}
+          className="text-ash transition-colors hover:text-bad"
+          aria-label={`Remove ${professionLabel}`}
+        >
+          {removing ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Trash2 className="h-3.5 w-3.5" />
+          )}
+        </button>
+      </div>
     </div>
   );
 }
@@ -608,8 +732,8 @@ function SpecialtyEditor({
         </button>
       </div>
 
-      <div className="mt-3 space-y-4">
-        <div className="space-y-1.5">
+      <div className="mt-3 grid gap-4 sm:grid-cols-2">
+        <div className="space-y-1.5 sm:col-span-2">
           <Label htmlFor={`headline-${specialty.id}`}>Headline (optional)</Label>
           <Input
             id={`headline-${specialty.id}`}
@@ -622,7 +746,7 @@ function SpecialtyEditor({
         </div>
 
         {!profession && (
-          <p className="text-xs leading-relaxed text-ash">
+          <p className="text-xs leading-relaxed text-ash sm:col-span-2">
             Custom profession — the structured questions only exist for the built-in professions so
             far. Your headline and skills carry this listing.
           </p>
@@ -690,7 +814,7 @@ function SpecialtyEditor({
           if (field.kind === "multi") {
             const selected = Array.isArray(value) ? (value as string[]) : [];
             return (
-              <div key={field.key} className="space-y-1.5">
+              <div key={field.key} className="space-y-1.5 sm:col-span-2">
                 <Label>{field.label}</Label>
                 <div className="flex flex-wrap gap-2">
                   {field.options.map((option) => {

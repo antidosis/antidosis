@@ -11,8 +11,10 @@ const ALLOWED_ORIGINS = [
   "https://antidosis-kqs9nele2-martins-projects-5d68d645.vercel.app",
 ];
 
-export function withCors(handler: (req: NextRequest) => Promise<Response> | Response) {
-  return async (req: NextRequest) => {
+export function withCors(
+  handler: (req: NextRequest, ...args: unknown[]) => Promise<Response> | Response
+) {
+  return async (req: NextRequest, ...args: unknown[]) => {
     const origin = req.headers.get("origin");
     const isAllowed = !origin || ALLOWED_ORIGINS.includes(origin);
 
@@ -28,7 +30,7 @@ export function withCors(handler: (req: NextRequest) => Promise<Response> | Resp
       });
     }
 
-    const res = await handler(req);
+    const res = await handler(req, ...args);
 
     if (isAllowed && origin) {
       res.headers.set("Access-Control-Allow-Origin", origin);
