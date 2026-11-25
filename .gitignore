@@ -60,3 +60,6 @@ crypto-test.ts
 
 # Test artifacts
 test-results/
+
+# Third-party audit (local reference only)
+third party audit/
