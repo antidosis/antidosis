@@ -54,7 +54,7 @@ export function SkillsSection({ skills }: { skills: Skill[] }) {
       }
       setValue("");
       await mutate("/api/v1/profiles/me");
-      toast(`${clean} added to your directory profile`, "success");
+      toast(`${clean} added to your profile`, "success");
     } catch {
       toast("Couldn't add skill — try again", "error");
     } finally {
@@ -85,9 +85,9 @@ export function SkillsSection({ skills }: { skills: Skill[] }) {
 
   return (
     <SectionCard
-      tone="directory"
+      tone="identity"
       title="Skills and services"
-      description="Tag what you can help with. These are searchable in the directory and improve need recommendations."
+      description="Tag what you can help with. Shown on your public profile, searchable in the directory, and used to match you with relevant needs."
     >
       <Label htmlFor="profile-skill">Add a skill or service</Label>
       <div className="mt-2 flex gap-2">

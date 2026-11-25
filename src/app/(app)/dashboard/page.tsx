@@ -37,6 +37,8 @@ type ProfileData = {
   locationName: string | null;
   publicPhone: string | null;
   privatePhone: string | null;
+  businessPhone: string | null;
+  businessEmail: string | null;
   accountType: "individual" | "business";
   abn: string | null;
   abnVerified: boolean;
@@ -78,7 +80,7 @@ function parseTab(value: string | null): DashboardTabId {
 }
 
 function parseProfileTab(value: string | null): ProfileTab {
-  return ["public", "directory", "social", "trust", "private"].includes(value ?? "")
+  return ["public", "directory", "social", "trust"].includes(value ?? "")
     ? (value as ProfileTab)
     : "public";
 }

@@ -20,6 +20,8 @@ model Profile {
   longitude              Float?
   publicPhone            String?   @map("public_phone")
   privatePhone           String?   @map("private_phone")
+  businessPhone          String?   @map("business_phone")
+  businessEmail          String?   @map("business_email")
   mobile                 String?   @unique
   mobileVerified         Boolean   @default(false) @map("mobile_verified")
   isVerified             Boolean   @default(false) @map("is_verified")

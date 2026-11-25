@@ -146,6 +146,8 @@ export interface DirectoryProfile {
   bio: string | null;
   locationName: string | null;
   publicPhone: string | null;
+  businessPhone: string | null;
+  businessEmail: string | null;
   ratingAvg: number;
   ratingCount: number;
   jobsCompleted: number;
@@ -190,6 +192,8 @@ export async function getDirectoryProfiles(
       bio: true,
       locationName: true,
       publicPhone: true,
+      businessPhone: true,
+      businessEmail: true,
       ratingAvg: true,
       ratingCount: true,
       jobsCompleted: true,

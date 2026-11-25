@@ -25,10 +25,11 @@ import { cn } from "@/lib/utils";
 import type { CredentialData } from "./credential-list";
 import { CredentialsSection } from "./credentials-section";
 import { AboutSection } from "./profile-editor/about-section";
-import { ContactSection } from "./profile-editor/contact-section";
+import { BusinessContactSection } from "./profile-editor/business-contact-section";
 import { HandleSection } from "./profile-editor/handle-section";
 import { IdentitySection } from "./profile-editor/identity-section";
 import { PreferencesSection } from "./profile-editor/preferences-section";
+import { PublicContactSection } from "./profile-editor/public-contact-section";
 import { SkillsSection } from "./profile-editor/skills-section";
 import { SocialLinksSection } from "./profile-editor/social-links-section";
 import type { EditorProfile, ProfileFormData, ProfileTab } from "./profile-editor/types";
@@ -72,13 +73,6 @@ const PROFILE_TABS = [
     icon: ShieldCheck,
     activeClass: "border-ok/30 bg-ok/[0.08] text-ok",
   },
-  {
-    id: "private" as const,
-    label: "Contact & privacy",
-    description: "Account mobile, public and private contact controls",
-    icon: LockKeyhole,
-    activeClass: "border-mercury/30 bg-mercury/[0.08] text-mercury",
-  },
 ];
 
 function toFormValues(profile: EditorProfile): ProfileFormData {
@@ -88,8 +82,8 @@ function toFormValues(profile: EditorProfile): ProfileFormData {
     avatarUrl: profile.avatarUrl ?? undefined,
     locationName: profile.locationName ?? undefined,
     publicPhone: profile.publicPhone ?? undefined,
-    privatePhone: profile.privatePhone ?? undefined,
-    mobile: profile.mobile ?? undefined,
+    businessPhone: profile.businessPhone ?? undefined,
+    businessEmail: profile.businessEmail ?? undefined,
     abn: profile.abn ?? undefined,
     accountType: profile.accountType ?? "individual",
     audienceSize: profile.audienceSize ?? undefined,
@@ -273,7 +267,7 @@ export function ProfileSection({
       <div
         role="tablist"
         aria-label="Profile sections"
-        className="mb-5 grid grid-cols-2 gap-2 rounded-lg border border-line bg-surface/35 p-2 sm:grid-cols-3 lg:grid-cols-5"
+        className="mb-5 grid grid-cols-2 gap-2 rounded-lg border border-line bg-surface/35 p-2 sm:grid-cols-4"
       >
         {PROFILE_TABS.map((tab) => (
           <button
@@ -317,6 +311,8 @@ export function ProfileSection({
               <HandleSection handle={initialProfile.handle} />
             </div>
             <AboutSection register={register} control={control} errors={errors} />
+            <PublicContactSection register={register} errors={errors} />
+            <SkillsSection skills={initialProfile.skills} />
           </div>
         )}
 
@@ -331,19 +327,21 @@ export function ProfileSection({
               errors={errors}
             />
             {accountType === "business" && (
-              <SocialLinksSection
-                control={control}
-                register={register}
-                fields={fields}
-                removingIds={removingIds}
-                onMarkRemoving={markRemoving}
-                append={addSocialLink}
-                errors={errors}
-                showAudience={false}
-                variant="business"
-              />
+              <>
+                <BusinessContactSection register={register} errors={errors} />
+                <SocialLinksSection
+                  control={control}
+                  register={register}
+                  fields={fields}
+                  removingIds={removingIds}
+                  onMarkRemoving={markRemoving}
+                  append={addSocialLink}
+                  errors={errors}
+                  showAudience={false}
+                  variant="business"
+                />
+              </>
             )}
-            <SkillsSection skills={initialProfile.skills} />
           </div>
         )}
 
@@ -386,33 +384,6 @@ export function ProfileSection({
             <div id="credentials-section">
               <CredentialsSection initialCredentials={credentials} onUpdate={onCredentialsUpdate} />
             </div>
-          </div>
-        )}
-
-        {activeTab === "private" && (
-          <div role="tabpanel" className="grid items-start gap-4 xl:grid-cols-2">
-            <ContactSection
-              register={register}
-              errors={errors}
-              mobileVerified={initialProfile.mobileVerified}
-            />
-            <section className="rounded-lg border border-ok/20 bg-ok/[0.035] p-5 sm:p-6">
-              <div className="flex items-start gap-3">
-                <LockKeyhole className="mt-0.5 h-5 w-5 shrink-0 text-ok" />
-                <div>
-                  <h3 className="text-sm font-medium text-gold">Private means private</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-parchment">
-                    Your account mobile and private phone are never included in public profile
-                    responses. Public phone is optional and clearly labelled before you save.
-                  </p>
-                  <p className="mt-3 text-sm leading-relaxed text-ash">
-                    To share a qualification without sharing the file, use its redacted summary
-                    action in Trust &amp; ID, then paste it into your chosen conversation. Nothing
-                    is sent automatically when you express interest.
-                  </p>
-                </div>
-              </div>
-            </section>
           </div>
         )}
       </div>

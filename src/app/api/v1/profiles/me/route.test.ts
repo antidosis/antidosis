@@ -298,6 +298,69 @@ describe("PATCH /api/v1/profiles/me", () => {
     expect(body.fullName).toBe("Updated");
   });
 
+  it("persists business contact details and clears them on empty string", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobile: null,
+      mobileVerified: false,
+    });
+    mockProfileUpdate.mockResolvedValue({
+      id: "profile-1",
+      businessPhone: "02 4321 0987",
+      businessEmail: "bookings@example.com.au",
+      skills: [],
+      socialLinks: [],
+      credentials: [],
+    });
+
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/profiles/me", {
+        method: "PATCH",
+        body: JSON.stringify({
+          businessPhone: "02 4321 0987",
+          businessEmail: "bookings@example.com.au",
+        }),
+      })
+    );
+    expect(res.status).toBe(200);
+    expect(mockProfileUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          businessPhone: "02 4321 0987",
+          businessEmail: "bookings@example.com.au",
+        }),
+      })
+    );
+
+    mockProfileUpdate.mockClear();
+    const cleared = await PATCH(
+      makeRequest("http://localhost/api/v1/profiles/me", {
+        method: "PATCH",
+        body: JSON.stringify({ businessPhone: "", businessEmail: "" }),
+      })
+    );
+    expect(cleared.status).toBe(200);
+    expect(mockProfileUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ businessPhone: null, businessEmail: null }),
+      })
+    );
+  });
+
+  it("returns 400 for a malformed business email", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/profiles/me", {
+        method: "PATCH",
+        body: JSON.stringify({ businessEmail: "not-an-email" }),
+      })
+    );
+
+    expect(res.status).toBe(400);
+  });
+
   it("normalizes scheme-less social link URLs to https", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
     mockProfileUpdate.mockResolvedValue({

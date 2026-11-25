@@ -12,6 +12,8 @@ export interface Profile {
   longitude: number | null;
   publicPhone: string | null;
   privatePhone: string | null;
+  businessPhone: string | null;
+  businessEmail: string | null;
   mobile: string | null;
   mobileVerified: boolean;
   isVerified: boolean;
@@ -296,6 +298,8 @@ export interface ProProfile {
   bio: string | null;
   locationName: string | null;
   publicPhone: string | null;
+  businessPhone: string | null;
+  businessEmail: string | null;
   ratingAvg: number;
   ratingCount: number;
   jobsCompleted: number;
@@ -422,6 +426,8 @@ export interface PublicProfile {
   avatarUrl: string | null;
   locationName: string | null;
   publicPhone: string | null;
+  businessPhone: string | null;
+  businessEmail: string | null;
   mobileVerified: boolean;
   isVerified: boolean;
   isPro: boolean;

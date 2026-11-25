@@ -16,6 +16,8 @@ const profile: EditorProfile = {
   locationName: "terrigal_2260",
   publicPhone: null,
   privatePhone: null,
+  businessPhone: null,
+  businessEmail: null,
   mobile: null,
   abn: null,
   accountType: "individual",

@@ -3,7 +3,7 @@ import type { z } from "zod";
 import type { updateProfileSchema } from "@/lib/schemas";
 
 export type ProfileFormData = z.input<typeof updateProfileSchema>;
-export type ProfileTab = "public" | "directory" | "social" | "trust" | "private";
+export type ProfileTab = "public" | "directory" | "social" | "trust";
 
 /** Profile shape the editor needs from `/api/v1/profiles/me`. */
 export interface EditorProfile {
@@ -14,6 +14,8 @@ export interface EditorProfile {
   locationName: string | null;
   publicPhone: string | null;
   privatePhone: string | null;
+  businessPhone: string | null;
+  businessEmail: string | null;
   mobile: string | null;
   abn: string | null;
   accountType: "individual" | "business";

@@ -97,11 +97,11 @@ export const DASHBOARD_TABS: DashboardTab[] = [
   },
   {
     id: "settings",
-    label: "Settings",
+    label: "Settings & Security",
     shortLabel: "Settings",
     icon: Settings,
     section: "account",
-    subtitle: "Appearance, account details and privacy controls",
+    subtitle: "Appearance, sign-in security, account details and privacy controls",
   },
 ];
 

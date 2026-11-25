@@ -9,6 +9,7 @@ import {
   Building2,
   FolderTree,
   Loader2,
+  LockKeyhole,
   Palette,
   Shield,
   Trash2,
@@ -21,6 +22,7 @@ import { cn } from "@/lib/utils";
 
 import type { DashboardTabId } from "./dashboard-nav";
 import type { ProfileTab } from "./profile-editor/types";
+import { SecuritySection } from "./security-section";
 import { ThemePicker } from "./theme-picker";
 
 interface SettingsProfile {
@@ -31,6 +33,7 @@ interface SettingsProfile {
   abn: string | null;
   abnVerified: boolean;
   showInDirectory: boolean;
+  mobile: string | null;
   mobileVerified: boolean;
   isVerified: boolean;
 }
@@ -43,7 +46,7 @@ interface SettingsPanelProps {
 export function SettingsPanel({ profile, onNavigate }: SettingsPanelProps) {
   const router = useRouter();
   const [supabase] = useState(() => createClient());
-  const [view, setView] = useState<"appearance" | "account">("appearance");
+  const [view, setView] = useState<"appearance" | "security" | "account">("appearance");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -88,20 +91,44 @@ export function SettingsPanel({ profile, onNavigate }: SettingsPanelProps) {
         <button
           type="button"
           role="tab"
+          aria-selected={view === "security"}
+          onClick={() => setView("security")}
+          className={cn(
+            "flex min-h-11 items-center justify-center gap-2 rounded-md px-4 py-2 text-sm",
+            view === "security"
+              ? "border border-mercury/25 bg-mercury/[0.07] text-mercury"
+              : "border border-transparent text-ash hover:text-gold"
+          )}
+        >
+          <LockKeyhole className="h-4 w-4" /> Security
+        </button>
+        <button
+          type="button"
+          role="tab"
           aria-selected={view === "account"}
           onClick={() => setView("account")}
           className={cn(
             "flex min-h-11 items-center justify-center gap-2 rounded-md px-4 py-2 text-sm",
             view === "account"
-              ? "border border-mercury/25 bg-mercury/[0.07] text-mercury"
+              ? "border border-ok/25 bg-ok/[0.07] text-ok"
               : "border border-transparent text-ash hover:text-gold"
           )}
         >
-          <Shield className="h-4 w-4" /> Account & privacy
+          <Shield className="h-4 w-4" /> Account
         </button>
       </div>
 
-      {view === "appearance" ? (
+      {view === "security" ? (
+        <div role="tabpanel">
+          <SecuritySection
+            profile={{
+              email: profile.email,
+              mobile: profile.mobile,
+              mobileVerified: profile.mobileVerified,
+            }}
+          />
+        </div>
+      ) : view === "appearance" ? (
         <section
           className="vessel rounded-xl border-orchid/20 bg-orchid/[0.02] p-4 sm:p-6"
           role="tabpanel"
@@ -123,8 +150,8 @@ export function SettingsPanel({ profile, onNavigate }: SettingsPanelProps) {
           className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,1fr)]"
           role="tabpanel"
         >
-          <section className="vessel rounded-lg border-mercury/20 bg-mercury/[0.02] p-4 sm:p-5">
-            <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.2em] text-mercury">
+          <section className="vessel rounded-lg border-ok/20 bg-ok/[0.02] p-4 sm:p-5">
+            <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.2em] text-ok">
               Account summary
             </p>
             <dl className="grid grid-cols-2 gap-x-4 gap-y-4 sm:grid-cols-3">

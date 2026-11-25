@@ -108,6 +108,31 @@ describe("updateProfileSchema", () => {
     expect(result.success).toBe(true);
   });
 
+  it("accepts business contact details and clears them with empty strings", () => {
+    const set = updateProfileSchema.safeParse({
+      businessPhone: "02 4321 0987",
+      businessEmail: "bookings@example.com.au",
+    });
+    expect(set.success).toBe(true);
+
+    const cleared = updateProfileSchema.safeParse({
+      businessPhone: "",
+      businessEmail: "",
+    });
+    expect(cleared.success).toBe(true);
+    if (cleared.success) {
+      expect(cleared.data.businessPhone).toBe("");
+      expect(cleared.data.businessEmail).toBe("");
+    }
+  });
+
+  it("rejects a malformed business email", () => {
+    const result = updateProfileSchema.safeParse({
+      businessEmail: "not-an-email",
+    });
+    expect(result.success).toBe(false);
+  });
+
   it("rejects fullName over 100 chars", () => {
     const result = updateProfileSchema.safeParse({
       fullName: "a".repeat(101),

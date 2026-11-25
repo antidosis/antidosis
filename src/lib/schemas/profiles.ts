@@ -42,6 +42,13 @@ export const updateProfileSchema = z.object({
   showInDirectory: z.boolean().optional().nullable(),
   publicPhone: z.string().max(50).optional().nullable(),
   privatePhone: z.string().max(50).optional().nullable(),
+  businessPhone: z.string().max(50).optional().nullable(),
+  // Empty string is treated as "clear the field" — the route normalises it to
+  // null after parsing, so allow it through the email check.
+  businessEmail: z
+    .union([z.literal(""), z.string().email("Enter a valid email address").max(200)])
+    .optional()
+    .nullable(),
   mobile: z.string().max(20).optional().nullable(),
   abn: z
     .string()
