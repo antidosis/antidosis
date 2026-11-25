@@ -5,6 +5,7 @@ import type {
   Control,
   FieldArrayWithId,
   FieldErrors,
+  Path,
   UseFieldArrayAppend,
   UseFormRegister,
 } from "react-hook-form";
@@ -34,13 +35,18 @@ const PLATFORMS = [
 const SELECT_CLASS =
   "h-10 rounded border border-line bg-inset px-3 text-sm text-gold outline-none transition-colors focus:border-sun disabled:cursor-not-allowed disabled:opacity-50";
 
+type LinksField = "socialLinks" | "businessSocialLinks";
+
 interface SocialLinksSectionProps {
   control: Control<ProfileFormData>;
   register: UseFormRegister<ProfileFormData>;
-  fields: FieldArrayWithId<ProfileFormData, "socialLinks", "id">[];
+  /** Which array this section binds to — personal and business links are
+      stored independently. */
+  field: LinksField;
+  fields: FieldArrayWithId<ProfileFormData, LinksField, "id">[];
   removingIds: ReadonlySet<string>;
   onMarkRemoving: (fieldId: string) => void;
-  append: UseFieldArrayAppend<ProfileFormData, "socialLinks">;
+  append: UseFieldArrayAppend<ProfileFormData, LinksField>;
   errors: FieldErrors<ProfileFormData>;
   showAudience: boolean;
   variant?: "social" | "business";
@@ -49,6 +55,7 @@ interface SocialLinksSectionProps {
 export function SocialLinksSection({
   control,
   register,
+  field,
   fields,
   removingIds,
   onMarkRemoving,
@@ -61,11 +68,6 @@ export function SocialLinksSection({
     <SectionCard
       tone="social"
       title={variant === "business" ? "Business web presence" : "Social profiles"}
-      description={
-        variant === "business"
-          ? "Add your business website and as many business social profiles as you need. Public links appear on your directory listing."
-          : "Connect the places where people already know you. Public links appear on your public profile; private links stay in this editor."
-      }
     >
       {fields.length === 0 && (
         <p className="mb-4 text-xs text-ash">No links yet — add your first below.</p>
@@ -73,15 +75,17 @@ export function SocialLinksSection({
 
       {fields.length > 0 && (
         <ul className="space-y-2">
-          {fields.map((field, index) => (
+          {fields.map((row, index) => (
             <LinkRow
-              key={field.id}
+              key={row.id}
+              field={field}
               index={index}
               control={control}
               register={register}
-              removing={removingIds.has(field.id)}
-              onMarkRemoving={() => onMarkRemoving(field.id)}
-              urlError={errors.socialLinks?.[index]?.url?.message}
+              removing={removingIds.has(row.id)}
+              onMarkRemoving={() => onMarkRemoving(row.id)}
+              urlError={errors[field]?.[index]?.url?.message}
+              showVisibility={variant !== "business"}
             />
           ))}
         </ul>
@@ -90,6 +94,7 @@ export function SocialLinksSection({
       <AddLinkRow
         append={append}
         defaultPlatform={variant === "business" ? "website" : "instagram"}
+        showVisibility={variant !== "business"}
       />
 
       {showAudience && (
@@ -121,18 +126,29 @@ export function SocialLinksSection({
 }
 
 interface LinkRowProps {
+  field: LinksField;
   index: number;
   control: Control<ProfileFormData>;
   register: UseFormRegister<ProfileFormData>;
   removing: boolean;
   onMarkRemoving: () => void;
   urlError?: string;
+  showVisibility: boolean;
 }
 
-function LinkRow({ index, control, register, removing, onMarkRemoving, urlError }: LinkRowProps) {
+function LinkRow({
+  field,
+  index,
+  control,
+  register,
+  removing,
+  onMarkRemoving,
+  urlError,
+  showVisibility,
+}: LinkRowProps) {
   const { field: visibility } = useController({
     control,
-    name: `socialLinks.${index}.isPublic`,
+    name: `${field}.${index}.isPublic` as Path<ProfileFormData>,
   });
   const isPublic = visibility.value !== false;
 
@@ -145,7 +161,7 @@ function LinkRow({ index, control, register, removing, onMarkRemoving, urlError 
         )}
       >
         <select
-          {...register(`socialLinks.${index}.platform`)}
+          {...register(`${field}.${index}.platform` as Path<ProfileFormData>)}
           disabled={removing}
           aria-label={`Link ${index + 1} platform`}
           className={cn(SELECT_CLASS, "col-span-3 w-full shrink-0 capitalize sm:w-28")}
@@ -157,29 +173,38 @@ function LinkRow({ index, control, register, removing, onMarkRemoving, urlError 
           ))}
         </select>
         <Input
-          {...register(`socialLinks.${index}.url`)}
+          {...register(`${field}.${index}.url` as Path<ProfileFormData>)}
           disabled={removing}
           placeholder="https://…"
           inputMode="url"
           aria-label={`Link ${index + 1} URL`}
           className={cn("min-w-0 flex-1 text-base", removing && "line-through")}
         />
-        <button
-          type="button"
-          onClick={() => visibility.onChange(!isPublic)}
-          disabled={removing}
-          title={isPublic ? "Public — shown on your profile" : "Private — visible only to you"}
-          aria-label={isPublic ? "Make link private" : "Make link public"}
-          aria-pressed={isPublic}
-          className={cn(
-            "flex h-10 w-10 shrink-0 items-center justify-center rounded border transition-colors disabled:cursor-not-allowed",
-            isPublic
-              ? "border-sun/30 text-sun hover:border-sun/60"
-              : "border-line text-ash hover:border-linehi hover:text-gold"
-          )}
-        >
-          {isPublic ? <Globe className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
-        </button>
+        {showVisibility ? (
+          <button
+            type="button"
+            onClick={() => visibility.onChange(!isPublic)}
+            disabled={removing}
+            title={isPublic ? "Public — shown on your profile" : "Private — visible only to you"}
+            aria-label={isPublic ? "Make link private" : "Make link public"}
+            aria-pressed={isPublic}
+            className={cn(
+              "flex h-10 w-10 shrink-0 items-center justify-center rounded border transition-colors disabled:cursor-not-allowed",
+              isPublic
+                ? "border-sun/30 text-sun hover:border-sun/60"
+                : "border-line text-ash hover:border-linehi hover:text-gold"
+            )}
+          >
+            {isPublic ? <Globe className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+          </button>
+        ) : (
+          <span
+            className="hidden h-10 w-10 shrink-0 items-center justify-center text-ash sm:flex"
+            title="Shown on your directory listing"
+          >
+            <Globe className="h-4 w-4" />
+          </span>
+        )}
         <button
           type="button"
           onClick={onMarkRemoving}
@@ -205,11 +230,12 @@ function LinkRow({ index, control, register, removing, onMarkRemoving, urlError 
 }
 
 interface AddLinkRowProps {
-  append: UseFieldArrayAppend<ProfileFormData, "socialLinks">;
+  append: UseFieldArrayAppend<ProfileFormData, LinksField>;
   defaultPlatform: string;
+  showVisibility: boolean;
 }
 
-function AddLinkRow({ append, defaultPlatform }: AddLinkRowProps) {
+function AddLinkRow({ append, defaultPlatform, showVisibility }: AddLinkRowProps) {
   const [platform, setPlatform] = useState(defaultPlatform);
   const [url, setUrl] = useState("");
   const [isPublic, setIsPublic] = useState(true);
@@ -222,7 +248,7 @@ function AddLinkRow({ append, defaultPlatform }: AddLinkRowProps) {
       setError("Enter a valid URL, e.g. https://instagram.com/you");
       return;
     }
-    append({ platform, url: normalized, isPublic });
+    append({ platform, url: normalized, isPublic: showVisibility ? isPublic : true });
     setUrl("");
     setError(null);
   }
@@ -261,21 +287,23 @@ function AddLinkRow({ append, defaultPlatform }: AddLinkRowProps) {
           className="min-w-0 flex-1 text-base"
         />
         <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => setIsPublic(!isPublic)}
-            title={isPublic ? "Will be public" : "Will be private"}
-            aria-label={isPublic ? "New link will be public" : "New link will be private"}
-            aria-pressed={isPublic}
-            className={cn(
-              "flex h-10 w-10 shrink-0 items-center justify-center rounded border transition-colors",
-              isPublic
-                ? "border-sun/30 text-sun hover:border-sun/60"
-                : "border-line text-ash hover:border-linehi hover:text-gold"
-            )}
-          >
-            {isPublic ? <Globe className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
-          </button>
+          {showVisibility && (
+            <button
+              type="button"
+              onClick={() => setIsPublic(!isPublic)}
+              title={isPublic ? "Will be public" : "Will be private"}
+              aria-label={isPublic ? "New link will be public" : "New link will be private"}
+              aria-pressed={isPublic}
+              className={cn(
+                "flex h-10 w-10 shrink-0 items-center justify-center rounded border transition-colors",
+                isPublic
+                  ? "border-sun/30 text-sun hover:border-sun/60"
+                  : "border-line text-ash hover:border-linehi hover:text-gold"
+              )}
+            >
+              {isPublic ? <Globe className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+            </button>
+          )}
           <Button type="button" variant="secondary" onClick={add} className="flex-1 sm:flex-none">
             <Plus className="h-4 w-4" /> Add
           </Button>

@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 
+import { parseBusinessSocialLinks } from "@/lib/business-links";
 import { EXCHANGE_MODE_VALUES } from "@/lib/categories";
 import { prisma } from "@/lib/prisma";
 
@@ -148,6 +149,7 @@ export interface DirectoryProfile {
   publicPhone: string | null;
   businessPhone: string | null;
   businessEmail: string | null;
+  businessSocialLinks: { platform: string; url: string }[];
   ratingAvg: number;
   ratingCount: number;
   jobsCompleted: number;
@@ -209,6 +211,7 @@ export async function getDirectoryProfiles(
       publicPhone: true,
       businessPhone: true,
       businessEmail: true,
+      businessSocialLinks: true,
       ratingAvg: true,
       ratingCount: true,
       jobsCompleted: true,
@@ -225,9 +228,10 @@ export async function getDirectoryProfiles(
     },
   });
 
-  return profiles.map(({ directorySpecialties, ...profile }) => ({
+  return profiles.map(({ directorySpecialties, businessSocialLinks, ...profile }) => ({
     ...profile,
     specialties: directorySpecialties,
+    businessSocialLinks: parseBusinessSocialLinks(businessSocialLinks),
     abn: profile.accountType === "business" ? profile.abn : null,
     abnVerified: profile.accountType === "business" ? profile.abnVerified : false,
     audienceSize: profile.accountType === "individual" ? profile.audienceSize : null,

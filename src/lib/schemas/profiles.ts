@@ -70,6 +70,7 @@ export const updateProfileSchema = z.object({
     .nullable()
     .optional(),
   socialLinks: z.array(socialLinkSchema).optional(),
+  businessSocialLinks: z.array(socialLinkSchema).optional(),
 });
 
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;

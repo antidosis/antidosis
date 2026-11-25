@@ -7,6 +7,8 @@ import {
   attributeHighlights,
   getProfession,
   parseAttributes,
+  professionDisplayLabel,
+  professionKeyFromInput,
 } from "./professions";
 
 describe("professions taxonomy", () => {
@@ -48,6 +50,31 @@ describe("professions taxonomy", () => {
   it("getProfession resolves known keys and rejects unknown ones", () => {
     expect(getProfession("plumber")?.label).toBe("Plumber");
     expect(getProfession("astronaut")).toBeUndefined();
+  });
+});
+
+describe("professionKeyFromInput", () => {
+  it("resolves exact and fuzzy matches to canonical profession keys", () => {
+    expect(professionKeyFromInput("plumber")).toBe("plumber");
+    expect(professionKeyFromInput("  Plumber ")).toBe("plumber");
+    // "Electrical" should land on the electrician profession, not a custom key
+    expect(professionKeyFromInput("Electrical")).toBe(getProfession("electrician")?.key);
+  });
+
+  it("slugs free text into a storage key for custom professions", () => {
+    expect(professionKeyFromInput("Rocket Surgeon!")).toBe("rocket_surgeon");
+    expect(professionKeyFromInput("solar panel cleaning")).toBe("solar_panel_cleaning");
+  });
+});
+
+describe("professionDisplayLabel", () => {
+  it("uses the canonical label for known professions", () => {
+    expect(professionDisplayLabel("plumber")).toBe("Plumber");
+  });
+
+  it("humanises custom keys", () => {
+    expect(professionDisplayLabel("rocket_surgeon")).toBe("Rocket Surgeon");
+    expect(professionDisplayLabel("solar_panel_cleaning")).toBe("Solar Panel Cleaning");
   });
 });
 

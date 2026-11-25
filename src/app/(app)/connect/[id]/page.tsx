@@ -117,7 +117,7 @@ export default function ConnectPage() {
                   <Check className="h-4 w-4" /> You&apos;re connected
                 </p>
                 <Button asChild variant="secondary" size="sm" className="mt-3">
-                  <Link href="/dashboard?tab=community">Open your community</Link>
+                  <Link href="/dashboard?tab=relay">Open your relay</Link>
                 </Button>
               </div>
             ) : loggedIn ? (

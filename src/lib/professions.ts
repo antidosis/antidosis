@@ -411,6 +411,45 @@ export function getProfession(key: string): Profession | undefined {
   return PROFESSION_MAP.get(key);
 }
 
+/**
+ * Normalise free-typed profession input into a storage key. Known professions
+ * resolve to their canonical key (so the dynamic questions still apply);
+ * anything else becomes a custom key the directory renders humanised.
+ */
+export function professionKeyFromInput(input: string): string {
+  const slug = input
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 60);
+  if (PROFESSION_MAP.has(slug)) return slug;
+  // Free text like "Electrical", "Plumbing" or "Modelling" lands on the
+  // canonical profession when they share a long enough prefix with its key
+  // or label — otherwise it stays a custom profession.
+  const commonPrefix = (a: string, b: string): number => {
+    let i = 0;
+    while (i < a.length && i < b.length && a[i] === b[i]) i += 1;
+    return i;
+  };
+  for (const [key, profession] of PROFESSION_MAP) {
+    const labelSlug = profession.label.toLowerCase().replace(/[^a-z0-9]+/g, "_");
+    if (commonPrefix(slug, key) >= 5 || commonPrefix(slug, labelSlug) >= 5) return key;
+  }
+  return slug;
+}
+
+/** Display label for any stored profession key, known or custom. */
+export function professionDisplayLabel(key: string): string {
+  const known = PROFESSION_MAP.get(key);
+  if (known) return known.label;
+  return key
+    .split("_")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 export const MAX_SPECIALTY_SLOTS = 3;
 /** Slots beyond this require a paid unlock (future monetisation). */
 export const FREE_SPECIALTY_SLOTS = 1;

@@ -2,17 +2,11 @@
 
 import { useState } from "react";
 
-import Link from "next/link";
-
-import { Archive, ArchiveRestore, Bell, CheckCheck, Inbox, Loader2, Radio } from "lucide-react";
+import { Archive, ArchiveRestore, Bell, CheckCheck, Inbox, Loader2 } from "lucide-react";
 import { mutate } from "swr";
 
-import { Button } from "@/components/ui/button";
 import { useApi } from "@/lib/swr-config";
 import { cn } from "@/lib/utils";
-
-import { FriendsManager } from "./friends-manager";
-import { TerminalActivityFeed } from "./terminal-activity-feed";
 
 interface NotificationItem {
   id: string;
@@ -204,27 +198,5 @@ export function NotificationsFeed() {
         </div>
       )}
     </section>
-  );
-}
-
-export function CommunityPanel() {
-  return (
-    <div className="space-y-6">
-      <section className="flex items-center justify-between rounded-lg border border-line bg-surface/40 p-4">
-        <div className="flex items-center gap-3">
-          <Radio className="h-4 w-4 text-mercury" />
-          <div>
-            <p className="text-sm text-gold">Community Relay</p>
-            <p className="text-xs text-ash">Real-time channels and direct messages</p>
-          </div>
-        </div>
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/terminal">Open relay</Link>
-        </Button>
-      </section>
-
-      <FriendsManager />
-      <TerminalActivityFeed />
-    </div>
   );
 }

@@ -19,13 +19,11 @@ import { CredentialsSection } from "./credentials-section";
 import { DirectorySlotsSection } from "./directory-slots-section";
 import { AboutSection } from "./profile-editor/about-section";
 import { BusinessContactSection } from "./profile-editor/business-contact-section";
-import { HandleSection } from "./profile-editor/handle-section";
 import { IdentitySection } from "./profile-editor/identity-section";
 import { KnowledgeBox } from "./profile-editor/knowledge-box";
 import { PreferencesSection } from "./profile-editor/preferences-section";
 import { SocialLinksSection } from "./profile-editor/social-links-section";
 import type { EditorProfile, ProfileFormData, ProfileTab } from "./profile-editor/types";
-import { ShareProfileCard } from "./share-profile-card";
 
 interface ProfileSectionProps {
   initialProfile: EditorProfile;
@@ -80,6 +78,11 @@ function toFormValues(profile: EditorProfile): ProfileFormData {
       url: link.url,
       isPublic: link.isPublic,
     })),
+    businessSocialLinks: (profile.businessSocialLinks ?? []).map((link) => ({
+      platform: link.platform,
+      url: link.url,
+      isPublic: link.isPublic ?? true,
+    })),
   };
 }
 
@@ -114,6 +117,10 @@ export function ProfileSection({
   });
 
   const { fields, append } = useFieldArray({ control, name: "socialLinks" });
+  const { fields: businessFields, append: appendBusinessLink } = useFieldArray({
+    control,
+    name: "businessSocialLinks",
+  });
   const avatarUrl = watch("avatarUrl");
   const fullName = watch("fullName");
   const showInDirectory = watch("showInDirectory");
@@ -137,6 +144,12 @@ export function ProfileSection({
     setHasUnsavedChanges(true);
     clearErrors("root");
     append(...args);
+  }
+
+  function addBusinessLink(...args: Parameters<typeof appendBusinessLink>) {
+    setHasUnsavedChanges(true);
+    clearErrors("root");
+    appendBusinessLink(...args);
   }
 
   function switchTab(tab: ProfileTab) {
@@ -214,14 +227,32 @@ export function ProfileSection({
         url: String(link.url).trim(),
         isPublic: link.isPublic ?? true,
       }));
+    const keptBusinessLinks = businessFields
+      .filter((field) => !removingIds.has(field.id))
+      .map((field) => values.businessSocialLinks?.[businessFields.indexOf(field)])
+      .filter(
+        (link): link is NonNullable<typeof link> => !!link && String(link.url ?? "").trim() !== ""
+      )
+      .map((link) => ({
+        platform: link.platform,
+        url: String(link.url).trim(),
+        isPublic: true,
+      }));
 
-    const parsed = updateProfileSchema.safeParse({ ...values, socialLinks: keptLinks });
+    const parsed = updateProfileSchema.safeParse({
+      ...values,
+      socialLinks: keptLinks,
+      businessSocialLinks: keptBusinessLinks,
+    });
     if (!parsed.success) {
       const first = parsed.error.issues[0];
       const [section, row, field] = first?.path ?? [];
       if (section === "socialLinks" && typeof row === "number" && field === "url") {
         setError(`socialLinks.${row}.url`, { message: first.message });
         onTabChange("public");
+      } else if (section === "businessSocialLinks" && typeof row === "number" && field === "url") {
+        setError(`businessSocialLinks.${row}.url`, { message: first.message });
+        onTabChange("directory");
       } else if (first) {
         setError("root", { message: first.message });
       }
@@ -319,39 +350,35 @@ export function ProfileSection({
               This is <strong className="text-gold">you, publicly</strong> — what anyone sees when
               they open your profile. Your account mobile, email and ID documents never appear here.
             </KnowledgeBox>
-            <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(300px,1fr)]">
-              <IdentitySection
-                register={register}
-                setValue={setChangedValue}
-                avatarUrl={avatarUrl ?? undefined}
-                fullName={fullName ?? undefined}
-                nameError={errors.fullName?.message}
-                isVerified={initialProfile.isVerified}
-                mobileVerified={initialProfile.mobileVerified}
-                mobile={initialProfile.mobile}
-                socialLinks={(initialProfile.socialLinks ?? []).map((link) => ({
-                  platform: link.platform,
-                  url: link.url,
-                }))}
-                importingFromSocial={importingAvatarFrom}
-                onImportFromSocial={importAvatarFromSocial}
-              />
-              <div className="space-y-4">
-                <HandleSection handle={initialProfile.handle} />
-                <ShareProfileCard profile={initialProfile} compact />
-              </div>
-            </div>
+            <IdentitySection
+              register={register}
+              setValue={setChangedValue}
+              phoneControl={control}
+              avatarUrl={avatarUrl ?? undefined}
+              fullName={fullName ?? undefined}
+              nameError={errors.fullName?.message}
+              isVerified={initialProfile.isVerified}
+              mobileVerified={initialProfile.mobileVerified}
+              mobile={initialProfile.mobile}
+              handle={initialProfile.handle}
+              socialLinks={(initialProfile.socialLinks ?? []).map((link) => ({
+                platform: link.platform,
+                url: link.url,
+              }))}
+              importingFromSocial={importingAvatarFrom}
+              onImportFromSocial={importAvatarFromSocial}
+              shareProfile={initialProfile}
+            />
             <AboutSection
               register={register}
               control={control}
               errors={errors}
               skills={initialProfile.skills}
-              mobile={initialProfile.mobile}
-              mobileVerified={initialProfile.mobileVerified}
             />
             <SocialLinksSection
               control={control}
               register={register}
+              field="socialLinks"
               fields={fields}
               removingIds={removingIds}
               onMarkRemoving={markRemoving}
@@ -386,10 +413,11 @@ export function ProfileSection({
                 <SocialLinksSection
                   control={control}
                   register={register}
-                  fields={fields}
+                  field="businessSocialLinks"
+                  fields={businessFields}
                   removingIds={removingIds}
                   onMarkRemoving={markRemoving}
-                  append={addSocialLink}
+                  append={addBusinessLink}
                   errors={errors}
                   showAudience={false}
                   variant="business"

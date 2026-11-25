@@ -16,6 +16,7 @@ import {
   X,
   Loader2,
   Building2,
+  Globe,
 } from "lucide-react";
 
 import { NodeAvatar } from "@/app/(app)/exchange/_components/node-avatar";
@@ -24,7 +25,12 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { formatAbn } from "@/lib/abn";
-import { attributeHighlights, getProfession, parseAttributes } from "@/lib/professions";
+import {
+  attributeHighlights,
+  getProfession,
+  parseAttributes,
+  professionDisplayLabel,
+} from "@/lib/professions";
 import type { DirectoryProfile } from "@/lib/public-content";
 import { useApi } from "@/lib/swr-config";
 import { cn } from "@/lib/utils";
@@ -257,18 +263,16 @@ export default function ProsDirectoryPage({ embedded = false, initialData }: Pro
                     <div className="flex flex-wrap gap-2 mt-3">
                       {pro.specialties.map((specialty) => {
                         const profession = getProfession(specialty.profession);
-                        if (!profession) return null;
-                        const highlights = attributeHighlights(
-                          profession,
-                          parseAttributes(specialty.attributes)
-                        );
+                        const highlights = profession
+                          ? attributeHighlights(profession, parseAttributes(specialty.attributes))
+                          : [];
                         return (
                           <div
                             key={specialty.profession}
                             className="rounded-md border border-aero/25 bg-aero/[0.04] px-2.5 py-1.5"
                           >
                             <span className="text-xs font-medium text-aero">
-                              {profession.label}
+                              {professionDisplayLabel(specialty.profession)}
                             </span>
                             {highlights.length > 0 && (
                               <span className="ml-1.5 text-xs text-ash">
@@ -278,6 +282,25 @@ export default function ProsDirectoryPage({ embedded = false, initialData }: Pro
                           </div>
                         );
                       })}
+                    </div>
+                  )}
+
+                  {pro.businessSocialLinks.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {pro.businessSocialLinks.slice(0, 4).map((link) => (
+                        <a
+                          key={link.url}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 rounded border border-line bg-raise px-2 py-1 text-xs text-ash transition-colors hover:border-sun/40 hover:text-sun"
+                        >
+                          <Globe className="h-3 w-3" />
+                          {link.platform === "website"
+                            ? "Website"
+                            : link.platform.replace(/^./, (c) => c.toUpperCase())}
+                        </a>
+                      ))}
                     </div>
                   )}
 

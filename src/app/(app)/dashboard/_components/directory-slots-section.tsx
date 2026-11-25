@@ -23,12 +23,14 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/toast";
 import {
   MAX_SPECIALTY_SLOTS,
-  PROFESSIONS,
   attributeHighlights,
   getProfession,
   parseAttributes,
+  professionDisplayLabel,
+  professionKeyFromInput,
   type SpecialtyAttributes,
 } from "@/lib/professions";
+import { searchSkills } from "@/lib/skills-taxonomy";
 import { useApi } from "@/lib/swr-config";
 import { cn } from "@/lib/utils";
 
@@ -44,15 +46,6 @@ interface DirectorySlotsSectionProps {
   /** Fired whenever slot-1 occupancy changes (claim or release). */
   onSlotChange?: (hasSlot: boolean) => void;
 }
-
-const CATEGORY_LABEL: Record<string, string> = {
-  trades: "Trades & hands-on",
-  creative: "Creative",
-  care: "Care & wellbeing",
-  food: "Food",
-  professional: "Professional services",
-  influence: "Influence & content",
-};
 
 const SLOT_NAMES = ["Primary specialty", "Second specialty", "Third specialty"];
 
@@ -73,28 +66,37 @@ export function DirectorySlotsSection({ onSlotChange }: DirectorySlotsSectionPro
     onSlotChange?.(Boolean(slotOne));
   }, [slotOne, onSlotChange]);
 
+  // Same autocomplete source as the public-profile skills box — type anything,
+  // suggestions come from the full skills taxonomy, and free text is claimable.
   const suggestions = useMemo(() => {
-    const needle = query.trim().toLowerCase();
+    const needle = query.trim();
+    if (!needle) return [];
     const taken = new Set(specialties.map((specialty) => specialty.profession));
-    const pool = PROFESSIONS.filter((profession) => !taken.has(profession.key));
-    if (!needle) return pool.slice(0, 7);
-    const matches = pool.filter(
-      (profession) =>
-        profession.label.toLowerCase().includes(needle) ||
-        profession.category.includes(needle) ||
-        profession.pitch.toLowerCase().includes(needle)
+    const takenLabels = new Set(
+      specialties.map((specialty) => professionDisplayLabel(specialty.profession).toLowerCase())
     );
-    return matches.slice(0, 7);
+    const results: { key: string; label: string }[] = [];
+    for (const name of searchSkills(needle)) {
+      const key = professionKeyFromInput(name);
+      if (taken.has(key) || takenLabels.has(name.toLowerCase())) continue;
+      if (results.some((result) => result.key === key)) continue;
+      results.push({ key, label: name });
+      if (results.length >= 7) break;
+    }
+    return results;
   }, [query, specialties]);
 
-  async function claim(professionKey: string) {
-    const profession = getProfession(professionKey);
-    if (!profession) return;
+  async function claim(rawInput: string) {
+    const professionKey = professionKeyFromInput(rawInput);
+    if (professionKey.length < 2) {
+      toast("Type a profession first — at least 2 characters", "error");
+      return;
+    }
     try {
       const response = await fetch("/api/v1/profiles/me/specialties", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ profession: professionKey }),
+        body: JSON.stringify({ profession: rawInput }),
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) {
@@ -105,7 +107,7 @@ export function DirectorySlotsSection({ onSlotChange }: DirectorySlotsSectionPro
       setQuery("");
       setEditingId(result.specialty.id);
       await mutate("/api/v1/profiles/me/specialties");
-      toast(`${profession.label} added to your directory listing`, "success");
+      toast(`${professionDisplayLabel(professionKey)} added to your directory listing`, "success");
     } catch {
       toast("Couldn't claim the slot — try again", "error");
     }
@@ -161,11 +163,11 @@ export function DirectorySlotsSection({ onSlotChange }: DirectorySlotsSectionPro
             <span>
               <span className="block text-base font-medium text-gold">Claim your specialty</span>
               <span className="mt-1 block text-sm text-ash">
-                Plumber, tutor, influencer — pick the profession people should find you for.
+                Any profession — type it and claim it. People filter the directory by it.
               </span>
             </span>
             <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-aero">
-              <Plus className="h-4 w-4" /> Choose a profession
+              <Plus className="h-4 w-4" /> Type a profession
             </span>
           </button>
         )}
@@ -208,8 +210,8 @@ export function DirectorySlotsSection({ onSlotChange }: DirectorySlotsSectionPro
         ))}
       </div>
 
-      {/* Profession picker — type-to-search autocomplete, same pattern as the
-          skills box in the public profile */}
+      {/* Profession picker — same autocomplete pattern as the skills box:
+          suggestions from the skills taxonomy, or claim exactly what you typed */}
       {pickerOpen && (
         <div
           className="border-t border-line/60 bg-inset/30 p-4 sm:p-5"
@@ -221,6 +223,12 @@ export function DirectorySlotsSection({ onSlotChange }: DirectorySlotsSectionPro
               <Input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    claim(query);
+                  }
+                }}
                 placeholder="Type a profession — plumber, influencer, tutor…"
                 autoComplete="off"
                 className="text-base"
@@ -239,32 +247,34 @@ export function DirectorySlotsSection({ onSlotChange }: DirectorySlotsSectionPro
               <X className="h-4 w-4" />
             </button>
           </div>
-          {suggestions.length === 0 ? (
-            <p className="py-6 text-center text-sm text-ash">
-              No professions match &ldquo;{query}&rdquo; — the taxonomy grows with the network.
-            </p>
-          ) : (
+          {suggestions.length > 0 && (
             <ul className="max-w-md divide-y divide-line/50 rounded-md border border-line/70 bg-surface/40">
-              {suggestions.map((profession) => (
-                <li key={profession.key}>
+              {suggestions.map((suggestion) => (
+                <li key={suggestion.key}>
                   <button
                     type="button"
-                    onClick={() => claim(profession.key)}
+                    onClick={() => claim(suggestion.label)}
                     className="flex w-full items-center justify-between gap-3 px-3.5 py-2.5 text-left transition-colors hover:bg-aero/[0.06]"
                   >
                     <span className="min-w-0">
                       <span className="block text-sm font-medium text-gold">
-                        {profession.label}
+                        {suggestion.label}
                       </span>
-                      <span className="block truncate text-xs text-ash">{profession.pitch}</span>
                     </span>
-                    <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-ash">
-                      {CATEGORY_LABEL[profession.category] ?? profession.category}
-                    </span>
+                    <Plus className="h-3.5 w-3.5 shrink-0 text-ash" />
                   </button>
                 </li>
               ))}
             </ul>
+          )}
+          {query.trim().length >= 2 && (
+            <button
+              type="button"
+              onClick={() => claim(query)}
+              className="mt-3 inline-flex items-center gap-1.5 rounded border border-aero/40 bg-aero/10 px-3 py-1.5 text-sm font-medium text-aero transition-colors hover:bg-aero/20"
+            >
+              <Plus className="h-4 w-4" /> Claim &ldquo;{query.trim()}&rdquo;
+            </button>
           )}
         </div>
       )}
@@ -285,15 +295,14 @@ function SpecialtyEditor({
 }) {
   const { toast } = useToast();
   const profession = getProfession(specialty.profession);
+  const professionLabel = professionDisplayLabel(specialty.profession);
   const attributes = useMemo(() => parseAttributes(specialty.attributes), [specialty.attributes]);
   const [draft, setDraft] = useState<SpecialtyAttributes>(attributes);
   const [headline, setHeadline] = useState(specialty.headline ?? "");
   const [saving, setSaving] = useState(false);
   const [removing, setRemoving] = useState(false);
 
-  if (!profession) return null;
-  const professionLabel = profession.label;
-  const highlights = attributeHighlights(profession, attributes);
+  const highlights = profession ? attributeHighlights(profession, attributes) : [];
 
   async function save() {
     setSaving(true);
@@ -356,7 +365,7 @@ function SpecialtyEditor({
         </button>
       </div>
 
-      <p className="mt-2 text-lg font-medium text-gold">{profession.label}</p>
+      <p className="mt-2 text-lg font-medium text-gold">{professionLabel}</p>
 
       {editing ? (
         <div className="mt-3 space-y-4">
@@ -366,13 +375,20 @@ function SpecialtyEditor({
               id={`headline-${specialty.id}`}
               value={headline}
               onChange={(event) => setHeadline(event.target.value)}
-              placeholder={profession.pitch}
+              placeholder={profession?.pitch ?? "What should people know about your work?"}
               maxLength={120}
               className="text-base"
             />
           </div>
 
-          {profession.fields.map((field) => {
+          {!profession && (
+            <p className="text-xs leading-relaxed text-ash">
+              Custom profession — the structured questions only exist for the built-in professions
+              so far. Your headline and skills carry this listing.
+            </p>
+          )}
+
+          {(profession?.fields ?? []).map((field) => {
             const value = draft[field.key];
             if (field.kind === "boolean") {
               const on = value === true;

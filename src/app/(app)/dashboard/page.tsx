@@ -11,7 +11,7 @@ import { applyAccountPreferences } from "@/lib/appearance-sync";
 import { createClient } from "@/lib/supabase/client";
 import { useApi } from "@/lib/swr-config";
 
-import { CommunityPanel, NotificationsFeed } from "./_components/community-panel";
+import { NotificationsFeed } from "./_components/community-panel";
 import { ContractsPanel } from "./_components/contracts-panel";
 import { DASHBOARD_TABS, type DashboardTabId } from "./_components/dashboard-nav";
 import { DashboardShell } from "./_components/dashboard-shell";
@@ -203,9 +203,6 @@ function DashboardPageInner() {
             </DashboardPanel>
             <DashboardPanel id="relay" activeTab={tab} mounted={visited.has("relay")}>
               <RelayPanel />
-            </DashboardPanel>
-            <DashboardPanel id="community" activeTab={tab} mounted={visited.has("community")}>
-              <CommunityPanel />
             </DashboardPanel>
             <DashboardPanel id="profile" activeTab={tab} mounted={visited.has("profile")}>
               <ProfileSection

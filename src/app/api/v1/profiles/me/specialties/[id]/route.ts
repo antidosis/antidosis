@@ -61,34 +61,47 @@ export const PATCH = withApiHandler(async (req: NextRequest, _ctx, { params }: R
   }
   if (body.attributes !== undefined) {
     const profession = getProfession(owned.specialty.profession);
-    if (!profession) return NextResponse.json({ error: "Unknown profession" }, { status: 400 });
-    if (
-      typeof body.attributes !== "object" ||
-      body.attributes === null ||
-      Array.isArray(body.attributes)
-    ) {
-      return NextResponse.json({ error: "Attributes must be an object" }, { status: 400 });
+    // Custom professions have no structured fields — only an empty object
+    // (or omitting the key) is accepted for them.
+    if (!profession) {
+      const empty =
+        typeof body.attributes === "object" &&
+        body.attributes !== null &&
+        !Array.isArray(body.attributes) &&
+        Object.keys(body.attributes as object).length === 0;
+      if (!empty) {
+        return NextResponse.json({ error: "Unknown profession" }, { status: 400 });
+      }
+      data.attributes = "{}";
+    } else {
+      if (
+        typeof body.attributes !== "object" ||
+        body.attributes === null ||
+        Array.isArray(body.attributes)
+      ) {
+        return NextResponse.json({ error: "Attributes must be an object" }, { status: 400 });
+      }
+      const cleaned: Record<string, boolean | string | string[]> = {};
+      for (const field of profession.fields) {
+        const value = (body.attributes as Record<string, unknown>)[field.key];
+        if (value === undefined || value === null) continue;
+        if (field.kind === "boolean" && typeof value === "boolean") cleaned[field.key] = value;
+        if (field.kind === "text" && typeof value === "string" && value.trim()) {
+          cleaned[field.key] = value.trim().slice(0, field.maxLength ?? 200);
+        }
+        if (field.kind === "select" && typeof value === "string" && field.options.includes(value)) {
+          cleaned[field.key] = value;
+        }
+        if (field.kind === "multi" && Array.isArray(value)) {
+          cleaned[field.key] = value
+            .filter(
+              (item): item is string => typeof item === "string" && field.options.includes(item)
+            )
+            .slice(0, 10);
+        }
+      }
+      data.attributes = JSON.stringify(cleaned);
     }
-    const cleaned: Record<string, boolean | string | string[]> = {};
-    for (const field of profession.fields) {
-      const value = (body.attributes as Record<string, unknown>)[field.key];
-      if (value === undefined || value === null) continue;
-      if (field.kind === "boolean" && typeof value === "boolean") cleaned[field.key] = value;
-      if (field.kind === "text" && typeof value === "string" && value.trim()) {
-        cleaned[field.key] = value.trim().slice(0, field.maxLength ?? 200);
-      }
-      if (field.kind === "select" && typeof value === "string" && field.options.includes(value)) {
-        cleaned[field.key] = value;
-      }
-      if (field.kind === "multi" && Array.isArray(value)) {
-        cleaned[field.key] = value
-          .filter(
-            (item): item is string => typeof item === "string" && field.options.includes(item)
-          )
-          .slice(0, 10);
-      }
-    }
-    data.attributes = JSON.stringify(cleaned);
   }
 
   const specialty = await prisma.directorySpecialty.update({

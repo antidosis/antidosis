@@ -5,6 +5,7 @@ import { z } from "zod";
 import { verifyAbn } from "@/lib/abn";
 import { withApiHandler } from "@/lib/api-handler";
 import { recordBannedMobile } from "@/lib/bans";
+import { parseBusinessSocialLinks, serializeBusinessSocialLinks } from "@/lib/business-links";
 import { isValidCentralCoastSuburb } from "@/lib/data/central-coast-suburbs";
 import { logger } from "@/lib/logger";
 import { normalizeMobile, isValidAustralianMobile } from "@/lib/mobile";
@@ -74,7 +75,11 @@ export const GET = withApiHandler(async () => {
     });
   }
 
-  return NextResponse.json(profile);
+  const { businessSocialLinks: rawBusinessLinks, ...profileRest } = profile;
+  return NextResponse.json({
+    ...profileRest,
+    businessSocialLinks: parseBusinessSocialLinks(rawBusinessLinks),
+  });
 });
 
 export const PATCH = withApiHandler(async (req: NextRequest) => {
@@ -122,7 +127,7 @@ export const PATCH = withApiHandler(async (req: NextRequest) => {
     );
   }
 
-  const { socialLinks, ...profileData } = data;
+  const { socialLinks, businessSocialLinks, ...profileData } = data;
 
   // Clean up empty strings to null for optional fields, sanitize URLs
   const cleanedData: Record<string, unknown> = Object.fromEntries(
@@ -256,6 +261,16 @@ export const PATCH = withApiHandler(async (req: NextRequest) => {
             dark: dark ?? (theme != null && !isLightThemeId(theme) ? theme : null),
             font: font ?? null,
           });
+  }
+
+  // The directory listing's web presence is a JSON blob, independent from the
+  // personal socialLinks relation — the two never mix.
+  if (businessSocialLinks !== undefined) {
+    cleanedData.businessSocialLinks = serializeBusinessSocialLinks(
+      businessSocialLinks
+        .map((link) => ({ platform: link.platform, url: sanitizeUrl(link.url) }))
+        .filter((link): link is { platform: string; url: string } => Boolean(link.url))
+    );
   }
 
   const profile = await prisma.profile.update({

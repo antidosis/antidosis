@@ -22,6 +22,10 @@ model Profile {
   privatePhone           String?   @map("private_phone")
   businessPhone          String?   @map("business_phone")
   businessEmail          String?   @map("business_email")
+  // JSON array of the listing's own web presence:
+  // [{"platform":"website","url":"https://…"}] — independent from the
+  // personal socialLinks relation, which never appears on directory cards.
+  businessSocialLinks    String?   @map("business_social_links")
   mobile                 String?   @unique
   mobileVerified         Boolean   @default(false) @map("mobile_verified")
   isVerified             Boolean   @default(false) @map("is_verified")

@@ -303,6 +303,39 @@ describe("PATCH /api/v1/profiles/me", () => {
     expect(body.fullName).toBe("Updated");
   });
 
+  it("persists business social links as an independent JSON blob", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobile: null,
+      mobileVerified: false,
+      abn: null,
+      accountType: "business",
+    });
+    mockProfileUpdate.mockResolvedValue({ id: "profile-1" });
+
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/profiles/me", {
+        method: "PATCH",
+        body: JSON.stringify({
+          businessSocialLinks: [
+            { platform: "website", url: "https://acme.com.au" },
+            { platform: "instagram", url: "https://instagram.com/acme" },
+          ],
+        }),
+      })
+    );
+
+    expect(res.status).toBe(200);
+    const stored = JSON.parse(mockProfileUpdate.mock.calls[0][0].data.businessSocialLinks);
+    expect(stored).toEqual([
+      { platform: "website", url: "https://acme.com.au" },
+      { platform: "instagram", url: "https://instagram.com/acme" },
+    ]);
+    // Personal links untouched
+    expect(mockProfileUpdate.mock.calls[0][0].data.socialLinks).toBeUndefined();
+  });
+
   it("persists business contact details and clears them on empty string", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
     mockProfileFindUnique.mockResolvedValue({

@@ -107,15 +107,36 @@ describe("POST /api/v1/profiles/me/specialties", () => {
     expect(stored.services).toEqual(["Blocked drains", "Gas fitting"]);
   });
 
-  it("rejects unknown professions", async () => {
+  it("accepts free-typed custom professions (any skill-style text)", async () => {
     authed();
+    mockSpecialtyFindMany.mockResolvedValue([]);
+    mockSpecialtyCreate.mockResolvedValue({ id: "s1", profession: "rocket_surgeon", slot: 1 });
+
     const res = await POST(
       makeRequest("http://localhost/api/v1/profiles/me/specialties", {
         method: "POST",
-        body: JSON.stringify({ profession: "astronaut" }),
+        body: JSON.stringify({ profession: "Rocket Surgeon" }),
       })
     );
-    expect(res.status).toBe(400);
+
+    expect(res.status).toBe(201);
+    expect(mockSpecialtyCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ profession: "rocket_surgeon" }),
+      })
+    );
+  });
+
+  it("rejects non-string or too-short profession input", async () => {
+    authed();
+
+    const tooShort = await POST(
+      makeRequest("http://localhost/api/v1/profiles/me/specialties", {
+        method: "POST",
+        body: JSON.stringify({ profession: "a" }),
+      })
+    );
+    expect(tooShort.status).toBe(400);
     expect(mockSpecialtyCreate).not.toHaveBeenCalled();
   });
 
@@ -163,8 +184,7 @@ describe("POST /api/v1/profiles/me/specialties", () => {
 
   it("rejects a duplicate profession claim", async () => {
     authed();
-    mockSpecialtyFindMany.mockResolvedValue([{ slot: 1 }]);
-    mockSpecialtyFindFirst.mockResolvedValue({ id: "s1", profession: "plumber" });
+    mockSpecialtyFindMany.mockResolvedValue([{ slot: 1, profession: "plumber" }]);
 
     const res = await POST(
       makeRequest("http://localhost/api/v1/profiles/me/specialties", {

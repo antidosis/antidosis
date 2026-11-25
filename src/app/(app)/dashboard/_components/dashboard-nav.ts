@@ -9,7 +9,6 @@ import {
   Radio,
   Settings,
   User,
-  Users,
 } from "lucide-react";
 
 export type DashboardTabId =
@@ -21,7 +20,6 @@ export type DashboardTabId =
   | "profile"
   | "inbox"
   | "relay"
-  | "community"
   | "support"
   | "settings";
 
@@ -89,15 +87,7 @@ export const DASHBOARD_TABS: DashboardTab[] = [
     shortLabel: "Relay",
     icon: Radio,
     section: "network",
-    subtitle: "Direct messages and channels, with quick access to the full relay",
-  },
-  {
-    id: "community",
-    label: "Connections",
-    shortLabel: "People",
-    icon: Users,
-    section: "network",
-    subtitle: "Friends, blocked members and recent Relay activity",
+    subtitle: "Direct messages, channels, friends, blocks and recent relay activity",
   },
   {
     id: "profile",

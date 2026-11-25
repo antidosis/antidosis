@@ -2,7 +2,13 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { withApiHandler } from "@/lib/api-handler";
 import { prisma } from "@/lib/prisma";
-import { getProfession, FREE_SPECIALTY_SLOTS, MAX_SPECIALTY_SLOTS } from "@/lib/professions";
+import {
+  getProfession,
+  FREE_SPECIALTY_SLOTS,
+  MAX_SPECIALTY_SLOTS,
+  professionDisplayLabel,
+  professionKeyFromInput,
+} from "@/lib/professions";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -44,7 +50,20 @@ interface SpecialtyBody {
 
 function validateAttributes(professionKey: string, attributes: unknown) {
   const profession = getProfession(professionKey);
-  if (!profession) return { error: "Unknown profession" as const };
+  // Custom (free-typed) professions carry no structured questions — the only
+  // accepted attribute shape is empty.
+  if (!profession) {
+    if (
+      attributes !== undefined &&
+      attributes !== null &&
+      (typeof attributes !== "object" ||
+        Array.isArray(attributes) ||
+        Object.keys(attributes as object).length > 0)
+    ) {
+      return { error: "Unknown profession" as const };
+    }
+    return { value: {} };
+  }
   if (attributes === undefined || attributes === null) return { value: {} };
 
   if (typeof attributes !== "object" || Array.isArray(attributes)) {
@@ -97,8 +116,15 @@ export const POST = withApiHandler(async (req: NextRequest) => {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  if (typeof body.profession !== "string" || !getProfession(body.profession)) {
-    return NextResponse.json({ error: "Choose a valid profession" }, { status: 400 });
+  if (typeof body.profession !== "string") {
+    return NextResponse.json({ error: "Enter a profession" }, { status: 400 });
+  }
+  const professionKey = professionKeyFromInput(body.profession);
+  if (professionKey.length < 2) {
+    return NextResponse.json(
+      { error: "Enter a profession — letters and numbers, at least 2 characters" },
+      { status: 400 }
+    );
   }
   if (
     body.headline !== undefined &&
@@ -111,7 +137,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
     );
   }
 
-  const attributes = validateAttributes(body.profession, body.attributes);
+  const attributes = validateAttributes(professionKey, body.attributes);
   if ("error" in attributes) {
     return NextResponse.json({ error: attributes.error }, { status: 400 });
   }
@@ -121,18 +147,13 @@ export const POST = withApiHandler(async (req: NextRequest) => {
   // "slot locked".
   const existing = await prisma.directorySpecialty.findMany({
     where: { profileId: profile.id },
-    select: { slot: true },
+    select: { slot: true, profession: true },
   });
-  if (existing.length > 0) {
-    const duplicate = await prisma.directorySpecialty.findFirst({
-      where: { profileId: profile.id, profession: body.profession },
-    });
-    if (duplicate) {
-      return NextResponse.json(
-        { error: `You already list yourself as ${getProfession(body.profession)?.label}` },
-        { status: 409 }
-      );
-    }
+  if (existing.some((specialty) => specialty.profession === professionKey)) {
+    return NextResponse.json(
+      { error: `You already list yourself as ${professionDisplayLabel(professionKey)}` },
+      { status: 409 }
+    );
   }
 
   // Slot allocation: lowest free slot. Slots beyond the free tier are locked
@@ -153,7 +174,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
   const specialty = await prisma.directorySpecialty.create({
     data: {
       profileId: profile.id,
-      profession: body.profession,
+      profession: professionKey,
       headline:
         typeof body.headline === "string" && body.headline.trim() ? body.headline.trim() : null,
       attributes: JSON.stringify(attributes.value),

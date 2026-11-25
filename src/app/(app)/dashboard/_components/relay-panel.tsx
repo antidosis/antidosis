@@ -9,6 +9,9 @@ import { Button } from "@/components/ui/button";
 import { useApi } from "@/lib/swr-config";
 import { cn } from "@/lib/utils";
 
+import { FriendsManager } from "./friends-manager";
+import { TerminalActivityFeed } from "./terminal-activity-feed";
+
 interface DmThread {
   id: string;
   otherUser: { id: string; fullName: string | null; avatarUrl: string | null };
@@ -44,9 +47,9 @@ function timeAgo(iso: string): string {
 }
 
 /**
- * Quick-access Relay surface: recent direct messages and channels, each
- * deep-linking into the full relay at the right conversation. Complements
- * rather than replaces /terminal — reading and replying happen there.
+ * Quick-access Relay surface: direct messages, channels, friends, blocks and
+ * recent relay activity — everything the network tab needs without opening
+ * the full relay. Reading and replying happen at /terminal.
  */
 export function RelayPanel() {
   const { data: threadsData, isLoading: threadsLoading } = useApi<{ threads: DmThread[] }>(
@@ -197,6 +200,11 @@ export function RelayPanel() {
           )}
         </section>
       </div>
+
+      {/* People — friends, blocks and recent relay activity (formerly the
+          separate Connections tab) */}
+      <FriendsManager />
+      <TerminalActivityFeed />
     </div>
   );
 }
