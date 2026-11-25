@@ -22,6 +22,7 @@ import {
   Smartphone,
   LayoutDashboard,
   Flag,
+  LifeBuoy,
   Download,
   RefreshCw,
 } from "lucide-react";
@@ -36,6 +37,7 @@ import { cn } from "@/lib/utils";
 
 import { ReportsSection } from "./_components/reports-section";
 import { SerrSection } from "./_components/serr-section";
+import { SupportSection } from "./_components/support-section";
 import { UserManagementSection } from "./_components/user-management-section";
 
 type Stats = {
@@ -83,7 +85,7 @@ type PendingCredential = {
   };
 };
 
-type AdminView = "operations" | "verifications" | "reports" | "members" | "compliance";
+type AdminView = "operations" | "verifications" | "reports" | "support" | "members" | "compliance";
 
 export default function AdminPage() {
   const router = useRouter();
@@ -242,7 +244,7 @@ export default function AdminPage() {
 
       <nav
         aria-label="Admin workspaces"
-        className="mb-6 grid grid-cols-2 gap-2 rounded-lg border border-line bg-surface/35 p-2 sm:grid-cols-3 lg:grid-cols-5"
+        className="mb-6 grid grid-cols-2 gap-2 rounded-lg border border-line bg-surface/35 p-2 sm:grid-cols-3 lg:grid-cols-6"
       >
         {(
           [
@@ -254,6 +256,7 @@ export default function AdminPage() {
             },
             { id: "verifications", label: "ID review", icon: ShieldCheck, count: pending.length },
             { id: "reports", label: "Reports", icon: Flag },
+            { id: "support", label: "Support", icon: LifeBuoy },
             { id: "members", label: "Members", icon: Users },
             { id: "compliance", label: "SERR export", icon: Download },
           ] as const
@@ -594,6 +597,7 @@ export default function AdminPage() {
 
       {view === "compliance" && <SerrSection />}
       {view === "reports" && <ReportsSection />}
+      {view === "support" && <SupportSection />}
       {view === "members" && <UserManagementSection />}
     </div>
   );

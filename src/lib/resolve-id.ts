@@ -12,7 +12,8 @@ export function isIdPrefixLike(id: string): boolean {
   return PREFIX_RE.test(id);
 }
 
-type IdEntity = "need" | "acceptance" | "contract" | "profile" | "directorySpecialty";
+type IdEntity =
+  "need" | "acceptance" | "contract" | "profile" | "directorySpecialty" | "supportRequest";
 
 /**
  * Resolve an entity id that may be a full UUID or a unique hex prefix

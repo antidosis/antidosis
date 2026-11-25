@@ -6,6 +6,7 @@ import {
   Inbox,
   LayoutDashboard,
   LifeBuoy,
+  Radio,
   Settings,
   User,
   Users,
@@ -19,6 +20,7 @@ export type DashboardTabId =
   | "watchlist"
   | "profile"
   | "inbox"
+  | "relay"
   | "community"
   | "support"
   | "settings";
@@ -82,6 +84,14 @@ export const DASHBOARD_TABS: DashboardTab[] = [
     subtitle: "Recent notifications and your notification archive",
   },
   {
+    id: "relay",
+    label: "Relay",
+    shortLabel: "Relay",
+    icon: Radio,
+    section: "network",
+    subtitle: "Direct messages and channels, with quick access to the full relay",
+  },
+  {
     id: "community",
     label: "Connections",
     shortLabel: "People",
@@ -98,20 +108,20 @@ export const DASHBOARD_TABS: DashboardTab[] = [
     subtitle: "Your public identity, directory presence, social profiles and privacy",
   },
   {
-    id: "support",
-    label: "Support",
-    shortLabel: "Support",
-    icon: LifeBuoy,
-    section: "account",
-    subtitle: "Request assistance from the Antidosis team and track your past requests",
-  },
-  {
     id: "settings",
     label: "Settings & Security",
     shortLabel: "Settings",
     icon: Settings,
     section: "account",
     subtitle: "Appearance, sign-in security, account details and privacy controls",
+  },
+  {
+    id: "support",
+    label: "Support & Report",
+    shortLabel: "Support",
+    icon: LifeBuoy,
+    section: "account",
+    subtitle: "Get help from the Antidosis team, track tickets and follow your reports",
   },
 ];
 

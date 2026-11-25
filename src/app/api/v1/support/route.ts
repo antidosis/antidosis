@@ -16,8 +16,20 @@ const SUBJECTS = [
   "other",
 ] as const;
 
+/** Short, unambiguous, non-sequential ticket number (e.g. SUP-7K2Q9X1W). */
+function generateReference(): string {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no I/O/0/1 ambiguity
+  let suffix = "";
+  const bytes = new Uint8Array(8);
+  crypto.getRandomValues(bytes);
+  for (let index = 0; index < 8; index += 1) {
+    suffix += alphabet[bytes[index] % alphabet.length];
+  }
+  return `SUP-${suffix}`;
+}
+
 /** List the signed-in member's own support requests, newest first. */
-export const GET = withApiHandler(async () => {
+export const GET = withApiHandler(async (req: NextRequest) => {
   const supabase = await createClient();
   const {
     data: { user },
@@ -34,7 +46,16 @@ export const GET = withApiHandler(async () => {
     where: { profileId: profile.id },
     orderBy: { createdAt: "desc" },
     take: 50,
-    select: { id: true, subject: true, message: true, status: true, createdAt: true },
+    select: {
+      id: true,
+      reference: true,
+      subject: true,
+      message: true,
+      status: true,
+      response: true,
+      respondedAt: true,
+      createdAt: true,
+    },
   });
 
   return NextResponse.json({ requests });
@@ -82,10 +103,20 @@ export const POST = withApiHandler(async (req: NextRequest) => {
   const request = await prisma.supportRequest.create({
     data: {
       profileId: profile.id,
+      reference: generateReference(),
       subject,
       message: message.trim(),
     },
-    select: { id: true, subject: true, message: true, status: true, createdAt: true },
+    select: {
+      id: true,
+      reference: true,
+      subject: true,
+      message: true,
+      status: true,
+      response: true,
+      respondedAt: true,
+      createdAt: true,
+    },
   });
 
   return NextResponse.json({ request }, { status: 201 });

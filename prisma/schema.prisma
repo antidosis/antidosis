@@ -407,13 +407,16 @@ model DirectorySpecialty {
 }
 
 model SupportRequest {
-  id        String    @id @default(uuid())
-  profileId String    @map("profile_id")
-  subject   String
-  message   String
-  status    String    @default("open") // "open" | "in_progress" | "resolved"
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
+  id          String    @id @default(uuid())
+  profileId   String    @map("profile_id")
+  reference   String    @unique // human-friendly ticket number shown to the member
+  subject     String
+  message     String
+  status      String    @default("open") // "open" | "in_progress" | "resolved"
+  response    String? // admin reply, visible to the member
+  respondedAt DateTime? @map("responded_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
 
   profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 

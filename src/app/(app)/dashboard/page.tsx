@@ -25,6 +25,7 @@ import { OffersPanel } from "./_components/offers-panel";
 import { OverviewPanel } from "./_components/overview-panel";
 import type { ProfileTab } from "./_components/profile-editor/types";
 import { ProfileSection } from "./_components/profile-section";
+import { RelayPanel } from "./_components/relay-panel";
 import { SettingsPanel } from "./_components/settings-panel";
 import { SupportPanel } from "./_components/support-panel";
 import { WatchlistPanel } from "./_components/watchlist-panel";
@@ -199,6 +200,9 @@ function DashboardPageInner() {
             </DashboardPanel>
             <DashboardPanel id="inbox" activeTab={tab} mounted={visited.has("inbox")}>
               <NotificationsFeed />
+            </DashboardPanel>
+            <DashboardPanel id="relay" activeTab={tab} mounted={visited.has("relay")}>
+              <RelayPanel />
             </DashboardPanel>
             <DashboardPanel id="community" activeTab={tab} mounted={visited.has("community")}>
               <CommunityPanel />

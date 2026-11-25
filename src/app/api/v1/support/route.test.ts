@@ -71,7 +71,14 @@ describe("POST /api/v1/support", () => {
 
   it("creates a request with a valid topic and message", async () => {
     authed();
-    mockSupportCreate.mockResolvedValue({ id: "r1", subject: "technical_issue", status: "open" });
+    mockSupportCreate.mockResolvedValue({
+      id: "r1",
+      reference: "SUP-7K2Q9X2W",
+      subject: "technical_issue",
+      status: "open",
+      response: null,
+      respondedAt: null,
+    });
 
     const res = await POST(
       makeRequest("http://localhost/api/v1/support", {
@@ -83,9 +90,15 @@ describe("POST /api/v1/support", () => {
       })
     );
     expect(res.status).toBe(201);
+    const body = await res.json();
+    expect(body.request.reference).toBe("SUP-7K2Q9X2W");
     expect(mockSupportCreate).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({ profileId: "profile-1", subject: "technical_issue" }),
+        data: expect.objectContaining({
+          profileId: "profile-1",
+          subject: "technical_issue",
+          reference: expect.stringMatching(/^SUP-[A-Z2-9]{8}$/),
+        }),
       })
     );
   });
