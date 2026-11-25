@@ -418,7 +418,7 @@ export function ProfileSection({
               hasSpecialty={hasSpecialty}
               abnVerified={initialProfile.abnVerified}
               errors={errors}
-              handle={initialProfile.handle}
+              profileId={initialProfile.id}
             />
             {(accountType === "business" || hasSpecialty) && (
               <>

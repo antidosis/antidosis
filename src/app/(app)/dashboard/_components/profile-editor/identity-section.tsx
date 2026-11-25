@@ -64,16 +64,16 @@ export function IdentitySection({
 
   return (
     <SectionCard tone="identity" title="Identity" description="How you appear to other locals.">
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.9fr)]">
+      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(300px,0.85fr)]">
         {/* Left — photo, name, verification */}
         <div>
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
             <div className="flex flex-col gap-2">
               <Avatar
                 src={avatarUrl || null}
                 name={fullName || null}
                 size="lg"
-                className="h-20 w-20 shrink-0"
+                className="h-16 w-16 shrink-0"
               />
               <FileUpload
                 folder="avatars"
@@ -87,11 +87,11 @@ export function IdentitySection({
                   onClick={() => setValue("avatarUrl", null, { shouldDirty: true })}
                   className="text-xs text-ash underline-offset-2 transition-colors hover:text-bad hover:underline"
                 >
-                  Remove photo — use initials
+                  Remove photo
                 </button>
               ) : (
                 <p className="max-w-[160px] text-[11px] leading-snug text-ash">
-                  No photo — a placeholder with your initials shows instead.
+                  No photo — your initials show instead.
                 </p>
               )}
               {importable.length > 0 && onImportFromSocial && (
@@ -127,7 +127,7 @@ export function IdentitySection({
               {nameError && <p className="text-xs text-bad">{nameError}</p>}
             </div>
           </div>
-          <div className="mt-5 border-t border-line/40 pt-4">
+          <div className="mt-4 border-t border-line/40 pt-3">
             <VerificationBadges
               isVerified={isVerified}
               mobileVerified={mobileVerified}
@@ -139,18 +139,18 @@ export function IdentitySection({
         {/* Right — profile link, public phone and connection card share one
             tidy panel so the identity card reads as a single composed unit */}
         <div className="vessel divide-y divide-line/50 rounded-xl border-sun/20">
-          <div className="p-4 sm:p-5">
+          <div className="p-3.5 sm:p-4">
             <HandleSection handle={handle} />
           </div>
-          <div className="p-4 sm:p-5">
+          <div className="p-3.5 sm:p-4">
             <PublicContactSection
               control={phoneControl}
               mobile={mobile}
               mobileVerified={mobileVerified}
             />
           </div>
-          <div className="p-4 sm:p-5">
-            <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.2em] text-ash">
+          <div className="p-3.5 sm:p-4">
+            <p className="mb-2.5 font-mono text-[10px] uppercase tracking-[0.2em] text-ash">
               Invite people to connect
             </p>
             <ShareProfileCard profile={shareProfile} />

@@ -237,3 +237,55 @@ export async function getDirectoryProfiles(
     audienceSize: profile.accountType === "individual" ? profile.audienceSize : null,
   }));
 }
+
+/**
+ * One live directory listing, or null when the profile is not a live directory
+ * entry (unverified, hidden from the directory, or banned). Used by the
+ * dedicated listing page — the same gates as the directory list apply.
+ */
+export async function getDirectoryProfile(id: string): Promise<DirectoryProfile | null> {
+  const profile = await prisma.profile.findFirst({
+    where: {
+      id,
+      isVerified: true,
+      mobileVerified: true,
+      showInDirectory: true,
+      bannedAt: null,
+    },
+    select: {
+      id: true,
+      fullName: true,
+      avatarUrl: true,
+      bio: true,
+      locationName: true,
+      publicPhone: true,
+      businessPhone: true,
+      businessEmail: true,
+      businessSocialLinks: true,
+      ratingAvg: true,
+      ratingCount: true,
+      jobsCompleted: true,
+      isVerified: true,
+      accountType: true,
+      abn: true,
+      abnVerified: true,
+      audienceSize: true,
+      skills: { select: { name: true } },
+      credentials: { where: { isPublic: true }, select: { id: true } },
+      directorySpecialties: {
+        select: { profession: true, headline: true, attributes: true },
+      },
+    },
+  });
+
+  if (!profile) return null;
+  const { directorySpecialties, businessSocialLinks, ...rest } = profile;
+  return {
+    ...rest,
+    specialties: directorySpecialties,
+    businessSocialLinks: parseBusinessSocialLinks(businessSocialLinks),
+    abn: profile.accountType === "business" ? profile.abn : null,
+    abnVerified: profile.accountType === "business" ? profile.abnVerified : false,
+    audienceSize: profile.accountType === "individual" ? profile.audienceSize : null,
+  };
+}

@@ -172,7 +172,7 @@ export default function ProsDirectoryPage({ embedded = false, initialData }: Pro
           {pros.map((pro) => (
             <Link
               key={pro.id}
-              href={`/profile/${pro.id}`}
+              href={`/pros/${pro.id}`}
               className="block vessel p-6 hover:bg-raise transition-colors"
             >
               <div className="flex items-start gap-4">

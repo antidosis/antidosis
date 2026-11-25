@@ -17,8 +17,8 @@ interface PreferencesSectionProps {
   hasSpecialty: boolean;
   abnVerified: boolean;
   errors: FieldErrors<ProfileFormData>;
-  /** Public profile handle, used for the "view live listing" deep link. */
-  handle: string | null;
+  /** Own profile id, used for the "view live listing" deep link. */
+  profileId: string;
 }
 
 export function PreferencesSection({
@@ -28,7 +28,7 @@ export function PreferencesSection({
   hasSpecialty,
   abnVerified,
   errors,
-  handle,
+  profileId,
 }: PreferencesSectionProps) {
   return (
     <SectionCard
@@ -53,15 +53,13 @@ export function PreferencesSection({
               </div>
             </div>
             <div className="flex items-center gap-3">
-              {handle && (
-                <Link
-                  href={`/profile/@${handle}`}
-                  target="_blank"
-                  className="inline-flex items-center gap-1 text-xs font-medium text-sun underline-offset-2 hover:underline"
-                >
-                  View live listing <ArrowUpRight className="h-3.5 w-3.5" />
-                </Link>
-              )}
+              <Link
+                href={`/pros/${profileId}`}
+                target="_blank"
+                className="inline-flex items-center gap-1 text-xs font-medium text-sun underline-offset-2 hover:underline"
+              >
+                View live listing <ArrowUpRight className="h-3.5 w-3.5" />
+              </Link>
               <button
                 type="button"
                 onClick={() => setValue("showInDirectory", false, { shouldDirty: true })}

@@ -165,14 +165,56 @@ describe("POST /api/v1/profiles/me/specialties", () => {
     expect(stored.unknown_field).toBeUndefined();
   });
 
-  it("rejects a second specialty with 402 SLOT_LOCKED (paid unlock not yet live)", async () => {
+  it("lets same-industry professions share the free slot", async () => {
     authed();
-    mockSpecialtyFindMany.mockResolvedValue([{ slot: 1 }]);
+    mockSpecialtyFindMany.mockResolvedValue([{ slot: 1, profession: "web_developer" }]);
+    mockSpecialtyCreate.mockResolvedValue({ id: "s2", profession: "app_developer", slot: 1 });
 
     const res = await POST(
       makeRequest("http://localhost/api/v1/profiles/me/specialties", {
         method: "POST",
-        body: JSON.stringify({ profession: "cleaner" }),
+        body: JSON.stringify({ profession: "app developer" }),
+      })
+    );
+
+    expect(res.status).toBe(201);
+    expect(mockSpecialtyCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ profession: "app_developer", slot: 1 }),
+      })
+    );
+  });
+
+  it("rejects a different industry in the free slot with 409 INDUSTRY_MISMATCH", async () => {
+    authed();
+    mockSpecialtyFindMany.mockResolvedValue([{ slot: 1, profession: "plumber" }]);
+
+    const res = await POST(
+      makeRequest("http://localhost/api/v1/profiles/me/specialties", {
+        method: "POST",
+        body: JSON.stringify({ profession: "web developer" }),
+      })
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(409);
+    expect(body.code).toBe("INDUSTRY_MISMATCH");
+    expect(mockSpecialtyCreate).not.toHaveBeenCalled();
+  });
+
+  it("rejects a fifth profession with 402 SLOT_LOCKED (free slot full, paid unlock not yet live)", async () => {
+    authed();
+    mockSpecialtyFindMany.mockResolvedValue([
+      { slot: 1, profession: "plumber" },
+      { slot: 1, profession: "electrician" },
+      { slot: 1, profession: "carpenter" },
+      { slot: 1, profession: "handyman" },
+    ]);
+
+    const res = await POST(
+      makeRequest("http://localhost/api/v1/profiles/me/specialties", {
+        method: "POST",
+        body: JSON.stringify({ profession: "painter" }),
       })
     );
     const body = await res.json();

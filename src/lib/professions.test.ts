@@ -47,6 +47,24 @@ describe("professions taxonomy", () => {
     expect(FREE_SPECIALTY_SLOTS).toBeLessThan(MAX_SPECIALTY_SLOTS);
   });
 
+  it("every profession maps to a declared industry, and order covers them all", async () => {
+    const { INDUSTRIES, INDUSTRY_ORDER, professionsByIndustry } = await import("./professions");
+    for (const profession of PROFESSIONS) {
+      expect(INDUSTRIES[profession.industry], profession.key).toBeDefined();
+    }
+    expect(new Set(INDUSTRY_ORDER).size).toBe(Object.keys(INDUSTRIES).length);
+    const grouped = professionsByIndustry();
+    const total = Object.values(grouped).reduce((sum, list) => sum + list.length, 0);
+    expect(total).toBe(PROFESSIONS.length);
+  });
+
+  it("industryOfProfession resolves registry keys and nulls custom ones", async () => {
+    const { industryOfProfession } = await import("./professions");
+    expect(industryOfProfession("web_developer")).toBe("tech");
+    expect(industryOfProfession("plumber")).toBe("trades");
+    expect(industryOfProfession("rocket_surgeon")).toBeNull();
+  });
+
   it("getProfession resolves known keys and rejects unknown ones", () => {
     expect(getProfession("plumber")?.label).toBe("Plumber");
     expect(getProfession("astronaut")).toBeUndefined();

@@ -120,32 +120,22 @@ export function ShareProfileCard({ profile }: ShareProfileCardProps) {
 
   return (
     <div>
-      <div className="relative overflow-hidden rounded-lg bg-void text-parchment">
-        <div className="absolute -right-16 -top-24 h-56 w-56 rounded-full border border-mercury/20 shadow-[0_0_0_40px_rgb(var(--c-mercury)/0.035),0_0_0_80px_rgb(var(--c-mercury)/0.025)]" />
-        <div className="relative p-4">
-          <div className="flex items-center justify-between gap-4">
-            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-ok">Antidosis</p>
-            {profile.isVerified && (
-              <span className="flex items-center gap-1 text-[11px] text-ok">
-                <ShieldCheck className="h-3 w-3" /> Verified
-              </span>
-            )}
-          </div>
-          <div className="mt-3 flex items-center gap-3">
-            <Avatar
-              src={profile.avatarUrl}
-              name={profile.fullName}
-              size="lg"
-              className="h-11 w-11"
-            />
-            <div className="min-w-0">
-              <p className="truncate text-base font-semibold">{name}</p>
-              <p className="truncate font-mono text-xs text-ok">{handle}</p>
-            </div>
-          </div>
+      <div className="flex items-center gap-3 rounded-lg border border-ok/25 bg-ok/[0.05] p-3">
+        <Avatar
+          src={profile.avatarUrl}
+          name={profile.fullName}
+          size="sm"
+          className="h-9 w-9 shrink-0"
+        />
+        <div className="min-w-0 flex-1">
+          <p className="flex items-center gap-1.5 truncate text-sm font-medium text-parchment">
+            <span className="truncate">{name}</span>
+            {profile.isVerified && <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-ok" />}
+          </p>
+          <p className="truncate font-mono text-[11px] text-ash">{handle} · antidosis.com</p>
         </div>
       </div>
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div className="mt-2.5 flex flex-wrap gap-2">
         <CopyLinkButton url={inviteUrl} label="Copy invitation" />
         <Button
           type="button"
