@@ -70,14 +70,14 @@ test.describe("Dashboard", () => {
     await expect(page.getByText("E2E Test User").first()).toBeVisible();
   });
 
-  test("creator reach opens the social profile editor", async ({ page }) => {
+  test("creator reach opens the public profile editor with socials", async ({ page }) => {
     test.skip(!hasAuthCredentials(), "E2E auth credentials not configured");
     await login(page);
     await mockDashboard(page);
     await page.goto("/dashboard");
 
     await page.getByRole("button", { name: "Manage presence", exact: true }).click();
-    await expect(page.getByRole("tab", { name: "Social profiles" })).toHaveAttribute(
+    await expect(page.getByRole("tab", { name: "Public profile" })).toHaveAttribute(
       "aria-selected",
       "true"
     );
@@ -116,7 +116,7 @@ test.describe("Dashboard", () => {
     await expect(page.getByText("Driver's Licence", { exact: true })).toBeVisible();
   });
 
-  test("keeps dashboard navigation visible and separates social settings on mobile", async ({
+  test("keeps dashboard navigation visible with socials and connection card on mobile", async ({
     page,
   }) => {
     test.skip(!hasAuthCredentials(), "E2E auth credentials not configured");
@@ -131,13 +131,11 @@ test.describe("Dashboard", () => {
       "aria-selected",
       "true"
     );
-    await page.getByRole("tab", { name: "Social profiles" }).click();
+    // Social links, audience size and the compact connection card all live on
+    // the single public profile tab.
     await expect(page.getByLabel("Audience size (optional)")).toBeVisible();
-    await expect(page.getByText("Social profiles", { exact: true }).last()).toBeVisible();
-    const downloadEvent = page.waitForEvent("download");
-    await page.getByRole("button", { name: "Download card", exact: true }).click();
-    const download = await downloadEvent;
-    expect(download.suggestedFilename()).toBe("antidosis-e2e-user-card.png");
+    await expect(page.getByText("Your connection card", { exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Copy invitation", exact: true })).toBeVisible();
   });
 
   test("shows analytics within each need instead of a separate tab", async ({ page }) => {
