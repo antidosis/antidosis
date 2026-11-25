@@ -79,6 +79,15 @@ export function DirectorySlotsSection({ onSlotChange }: DirectorySlotsSectionPro
     [specialties]
   );
   const slotOneFull = slotOne.length >= FREE_SLOT_PROFESSIONS;
+  /** The single industry slot 1 is dedicated to, once professions are claimed. */
+  const slotIndustry = useMemo(() => {
+    const industries = new Set(
+      slotOne
+        .map((specialty) => industryOfProfession(specialty.profession))
+        .filter((key): key is keyof typeof INDUSTRIES => key !== null)
+    );
+    return industries.size === 1 ? ([...industries][0] as keyof typeof INDUSTRIES) : null;
+  }, [slotOne]);
 
   useEffect(() => {
     onSlotChange?.(slotOne.length > 0);
@@ -235,6 +244,7 @@ export function DirectorySlotsSection({ onSlotChange }: DirectorySlotsSectionPro
         <ProfessionPicker
           existing={slotOne.map((specialty) => specialty.profession)}
           remaining={FREE_SLOT_PROFESSIONS - slotOne.length}
+          lockedIndustry={slotIndustry}
           onClose={() => setPickerOpen(false)}
         />
       )}
@@ -247,15 +257,18 @@ export function DirectorySlotsSection({ onSlotChange }: DirectorySlotsSectionPro
 function ProfessionPicker({
   existing,
   remaining,
+  lockedIndustry,
   onClose,
 }: {
   existing: string[];
   remaining: number;
+  /** Industry already claimed in slot 1 — the picker is confined to it. */
+  lockedIndustry: keyof typeof INDUSTRIES | null;
   onClose: () => void;
 }) {
   const { toast } = useToast();
   const [query, setQuery] = useState("");
-  const [industry, setIndustry] = useState<string | null>(null);
+  const [industry, setIndustry] = useState<string | null>(lockedIndustry);
   const [selected, setSelected] = useState<string[]>([]);
   const [claiming, setClaiming] = useState(false);
 
@@ -284,11 +297,32 @@ function ProfessionPicker({
   const activeIndustry = industry as keyof typeof INDUSTRIES | null;
   const canClaimFreeText = query.trim().length >= 2 && results.length === 0;
 
+  /** The industry the current selection (or the locked slot) is confined to. */
+  function confineIndustry(): string | null {
+    if (lockedIndustry) return lockedIndustry;
+    for (const key of selected) {
+      const found = industryOfProfession(key);
+      if (found) return found;
+    }
+    return null;
+  }
+
   function toggle(key: string) {
     setSelected((previous) => {
       if (previous.includes(key)) return previous.filter((item) => item !== key);
       if (previous.length >= remaining) {
         toast(`This slot holds up to ${FREE_SLOT_PROFESSIONS} professions`, "error");
+        return previous;
+      }
+      // One industry per slot: professions from another industry are disabled
+      // in the UI, and this guard covers the race/edge case.
+      const confined = confineIndustry();
+      const next = industryOfProfession(key);
+      if (confined && next && next !== confined) {
+        toast(
+          `Your slot covers ${INDUSTRIES[confined as keyof typeof INDUSTRIES].label} — ${INDUSTRIES[next].label} needs its own slot`,
+          "error"
+        );
         return previous;
       }
       return [...previous, key];
@@ -379,32 +413,46 @@ function ProfessionPicker({
       {query.trim() ? (
         /* Search results — flat list with industry labels */
         <div className="max-w-2xl">
-          {results.map(({ profession, industryKey }) => {
-            const active = selected.includes(profession.key);
-            return (
-              <button
-                key={profession.key}
-                type="button"
-                onClick={() => toggle(profession.key)}
-                aria-pressed={active}
-                className={cn(
-                  "flex w-full items-center justify-between gap-3 border-b border-line/40 px-3 py-2.5 text-left transition-colors last:border-b-0",
-                  active ? "bg-aero/[0.08]" : "hover:bg-aero/[0.04]"
-                )}
-              >
-                <span className="min-w-0">
-                  <span className="block text-sm font-medium text-gold">
-                    {active && <Check className="mr-1.5 inline h-3.5 w-3.5 text-aero" />}
-                    {profession.label}
+          {(() => {
+            const confined = confineIndustry();
+            return results.map(({ profession, industryKey }) => {
+              const active = selected.includes(profession.key);
+              const blocked = confined !== null && industryKey !== confined;
+              return (
+                <button
+                  key={profession.key}
+                  type="button"
+                  onClick={() => toggle(profession.key)}
+                  disabled={blocked}
+                  aria-pressed={active}
+                  className={cn(
+                    "flex w-full items-center justify-between gap-3 border-b border-line/40 px-3 py-2.5 text-left transition-colors last:border-b-0",
+                    blocked
+                      ? "cursor-not-allowed opacity-50"
+                      : active
+                        ? "bg-aero/[0.08]"
+                        : "hover:bg-aero/[0.04]"
+                  )}
+                >
+                  <span className="min-w-0">
+                    <span className="block text-sm font-medium text-gold">
+                      {active && <Check className="mr-1.5 inline h-3.5 w-3.5 text-aero" />}
+                      {profession.label}
+                    </span>
+                    <span className="block text-xs text-ash">
+                      {INDUSTRIES[industryKey as keyof typeof INDUSTRIES].label} ·{" "}
+                      {blocked ? "different industry — needs its own slot" : profession.pitch}
+                    </span>
                   </span>
-                  <span className="block text-xs text-ash">
-                    {INDUSTRIES[industryKey as keyof typeof INDUSTRIES].label} · {profession.pitch}
-                  </span>
-                </span>
-                <Plus className="h-3.5 w-3.5 shrink-0 text-ash" />
-              </button>
-            );
-          })}
+                  {blocked ? (
+                    <Lock className="h-3.5 w-3.5 shrink-0 text-ash" />
+                  ) : (
+                    <Plus className="h-3.5 w-3.5 shrink-0 text-ash" />
+                  )}
+                </button>
+              );
+            });
+          })()}
           {results.length === 0 && (
             <p className="px-1 text-sm text-ash">
               No built-in match for &ldquo;{query.trim()}&rdquo; — claim it as a custom profession
@@ -470,30 +518,50 @@ function ProfessionPicker({
           )}
         </div>
       ) : (
-        /* Industry grid */
+        /* Industry grid — the slot's industry is highlighted, others show as needing their own slot */
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {INDUSTRY_ORDER.map((industryKey) => {
             const professions = grouped[industryKey];
             const available = professions.filter((profession) => !taken.has(profession.key));
+            const isLocked = lockedIndustry !== null && industryKey !== lockedIndustry;
             return (
               <button
                 key={industryKey}
                 type="button"
+                disabled={isLocked}
                 onClick={() => setIndustry(industryKey)}
-                className="group rounded-lg border border-line/70 bg-surface/40 p-4 text-left transition-colors hover:border-aero/50 hover:bg-aero/[0.04]"
+                className={cn(
+                  "group rounded-lg border p-4 text-left transition-colors",
+                  isLocked
+                    ? "cursor-not-allowed border-line/40 bg-surface/20 opacity-60"
+                    : lockedIndustry === industryKey
+                      ? "border-aero/60 bg-aero/[0.07]"
+                      : "border-line/70 bg-surface/40 hover:border-aero/50 hover:bg-aero/[0.04]"
+                )}
               >
                 <span className="flex w-full items-center justify-between gap-2">
-                  <span className="text-sm font-medium text-gold group-hover:text-aero">
+                  <span
+                    className={cn(
+                      "text-sm font-medium",
+                      isLocked ? "text-ash" : "text-gold group-hover:text-aero"
+                    )}
+                  >
                     {INDUSTRIES[industryKey].label}
                   </span>
-                  <ArrowRight className="h-3.5 w-3.5 shrink-0 text-ash transition-transform group-hover:translate-x-0.5 group-hover:text-aero" />
+                  {isLocked ? (
+                    <Lock className="h-3.5 w-3.5 shrink-0 text-ash" />
+                  ) : (
+                    <ArrowRight className="h-3.5 w-3.5 shrink-0 text-ash transition-transform group-hover:translate-x-0.5 group-hover:text-aero" />
+                  )}
                 </span>
                 <span className="mt-1 block text-xs leading-relaxed text-ash">
-                  {INDUSTRIES[industryKey].blurb}
+                  {isLocked ? "Needs its own slot — unlocks soon" : INDUSTRIES[industryKey].blurb}
                 </span>
-                <span className="mt-2 block font-mono text-[10px] uppercase tracking-wider text-ash/70">
-                  {available.length} profession{available.length !== 1 ? "s" : ""}
-                </span>
+                {!isLocked && (
+                  <span className="mt-2 block font-mono text-[10px] uppercase tracking-wider text-ash/70">
+                    {available.length} profession{available.length !== 1 ? "s" : ""}
+                  </span>
+                )}
               </button>
             );
           })}
