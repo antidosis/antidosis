@@ -1,9 +1,13 @@
 "use client";
 
-import { Eye, EyeOff, Trash2, FileCheck, ShieldCheck } from "lucide-react";
+import { useState } from "react";
+
+import { Check, Copy, Eye, EyeOff, Trash2, FileCheck, ShieldCheck } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/toast";
+import { formatCredentialForMessage } from "@/lib/redaction";
 
 export interface CredentialData {
   id: string;
@@ -38,6 +42,26 @@ export function CredentialList({
   onEdit,
   onDelete,
 }: CredentialListProps) {
+  const { toast } = useToast();
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  async function copyRedactedSummary(cred: CredentialData) {
+    const text = formatCredentialForMessage({
+      title: cred.title,
+      type: cred.type,
+      documentNumber: cred.documentNumber,
+      issuedBy: cred.issuedBy,
+      expiresAt: cred.expiresAt ? new Date(cred.expiresAt) : null,
+    });
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedId(cred.id);
+      setTimeout(() => setCopiedId((current) => (current === cred.id ? null : current)), 2000);
+      toast("Redacted summary copied — paste it into a message", "success");
+    } catch {
+      toast("Couldn't copy — select the text manually from the document view", "error");
+    }
+  }
   if (credentials.length === 0) {
     return (
       <div className="py-24 text-center vessel">
@@ -124,6 +148,18 @@ export function CredentialList({
               </div>
             </div>
             <div className="flex items-center gap-1 ml-4">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => copyRedactedSummary(cred)}
+                title="Copy a redacted text summary to share in messages — the document file stays private"
+              >
+                {copiedId === cred.id ? (
+                  <Check className="h-4 w-4 text-ok" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
+              </Button>
               <Button
                 size="sm"
                 variant="ghost"

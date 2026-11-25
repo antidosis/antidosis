@@ -69,6 +69,19 @@ export function IdentitySection({
           >
             Change avatar
           </FileUpload>
+          {avatarUrl ? (
+            <button
+              type="button"
+              onClick={() => setValue("avatarUrl", null, { shouldDirty: true })}
+              className="text-xs text-ash underline-offset-2 transition-colors hover:text-bad hover:underline"
+            >
+              Remove photo — use initials
+            </button>
+          ) : (
+            <p className="max-w-[160px] text-[11px] leading-snug text-ash">
+              No photo — a placeholder with your initials shows instead.
+            </p>
+          )}
           {importable.length > 0 && onImportFromSocial && (
             <div className="max-w-[160px]">
               <p className="mb-1 text-[11px] text-ash">or import from</p>

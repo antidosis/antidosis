@@ -19,7 +19,7 @@ export function PublicContactSection({ register, errors }: PublicContactSectionP
     <SectionCard
       tone="identity"
       title="Public contact"
-      description="Optional. Shown on your public profile and in the directory — like a Gumtree listing. Leave blank to keep contact to in-app messages."
+      description="Optional. Your personal number, shown on your public profile only — never in the directory. Leave blank to keep contact to in-app messages."
     >
       <div className="space-y-2">
         <Label htmlFor="profile-publicPhone">

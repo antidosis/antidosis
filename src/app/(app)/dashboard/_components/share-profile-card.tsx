@@ -8,6 +8,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CopyLinkButton } from "@/components/ui/copy-link";
 import { useToast } from "@/components/ui/toast";
+import { cn } from "@/lib/utils";
 
 interface ShareProfileCardProps {
   profile: {
@@ -24,6 +25,8 @@ interface ShareProfileCardProps {
     isVerified: boolean;
     skills: { id: string; name: string }[];
   };
+  /** Tighter rendering for embedding next to the handle card. */
+  compact?: boolean;
 }
 
 function xml(value: string): string {
@@ -32,7 +35,7 @@ function xml(value: string): string {
   });
 }
 
-export function ShareProfileCard({ profile }: ShareProfileCardProps) {
+export function ShareProfileCard({ profile, compact = false }: ShareProfileCardProps) {
   const { toast } = useToast();
   const [sharing, setSharing] = useState(false);
   const name = profile.fullName || "Antidosis member";
@@ -122,11 +125,18 @@ export function ShareProfileCard({ profile }: ShareProfileCardProps) {
     <section className="vessel overflow-hidden rounded-xl">
       <div className="border-b border-line/60 px-5 py-4">
         <h3 className="text-sm font-medium text-gold">Your connection card</h3>
-        <p className="mt-1 text-xs text-ash">
-          Invite someone to join Antidosis and connect with you. They choose whether to accept.
-        </p>
+        {!compact && (
+          <p className="mt-1 text-xs text-ash">
+            Invite someone to join Antidosis and connect with you. They choose whether to accept.
+          </p>
+        )}
       </div>
-      <div className="relative overflow-hidden bg-void p-6 text-parchment sm:p-8">
+      <div
+        className={cn(
+          "relative overflow-hidden bg-void text-parchment",
+          compact ? "p-5" : "p-6 sm:p-8"
+        )}
+      >
         <div className="absolute -right-24 -top-32 h-72 w-72 rounded-full border border-mercury/20 shadow-[0_0_0_48px_rgb(var(--c-mercury)/0.035),0_0_0_96px_rgb(var(--c-mercury)/0.025)]" />
         <div className="relative">
           <div className="flex items-center justify-between gap-4">
@@ -137,26 +147,32 @@ export function ShareProfileCard({ profile }: ShareProfileCardProps) {
               </span>
             )}
           </div>
-          <div className="mt-8 flex items-center gap-4">
+          <div className={cn("flex items-center gap-4", compact ? "mt-4" : "mt-8")}>
             <Avatar
               src={profile.avatarUrl}
               name={profile.fullName}
               size="lg"
-              className="h-16 w-16"
+              className={compact ? "h-12 w-12" : "h-16 w-16"}
             />
             <div className="min-w-0">
-              <p className="truncate text-2xl font-semibold">{name}</p>
+              <p className={cn("truncate font-semibold", compact ? "text-lg" : "text-2xl")}>
+                {name}
+              </p>
               <p className="mt-1 truncate font-mono text-sm text-ok">{handle}</p>
             </div>
           </div>
-          <p className="mt-7 max-w-md text-lg font-medium leading-snug">
-            Connect with me on the local exchange network.
-          </p>
-          <p className="mt-2 text-sm text-ash">
-            {[profile.locationName, ...profile.skills.slice(0, 2).map((skill) => skill.name)]
-              .filter(Boolean)
-              .join(" · ") || "People · skills · direct agreements · genuine reviews"}
-          </p>
+          {!compact && (
+            <>
+              <p className="mt-7 max-w-md text-lg font-medium leading-snug">
+                Connect with me on the local exchange network.
+              </p>
+              <p className="mt-2 text-sm text-ash">
+                {[profile.locationName, ...profile.skills.slice(0, 2).map((skill) => skill.name)]
+                  .filter(Boolean)
+                  .join(" · ") || "People · skills · direct agreements · genuine reviews"}
+              </p>
+            </>
+          )}
         </div>
       </div>
       <div className="flex flex-wrap gap-2 p-4">
@@ -175,9 +191,11 @@ export function ShareProfileCard({ profile }: ShareProfileCardProps) {
           )}
           Share
         </Button>
-        <Button type="button" variant="ghost" size="sm" onClick={downloadCard}>
-          <Download className="mr-1.5 h-3.5 w-3.5" /> Download card
-        </Button>
+        {!compact && (
+          <Button type="button" variant="ghost" size="sm" onClick={downloadCard}>
+            <Download className="mr-1.5 h-3.5 w-3.5" /> Download card
+          </Button>
+        )}
       </div>
     </section>
   );

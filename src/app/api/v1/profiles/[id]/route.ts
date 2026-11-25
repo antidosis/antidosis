@@ -69,8 +69,6 @@ export const GET = withApiHandler(
         bio: true,
         locationName: true,
         publicPhone: true,
-        businessPhone: true,
-        businessEmail: true,
         mobileVerified: true,
         isVerified: true,
         isPro: true,

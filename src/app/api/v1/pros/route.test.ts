@@ -63,7 +63,8 @@ describe("GET /api/v1/pros", () => {
     const json = await res.json();
     expect(json).toEqual([]);
     const call = mockProfileFindMany.mock.calls[0][0];
-    expect(call.where.OR).toBeDefined();
+    expect(Array.isArray(call.where.AND)).toBe(true);
+    expect(call.where.AND[0].OR).toBeDefined();
   });
 
   it("sets cache-control header", async () => {
@@ -149,5 +150,39 @@ describe("GET /api/v1/pros", () => {
     expect(json[0].abn).toBe("51824753556");
     expect(json[0].abnVerified).toBe(true);
     expect(json[0].audienceSize).toBeNull();
+  });
+
+  it("directory projection never selects account-only fields", async () => {
+    // Directory cards promise business contact details (business phone /
+    // email, public phone) but never the member's account mobile, private
+    // phone or sign-in email.
+    mockProfileFindMany.mockResolvedValue([]);
+    await GET(makeRequest("http://localhost/api/v1/pros"));
+    const select = mockProfileFindMany.mock.calls[0][0].select;
+    const selected = Object.keys(select);
+    for (const forbidden of ["mobile", "privatePhone", "email"]) {
+      expect(selected).not.toContain(forbidden);
+    }
+    expect(selected).toContain("publicPhone");
+    expect(selected).toContain("businessPhone");
+    expect(selected).toContain("businessEmail");
+  });
+
+  it("filters by profession specialty when profession param is set", async () => {
+    mockProfileFindMany.mockResolvedValue([]);
+    const res = await GET(makeRequest("http://localhost/api/v1/pros?profession=plumber"));
+    expect(res.status).toBe(200);
+    const call = mockProfileFindMany.mock.calls[0][0];
+    expect(call.where.directorySpecialties).toEqual({ some: { profession: "plumber" } });
+  });
+
+  it("AND-combines profession filter with text search", async () => {
+    mockProfileFindMany.mockResolvedValue([]);
+    const res = await GET(makeRequest("http://localhost/api/v1/pros?profession=influencer&q=food"));
+    expect(res.status).toBe(200);
+    const call = mockProfileFindMany.mock.calls[0][0];
+    expect(call.where.directorySpecialties).toEqual({ some: { profession: "influencer" } });
+    expect(Array.isArray(call.where.AND)).toBe(true);
+    expect(call.where.OR).toBeUndefined();
   });
 });

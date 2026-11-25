@@ -158,11 +158,17 @@ export interface DirectoryProfile {
   audienceSize: number | null;
   skills: { name: string }[];
   credentials: { id: string }[];
+  specialties: {
+    profession: string;
+    headline: string | null;
+    attributes: string | null;
+  }[];
 }
 
 export async function getDirectoryProfiles(
   query?: string,
-  type?: string
+  type?: string,
+  profession?: string
 ): Promise<DirectoryProfile[]> {
   const accountType = type === "businesses" ? "business" : type === "people" ? "individual" : null;
   const where: Prisma.ProfileWhereInput = {
@@ -172,13 +178,22 @@ export async function getDirectoryProfiles(
     bannedAt: null,
   };
   if (accountType) where.accountType = accountType;
+  if (profession) {
+    where.directorySpecialties = { some: { profession } };
+  }
   if (query) {
-    where.OR = [
-      { fullName: { contains: query, mode: "insensitive" } },
-      { bio: { contains: query, mode: "insensitive" } },
-      { skills: { some: { name: { contains: query, mode: "insensitive" } } } },
-      { locationName: { contains: query, mode: "insensitive" } },
-    ];
+    const search: Prisma.ProfileWhereInput = {
+      OR: [
+        { fullName: { contains: query, mode: "insensitive" } },
+        { bio: { contains: query, mode: "insensitive" } },
+        { skills: { some: { name: { contains: query, mode: "insensitive" } } } },
+        { locationName: { contains: query, mode: "insensitive" } },
+      ],
+    };
+    // AND-combine so a profession filter and a text search narrow together
+    // instead of overriding each other.
+    const existingAnd = Array.isArray(where.AND) ? where.AND : where.AND ? [where.AND] : [];
+    where.AND = [...existingAnd, search];
   }
 
   const profiles = await prisma.profile.findMany({
@@ -204,11 +219,15 @@ export async function getDirectoryProfiles(
       audienceSize: true,
       skills: { select: { name: true } },
       credentials: { where: { isPublic: true }, select: { id: true } },
+      directorySpecialties: {
+        select: { profession: true, headline: true, attributes: true },
+      },
     },
   });
 
-  return profiles.map((profile) => ({
+  return profiles.map(({ directorySpecialties, ...profile }) => ({
     ...profile,
+    specialties: directorySpecialties,
     abn: profile.accountType === "business" ? profile.abn : null,
     abnVerified: profile.accountType === "business" ? profile.abnVerified : false,
     audienceSize: profile.accountType === "individual" ? profile.audienceSize : null,

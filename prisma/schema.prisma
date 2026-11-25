@@ -73,6 +73,8 @@ model Profile {
   friendsAsA       Friend[]              @relation("friendsAsA")
   friendsAsB       Friend[]              @relation("friendsAsB")
   reportsFiled     Report[]
+  supportRequests  SupportRequest[]
+  directorySpecialties DirectorySpecialty[]
   deviceTokens     DeviceToken[]
   needWatches      NeedWatch[]
 
@@ -385,6 +387,39 @@ model BannedMobile {
 
   @@index([profileId])
   @@map("banned_mobiles")
+}
+
+model DirectorySpecialty {
+  id         String   @id @default(uuid())
+  profileId  String   @map("profile_id")
+  profession String // taxonomy key from src/lib/professions.ts
+  headline   String? // short pitch shown on the listing
+  attributes String?  @map("attributes") // JSON blob of profession-specific answers
+  slot       Int      @default(1) // 1 free; 2–3 are future paid unlocks
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, slot])
+  @@index([profession])
+  @@map("directory_specialties")
+}
+
+model SupportRequest {
+  id        String    @id @default(uuid())
+  profileId String    @map("profile_id")
+  subject   String
+  message   String
+  status    String    @default("open") // "open" | "in_progress" | "resolved"
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, createdAt])
+  @@index([status, createdAt])
+  @@map("support_requests")
 }
 
 model Report {

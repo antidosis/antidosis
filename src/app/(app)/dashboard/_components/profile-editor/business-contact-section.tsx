@@ -19,7 +19,7 @@ export function BusinessContactSection({ register, errors }: BusinessContactSect
     <SectionCard
       tone="directory"
       title="Business contact"
-      description="How customers reach the business — shown on your public profile and directory listing, alongside your public phone."
+      description="How customers reach the business — shown on your directory listing only, separate from your personal public profile."
     >
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         <div className="space-y-2">

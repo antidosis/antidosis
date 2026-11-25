@@ -304,4 +304,34 @@ describe("GET /api/v1/profiles/[id]", () => {
 
     expect(res.headers.get("x-request-id")).toMatch(/^\w+-\w+$/);
   });
+
+  it("public projection never selects account or directory-only contact fields", async () => {
+    // The public profile page and mobile PublicProfile type promise a
+    // personal-only surface: no account mobile, no private phone, and no
+    // business contact details (those belong to the directory API).
+    mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "d1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+      fullName: "Test User",
+      skills: [],
+      socialLinks: [],
+      credentials: [],
+      needsPosted: [],
+      reviewsReceived: [],
+    });
+
+    await GET(makeRequest("http://localhost/api/v1/profiles/profile-1"), {
+      params: { id: "d1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
+    });
+
+    const projectionCall = mockProfileFindUnique.mock.calls.find(
+      (call) => call[0]?.select && "needsPosted" in call[0].select
+    );
+    expect(projectionCall).toBeDefined();
+    const selected = Object.keys(projectionCall![0].select);
+    for (const forbidden of ["mobile", "privatePhone", "businessPhone", "businessEmail", "email"]) {
+      expect(selected).not.toContain(forbidden);
+    }
+    expect(selected).toContain("publicPhone");
+  });
 });

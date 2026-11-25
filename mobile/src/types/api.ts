@@ -426,8 +426,6 @@ export interface PublicProfile {
   avatarUrl: string | null;
   locationName: string | null;
   publicPhone: string | null;
-  businessPhone: string | null;
-  businessEmail: string | null;
   mobileVerified: boolean;
   isVerified: boolean;
   isPro: boolean;

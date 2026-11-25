@@ -36,8 +36,6 @@ interface ProfileData {
   bio: string | null;
   locationName: string | null;
   publicPhone: string | null;
-  businessPhone?: string | null;
-  businessEmail?: string | null;
   mobileVerified: boolean;
   ratingAvg: number;
   ratingCount: number;
@@ -212,10 +210,7 @@ export default function ProfilePage() {
                 </div>
               </div>
             )}
-            {(profile.publicPhone ||
-              (profile.accountType === "business" &&
-                (profile.businessPhone || profile.businessEmail)) ||
-              profile.socialLinks.length > 0) && (
+            {(profile.publicPhone || profile.socialLinks.length > 0) && (
               <div className="mt-6 flex flex-wrap gap-3 border-t border-line/60 pt-5">
                 {profile.publicPhone && (
                   <a
@@ -223,22 +218,6 @@ export default function ProfilePage() {
                     className="rounded-md border border-line px-3 py-2 text-sm text-parchment hover:border-linehi hover:text-gold"
                   >
                     {profile.publicPhone}
-                  </a>
-                )}
-                {profile.accountType === "business" && profile.businessPhone && (
-                  <a
-                    href={`tel:${profile.businessPhone}`}
-                    className="rounded-md border border-line px-3 py-2 text-sm text-parchment hover:border-linehi hover:text-gold"
-                  >
-                    Business: {profile.businessPhone}
-                  </a>
-                )}
-                {profile.accountType === "business" && profile.businessEmail && (
-                  <a
-                    href={`mailto:${profile.businessEmail}`}
-                    className="rounded-md border border-line px-3 py-2 text-sm text-parchment hover:border-linehi hover:text-gold"
-                  >
-                    {profile.businessEmail}
                   </a>
                 )}
                 {profile.socialLinks.map((link) => (

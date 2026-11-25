@@ -10,6 +10,7 @@ import {
   Briefcase,
   Shield,
   Phone,
+  Mail,
   Award,
   Search,
   X,
@@ -23,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { formatAbn } from "@/lib/abn";
+import { attributeHighlights, getProfession, parseAttributes } from "@/lib/professions";
 import type { DirectoryProfile } from "@/lib/public-content";
 import { useApi } from "@/lib/swr-config";
 import { cn } from "@/lib/utils";
@@ -229,6 +231,18 @@ export default function ProsDirectoryPage({ embedded = false, initialData }: Pro
                         {pro.publicPhone}
                       </span>
                     )}
+                    {pro.accountType === "business" && pro.businessPhone && (
+                      <span className="flex items-center gap-1">
+                        <Phone className="h-3 w-3 text-sun" />
+                        Business: {pro.businessPhone}
+                      </span>
+                    )}
+                    {pro.accountType === "business" && pro.businessEmail && (
+                      <span className="flex items-center gap-1">
+                        <Mail className="h-3 w-3 text-sun" />
+                        {pro.businessEmail}
+                      </span>
+                    )}
                     {pro.credentials.length > 0 && (
                       <span className="flex items-center gap-1">
                         <Award className="h-3 w-3" />
@@ -238,6 +252,34 @@ export default function ProsDirectoryPage({ embedded = false, initialData }: Pro
                   </div>
 
                   {pro.bio && <p className="text-sm text-ash mt-3 line-clamp-2">{pro.bio}</p>}
+
+                  {pro.specialties.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {pro.specialties.map((specialty) => {
+                        const profession = getProfession(specialty.profession);
+                        if (!profession) return null;
+                        const highlights = attributeHighlights(
+                          profession,
+                          parseAttributes(specialty.attributes)
+                        );
+                        return (
+                          <div
+                            key={specialty.profession}
+                            className="rounded-md border border-aero/25 bg-aero/[0.04] px-2.5 py-1.5"
+                          >
+                            <span className="text-xs font-medium text-aero">
+                              {profession.label}
+                            </span>
+                            {highlights.length > 0 && (
+                              <span className="ml-1.5 text-xs text-ash">
+                                · {highlights.slice(0, 2).join(" · ")}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
 
                   {pro.skills.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-3">

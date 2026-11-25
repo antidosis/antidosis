@@ -54,8 +54,14 @@ export function Avatar({ src, name, size = "md", className }: AvatarProps) {
           }}
           unoptimized={src.startsWith("data:")}
         />
-      ) : null}
-      <span className="text-parchment font-medium">{initials}</span>
+      ) : (
+        <span
+          className="flex h-full w-full items-center justify-center bg-gradient-to-br from-mercury/25 via-aero/20 to-orchid/20 font-medium text-parchment"
+          aria-hidden
+        >
+          {initials}
+        </span>
+      )}
     </div>
   );
 }

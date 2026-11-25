@@ -26,6 +26,7 @@ import { OverviewPanel } from "./_components/overview-panel";
 import type { ProfileTab } from "./_components/profile-editor/types";
 import { ProfileSection } from "./_components/profile-section";
 import { SettingsPanel } from "./_components/settings-panel";
+import { SupportPanel } from "./_components/support-panel";
 import { WatchlistPanel } from "./_components/watchlist-panel";
 
 type ProfileData = {
@@ -80,9 +81,7 @@ function parseTab(value: string | null): DashboardTabId {
 }
 
 function parseProfileTab(value: string | null): ProfileTab {
-  return ["public", "directory", "social", "trust"].includes(value ?? "")
-    ? (value as ProfileTab)
-    : "public";
+  return ["public", "directory", "trust"].includes(value ?? "") ? (value as ProfileTab) : "public";
 }
 
 export default function DashboardPage() {
@@ -219,6 +218,9 @@ function DashboardPageInner() {
             </DashboardPanel>
             <DashboardPanel id="settings" activeTab={tab} mounted={visited.has("settings")}>
               <SettingsPanel profile={profile} onNavigate={navigate} />
+            </DashboardPanel>
+            <DashboardPanel id="support" activeTab={tab} mounted={visited.has("support")}>
+              <SupportPanel />
             </DashboardPanel>
           </>
         );

@@ -9,7 +9,8 @@ export const GET = withCors(
     const { searchParams } = new URL(req.url);
     const profiles = await getDirectoryProfiles(
       searchParams.get("q")?.slice(0, 100),
-      searchParams.get("type") ?? undefined
+      searchParams.get("type") ?? undefined,
+      searchParams.get("profession") ?? undefined
     );
 
     return NextResponse.json(profiles, {

@@ -63,8 +63,8 @@ export function SocialLinksSection({
       title={variant === "business" ? "Business web presence" : "Social profiles"}
       description={
         variant === "business"
-          ? "Add your business website and as many business social profiles as you need. Public links appear on your directory profile."
-          : "Connect the places where people already know you. Public links appear on your profile and directory listing; private links stay in this editor."
+          ? "Add your business website and as many business social profiles as you need. Public links appear on your directory listing."
+          : "Connect the places where people already know you. Public links appear on your public profile; private links stay in this editor."
       }
     >
       {fields.length === 0 && (

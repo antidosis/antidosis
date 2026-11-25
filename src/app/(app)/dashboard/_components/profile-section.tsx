@@ -5,15 +5,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  ArrowUpRight,
-  BriefcaseBusiness,
-  Loader2,
-  LockKeyhole,
-  Share2,
-  ShieldCheck,
-  UserRound,
-} from "lucide-react";
+import { ArrowUpRight, BriefcaseBusiness, Loader2, ShieldCheck, UserRound } from "lucide-react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { mutate } from "swr";
 
@@ -24,10 +16,12 @@ import { cn } from "@/lib/utils";
 
 import type { CredentialData } from "./credential-list";
 import { CredentialsSection } from "./credentials-section";
+import { DirectorySlotsSection } from "./directory-slots-section";
 import { AboutSection } from "./profile-editor/about-section";
 import { BusinessContactSection } from "./profile-editor/business-contact-section";
 import { HandleSection } from "./profile-editor/handle-section";
 import { IdentitySection } from "./profile-editor/identity-section";
+import { KnowledgeBox } from "./profile-editor/knowledge-box";
 import { PreferencesSection } from "./profile-editor/preferences-section";
 import { PublicContactSection } from "./profile-editor/public-contact-section";
 import { SkillsSection } from "./profile-editor/skills-section";
@@ -48,23 +42,17 @@ const PROFILE_TABS = [
   {
     id: "public" as const,
     label: "Public profile",
-    description: "Your name, story, photo and permanent handle",
+    description: "Your name, story, photo, handle, socials and how people reach you",
     icon: UserRound,
     activeClass: "border-sun/30 bg-sun/[0.08] text-sun",
   },
   {
     id: "directory" as const,
     label: "Directory profile",
-    description: "Skills, business details and your public web presence",
+    description:
+      "Your advertisement in the public directory — listing, specialties and business contact",
     icon: BriefcaseBusiness,
     activeClass: "border-aero/30 bg-aero/[0.08] text-aero",
-  },
-  {
-    id: "social" as const,
-    label: "Social profiles",
-    description: "Connected links, creator reach and your invitation card",
-    icon: Share2,
-    activeClass: "border-orchid/30 bg-orchid/[0.08] text-orchid",
   },
   {
     id: "trust" as const,
@@ -142,12 +130,20 @@ export function ProfileSection({
 
   function setChangedValue(...args: Parameters<typeof setValue>) {
     setHasUnsavedChanges(true);
+    clearErrors("root");
     setValue(...args);
   }
 
   function addSocialLink(...args: Parameters<typeof append>) {
     setHasUnsavedChanges(true);
+    clearErrors("root");
     append(...args);
+  }
+
+  function switchTab(tab: ProfileTab) {
+    // A stale save error from one tab shouldn't follow the member to another.
+    clearErrors("root");
+    onTabChange(tab);
   }
 
   function markRemoving(fieldId: string) {
@@ -201,11 +197,11 @@ export function ProfileSection({
       const [section, row, field] = first?.path ?? [];
       if (section === "socialLinks" && typeof row === "number" && field === "url") {
         setError(`socialLinks.${row}.url`, { message: first.message });
-        onTabChange("social");
+        onTabChange("public");
       } else if (first) {
         setError("root", { message: first.message });
       }
-      toast("Couldn't save changes — check the highlighted fields", "error");
+      toast(first?.message ?? "Couldn't save changes — check the highlighted fields", "error");
       return;
     }
 
@@ -225,7 +221,11 @@ export function ProfileSection({
               ? error.error.map((item: { message?: string }) => item.message).join(", ")
               : "Save failed";
         setError("root", { message });
-        toast("Couldn't save changes — try again", "error");
+        // Business-rule rejections (e.g. missing ABN) belong to the directory
+        // tab where the field lives — surface them there, not on whatever tab
+        // the member happened to be on.
+        if (message.toLowerCase().includes("abn")) onTabChange("directory");
+        toast(message, "error");
         return;
       }
 
@@ -267,7 +267,7 @@ export function ProfileSection({
       <div
         role="tablist"
         aria-label="Profile sections"
-        className="mb-5 grid grid-cols-2 gap-2 rounded-lg border border-line bg-surface/35 p-2 sm:grid-cols-4"
+        className="mb-5 grid grid-cols-1 gap-2 rounded-lg border border-line bg-surface/35 p-2 sm:grid-cols-3"
       >
         {PROFILE_TABS.map((tab) => (
           <button
@@ -275,7 +275,7 @@ export function ProfileSection({
             type="button"
             role="tab"
             aria-selected={activeTab === tab.id}
-            onClick={() => onTabChange(tab.id)}
+            onClick={() => switchTab(tab.id)}
             className={cn(
               "flex min-h-11 items-center justify-center gap-2 rounded-md border px-2 py-2.5 text-center text-xs leading-tight transition-colors sm:px-3 sm:text-sm",
               activeTab === tab.id
@@ -291,6 +291,12 @@ export function ProfileSection({
       <div className="space-y-5">
         {activeTab === "public" && (
           <div role="tabpanel" className="space-y-4">
+            <KnowledgeBox>
+              This is <strong className="text-gold">you, publicly</strong> — what anyone sees when
+              they open your profile page from a need, a message or your shared link. Your photo,
+              story, skills, socials and public phone live here. Your account mobile, email and ID
+              documents never appear on this page.
+            </KnowledgeBox>
             <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(300px,1fr)]">
               <IdentitySection
                 register={register}
@@ -308,16 +314,41 @@ export function ProfileSection({
                 importingFromSocial={importingAvatarFrom}
                 onImportFromSocial={importAvatarFromSocial}
               />
-              <HandleSection handle={initialProfile.handle} />
+              <div className="space-y-4">
+                <HandleSection handle={initialProfile.handle} />
+                <ShareProfileCard profile={initialProfile} compact />
+              </div>
             </div>
             <AboutSection register={register} control={control} errors={errors} />
-            <PublicContactSection register={register} errors={errors} />
-            <SkillsSection skills={initialProfile.skills} />
+            <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(300px,1fr)]">
+              <SocialLinksSection
+                control={control}
+                register={register}
+                fields={fields}
+                removingIds={removingIds}
+                onMarkRemoving={markRemoving}
+                append={addSocialLink}
+                errors={errors}
+                showAudience={accountType !== "business"}
+              />
+              <div className="space-y-4">
+                <PublicContactSection register={register} errors={errors} />
+                <SkillsSection skills={initialProfile.skills} />
+              </div>
+            </div>
           </div>
         )}
 
         {activeTab === "directory" && (
           <div role="tabpanel" className="space-y-5">
+            <KnowledgeBox>
+              This is <strong className="text-gold">your listing in the public directory</strong> —
+              a separate, professional space from your personal profile. People and businesses
+              filter the directory to find someone for a job: your specialty slots, business contact
+              and credentials decide whether you show up. Listing is free; your personal phone and
+              personal socials stay out of it.
+            </KnowledgeBox>
+            <DirectorySlotsSection />
             <PreferencesSection
               register={register}
               setValue={setChangedValue}
@@ -345,42 +376,15 @@ export function ProfileSection({
           </div>
         )}
 
-        {activeTab === "social" && (
-          <div
-            role="tabpanel"
-            className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(320px,1fr)]"
-          >
-            <SocialLinksSection
-              control={control}
-              register={register}
-              fields={fields}
-              removingIds={removingIds}
-              onMarkRemoving={markRemoving}
-              append={addSocialLink}
-              errors={errors}
-              showAudience={accountType !== "business"}
-            />
-            <ShareProfileCard profile={initialProfile} />
-          </div>
-        )}
-
         {activeTab === "trust" && (
           <div role="tabpanel" className="space-y-4">
-            <section className="rounded-lg border border-ok/25 bg-ok/[0.04] p-5">
-              <div className="flex items-start gap-3">
-                <LockKeyhole className="mt-0.5 h-5 w-5 shrink-0 text-ok" />
-                <div>
-                  <h3 className="text-base font-medium text-gold">
-                    Your documents are not directory content
-                  </h3>
-                  <p className="mt-1 text-sm leading-relaxed text-parchment">
-                    ID and licence files stay in this private workspace. They are never published in
-                    the directory. Only a redacted summary you explicitly choose to share leaves
-                    this area.
-                  </p>
-                </div>
-              </div>
-            </section>
+            <KnowledgeBox>
+              This is <strong className="text-gold">your private vault</strong> — documents here
+              back your verified badge and are reviewed by our team, but they are never published on
+              your public profile or directory listing. To prove a qualification in a conversation,
+              use a credential&apos;s <em>Copy redacted summary</em> action and paste it into the
+              message — the file itself stays here.
+            </KnowledgeBox>
             <div id="credentials-section">
               <CredentialsSection initialCredentials={credentials} onUpdate={onCredentialsUpdate} />
             </div>

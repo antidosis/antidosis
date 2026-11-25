@@ -5,6 +5,7 @@ import {
   HandHelping,
   Inbox,
   LayoutDashboard,
+  LifeBuoy,
   Settings,
   User,
   Users,
@@ -19,6 +20,7 @@ export type DashboardTabId =
   | "profile"
   | "inbox"
   | "community"
+  | "support"
   | "settings";
 
 export interface DashboardTab {
@@ -94,6 +96,14 @@ export const DASHBOARD_TABS: DashboardTab[] = [
     icon: User,
     section: "account",
     subtitle: "Your public identity, directory presence, social profiles and privacy",
+  },
+  {
+    id: "support",
+    label: "Support",
+    shortLabel: "Support",
+    icon: LifeBuoy,
+    section: "account",
+    subtitle: "Request assistance from the Antidosis team and track your past requests",
   },
   {
     id: "settings",
