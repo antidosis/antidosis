@@ -65,7 +65,9 @@ export function NetworkMap({ className = "" }: { className?: string }) {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    const staticCanvas = document.createElement("canvas");
+    const staticCtx = staticCanvas.getContext("2d");
+    if (!ctx || !staticCtx) return;
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -73,7 +75,10 @@ export function NetworkMap({ className = "" }: { className?: string }) {
     let nodes: Node[] = [];
     let links: Array<[number, number]> = [];
     let pulses: Pulse[] = [];
+    let width = 1;
+    let height = 1;
     let raf = 0;
+    let lastFrameAt = 0;
     let lastPulseAt = 0;
     let running = true;
     let inView = true;
@@ -86,6 +91,7 @@ export function NetworkMap({ className = "" }: { className?: string }) {
       GOLD = readToken("--c-sun", "245, 166, 35");
       CYAN = readToken("--c-mercury", "0, 229, 255");
       LABEL = readToken("--c-ash", "143, 127, 110");
+      renderStatic();
       if (reduced) drawFrame(0);
     }
     window.addEventListener("antidosis-theme", refreshColors);
@@ -93,29 +99,66 @@ export function NetworkMap({ className = "" }: { className?: string }) {
     function resize() {
       if (!canvas) return;
       const rect = canvas.getBoundingClientRect();
-      canvas.width = Math.max(1, Math.floor(rect.width * dpr));
-      canvas.height = Math.max(1, Math.floor(rect.height * dpr));
-      nodes = buildNodes(rect.width, rect.height);
+      width = Math.max(1, rect.width);
+      height = Math.max(1, rect.height);
+      canvas.width = Math.max(1, Math.floor(width * dpr));
+      canvas.height = Math.max(1, Math.floor(height * dpr));
+      staticCanvas.width = canvas.width;
+      staticCanvas.height = canvas.height;
+      nodes = buildNodes(width, height);
       links = nearestLinks(nodes);
+      renderStatic();
+      if (reduced) drawFrame(0);
     }
 
-    function drawFrame(now: number) {
-      if (!ctx || !canvas) return;
-      const rect = canvas.getBoundingClientRect();
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, rect.width, rect.height);
-
-      // Links
-      ctx.lineWidth = 1;
+    function renderStatic() {
+      if (!staticCtx) return;
+      staticCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      staticCtx.clearRect(0, 0, width, height);
+      staticCtx.lineWidth = 1;
       for (const [a, b] of links) {
-        ctx.strokeStyle = `rgba(${GOLD}, 0.08)`;
-        ctx.beginPath();
-        ctx.moveTo(nodes[a].x, nodes[a].y);
-        ctx.lineTo(nodes[b].x, nodes[b].y);
-        ctx.stroke();
+        staticCtx.strokeStyle = `rgba(${GOLD}, 0.08)`;
+        staticCtx.beginPath();
+        staticCtx.moveTo(nodes[a].x, nodes[a].y);
+        staticCtx.lineTo(nodes[b].x, nodes[b].y);
+        staticCtx.stroke();
       }
 
-      // Spawn pulses
+      nodes.forEach((n, i) => {
+        const colour = i % 3 === 0 ? CYAN : GOLD;
+        staticCtx.fillStyle = `rgba(${colour}, 0.9)`;
+        staticCtx.beginPath();
+        staticCtx.arc(n.x, n.y, 2.6, 0, TAU);
+        staticCtx.fill();
+        staticCtx.strokeStyle = `rgba(${colour}, 0.25)`;
+        staticCtx.beginPath();
+        staticCtx.arc(n.x, n.y, 6, 0, TAU);
+        staticCtx.stroke();
+        if (n.label) {
+          staticCtx.fillStyle = `rgba(${LABEL}, 0.55)`;
+          staticCtx.font = "8px monospace";
+          staticCtx.textAlign = "center";
+          staticCtx.fillText(n.label, n.x, n.y + 16);
+        }
+      });
+    }
+
+    function drawFrame(now: number, frameScale = 1) {
+      if (!ctx) return;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, width, height);
+      ctx.drawImage(
+        staticCanvas,
+        0,
+        0,
+        staticCanvas.width,
+        staticCanvas.height,
+        0,
+        0,
+        width,
+        height
+      );
+
       if (!reduced && now - lastPulseAt > 900 && links.length > 0) {
         lastPulseAt = now;
         const [a, b] = links[Math.floor(Math.random() * links.length)];
@@ -128,10 +171,9 @@ export function NetworkMap({ className = "" }: { className?: string }) {
         if (pulses.length > 6) pulses = pulses.slice(-6);
       }
 
-      // Pulses (signals traveling node → node)
       pulses = pulses.filter((p) => p.t <= 1);
       for (const p of pulses) {
-        p.t += p.speed;
+        p.t += p.speed * frameScale;
         const x = nodes[p.from].x + (nodes[p.to].x - nodes[p.from].x) * p.t;
         const y = nodes[p.from].y + (nodes[p.to].y - nodes[p.from].y) * p.t;
         const fade = Math.sin(Math.min(p.t, 1) * Math.PI);
@@ -139,37 +181,21 @@ export function NetworkMap({ className = "" }: { className?: string }) {
         ctx.beginPath();
         ctx.arc(x, y, 2.2, 0, TAU);
         ctx.fill();
-        // Glow trail
         ctx.fillStyle = `rgba(${CYAN}, ${0.18 * fade})`;
         ctx.beginPath();
         ctx.arc(x, y, 5.5, 0, TAU);
         ctx.fill();
       }
-
-      // Nodes — alternate gold/cyan like a signal map
-      nodes.forEach((n, i) => {
-        const colour = i % 3 === 0 ? CYAN : GOLD;
-        ctx.fillStyle = `rgba(${colour}, 0.9)`;
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, 2.6, 0, TAU);
-        ctx.fill();
-        ctx.strokeStyle = `rgba(${colour}, 0.25)`;
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, 6, 0, TAU);
-        ctx.stroke();
-        if (n.label) {
-          ctx.fillStyle = `rgba(${LABEL}, 0.55)`;
-          ctx.font = "8px monospace";
-          ctx.textAlign = "center";
-          ctx.fillText(n.label, n.x, n.y + 16);
-        }
-      });
     }
 
     function loop(now: number) {
       raf = 0;
       if (!running || !inView || document.hidden) return;
-      drawFrame(now);
+      if (now - lastFrameAt >= 1000 / 30) {
+        const frameScale = lastFrameAt ? Math.min(now - lastFrameAt, 100) / (1000 / 60) : 1;
+        drawFrame(now, frameScale);
+        lastFrameAt = now;
+      }
       raf = requestAnimationFrame(loop);
     }
 
@@ -179,12 +205,14 @@ export function NetworkMap({ className = "" }: { className?: string }) {
       if (!inView) {
         cancelAnimationFrame(raf);
         raf = 0;
+        lastFrameAt = 0;
       }
     });
     const onVisibility = () => {
       if (document.hidden) {
         cancelAnimationFrame(raf);
         raf = 0;
+        lastFrameAt = 0;
       } else if (inView && !reduced && !raf) {
         raf = requestAnimationFrame(loop);
       }
@@ -193,16 +221,9 @@ export function NetworkMap({ className = "" }: { className?: string }) {
     document.addEventListener("visibilitychange", onVisibility);
 
     resize();
-    if (reduced) {
-      drawFrame(0);
-    } else {
-      raf = requestAnimationFrame(loop);
-    }
+    if (!reduced) raf = requestAnimationFrame(loop);
 
-    const observer = new ResizeObserver(() => {
-      resize();
-      if (reduced) drawFrame(0);
-    });
+    const observer = new ResizeObserver(resize);
     observer.observe(canvas);
 
     return () => {

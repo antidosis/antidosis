@@ -1943,6 +1943,11 @@
   );
 }
 
+.signal-journey > header {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
 .signal-journey > main,
 .signal-journey > footer {
   position: relative;
@@ -2157,6 +2162,11 @@
   background: linear-gradient(90deg, transparent, rgb(var(--c-mercury) / 0.04), transparent);
   transform: translateX(-30vw);
   animation: home-relay-scan 14s ease-in-out infinite;
+  animation-play-state: paused;
+}
+
+.signal-journey .home-relay.home-scene-active::after {
+  animation-play-state: running;
 }
 
 .signal-journey .home-communities {
@@ -2233,6 +2243,11 @@
   background: linear-gradient(90deg, transparent, rgb(var(--c-aqua) / 0.35), transparent);
   box-shadow: 0 0 4rem 1rem rgb(var(--c-aqua) / 0.04);
   animation: home-horizon-breathe 7s ease-in-out infinite;
+  animation-play-state: paused;
+}
+
+.signal-journey .home-offgrid.home-scene-active::after {
+  animation-play-state: running;
 }
 
 .signal-journey .home-join {

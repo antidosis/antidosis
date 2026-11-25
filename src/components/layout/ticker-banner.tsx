@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Zap, ShieldCheck, Globe, Repeat, Lock, Star, MapPin, Sparkles } from "lucide-react";
 
@@ -48,14 +48,26 @@ const TICKER_ITEMS = [
 ];
 
 export function TickerBanner() {
-  const trackRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const element = rootRef.current;
+    if (!element) return;
+    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), {
+      rootMargin: "100px 0px",
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
 
   // Duplicate items for seamless loop
   const items = [...TICKER_ITEMS, ...TICKER_ITEMS];
 
   return (
     <div
+      ref={rootRef}
       className="relative w-full overflow-hidden border-y border-sun/20 bg-inset"
       style={{
         boxShadow: "inset 0 0 40px rgba(245,166,35,0.04), 0 0 20px rgba(245,166,35,0.06)",
@@ -71,16 +83,15 @@ export function TickerBanner() {
 
       {/* Scrolling track */}
       <div
-        ref={trackRef}
         className="flex items-center py-3 md:py-3.5"
         style={{
-          animationPlayState: isPaused ? "paused" : "running",
+          animationPlayState: isPaused || !inView ? "paused" : "running",
         }}
       >
         <div
           className="flex items-center gap-0 animate-ticker"
           style={{
-            animationPlayState: isPaused ? "paused" : "running",
+            animationPlayState: isPaused || !inView ? "paused" : "running",
           }}
         >
           {items.map((item, i) => (

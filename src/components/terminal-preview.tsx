@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const SCENES = [
   {
@@ -45,26 +45,46 @@ const HOLD_DURATION = 2000; // ms to hold before clearing
 const CLEAR_DURATION = 250; // ms for clear animation
 
 export function TerminalPreview({ className = "" }: { className?: string }) {
+  const rootRef = useRef<HTMLDivElement>(null);
   const [sceneIndex, setSceneIndex] = useState(0);
   const [typedChars, setTypedChars] = useState(0);
   const [showResponse, setShowResponse] = useState(false);
   const [clearing, setClearing] = useState(false);
+  const [inView, setInView] = useState(false);
+  const [pageVisible, setPageVisible] = useState(true);
 
   const scene = SCENES[sceneIndex];
   const displayedCommand = scene.command.slice(0, typedChars);
+  const isActive = inView && pageVisible;
 
-  const nextScene = useCallback(() => {
-    setClearing(true);
-    setTimeout(() => {
-      setSceneIndex((i) => (i + 1) % SCENES.length);
-      setTypedChars(0);
-      setShowResponse(false);
-      setClearing(false);
-    }, CLEAR_DURATION);
+  useEffect(() => {
+    const element = rootRef.current;
+    if (!element) return;
+    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), {
+      rootMargin: "100px 0px",
+    });
+    const onVisibility = () => setPageVisible(!document.hidden);
+    observer.observe(element);
+    document.addEventListener("visibilitychange", onVisibility);
+    onVisibility();
+    return () => {
+      observer.disconnect();
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
   }, []);
 
   useEffect(() => {
-    if (clearing) return;
+    if (!isActive) return;
+
+    if (clearing) {
+      const timer = setTimeout(() => {
+        setSceneIndex((i) => (i + 1) % SCENES.length);
+        setTypedChars(0);
+        setShowResponse(false);
+        setClearing(false);
+      }, CLEAR_DURATION);
+      return () => clearTimeout(timer);
+    }
 
     if (typedChars < scene.command.length) {
       const timer = setTimeout(() => setTypedChars((c) => c + 1), TYPING_SPEED);
@@ -76,12 +96,13 @@ export function TerminalPreview({ className = "" }: { className?: string }) {
       return () => clearTimeout(timer);
     }
 
-    const timer = setTimeout(nextScene, HOLD_DURATION);
+    const timer = setTimeout(() => setClearing(true), HOLD_DURATION);
     return () => clearTimeout(timer);
-  }, [typedChars, showResponse, clearing, scene, nextScene]);
+  }, [typedChars, showResponse, clearing, scene, isActive]);
 
   return (
     <div
+      ref={rootRef}
       className={`relative rounded-lg border border-line bg-void overflow-hidden shadow-[0_0_40px_rgba(245,166,35,0.08)] ${className}`}
     >
       {/* Window chrome */}
@@ -105,7 +126,10 @@ export function TerminalPreview({ className = "" }: { className?: string }) {
             <span className="text-gold">
               {displayedCommand}
               {typedChars < scene.command.length && (
-                <span className="inline-block w-2 h-4 bg-sun/60 ml-0.5 animate-pulse align-text-bottom" />
+                <span
+                  className="inline-block w-2 h-4 bg-sun/60 ml-0.5 animate-pulse align-text-bottom"
+                  style={{ animationPlayState: isActive ? "running" : "paused" }}
+                />
               )}
             </span>
           </div>

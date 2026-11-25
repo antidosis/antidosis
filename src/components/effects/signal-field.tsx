@@ -173,6 +173,7 @@ export function SignalField() {
     let frame = 0;
     let lastFrame = 0;
     let lastAmbient = 0;
+    let ambientRgb = "";
     let maxScroll = 1;
     let scroll = window.scrollY;
     let pointerX = 0;
@@ -384,8 +385,9 @@ export function SignalField() {
       }
 
       drawLogo(logoStrength);
-      if (now - lastAmbient > 250) {
+      if (rgb !== ambientRgb && now - lastAmbient > 250) {
         root!.style.setProperty("--signal-rgb", rgb.replaceAll(",", " "));
+        ambientRgb = rgb;
         lastAmbient = now;
       }
     }
@@ -425,8 +427,19 @@ export function SignalField() {
 
     const resizeObserver = new ResizeObserver(resize);
     const journeyObserver = new ResizeObserver(measureSections);
+    const sceneObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          entry.target.classList.toggle("home-scene-active", entry.isIntersecting);
+        });
+      },
+      { rootMargin: "120px 0px" }
+    );
     resizeObserver.observe(canvas);
     journeyObserver.observe(journey);
+    journey
+      .querySelectorAll(".home-relay, .home-offgrid")
+      .forEach((section) => sceneObserver.observe(section));
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("antidosis-theme", onTheme);
     document.addEventListener("visibilitychange", onVisibility);
@@ -441,6 +454,7 @@ export function SignalField() {
       cancelAnimationFrame(frame);
       resizeObserver.disconnect();
       journeyObserver.disconnect();
+      sceneObserver.disconnect();
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("antidosis-theme", onTheme);
       window.removeEventListener("pointermove", onPointerMove);
