@@ -12,6 +12,11 @@
  * Within each family hues are 8° apart so siblings feel related.
  * Between families hues are 24–32° apart so groups feel distinct.
  * All colours are tuned for the dark terminal background (#0a0806).
+ *
+ * Value semantics: "{offer}-for-{need}" — goods-for-service means the poster
+ * offers goods and needs a service. Labels read "NEED → OFFER" ("Service →
+ * Goods" = needs a service, offers goods). Each mode carries a short
+ * `example` hint rendered in the need form when that mode is selected.
  */
 
 export const EXCHANGE_MODES = [
@@ -19,6 +24,7 @@ export const EXCHANGE_MODES = [
   {
     value: "goods-swap",
     label: "Goods ↔ Goods",
+    example: "e.g. Trade lemons for oranges, a skateboard for a surfboard",
     color: "var(--x-35e87a)",
     twText: "text-ok",
     twBorder: "border-ok/30",
@@ -28,6 +34,7 @@ export const EXCHANGE_MODES = [
   {
     value: "goods-for-service",
     label: "Service → Goods",
+    example: "e.g. Fix my fence — take my Weber BBQ in return",
     color: "var(--x-2ce090)",
     twText: "text-ok",
     twBorder: "border-ok/30",
@@ -37,6 +44,7 @@ export const EXCHANGE_MODES = [
   {
     value: "goods-for-skills",
     label: "Skills → Goods",
+    example: "e.g. Teach me guitar — take my old amp",
     color: "var(--x-24d6a3)",
     twText: "text-aqua",
     twBorder: "border-aqua/30",
@@ -46,6 +54,7 @@ export const EXCHANGE_MODES = [
   {
     value: "goods-for-money",
     label: "Cash → Goods",
+    example: "e.g. Selling my kayak — $250, pickup only",
     color: "var(--x-1ec4b8)",
     twText: "text-aqua",
     twBorder: "border-aqua/30",
@@ -57,6 +66,7 @@ export const EXCHANGE_MODES = [
   {
     value: "skill-swap",
     label: "Skills ↔ Skills",
+    example: "e.g. I'll teach you to skate if you teach me to surf",
     color: "var(--x-33d4f5)",
     twText: "text-mercury",
     twBorder: "border-mercury/30",
@@ -66,6 +76,7 @@ export const EXCHANGE_MODES = [
   {
     value: "service-for-goods",
     label: "Goods → Service",
+    example: "e.g. Need a lawnmower — I'll service your bike",
     color: "var(--x-35c2f0)",
     twText: "text-aero",
     twBorder: "border-aero/30",
@@ -75,6 +86,7 @@ export const EXCHANGE_MODES = [
   {
     value: "skills-for-goods",
     label: "Goods → Skills",
+    example: "e.g. I'll build your website for a decent espresso machine",
     color: "var(--x-3aadf0)",
     twText: "text-aero",
     twBorder: "border-aero/30",
@@ -84,6 +96,7 @@ export const EXCHANGE_MODES = [
   {
     value: "service-for-money",
     label: "Cash → Service",
+    example: "e.g. Gutter cleaning — $80 a house, cash",
     color: "var(--x-4896f0)",
     twText: "text-aero",
     twBorder: "border-aero/30",
@@ -95,6 +108,7 @@ export const EXCHANGE_MODES = [
   {
     value: "money-for-anything",
     label: "Cash Offers",
+    example: "e.g. $100 for whatever gets this sorted",
     color: "var(--x-f0cc33)",
     twText: "text-alert",
     twBorder: "border-alert/30",
@@ -104,6 +118,7 @@ export const EXCHANGE_MODES = [
   {
     value: "paid-work",
     label: "Paid Work / Hiring",
+    example: "e.g. Casual barista — lawful award wages",
     color: "var(--x-e0d62e)",
     twText: "text-alert",
     twBorder: "border-alert/30",
@@ -113,6 +128,7 @@ export const EXCHANGE_MODES = [
   {
     value: "money-for-service",
     label: "Service → Cash",
+    example: "e.g. Licensed plumber needed — $80 cash",
     color: "var(--x-e8b830)",
     twText: "text-sunhi",
     twBorder: "border-sunhi/30",
@@ -122,6 +138,7 @@ export const EXCHANGE_MODES = [
   {
     value: "money-for-goods",
     label: "Goods → Cash",
+    example: "e.g. Buying a working camping stove — cash today",
     color: "var(--x-d0d040)",
     twText: "text-alert",
     twBorder: "border-alert/30",
@@ -133,6 +150,7 @@ export const EXCHANGE_MODES = [
   {
     value: "community-help",
     label: "Community",
+    example: "e.g. Help clear a garden for an elderly neighbour",
     color: "var(--x-f57633)",
     twText: "text-ember",
     twBorder: "border-ember/30",
@@ -142,6 +160,7 @@ export const EXCHANGE_MODES = [
   {
     value: "free-giveaway",
     label: "Free / Giveaway",
+    example: "e.g. Free plants, free furniture — just come grab it",
     color: "var(--x-f08a35)",
     twText: "text-ember",
     twBorder: "border-ember/30",
@@ -151,6 +170,7 @@ export const EXCHANGE_MODES = [
   {
     value: "borrow-lend",
     label: "Borrow / Lend",
+    example: "e.g. Borrow a ladder for the weekend",
     color: "var(--x-e89e38)",
     twText: "text-sun",
     twBorder: "border-sun/30",
@@ -160,6 +180,7 @@ export const EXCHANGE_MODES = [
   {
     value: "rideshare",
     label: "Rideshare / Lifts",
+    example: "e.g. Lift to Sydney on Tuesdays — split the fuel",
     color: "var(--x-e89e38)",
     twText: "text-sun",
     twBorder: "border-sun/30",
@@ -169,6 +190,7 @@ export const EXCHANGE_MODES = [
   {
     value: "errands-delivery",
     label: "Errands & Delivery",
+    example: "e.g. Pick up my prescription while you're at the shops",
     color: "var(--x-f08a35)",
     twText: "text-ember",
     twBorder: "border-ember/30",
@@ -178,6 +200,7 @@ export const EXCHANGE_MODES = [
   {
     value: "care-support",
     label: "Care & Support",
+    example: "e.g. A weekly social visit for my dad",
     color: "var(--x-f57633)",
     twText: "text-ember",
     twBorder: "border-ember/30",
@@ -187,6 +210,7 @@ export const EXCHANGE_MODES = [
   {
     value: "learning-mentoring",
     label: "Learning & Mentoring",
+    example: "e.g. Mentor a teen starting their first small business",
     color: "var(--x-33d4f5)",
     twText: "text-mercury",
     twBorder: "border-mercury/30",
@@ -198,6 +222,7 @@ export const EXCHANGE_MODES = [
   {
     value: "creative",
     label: "Creative",
+    example: "e.g. Design my logo — I'll mix your band's demo",
     color: "var(--x-d76bf5)",
     twText: "text-orchid",
     twBorder: "border-orchid/30",
@@ -207,6 +232,7 @@ export const EXCHANGE_MODES = [
   {
     value: "experiences",
     label: "Experiences",
+    example: "e.g. Take me rock climbing — I'll cook the post-climb feast",
     color: "var(--x-e06df0)",
     twText: "text-orchid",
     twBorder: "border-orchid/30",
@@ -216,6 +242,7 @@ export const EXCHANGE_MODES = [
   {
     value: "backpacker-life",
     label: "Backpacker & Travel",
+    example: "e.g. A bed for a week — I'll work 3 hours a day",
     color: "var(--x-e86ee6)",
     twText: "text-orchid",
     twBorder: "border-orchid/30",
@@ -225,6 +252,7 @@ export const EXCHANGE_MODES = [
   {
     value: "promotion",
     label: "Promo / Review",
+    example: "e.g. Free meals for an honest food review",
     color: "var(--x-dc6df2)",
     twText: "text-orchid",
     twBorder: "border-orchid/30",
@@ -236,6 +264,7 @@ export const EXCHANGE_MODES = [
   {
     value: "eccentric",
     label: "Eccentric",
+    example: "e.g. Teach my parrot to talk — name your price",
     color: "var(--x-f54d99)",
     twText: "text-magenta",
     twBorder: "border-magenta/30",
@@ -256,8 +285,9 @@ export function getExchangeMode(value: string | null | undefined) {
 /**
  * Incompatible mapping: when a user selects an offerType, these exchange modes
  * are hidden because they describe the poster giving something different.
- * e.g. offerType="item" means the poster gives goods, so "Skills → Goods"
- * (where poster gives skills) is semantically wrong.
+ * Values read "{offer}-for-{need}": offerType="item" means the poster gives
+ * goods, so modes whose offer side is not goods (e.g. "skills-for-goods",
+ * where the poster gives skills) are semantically wrong and get filtered out.
  */
 export const INCOMPATIBLE_EXCHANGE_MODES: Record<string, string[]> = {
   service: [

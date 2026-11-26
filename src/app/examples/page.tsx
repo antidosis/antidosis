@@ -39,23 +39,21 @@ import {
   ShowerHead,
   Globe,
   Sun,
+  Armchair,
+  Bird,
+  Coins,
+  GraduationCap,
+  Home,
+  Laptop,
+  ShoppingBag,
+  Sparkles,
+  Sprout,
 } from "lucide-react";
 
 import { Footer } from "@/components/layout/footer";
 import { Navbar } from "@/components/layout/navbar";
 import { Button } from "@/components/ui/button";
-import { EXCHANGE_MODES, getExchangeMode } from "@/lib/categories";
-
-type ExampleCategory =
-  | "goods-swap"
-  | "skill-swap"
-  | "service-for-goods"
-  | "goods-for-service"
-  | "money-for-anything"
-  | "community-help"
-  | "creative"
-  | "experiences"
-  | "backpacker-life";
+import { EXCHANGE_MODES, getExchangeMode, type ExchangeMode } from "@/lib/categories";
 
 type Example = {
   id: number;
@@ -64,7 +62,7 @@ type Example = {
   offerType: "service" | "item" | "money";
   offerDescription: string;
   location: string;
-  category: ExampleCategory;
+  category: ExchangeMode;
   icon: React.ReactNode;
 };
 
@@ -225,7 +223,7 @@ const examples: Example[] = [
     offerType: "item",
     offerDescription: "Weber kettle BBQ — good condition, all accessories",
     location: "Umina Beach",
-    category: "service-for-goods",
+    category: "goods-for-service",
     icon: <Hammer className="h-4 w-4" />,
   },
   {
@@ -236,7 +234,7 @@ const examples: Example[] = [
     offerType: "item",
     offerDescription: "Dozen backyard eggs (proper free range, mixed colours)",
     location: "Woy Woy",
-    category: "service-for-goods",
+    category: "goods-for-service",
     icon: <Leaf className="h-4 w-4" />,
   },
   {
@@ -247,7 +245,7 @@ const examples: Example[] = [
     offerType: "item",
     offerDescription: "Breville espresso machine — works perfectly",
     location: "Gosford",
-    category: "service-for-goods",
+    category: "goods-for-service",
     icon: <Coffee className="h-4 w-4" />,
   },
   {
@@ -258,7 +256,7 @@ const examples: Example[] = [
     offerType: "service",
     offerDescription: "5 home-cooked meals prepped every Sunday",
     location: "Avoca Beach",
-    category: "service-for-goods",
+    category: "goods-for-service",
     icon: <Dog className="h-4 w-4" />,
   },
   {
@@ -269,7 +267,7 @@ const examples: Example[] = [
     offerType: "item",
     offerDescription: "2.7m sit-on-top kayak + paddle",
     location: "Terrigal → Wamberal",
-    category: "service-for-goods",
+    category: "goods-for-service",
     icon: <Waves className="h-4 w-4" />,
   },
   {
@@ -280,11 +278,10 @@ const examples: Example[] = [
     offerType: "item",
     offerDescription: "Homemade jams, chutneys, and pickled veg (your pick)",
     location: "Erina",
-    category: "service-for-goods",
+    category: "goods-for-service",
     icon: <Baby className="h-4 w-4" />,
   },
 
-  // ── Goods → Service ──
   {
     id: 20,
     needTitle: "Someone to teach me Excel — I'll give you my old tools",
@@ -339,7 +336,7 @@ const examples: Example[] = [
     offerType: "money",
     offerDescription: "$80 cash on completion",
     location: "Umina Beach",
-    category: "money-for-anything",
+    category: "money-for-service",
     icon: <Hammer className="h-4 w-4" />,
   },
   {
@@ -350,7 +347,7 @@ const examples: Example[] = [
     offerType: "money",
     offerDescription: "$150 — negotiable",
     location: "Gosford",
-    category: "money-for-anything",
+    category: "money-for-service",
     icon: <Music className="h-4 w-4" />,
   },
   {
@@ -407,7 +404,7 @@ const examples: Example[] = [
     offerType: "service",
     offerDescription: "A freshly baked cake every fortnight (your choice)",
     location: "Woy Woy",
-    category: "community-help",
+    category: "care-support",
     icon: <Heart className="h-4 w-4" />,
   },
   {
@@ -418,7 +415,7 @@ const examples: Example[] = [
     offerType: "service",
     offerDescription: "We'll babysit your kids in return (qualified teacher)",
     location: "Terrigal",
-    category: "community-help",
+    category: "care-support",
     icon: <Baby className="h-4 w-4" />,
   },
   {
@@ -622,7 +619,7 @@ const examples: Example[] = [
     offerType: "money",
     offerDescription: "Half the fuel cost + I'll drive your share of the way",
     location: "Gosford → Sydney",
-    category: "backpacker-life",
+    category: "rideshare",
     icon: <Bus className="h-4 w-4" />,
   },
   {
@@ -655,7 +652,7 @@ const examples: Example[] = [
     offerType: "money",
     offerDescription: "Lawful award wages and entitlements through payroll, plus staff meals",
     location: "Avoca Beach",
-    category: "backpacker-life",
+    category: "paid-work",
     icon: <Coffee className="h-4 w-4" />,
   },
   {
@@ -666,7 +663,7 @@ const examples: Example[] = [
     offerType: "money",
     offerDescription: "All fuel + lunch + live acoustic entertainment",
     location: "Central Coast → Byron Bay",
-    category: "backpacker-life",
+    category: "rideshare",
     icon: <Bus className="h-4 w-4" />,
   },
   {
@@ -833,6 +830,380 @@ const examples: Example[] = [
     location: "Anywhere on the Coast",
     category: "backpacker-life",
     icon: <Sun className="h-4 w-4" />,
+  },
+
+  // ── Skills → Goods (need a skill, offer goods) ──
+  {
+    id: 69,
+    needTitle: "Guitar lessons — take my old amp",
+    needDescription:
+      "Always wanted to learn electric guitar. Looking for a patient teacher, one hour a week for a month or so. In return you take home my Fender Champion amp — barely used, sounds great.",
+    offerType: "item",
+    offerDescription: "Fender Champion guitar amp — near new condition",
+    location: "Woy Woy",
+    category: "goods-for-skills",
+    icon: <Guitar className="h-4 w-4" />,
+  },
+  {
+    id: 70,
+    needTitle: "Teach me my new camera — tripod and bag included",
+    needDescription:
+      "Bought a mirrorless camera for a trip and I'm shooting everything on auto. Want two or three sessions covering settings, composition and editing. Trade: my old tripod, camera bag and a 50mm lens.",
+    offerType: "item",
+    offerDescription: "Tripod, camera bag and 50mm lens — all good condition",
+    location: "Terrigal",
+    category: "goods-for-skills",
+    icon: <Camera className="h-4 w-4" />,
+  },
+  {
+    id: 71,
+    needTitle: "Fix my laptop screen — take my coffee machine",
+    needDescription:
+      "Cracked screen on a 14-inch laptop, the replacement panel is easy to find but I don't trust myself with the ribbons. Happy to hand over my Nespresso machine and milk frother for a proper job.",
+    offerType: "item",
+    offerDescription: "Nespresso machine + milk frother — works perfectly",
+    location: "Kincumber",
+    category: "goods-for-skills",
+    icon: <Laptop className="h-4 w-4" />,
+  },
+
+  // ── Cash → Goods (selling goods) ──
+  {
+    id: 72,
+    needTitle: "Selling: 2.5m fibreglass kayak, paddle included",
+    needDescription:
+      "Upgraded to a longer boat so this one's got to go. Stable sit-on-top, perfect for Brisbane Water. A few scratches on the hull, structurally solid. Pickup only, cash preferred.",
+    offerType: "item",
+    offerDescription: "Fibreglass kayak + paddle + roof racks — $280",
+    location: "Umina Beach",
+    category: "goods-for-money",
+    icon: <Waves className="h-4 w-4" />,
+  },
+  {
+    id: 73,
+    needTitle: "Vintage solid-timber dresser — $120",
+    needDescription:
+      "Beautiful old dresser from the 60s, all drawers run smooth. Too heavy for our new place. A light sand and oil would make it sing. You collect from Erina.",
+    offerType: "item",
+    offerDescription: "Solid timber dresser, 6 drawers — $120",
+    location: "Erina",
+    category: "goods-for-money",
+    icon: <Armchair className="h-4 w-4" />,
+  },
+  {
+    id: 74,
+    needTitle: "Seasoned hardwood firewood — delivered locally",
+    needDescription:
+      "Split and seasoned for 12 months, burns hot and clean. Selling by the half-cord. Free delivery within 10 minutes of Somersby, small fee beyond that.",
+    offerType: "item",
+    offerDescription: "Half cord of seasoned hardwood — $150 delivered",
+    location: "Somersby",
+    category: "goods-for-money",
+    icon: <TreePine className="h-4 w-4" />,
+  },
+
+  // ── Goods → Service (need goods, offer a service) ──
+  {
+    id: 75,
+    needTitle: "Need a working lawnmower — I'll service your bike",
+    needDescription:
+      "Mine died mid-mow and I'm quoted three weeks for a repair. After a decent second-hand mower to keep my yard alive. In return I'll strip, clean and tune your bike — I was a mechanic for 10 years.",
+    offerType: "service",
+    offerDescription: "Full bicycle service — gears, brakes, wheels trued",
+    location: "Gosford",
+    category: "service-for-goods",
+    icon: <Bike className="h-4 w-4" />,
+  },
+  {
+    id: 76,
+    needTitle: "After a chest freezer — I'll sort your books for the year",
+    needDescription:
+      "Starting a bulk-cooking habit and need freezer space. Looking for a working chest freezer, any size. In return I'll do your bookkeeping for the year — I'm a registered BAS agent.",
+    offerType: "service",
+    offerDescription: "12 months of bookkeeping, reconciled monthly",
+    location: "Woy Woy",
+    category: "service-for-goods",
+    icon: <Coins className="h-4 w-4" />,
+  },
+  {
+    id: 77,
+    needTitle: "Need ~200 paving bricks — I'll lay them for you",
+    needDescription:
+      "Doing a small garden path and short about 200 standard pavers. If you've got leftovers from a job, I'll come collect and lay your next path or patio as payment. Fair trade either way.",
+    offerType: "service",
+    offerDescription: "Paving labour — a day's work, you supply materials",
+    location: "Kincumber",
+    category: "service-for-goods",
+    icon: <Hammer className="h-4 w-4" />,
+  },
+
+  // ── Cash → Service (offering a service for cash) ──
+  {
+    id: 78,
+    needTitle: "Gutter cleaning — $80 a house",
+    needDescription:
+      "Leaves are down and the rain's coming. I'll clear your gutters, flush the downpipes and bag the debris. $80 single storey, $110 two storey. Most of the Coast covered.",
+    offerType: "service",
+    offerDescription: "Full gutter clean + downpipe flush, debris removed",
+    location: "Terrigal",
+    category: "service-for-money",
+    icon: <Home className="h-4 w-4" />,
+  },
+  {
+    id: 79,
+    needTitle: "End-of-lease cleaning, bond-back standard",
+    needDescription:
+      "Professional cleaner with 6 years of end-of-lease work. Kitchen, bathrooms, walls, windows, floors — the lot, to agent checklist. From $250 for a one-bed, quoted upfront.",
+    offerType: "service",
+    offerDescription: "Bond-standard end-of-lease clean, checklist included",
+    location: "Gosford",
+    category: "service-for-money",
+    icon: <Sparkles className="h-4 w-4" />,
+  },
+  {
+    id: 80,
+    needTitle: "Mobile car detailing at your place",
+    needDescription:
+      "Full interior deep clean — seats, carpets, vents, glass — plus exterior wash and wax if you want it. I bring everything including water and power. $120 interior, $180 in and out.",
+    offerType: "service",
+    offerDescription: "Mobile detailing — interior $120, full $180",
+    location: "Erina",
+    category: "service-for-money",
+    icon: <Car className="h-4 w-4" />,
+  },
+
+  // ── Goods → Cash (buying goods) ──
+  {
+    id: 81,
+    needTitle: "Buying: second-hand fishing kayak, up to $400",
+    needDescription:
+      "After a sit-on-top fishing kayak with rod holders — Hobie, Feelfree or similar. Must be watertight and in honest condition. Cash waiting, can pick up this weekend.",
+    offerType: "money",
+    offerDescription: "Cash up to $400 depending on condition",
+    location: "Avoca Beach",
+    category: "money-for-goods",
+    icon: <ShoppingBag className="h-4 w-4" />,
+  },
+  {
+    id: 82,
+    needTitle: "Looking for a used 6ft surfboard for my teen",
+    needDescription:
+      "My daughter's outgrown her softboard and is ready for a proper board. After something forgiving around 6ft — small dings fine, delamination not. Cash today, happy to come to you.",
+    offerType: "money",
+    offerDescription: "Cash up to $250, paid on inspection",
+    location: "Copacabana",
+    category: "money-for-goods",
+    icon: <Waves className="h-4 w-4" />,
+  },
+
+  // ── Free / Giveaway ──
+  {
+    id: 83,
+    needTitle: "Free: succulents and cuttings — bring a box",
+    needDescription:
+      "Thinning out the garden before winter. Heaps of healthy succulents, aloe, and propagated cuttings all rooted and ready. Take as many as you like — just bring something to carry them in.",
+    offerType: "item",
+    offerDescription: "Free succulents, aloe and cuttings — yours to take",
+    location: "Macmasters Beach",
+    category: "free-giveaway",
+    icon: <Sprout className="h-4 w-4" />,
+  },
+  {
+    id: 84,
+    needTitle: "Free pallet furniture — couch and coffee table",
+    needDescription:
+      "Made a pallet lounge and coffee table for the deck, replacing them with proper outdoor furniture. Both solid and weatherproofed. Free to anyone with a ute or trailer.",
+    offerType: "item",
+    offerDescription: "Pallet couch + coffee table — free, pickup only",
+    location: "Woy Woy",
+    category: "free-giveaway",
+    icon: <Armchair className="h-4 w-4" />,
+  },
+  {
+    id: 85,
+    needTitle: "Free surfboard for a grommet",
+    needDescription:
+      "Old 6'4\" shortboard with a couple of repaired dings — rides perfectly. Want it to go to a kid who's getting into surfing, not to someone who'll flip it. Tell me who's it for.",
+    offerType: "item",
+    offerDescription: "6'4\" shortboard — free to a young surfer",
+    location: "Terrigal",
+    category: "free-giveaway",
+    icon: <Waves className="h-4 w-4" />,
+  },
+
+  // ── Borrow / Lend ──
+  {
+    id: 86,
+    needTitle: "Borrow: extendable ladder for the weekend",
+    needDescription:
+      "Cleaning out the gutters and cutting back a frangipani — need an extension ladder rated for the height, just for Saturday and Sunday. Will return it clean and on time.",
+    offerType: "money",
+    offerDescription: "$20 plus a six-pack of your choice",
+    location: "Gosford",
+    category: "borrow-lend",
+    icon: <Home className="h-4 w-4" />,
+  },
+  {
+    id: 87,
+    needTitle: "Lending my cement mixer — give me a hand instead",
+    needDescription:
+      "Electric cement mixer sitting in the shed doing nothing. Happy to lend it for a week if you'll spend a few hours helping me lay a small slab next month. Fair swap.",
+    offerType: "service",
+    offerDescription: "Cement mixer loan for a week — labour trade",
+    location: "Kincumber",
+    category: "borrow-lend",
+    icon: <Hammer className="h-4 w-4" />,
+  },
+  {
+    id: 88,
+    needTitle: "Borrow a fishing rod for a weekend trip",
+    needDescription:
+      "Heading to Lake Munmorah with mates, short one rod. After a spin rod and reel, nothing fancy. I'll bring back fillets if we catch — and I'll replace anything that breaks.",
+    offerType: "item",
+    offerDescription: "Fresh fish fillets from the trip (if we catch)",
+    location: "Avoca Beach",
+    category: "borrow-lend",
+    icon: <Waves className="h-4 w-4" />,
+  },
+
+  // ── Errands & Delivery ──
+  {
+    id: 89,
+    needTitle: "Pick up my prescription — I'm isolating",
+    needDescription:
+      "Coming down with something and can't leave the house. Script is ready at the Terry White in Gosford. Grab it and drop it at my door — no contact needed, I'll leave payment out.",
+    offerType: "money",
+    offerDescription: "$15 + fuel covered",
+    location: "Gosford",
+    category: "errands-delivery",
+    icon: <ShoppingBag className="h-4 w-4" />,
+  },
+  {
+    id: 90,
+    needTitle: "Weekly grocery run for my nan",
+    needDescription:
+      "Nan's 84 and doesn't drive anymore. Needs a small grocery shop every Thursday — I'll write the list, you shop and drop it off. Same Woolworths each time, takes about 40 minutes.",
+    offerType: "money",
+    offerDescription: "$25 per week, ongoing",
+    location: "Woy Woy",
+    category: "errands-delivery",
+    icon: <ShoppingBag className="h-4 w-4" />,
+  },
+  {
+    id: 91,
+    needTitle: "Deliver a cake to a birthday party Saturday",
+    needDescription:
+      "Picking up a custom cake from a bakery in Erina at 11am Saturday and need it at a party in Umina by 12. Cake box fits in any car boot. Needs to arrive level — no spirited cornering.",
+    offerType: "money",
+    offerDescription: "$30 + a slice of the cake",
+    location: "Erina → Umina",
+    category: "errands-delivery",
+    icon: <Car className="h-4 w-4" />,
+  },
+
+  // ── Learning & Mentoring ──
+  {
+    id: 92,
+    needTitle: "Mentor wanted for my 16yo's mowing business",
+    needDescription:
+      "My son just started a lawn-mowing round — 12 customers and growing. Needs someone who's run a small trade business to show him quoting, scheduling and dealing with difficult customers. Fortnightly chat over a sausage roll.",
+    offerType: "money",
+    offerDescription: "$30 per session, or trade for mowing",
+    location: "Erina",
+    category: "learning-mentoring",
+    icon: <GraduationCap className="h-4 w-4" />,
+  },
+  {
+    id: 93,
+    needTitle: "Free weekly coding study group — all levels",
+    needDescription:
+      "Running a free study group at the library for anyone learning to code. Bring your laptop and whatever you're stuck on. Beginners welcome — no question is too basic. Every Wednesday 6pm.",
+    offerType: "service",
+    offerDescription: "Free weekly tutoring and code reviews",
+    location: "Gosford",
+    category: "learning-mentoring",
+    icon: <Code className="h-4 w-4" />,
+  },
+  {
+    id: 94,
+    needTitle: "Want to learn sourdough from scratch",
+    needDescription:
+      "Two failed starters and a lot of dense bread later, I need an actual human to show me. One afternoon in your kitchen covering starter, shaping and baking. Reward: my first successful loaf plus $20.",
+    offerType: "money",
+    offerDescription: "$20 + my first successful loaf, however ugly",
+    location: "Kincumber",
+    category: "learning-mentoring",
+    icon: <ChefHat className="h-4 w-4" />,
+  },
+
+  // ── Promo / Review ──
+  {
+    id: 95,
+    needTitle: "New cafe — free brunch for honest food reviewers",
+    needDescription:
+      "Opening a small cafe near the water and want real local feedback before our grand opening. Free brunch and coffee for local foodies with an engaged following. Post honestly and disclose the free meal — no scripted praise.",
+    offerType: "item",
+    offerDescription: "Free brunch for two + coffee, every visit in opening month",
+    location: "Terrigal",
+    category: "promotion",
+    icon: <Coffee className="h-4 w-4" />,
+  },
+  {
+    id: 96,
+    needTitle: "Skincare startup seeking UGC creators",
+    needDescription:
+      "Local skincare brand launching soon. Looking for creators to film honest try-on content — unboxings, routines, before-and-afters. Free full product set plus a fee for usage rights. Disclosure required on every post.",
+    offerType: "item",
+    offerDescription: "Full product set free + paid usage rights",
+    location: "Anywhere on the Coast",
+    category: "promotion",
+    icon: <Sparkles className="h-4 w-4" />,
+  },
+  {
+    id: 97,
+    needTitle: "Landscaper wants a content creator — garden makeover trade",
+    needDescription:
+      "Want someone to document a full front-yard transformation for both our portfolios — before, during, after. You get a free garden makeover and the footage; I get the content. Must credit both parties.",
+    offerType: "service",
+    offerDescription: "Free full garden makeover (design, plants, mulch, labour)",
+    location: "Kincumber",
+    category: "promotion",
+    icon: <Clapperboard className="h-4 w-4" />,
+  },
+
+  // ── Eccentric ──
+  {
+    id: 98,
+    needTitle: "Teach my parrot to stop swearing",
+    needDescription:
+      "Inherited my uncle's African grey. He knows four words and three of them would make a sailor blush. Need someone who understands bird behaviour to help us both through this. He's loud, he's clever, he's not sorry.",
+    offerType: "item",
+    offerDescription: "Fresh vegetables from my garden, forever",
+    location: "Woy Woy",
+    category: "eccentric",
+    icon: <Bird className="h-4 w-4" />,
+  },
+  {
+    id: 99,
+    needTitle: "Wanted: someone to name my boat",
+    needDescription:
+      "Bought a 5m runabout and I'm paralysed with naming anxiety. Need a creative person to workshop names with me over a beer. Winner gets a sunset cruise and their name in the boat's logbook forever.",
+    offerType: "service",
+    offerDescription: "Sunset cruise for two + eternal logbook fame",
+    location: "Gosford",
+    category: "eccentric",
+    icon: <Waves className="h-4 w-4" />,
+  },
+  {
+    id: 100,
+    needTitle: "Wanted: race rival for my tortoise",
+    needDescription:
+      "My tortoise Kevin races a remote-control car every Sunday and Kevin is unbeaten. His rival's batteries are dying and so is the drama. After someone with a faster RC car and a sense of occasion.",
+    offerType: "item",
+    offerDescription: "Homemade scones + eternal bragging rights",
+    location: "Erina",
+    category: "eccentric",
+    icon: <Gamepad2 className="h-4 w-4" />,
   },
 ];
 

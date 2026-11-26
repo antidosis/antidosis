@@ -31,7 +31,7 @@ import { Label } from "@/components/ui/label";
 import { LocationAutocomplete } from "@/components/ui/location-autocomplete";
 import { SkillAutocomplete } from "@/components/ui/skill-autocomplete";
 import { Textarea } from "@/components/ui/textarea";
-import { EXCHANGE_MODES, INCOMPATIBLE_EXCHANGE_MODES } from "@/lib/categories";
+import { EXCHANGE_MODES, INCOMPATIBLE_EXCHANGE_MODES, getExchangeMode } from "@/lib/categories";
 import { detectRegulatedTrade } from "@/lib/regulated-trades";
 import { createNeedSchema } from "@/lib/schemas";
 import { createClient } from "@/lib/supabase/client";
@@ -362,6 +362,9 @@ export default function CreateNeedPage() {
                   </option>
                 ))}
               </select>
+              {exchangeMode && getExchangeMode(exchangeMode)?.example && (
+                <p className="text-xs text-ash">{getExchangeMode(exchangeMode)?.example}</p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="offer-description">Offer</Label>
