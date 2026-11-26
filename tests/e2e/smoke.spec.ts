@@ -43,7 +43,7 @@ test.describe("Smoke tests", () => {
     await navigation.getByRole("link", { name: "Learn", exact: true }).hover();
     await expect(navigation.getByRole("link", { name: /Interactive demos/ })).toBeVisible();
     await navigation.getByRole("link", { name: "Store", exact: true }).hover();
-    await expect(navigation.getByRole("link", { name: /Express interest/ })).toBeVisible();
+    await expect(navigation.getByRole("link", { name: /Join the pilot/ })).toBeVisible();
     await expect(navigation.getByRole("link", { name: /How it works/ })).toBeHidden();
   });
 
