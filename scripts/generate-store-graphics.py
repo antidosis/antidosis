@@ -331,7 +331,7 @@ def p1_pro() -> None:
 
 
 def product_card(src: str, out: str, title: str, sub: str, seed: int) -> None:
-    """Uniform 1200x1200 branded card for a raw product photo."""
+    """Uniform 1200x1200 branded card for a raw product photo — photo-led layout."""
     palettes = [
         ([(0.0, (8, 12, 8)), (0.45, (12, 26, 16)), (1.0, (30, 22, 8))],
          [((760, -320, 1560, 420), (22, 78, 40), 56), ((-360, 820, 480, 1520), (90, 54, 10), 52)]),
@@ -341,16 +341,16 @@ def product_card(src: str, out: str, title: str, sub: str, seed: int) -> None:
     stops, glows = palettes[seed % 2]
     card = base_card(stops, glows, seed=seed)
 
-    lg = logo(190)
-    card.alpha_composite(lg, (72, 48))
-    title_y = 48 + lg.height + 30
+    lg = logo(150)
+    card.alpha_composite(lg, (64, 44))
+    title_y = 44 + lg.height + 18
 
     d = ImageDraw.Draw(card)
-    d.text((72, title_y), title, font=font("segoeuib.ttf", 54), fill=(*GOLD, 255))
-    d.rectangle([74, title_y + 78, 174, title_y + 84], fill=(*SUN, 255))
+    d.text((64, title_y), title, font=font("segoeuib.ttf", 46), fill=(*GOLD, 255))
+    d.rectangle([66, title_y + 66, 156, title_y + 71], fill=(*SUN, 255))
 
     photo = Image.open(STORE / src).convert("RGB")
-    photo.thumbnail((860, 660), Image.LANCZOS)
+    photo.thumbnail((1040, 720), Image.LANCZOS)
     frame = Image.new("RGBA", (photo.width + 8, photo.height + 8), (0, 0, 0, 0))
     mask = Image.new("L", photo.size, 0)
     ImageDraw.Draw(mask).rounded_rectangle([0, 0, photo.width, photo.height], radius=26, fill=255)
@@ -358,11 +358,12 @@ def product_card(src: str, out: str, title: str, sub: str, seed: int) -> None:
     ImageDraw.Draw(frame).rounded_rectangle(
         [0, 0, frame.width - 1, frame.height - 1], radius=30, outline=(*GOLD, 110), width=2
     )
-    panel_y = title_y + 124 + max(0, (700 - frame.height) // 2)
+    panel_top = title_y + 100
+    panel_y = panel_top + max(0, (1044 - panel_top - frame.height) // 2)
     card.alpha_composite(frame, ((SIZE - frame.width) // 2, panel_y))
 
     d = ImageDraw.Draw(card)
-    d.text((72, 1046), sub, font=font("consola.ttf", 26), fill=(*MERCURY, 235))
+    d.text((64, 1056), sub, font=font("consola.ttf", 26), fill=(*MERCURY, 235))
     footer(card, "·  antidosis mesh store")
     card.convert("RGB").save(STORE / out, "WEBP", quality=88)
     print(f"wrote {out}")

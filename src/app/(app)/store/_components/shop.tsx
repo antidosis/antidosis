@@ -119,7 +119,28 @@ export function Shop({
 
         {/* floor */}
         <div className="min-w-0 flex-1 p-3 sm:p-5">
-          <ProductGrid items={visible} onNotify={onNotify} />
+          {builders === null ? (
+            <div
+              className="grid grid-cols-2 gap-3 lg:grid-cols-3"
+              aria-label="Loading the store floor"
+            >
+              {[0, 1, 2, 3, 4, 5].map((i) => (
+                <div
+                  key={i}
+                  className="animate-pulse overflow-hidden rounded-lg border border-line/50"
+                >
+                  <div className="aspect-square bg-surface/50" />
+                  <div className="space-y-2 p-3">
+                    <div className="h-3 w-2/3 rounded bg-surface/70" />
+                    <div className="h-3 w-full rounded bg-surface/50" />
+                    <div className="h-3 w-1/3 rounded bg-surface/40" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <ProductGrid items={visible} onNotify={onNotify} />
+          )}
         </div>
       </div>
     </div>

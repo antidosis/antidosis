@@ -162,34 +162,35 @@ function ProductCard({
   item: StoreItem;
   onNotify: (kind: InterestKind) => void;
 }) {
-  const name = item.id ? (
-    <Link href={`/store/product/${item.id}`} className="transition-colors hover:text-sun">
-      {item.name}
-    </Link>
-  ) : (
-    item.name
-  );
   return (
     <article
       className={cn(
-        "group flex flex-col overflow-hidden rounded-lg border bg-void/40 transition-colors hover:border-sun/30",
+        "group relative flex flex-col overflow-hidden rounded-lg border bg-void/40 transition-colors hover:border-sun/30",
         item.featured
           ? "border-sun/40 shadow-[0_0_24px_-8px_rgb(var(--c-sun)/0.35)]"
           : "border-line/70"
       )}
     >
-      <div className="border-b border-line/50 bg-gradient-to-b from-surface/50 to-transparent px-3 pt-3">
+      {/* The whole card is the link — this stretched overlay covers it */}
+      {item.id && (
+        <Link
+          href={`/store/product/${item.id}`}
+          aria-label={`View ${item.name}`}
+          className="absolute inset-0 z-[1] rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-sun"
+        />
+      )}
+      <div className="flex aspect-square items-center justify-center overflow-hidden border-b border-line/50 bg-gradient-to-b from-surface/50 to-transparent">
         {item.image ? (
           <img
             src={item.image}
             alt={item.name}
             loading="lazy"
-            className="mx-auto h-24 w-full max-w-[180px] object-contain transition-transform duration-300 group-hover:scale-[1.04] sm:h-28"
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           />
         ) : (
           <ProductArt
             variant={item.art}
-            className="mx-auto h-24 w-full max-w-[180px] transition-transform duration-300 group-hover:scale-[1.04] sm:h-28"
+            className="h-2/3 w-full max-w-[180px] transition-transform duration-300 group-hover:scale-[1.04]"
           />
         )}
       </div>
@@ -207,7 +208,9 @@ function ProductCard({
             {item.status.label}
           </span>
         </div>
-        <h3 className="mt-1.5 text-[15px] font-medium text-gold sm:text-base">{name}</h3>
+        <h3 className="mt-1.5 text-[15px] font-medium text-gold transition-colors group-hover:text-sun sm:text-base">
+          {item.name}
+        </h3>
         <p className="mt-1 line-clamp-2 text-sm leading-snug text-ash">{item.line}</p>
         {item.soldByAntidosis ? (
           <p className="mt-1 text-xs font-medium text-sun">
@@ -223,19 +226,15 @@ function ProductCard({
         <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-3">
           <span className="text-[15px] font-medium text-sun">{item.price}</span>
           {item.id ? (
-            <Link
-              href={`/store/product/${item.id}`}
-              className="inline-flex items-center gap-1.5 rounded bg-sun px-2.5 py-1.5 text-sm font-medium text-void transition-colors hover:bg-sunhi"
-            >
-              View listing
-              <ArrowUpRight className="h-3.5 w-3.5" />
-            </Link>
+            <span className="inline-flex items-center gap-1 text-sm text-ash transition-colors group-hover:text-sun">
+              view <ArrowUpRight className="h-3.5 w-3.5" />
+            </span>
           ) : item.buyUrl ? (
             <a
               href={item.buyUrl}
               target="_blank"
               rel="noopener noreferrer nofollow"
-              className="inline-flex items-center gap-1.5 rounded bg-sun px-2.5 py-1.5 text-sm font-medium text-void transition-colors hover:bg-sunhi"
+              className="relative z-[2] inline-flex items-center gap-1.5 rounded bg-sun px-2.5 py-1.5 text-sm font-medium text-void transition-colors hover:bg-sunhi"
             >
               <ExternalLink className="h-3.5 w-3.5" />
               {displayHostname(item.buyUrl)}
@@ -244,7 +243,7 @@ function ProductCard({
             <button
               type="button"
               onClick={() => onNotify(item.notifyKind ?? "node")}
-              className="inline-flex items-center gap-1.5 rounded border border-sun/40 px-2.5 py-1.5 text-sm font-medium text-sun transition-colors hover:bg-sun/10"
+              className="relative z-[2] inline-flex items-center gap-1.5 rounded border border-sun/40 px-2.5 py-1.5 text-sm font-medium text-sun transition-colors hover:bg-sun/10"
             >
               <BellRing className="h-3.5 w-3.5" />
               Notify me

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Link from "next/link";
 
@@ -13,6 +13,7 @@ import {
   Package,
   ShieldCheck,
   Truck,
+  X,
 } from "lucide-react";
 
 import { ReportButton } from "@/components/report-button";
@@ -347,17 +348,76 @@ export function ProductDetail({ product }: { product: ProductPageData }) {
 
 function ProductGallery({ name, images }: { name: string; images: string[] }) {
   const [active, setActive] = useState(0);
+  const [lightbox, setLightbox] = useState(false);
+  const [hoverOrigin, setHoverOrigin] = useState("50% 50%");
+  const [hovering, setHovering] = useState(false);
+  const [tapZoom, setTapZoom] = useState<{ scale: number; origin: string }>({
+    scale: 1,
+    origin: "50% 50%",
+  });
   const current = images[Math.min(active, images.length - 1)];
+
+  useEffect(() => {
+    if (!lightbox) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setLightbox(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [lightbox]);
+
+  function trackPointer(event: React.MouseEvent<HTMLElement>) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
+    setHoverOrigin(`${x}% ${y}%`);
+  }
+
+  function openLightbox() {
+    setTapZoom({ scale: 1, origin: "50% 50%" });
+    setLightbox(true);
+  }
+
+  function toggleTapZoom(event: React.MouseEvent<HTMLElement>) {
+    event.stopPropagation();
+    if (tapZoom.scale > 1) {
+      setTapZoom({ scale: 1, origin: "50% 50%" });
+      return;
+    }
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
+    setTapZoom({ scale: 2.2, origin: `${x}% ${y}%` });
+  }
+
   return (
     <div className="vessel overflow-hidden bg-gradient-to-b from-surface/60 to-transparent">
-      <div className="flex aspect-square items-center justify-center p-4">
+      {/* Main panel: hover magnifies (desktop), tap opens the lightbox (touch) */}
+      <button
+        type="button"
+        onClick={openLightbox}
+        onMouseEnter={() => setHovering(true)}
+        onMouseLeave={() => setHovering(false)}
+        onMouseMove={trackPointer}
+        aria-label={`Enlarge photo ${active + 1} of ${images.length}`}
+        className="block aspect-square w-full cursor-zoom-in overflow-hidden p-4"
+      >
         {}
         <img
           src={current}
           alt={`${name} — photo ${active + 1} of ${images.length}`}
-          className="max-h-full max-w-full rounded object-contain"
+          className="pointer-events-none max-h-full max-w-full rounded object-contain transition-transform duration-200 ease-out"
+          style={
+            hovering
+              ? { transform: "scale(1.9)", transformOrigin: hoverOrigin }
+              : { transform: "scale(1)" }
+          }
         />
-      </div>
+      </button>
       {images.length > 1 && (
         <div className="flex gap-2 overflow-x-auto border-t border-line/50 p-3">
           {images.map((src, index) => (
@@ -378,6 +438,37 @@ function ProductGallery({ name, images }: { name: string; images: string[] }) {
               <img src={src} alt="" className="h-full w-full object-cover" />
             </button>
           ))}
+        </div>
+      )}
+
+      {/* Lightbox: tap the image to toggle deep zoom, tap outside / Esc to close */}
+      {lightbox && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${name} photo viewer`}
+          onClick={() => setLightbox(false)}
+          className="fixed inset-0 z-50 flex cursor-zoom-out items-center justify-center bg-void/95 p-4 backdrop-blur-sm"
+        >
+          {}
+          <img
+            src={current}
+            alt={`${name} — enlarged`}
+            onClick={toggleTapZoom}
+            className={cn(
+              "max-h-[92vh] max-w-full rounded object-contain transition-transform duration-200 ease-out",
+              tapZoom.scale > 1 ? "cursor-zoom-out" : "cursor-zoom-in"
+            )}
+            style={{ transform: `scale(${tapZoom.scale})`, transformOrigin: tapZoom.origin }}
+          />
+          <button
+            type="button"
+            onClick={() => setLightbox(false)}
+            aria-label="Close photo viewer"
+            className="absolute right-4 top-4 rounded-full border border-line bg-void/80 p-2 text-ash transition-colors hover:text-gold"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
       )}
     </div>
