@@ -6,19 +6,25 @@ import { GET, POST } from "./route";
 
 // ─── Prisma mocks ───
 const mockProfileFindUnique = vi.fn();
+const mockProfileUpdate = vi.fn();
 const mockSpecialtyFindMany = vi.fn();
 const mockSpecialtyFindFirst = vi.fn();
 const mockSpecialtyCreate = vi.fn();
+const mockSpecialtyCount = vi.fn();
+/** ABN returned when the account-type sync reads the profile — set per test. */
+let syncAbn: string | null = "12345678901";
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     profile: {
       findUnique: (...args: unknown[]) => mockProfileFindUnique(...args),
+      update: (...args: unknown[]) => mockProfileUpdate(...args),
     },
     directorySpecialty: {
       findMany: (...args: unknown[]) => mockSpecialtyFindMany(...args),
       findFirst: (...args: unknown[]) => mockSpecialtyFindFirst(...args),
       create: (...args: unknown[]) => mockSpecialtyCreate(...args),
+      count: (...args: unknown[]) => mockSpecialtyCount(...args),
     },
   },
 }));
@@ -39,7 +45,13 @@ function makeRequest(url: string, init?: RequestInit): NextRequest {
 
 function authed() {
   mockGetUser.mockResolvedValue({ data: { user: { id: "user-1" } }, error: null });
-  mockProfileFindUnique.mockResolvedValue({ id: "profile-1", bannedAt: null });
+  // requireProfile reads { id, bannedAt }; the account-type sync reads
+  // { accountType, abn } — dispatch on the select shape.
+  mockProfileFindUnique.mockImplementation((args: { select?: Record<string, boolean> }) =>
+    args?.select?.accountType !== undefined
+      ? { accountType: "individual", abn: syncAbn }
+      : { id: "profile-1", bannedAt: null }
+  );
 }
 
 const PLUMBER_ATTRIBUTES = {
@@ -78,6 +90,8 @@ describe("GET /api/v1/profiles/me/specialties", () => {
 describe("POST /api/v1/profiles/me/specialties", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    syncAbn = "12345678901";
+    mockSpecialtyCount.mockResolvedValue(1);
   });
 
   it("claims slot 1 with validated profession attributes", async () => {
@@ -236,6 +250,45 @@ describe("POST /api/v1/profiles/me/specialties", () => {
     );
     expect(res.status).toBe(409);
     expect(mockSpecialtyCreate).not.toHaveBeenCalled();
+  });
+
+  it("upgrades the account to business when the first specialty is claimed with an ABN on file", async () => {
+    authed();
+    syncAbn = "12345678901";
+    mockSpecialtyFindMany.mockResolvedValue([]);
+    mockSpecialtyCreate.mockResolvedValue({ id: "s1", profession: "plumber", slot: 1 });
+
+    const res = await POST(
+      makeRequest("http://localhost/api/v1/profiles/me/specialties", {
+        method: "POST",
+        body: JSON.stringify({ profession: "plumber" }),
+      })
+    );
+
+    expect(res.status).toBe(201);
+    expect(mockProfileUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: "profile-1" },
+        data: { accountType: "business" },
+      })
+    );
+  });
+
+  it("leaves the account type alone when no ABN is on file yet", async () => {
+    authed();
+    syncAbn = null;
+    mockSpecialtyFindMany.mockResolvedValue([]);
+    mockSpecialtyCreate.mockResolvedValue({ id: "s1", profession: "plumber", slot: 1 });
+
+    const res = await POST(
+      makeRequest("http://localhost/api/v1/profiles/me/specialties", {
+        method: "POST",
+        body: JSON.stringify({ profession: "plumber" }),
+      })
+    );
+
+    expect(res.status).toBe(201);
+    expect(mockProfileUpdate).not.toHaveBeenCalled();
   });
 
   it("rejects members whose account is suspended", async () => {

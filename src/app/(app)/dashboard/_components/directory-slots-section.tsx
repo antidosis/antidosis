@@ -355,6 +355,9 @@ function ProfessionPicker({
         claimed += 1;
       }
       await mutate("/api/v1/profiles/me/specialties");
+      // The sidebar node badge reads /api/v1/profiles/me — refresh it too or
+      // business/member node lags until the next unrelated revalidation.
+      await mutate("/api/v1/profiles/me");
       if (claimed > 0) {
         toast(
           claimed === 1
@@ -613,6 +616,7 @@ function CompactSpecialtyRow({
         return;
       }
       await mutate("/api/v1/profiles/me/specialties");
+      await mutate("/api/v1/profiles/me");
       toast(`${professionLabel} removed — space freed in your slot`, "success");
     } catch {
       toast("Couldn't remove the specialty", "error");
@@ -704,6 +708,7 @@ function SpecialtyEditor({
         return;
       }
       await mutate("/api/v1/profiles/me/specialties");
+      await mutate("/api/v1/profiles/me");
       toast("Specialty updated", "success");
       onToggleEdit();
     } catch {
@@ -724,6 +729,7 @@ function SpecialtyEditor({
         return;
       }
       await mutate("/api/v1/profiles/me/specialties");
+      await mutate("/api/v1/profiles/me");
       toast(`${professionLabel} removed — space freed in your slot`, "success");
     } catch {
       toast("Couldn't remove the specialty", "error");

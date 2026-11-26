@@ -277,6 +277,75 @@ describe("PATCH /api/v1/profiles/me", () => {
     expect(res.status).toBe(401);
   });
 
+  it("returns 400 when a personal link points at a file host or shortener", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/profiles/me", {
+        method: "PATCH",
+        body: JSON.stringify({
+          socialLinks: [{ platform: "website", url: "https://bit.ly/3xyzABC", isPublic: true }],
+        }),
+      })
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(body.error).toContain("Personal link");
+    expect(body.error).toContain("shorteners");
+    expect(mockProfileUpdate).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when a business link points at a file host", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/profiles/me", {
+        method: "PATCH",
+        body: JSON.stringify({
+          businessSocialLinks: [
+            { platform: "website", url: "https://dropbox.com/s/abc/invoice.pdf", isPublic: true },
+          ],
+        }),
+      })
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(body.error).toContain("Business link");
+    expect(body.error).toContain("file hosting");
+    expect(mockProfileUpdate).not.toHaveBeenCalled();
+  });
+
+  it("accepts ordinary profile links", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobile: null,
+      mobileVerified: false,
+      abn: null,
+      accountType: "individual",
+    });
+    mockProfileUpdate.mockResolvedValue({
+      id: "profile-1",
+      fullName: "Updated",
+      skills: [],
+      socialLinks: [],
+      credentials: [],
+    });
+
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/profiles/me", {
+        method: "PATCH",
+        body: JSON.stringify({
+          socialLinks: [{ platform: "instagram", url: "https://instagram.com/me", isPublic: true }],
+        }),
+      })
+    );
+
+    expect(res.status).toBe(200);
+  });
+
   it("returns 400 for invalid location", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
 

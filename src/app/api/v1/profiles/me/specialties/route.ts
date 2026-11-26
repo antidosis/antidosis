@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import { withApiHandler } from "@/lib/api-handler";
+import { syncListingAccountType } from "@/lib/listing-account";
 import { prisma } from "@/lib/prisma";
 import {
   getProfession,
@@ -213,6 +214,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
       slot,
     },
   });
+  await syncListingAccountType(profile.id);
 
   return NextResponse.json({ specialty }, { status: 201 });
 });

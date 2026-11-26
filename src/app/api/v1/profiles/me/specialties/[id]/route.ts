@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import { withApiHandler } from "@/lib/api-handler";
+import { syncListingAccountType } from "@/lib/listing-account";
 import { prisma } from "@/lib/prisma";
 import { getProfession } from "@/lib/professions";
 import { resolveEntityId } from "@/lib/resolve-id";
@@ -126,5 +127,6 @@ export const DELETE = withApiHandler(async (_req: NextRequest, _ctx, { params }:
   if (!owned) return NextResponse.json({ error: "Specialty not found" }, { status: 404 });
 
   await prisma.directorySpecialty.delete({ where: { id: owned.specialty.id } });
+  await syncListingAccountType(owned.profile.id);
   return NextResponse.json({ success: true });
 });

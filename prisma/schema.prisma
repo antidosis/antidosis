@@ -53,6 +53,12 @@ model Profile {
   accountType            String    @default("individual") @map("account_type")
   abnVerified            Boolean   @default(false) @map("abn_verified")
   audienceSize           Int?      @map("audience_size")
+  // Trust-and-safety reporter reputation: admins score reports on resolution
+  // (valid → +1, dismissed → −2). Chronically bad reporters sink below zero
+  // and get flagged in the admin queue; private — never on public profiles.
+  reporterScore          Int       @default(0) @map("reporter_score")
+  goodReports            Int       @default(0) @map("good_reports")
+  badReports             Int       @default(0) @map("bad_reports")
   // JSON blob of cross-device preferences: {"theme":"chrome","font":"system"}.
   // Appearance pickers PATCH this; the client applies it on devices that have
   // no local choice yet. Invalid shapes are ignored client-side.

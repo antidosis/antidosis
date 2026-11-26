@@ -33,6 +33,24 @@ export const PATCH = withApiHandler(
       data: { status: parsed.data.status },
     });
 
+    // Reporter reputation: only transitions out of "open" score the reporter —
+    // re-resolving an already-handled report must not double-count.
+    // Valid reports earn +1; dismissed ones cost −2, so sustained bad-faith
+    // reporting sinks below zero and gets flagged in the queue.
+    if (existing.status === "open") {
+      if (parsed.data.status === "resolved") {
+        await prisma.profile.update({
+          where: { id: existing.reporterId },
+          data: { reporterScore: { increment: 1 }, goodReports: { increment: 1 } },
+        });
+      } else if (parsed.data.status === "dismissed") {
+        await prisma.profile.update({
+          where: { id: existing.reporterId },
+          data: { reporterScore: { decrement: 2 }, badReports: { increment: 1 } },
+        });
+      }
+    }
+
     return NextResponse.json({ report: { id: report.id, status: report.status } });
   }
 );

@@ -54,7 +54,18 @@ describe("GET /api/v1/admin/reports", () => {
     expect(mockFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { status: "open" },
-        include: { reporter: { select: { id: true, fullName: true, email: true } } },
+        include: {
+          reporter: {
+            select: {
+              id: true,
+              fullName: true,
+              email: true,
+              reporterScore: true,
+              goodReports: true,
+              badReports: true,
+            },
+          },
+        },
       })
     );
   });

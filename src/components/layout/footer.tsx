@@ -40,6 +40,7 @@ const linkGroups: {
   {
     title: "Trust & support",
     links: [
+      { href: "/safety", label: "Safety & trust" },
       { email: "support@antidosis.com", label: "Contact" },
       { href: "/terms", label: "Terms of Service" },
       { href: "/privacy", label: "Privacy Policy" },

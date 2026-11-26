@@ -6,6 +6,7 @@ import { PATCH } from "./route";
 
 const mockFindUnique = vi.fn();
 const mockUpdate = vi.fn();
+const mockProfileUpdate = vi.fn();
 const mockRequireAdmin = vi.fn();
 
 vi.mock("@/lib/prisma", () => ({
@@ -13,6 +14,9 @@ vi.mock("@/lib/prisma", () => ({
     report: {
       findUnique: (...args: unknown[]) => mockFindUnique(...args),
       update: (...args: unknown[]) => mockUpdate(...args),
+    },
+    profile: {
+      update: (...args: unknown[]) => mockProfileUpdate(...args),
     },
   },
 }));
@@ -39,7 +43,11 @@ describe("PATCH /api/v1/admin/reports/[id]", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockRequireAdmin.mockResolvedValue({ authorized: true, user: { id: "admin-1" } });
-    mockFindUnique.mockResolvedValue({ id: "report-1", status: "open" });
+    mockFindUnique.mockResolvedValue({
+      id: "report-1",
+      status: "open",
+      reporterId: "reporter-1",
+    });
     mockUpdate.mockResolvedValue({ id: "report-1", status: "resolved" });
   });
 
@@ -78,5 +86,37 @@ describe("PATCH /api/v1/admin/reports/[id]", () => {
       where: { id: "report-1" },
       data: { status: "resolved" },
     });
+  });
+
+  it("rewards the reporter when an open report is resolved", async () => {
+    const res = await PATCH(makeRequest({ status: "resolved" }), ctx);
+    expect(res.status).toBe(200);
+    expect(mockProfileUpdate).toHaveBeenCalledWith({
+      where: { id: "reporter-1" },
+      data: { reporterScore: { increment: 1 }, goodReports: { increment: 1 } },
+    });
+  });
+
+  it("penalises the reporter when an open report is dismissed", async () => {
+    mockUpdate.mockResolvedValue({ id: "report-1", status: "dismissed" });
+
+    const res = await PATCH(makeRequest({ status: "dismissed" }), ctx);
+    expect(res.status).toBe(200);
+    expect(mockProfileUpdate).toHaveBeenCalledWith({
+      where: { id: "reporter-1" },
+      data: { reporterScore: { decrement: 2 }, badReports: { increment: 1 } },
+    });
+  });
+
+  it("does not double-count when an already-handled report is updated again", async () => {
+    mockFindUnique.mockResolvedValue({
+      id: "report-1",
+      status: "resolved",
+      reporterId: "reporter-1",
+    });
+
+    const res = await PATCH(makeRequest({ status: "dismissed" }), ctx);
+    expect(res.status).toBe(200);
+    expect(mockProfileUpdate).not.toHaveBeenCalled();
   });
 });

@@ -8,6 +8,14 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CopyLinkButton } from "@/components/ui/copy-link";
 import { useToast } from "@/components/ui/toast";
+import {
+  downloadSvgAsPng,
+  fetchSiteLogoDataUrl,
+  formatRatingLine,
+  renderShareCardSvg,
+  SHARE_CARD_THEMES,
+  type ShareCardTheme,
+} from "@/lib/share-card";
 import { cn } from "@/lib/utils";
 
 interface ShareProfileCardProps {
@@ -27,85 +35,11 @@ interface ShareProfileCardProps {
   };
 }
 
-/** Branded card accents — the card keeps its own identity across site themes. */
-const CARD_THEMES = [
-  {
-    id: "emerald",
-    label: "Emerald",
-    accent: "#39d98a",
-    accentSoft: "#8ff0bd",
-    bgFrom: "#06120d",
-    bgTo: "#0e2a20",
-    glow: "#39d98a",
-  },
-  {
-    id: "aqua",
-    label: "Aqua",
-    accent: "#51c8bc",
-    accentSoft: "#9fe8e0",
-    bgFrom: "#071418",
-    bgTo: "#0f2c30",
-    glow: "#51c8bc",
-  },
-  {
-    id: "sun",
-    label: "Sun",
-    accent: "#f5c542",
-    accentSoft: "#ffe08a",
-    bgFrom: "#161006",
-    bgTo: "#2e230e",
-    glow: "#f5c542",
-  },
-  {
-    id: "graphite",
-    label: "Graphite",
-    accent: "#b7c4bd",
-    accentSoft: "#e4ece8",
-    bgFrom: "#0c0f0e",
-    bgTo: "#1d2421",
-    glow: "#b7c4bd",
-  },
-  {
-    id: "violet",
-    label: "Violet",
-    accent: "#a78bfa",
-    accentSoft: "#cfbcff",
-    bgFrom: "#110b1c",
-    bgTo: "#241739",
-    glow: "#a78bfa",
-  },
-] as const;
-
-type CardTheme = (typeof CARD_THEMES)[number];
-
-function xml(value: string): string {
-  return value.replace(/[<>&"']/g, (character) => {
-    return { "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;", "'": "&apos;" }[character]!;
-  });
-}
-
-async function fetchLogoDataUrl(): Promise<string | null> {
-  try {
-    const response = await fetch("/images/logo-sm.webp");
-    if (!response.ok) return null;
-    const buffer = await response.arrayBuffer();
-    const bytes = new Uint8Array(buffer);
-    let binary = "";
-    const chunk = 0x8000;
-    for (let offset = 0; offset < bytes.length; offset += chunk) {
-      binary += String.fromCharCode(...bytes.subarray(offset, offset + chunk));
-    }
-    return `data:image/webp;base64,${window.btoa(binary)}`;
-  } catch {
-    return null;
-  }
-}
-
 export function ShareProfileCard({ profile }: ShareProfileCardProps) {
   const { toast } = useToast();
   const [sharing, setSharing] = useState(false);
   const [downloading, setDownloading] = useState(false);
-  const [theme, setTheme] = useState<CardTheme>(CARD_THEMES[0]);
+  const [theme, setTheme] = useState<ShareCardTheme>(SHARE_CARD_THEMES[0]);
   const name = profile.fullName || "Antidosis member";
   const handle = profile.handle ? `@${profile.handle}` : "Local exchange member";
   const inviteUrl = `${window.location.origin}/connect/${profile.handle || profile.id}`;
@@ -113,6 +47,7 @@ export function ShareProfileCard({ profile }: ShareProfileCardProps) {
     profile.ratingCount > 0
       ? `${profile.ratingAvg.toFixed(1)} · ${profile.ratingCount} review${profile.ratingCount === 1 ? "" : "s"}`
       : "New member";
+  const skillNames = profile.skills.map((skill) => skill.name);
 
   async function nativeShare() {
     setSharing(true);
@@ -138,74 +73,32 @@ export function ShareProfileCard({ profile }: ShareProfileCardProps) {
   async function downloadCard() {
     setDownloading(true);
     try {
-      const logo = await fetchLogoDataUrl();
-      const skillText = profile.skills
-        .slice(0, 3)
-        .map((skill) => skill.name)
-        .join("  ·  ");
-      const logoImage = logo
-        ? `<image href="${logo}" x="88" y="72" width="132" height="58" preserveAspectRatio="xMinYMid meet" opacity="0.92"/>`
-        : `<text x="88" y="110" fill="${theme.accent}" font-family="Arial, sans-serif" font-size="30" font-weight="700" letter-spacing="6">ANTIDOSIS</text>`;
-      const stars =
-        profile.ratingCount > 0
-          ? `<text x="88" y="448" fill="${theme.accentSoft}" font-family="Arial, sans-serif" font-size="24">★ ${profile.ratingAvg.toFixed(1)} · ${profile.ratingCount} review${profile.ratingCount === 1 ? "" : "s"}</text>`
-          : "";
-      const jobs =
+      const logo = await fetchSiteLogoDataUrl();
+      const line = [profile.locationName, skillNames[0]].filter(Boolean).join("  ·  ");
+      const meta = [
+        formatRatingLine(profile.ratingAvg, profile.ratingCount),
         profile.jobsCompleted > 0
-          ? `<text x="420" y="448" fill="#9fb5aa" font-family="Arial, sans-serif" font-size="24">${profile.jobsCompleted} exchange${profile.jobsCompleted === 1 ? "" : "s"} completed</text>`
-          : "";
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${theme.bgFrom}"/><stop offset="1" stop-color="${theme.bgTo}"/></linearGradient>
-    <radialGradient id="glow"><stop stop-color="${theme.glow}" stop-opacity=".16"/><stop offset="1" stop-color="${theme.glow}" stop-opacity="0"/></radialGradient>
-  </defs>
-  <rect width="1200" height="630" rx="32" fill="url(#bg)"/>
-  <circle cx="1040" cy="110" r="340" fill="url(#glow)"/>
-  <g fill="none" stroke="${theme.accent}" stroke-opacity=".14"><circle cx="1040" cy="110" r="90"/><circle cx="1040" cy="110" r="160"/><circle cx="1040" cy="110" r="235"/></g>
-  <rect x="44" y="44" width="1112" height="542" rx="24" fill="none" stroke="${theme.accent}" stroke-opacity=".22"/>
-  ${logoImage}
-  <text x="1112" y="112" text-anchor="end" fill="${theme.accent}" font-family="monospace" font-size="20" letter-spacing="4">CONNECTION CARD</text>
-  <text x="88" y="252" fill="#f4f7f2" font-family="Georgia, 'Times New Roman', serif" font-size="66" font-weight="700">${xml(name)}</text>
-  <text x="88" y="304" fill="${theme.accentSoft}" font-family="monospace" font-size="30">${xml(handle)}</text>
-  <text x="88" y="372" fill="#c3d0c8" font-family="Arial, sans-serif" font-size="25">${xml([profile.locationName, skillText].filter(Boolean).join("  ·  ") || "Local exchange network")}</text>
-  ${stars}${jobs}
-  <text x="88" y="536" fill="#f4f7f2" font-family="Georgia, 'Times New Roman', serif" font-size="34" font-weight="600">Connect with me on the local exchange network.</text>
-  <text x="88" y="578" fill="${theme.accent}" font-family="monospace" font-size="20">antidosis.com/connect/${xml(profile.handle || profile.id)}</text>
-</svg>`;
-      const svgUrl = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }));
-      try {
-        const image = new window.Image();
-        await new Promise<void>((resolve, reject) => {
-          image.onload = () => resolve();
-          image.onerror = () => reject(new Error("Could not render the share card"));
-          image.src = svgUrl;
-        });
-        const canvas = document.createElement("canvas");
-        canvas.width = 1200;
-        canvas.height = 630;
-        const context = canvas.getContext("2d");
-        if (!context) throw new Error("Canvas is unavailable");
-        context.drawImage(image, 0, 0, 1200, 630);
-        const png = await new Promise<Blob>((resolve, reject) => {
-          canvas.toBlob(
-            (result) => (result ? resolve(result) : reject(new Error("Could not create the PNG"))),
-            "image/png"
-          );
-        });
-        const downloadUrl = URL.createObjectURL(png);
-        const anchor = document.createElement("a");
-        anchor.href = downloadUrl;
-        anchor.download = `antidosis-${profile.handle || "profile"}-card.png`;
-        document.body.appendChild(anchor);
-        anchor.click();
-        anchor.remove();
-        setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
-        toast("Share card downloaded as PNG", "success");
-      } catch {
-        toast("Couldn't create the card — please try another browser", "error");
-      } finally {
-        URL.revokeObjectURL(svgUrl);
-      }
+          ? `${profile.jobsCompleted} exchange${profile.jobsCompleted === 1 ? "" : "s"} completed`
+          : null,
+      ]
+        .filter(Boolean)
+        .join("  ·  ");
+      const svg = renderShareCardSvg({
+        badge: "CONNECTION CARD",
+        name,
+        subtitle: handle,
+        line: line || "Local exchange network",
+        chips: skillNames,
+        meta,
+        cta: "Connect with me on the local exchange network.",
+        url: `antidosis.com/connect/${profile.handle || profile.id}`,
+        theme,
+        logoDataUrl: logo,
+      });
+      await downloadSvgAsPng(svg, `antidosis-${profile.handle || "profile"}-card.png`);
+      toast("Share card downloaded as PNG", "success");
+    } catch {
+      toast("Couldn't create the card — please try another browser", "error");
     } finally {
       setDownloading(false);
     }
@@ -216,7 +109,7 @@ export function ShareProfileCard({ profile }: ShareProfileCardProps) {
       {/* Theme picker — small bubbles that recolour the card */}
       <div className="mb-2.5 flex items-center gap-1.5">
         <span className="mr-1 font-mono text-[10px] uppercase tracking-[0.2em] text-ash">Card</span>
-        {CARD_THEMES.map((option) => (
+        {SHARE_CARD_THEMES.map((option) => (
           <button
             key={option.id}
             type="button"
@@ -315,6 +208,25 @@ export function ShareProfileCard({ profile }: ShareProfileCardProps) {
               Antidosis
             </span>
           </div>
+
+          {/* Every skill rides on the card — the point of the preview */}
+          {skillNames.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-1.5">
+              {skillNames.map((skill) => (
+                <span
+                  key={skill}
+                  className="rounded-full border px-2.5 py-1 text-xs"
+                  style={{
+                    borderColor: `${theme.accent}59`,
+                    color: theme.accentSoft,
+                    backgroundColor: `${theme.accent}1a`,
+                  }}
+                >
+                  {skill}
+                </span>
+              ))}
+            </div>
+          )}
 
           {/* CTA + link */}
           <p className="heading-display mt-6 text-lg leading-snug text-[#f4f7f2]">

@@ -17,7 +17,14 @@ type ReportItem = {
   details: string | null;
   status: string;
   createdAt: string;
-  reporter: { id: string; fullName: string | null; email: string };
+  reporter: {
+    id: string;
+    fullName: string | null;
+    email: string;
+    reporterScore: number;
+    goodReports: number;
+    badReports: number;
+  };
 };
 
 const REASON_VARIANT: Record<string, string> = {
@@ -111,6 +118,26 @@ export function ReportsSection() {
                       hour: "2-digit",
                       minute: "2-digit",
                     })}
+                  </p>
+                  <p className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px]">
+                    <span
+                      className={
+                        report.reporter.reporterScore < 0
+                          ? "inline-flex items-center gap-1 rounded border border-bad/40 bg-bad/10 px-1.5 py-0.5 text-bad"
+                          : "inline-flex items-center gap-1 rounded border border-line/70 bg-inset/60 px-1.5 py-0.5 text-ash"
+                      }
+                    >
+                      reporter trust {report.reporter.reporterScore > 0 ? "+" : ""}
+                      {report.reporter.reporterScore}
+                    </span>
+                    <span className="text-ash/80">
+                      {report.reporter.goodReports} valid · {report.reporter.badReports} dismissed
+                    </span>
+                    {report.reporter.reporterScore < 0 && (
+                      <span className="text-bad">
+                        — pattern of bad-faith reports, weigh carefully
+                      </span>
+                    )}
                   </p>
                   {report.details && <p className="text-sm text-gold mt-2">{report.details}</p>}
                 </div>

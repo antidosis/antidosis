@@ -20,13 +20,13 @@ import { CredentialsSection } from "./credentials-section";
 import { DirectorySlotsSection } from "./directory-slots-section";
 import { AboutSection } from "./profile-editor/about-section";
 import { AcceptedExchangesSection } from "./profile-editor/accepted-exchanges-section";
-import { BusinessContactSection } from "./profile-editor/business-contact-section";
+import { BusinessDetailsSection } from "./profile-editor/business-details-section";
 import { DirectoryBioSection } from "./profile-editor/directory-bio-section";
 import { IdentitySection } from "./profile-editor/identity-section";
 import { KnowledgeBox } from "./profile-editor/knowledge-box";
-import { PreferencesSection } from "./profile-editor/preferences-section";
 import { SocialLinksSection } from "./profile-editor/social-links-section";
 import type { EditorProfile, ProfileFormData, ProfileTab } from "./profile-editor/types";
+import { ShareBusinessCard } from "./share-business-card";
 
 interface ProfileSectionProps {
   initialProfile: EditorProfile;
@@ -414,11 +414,6 @@ export function ProfileSection({
               the sidebar shows <strong className="text-gold">business node</strong> — the listing
               marks the whole account as a business everywhere on Antidosis, not just this tab.
             </KnowledgeBox>
-            <DirectoryBioSection
-              register={register}
-              control={control}
-              error={errors.directoryBio?.message}
-            />
             <DirectorySlotsSection onSlotChange={handleSlotChange} />
             <AcceptedExchangesSection
               control={control}
@@ -428,7 +423,12 @@ export function ProfileSection({
                 clearErrors("root");
               }}
             />
-            <PreferencesSection
+            <DirectoryBioSection
+              register={register}
+              control={control}
+              error={errors.directoryBio?.message}
+            />
+            <BusinessDetailsSection
               register={register}
               setValue={setChangedValue}
               showInDirectory={!!showInDirectory}
@@ -438,20 +438,20 @@ export function ProfileSection({
               profileId={initialProfile.id}
             />
             {(accountType === "business" || hasSpecialty) && (
-              <>
-                <BusinessContactSection register={register} errors={errors} />
-                <SocialLinksSection
-                  control={control}
-                  register={register}
-                  field="businessSocialLinks"
-                  fields={businessFields}
-                  onRemove={(index) => removeLinkAt(removeBusinessLink, index)}
-                  append={addBusinessLink}
-                  errors={errors}
-                  showAudience={false}
-                  variant="business"
-                />
-              </>
+              <SocialLinksSection
+                control={control}
+                register={register}
+                field="businessSocialLinks"
+                fields={businessFields}
+                onRemove={(index) => removeLinkAt(removeBusinessLink, index)}
+                append={addBusinessLink}
+                errors={errors}
+                showAudience={false}
+                variant="business"
+              />
+            )}
+            {(accountType === "business" || hasSpecialty) && (
+              <ShareBusinessCard profile={initialProfile} />
             )}
           </div>
         )}

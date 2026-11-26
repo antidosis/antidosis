@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ProfileActions } from "@/components/ui/profile-actions";
 import { formatAbn } from "@/lib/abn";
+import { displayHostname } from "@/lib/security/link-policy";
 import { useApi } from "@/lib/swr-config";
 
 interface ProfileData {
@@ -225,10 +226,13 @@ export default function ProfilePage() {
                     key={link.id}
                     href={link.url}
                     target="_blank"
-                    rel="noopener noreferrer"
+                    rel="noopener noreferrer nofollow"
                     className="inline-flex items-center gap-1.5 rounded-md border border-line px-3 py-2 text-sm capitalize text-parchment hover:border-linehi hover:text-gold"
                   >
                     <Globe className="h-3.5 w-3.5" /> {link.platform}
+                    <span className="font-mono text-xs normal-case text-ash">
+                      {displayHostname(link.url)}
+                    </span>
                     <ArrowUpRight className="h-3 w-3" />
                   </a>
                 ))}

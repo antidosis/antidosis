@@ -12,6 +12,7 @@ import { logger } from "@/lib/logger";
 import { normalizeMobile, isValidAustralianMobile } from "@/lib/mobile";
 import { prisma } from "@/lib/prisma";
 import { updateProfileSchema } from "@/lib/schemas";
+import { assessProfileLink } from "@/lib/security/link-policy";
 import { sanitizeUrl } from "@/lib/security/url";
 import { extractStoragePath, bucketForPath } from "@/lib/storage";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
@@ -140,6 +141,15 @@ export const PATCH = withApiHandler(async (req: NextRequest) => {
           : link.url,
     }));
   }
+  if (Array.isArray(body?.businessSocialLinks)) {
+    body.businessSocialLinks = body.businessSocialLinks.map((link: { url?: unknown }) => ({
+      ...link,
+      url:
+        typeof link.url === "string" && !/^[a-z][a-z0-9+.-]*:/i.test(link.url)
+          ? `https://${link.url}`
+          : link.url,
+    }));
+  }
 
   let data;
   try {
@@ -164,6 +174,28 @@ export const PATCH = withApiHandler(async (req: NextRequest) => {
   }
 
   const { socialLinks, businessSocialLinks, acceptedExchanges, ...profileData } = data;
+
+  // Profile links are judged destinations, not just safe schemes: shorteners,
+  // file hosts and paste sites are rejected with the reason so members know
+  // what to fix instead of hitting a silent drop.
+  for (const link of socialLinks ?? []) {
+    const assessment = assessProfileLink(link.url);
+    if (!assessment.ok) {
+      return NextResponse.json(
+        { error: `Personal link (${link.platform}): ${assessment.reason}` },
+        { status: 400 }
+      );
+    }
+  }
+  for (const link of businessSocialLinks ?? []) {
+    const assessment = assessProfileLink(link.url);
+    if (!assessment.ok) {
+      return NextResponse.json(
+        { error: `Business link (${link.platform}): ${assessment.reason}` },
+        { status: 400 }
+      );
+    }
+  }
 
   // Clean up empty strings to null for optional fields, sanitize URLs
   const cleanedData: Record<string, unknown> = Object.fromEntries(

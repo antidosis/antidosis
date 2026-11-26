@@ -22,7 +22,14 @@ export const GET = withApiHandler(async (req: NextRequest) => {
     orderBy: { createdAt: "desc" },
     include: {
       reporter: {
-        select: { id: true, fullName: true, email: true },
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          reporterScore: true,
+          goodReports: true,
+          badReports: true,
+        },
       },
     },
   });
