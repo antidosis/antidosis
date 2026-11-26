@@ -8,6 +8,7 @@ import {
   LifeBuoy,
   Radio,
   Settings,
+  Store,
   User,
 } from "lucide-react";
 
@@ -20,6 +21,7 @@ export type DashboardTabId =
   | "profile"
   | "inbox"
   | "relay"
+  | "mesh-store"
   | "support"
   | "settings";
 
@@ -88,6 +90,14 @@ export const DASHBOARD_TABS: DashboardTab[] = [
     icon: Radio,
     section: "network",
     subtitle: "Direct messages, channels, friends, blocks and recent relay activity",
+  },
+  {
+    id: "mesh-store",
+    label: "Mesh Store",
+    shortLabel: "Mesh",
+    icon: Store,
+    section: "network",
+    subtitle: "Your builder application, product shelf and mesh pilot presence",
   },
   {
     id: "profile",

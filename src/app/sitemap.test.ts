@@ -30,8 +30,8 @@ describe("sitemap", () => {
     expect(urls).toContain("https://antidosis.com/examples");
     expect(urls).toContain("https://antidosis.com/exchange");
     expect(urls).toContain("https://antidosis.com/store");
-    expect(urls).toContain("https://antidosis.com/store/interest");
-    expect(urls).toContain("https://antidosis.com/store/builders");
+    expect(urls).not.toContain("https://antidosis.com/store/interest");
+    expect(urls).not.toContain("https://antidosis.com/store/builders");
     expect(urls).toContain("https://antidosis.com/needs/need-live");
     expect(urls).toContain("https://antidosis.com/profile/profile-live");
     expect(urls).not.toContain("https://antidosis.com/needs");
@@ -63,7 +63,7 @@ describe("sitemap", () => {
     expect(urls).toContain("https://antidosis.com/");
     expect(urls).toContain("https://antidosis.com/examples");
     expect(urls).toContain("https://antidosis.com/safety");
-    expect(urls).toHaveLength(18 + blogPosts.length);
+    expect(urls).toHaveLength(16 + blogPosts.length);
     expect(urls.some((url) => url.includes("/needs/need-live"))).toBe(false);
   });
 });

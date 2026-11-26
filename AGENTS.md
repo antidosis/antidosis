@@ -231,6 +231,8 @@ needs/[id]/_components/
 - `BannedMobile` — banned mobile numbers, survives account deletion (`src/lib/bans.ts`)
 - `Report` — user-filed trust-and-safety reports (`/api/v1/reports`, admin queue at `/api/v1/admin/reports`)
 - `DeviceToken` — push notification device registrations (`/api/v1/devices`)
+- `MeshInterest` — email-only mesh pilot interest capture (`POST /api/v1/store/interest`, honeypot + rate-limited, upsert on email+kind)
+- `MeshBuilder` / `MeshProduct` — verified node builders and their product shelves. Apply at `/store#builders` (mobile-verified members only), manage via dashboard "Mesh Store" tab, admin review queue at `/admin` → Mesh store. Products are listings only — builders sell direct; Antidosis is never the merchant
 
 ### Migrations
 

@@ -20,6 +20,7 @@ import {
   ChevronDown,
   ChevronUp,
   Smartphone,
+  RadioTower,
   LayoutDashboard,
   Flag,
   LifeBuoy,
@@ -35,6 +36,7 @@ import { useToast } from "@/components/ui/toast";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
+import { MeshSection } from "./_components/mesh-section";
 import { ReportsSection } from "./_components/reports-section";
 import { SerrSection } from "./_components/serr-section";
 import { SupportSection } from "./_components/support-section";
@@ -85,7 +87,8 @@ type PendingCredential = {
   };
 };
 
-type AdminView = "operations" | "verifications" | "reports" | "support" | "members" | "compliance";
+type AdminView =
+  "operations" | "verifications" | "reports" | "support" | "members" | "compliance" | "mesh";
 
 export default function AdminPage() {
   const router = useRouter();
@@ -244,7 +247,7 @@ export default function AdminPage() {
 
       <nav
         aria-label="Admin workspaces"
-        className="mb-6 grid grid-cols-2 gap-2 rounded-lg border border-line bg-surface/35 p-2 sm:grid-cols-3 lg:grid-cols-6"
+        className="mb-6 grid grid-cols-2 gap-2 rounded-lg border border-line bg-surface/35 p-2 sm:grid-cols-3 lg:grid-cols-7"
       >
         {(
           [
@@ -258,6 +261,7 @@ export default function AdminPage() {
             { id: "reports", label: "Reports", icon: Flag },
             { id: "support", label: "Support", icon: LifeBuoy },
             { id: "members", label: "Members", icon: Users },
+            { id: "mesh", label: "Mesh store", icon: RadioTower },
             { id: "compliance", label: "SERR export", icon: Download },
           ] as const
         ).map((item) => (
@@ -599,6 +603,7 @@ export default function AdminPage() {
       {view === "reports" && <ReportsSection />}
       {view === "support" && <SupportSection />}
       {view === "members" && <UserManagementSection />}
+      {view === "mesh" && <MeshSection />}
     </div>
   );
 }

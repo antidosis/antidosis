@@ -161,3 +161,59 @@ export async function sendContractCompletedEmail(to: string, needTitle: string) 
     `,
   });
 }
+
+const MESH_INTEREST_COPY: Record<string, { subject: string; heading: string; body: string }> = {
+  node: {
+    subject: "You're on the list for the Antidosis node",
+    heading: "Node pilot interest received",
+    body: "We'll email you the moment pilot batch pricing and availability are confirmed. Expressing interest is free and is not an order.",
+  },
+  byo_device: {
+    subject: "Your device can join the Antidosis mesh",
+    heading: "Channel access interest received",
+    body: "We'll send setup guidance for your 915 MHz device and explain how channel access works for verified members.",
+  },
+  updates: {
+    subject: "Mesh network updates — you're subscribed",
+    heading: "You're subscribed to mesh updates",
+    body: "Occasional updates on the Antidosis mesh: pilot progress, range-test results and how to get connected.",
+  },
+};
+
+export async function sendMeshInterestConfirmationEmail(to: string, kind: string) {
+  if (!checkResendReady() || !resend) return;
+
+  const copy = MESH_INTEREST_COPY[kind] ?? MESH_INTEREST_COPY.updates;
+
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to,
+    subject: copy.subject,
+    html: `
+      <div style="font-family: system-ui, sans-serif; max-width: 500px; margin: 0 auto;">
+        <h2 style="color: #18181b;">${copy.heading}</h2>
+        <p>${copy.body}</p>
+        <p style="color: #71717a; font-size: 14px;">When the internet stops, the mesh doesn't.</p>
+        <a href="${process.env.NEXT_PUBLIC_APP_URL}/store" style="display: inline-block; padding: 12px 24px; background: #d97706; color: white; text-decoration: none; border-radius: 8px; margin-top: 16px;">Visit the mesh store</a>
+      </div>
+    `,
+  });
+}
+
+export async function sendMeshBuilderApplicationEmail(to: string, businessName: string) {
+  if (!checkResendReady() || !resend || !to) return;
+
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to,
+    subject: "Mesh builder application received",
+    html: `
+      <div style="font-family: system-ui, sans-serif; max-width: 500px; margin: 0 auto;">
+        <h2 style="color: #18181b;">Application received: ${businessName}</h2>
+        <p>We review builder applications manually &mdash; hardware specifications, range-test evidence and buyer support terms. You can add products to your shelf once the application is approved.</p>
+        <p>Track your application status from your dashboard under Mesh store.</p>
+        <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard?tab=mesh-store" style="display: inline-block; padding: 12px 24px; background: #d97706; color: white; text-decoration: none; border-radius: 8px; margin-top: 16px;">View application</a>
+      </div>
+    `,
+  });
+}

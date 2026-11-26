@@ -98,6 +98,8 @@ model Profile {
   directorySpecialties DirectorySpecialty[]
   deviceTokens         DeviceToken[]
   needWatches          NeedWatch[]
+  meshInterests        MeshInterest[]
+  meshBuilder          MeshBuilder?
 
   @@index([isPro])
   @@index([stripeCustomerId])
@@ -696,4 +698,73 @@ model ContactReveal {
   @@index([viewerId, createdAt])
   @@index([targetId, createdAt])
   @@map("contact_reveals")
+}
+
+model MeshInterest {
+  id           String   @id @default(uuid())
+  // "node" | "byo_device" | "builder" | "updates"
+  kind         String
+  email        String
+  name         String?
+  suburb       String?
+  deviceModel  String?  @map("device_model")
+  businessName String?  @map("business_name")
+  message      String?
+  profileId    String?  @map("profile_id")
+  // "new" | "contacted" | "closed"
+  status       String   @default("new")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  profile Profile? @relation(fields: [profileId], references: [id], onDelete: SetNull)
+
+  @@unique([email, kind])
+  @@index([status, createdAt])
+  @@index([kind, createdAt])
+  @@map("mesh_interests")
+}
+
+model MeshBuilder {
+  id           String    @id @default(uuid())
+  profileId    String    @unique @map("profile_id")
+  businessName String    @map("business_name")
+  suburb       String?
+  website      String?
+  description  String
+  // "pending" | "approved" | "rejected" | "suspended"
+  status       String    @default("pending")
+  reviewNote   String?   @map("review_note")
+  reviewedAt   DateTime? @map("reviewed_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  profile  Profile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  products MeshProduct[]
+
+  @@index([status, createdAt])
+  @@map("mesh_builders")
+}
+
+model MeshProduct {
+  id            String   @id @default(uuid())
+  builderId     String   @map("builder_id")
+  name          String
+  // "node" | "kit" | "gateway" | "accessory"
+  category      String
+  description   String
+  // board / antenna / battery / enclosure - free text, shown verbatim
+  specs         String?
+  // null = price on application
+  priceAudCents Int?     @map("price_aud_cents")
+  // "in_stock" | "made_to_order" | "out_of_stock"
+  stockStatus   String   @default("in_stock") @map("stock_status")
+  // Builder's own checkout (Etsy/eBay/own site) - validated against link policy
+  buyUrl        String?  @map("buy_url")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  builder MeshBuilder @relation(fields: [builderId], references: [id], onDelete: Cascade)
+
+  @@index([builderId])
+  @@map("mesh_products")
 }

@@ -20,6 +20,7 @@ import type {
   DashboardNeed,
   DashboardOffer,
 } from "./_components/dashboard-types";
+import { MeshStorePanel } from "./_components/mesh-store-panel";
 import { NeedsPanel } from "./_components/needs-panel";
 import { OffersPanel } from "./_components/offers-panel";
 import { OverviewPanel } from "./_components/overview-panel";
@@ -207,6 +208,9 @@ function DashboardPageInner() {
             </DashboardPanel>
             <DashboardPanel id="relay" activeTab={tab} mounted={visited.has("relay")}>
               <RelayPanel />
+            </DashboardPanel>
+            <DashboardPanel id="mesh-store" activeTab={tab} mounted={visited.has("mesh-store")}>
+              <MeshStorePanel />
             </DashboardPanel>
             <DashboardPanel id="profile" activeTab={tab} mounted={visited.has("profile")}>
               <ProfileSection

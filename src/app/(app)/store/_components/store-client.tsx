@@ -4,26 +4,35 @@ import { useState } from "react";
 
 import Link from "next/link";
 
-import { ArrowRight, Package, Radio, Wrench } from "lucide-react";
+import {
+  ArrowRight,
+  Globe,
+  Package,
+  Radio,
+  RadioTower,
+  RefreshCw,
+  Router,
+  Satellite,
+} from "lucide-react";
 
-import { EmailLink } from "@/components/email-link";
 import { cn } from "@/lib/utils";
 
+import { BuildersMarket } from "./builders-market";
+import { InterestForm, type InterestKind } from "./interest-form";
 import { MeshVisual } from "./mesh-visual";
 
-type Tab = "network" | "get" | "setup" | "builders";
-
-const TABS: { id: Tab; label: string }[] = [
-  { id: "network", label: "the network" },
-  { id: "get", label: "get a node" },
+const SECTIONS = [
+  { id: "nodes", label: "the shelf" },
+  { id: "network", label: "how it connects" },
+  { id: "builders", label: "builders" },
   { id: "setup", label: "set it up" },
-  { id: "builders", label: "for builders" },
-];
+  { id: "interest", label: "join the pilot" },
+] as const;
 
 const SIMPLE_STEPS = [
   {
     title: "Get a node",
-    body: "One small device. Order it here when the first batch lands, or bring any Meshtastic-compatible device you already own.",
+    body: "One small device. Order from a verified builder below when the first shelves land, or bring any Meshtastic-compatible device you already own.",
   },
   {
     title: "Turn it on",
@@ -39,7 +48,7 @@ const RUNBOOK_STEPS = [
   {
     step: "01",
     title: "Get a node",
-    body: "Any Meshtastic-compatible 915 MHz device works — ours, a builder's, or your own. See the shopping list below.",
+    body: "Any Meshtastic-compatible 915 MHz device works — a builder's, ours, or your own. See the pilot parts list on the shelf.",
   },
   {
     step: "02",
@@ -74,170 +83,166 @@ const SHOPPING_LIST = [
   },
 ];
 
-function NotifyButton({ subject, label, href }: { subject: string; label: string; href?: string }) {
-  const className =
-    "inline-flex items-center gap-2 rounded bg-sun px-4 py-2 text-[15px] font-medium text-void transition-colors hover:bg-sunhi";
-  if (href) {
-    return (
-      <Link href={href} className={className}>
-        {label}
-      </Link>
-    );
-  }
-  return (
-    <EmailLink email="support@antidosis.com" subject={subject} className={className}>
-      {label}
-    </EmailLink>
-  );
-}
+/**
+ * How the radio mesh and the online platform relate — the three layers, in
+ * plain language, with an honest status for each.
+ */
+const CONNECTION_LAYERS = [
+  {
+    icon: Globe,
+    status: "live now",
+    statusTone: "border-ok/40 text-ok",
+    title: "The exchange — online",
+    body: "Antidosis today runs on the internet: needs, directory, contracts, reviews, and the Relay comms surface. Every member's phone is already a node on this layer.",
+  },
+  {
+    icon: RadioTower,
+    status: "pilot",
+    statusTone: "border-sun/50 text-sun",
+    title: "The channel — radio",
+    body: "A channel is a private, encrypted group on the public 915 MHz mesh — a name plus a key, not special hardware. Any Meshtastic device with the antidosis channel joins the community mesh and keeps working with no internet at all. Verified members receive the channel key.",
+  },
+  {
+    icon: RefreshCw,
+    status: "roadmap",
+    statusTone: "border-mercury/40 text-mercury",
+    title: "The bridge — gateway",
+    body: "A gateway is a fixed node with an internet uplink. It is how online needs will reach radios in the field, and how everything said on the mesh reconciles back to your account when connectivity returns. The channel pilot comes first; gateway sync is the next phase.",
+  },
+];
 
 export function StoreClient() {
-  const [tab, setTab] = useState<Tab>("network");
+  const [interestKind, setInterestKind] = useState<InterestKind>("node");
+
+  function goToInterest(kind: InterestKind) {
+    setInterestKind(kind);
+    document.getElementById("interest")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   return (
     <div className="chapter scene-mesh">
-      <div className="mx-auto max-w-5xl px-4 py-12 md:px-8 md:py-16">
-        {/* Header */}
-        <div className="mb-10">
+      <div className="mx-auto max-w-5xl px-4 pb-16 md:px-8">
+        {/* Hero — the banner members asked to keep */}
+        <div className="pt-8 md:pt-12">
           <p className="mb-4 font-mono text-xs text-ash">» STORE — OFF-GRID HARDWARE</p>
-          <h1 className="heading-display mb-4 text-3xl text-gold md:text-5xl">
-            the mesh <span className="text-sun">store</span>
-          </h1>
-          <p className="max-w-2xl text-base leading-relaxed text-ash">
-            One device keeps you connected to your community when everything else drops out.
-          </p>
+          <div className="vessel relative overflow-hidden">
+            <MeshVisual className="h-72 w-full md:h-[26rem]" />
+            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
+              <p className="heading-display text-2xl text-gold md:text-4xl">
+                when the internet stops,
+                <br />
+                <span className="text-sun">the mesh doesn&apos;t.</span>
+              </p>
+              <p className="mt-3 max-w-md text-sm text-ash md:text-base">
+                Every dot is a neighbour. Every line is a message finding its way home.
+              </p>
+              <div className="pointer-events-auto mt-6 flex flex-wrap items-center justify-center gap-3">
+                <a
+                  href="#nodes"
+                  className="inline-flex items-center gap-2 rounded bg-sun px-5 py-2.5 text-[15px] font-medium text-void transition-colors hover:bg-sunhi"
+                >
+                  <Package className="h-4 w-4" /> Browse the shelf
+                </a>
+                <a
+                  href="#network"
+                  className="inline-flex items-center gap-2 rounded border border-line bg-void/40 px-5 py-2.5 text-[15px] text-parchment backdrop-blur-sm transition-colors hover:border-sun/40 hover:text-sun"
+                >
+                  How it connects <ArrowRight className="h-4 w-4" />
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Tabs */}
-        <div
-          role="tablist"
+        {/* Sticky section nav */}
+        <nav
           aria-label="Store sections"
-          className="mb-10 flex gap-1 overflow-x-auto border-b border-line"
+          className="sticky top-16 z-30 -mx-4 mt-6 overflow-x-auto border-y border-line bg-void/85 px-4 backdrop-blur-md md:-mx-8 md:px-8"
         >
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              role="tab"
-              aria-selected={tab === t.id}
-              onClick={() => setTab(t.id)}
-              className={cn(
-                "whitespace-nowrap border-b-2 px-4 py-2.5 text-[15px] transition-colors",
-                tab === t.id
-                  ? "border-sun text-gold"
-                  : "border-transparent text-ash hover:text-parchment"
-              )}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+          <div className="flex gap-1">
+            {SECTIONS.map((section) => (
+              <a
+                key={section.id}
+                href={`#${section.id}`}
+                className="whitespace-nowrap px-4 py-3 text-[15px] text-ash transition-colors hover:text-gold"
+              >
+                {section.label}
+              </a>
+            ))}
+          </div>
+        </nav>
 
-        {/* TAB 1 — the network: the concept, plain language */}
-        {tab === "network" && (
-          <div>
-            <div className="vessel relative mb-10 overflow-hidden">
-              <MeshVisual className="h-64 w-full md:h-96" />
-              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
-                <p className="heading-display text-2xl text-gold md:text-4xl">
-                  when the internet stops,
-                  <br />
-                  <span className="text-sun">the mesh doesn&apos;t.</span>
-                </p>
-                <p className="mt-3 max-w-md text-sm text-ash md:text-base">
-                  Every dot is a neighbour. Every line is a message finding its way home.
-                </p>
+        {/* ── The shelf ── */}
+        <section id="nodes" className="scroll-mt-32 pt-12">
+          <p className="mb-2 font-mono text-xs uppercase tracking-[0.18em] text-mercury">
+            the shelf
+          </p>
+          <h2 className="heading-display mb-3 text-2xl text-gold md:text-3xl">
+            Two ways onto the mesh
+          </h2>
+          <p className="mb-8 max-w-2xl text-base leading-relaxed text-ash">
+            Hardware is a commodity — the network is the channel, the verified members and the
+            community. Buy ready-made from a verified builder, or bring any compatible device.
+          </p>
+
+          <div className="grid gap-5 md:grid-cols-2">
+            <div className="vessel flex flex-col p-6">
+              <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-sun">
+                flagship
+              </p>
+              <h3 className="heading-display mb-2 text-2xl text-gold">The Antidosis Node</h3>
+              <p className="mb-4 text-[15px] leading-relaxed text-ash">
+                Cased, pre-flashed, channel pre-configured, app-pairing included. Power it on and
+                you&apos;re on the mesh — the plug-and-play way in.
+              </p>
+              <ul className="mb-6 space-y-1.5 text-[15px] text-parchment">
+                <li>· 915 MHz LoRa, ESP32-class, days of battery</li>
+                <li>· antidosis channel preconfigured (verified members)</li>
+                <li>· Pairs with the app over Bluetooth</li>
+                <li>· Engraved enclosure, Central Coast tested</li>
+              </ul>
+              <p className="mb-4 font-mono text-xs text-ash">
+                Price TBC — pilot batch pricing soon
+              </p>
+              <div className="mt-auto">
+                <button
+                  onClick={() => goToInterest("node")}
+                  className="inline-flex items-center gap-2 rounded bg-sun px-4 py-2 text-[15px] font-medium text-void transition-colors hover:bg-sunhi"
+                >
+                  <Package className="h-4 w-4" /> Notify me at launch
+                </button>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
-              {SIMPLE_STEPS.map((s, i) => (
-                <div
-                  key={s.title}
-                  className={cn("vessel p-4 sm:p-6", i === 2 && "col-span-2 md:col-span-1")}
+            <div className="vessel flex flex-col p-6">
+              <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-mercury">
+                bring your own
+              </p>
+              <h3 className="heading-display mb-2 text-2xl text-gold">Any device, our channel</h3>
+              <p className="mb-4 text-[15px] leading-relaxed text-ash">
+                Already have a node, or want to build one? Any Meshtastic-compatible device joins
+                the antidosis channel — no firmware changes, no exclusivity. The channel key is
+                distributed to verified members.
+              </p>
+              <ul className="mb-6 space-y-1.5 text-[15px] text-parchment">
+                <li>· Works alongside the public mesh</li>
+                <li>· Setup runbook below — five minutes</li>
+                <li>· Channel QR distributed to verified members</li>
+              </ul>
+              <div className="mt-auto">
+                <button
+                  onClick={() => goToInterest("byo_device")}
+                  className="inline-flex items-center gap-2 rounded border border-mercury/40 px-4 py-2 text-[15px] font-medium text-mercury transition-colors hover:bg-mercury/10"
                 >
-                  <p className="heading-display mb-3 text-3xl text-sun/40">0{i + 1}</p>
-                  <h3 className="mb-1.5 text-lg font-medium text-gold">{s.title}</h3>
-                  <p className="text-[15px] leading-relaxed text-ash">{s.body}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-8 flex flex-wrap items-center gap-4">
-              <button
-                onClick={() => setTab("get")}
-                className="inline-flex items-center gap-2 rounded bg-sun px-5 py-2.5 text-[15px] font-medium text-void transition-colors hover:bg-sunhi"
-              >
-                <Package className="h-4 w-4" /> See the nodes
-              </button>
-              <Link
-                href="/exchange?band=relay"
-                className="inline-flex items-center gap-2 text-[15px] text-ash transition-colors hover:text-gold"
-              >
-                <Radio className="h-4 w-4" /> Meanwhile, the relay works on the internet too
-                <ArrowRight className="h-4 w-4" />
-              </Link>
+                  <Radio className="h-4 w-4" /> Get channel access
+                </button>
+              </div>
             </div>
           </div>
-        )}
 
-        {/* TAB 2 — get a node */}
-        {tab === "get" && (
-          <div>
-            <div className="mb-8 grid gap-5 md:grid-cols-2">
-              <section className="vessel flex flex-col p-6">
-                <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-sun">
-                  flagship
-                </p>
-                <h2 className="heading-display mb-2 text-2xl text-gold">The Antidosis Node</h2>
-                <p className="mb-4 text-[15px] leading-relaxed text-ash">
-                  Cased, pre-flashed, channel pre-configured, app-pairing included. Power it on and
-                  you&apos;re on the mesh — the plug-and-play way in.
-                </p>
-                <ul className="mb-6 space-y-1.5 text-[15px] text-parchment">
-                  <li>· 915 MHz LoRa, ESP32-class, days of battery</li>
-                  <li>· antidosis channel preconfigured (verified members)</li>
-                  <li>· Pairs with the app over Bluetooth</li>
-                  <li>· Engraved enclosure, Central Coast tested</li>
-                </ul>
-                <p className="mb-4 font-mono text-xs text-ash">
-                  Price TBC — pilot batch pricing soon
-                </p>
-                <div className="mt-auto">
-                  <NotifyButton
-                    subject="Node notify"
-                    label="Express interest"
-                    href="/store/interest"
-                  />
-                </div>
-              </section>
-
-              <section className="vessel flex flex-col p-6">
-                <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-mercury">
-                  bring your own
-                </p>
-                <h2 className="heading-display mb-2 text-2xl text-gold">Any device, our channel</h2>
-                <p className="mb-4 text-[15px] leading-relaxed text-ash">
-                  Already have a node, or want to build one? Any Meshtastic-compatible device joins
-                  the antidosis channel — no firmware changes, no exclusivity. The channel key is
-                  distributed to verified members.
-                </p>
-                <ul className="mb-6 space-y-1.5 text-[15px] text-parchment">
-                  <li>· Works alongside the public mesh</li>
-                  <li>· Setup runbook below — five minutes</li>
-                  <li>· Channel QR distributed to verified members</li>
-                </ul>
-                <div className="mt-auto">
-                  <NotifyButton
-                    subject="Channel access"
-                    label="Get channel access"
-                    href="/store/interest"
-                  />
-                </div>
-              </section>
-            </div>
-
+          <div className="mt-10">
             <p className="mb-4 font-mono text-[10px] uppercase tracking-[0.2em] text-ash/70">
-              pilot shopping list — ~AU$150 gets you testing
+              pilot parts list — ~AU$150 gets you testing
             </p>
             <div className="vessel overflow-x-auto">
               <table className="w-full min-w-[480px] text-left text-[15px]">
@@ -262,69 +267,147 @@ export function StoreClient() {
               </table>
             </div>
             <p className="mt-3 text-sm text-ash">
-              Sourcing: Heltec/LilyGo/RAK official stores, or a verified node builder. Two nodes
+              Sourcing: Heltec/LilyGo/RAK official stores, or a verified builder below. Two nodes
               minimum for a range test — three if you can place one high.
             </p>
           </div>
-        )}
+        </section>
 
-        {/* TAB 3 — setup */}
-        {tab === "setup" && (
-          <div>
-            <p className="mb-8 max-w-2xl text-base leading-relaxed text-ash">
-              From box to mesh in about five minutes. If you can pair Bluetooth headphones, you can
-              do this.
-            </p>
-            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-              {RUNBOOK_STEPS.map((s) => (
-                <div key={s.step} className="vessel p-4 sm:p-5">
-                  <p className="heading-display mb-3 text-3xl text-sun/40">{s.step}</p>
-                  <h3 className="mb-1.5 text-base font-medium text-gold">{s.title}</h3>
-                  <p className="text-[15px] leading-relaxed text-ash">{s.body}</p>
-                </div>
-              ))}
-            </div>
-            <div className="mt-8">
-              <NotifyButton subject="Setup help" label="Stuck? Get setup help" />
-            </div>
-          </div>
-        )}
+        {/* ── How it connects ── */}
+        <section id="network" className="scroll-mt-32 pt-16">
+          <p className="mb-2 font-mono text-xs uppercase tracking-[0.18em] text-mercury">
+            how it connects
+          </p>
+          <h2 className="heading-display mb-3 text-2xl text-gold md:text-3xl">
+            One community, three layers
+          </h2>
+          <p className="mb-8 max-w-2xl text-base leading-relaxed text-ash">
+            The radio mesh is not a separate app or a separate network — it is the same antidosis
+            community on a transport that survives outages. Here is exactly how the pieces meet.
+          </p>
 
-        {/* TAB 4 — builders + the fine print */}
-        {tab === "builders" && (
-          <div>
-            <section className="mb-8 border border-line bg-surface/40 p-6 md:p-8">
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div>
-                  <p className="mb-1 flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-ash/70">
-                    <Wrench className="h-3 w-3" /> verified node builders
-                  </p>
-                  <h2 className="heading-display text-xl text-gold">Built by the community</h2>
-                  <p className="mt-1 max-w-lg text-[15px] text-ash">
-                    Local makers who sell pre-flashed, channel-ready nodes. Applications open —
-                    builders get listed here and receive buyer referrals from the platform.
-                  </p>
+          <div className="grid gap-4 md:grid-cols-3">
+            {CONNECTION_LAYERS.map((layer) => (
+              <div key={layer.title} className="vessel flex flex-col p-5 md:p-6">
+                <div className="flex items-center justify-between">
+                  <layer.icon className="h-6 w-6 text-sun" />
+                  <span
+                    className={cn(
+                      "rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider",
+                      layer.statusTone
+                    )}
+                  >
+                    {layer.status}
+                  </span>
                 </div>
-                <NotifyButton
-                  subject="Node builder application"
-                  label="For mesh builders"
-                  href="/store/builders"
-                />
+                <h3 className="mt-4 text-lg font-medium text-gold">{layer.title}</h3>
+                <p className="mt-2 text-[15px] leading-relaxed text-ash">{layer.body}</p>
               </div>
-              <p className="mt-5 border-t border-line/60 pt-4 text-sm italic text-ash">
-                No builders listed yet — the pilot is sourcing its first three. Range-test results
-                will be published here.
-              </p>
-            </section>
-
-            <p className="text-sm leading-relaxed text-ash/70">
-              Regulatory: 915–928 MHz ISM operation in Australia is licence-free under ACMA LIPD
-              class conditions; community mesh practice stays well inside power and duty-cycle
-              etiquette. Devices are communication tools — the antidosis exchange, contracts, and
-              verification remain on the platform.
-            </p>
+            ))}
           </div>
-        )}
+
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <div className="rounded-lg border border-line bg-surface/40 p-5">
+              <h4 className="flex items-center gap-2 text-base font-medium text-gold">
+                <Router className="h-4 w-4 text-mercury" /> Does the mesh see online needs?
+              </h4>
+              <p className="mt-2 text-sm leading-relaxed text-ash">
+                Not yet — and we won&apos;t pretend otherwise. Today the channel carries member text
+                between nodes. Gateway sync (the bridge above) is the phase that publishes verified
+                members&apos; needs to radios in the field and reconciles mesh activity back to
+                accounts. It is designed, documented and sequenced after the channel pilot proves
+                coverage.
+              </p>
+            </div>
+            <div className="rounded-lg border border-line bg-surface/40 p-5">
+              <h4 className="flex items-center gap-2 text-base font-medium text-gold">
+                <Satellite className="h-4 w-4 text-mercury" /> What if I never buy a node?
+              </h4>
+              <p className="mt-2 text-sm leading-relaxed text-ash">
+                Nothing changes — the exchange, Relay and contracts work online exactly as they do
+                now. A node is resilience, not a requirement: it keeps your neighbourhood reachable
+                in a blackout, a storm, or a dead zone, and relays for everyone else on the mesh.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-10 grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
+            {SIMPLE_STEPS.map((s, i) => (
+              <div
+                key={s.title}
+                className={cn("vessel p-4 sm:p-6", i === 2 && "col-span-2 md:col-span-1")}
+              >
+                <p className="heading-display mb-3 text-3xl text-sun/40">0{i + 1}</p>
+                <h3 className="mb-1.5 text-lg font-medium text-gold">{s.title}</h3>
+                <p className="text-[15px] leading-relaxed text-ash">{s.body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── Builders ── */}
+        <section id="builders" className="scroll-mt-32 pt-16">
+          <p className="mb-2 font-mono text-xs uppercase tracking-[0.18em] text-mercury">
+            verified node builders
+          </p>
+          <h2 className="heading-display mb-3 text-2xl text-gold md:text-3xl">
+            Built by the community
+          </h2>
+          <p className="mb-8 max-w-2xl text-base leading-relaxed text-ash">
+            Local makers who sell pre-flashed, channel-ready nodes. Every listing below is a real
+            member, manually approved, with their own product shelf. Buying from a builder keeps the
+            infrastructure — and the money — inside the community.
+          </p>
+          <BuildersMarket />
+        </section>
+
+        {/* ── Setup ── */}
+        <section id="setup" className="scroll-mt-32 pt-16">
+          <p className="mb-2 font-mono text-xs uppercase tracking-[0.18em] text-mercury">
+            set it up
+          </p>
+          <h2 className="heading-display mb-3 text-2xl text-gold md:text-3xl">
+            Box to mesh in five minutes
+          </h2>
+          <p className="mb-8 max-w-2xl text-base leading-relaxed text-ash">
+            If you can pair Bluetooth headphones, you can do this.
+          </p>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {RUNBOOK_STEPS.map((s) => (
+              <div key={s.step} className="vessel p-4 sm:p-5">
+                <p className="heading-display mb-3 text-3xl text-sun/40">{s.step}</p>
+                <h3 className="mb-1.5 text-base font-medium text-gold">{s.title}</h3>
+                <p className="text-[15px] leading-relaxed text-ash">{s.body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── Join the pilot ── */}
+        <section id="interest" className="scroll-mt-32 pt-16">
+          <p className="mb-2 font-mono text-xs uppercase tracking-[0.18em] text-mercury">
+            join the pilot
+          </p>
+          <h2 className="heading-display mb-3 text-2xl text-gold md:text-3xl">Get on the list</h2>
+          <p className="mb-8 max-w-2xl text-base leading-relaxed text-ash">
+            Launch updates, channel access for your own device, or plain mesh news — pick a lane,
+            leave an email, done. No account needed.
+          </p>
+          <InterestForm key={interestKind} initialKind={interestKind} />
+        </section>
+
+        {/* Fine print */}
+        <p className="mt-14 border-t border-line/60 pt-6 text-sm leading-relaxed text-ash/70">
+          Regulatory: 915–928 MHz ISM operation in Australia is licence-free under ACMA LIPD class
+          conditions; community mesh practice stays well inside power and duty-cycle etiquette.
+          Devices are communication tools — the antidosis exchange, contracts, and verification
+          remain on the platform. Antidosis is not the seller of builder-listed products; pricing,
+          warranty and delivery are between you and the builder.{" "}
+          <Link href="/safety" className="underline-offset-4 hover:text-gold hover:underline">
+            How we keep the platform safe
+          </Link>
+          .
+        </p>
       </div>
     </div>
   );

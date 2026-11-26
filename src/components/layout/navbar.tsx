@@ -54,14 +54,14 @@ const NAV_HUBS: NavHub[] = [
     links: [
       { href: "/store", label: "Mesh overview", description: "How a node keeps you connected" },
       {
-        href: "/store/interest",
-        label: "Express interest",
-        description: "Node launch, channel access and updates",
-      },
-      {
-        href: "/store/builders",
+        href: "/store#builders",
         label: "For mesh builders",
         description: "Build, test and supply community nodes",
+      },
+      {
+        href: "/store#interest",
+        label: "Join the pilot",
+        description: "Node launch, channel access and updates",
       },
     ],
   },
