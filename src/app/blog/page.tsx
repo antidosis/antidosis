@@ -83,187 +83,202 @@ function formatDate(iso: string) {
 
 export default function BlogIndexPage() {
   return (
-    <>
+    <div className="chapters flex min-h-screen flex-col bg-void text-gold">
       <Navbar />
-      <main className="min-h-screen pt-20">
-        <div className="max-w-6xl mx-auto px-4 md:px-8 py-16 md:py-24">
-          {/* Header */}
-          <div className="mb-14 md:mb-20 border border-line bg-surface/60 p-6 md:p-10 relative">
-            <CornerMark
-              pos="left-0 top-0 border-l border-t"
-              className="-translate-x-px -translate-y-px border-mercury/60"
-            />
-            <CornerMark
-              pos="right-0 top-0 border-r border-t"
-              className="translate-x-px -translate-y-px border-mercury/60"
-            />
-            <CornerMark
-              pos="left-0 bottom-0 border-l border-b"
-              className="-translate-x-px translate-y-px border-mercury/60"
-            />
-            <CornerMark
-              pos="right-0 bottom-0 border-r border-b"
-              className="translate-x-px translate-y-px border-mercury/60"
-            />
-            <div className="flex flex-wrap items-end justify-between gap-6">
-              <div>
-                <p className="text-xs font-mono text-ash mb-4">
-                  » TRANSMISSION LOG — {blogPosts.length} RECORDS
-                </p>
-                <h1 className="heading-display text-4xl md:text-6xl text-gold mb-4">Blog</h1>
-                <p className="text-parchment max-w-xl leading-relaxed">
-                  Guides, stories, and insights about barter, exchange, and building a network that
-                  keeps working — on the Central Coast.
-                </p>
-              </div>
-              <div
-                aria-hidden
-                className="hidden md:block font-mono text-[10px] text-ash/60 leading-relaxed text-right"
-              >
-                FREQ 146.520MHZ
-                <br />
-                MODE FM — OPEN
-                <br />
-                NET STATUS: ON AIR
+      <main className="flex-1 pt-20">
+        {/* Header — the journal strata */}
+        <section className="chapter scene-strata">
+          <div className="max-w-6xl mx-auto px-4 md:px-8 py-14 md:py-20">
+            <div className="border border-line bg-surface/60 p-6 md:p-10 relative">
+              <CornerMark
+                pos="left-0 top-0 border-l border-t"
+                className="-translate-x-px -translate-y-px border-mercury/60"
+              />
+              <CornerMark
+                pos="right-0 top-0 border-r border-t"
+                className="translate-x-px -translate-y-px border-mercury/60"
+              />
+              <CornerMark
+                pos="left-0 bottom-0 border-l border-b"
+                className="-translate-x-px translate-y-px border-mercury/60"
+              />
+              <CornerMark
+                pos="right-0 bottom-0 border-r border-b"
+                className="translate-x-px translate-y-px border-mercury/60"
+              />
+              <div className="flex flex-wrap items-end justify-between gap-6">
+                <div>
+                  <p className="text-xs font-mono text-ash mb-4">
+                    » TRANSMISSION LOG — {blogPosts.length} RECORDS
+                  </p>
+                  <h1 className="heading-display text-4xl md:text-6xl text-gold mb-4">Blog</h1>
+                  <p className="text-parchment max-w-xl leading-relaxed">
+                    Guides, stories, and insights about barter, exchange, and building a network
+                    that keeps working — on the Central Coast.
+                  </p>
+                </div>
+                <div
+                  aria-hidden
+                  className="hidden md:block font-mono text-[10px] text-ash/60 leading-relaxed text-right"
+                >
+                  FREQ 146.520MHZ
+                  <br />
+                  MODE FM — OPEN
+                  <br />
+                  NET STATUS: ON AIR
+                </div>
               </div>
             </div>
           </div>
+        </section>
 
-          {/* Mosaic grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-            {blogPosts.map((post, i) => {
-              const accent = ACCENTS[i % ACCENTS.length];
-              // Every 7th card after the first goes wide with a horizontal layout
-              const wide = i > 0 && i % 7 === 6;
-              const featured = i === 0;
-              return (
-                <Fragment key={post.slug}>
-                  <article
-                    className={cn(
-                      "group relative border bg-surface/40 p-5 md:p-6 flex flex-col transition-all duration-200",
-                      "hover:bg-surface/70 hover:-translate-y-0.5 hover:border-linehi",
-                      wide ? "md:col-span-2" : "",
-                      featured ? "lg:col-span-2 lg:row-span-1" : "",
-                      accent.border
-                    )}
-                  >
-                    {/* Registration corners */}
-                    <CornerMark
-                      pos="left-0 top-0 border-l border-t"
-                      className={cn(accent.border, "-translate-x-px -translate-y-px")}
-                    />
-                    <CornerMark
-                      pos="right-0 top-0 border-r border-t"
-                      className={cn(accent.border, "translate-x-px -translate-y-px")}
-                    />
-                    <CornerMark
-                      pos="left-0 bottom-0 border-l border-b"
-                      className={cn(accent.border, "-translate-x-px translate-y-px")}
-                    />
-                    <CornerMark
-                      pos="right-0 bottom-0 border-r border-b"
-                      className={cn(accent.border, "translate-x-px translate-y-px")}
-                    />
+        {/* Mosaic grid — plain chapter: the cards carry the design */}
+        <section className="chapter">
+          <div className="max-w-6xl mx-auto px-4 md:px-8 py-12 md:py-16">
+            <div className="grid grid-cols-2 gap-3 md:gap-5 lg:grid-cols-3">
+              {blogPosts.map((post, i) => {
+                const accent = ACCENTS[i % ACCENTS.length];
+                // Every 7th card after the first goes wide with a horizontal layout
+                const wide = i > 0 && i % 7 === 6;
+                const featured = i === 0;
+                return (
+                  <Fragment key={post.slug}>
+                    <article
+                      className={cn(
+                        "group relative border bg-surface/40 p-4 sm:p-5 md:p-6 flex flex-col transition-all duration-200",
+                        "hover:bg-surface/70 hover:-translate-y-0.5 hover:border-linehi",
+                        wide ? "col-span-2" : "",
+                        featured ? "col-span-2 lg:col-span-2 lg:row-span-1" : "",
+                        accent.border
+                      )}
+                    >
+                      {/* Registration corners */}
+                      <CornerMark
+                        pos="left-0 top-0 border-l border-t"
+                        className={cn(accent.border, "-translate-x-px -translate-y-px")}
+                      />
+                      <CornerMark
+                        pos="right-0 top-0 border-r border-t"
+                        className={cn(accent.border, "translate-x-px -translate-y-px")}
+                      />
+                      <CornerMark
+                        pos="left-0 bottom-0 border-l border-b"
+                        className={cn(accent.border, "-translate-x-px translate-y-px")}
+                      />
+                      <CornerMark
+                        pos="right-0 bottom-0 border-r border-b"
+                        className={cn(accent.border, "translate-x-px translate-y-px")}
+                      />
 
-                    <Link href={`/blog/${post.slug}`} className="flex h-full flex-col">
-                      {/* Index row */}
-                      <div className="flex items-center justify-between mb-4">
-                        <span className={cn("font-mono text-[11px] tracking-widest", accent.ghost)}>
-                          {txId(i + 1)}
-                        </span>
-                        <span
-                          aria-hidden
-                          className={cn("font-mono text-[11px] tracking-widest", accent.ghost)}
-                        >
-                          ━━━
-                        </span>
-                      </div>
-
-                      {/* Tags */}
-                      <div className="flex flex-wrap gap-1.5 mb-3">
-                        {post.tags.map((tag) => (
+                      <Link href={`/blog/${post.slug}`} className="flex h-full flex-col">
+                        {/* Index row */}
+                        <div className="flex items-center justify-between mb-4">
                           <span
-                            key={tag}
+                            className={cn("font-mono text-[11px] tracking-widest", accent.ghost)}
+                          >
+                            {txId(i + 1)}
+                          </span>
+                          <span
+                            aria-hidden
+                            className={cn("font-mono text-[11px] tracking-widest", accent.ghost)}
+                          >
+                            ━━━
+                          </span>
+                        </div>
+
+                        {/* Tags */}
+                        <div className="flex flex-wrap gap-1.5 mb-3">
+                          {post.tags.map((tag) => (
+                            <span
+                              key={tag}
+                              className={cn(
+                                "text-xs font-mono uppercase tracking-wider px-1.5 py-1 border",
+                                accent.border,
+                                accent.bg,
+                                accent.text
+                              )}
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+
+                        <h2
+                          className={cn(
+                            "heading-display text-gold group-hover:text-parchment transition-colors mb-2",
+                            featured
+                              ? "text-2xl md:text-3xl"
+                              : wide
+                                ? "text-xl md:text-2xl"
+                                : "text-base sm:text-lg"
+                          )}
+                        >
+                          {post.title}
+                        </h2>
+                        <p
+                          className={cn(
+                            "text-xs sm:text-sm text-parchment/85 leading-relaxed mb-5",
+                            featured ? "" : "line-clamp-2 sm:line-clamp-3"
+                          )}
+                        >
+                          {post.excerpt}
+                        </p>
+
+                        <div className="mt-auto flex items-center justify-between gap-3 border-t border-line/60 pt-3">
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ash">
+                            <span className="flex items-center gap-1.5">
+                              <Calendar className="h-3 w-3" />
+                              {formatDate(post.publishedAt)}
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                              <Clock className="h-3 w-3" />
+                              {post.readingTime}
+                            </span>
+                          </div>
+                          <span
                             className={cn(
-                              "text-xs font-mono uppercase tracking-wider px-1.5 py-1 border",
-                              accent.border,
-                              accent.bg,
+                              "flex shrink-0 items-center gap-1.5 font-mono text-[11px] tracking-wider",
                               accent.text
                             )}
                           >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-
-                      <h2
-                        className={cn(
-                          "heading-display text-gold group-hover:text-parchment transition-colors mb-2",
-                          featured
-                            ? "text-2xl md:text-3xl"
-                            : wide
-                              ? "text-xl md:text-2xl"
-                              : "text-lg"
-                        )}
-                      >
-                        {post.title}
-                      </h2>
-                      <p
-                        className={cn(
-                          "text-sm text-parchment/85 leading-relaxed mb-5",
-                          featured ? "" : "line-clamp-3"
-                        )}
-                      >
-                        {post.excerpt}
-                      </p>
-
-                      <div className="mt-auto flex items-center justify-between gap-3 border-t border-line/60 pt-3">
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ash">
-                          <span className="flex items-center gap-1.5">
-                            <Calendar className="h-3 w-3" />
-                            {formatDate(post.publishedAt)}
-                          </span>
-                          <span className="flex items-center gap-1.5">
-                            <Clock className="h-3 w-3" />
-                            {post.readingTime}
+                            READ
+                            <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
                           </span>
                         </div>
-                        <span
-                          className={cn(
-                            "flex shrink-0 items-center gap-1.5 font-mono text-[11px] tracking-wider",
-                            accent.text
-                          )}
-                        >
-                          READ
-                          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-                        </span>
-                      </div>
-                    </Link>
-                  </article>
-                  {/* In-feed sponsored placement (reserved for Phase 2 featured listings) */}
-                  {i === 5 && (
-                    <SponsoredSlot placement="blog-feed" className="md:col-span-2 lg:col-span-3" />
-                  )}
-                </Fragment>
-              );
-            })}
+                      </Link>
+                    </article>
+                    {/* In-feed sponsored placement (reserved for Phase 2 featured listings) */}
+                    {i === 5 && (
+                      <SponsoredSlot
+                        placement="blog-feed"
+                        className="md:col-span-2 lg:col-span-3"
+                      />
+                    )}
+                  </Fragment>
+                );
+              })}
+            </div>
           </div>
+        </section>
 
-          {/* CTA */}
-          <div className="mt-16 border border-line bg-surface/40 p-6 md:p-8 text-center">
-            <p className="text-sm text-parchment mb-4">Want to share your exchange story?</p>
-            <EmailLink
-              email="support@antidosis.com"
-              subject="Blog Submission"
-              className="inline-flex items-center gap-2 text-sm text-mercury hover:underline"
-            >
-              Submit an article idea
-              <ArrowRight className="h-4 w-4" />
-            </EmailLink>
+        {/* CTA */}
+        <section className="chapter scene-target">
+          <div className="max-w-6xl mx-auto px-4 md:px-8 py-14 md:py-20">
+            <div className="border border-line bg-surface/40 p-6 md:p-8 text-center">
+              <p className="text-sm text-parchment mb-4">Want to share your exchange story?</p>
+              <EmailLink
+                email="support@antidosis.com"
+                subject="Blog Submission"
+                className="inline-flex items-center gap-2 text-sm text-mercury hover:underline"
+              >
+                Submit an article idea
+                <ArrowRight className="h-4 w-4" />
+              </EmailLink>
+            </div>
           </div>
-        </div>
+        </section>
       </main>
       <Footer />
-    </>
+    </div>
   );
 }

@@ -62,7 +62,8 @@ describe("sitemap", () => {
 
     expect(urls).toContain("https://antidosis.com/");
     expect(urls).toContain("https://antidosis.com/examples");
-    expect(urls).toHaveLength(17 + blogPosts.length);
+    expect(urls).toContain("https://antidosis.com/safety");
+    expect(urls).toHaveLength(18 + blogPosts.length);
     expect(urls.some((url) => url.includes("/needs/need-live"))).toBe(false);
   });
 });

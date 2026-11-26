@@ -8,15 +8,15 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CopyLinkButton } from "@/components/ui/copy-link";
 import { useToast } from "@/components/ui/toast";
-import { professionDisplayLabel } from "@/lib/professions";
 import {
-  downloadSvgAsPng,
-  fetchSiteLogoDataUrl,
-  formatRatingLine,
-  renderShareCardSvg,
-  SHARE_CARD_THEMES,
-  type ShareCardTheme,
-} from "@/lib/share-card";
+  BUSINESS_CARD_TEXTURES,
+  formatAbnDisplay,
+  renderBusinessCardSvg,
+  type BusinessCardTexture,
+} from "@/lib/business-card";
+import { exchangeModeLabel, parseExchangeModes } from "@/lib/exchange-modes";
+import { professionDisplayLabel } from "@/lib/professions";
+import { downloadSvgAsPng, fetchSiteLogoDataUrl, formatRatingLine } from "@/lib/share-card";
 import { useApi } from "@/lib/swr-config";
 import { cn } from "@/lib/utils";
 
@@ -33,6 +33,7 @@ interface ShareBusinessCardProps {
     isVerified: boolean;
     ratingAvg: number;
     ratingCount: number;
+    acceptedExchanges: string[];
   };
 }
 
@@ -43,13 +44,17 @@ interface SpecialtyRecord {
   slot: number;
 }
 
-/** The directory listing's own card — same machinery as the connection card,
- *  but the business leads: trading name, specialties, business contact. */
+/**
+ * The directory listing's own card. Deliberately not the connection card:
+ * texture-led materials (carbon, titanium, circuit, topo, aurora), the
+ * trading name leads, and the listing's accepted exchange forms are on the
+ * face — it reads as a business card, not a profile card.
+ */
 export function ShareBusinessCard({ profile }: ShareBusinessCardProps) {
   const { toast } = useToast();
   const [sharing, setSharing] = useState(false);
   const [downloading, setDownloading] = useState(false);
-  const [theme, setTheme] = useState<ShareCardTheme>(SHARE_CARD_THEMES[0]);
+  const [texture, setTexture] = useState<BusinessCardTexture>(BUSINESS_CARD_TEXTURES[0]);
   const { data: specialtiesData } = useApi<{ specialties: SpecialtyRecord[] }>(
     "/api/v1/profiles/me/specialties"
   );
@@ -61,7 +66,12 @@ export function ShareBusinessCard({ profile }: ShareBusinessCardProps) {
   const specialtyLabels = specialties.map((specialty) =>
     professionDisplayLabel(specialty.profession)
   );
+  const acceptLabels = parseExchangeModes(profile.acceptedExchanges).map(exchangeModeLabel);
   const listingUrl = `${window.location.origin}/pros/${profile.id}`;
+  const contactLine =
+    [profile.locationName, profile.businessPhone, profile.businessEmail]
+      .filter(Boolean)
+      .join("  ·  ") || "Central Coast NSW";
 
   async function nativeShare() {
     setSharing(true);
@@ -88,25 +98,16 @@ export function ShareBusinessCard({ profile }: ShareBusinessCardProps) {
     setDownloading(true);
     try {
       const logo = await fetchSiteLogoDataUrl();
-      const line = [profile.locationName, profile.businessPhone, profile.businessEmail]
-        .filter(Boolean)
-        .join("  ·  ");
-      const meta = [
-        formatRatingLine(profile.ratingAvg, profile.ratingCount),
-        profile.abn ? `ABN ${profile.abn}` : null,
-      ]
-        .filter(Boolean)
-        .join("  ·  ");
-      const svg = renderShareCardSvg({
-        badge: "BUSINESS CARD",
+      const svg = renderBusinessCardSvg({
         name,
         subtitle: specialtyLabels[0] ?? "Directory listing",
-        line: line || "Central Coast NSW",
-        chips: specialtyLabels,
-        meta,
+        line: contactLine,
+        specialties: specialtyLabels,
+        accepts: acceptLabels,
+        abn: profile.abn ? formatAbnDisplay(profile.abn) : null,
         cta: "Find us in the Antidosis directory.",
         url: `antidosis.com/pros/${profile.id}`,
-        theme,
+        texture,
         logoDataUrl: logo,
       });
       await downloadSvgAsPng(svg, `antidosis-listing-${profile.id.slice(0, 8)}-card.png`);
@@ -118,23 +119,27 @@ export function ShareBusinessCard({ profile }: ShareBusinessCardProps) {
     }
   }
 
+  const ratingLine = formatRatingLine(profile.ratingAvg, profile.ratingCount);
+
   return (
     <div>
       <div className="mb-2.5 flex items-center gap-1.5">
-        <span className="mr-1 font-mono text-[10px] uppercase tracking-[0.2em] text-ash">Card</span>
-        {SHARE_CARD_THEMES.map((option) => (
+        <span className="mr-1 font-mono text-[10px] uppercase tracking-[0.2em] text-ash">
+          Material
+        </span>
+        {BUSINESS_CARD_TEXTURES.map((option) => (
           <button
             key={option.id}
             type="button"
             title={`${option.label} card`}
-            aria-pressed={theme.id === option.id}
-            aria-label={`${option.label} card theme`}
-            onClick={() => setTheme(option)}
+            aria-pressed={texture.id === option.id}
+            aria-label={`${option.label} card material`}
+            onClick={() => setTexture(option)}
             className={cn(
-              "h-5 w-5 rounded-full border transition-transform",
-              theme.id === option.id ? "scale-110 border-gold" : "border-line hover:scale-105"
+              "h-6 w-6 rounded-md border transition-transform",
+              texture.id === option.id ? "scale-110 border-gold" : "border-line hover:scale-105"
             )}
-            style={{ backgroundColor: option.accent }}
+            style={{ backgroundColor: option.base, backgroundImage: option.cssBackground }}
           />
         ))}
       </div>
@@ -142,31 +147,34 @@ export function ShareBusinessCard({ profile }: ShareBusinessCardProps) {
       <div
         className="relative overflow-hidden rounded-xl border"
         style={{
-          background: `linear-gradient(135deg, ${theme.bgFrom}, ${theme.bgTo})`,
-          borderColor: `${theme.accent}33`,
+          backgroundColor: texture.base,
+          backgroundImage: texture.cssBackground,
+          borderColor: `${texture.accent}40`,
         }}
       >
+        {/* frame + spine — mirrors the PNG render */}
         <div
-          className="absolute inset-x-0 top-0 h-1"
-          style={{ background: `linear-gradient(90deg, ${theme.accent}, transparent)` }}
+          className="pointer-events-none absolute inset-3 rounded-lg border"
+          style={{ borderColor: `${texture.accent}4d` }}
         />
         <div
-          className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full border"
-          style={{ borderColor: `${theme.accent}26` }}
+          className="pointer-events-none absolute bottom-3 left-3 top-3 w-1.5"
+          style={{ backgroundColor: `${texture.accent}bf` }}
         />
-        <div className="relative flex flex-col p-6">
+
+        <div className="relative flex flex-col p-6 pl-8 sm:p-7 sm:pl-9">
           <div className="flex items-start justify-between gap-3">
             <img
               src="/images/logo-sm.webp"
               alt="Antidosis"
               className="h-10 w-auto"
-              style={{ filter: `drop-shadow(0 0 12px ${theme.accent}55)` }}
+              style={{ filter: `drop-shadow(0 0 12px ${texture.accent}55)` }}
             />
             <span
               className="mt-1 font-mono text-[9px] uppercase tracking-[0.25em]"
-              style={{ color: `${theme.accent}b3` }}
+              style={{ color: `${texture.accent}b3` }}
             >
-              Business card
+              Antidosis directory
             </span>
           </div>
 
@@ -176,68 +184,88 @@ export function ShareBusinessCard({ profile }: ShareBusinessCardProps) {
               name={name}
               size="lg"
               className="h-16 w-16 shrink-0"
-              style={{ boxShadow: `0 0 0 2px ${theme.accent}40` }}
+              style={{ boxShadow: `0 0 0 2px ${texture.accent}40` }}
             />
             <div className="min-w-0 flex-1">
               <p className="flex items-center gap-1.5">
-                <span className="heading-display truncate text-2xl leading-tight text-[#f4f7f2]">
+                <span
+                  className="heading-display truncate text-2xl leading-tight"
+                  style={{ color: texture.ink }}
+                >
                   {name}
                 </span>
                 {profile.isVerified && (
-                  <ShieldCheck className="h-4 w-4 shrink-0" style={{ color: theme.accent }} />
+                  <ShieldCheck className="h-4 w-4 shrink-0" style={{ color: texture.accent }} />
                 )}
               </p>
               <p
                 className="mt-0.5 flex items-center gap-1.5 font-mono text-sm"
-                style={{ color: theme.accentSoft }}
+                style={{ color: texture.accentSoft }}
               >
                 <Building2 className="h-3.5 w-3.5 shrink-0" />
-                <span className="truncate">
-                  {specialtyLabels.join(" · ") || "Directory listing"}
-                </span>
+                <span className="truncate">{specialtyLabels[0] ?? "Directory listing"}</span>
               </p>
-              <p className="mt-1.5 flex flex-wrap items-center gap-x-2 text-xs text-[#9fb5aa]">
-                {profile.locationName && <span>{profile.locationName}</span>}
-                {profile.businessPhone && <span>· {profile.businessPhone}</span>}
-                {profile.ratingCount > 0 && (
-                  <span>
-                    · {profile.ratingAvg.toFixed(1)} ({profile.ratingCount} reviews)
-                  </span>
-                )}
+              <p
+                className="mt-1.5 truncate text-xs"
+                style={{ color: texture.sub }}
+                title={contactLine}
+              >
+                {contactLine}
+                {ratingLine ? `  ·  ${ratingLine}` : ""}
               </p>
             </div>
-            <span
-              className="hidden shrink-0 rotate-90 font-mono text-[10px] uppercase tracking-[0.3em] [writing-mode:vertical-rl] sm:block"
-              style={{ color: `${theme.accent}66` }}
-            >
-              Antidosis
-            </span>
           </div>
 
           {specialtyLabels.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-1.5">
-              {specialtyLabels.map((label) => (
+              {specialtyLabels.slice(0, 4).map((label) => (
                 <span
                   key={label}
-                  className="rounded-full border px-2.5 py-1 text-xs"
+                  className="rounded-md border px-2.5 py-1 text-xs"
                   style={{
-                    borderColor: `${theme.accent}59`,
-                    color: theme.accentSoft,
-                    backgroundColor: `${theme.accent}1a`,
+                    borderColor: `${texture.accent}66`,
+                    color: texture.accentSoft,
+                    backgroundColor: `${texture.accent}1a`,
                   }}
                 >
                   {label}
                 </span>
               ))}
+              {specialtyLabels.length > 4 && (
+                <span
+                  className="rounded-md border px-2.5 py-1 text-xs"
+                  style={{ borderColor: `${texture.accent}40`, color: texture.sub }}
+                >
+                  +{specialtyLabels.length - 4}
+                </span>
+              )}
             </div>
           )}
 
-          <p className="heading-display mt-6 text-lg leading-snug text-[#f4f7f2]">
-            Find us in the Antidosis directory.
-          </p>
-          <p className="mt-1.5 font-mono text-xs" style={{ color: theme.accent }}>
-            antidosis.com/pros/{profile.id}
-          </p>
+          {acceptLabels.length > 0 && (
+            <p className="mt-4 font-mono text-[11px] leading-relaxed">
+              <span className="mr-2 uppercase tracking-[0.2em]" style={{ color: texture.accent }}>
+                Accepts
+              </span>
+              <span style={{ color: texture.ink }}>{acceptLabels.join("  ·  ")}</span>
+            </p>
+          )}
+
+          <div className="mt-5 border-t pt-4" style={{ borderColor: `${texture.accent}26` }}>
+            <p className="heading-display text-lg leading-snug" style={{ color: texture.ink }}>
+              Find us in the Antidosis directory.
+            </p>
+            <div className="mt-1.5 flex items-baseline justify-between gap-3">
+              <p className="min-w-0 truncate font-mono text-xs" style={{ color: texture.accent }}>
+                antidosis.com/pros/{profile.id}
+              </p>
+              {profile.abn && (
+                <p className="shrink-0 font-mono text-[11px]" style={{ color: texture.sub }}>
+                  ABN {formatAbnDisplay(profile.abn)}
+                </p>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 

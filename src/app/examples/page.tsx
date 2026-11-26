@@ -854,11 +854,11 @@ export default function ExamplesPage() {
     categoryFilter === "all" ? examples : examples.filter((e) => e.category === categoryFilter);
 
   return (
-    <div className="min-h-screen bg-void text-gold flex flex-col">
+    <div className="chapters min-h-screen bg-void text-gold flex flex-col">
       <Navbar />
       <main className="flex-1">
         {/* Hero */}
-        <section className="pt-32 pb-16 md:pt-40 md:pb-20">
+        <section className="chapter scene-beacon pt-32 pb-16 md:pt-40 md:pb-20">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <p className="text-xs text-ash mb-8 font-mono">
               » EXAMPLE CATALOGUE — ILLUSTRATIONS ONLY
@@ -884,12 +884,10 @@ export default function ExamplesPage() {
           </div>
         </section>
 
-        <div className="divider" />
-
         {/* Concept Explainer */}
-        <section className="py-12">
+        <section className="chapter scene-ember py-12 md:py-16">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
-            <div className="grid sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
               <div className="vessel p-5">
                 <div className="inline-flex bg-raise p-3 rounded-md text-sun mb-4">
                   <Shuffle className="h-5 w-5" />
@@ -911,7 +909,7 @@ export default function ExamplesPage() {
                   your way past.
                 </p>
               </div>
-              <div className="vessel p-5">
+              <div className="vessel col-span-2 p-5 sm:col-span-1">
                 <div className="inline-flex bg-raise p-3 rounded-md text-ok mb-4">
                   <Heart className="h-5 w-5" />
                 </div>
@@ -926,10 +924,8 @@ export default function ExamplesPage() {
           </div>
         </section>
 
-        <div className="divider" />
-
-        {/* Filters */}
-        <section className="py-8">
+        {/* Filters — plain chapter: a control strip, not a meaning change */}
+        <section className="chapter py-8">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <p className="text-xs text-ash mb-4 font-mono">» CHANNELS — FILTER BY TYPE</p>
             <div className="flex flex-wrap gap-2">
@@ -948,9 +944,9 @@ export default function ExamplesPage() {
         </section>
 
         {/* Examples Grid */}
-        <section className="pb-20 md:pb-28">
+        <section className="chapter scene-scan border-t-0 pb-20 pt-8 md:pb-28">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
               {filtered.map((example) => {
                 const catMeta = getExchangeMode(example.category);
                 return (
@@ -1017,10 +1013,8 @@ export default function ExamplesPage() {
           </div>
         </section>
 
-        <div className="divider" />
-
         {/* Inspiration Section */}
-        <section className="py-16 md:py-24">
+        <section className="chapter scene-bloom py-16 md:py-24">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <p className="text-xs text-ash mb-8 font-mono">
               » COMMON QUESTIONS — CLEARING THE STATIC
@@ -1031,7 +1025,7 @@ export default function ExamplesPage() {
               <span className="text-sun">Here Are Some Truths.</span>
             </h2>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
               {[
                 {
                   q: "I don't have anything valuable.",
@@ -1071,10 +1065,8 @@ export default function ExamplesPage() {
           </div>
         </section>
 
-        <div className="divider" />
-
         {/* CTA */}
-        <section className="py-20 md:py-28">
+        <section className="chapter scene-target py-20 md:py-28">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <p className="text-xs text-ash mb-8 font-mono">◉ BROADCAST YOUR NEED</p>
             <h2 className="heading-display text-3xl md:text-5xl text-gold mb-6">

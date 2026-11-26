@@ -602,92 +602,11 @@
     color: transparent;
   }
 
-  /* ─── Section treatments — SELECTIVE BY DESIGN ───
-   The default section stays plain. These two surfaces mark a change in
-   meaning, not merely a change in scroll position. Every colour comes from
-   the active theme; nothing animates or repaints while the reader scrolls.
-
-   section-plateau — TRUST / INFRASTRUCTURE. A broad, raised surface with a
-   quiet light source above it. The absence of a pattern is deliberate:
-   verification and agreements should feel stable, not decorative.
-
-   section-constellation — COMMUNITY / RELAY. Signal rings originate beyond
-   the content edge, implying a network larger than the visible viewport.
-   One emitter, three faint wavefronts, and a low horizon glow. */
-
-  .section-plateau {
-    position: relative;
-    isolation: isolate;
-    background-color: rgb(var(--c-inset));
-    background-image:
-      radial-gradient(ellipse 75% 85% at 12% 0%, rgb(var(--c-ok) / 0.075), transparent 68%),
-      linear-gradient(
-        145deg,
-        rgb(var(--c-void)) 0%,
-        rgb(var(--c-inset)) 52%,
-        rgb(var(--c-surface)) 100%
-      );
-    box-shadow: inset 0 1px rgb(var(--c-linehi) / 0.32);
-  }
-
-  .section-constellation {
-    position: relative;
-    isolation: isolate;
-    overflow: hidden;
-    background-color: rgb(var(--c-void));
-    background-image:
-      radial-gradient(ellipse 65% 75% at 88% 55%, rgb(var(--c-mercury) / 0.085), transparent 70%),
-      linear-gradient(180deg, rgb(var(--c-void)), rgb(var(--c-inset)) 55%, rgb(var(--c-void)));
-    box-shadow: inset 0 1px rgb(var(--c-linehi) / 0.28);
-  }
-
-  .section-constellation::before {
-    content: "";
-    position: absolute;
-    z-index: -1;
-    top: 50%;
-    right: -13rem;
-    width: 36rem;
-    aspect-ratio: 1;
-    transform: translateY(-50%);
-    border: 1px solid rgb(var(--c-mercury) / 0.12);
-    border-radius: 50%;
-    box-shadow:
-      0 0 0 5rem rgb(var(--c-void)),
-      0 0 0 calc(5rem + 1px) rgb(var(--c-mercury) / 0.09),
-      0 0 0 10rem rgb(var(--c-void)),
-      0 0 0 calc(10rem + 1px) rgb(var(--c-mercury) / 0.065);
-  }
-
-  .section-constellation::after {
-    content: "";
-    position: absolute;
-    z-index: -1;
-    top: calc(50% - 3px);
-    right: 4.7rem;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: rgb(var(--c-mercury) / 0.8);
-    box-shadow: 0 0 24px 5px rgb(var(--c-mercury) / 0.18);
-  }
-
   @media (prefers-reduced-motion: reduce) {
     .reveal {
       opacity: 1 !important;
       transform: none !important;
       transition: none !important;
-    }
-  }
-
-  @media (max-width: 767px) {
-    .section-constellation::before {
-      right: -22rem;
-      opacity: 0.65;
-    }
-
-    .section-constellation::after {
-      display: none;
     }
   }
 
@@ -2275,6 +2194,311 @@
     0 0 0 7.0625rem rgb(var(--c-ok) / 0.06);
 }
 
+/* ─── Shared page chapters: one bespoke scene per section ───
+   Every marketing page composes these so no two adjacent sections share
+   the same background. All values come from theme tokens, so each scene
+   re-tunes itself for light and dark themes automatically. */
+.chapters {
+  position: relative;
+  isolation: isolate;
+  background: rgb(var(--c-void));
+}
+
+.chapters > main,
+.chapters > footer {
+  position: relative;
+  z-index: 1;
+}
+
+.chapter {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-top: 1px solid rgb(var(--c-line) / 0.8);
+  /* Skip layout/paint of off-screen chapters; the browser keeps the real
+     size once rendered so the scrollbar stays stable. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 720px;
+}
+
+.chapter:first-of-type {
+  border-top: 0;
+}
+
+.chapter > * {
+  position: relative;
+  z-index: 2;
+}
+
+.chapter::before,
+.chapter::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+/* Beacon — the opening transmission: antenna pinstripes over an ok glow. */
+.chapter.scene-beacon {
+  background:
+    radial-gradient(ellipse 48% 70% at 80% 36%, rgb(var(--c-ok) / 0.08), transparent 72%),
+    linear-gradient(
+      112deg,
+      rgb(var(--c-void) / 0.94) 8%,
+      rgb(var(--c-void) / 0.72) 52%,
+      rgb(var(--c-surface) / 0.7)
+    );
+}
+
+.chapter.scene-beacon::before {
+  inset: 0;
+  opacity: 0.25;
+  background-image: linear-gradient(
+    90deg,
+    transparent calc(100% - 1px),
+    rgb(var(--c-line) / 0.36) 1px
+  );
+  background-size: 12.5% 100%;
+  mask-image: linear-gradient(180deg, transparent, black 30%, transparent 92%);
+}
+
+/* Ember — warm exchange energy: a sun dotfield drifting in from the left. */
+.chapter.scene-ember {
+  background:
+    radial-gradient(ellipse 55% 70% at 0% 40%, rgb(var(--c-sun) / 0.075), transparent 70%),
+    linear-gradient(180deg, rgb(var(--c-surface)), rgb(var(--c-inset)) 52%, rgb(var(--c-void)));
+}
+
+.chapter.scene-ember::before {
+  inset: 0;
+  opacity: 0.32;
+  background-image: radial-gradient(rgb(var(--c-sun) / 0.25) 0.7px, transparent 0.7px);
+  background-size: 18px 18px;
+  mask-image: linear-gradient(90deg, black, transparent 38%);
+}
+
+/* Ledger — the signal path: one aqua line every step crosses. */
+.chapter.scene-ledger {
+  background: linear-gradient(
+    105deg,
+    rgb(var(--c-inset)),
+    rgb(var(--c-surface)) 48%,
+    rgb(var(--c-inset))
+  );
+}
+
+.chapter.scene-ledger::before {
+  top: 50%;
+  right: 4%;
+  left: 4%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(var(--c-aqua) / 0.3) 14%,
+    rgb(var(--c-aqua) / 0.3) 86%,
+    transparent
+  );
+  box-shadow: 0 0 2rem rgb(var(--c-aqua) / 0.08);
+}
+
+.chapter.scene-ledger::after {
+  inset: 0;
+  background: radial-gradient(
+    ellipse 50% 70% at 50% 110%,
+    rgb(var(--c-aqua) / 0.055),
+    transparent 70%
+  );
+}
+
+/* Orbit — agreements in motion: mercury rings circling the terms. */
+.chapter.scene-orbit {
+  background:
+    radial-gradient(ellipse 42% 85% at 86% 50%, rgb(var(--c-mercury) / 0.095), transparent 70%),
+    linear-gradient(112deg, rgb(var(--c-void)), rgb(var(--c-surface)) 68%, rgb(var(--c-inset)));
+}
+
+.chapter.scene-orbit::before {
+  top: 50%;
+  right: -10%;
+  width: min(64rem, 76vw);
+  aspect-ratio: 1;
+  border: 1px solid rgb(var(--c-mercury) / 0.1);
+  border-radius: 50%;
+  transform: translateY(-50%);
+  box-shadow:
+    0 0 0 5rem rgb(var(--c-mercury) / 0.018),
+    0 0 0 10rem rgb(var(--c-mercury) / 0.012);
+}
+
+/* Beam — the trust rail: a verified-green line down the left edge. */
+.chapter.scene-beam {
+  background:
+    linear-gradient(90deg, rgb(var(--c-ok) / 0.035), transparent 36%), rgb(var(--c-surface));
+}
+
+.chapter.scene-beam::before {
+  top: 0;
+  bottom: 0;
+  left: clamp(1rem, 4vw, 4rem);
+  width: 1px;
+  background: linear-gradient(
+    transparent,
+    rgb(var(--c-ok) / 0.3) 40%,
+    rgb(var(--c-ok) / 0.3) 60%,
+    transparent
+  );
+}
+
+/* Mesh — infrastructure: a blueprint grid behind the hardware. */
+.chapter.scene-mesh {
+  background:
+    radial-gradient(ellipse 60% 90% at 75% 50%, rgb(var(--c-mercury) / 0.075), transparent 70%),
+    linear-gradient(180deg, rgb(var(--c-inset)), rgb(var(--c-void)) 70%);
+}
+
+.chapter.scene-mesh::before {
+  inset: 0;
+  opacity: 0.28;
+  background-image:
+    linear-gradient(rgb(var(--c-mercury) / 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--c-mercury) / 0.09) 1px, transparent 1px);
+  background-size: 40px 40px;
+  mask-image: radial-gradient(ellipse at 72% 50%, black, transparent 68%);
+}
+
+/* Bloom — community: sun warming into orchid across the section. */
+.chapter.scene-bloom {
+  background:
+    linear-gradient(
+      112deg,
+      rgb(var(--c-sun) / 0.055) 0%,
+      transparent 45%,
+      rgb(var(--c-orchid) / 0.065) 100%
+    ),
+    rgb(var(--c-surface));
+}
+
+.chapter.scene-bloom::before {
+  top: -40%;
+  right: 10%;
+  width: 1px;
+  height: 180%;
+  background: linear-gradient(transparent, rgb(var(--c-orchid) / 0.26), transparent);
+  transform: rotate(22deg);
+  box-shadow: 0 0 5rem 2rem rgb(var(--c-orchid) / 0.025);
+}
+
+/* Sonar — broadcast: repeating rings pulsing out from the corner. */
+.chapter.scene-sonar {
+  background:
+    radial-gradient(ellipse at 90% 50%, rgb(var(--c-sun) / 0.07), transparent 52%),
+    linear-gradient(110deg, rgb(var(--c-inset)), rgb(var(--c-surface)));
+}
+
+.chapter.scene-sonar::before {
+  top: -45%;
+  right: -12%;
+  width: 68%;
+  aspect-ratio: 1;
+  opacity: 0.55;
+  border-radius: 42% 58% 62% 38%;
+  background: repeating-radial-gradient(
+    ellipse at 50% 50%,
+    transparent 0 28px,
+    rgb(var(--c-sun) / 0.11) 29px 30px,
+    transparent 31px 48px
+  );
+  transform: rotate(-14deg);
+  mask-image: linear-gradient(90deg, transparent, black);
+}
+
+/* Horizon — the off-grid vision: a perspective floor under a breathing line. */
+.chapter.scene-horizon {
+  background:
+    radial-gradient(ellipse 70% 48% at 50% 100%, rgb(var(--c-aqua) / 0.11), transparent 72%),
+    linear-gradient(180deg, rgb(var(--c-void)), rgb(var(--c-inset)) 72%, rgb(var(--c-void)));
+}
+
+.chapter.scene-horizon::before {
+  right: -20%;
+  bottom: -48%;
+  left: -20%;
+  height: 90%;
+  opacity: 0.42;
+  background-image:
+    linear-gradient(rgb(var(--c-aqua) / 0.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--c-aqua) / 0.16) 1px, transparent 1px);
+  background-size: 64px 48px;
+  transform: perspective(28rem) rotateX(58deg);
+  transform-origin: center top;
+  mask-image: linear-gradient(180deg, transparent, black 38%, transparent 86%);
+}
+
+.chapter.scene-horizon::after {
+  right: 0;
+  bottom: 17%;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(var(--c-aqua) / 0.35), transparent);
+  box-shadow: 0 0 4rem 1rem rgb(var(--c-aqua) / 0.04);
+}
+
+/* Target — the join: concentric ok rings around the call to action. */
+.chapter.scene-target {
+  background:
+    radial-gradient(circle at 72% 50%, rgb(var(--c-ok) / 0.1), transparent 26%),
+    linear-gradient(105deg, rgb(var(--c-surface)), rgb(var(--c-void)) 65%);
+}
+
+.chapter.scene-target::before {
+  top: 50%;
+  right: 7%;
+  width: min(28rem, 54vw);
+  aspect-ratio: 1;
+  border: 1px solid rgb(var(--c-ok) / 0.14);
+  border-radius: 50%;
+  transform: translateY(-50%);
+  box-shadow:
+    0 0 0 3rem rgb(var(--c-ok) / 0.025),
+    0 0 0 3.0625rem rgb(var(--c-ok) / 0.09),
+    0 0 0 7rem rgb(var(--c-ok) / 0.018),
+    0 0 0 7.0625rem rgb(var(--c-ok) / 0.06);
+}
+
+/* Scan — diagnostics: fine aqua scanlines sweeping the section. */
+.chapter.scene-scan {
+  background:
+    radial-gradient(ellipse 50% 60% at 100% 0%, rgb(var(--c-aqua) / 0.06), transparent 70%),
+    linear-gradient(180deg, rgb(var(--c-inset)), rgb(var(--c-surface)) 60%, rgb(var(--c-inset)));
+}
+
+.chapter.scene-scan::before {
+  inset: 0;
+  opacity: 0.5;
+  background: repeating-linear-gradient(
+    180deg,
+    rgb(var(--c-aqua) / 0.045) 0 1px,
+    transparent 1px 7px
+  );
+  mask-image: linear-gradient(90deg, transparent, black 30%, black 70%, transparent);
+}
+
+/* Strata — the journal: quiet sediment lines, one per layer of the story. */
+.chapter.scene-strata {
+  background: linear-gradient(180deg, rgb(var(--c-surface)), rgb(var(--c-void)) 80%);
+}
+
+.chapter.scene-strata::before {
+  inset: 0;
+  opacity: 0.4;
+  background-image: repeating-linear-gradient(
+    180deg,
+    rgb(var(--c-line) / 0.5) 0 1px,
+    transparent 1px 56px
+  );
+  mask-image: linear-gradient(180deg, transparent, black 25%, black 75%, transparent);
+}
+
 @keyframes boot-copy-arrive {
   from {
     opacity: 0;
@@ -2523,6 +2747,36 @@
     right: -25%;
     opacity: 0.65;
   }
+
+  .chapter.scene-beacon::before {
+    background-size: 25% 100%;
+  }
+
+  .chapter.scene-ledger::before {
+    display: none;
+  }
+
+  .chapter.scene-orbit::before {
+    right: -50%;
+    width: 120vw;
+  }
+
+  .chapter.scene-sonar::before {
+    top: 10%;
+    right: -50%;
+    width: 120%;
+    opacity: 0.35;
+  }
+
+  .chapter.scene-horizon::before {
+    bottom: -25%;
+    background-size: 42px 36px;
+  }
+
+  .chapter.scene-target::before {
+    right: -25%;
+    opacity: 0.65;
+  }
 }
 
 @media (max-height: 700px) and (min-width: 768px) {
@@ -2563,7 +2817,9 @@
   .boot-sequence *::before,
   .boot-sequence *::after,
   .signal-journey *::before,
-  .signal-journey *::after {
+  .signal-journey *::after,
+  .chapters *::before,
+  .chapters *::after {
     animation: none !important;
     transition-duration: 0.01ms !important;
   }

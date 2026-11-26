@@ -92,14 +92,14 @@ const PRINCIPLES = [
 
 export default function BriefPage() {
   return (
-    <div className="min-h-screen bg-void text-gold flex flex-col relative">
+    <div className="chapters min-h-screen bg-void text-gold flex flex-col relative">
       <div className="print:hidden">
         <Navbar />
       </div>
 
       <main className="flex-1 brief-root">
         {/* ── HERO ── */}
-        <section className="relative pt-28 md:pt-36 pb-16 md:pb-20 border-b border-line">
+        <section className="chapter scene-beacon relative pt-28 md:pt-36 pb-16 md:pb-20">
           <div className="max-w-4xl mx-auto px-6 md:px-8 animate-fade-in">
             <p className="font-mono text-[11px] md:text-xs tracking-[0.3em] text-ash mb-10">
               INTERNAL · EMPLOYEE BRIEF
@@ -116,7 +116,7 @@ export default function BriefPage() {
         </section>
 
         {/* ── 01 · WHAT IS ANTIDOSIS ── */}
-        <section className="py-20 md:py-28">
+        <section className="chapter scene-ledger py-20 md:py-28">
           <div className="max-w-4xl mx-auto px-6 md:px-8">
             <div className="brief-avoid mb-10">
               <p className="font-mono text-[11px] tracking-[0.3em] text-sun brief-accent mb-6">
@@ -154,10 +154,8 @@ export default function BriefPage() {
           </div>
         </section>
 
-        <div className="divider" />
-
         {/* ── 02 · WHY THE COMMUNITY NEEDS IT ── */}
-        <section className="py-20 md:py-28">
+        <section className="chapter scene-ember py-20 md:py-28">
           <div className="max-w-4xl mx-auto px-6 md:px-8">
             <div className="brief-avoid mb-12">
               <p className="font-mono text-[11px] tracking-[0.3em] text-sun brief-accent mb-6">
@@ -177,9 +175,9 @@ export default function BriefPage() {
                 transaction.
               </p>
             </div>
-            <div className="grid md:grid-cols-2 gap-4 md:gap-5">
+            <div className="grid grid-cols-2 gap-3 md:gap-5">
               {BENEFITS.map((b) => (
-                <div key={b.title} className="vessel brief-card p-7 md:p-8">
+                <div key={b.title} className="vessel brief-card p-4 sm:p-7 md:p-8">
                   <p className="font-mono text-xs text-sun brief-accent mb-4">{b.numeral}.</p>
                   <h3 className="heading-display text-lg md:text-xl text-gold brief-gold mb-3">
                     {b.title}
@@ -191,10 +189,8 @@ export default function BriefPage() {
           </div>
         </section>
 
-        <div className="divider" />
-
         {/* ── 03 · HOW IT BUILDS CONNECTION ── */}
-        <section className="py-20 md:py-28">
+        <section className="chapter scene-beam py-20 md:py-28">
           <div className="max-w-4xl mx-auto px-6 md:px-8">
             <div className="brief-avoid mb-12">
               <p className="font-mono text-[11px] tracking-[0.3em] text-sun brief-accent mb-6">
@@ -211,15 +207,15 @@ export default function BriefPage() {
                 on this person?
               </p>
             </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+            <div className="grid grid-cols-2 gap-3 md:gap-5 lg:grid-cols-3">
               {PILLARS.map((p) => (
                 <div
                   key={p.title}
-                  className="vessel brief-card p-7 md:p-8"
+                  className="vessel brief-card p-4 sm:p-7 md:p-8"
                   style={{ borderTop: `1px solid ${p.color}22` }}
                 >
                   <div
-                    className="w-10 h-10 flex items-center justify-center mb-5"
+                    className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center mb-3 md:mb-5"
                     style={{ background: `${p.color}10`, border: `1px solid ${p.color}25` }}
                   >
                     <p.icon className="h-5 w-5" style={{ color: p.color }} />
@@ -245,7 +241,7 @@ export default function BriefPage() {
         </section>
 
         {/* ── 04 · IMPROVING OUR WAY OF LIFE ── */}
-        <section className="py-20 md:py-28 border-y border-line bg-surface/40">
+        <section className="chapter scene-strata py-20 md:py-28">
           <div className="max-w-4xl mx-auto px-6 md:px-8">
             <div className="brief-avoid mb-10">
               <p className="font-mono text-[11px] tracking-[0.3em] text-sun brief-accent mb-10">
@@ -275,7 +271,7 @@ export default function BriefPage() {
         </section>
 
         {/* ── 05 · WHAT THIS MEANS FOR YOU ── */}
-        <section className="py-20 md:py-28">
+        <section className="chapter scene-orbit py-20 md:py-28">
           <div className="max-w-4xl mx-auto px-6 md:px-8">
             <div className="brief-avoid mb-12">
               <p className="font-mono text-[11px] tracking-[0.3em] text-sun brief-accent mb-6">
@@ -310,7 +306,7 @@ export default function BriefPage() {
         </section>
 
         {/* ── MOTTO ── */}
-        <section className="pb-24 md:pb-32">
+        <section className="chapter scene-target pb-24 md:pb-32 pt-6">
           <div className="max-w-4xl mx-auto px-6 md:px-8">
             <div className="brief-avoid text-center pt-6">
               <div className="divider mb-12" />

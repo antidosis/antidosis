@@ -69,7 +69,7 @@ function PathCard({
 }) {
   return (
     <div
-      className="relative vessel p-8 md:p-10 overflow-hidden group"
+      className="relative vessel p-5 sm:p-8 md:p-10 overflow-hidden group"
       style={{ borderColor: `${accent}20` }}
     >
       <div
@@ -135,11 +135,11 @@ function JourneyStep({
 
 export default function HowItWorksPage() {
   return (
-    <div className="min-h-screen bg-void text-gold flex flex-col">
+    <div className="chapters min-h-screen bg-void text-gold flex flex-col">
       <Navbar />
       <main className="flex-1">
         {/* HERO */}
-        <section className="pt-32 pb-20 md:pt-44 md:pb-28 overflow-hidden">
+        <section className="chapter scene-beacon pt-32 pb-20 md:pt-44 md:pb-28">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-8 font-mono">◉ ON AIR — HOW THE NETWORK WORKS</p>
@@ -176,10 +176,8 @@ export default function HowItWorksPage() {
           </div>
         </section>
 
-        <div className="divider" />
-
         {/* TWO PATHS */}
-        <section className="py-20 md:py-28">
+        <section className="chapter scene-ledger py-20 md:py-28">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <div className="flex items-center gap-3 mb-4">
@@ -229,10 +227,8 @@ export default function HowItWorksPage() {
           </div>
         </section>
 
-        <div className="divider" />
-
         {/* THE JOURNEY */}
-        <section className="py-20 md:py-28">
+        <section className="chapter scene-orbit py-20 md:py-28">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-8 font-mono">» TRANSMISSION SEQUENCE</p>
@@ -351,10 +347,8 @@ export default function HowItWorksPage() {
           </div>
         </section>
 
-        <div className="divider" />
-
         {/* TRUST BY DESIGN */}
-        <section className="section-plateau py-20 md:py-28">
+        <section className="chapter scene-beam py-20 md:py-28">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
               <div>
@@ -458,10 +452,8 @@ export default function HowItWorksPage() {
           </div>
         </section>
 
-        <div className="divider" />
-
         {/* BUSINESS DESK */}
-        <section className="py-20 md:py-28">
+        <section className="chapter scene-ember py-20 md:py-28">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-6 font-mono">
@@ -478,8 +470,8 @@ export default function HowItWorksPage() {
               </p>
             </Reveal>
             <Reveal delay={150}>
-              <div className="grid md:grid-cols-3 gap-6">
-                <div className="vessel p-6">
+              <div className="grid grid-cols-2 gap-3 md:gap-6 lg:grid-cols-3">
+                <div className="vessel p-4 sm:p-6">
                   <ShieldCheck className="h-5 w-5 text-ok mb-3" />
                   <p className="text-sm font-medium text-gold mb-2">ABN on the record</p>
                   <p className="text-xs text-ash leading-relaxed">
@@ -487,7 +479,7 @@ export default function HowItWorksPage() {
                     directory, and never displayed for personal accounts.
                   </p>
                 </div>
-                <div className="vessel p-6">
+                <div className="vessel p-4 sm:p-6">
                   <FileText className="h-5 w-5 text-sun mb-3" />
                   <p className="text-sm font-medium text-gold mb-2">Business contracts</p>
                   <p className="text-xs text-ash leading-relaxed">
@@ -495,7 +487,7 @@ export default function HowItWorksPage() {
                     the contract document.
                   </p>
                 </div>
-                <div className="vessel p-6">
+                <div className="vessel col-span-2 p-4 sm:p-6 lg:col-span-1">
                   <Star className="h-5 w-5 text-mercury mb-3" />
                   <p className="text-sm font-medium text-gold mb-2">Reviews that count</p>
                   <p className="text-xs text-ash leading-relaxed">
@@ -509,10 +501,8 @@ export default function HowItWorksPage() {
           </div>
         </section>
 
-        <div className="divider" />
-
         {/* CREATOR DESK */}
-        <section className="py-20 md:py-28">
+        <section className="chapter scene-bloom py-20 md:py-28">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-6 font-mono">
@@ -529,8 +519,8 @@ export default function HowItWorksPage() {
               </p>
             </Reveal>
             <Reveal delay={150}>
-              <div className="grid md:grid-cols-3 gap-6">
-                <div className="vessel p-6">
+              <div className="grid grid-cols-2 gap-3 md:gap-6 lg:grid-cols-3">
+                <div className="vessel p-4 sm:p-6">
                   <Camera className="h-5 w-5 text-orchid mb-3" />
                   <p className="text-sm font-medium text-gold mb-2">Put your reach on the record</p>
                   <p className="text-xs text-ash leading-relaxed">
@@ -538,7 +528,7 @@ export default function HowItWorksPage() {
                     directory can see exactly what a collab with you is worth.
                   </p>
                 </div>
-                <div className="vessel p-6">
+                <div className="vessel p-4 sm:p-6">
                   <Megaphone className="h-5 w-5 text-sun mb-3" />
                   <p className="text-sm font-medium text-gold mb-2">Promo / Review needs</p>
                   <p className="text-xs text-ash leading-relaxed">
@@ -547,7 +537,7 @@ export default function HowItWorksPage() {
                     shout- out. Browse them like any other need.
                   </p>
                 </div>
-                <div className="vessel p-6">
+                <div className="vessel col-span-2 p-4 sm:p-6 lg:col-span-1">
                   <Star className="h-5 w-5 text-mercury mb-3" />
                   <p className="text-sm font-medium text-gold mb-2">Reputation that compounds</p>
                   <p className="text-xs text-ash leading-relaxed">
@@ -560,10 +550,8 @@ export default function HowItWorksPage() {
           </div>
         </section>
 
-        <div className="divider" />
-
         {/* CTA */}
-        <section className="py-20 md:py-28">
+        <section className="chapter scene-target py-20 md:py-28">
           <div className="max-w-6xl mx-auto px-4 md:px-8">
             <Reveal>
               <p className="text-xs text-ash mb-8 font-mono">◉ TUNE IN</p>

@@ -101,6 +101,17 @@ export function xmlEscape(value: string): string {
   });
 }
 
+/**
+ * SVG has no text measurement — truncate to an estimated width so long text
+ * can never paint over the card frame. charWidth is the per-character
+ * estimate for the font at hand.
+ */
+export function fitCardText(text: string, maxWidth: number, charWidth: number): string {
+  if (text.length * charWidth <= maxWidth) return text;
+  const maxChars = Math.max(4, Math.floor(maxWidth / charWidth) - 1);
+  return `${text.slice(0, maxChars).trimEnd()}…`;
+}
+
 function chipWidth(label: string): number {
   return Math.ceil(label.length * CHAR_WIDTH) + CHIP_PAD_X * 2;
 }
@@ -156,13 +167,13 @@ export function renderShareCardSvg(fields: ShareCardFields): string {
   <rect x="44" y="44" width="1112" height="542" rx="24" fill="none" stroke="${theme.accent}" stroke-opacity=".22"/>
   ${logoImage}
   <text x="1112" y="112" text-anchor="end" fill="${theme.accent}" font-family="monospace" font-size="20" letter-spacing="4">${xmlEscape(fields.badge)}</text>
-  <text x="88" y="252" fill="#f4f7f2" font-family="Georgia, 'Times New Roman', serif" font-size="66" font-weight="700">${xmlEscape(fields.name)}</text>
-  ${fields.subtitle ? `<text x="88" y="304" fill="${theme.accentSoft}" font-family="monospace" font-size="30">${xmlEscape(fields.subtitle)}</text>` : ""}
-  ${fields.line ? `<text x="88" y="356" fill="#c3d0c8" font-family="Arial, sans-serif" font-size="25">${xmlEscape(fields.line)}</text>` : ""}
+  <text x="88" y="252" fill="#f4f7f2" font-family="Georgia, 'Times New Roman', serif" font-size="66" font-weight="700">${xmlEscape(fitCardText(fields.name, 984, 40))}</text>
+  ${fields.subtitle ? `<text x="88" y="304" fill="${theme.accentSoft}" font-family="monospace" font-size="30">${xmlEscape(fitCardText(fields.subtitle, 1024, 18))}</text>` : ""}
+  ${fields.line ? `<text x="88" y="356" fill="#c3d0c8" font-family="Arial, sans-serif" font-size="25">${xmlEscape(fitCardText(fields.line, 1024, 12.6))}</text>` : ""}
   ${chipSvg}
-  ${fields.meta ? `<text x="88" y="${metaY}" fill="#9fb5aa" font-family="Arial, sans-serif" font-size="24">${xmlEscape(fields.meta)}</text>` : ""}
-  <text x="88" y="560" fill="#f4f7f2" font-family="Georgia, 'Times New Roman', serif" font-size="34" font-weight="600">${xmlEscape(fields.cta)}</text>
-  <text x="88" y="600" fill="${theme.accent}" font-family="monospace" font-size="20">${xmlEscape(fields.url)}</text>
+  ${fields.meta ? `<text x="88" y="${metaY}" fill="#9fb5aa" font-family="Arial, sans-serif" font-size="24">${xmlEscape(fitCardText(fields.meta, 1024, 12))}</text>` : ""}
+  <text x="88" y="560" fill="#f4f7f2" font-family="Georgia, 'Times New Roman', serif" font-size="34" font-weight="600">${xmlEscape(fitCardText(fields.cta, 1024, 20))}</text>
+  <text x="88" y="600" fill="${theme.accent}" font-family="monospace" font-size="20">${xmlEscape(fitCardText(fields.url, 1024, 12))}</text>
 </svg>`;
 }
 

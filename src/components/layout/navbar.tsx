@@ -68,7 +68,7 @@ const NAV_HUBS: NavHub[] = [
   {
     href: "/how-it-works",
     label: "Learn",
-    matches: ["/how-it-works", "/demo", "/examples", "/blog"],
+    matches: ["/how-it-works", "/demo", "/examples", "/blog", "/safety"],
     links: [
       {
         href: "/how-it-works",
@@ -82,6 +82,11 @@ const NAV_HUBS: NavHub[] = [
       },
       { href: "/examples", label: "Exchange ideas", description: "Practical ways to participate" },
       { href: "/blog", label: "Journal", description: "Guides, safety and community stories" },
+      {
+        href: "/safety",
+        label: "Safety & trust",
+        description: "Verification, contracts, guarded links and reporting",
+      },
     ],
   },
 ];
