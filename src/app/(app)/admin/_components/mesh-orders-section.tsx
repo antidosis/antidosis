@@ -2,13 +2,21 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import { Loader2, Package } from "lucide-react";
+import { Loader2, Package, Radio } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { MESH_ORDER_STATUS_LABEL } from "@/lib/store-first-party";
 import { cn } from "@/lib/utils";
+
+type BoundNode = {
+  id: string;
+  publicKey: string;
+  meshName: string;
+  status: string;
+  createdAt: string;
+};
 
 type AdminMeshOrder = {
   id: string;
@@ -32,6 +40,7 @@ type AdminMeshOrder = {
     email: string;
     mobileVerified: boolean;
   };
+  nodes: BoundNode[];
 };
 
 const STATUSES = ["placed", "paid", "preparing", "shipped", "delivered", "cancelled"] as const;
@@ -191,6 +200,13 @@ export function MeshOrdersQueue() {
                 <p className="mt-1 text-xs italic text-ash">note: {order.adminNote}</p>
               )}
 
+              <NodeBinding
+                order={order}
+                acting={acting}
+                onChanged={() => load(filter)}
+                setActing={setActing}
+              />
+
               <div className="mt-3 flex flex-wrap gap-2">
                 {STATUSES.filter((s) => s !== order.status).map((status) => (
                   <Button
@@ -207,6 +223,131 @@ export function MeshOrdersQueue() {
             </li>
           ))}
         </ul>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Flash-time identity binding: paste the device's public key as the flasher
+ * prints it and the node is cryptographically tied to the buyer's account.
+ */
+function NodeBinding({
+  order,
+  acting,
+  onChanged,
+  setActing,
+}: {
+  order: AdminMeshOrder;
+  acting: boolean;
+  onChanged: () => Promise<void>;
+  setActing: (value: boolean) => void;
+}) {
+  const { toast } = useToast();
+  const [publicKey, setPublicKey] = useState("");
+  const bindable = ["preparing", "shipped", "delivered"].includes(order.status);
+
+  async function bind() {
+    setActing(true);
+    try {
+      const res = await fetch("/api/v1/admin/mesh-identities", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: order.id, publicKey }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (res.ok) {
+        toast(`Node bound to ${order.buyer.memberCode}`, "success");
+        setPublicKey("");
+        await onChanged();
+      } else {
+        toast(body.error || "Could not bind the node", "error");
+      }
+    } finally {
+      setActing(false);
+    }
+  }
+
+  async function setNodeStatus(node: BoundNode, status: "active" | "revoked") {
+    if (
+      status === "revoked" &&
+      !window.confirm(
+        `Revoke this binding? The node stops attesting for ${order.buyer.memberCode}.`
+      )
+    ) {
+      return;
+    }
+    setActing(true);
+    try {
+      const res = await fetch(`/api/v1/admin/mesh-identities/${node.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (res.ok) {
+        toast(status === "revoked" ? "Binding revoked" : "Binding reactivated", "success");
+        await onChanged();
+      } else {
+        toast(body.error || "Could not update the binding", "error");
+      }
+    } finally {
+      setActing(false);
+    }
+  }
+
+  return (
+    <div className="mt-3 rounded-md border border-line/60 bg-inset/40 p-3">
+      {order.nodes.length > 0 ? (
+        <ul className="space-y-1.5">
+          {order.nodes.map((node) => (
+            <li key={node.id} className="flex flex-wrap items-center gap-2 text-xs">
+              <Radio
+                className={cn("h-3.5 w-3.5", node.status === "active" ? "text-ok" : "text-ash")}
+              />
+              <span className="font-mono text-parchment">
+                {node.publicKey.slice(0, 8)}…{node.publicKey.slice(-6)}
+              </span>
+              <span
+                className={cn(
+                  "font-mono text-[10px] uppercase tracking-wider",
+                  node.status === "active" ? "text-ok" : "text-bad"
+                )}
+              >
+                {node.status === "active" ? "on the mesh" : "revoked"}
+              </span>
+              <button
+                type="button"
+                disabled={acting}
+                onClick={() => setNodeStatus(node, node.status === "active" ? "revoked" : "active")}
+                className="text-[11px] text-ash underline-offset-2 transition-colors hover:text-sun hover:underline"
+              >
+                {node.status === "active" ? "revoke" : "reactivate"}
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : bindable ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            value={publicKey}
+            onChange={(event) => setPublicKey(event.target.value)}
+            placeholder="device public key (64 hex chars, from the flasher)"
+            spellCheck={false}
+            className="min-w-0 flex-1 rounded border border-line bg-void px-2.5 py-1.5 font-mono text-xs text-gold outline-none transition-colors placeholder:text-ash/50 focus:border-sun"
+          />
+          <Button
+            size="sm"
+            disabled={acting || !/^[0-9a-fA-F]{64}$/.test(publicKey.trim())}
+            onClick={bind}
+          >
+            <Radio className="mr-1 h-3.5 w-3.5" /> bind node
+          </Button>
+        </div>
+      ) : (
+        <p className="text-[11px] text-ash/70">
+          node binding opens when the order reaches “preparing” — bind the key as you flash it
+        </p>
       )}
     </div>
   );

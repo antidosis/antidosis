@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { Package, PackageCheck, Truck } from "lucide-react";
+import { Package, PackageCheck, Radio, Truck } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ type StoreOrder = {
   totalAudCents: number;
   createdAt: string;
   product: { id: string; name: string; category: string; soldByAntidosis: boolean };
+  nodes: { id: string; publicKey: string; meshName: string; status: string }[];
 };
 
 const STATUS_TONE: Record<string, string> = {
@@ -138,6 +139,18 @@ export function OrdersPanel() {
                 {order.meshName}”
               </span>
             )}
+            {order.nodes
+              .filter((node) => node.status === "active")
+              .map((node) => (
+                <span
+                  key={node.id}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-ok/40 bg-ok/[0.06] px-2.5 py-1 font-mono text-[11px] uppercase tracking-wider text-ok"
+                  title={`Device key ${node.publicKey}`}
+                >
+                  <Radio className="h-3 w-3" />
+                  on the mesh · {node.publicKey.slice(0, 8)}…{node.publicKey.slice(-4)}
+                </span>
+              ))}
           </div>
         </div>
       ))}

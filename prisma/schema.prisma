@@ -105,6 +105,7 @@ model Profile {
   meshInterests        MeshInterest[]
   meshBuilder          MeshBuilder?
   meshOrders           MeshOrder[]
+  meshIdentities       MeshIdentity[]
 
   @@index([isPro])
   @@index([stripeCustomerId])
@@ -821,10 +822,39 @@ model MeshOrder {
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
-  product MeshProduct @relation(fields: [productId], references: [id])
-  buyer   Profile     @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  product MeshProduct    @relation(fields: [productId], references: [id])
+  buyer   Profile        @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  nodes   MeshIdentity[]
 
   @@index([buyerId, createdAt])
   @@index([status, createdAt])
   @@map("mesh_orders")
+}
+
+// A cryptographic identity on the mesh, bound to a member account. Bound at
+// flash time for first-party orders (we read the device's public key as we
+// flash it); self-serve binding for third-party devices comes later.
+// Transport-agnostic by design: meshcore_ed25519 today, other identity types
+// (e.g. reticulum) can join without reworking the binding/reputation layer.
+model MeshIdentity {
+  id           String    @id @default(uuid())
+  profileId    String    @map("profile_id")
+  // "meshcore_ed25519" — the device's Ed25519 public key, 64 lowercase hex chars
+  identityType String    @map("identity_type")
+  publicKey    String    @map("public_key")
+  // Callsign flashed on the device (matches the order's meshName at bind time)
+  meshName     String    @map("mesh_name")
+  // Provenance: the first-party order this device was flashed for, if any
+  orderId      String?   @map("order_id")
+  // "active" | "revoked" (sold on, lost, or banned — binding no longer attests)
+  status       String    @default("active")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  revokedAt    DateTime? @map("revoked_at")
+
+  profile Profile    @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  order   MeshOrder? @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@unique([identityType, publicKey])
+  @@index([profileId, status])
+  @@map("mesh_identities")
 }

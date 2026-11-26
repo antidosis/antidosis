@@ -35,6 +35,9 @@ export const GET = withApiHandler(async (req: NextRequest) => {
           mobileVerified: true,
         },
       },
+      nodes: {
+        select: { id: true, publicKey: true, meshName: true, status: true, createdAt: true },
+      },
     },
   });
 

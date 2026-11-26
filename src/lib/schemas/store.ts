@@ -170,3 +170,27 @@ export const updateMeshOrderSchema = z.object({
 export type MeshOrderStatus = (typeof meshOrderStatuses)[number];
 export type CreateMeshOrderInput = z.infer<typeof createMeshOrderSchema>;
 export type UpdateMeshOrderInput = z.infer<typeof updateMeshOrderSchema>;
+
+// ─── Mesh identities: cryptographic device keys bound to member accounts ───
+
+export const meshIdentityTypes = ["meshcore_ed25519"] as const;
+export const meshIdentityStatuses = ["active", "revoked"] as const;
+
+export const bindMeshIdentitySchema = z.object({
+  // The first-party order the device was flashed for — buyer and mesh name
+  // are derived from it, so the binding always matches a real fulfilment.
+  orderId: z.string().uuid(),
+  // Ed25519 public key as printed by the flasher: 64 hex chars
+  publicKey: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .regex(/^[0-9a-f]{64}$/, "A device public key is 64 hex characters"),
+});
+
+export const updateMeshIdentitySchema = z.object({
+  status: z.enum(meshIdentityStatuses),
+});
+
+export type BindMeshIdentityInput = z.infer<typeof bindMeshIdentitySchema>;
+export type UpdateMeshIdentityInput = z.infer<typeof updateMeshIdentitySchema>;
