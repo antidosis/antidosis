@@ -53,6 +53,51 @@ const productData = {
   ],
 };
 
+// Made-to-order: we buy the unit when the customer pays, flash and test it
+// ourselves, then ship AusPost. stockCount stays null (no shelf to run out of).
+const repeaterData = {
+  name: "SenseCAP P1-Pro — solar mesh repeater, mounted and on the air",
+  category: "gateway",
+  description:
+    "A solar-powered MeshCore repeater that keeps your street, valley or worksite on the " +
+    "air 24/7 — no mains power, no internet, no babysitting. Strap it to a pole or fix it " +
+    "to a wall, and every mesh message in earshot gets a relay home.\n\n" +
+    "Made to order: we buy your unit the day you pay, and when it lands with us we flash " +
+    "it to the Australia Mid profile (915 MHz), name it, and test-message it on the live " +
+    "Central Coast network before it ships to you. Allow 3–4 weeks door to door — the " +
+    "listing graphics walk through exactly what happens and when.",
+  specs:
+    "Seeed SenseCAP Solar Node P1-Pro · nRF52840 + SX1262 (862–930 MHz, configured 915) · " +
+    "5W solar panel · 18650 battery pack · L76K GPS · IP-rated enclosure · " +
+    "pole/wall mount kit, clamp, antenna and cables included · MeshCore repeater firmware",
+  priceAudCents: 25900,
+  stockStatus: "made_to_order",
+  offerPostage: true,
+  postageAudCents: 0,
+  localPickup: false,
+  postageNote:
+    "Free tracked Australia Post — delivery is 3–4 weeks total: ~2–3 weeks for your unit " +
+    "to reach us, then flashing, testing and AusPost dispatch.",
+  paymentTerms: ["payid", "bank_transfer"],
+  paymentNote: "Quote your order reference so we can match your transfer.",
+  highlights: [
+    "Solar + battery — runs itself",
+    "Australia Mid · 915 MHz",
+    "Up to 9 km relay range",
+    "Free postage",
+    "3–4 weeks — ordered for you",
+  ],
+  soldByAntidosis: true,
+  stockCount: null,
+  images: [
+    "/images/store/p1-pro-hero.webp",
+    "/images/store/p1-pro-mto.webp",
+    "/images/store/p1-pro-1.webp",
+    "/images/store/p1-pro-3.webp",
+    "/images/store/p1-pro-4.webp",
+  ],
+};
+
 async function main() {
   const profile = await prisma.profile.findUnique({ where: { email: OWNER_EMAIL } });
   if (!profile) {
@@ -81,21 +126,25 @@ async function main() {
   });
   console.log(`builder: ${builder.businessName} (${builder.status})`);
 
-  const existing = await prisma.meshProduct.findFirst({
-    where: { builderId: builder.id, name: productData.name },
-  });
-  if (existing) {
-    const updated = await prisma.meshProduct.update({
-      where: { id: existing.id },
-      data: productData,
+  for (const data of [productData, repeaterData]) {
+    const existing = await prisma.meshProduct.findFirst({
+      where: { builderId: builder.id, name: data.name },
     });
-    console.log(`product updated: ${updated.name} — stock ${updated.stockCount}`);
-  } else {
-    const created = await prisma.meshProduct.create({
-      data: { ...productData, builderId: builder.id },
-    });
-    console.log(`product created: ${created.name} — stock ${created.stockCount}`);
-    console.log(`product page: https://antidosis.com/store/product/${created.id}`);
+    if (existing) {
+      const updated = await prisma.meshProduct.update({
+        where: { id: existing.id },
+        data,
+      });
+      console.log(
+        `product updated: ${updated.name} — stock ${updated.stockCount ?? "made to order"}`
+      );
+    } else {
+      const created = await prisma.meshProduct.create({
+        data: { ...data, builderId: builder.id },
+      });
+      console.log(`product created: ${created.name}`);
+      console.log(`product page: https://antidosis.com/store/product/${created.id}`);
+    }
   }
 }
 

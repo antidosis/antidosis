@@ -263,6 +263,73 @@ def dimensions() -> None:
     print("wrote wio-tracker-dimensions.webp")
 
 
+def p1_pro() -> None:
+    """Branded cards for the made-to-order P1-Pro solar repeater."""
+    card = base_card(
+        [(0.0, (8, 12, 8)), (0.45, (12, 26, 16)), (1.0, (30, 22, 8))],
+        [((340, 300, 1350, 1250), (24, 92, 48), 70), ((-260, 780, 520, 1460), (96, 58, 10), 60)],
+        seed=17,
+    )
+
+    lg = logo(300)
+    card.alpha_composite(lg, (72, 64))
+
+    device = cutout(STORE / "p1-pro-5.webp")
+    device.thumbnail((700, 700), Image.LANCZOS)
+    dx, dy = SIZE - device.width - 30, (SIZE - device.height) // 2 + 110
+    halo = Image.new("RGBA", card.size, (0, 0, 0, 0))
+    ImageDraw.Draw(halo).ellipse(
+        [dx - 60, dy - 40, dx + device.width + 60, dy + device.height + 40], fill=(*GREEN, 34)
+    )
+    card = Image.alpha_composite(card, halo.filter(ImageFilter.GaussianBlur(90)))
+    card.alpha_composite(device, (dx, dy))
+
+    d = ImageDraw.Draw(card)
+    d.text((72, 330), "YOUR STREET,", font=font("segoeuib.ttf", 84), fill=(*GOLD, 255))
+    d.text((72, 428), "ON THE AIR.", font=font("segoeuib.ttf", 84), fill=(*GOLD, 255))
+    d.rectangle([74, 546, 208, 553], fill=(*SUN, 255))
+    chips(card, 72, 588, ["SOLAR MESHCORE REPEATER", "AUSTRALIA MID · 915 MHZ", "POLE OR WALL MOUNT"])
+
+    footer(card, "·  flashed, tested & shipped by us")
+    card.convert("RGB").save(STORE / "p1-pro-hero.webp", "WEBP", quality=90)
+    print("wrote p1-pro-hero.webp")
+
+    card = base_card(
+        [(0.0, (6, 10, 14)), (0.5, (8, 24, 26)), (1.0, (14, 34, 18))],
+        [((-300, -260, 620, 560), (0, 70, 84), 62), ((620, 700, 1500, 1500), (20, 80, 40), 66)],
+        seed=19,
+    )
+
+    lg = logo(300)
+    card.alpha_composite(lg, (72, 64))
+
+    d = ImageDraw.Draw(card)
+    d.text((72, 330), "ORDERED FOR YOU.", font=font("segoeuib.ttf", 72), fill=(*GOLD, 255))
+    d.rectangle([74, 434, 208, 441], fill=(*SUN, 255))
+
+    f = font("consola.ttf", 28)
+    items = [
+        "We order your unit the day you pay",
+        "It lands with us in ~2–3 weeks",
+        "Flashed to Australia Mid, 915 MHz",
+        "Tested on the live Coast network",
+        "Shipped AusPost tracked — 3–4 weeks total",
+    ]
+    y = 486
+    for text in items:
+        d.ellipse([76, y + 8, 96, y + 28], outline=(*GREEN, 255), width=3)
+        d.line([(81, y + 18), (86, y + 24), (93, y + 11)], fill=(*GREEN, 255), width=3)
+        d.text((116, y), text, font=f, fill=(*GOLD, 235))
+        y += 56
+
+    d.text((72, y + 30), "why the wait? no warehouse, no dead stock —", font=font("consola.ttf", 26), fill=(*ASH, 255))
+    d.text((72, y + 68), "every repeater is configured fresh for you.", font=font("consola.ttf", 26), fill=(*ASH, 255))
+
+    footer(card, "·  honest delivery, every time")
+    card.convert("RGB").save(STORE / "p1-pro-mto.webp", "WEBP", quality=90)
+    print("wrote p1-pro-mto.webp")
+
+
 if __name__ == "__main__":
     hero()
     checklist()
@@ -274,3 +341,4 @@ if __name__ == "__main__":
         seed=13,
     )
     dimensions()
+    p1_pro()
