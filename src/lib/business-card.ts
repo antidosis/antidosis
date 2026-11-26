@@ -146,25 +146,39 @@ const CHIP_FONT = 20;
 const CHIP_HEIGHT = 40;
 const CHIP_PAD_X = 18;
 const CHIP_GAP = 12;
-const CHIP_CHAR_WIDTH = 7.6;
+const CHIP_CHAR_WIDTH = 11.5;
 const MAX_CHIPS = 4;
 
-/** One row of rectangular chips; overflow collapses into a trailing "+n". */
+function chipSvg(
+  text: string,
+  x: number,
+  width: number,
+  accent: string,
+  accentSoft: string
+): string {
+  return `<g><rect x="${x}" y="318" width="${width}" height="${CHIP_HEIGHT}" rx="8" fill="${accent}" fill-opacity="0.1" stroke="${accent}" stroke-opacity="0.4"/><text x="${x + CHIP_PAD_X}" y="${318 + CHIP_HEIGHT / 2 + CHIP_FONT * 0.36}" fill="${accentSoft}" font-family="Arial, sans-serif" font-size="${CHIP_FONT}">${xmlEscape(text)}</text></g>`;
+}
+
+/** One row of rectangular chips; anything that doesn't fit collapses into a trailing "+n". */
 function layoutSpecialtyChips(labels: string[], accent: string, accentSoft: string): string {
-  const shown = labels.slice(0, MAX_CHIPS);
-  const overflow = labels.length - shown.length;
-  const items = overflow > 0 ? [...shown.slice(0, MAX_CHIPS - 1), `+${overflow + 1}`] : shown;
+  const chips: string[] = [];
   let x = FRAME_LEFT;
-  return items
-    .map((raw) => {
-      const text = fitCardText(raw, 300, CHIP_CHAR_WIDTH);
-      const width = Math.ceil(text.length * CHIP_CHAR_WIDTH) + CHIP_PAD_X * 2;
-      if (x + width > FRAME_RIGHT) return "";
-      const chip = `<g><rect x="${x}" y="318" width="${width}" height="${CHIP_HEIGHT}" rx="8" fill="${accent}" fill-opacity="0.1" stroke="${accent}" stroke-opacity="0.4"/><text x="${x + CHIP_PAD_X}" y="${318 + CHIP_HEIGHT / 2 + CHIP_FONT * 0.36}" fill="${accentSoft}" font-family="Arial, sans-serif" font-size="${CHIP_FONT}">${xmlEscape(text)}</text></g>`;
-      x += width + CHIP_GAP;
-      return chip;
-    })
-    .join("\n  ");
+  let placed = 0;
+  for (const raw of labels.slice(0, MAX_CHIPS)) {
+    const text = fitCardText(raw, 300, CHIP_CHAR_WIDTH);
+    const width = Math.ceil(text.length * CHIP_CHAR_WIDTH) + CHIP_PAD_X * 2;
+    if (x + width > FRAME_RIGHT) break;
+    chips.push(chipSvg(text, x, width, accent, accentSoft));
+    x += width + CHIP_GAP;
+    placed += 1;
+  }
+  const remaining = labels.length - placed;
+  if (remaining > 0) {
+    const text = `+${remaining}`;
+    const width = Math.ceil(text.length * CHIP_CHAR_WIDTH) + CHIP_PAD_X * 2;
+    if (x + width <= FRAME_RIGHT) chips.push(chipSvg(text, x, width, accent, accentSoft));
+  }
+  return chips.join("\n  ");
 }
 
 export function renderBusinessCardSvg(fields: BusinessCardFields): string {
@@ -175,7 +189,7 @@ export function renderBusinessCardSvg(fields: BusinessCardFields): string {
 
   const name = fitCardText(fields.name, 780, 34);
   const subtitle = fields.subtitle ? fitCardText(fields.subtitle, 800, 15) : null;
-  const line = fields.line ? fitCardText(fields.line, CONTENT_WIDTH, 11.3) : null;
+  const line = fields.line ? fitCardText(fields.line, CONTENT_WIDTH, 12) : null;
   const accepts =
     fields.accepts && fields.accepts.length > 0
       ? fitCardText(fields.accepts.join("  ·  ").toUpperCase(), CONTENT_WIDTH - 150, 12.8)
@@ -186,10 +200,13 @@ export function renderBusinessCardSvg(fields: BusinessCardFields): string {
   <defs>
     ${texture.svgDefs}
     <radialGradient id="bc-vignette" cx="0.5" cy="0.45" r="0.85"><stop offset=".55" stop-color="#000000" stop-opacity="0"/><stop offset="1" stop-color="#000000" stop-opacity=".32"/></radialGradient>
+    <clipPath id="bc-clip"><rect width="1200" height="630" rx="32"/></clipPath>
   </defs>
-  <rect width="1200" height="630" rx="32" fill="${texture.base}"/>
+  <g clip-path="url(#bc-clip)">
+  <rect width="1200" height="630" fill="${texture.base}"/>
   ${texture.svgOverlay}
-  <rect width="1200" height="630" rx="32" fill="url(#bc-vignette)"/>
+  <rect width="1200" height="630" fill="url(#bc-vignette)"/>
+  </g>
   <rect x="44" y="44" width="1112" height="542" rx="20" fill="none" stroke="${texture.accent}" stroke-opacity=".3"/>
   <rect x="44" y="44" width="6" height="542" fill="${texture.accent}" fill-opacity=".75"/>
   <text x="${FRAME_RIGHT}" y="100" text-anchor="end" fill="${texture.accent}" font-family="monospace" font-size="19" letter-spacing="4">ANTIDOSIS DIRECTORY</text>
@@ -205,7 +222,7 @@ export function renderBusinessCardSvg(fields: BusinessCardFields): string {
       : ""
   }
   <text x="${FRAME_LEFT}" y="490" fill="${texture.ink}" font-family="Georgia, 'Times New Roman', serif" font-size="29" font-weight="600">${xmlEscape(fields.cta)}</text>
-  <text x="${FRAME_LEFT}" y="540" fill="${texture.accent}" font-family="monospace" font-size="19">${xmlEscape(fitCardText(fields.url, 640, 11.2))}</text>
+  <text x="${FRAME_LEFT}" y="540" fill="${texture.accent}" font-family="monospace" font-size="19">${xmlEscape(fitCardText(fields.url, 640, 11.5))}</text>
   ${fields.abn ? `<text x="${FRAME_RIGHT}" y="540" text-anchor="end" fill="${texture.sub}" font-family="monospace" font-size="18">ABN ${xmlEscape(fields.abn)}</text>` : ""}
 </svg>`;
 }

@@ -52,9 +52,23 @@ describe("renderBusinessCardSvg", () => {
     const svg = render({
       specialties: ["Plumber", "Electrician", "Carpenter", "Cleaner", "Gardener", "Tutor"],
     });
-    expect(svg).toContain("+3");
+    expect(svg).toContain("+2");
     expect(svg).not.toContain("Gardener");
     expect(svg).not.toContain("Tutor");
+  });
+
+  it("pills stay inside the frame and keep the rounded card shape", () => {
+    const svg = render({
+      specialties: ["Web developer", "App developer", "Graphic designer", "Digital marketer / SEO"],
+    });
+    const rects = [...svg.matchAll(/<rect x="(\d+)" y="318" width="(\d+)"/g)];
+    expect(rects.length).toBe(4);
+    for (const rect of rects) {
+      expect(Number(rect[1]) + Number(rect[2])).toBeLessThanOrEqual(1112);
+    }
+    // Texture overlays are clipped to the rounded card — no square corners.
+    expect(svg).toContain('clip-path="url(#bc-clip)"');
+    expect(svg).toContain('<clipPath id="bc-clip"><rect width="1200" height="630" rx="32"/>');
   });
 
   it("omits the ACCEPTS line when nothing is selected", () => {

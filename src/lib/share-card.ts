@@ -93,7 +93,7 @@ const CHIPS_LEFT = 88;
 const CHIPS_RIGHT = 1112;
 /** Rough per-character width for the chip font — SVG has no measure, so chips
  *  are sized by estimate and their text is truncated to stay inside. */
-const CHAR_WIDTH = 7.6;
+const CHAR_WIDTH = 11.5;
 
 export function xmlEscape(value: string): string {
   return value.replace(/[<>&"']/g, (character) => {
@@ -160,10 +160,13 @@ export function renderShareCardSvg(fields: ShareCardFields): string {
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${theme.bgFrom}"/><stop offset="1" stop-color="${theme.bgTo}"/></linearGradient>
     <radialGradient id="glow"><stop stop-color="${theme.glow}" stop-opacity=".16"/><stop offset="1" stop-color="${theme.glow}" stop-opacity="0"/></radialGradient>
+    <clipPath id="card-clip"><rect width="1200" height="630" rx="32"/></clipPath>
   </defs>
-  <rect width="1200" height="630" rx="32" fill="url(#bg)"/>
+  <g clip-path="url(#card-clip)">
+  <rect width="1200" height="630" fill="url(#bg)"/>
   <circle cx="1040" cy="110" r="340" fill="url(#glow)"/>
   <g fill="none" stroke="${theme.accent}" stroke-opacity=".14"><circle cx="1040" cy="110" r="90"/><circle cx="1040" cy="110" r="160"/><circle cx="1040" cy="110" r="235"/></g>
+  </g>
   <rect x="44" y="44" width="1112" height="542" rx="24" fill="none" stroke="${theme.accent}" stroke-opacity=".22"/>
   ${logoImage}
   <text x="1112" y="112" text-anchor="end" fill="${theme.accent}" font-family="monospace" font-size="20" letter-spacing="4">${xmlEscape(fields.badge)}</text>
