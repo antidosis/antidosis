@@ -378,7 +378,6 @@ export function ProfileSection({
               mobileVerified={initialProfile.mobileVerified}
               mobile={initialProfile.mobile}
               handle={initialProfile.handle}
-              memberCode={initialProfile.memberCode}
               socialLinks={(initialProfile.socialLinks ?? []).map((link) => ({
                 platform: link.platform,
                 url: link.url,
