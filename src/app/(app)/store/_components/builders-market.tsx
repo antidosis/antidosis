@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import Link from "next/link";
 
@@ -231,39 +231,37 @@ function ApplicationForm({ onApplied }: { onApplied: () => void }) {
   );
 }
 
-type BuilderSession = "loading" | "anon" | "none" | "applied";
+export type BuilderSession = "loading" | "anon" | "none" | "applied";
+
+/** Probe once (page mount) so the sell popup opens instantly. */
+export async function probeBuilderSession(): Promise<BuilderSession> {
+  try {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return "anon";
+    const res = await fetch("/api/v1/store/builders/mine");
+    if (!res.ok) return "none";
+    const data = await res.json();
+    return data.builder ? "applied" : "none";
+  } catch {
+    return "anon";
+  }
+}
 
 /**
  * The sell flow, session-aware: anonymous visitors get a sign-in prompt,
  * members get the application form, existing builders get a dashboard link.
+ * The session is probed by the page on mount and passed in.
  */
-export function SellPanel({ onApplied }: { onApplied: () => void }) {
-  const [session, setSession] = useState<BuilderSession>("loading");
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const supabase = createClient();
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        if (!user) {
-          setSession("anon");
-          return;
-        }
-        const res = await fetch("/api/v1/store/builders/mine");
-        if (!res.ok) {
-          setSession("none");
-          return;
-        }
-        const data = await res.json();
-        setSession(data.builder ? "applied" : "none");
-      } catch {
-        setSession("anon");
-      }
-    })();
-  }, []);
-
+export function SellPanel({
+  session,
+  onApplied,
+}: {
+  session: BuilderSession;
+  onApplied: () => void;
+}) {
   if (session === "loading") {
     return (
       <p className="flex items-center justify-center gap-2 py-8 text-sm text-ash">
@@ -297,12 +295,5 @@ export function SellPanel({ onApplied }: { onApplied: () => void }) {
       </div>
     );
   }
-  return (
-    <ApplicationForm
-      onApplied={() => {
-        setSession("applied");
-        onApplied();
-      }}
-    />
-  );
+  return <ApplicationForm onApplied={onApplied} />;
 }

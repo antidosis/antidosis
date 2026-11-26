@@ -6,17 +6,14 @@ import { cn } from "@/lib/utils";
 
 import type { PublicMeshBuilder } from "./builders-market";
 import type { InterestKind } from "./interest-form";
-import { ProductGrid, type StoreCategory, type StoreItem } from "./product-grid";
+import { CATEGORY_LABEL, ProductGrid, type StoreCategory, type StoreItem } from "./product-grid";
 
 export type StoreFilter = "all" | StoreCategory;
 export type StorePopup = "how" | "byo" | "sellers" | "sell" | "list";
 
 const FILTER_LABEL: Record<StoreFilter, string> = {
   all: "Everything",
-  node: "Nodes",
-  gateway: "Home bases",
-  kit: "Field kits",
-  accessory: "Accessories",
+  ...CATEGORY_LABEL,
 };
 
 const TOP_BAR_ACTIONS: { id: StorePopup; label: string; icon: typeof HelpCircle }[] = [

@@ -42,9 +42,11 @@ test.describe("Smoke tests", () => {
     const navigation = page.getByRole("navigation", { name: "Main navigation" });
     await navigation.getByRole("link", { name: "Learn", exact: true }).hover();
     await expect(navigation.getByRole("link", { name: /Interactive demos/ })).toBeVisible();
+    // Store is a direct link with no dropdown — hovering it closes the open hub
     await navigation.getByRole("link", { name: "Store", exact: true }).hover();
-    await expect(navigation.getByRole("link", { name: /Join the pilot/ })).toBeVisible();
     await expect(navigation.getByRole("link", { name: /How it works/ })).toBeHidden();
+    await navigation.getByRole("link", { name: "Store", exact: true }).click();
+    await expect(page).toHaveURL(/\/store/);
   });
 
   test("mobile hubs open through explicit controls", async ({ page }) => {
@@ -55,10 +57,10 @@ test.describe("Smoke tests", () => {
     const navigation = page.getByRole("navigation", { name: "Mobile navigation" });
     await navigation.getByRole("button", { name: "Open Exchange links" }).click();
     await expect(navigation.getByRole("link", { name: "Directory", exact: true })).toBeVisible();
-    await navigation.getByRole("button", { name: "Open Store links" }).click();
-    await expect(
-      navigation.getByRole("link", { name: "For mesh builders", exact: true })
-    ).toBeVisible();
+    // Store has no spokes — it is a plain link without an expand control
+    await expect(navigation.getByRole("button", { name: "Open Store links" })).toHaveCount(0);
+    await navigation.getByRole("link", { name: "Store", exact: true }).click();
+    await expect(page).toHaveURL(/\/store/);
   });
 
   test("social preview uses the branded PNG", async ({ page, request }) => {

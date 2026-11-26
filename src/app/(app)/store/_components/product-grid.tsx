@@ -10,7 +10,8 @@ import type { PublicMeshBuilder } from "./builders-market";
 import type { InterestKind } from "./interest-form";
 import { ProductArt, type ProductArtVariant } from "./product-art";
 
-export type StoreCategory = "node" | "gateway" | "kit" | "accessory";
+export type StoreCategory =
+  "node" | "gateway" | "kit" | "board" | "antenna" | "power" | "enclosure" | "accessory";
 
 export type StoreItem = {
   key: string;
@@ -29,6 +30,10 @@ export const CATEGORY_LABEL: Record<StoreCategory, string> = {
   node: "Nodes",
   gateway: "Home bases",
   kit: "Field kits",
+  board: "Boards",
+  antenna: "Antennas",
+  power: "Power",
+  enclosure: "Enclosures",
   accessory: "Accessories",
 };
 
@@ -63,12 +68,56 @@ const FLAGSHIP: StoreItem[] = [
     status: { label: "coming soon", tone: "text-sun" },
     notifyKind: "node",
   },
+  {
+    key: "lora-boards",
+    art: "board",
+    category: "board",
+    name: "LoRa Dev Boards",
+    line: "Heltec, LilyGo and RAK-class 915 MHz boards for your own build.",
+    price: "Pilot pricing soon",
+    status: { label: "coming soon", tone: "text-sun" },
+    notifyKind: "updates",
+  },
+  {
+    key: "antennas",
+    art: "antenna",
+    category: "antenna",
+    name: "915 MHz Antennas",
+    line: "Whips, collinears and pigtails — range is antenna-first.",
+    price: "Pilot pricing soon",
+    status: { label: "coming soon", tone: "text-sun" },
+    notifyKind: "updates",
+  },
+  {
+    key: "power",
+    art: "power",
+    category: "power",
+    name: "Batteries & Solar",
+    line: "18650 packs, holders and panels to keep nodes alive off-grid.",
+    price: "Pilot pricing soon",
+    status: { label: "coming soon", tone: "text-sun" },
+    notifyKind: "updates",
+  },
+  {
+    key: "enclosures",
+    art: "case",
+    category: "enclosure",
+    name: "Printed Enclosures",
+    line: "3D-printed cases — pocket nodes to weatherproof roof boxes.",
+    price: "Pilot pricing soon",
+    status: { label: "coming soon", tone: "text-sun" },
+    notifyKind: "updates",
+  },
 ];
 
 const CATEGORY_ART: Record<string, ProductArtVariant> = {
   node: "node",
   kit: "kit",
   gateway: "base",
+  board: "board",
+  antenna: "antenna",
+  power: "power",
+  enclosure: "case",
   accessory: "node",
 };
 

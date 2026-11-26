@@ -51,19 +51,7 @@ const NAV_HUBS: NavHub[] = [
     href: "/store",
     label: "Store",
     matches: ["/store"],
-    links: [
-      { href: "/store", label: "Mesh overview", description: "How a node keeps you connected" },
-      {
-        href: "/store#builders",
-        label: "For mesh builders",
-        description: "Build, test and supply community nodes",
-      },
-      {
-        href: "/store#interest",
-        label: "Join the pilot",
-        description: "Node launch, channel access and updates",
-      },
-    ],
+    links: [],
   },
   {
     href: "/how-it-works",
@@ -149,6 +137,24 @@ export function Navbar() {
           <nav className="hidden items-center gap-7 md:flex" aria-label="Main navigation">
             {NAV_HUBS.map((hub) => {
               const active = hubIsActive(hub, pathname);
+              if (hub.links.length === 0) {
+                return (
+                  <Link
+                    key={hub.href}
+                    href={hub.href}
+                    aria-current={active ? "page" : undefined}
+                    className={cn(
+                      "relative flex items-center py-2 text-[15px] transition-colors",
+                      active ? "text-sun glow-gold-subtle" : "text-ash hover:text-gold"
+                    )}
+                  >
+                    {hub.label}
+                    {active && (
+                      <span className="absolute -bottom-1 left-0 right-0 h-px bg-sun shadow-[0_0_8px_rgba(245,166,35,0.5)]" />
+                    )}
+                  </Link>
+                );
+              }
               const expanded = desktopHub === hub.href;
               return (
                 <div
@@ -285,18 +291,20 @@ export function Navbar() {
                     >
                       {hub.label}
                     </Link>
-                    <button
-                      type="button"
-                      aria-label={`${expanded ? "Close" : "Open"} ${hub.label} links`}
-                      aria-expanded={expanded}
-                      aria-controls={`mobile-${hub.label.toLowerCase()}-links`}
-                      onClick={() => setOpenHub(expanded ? null : hub.href)}
-                      className="flex h-11 w-11 items-center justify-center text-ash hover:text-gold"
-                    >
-                      <ChevronDown
-                        className={cn("h-4 w-4 transition-transform", expanded && "rotate-180")}
-                      />
-                    </button>
+                    {hub.links.length > 0 && (
+                      <button
+                        type="button"
+                        aria-label={`${expanded ? "Close" : "Open"} ${hub.label} links`}
+                        aria-expanded={expanded}
+                        aria-controls={`mobile-${hub.label.toLowerCase()}-links`}
+                        onClick={() => setOpenHub(expanded ? null : hub.href)}
+                        className="flex h-11 w-11 items-center justify-center text-ash hover:text-gold"
+                      >
+                        <ChevronDown
+                          className={cn("h-4 w-4 transition-transform", expanded && "rotate-180")}
+                        />
+                      </button>
+                    )}
                   </div>
                   {expanded && (
                     <div

@@ -975,6 +975,8 @@
   html {
     scrollbar-color: var(--bronze) var(--void);
     scrollbar-width: thin;
+    /* Reserve the scrollbar track so modal scroll-locks don't shift the page */
+    scrollbar-gutter: stable;
   }
 }
 

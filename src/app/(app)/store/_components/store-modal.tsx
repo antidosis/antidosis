@@ -36,7 +36,7 @@ export function StoreModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-void/80 backdrop-blur-sm sm:items-center sm:p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-void/85 sm:items-center sm:p-4"
       onClick={onClose}
       role="dialog"
       aria-modal="true"

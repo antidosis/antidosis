@@ -35,7 +35,16 @@ export type UpdateMeshInterestInput = z.infer<typeof updateMeshInterestSchema>;
 // ─── Mesh builders: account-bound applications and product listings ───
 
 export const meshBuilderStatuses = ["pending", "approved", "rejected", "suspended"] as const;
-export const meshProductCategories = ["node", "kit", "gateway", "accessory"] as const;
+export const meshProductCategories = [
+  "node",
+  "kit",
+  "gateway",
+  "board",
+  "antenna",
+  "power",
+  "enclosure",
+  "accessory",
+] as const;
 export const meshProductStockStatuses = ["in_stock", "made_to_order", "out_of_stock"] as const;
 
 export const applyMeshBuilderSchema = z.object({

@@ -31,10 +31,25 @@ function tokenRGB(name: string, fallback: string): [number, number, number] {
 /**
  * A living mesh: nodes drift on three depth planes, links form between
  * neighbours, and message pulses travel the links. Canvas 2D, DPR-aware,
- * paused offscreen and stilled under prefers-reduced-motion.
+ * paused offscreen, while `paused` (e.g. a popup is open), and stilled
+ * under prefers-reduced-motion.
  */
-export function MeshVisual({ className }: { className?: string }) {
+export function MeshVisual({
+  className,
+  paused = false,
+}: {
+  className?: string;
+  paused?: boolean;
+}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const pausedRef = useRef(paused);
+  const controlsRef = useRef<{ start: () => void; stop: () => void } | null>(null);
+
+  useEffect(() => {
+    pausedRef.current = paused;
+    if (paused) controlsRef.current?.stop();
+    else controlsRef.current?.start();
+  }, [paused]);
 
   useEffect(() => {
     const cv = canvasRef.current;
@@ -183,7 +198,7 @@ export function MeshVisual({ className }: { className?: string }) {
     }
 
     function start() {
-      if (running || reduced) return;
+      if (running || reduced || pausedRef.current) return;
       running = true;
       raf = requestAnimationFrame(step);
     }
@@ -191,6 +206,7 @@ export function MeshVisual({ className }: { className?: string }) {
       running = false;
       cancelAnimationFrame(raf);
     }
+    controlsRef.current = { start, stop };
 
     function refreshTokens() {
       sun = tokenRGB("--c-sun", "30 210 130");
@@ -214,6 +230,7 @@ export function MeshVisual({ className }: { className?: string }) {
 
     return () => {
       stop();
+      controlsRef.current = null;
       observer.disconnect();
       ro.disconnect();
       window.clearInterval(themeWatcher);

@@ -22,11 +22,7 @@ const linkGroups: {
   },
   {
     title: "Off-grid",
-    links: [
-      { href: "/store", label: "Mesh store" },
-      { href: "/store#builders", label: "For mesh builders" },
-      { href: "/store#interest", label: "Join the pilot" },
-    ],
+    links: [{ href: "/store", label: "Mesh store" }],
   },
   {
     title: "Learn",

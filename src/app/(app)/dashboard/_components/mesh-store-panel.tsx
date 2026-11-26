@@ -47,9 +47,13 @@ const inputClass =
   "w-full rounded border border-line bg-inset px-3 py-2.5 text-base text-gold outline-none transition-colors placeholder:text-ash/50 focus:border-sun";
 
 const CATEGORIES = [
-  { value: "node", label: "Node" },
+  { value: "node", label: "Node (complete)" },
   { value: "kit", label: "Kit" },
-  { value: "gateway", label: "Gateway" },
+  { value: "gateway", label: "Gateway / home base" },
+  { value: "board", label: "Board (LoRa dev board)" },
+  { value: "antenna", label: "Antenna / cable" },
+  { value: "power", label: "Power (battery / solar)" },
+  { value: "enclosure", label: "Enclosure (3D-printed case)" },
   { value: "accessory", label: "Accessory" },
 ];
 

@@ -3,7 +3,267 @@
  * coloured, so the cards feel like a real storefront without shipping
  * image assets. Variants: handheld node, home base, field kit.
  */
-export type ProductArtVariant = "node" | "base" | "kit";
+function BoardArt() {
+  return (
+    <>
+      <Backdrop />
+      {/* PCB */}
+      <rect
+        x="60"
+        y="58"
+        width="120"
+        height="64"
+        rx="8"
+        style={{ fill: "rgb(var(--c-inset))", ...stroke }}
+        strokeWidth="2.5"
+      />
+      {/* pin headers */}
+      {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+        <rect
+          key={`t${i}`}
+          x={70 + i * 13}
+          y="52"
+          width="6"
+          height="8"
+          rx="1.5"
+          style={{ fill: "rgb(var(--c-mercury) / 0.45)" }}
+        />
+      ))}
+      {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+        <rect
+          key={`b${i}`}
+          x={70 + i * 13}
+          y="120"
+          width="6"
+          height="8"
+          rx="1.5"
+          style={{ fill: "rgb(var(--c-mercury) / 0.45)" }}
+        />
+      ))}
+      {/* main chip */}
+      <rect
+        x="96"
+        y="74"
+        width="34"
+        height="30"
+        rx="4"
+        style={{ fill: "rgb(var(--c-sun) / 0.14)", ...sunStroke }}
+        strokeWidth="1.5"
+      />
+      <rect x="106" y="84" width="14" height="10" rx="2" {...sunFill} opacity="0.5" />
+      {/* radio module + traces */}
+      <rect
+        x="142"
+        y="76"
+        width="24"
+        height="18"
+        rx="3"
+        style={{ fill: "rgb(var(--c-mercury) / 0.12)", ...stroke }}
+        strokeWidth="1.5"
+      />
+      <path
+        d="M 130 89 h 12 M 96 82 h -14 v 14 M 166 85 h 10"
+        fill="none"
+        strokeWidth="1.5"
+        style={{ stroke: "rgb(var(--c-mercury) / 0.5)" }}
+      />
+      {/* antenna pad + LED */}
+      <circle cx="176" cy="85" r="4" {...sunFill} opacity="0.85" />
+      <circle cx="80" cy="106" r="3" {...sunFill} opacity="0.7" />
+    </>
+  );
+}
+
+function AntennaArt() {
+  return (
+    <>
+      <Backdrop />
+      <SignalArcs x={120} y={30} />
+      {/* whip */}
+      <line x1="120" y1="38" x2="120" y2="108" strokeWidth="4" strokeLinecap="round" {...stroke} />
+      <circle cx="120" cy="36" r="4" {...sunFill} />
+      {/* coil */}
+      <path
+        d="M 114 108 q 6 5 12 0 q -6 5 -12 0 q 6 5 12 0 q -6 5 -12 0"
+        fill="none"
+        strokeWidth="2"
+        style={{ stroke: "rgb(var(--c-mercury) / 0.6)" }}
+      />
+      {/* base + connector */}
+      <rect
+        x="104"
+        y="122"
+        width="32"
+        height="16"
+        rx="4"
+        style={{ fill: "rgb(var(--c-inset))", ...stroke }}
+        strokeWidth="2.5"
+      />
+      <rect
+        x="112"
+        y="138"
+        width="16"
+        height="8"
+        rx="2"
+        style={{ fill: "rgb(var(--c-mercury) / 0.5)" }}
+      />
+      {/* cable */}
+      <path
+        d="M 136 130 C 160 130 168 142 190 142"
+        fill="none"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        style={{ stroke: "rgb(var(--c-mercury) / 0.5)" }}
+      />
+    </>
+  );
+}
+
+function PowerArt() {
+  return (
+    <>
+      <Backdrop />
+      {/* solar panel */}
+      <g transform="rotate(-8 158 92)">
+        <rect
+          x="128"
+          y="66"
+          width="62"
+          height="44"
+          rx="6"
+          style={{ fill: "rgb(var(--c-inset))", ...stroke }}
+          strokeWidth="2.5"
+        />
+        {[0, 1, 2].map((i) => (
+          <line
+            key={`v${i}`}
+            x1={143.5 + i * 15.5}
+            y1="70"
+            x2={143.5 + i * 15.5}
+            y2="106"
+            strokeWidth="1.5"
+            style={{ stroke: "rgb(var(--c-mercury) / 0.4)" }}
+          />
+        ))}
+        <line
+          x1="132"
+          y1="88"
+          x2="186"
+          y2="88"
+          strokeWidth="1.5"
+          style={{ stroke: "rgb(var(--c-mercury) / 0.4)" }}
+        />
+      </g>
+      {/* battery */}
+      <rect x="76" y="48" width="14" height="8" rx="3" {...sunFill} opacity="0.9" />
+      <rect
+        x="66"
+        y="56"
+        width="34"
+        height="84"
+        rx="8"
+        style={{ fill: "rgb(var(--c-inset))", ...stroke }}
+        strokeWidth="2.5"
+      />
+      <rect
+        x="74"
+        y="86"
+        width="18"
+        height="40"
+        rx="3"
+        style={{ fill: "rgb(var(--c-sun) / 0.18)", ...sunStroke }}
+        strokeWidth="1.5"
+      />
+      <line
+        x1="78"
+        y1="102"
+        x2="88"
+        y2="102"
+        strokeWidth="2"
+        strokeLinecap="round"
+        {...sunStroke}
+        opacity="0.7"
+      />
+      {/* cable panel → battery */}
+      <path
+        d="M 128 104 C 116 116 110 118 100 116"
+        fill="none"
+        strokeWidth="2"
+        strokeLinecap="round"
+        style={{ stroke: "rgb(var(--c-mercury) / 0.5)" }}
+      />
+    </>
+  );
+}
+
+function CaseArt() {
+  return (
+    <>
+      <Backdrop />
+      {/* printed enclosure — lid, shell, layer lines, screw bosses */}
+      <rect
+        x="70"
+        y="56"
+        width="100"
+        height="34"
+        rx="10"
+        style={{ fill: "rgb(var(--c-inset))", ...stroke }}
+        strokeWidth="2.5"
+      />
+      <rect
+        x="70"
+        y="90"
+        width="100"
+        height="52"
+        rx="10"
+        style={{ fill: "rgb(var(--c-inset))", ...stroke }}
+        strokeWidth="2.5"
+      />
+      {/* print layer ridges */}
+      {[0, 1, 2, 3].map((i) => (
+        <line
+          key={i}
+          x1="76"
+          y1={100 + i * 10}
+          x2="164"
+          y2={100 + i * 10}
+          strokeWidth="1.5"
+          style={{ stroke: "rgb(var(--c-mercury) / 0.25)" }}
+        />
+      ))}
+      {/* screw bosses */}
+      {[
+        [82, 68],
+        [158, 68],
+        [82, 130],
+        [158, 130],
+      ].map(([cx, cy]) => (
+        <g key={`${cx}-${cy}`}>
+          <circle
+            cx={cx}
+            cy={cy}
+            r="4.5"
+            style={{ fill: "rgb(var(--c-mercury) / 0.2)", ...stroke }}
+            strokeWidth="1.5"
+          />
+          <circle cx={cx} cy={cy} r="1.6" {...sunFill} opacity="0.8" />
+        </g>
+      ))}
+      {/* status window */}
+      <rect
+        x="104"
+        y="66"
+        width="32"
+        height="14"
+        rx="3"
+        style={{ fill: "rgb(var(--c-sun) / 0.16)", ...sunStroke }}
+        strokeWidth="1.5"
+      />
+    </>
+  );
+}
+
+export type ProductArtVariant = "node" | "base" | "kit" | "board" | "antenna" | "power" | "case";
 
 const stroke = { stroke: "rgb(var(--c-mercury))" } as const;
 const sunFill = { fill: "rgb(var(--c-sun))" } as const;
@@ -247,6 +507,10 @@ export function ProductArt({
       {variant === "node" && <NodeArt />}
       {variant === "base" && <BaseArt />}
       {variant === "kit" && <KitArt />}
+      {variant === "board" && <BoardArt />}
+      {variant === "antenna" && <AntennaArt />}
+      {variant === "power" && <PowerArt />}
+      {variant === "case" && <CaseArt />}
     </svg>
   );
 }
