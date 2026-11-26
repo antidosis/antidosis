@@ -64,7 +64,7 @@ export function IdentitySection({
 
   return (
     <SectionCard tone="identity" title="Identity" description="How you appear to other locals.">
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.9fr)]">
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(340px,0.9fr)]">
         {/* Left — photo + name + badges + handle + phone, stacked dense */}
         <div className="space-y-4">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
@@ -125,6 +125,7 @@ export function IdentitySection({
                 className="text-base"
               />
               {nameError && <p className="text-xs text-bad">{nameError}</p>}
+              <HandleSection handle={handle} />
             </div>
           </div>
 
@@ -133,10 +134,6 @@ export function IdentitySection({
             mobileVerified={mobileVerified}
             mobile={mobile}
           />
-
-          <div className="border-t border-line/40 pt-4">
-            <HandleSection handle={handle} />
-          </div>
 
           <div className="border-t border-line/40 pt-4">
             <PublicContactSection

@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { Globe, Loader2, Lock, Plus, X } from "lucide-react";
+import { Globe, Lock, Plus, X } from "lucide-react";
 import type {
   Control,
   FieldArrayWithId,
@@ -44,8 +44,7 @@ interface SocialLinksSectionProps {
       stored independently. */
   field: LinksField;
   fields: FieldArrayWithId<ProfileFormData, LinksField, "id">[];
-  removingIds: ReadonlySet<string>;
-  onMarkRemoving: (fieldId: string) => void;
+  onRemove: (index: number) => void;
   append: UseFieldArrayAppend<ProfileFormData, LinksField>;
   errors: FieldErrors<ProfileFormData>;
   showAudience: boolean;
@@ -57,8 +56,7 @@ export function SocialLinksSection({
   register,
   field,
   fields,
-  removingIds,
-  onMarkRemoving,
+  onRemove,
   append,
   errors,
   showAudience,
@@ -82,8 +80,7 @@ export function SocialLinksSection({
               index={index}
               control={control}
               register={register}
-              removing={removingIds.has(row.id)}
-              onMarkRemoving={() => onMarkRemoving(row.id)}
+              onRemove={() => onRemove(index)}
               urlError={errors[field]?.[index]?.url?.message}
               showVisibility={variant !== "business"}
             />
@@ -130,8 +127,7 @@ interface LinkRowProps {
   index: number;
   control: Control<ProfileFormData>;
   register: UseFormRegister<ProfileFormData>;
-  removing: boolean;
-  onMarkRemoving: () => void;
+  onRemove: () => void;
   urlError?: string;
   showVisibility: boolean;
 }
@@ -141,8 +137,7 @@ function LinkRow({
   index,
   control,
   register,
-  removing,
-  onMarkRemoving,
+  onRemove,
   urlError,
   showVisibility,
 }: LinkRowProps) {
@@ -154,15 +149,9 @@ function LinkRow({
 
   return (
     <li>
-      <div
-        className={cn(
-          "grid grid-cols-[minmax(0,1fr)_2.5rem_2.5rem] items-center gap-2 sm:flex",
-          removing && "opacity-50"
-        )}
-      >
+      <div className="grid grid-cols-[minmax(0,1fr)_2.5rem_2.5rem] items-center gap-2 sm:flex">
         <select
           {...register(`${field}.${index}.platform` as Path<ProfileFormData>)}
-          disabled={removing}
           aria-label={`Link ${index + 1} platform`}
           className={cn(SELECT_CLASS, "col-span-3 w-full shrink-0 capitalize sm:w-28")}
         >
@@ -174,17 +163,15 @@ function LinkRow({
         </select>
         <Input
           {...register(`${field}.${index}.url` as Path<ProfileFormData>)}
-          disabled={removing}
           placeholder="https://…"
           inputMode="url"
           aria-label={`Link ${index + 1} URL`}
-          className={cn("min-w-0 flex-1 text-base", removing && "line-through")}
+          className="min-w-0 flex-1 text-base"
         />
         {showVisibility ? (
           <button
             type="button"
             onClick={() => visibility.onChange(!isPublic)}
-            disabled={removing}
             title={isPublic ? "Public — shown on your profile" : "Private — visible only to you"}
             aria-label={isPublic ? "Make link private" : "Make link public"}
             aria-pressed={isPublic}
@@ -207,24 +194,15 @@ function LinkRow({
         )}
         <button
           type="button"
-          onClick={onMarkRemoving}
-          disabled={removing}
-          title={removing ? "Removing on save…" : "Remove link"}
+          onClick={onRemove}
+          title="Remove link"
           aria-label={`Remove link ${index + 1}`}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded border border-line text-ash transition-colors hover:border-bad/40 hover:text-bad disabled:cursor-wait"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded border border-line text-ash transition-colors hover:border-bad/40 hover:text-bad"
         >
-          {removing ? (
-            <Loader2 className="h-4 w-4 animate-spin text-bad" />
-          ) : (
-            <X className="h-4 w-4" />
-          )}
+          <X className="h-4 w-4" />
         </button>
       </div>
-      {removing ? (
-        <p className="mt-1 text-[11px] text-ash">This link will be removed when you save.</p>
-      ) : (
-        urlError && <p className="mt-1 text-xs text-bad">{urlError}</p>
-      )}
+      {urlError && <p className="mt-1 text-xs text-bad">{urlError}</p>}
     </li>
   );
 }

@@ -7,10 +7,11 @@ import { Building2, Radio, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import { DASHBOARD_SECTIONS, DASHBOARD_TABS, type DashboardTabId } from "./dashboard-nav";
+import type { ProfileTab } from "./profile-editor/types";
 
 interface SidebarProps {
   activeTab: DashboardTabId;
-  onSelect: (tab: DashboardTabId) => void;
+  onSelect: (tab: DashboardTabId, profileSection?: ProfileTab) => void;
   counts: Partial<Record<DashboardTabId, number>>;
   isBusiness: boolean;
   mobileOpen: boolean;
@@ -139,12 +140,18 @@ export function Sidebar({
         </nav>
 
         <div className="shrink-0 border-t border-line p-2 lg:p-3">
-          <div
+          <button
+            type="button"
+            onClick={() => onSelect("profile", isBusiness ? "directory" : "public")}
+            title={
+              isBusiness
+                ? "Business node — your active directory listing marks this account as a business across Antidosis"
+                : "Member node — an individual account"
+            }
             className={cn(
-              "flex items-center gap-2 rounded border border-line bg-surface/60 px-2 py-2",
+              "flex w-full items-center gap-2 rounded border border-line bg-surface/60 px-2 py-2 text-left transition-colors hover:border-sun/30 hover:bg-surface",
               !mobileOpen && "justify-center lg:justify-start"
             )}
-            title={isBusiness ? "Business account" : "Individual account"}
           >
             {isBusiness ? (
               <Building2 className="h-4 w-4 shrink-0 text-sun" />
@@ -159,7 +166,7 @@ export function Sidebar({
             >
               {isBusiness ? "business node" : "member node"}
             </span>
-          </div>
+          </button>
         </div>
       </aside>
     </>

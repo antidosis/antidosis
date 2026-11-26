@@ -1,4 +1,4 @@
-import * as React from "react";
+import type * as React from "react";
 
 import Image from "next/image";
 
@@ -9,6 +9,7 @@ interface AvatarProps {
   name?: string | null;
   size?: "sm" | "md" | "lg";
   className?: string;
+  style?: React.CSSProperties;
 }
 
 const sizePixels = {
@@ -17,7 +18,7 @@ const sizePixels = {
   lg: 56,
 };
 
-export function Avatar({ src, name, size = "md", className }: AvatarProps) {
+export function Avatar({ src, name, size = "md", className, style }: AvatarProps) {
   const sizeClasses = {
     sm: "h-8 w-8 text-[10px]",
     md: "h-10 w-10 text-xs",
@@ -41,6 +42,7 @@ export function Avatar({ src, name, size = "md", className }: AvatarProps) {
         sizeClasses[size],
         className
       )}
+      style={style}
     >
       {src ? (
         <Image

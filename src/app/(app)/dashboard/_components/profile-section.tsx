@@ -113,7 +113,6 @@ export function ProfileSection({
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [hasSpecialty, setHasSpecialty] = useState(initialProfile.accountType === "business");
   const [importingAvatarFrom, setImportingAvatarFrom] = useState<string | null>(null);
-  const [removingIds, setRemovingIds] = useState<ReadonlySet<string>>(new Set());
 
   const {
     register,
@@ -130,8 +129,16 @@ export function ProfileSection({
     defaultValues: toFormValues(initialProfile),
   });
 
-  const { fields, append } = useFieldArray({ control, name: "socialLinks" });
-  const { fields: businessFields, append: appendBusinessLink } = useFieldArray({
+  const {
+    fields,
+    append,
+    remove: removeSocialLink,
+  } = useFieldArray({ control, name: "socialLinks" });
+  const {
+    fields: businessFields,
+    append: appendBusinessLink,
+    remove: removeBusinessLink,
+  } = useFieldArray({
     control,
     name: "businessSocialLinks",
   });
@@ -186,9 +193,12 @@ export function ProfileSection({
     [clearErrors, setValue]
   );
 
-  function markRemoving(fieldId: string) {
+  function removeLinkAt(remove: (index: number) => void, index: number) {
+    // useFieldArray drops the row from the form immediately, so the link is
+    // gone from sight and won't be sent on the next save — no pending state.
     setHasUnsavedChanges(true);
-    setRemovingIds((previous) => new Set(previous).add(fieldId));
+    clearErrors("root");
+    remove(index);
   }
 
   async function importAvatarFromSocial(url: string) {
@@ -230,23 +240,15 @@ export function ProfileSection({
       toast(message, "error");
       return;
     }
-    const keptLinks = fields
-      .filter((field) => !removingIds.has(field.id))
-      .map((field) => values.socialLinks?.[fields.indexOf(field)])
-      .filter(
-        (link): link is NonNullable<typeof link> => !!link && String(link.url ?? "").trim() !== ""
-      )
+    const keptLinks = (values.socialLinks ?? [])
+      .filter((link) => String(link?.url ?? "").trim() !== "")
       .map((link) => ({
         platform: link.platform,
         url: String(link.url).trim(),
         isPublic: link.isPublic ?? true,
       }));
-    const keptBusinessLinks = businessFields
-      .filter((field) => !removingIds.has(field.id))
-      .map((field) => values.businessSocialLinks?.[businessFields.indexOf(field)])
-      .filter(
-        (link): link is NonNullable<typeof link> => !!link && String(link.url ?? "").trim() !== ""
-      )
+    const keptBusinessLinks = (values.businessSocialLinks ?? [])
+      .filter((link) => String(link?.url ?? "").trim() !== "")
       .map((link) => ({
         platform: link.platform,
         url: String(link.url).trim(),
@@ -299,7 +301,6 @@ export function ProfileSection({
       }
 
       const updated = await response.json();
-      setRemovingIds(new Set());
       reset(toFormValues(updated as EditorProfile));
       setHasUnsavedChanges(false);
       await mutate("/api/v1/profiles/me");
@@ -314,7 +315,6 @@ export function ProfileSection({
   }
 
   function onCancel() {
-    setRemovingIds(new Set());
     reset(toFormValues(initialProfile));
     setHasUnsavedChanges(false);
   }
@@ -395,8 +395,7 @@ export function ProfileSection({
               register={register}
               field="socialLinks"
               fields={fields}
-              removingIds={removingIds}
-              onMarkRemoving={markRemoving}
+              onRemove={(index) => removeLinkAt(removeSocialLink, index)}
               append={addSocialLink}
               errors={errors}
               showAudience={accountType !== "business"}
@@ -410,7 +409,9 @@ export function ProfileSection({
               This is <strong className="text-gold">your listing in the public directory</strong> —
               a separate, professional space from your personal profile. Claim a specialty to be
               discovered and filtered by; listings are business listings, so an ABN is required.
-              Your personal phone and personal socials stay out of it.
+              Your personal phone and personal socials stay out of it. While a specialty is live,
+              the sidebar shows <strong className="text-gold">business node</strong> — the listing
+              marks the whole account as a business everywhere on Antidosis, not just this tab.
             </KnowledgeBox>
             <DirectoryBioSection register={register} error={errors.directoryBio?.message} />
             <DirectorySlotsSection onSlotChange={handleSlotChange} />
@@ -431,8 +432,7 @@ export function ProfileSection({
                   register={register}
                   field="businessSocialLinks"
                   fields={businessFields}
-                  removingIds={removingIds}
-                  onMarkRemoving={markRemoving}
+                  onRemove={(index) => removeLinkAt(removeBusinessLink, index)}
                   append={addBusinessLink}
                   errors={errors}
                   showAudience={false}

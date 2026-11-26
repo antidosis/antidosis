@@ -7,7 +7,7 @@ import { auditLog, getClientInfo } from "@/lib/audit";
 import { prisma } from "@/lib/prisma";
 import { createCredentialSchema } from "@/lib/schemas";
 import { sanitizeUrl } from "@/lib/security/url";
-import { createCredentialSignedUrls } from "@/lib/storage";
+import { createCredentialFileAccess } from "@/lib/storage";
 import { createClient } from "@/lib/supabase/server";
 
 export const GET = withApiHandler(async (_req: NextRequest) => {
@@ -35,10 +35,12 @@ export const GET = withApiHandler(async (_req: NextRequest) => {
 
   // Attach short-lived signed URLs so document files can be served from the
   // private bucket (falls back to the stored URL for pre-migration objects).
+  // Files whose objects no longer exist are flagged so the UI offers a
+  // re-upload instead of a dead link.
   const withSignedUrls = await Promise.all(
     credentials.map(async (c) => {
-      const { signedUrl, signedBackUrl } = await createCredentialSignedUrls(c);
-      return { ...c, signedUrl, signedBackUrl };
+      const access = await createCredentialFileAccess(c);
+      return { ...c, ...access };
     })
   );
 

@@ -134,7 +134,7 @@ test.describe("Dashboard", () => {
     // Social links, audience size and the compact connection card all live on
     // the single public profile tab.
     await expect(page.getByLabel("Audience size (optional)")).toBeVisible();
-    await expect(page.getByText("Invite people to connect", { exact: true })).toBeVisible();
+    await expect(page.getByText("Your connection card", { exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: "Copy invitation", exact: true })).toBeVisible();
   });
 

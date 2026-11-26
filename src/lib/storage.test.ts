@@ -4,12 +4,14 @@ import {
   createSignedUrl,
   createSignedUrlOrFallback,
   createCredentialSignedUrls,
+  createCredentialFileAccess,
   bucketForPath,
   extractStoragePath,
   isPrivatePath,
 } from "./storage";
 
 const mockCreateSignedUrl = vi.fn();
+const mockExists = vi.fn();
 const mockFrom = vi.fn();
 
 vi.mock("@/lib/supabase/service", () => ({
@@ -19,6 +21,7 @@ vi.mock("@/lib/supabase/service", () => ({
         mockFrom(bucket);
         return {
           createSignedUrl: (...args: unknown[]) => mockCreateSignedUrl(...args),
+          exists: (...args: unknown[]) => mockExists(...args),
         };
       },
     },
@@ -202,5 +205,61 @@ describe("createCredentialSignedUrls", () => {
     const result = await createCredentialSignedUrls({ fileUrl: null, backFileUrl: null });
 
     expect(result).toEqual({ signedUrl: null, signedBackUrl: null });
+  });
+});
+
+describe("createCredentialFileAccess", () => {
+  it("returns signed URLs when both objects exist", async () => {
+    mockCreateSignedUrl
+      .mockResolvedValueOnce({ data: { signedUrl: "https://front.example.com" }, error: null })
+      .mockResolvedValueOnce({ data: { signedUrl: "https://back.example.com" }, error: null });
+    mockExists.mockResolvedValue({ data: true, error: null });
+
+    const result = await createCredentialFileAccess({
+      fileUrl: "https://xxx.supabase.co/storage/v1/object/public/uploads/credentials/123/front.jpg",
+      backFileUrl:
+        "https://xxx.supabase.co/storage/v1/object/public/uploads/credentials/123/back.jpg",
+    });
+
+    expect(result).toEqual({
+      signedUrl: "https://front.example.com",
+      signedBackUrl: "https://back.example.com",
+      fileMissing: false,
+      backFileMissing: false,
+    });
+  });
+
+  it("flags a missing front object and strips its signed URL", async () => {
+    mockCreateSignedUrl
+      .mockResolvedValueOnce({ data: { signedUrl: "https://front.example.com" }, error: null })
+      .mockResolvedValueOnce({ data: { signedUrl: "https://back.example.com" }, error: null });
+    mockExists
+      .mockResolvedValueOnce({ data: false, error: null })
+      .mockResolvedValueOnce({ data: true, error: null });
+
+    const result = await createCredentialFileAccess({
+      fileUrl: "https://xxx.supabase.co/storage/v1/object/public/uploads/credentials/123/front.jpg",
+      backFileUrl:
+        "https://xxx.supabase.co/storage/v1/object/public/uploads/credentials/123/back.jpg",
+    });
+
+    expect(result).toEqual({
+      signedUrl: null,
+      signedBackUrl: "https://back.example.com",
+      fileMissing: true,
+      backFileMissing: false,
+    });
+  });
+
+  it("never marks missing when there is no stored file", async () => {
+    const result = await createCredentialFileAccess({ fileUrl: null, backFileUrl: null });
+
+    expect(result).toEqual({
+      signedUrl: null,
+      signedBackUrl: null,
+      fileMissing: false,
+      backFileMissing: false,
+    });
+    expect(mockExists).not.toHaveBeenCalled();
   });
 });

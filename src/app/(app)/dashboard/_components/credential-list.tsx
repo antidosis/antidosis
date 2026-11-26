@@ -23,6 +23,8 @@ export interface CredentialData {
   backFileUrl: string | null;
   signedUrl?: string | null;
   signedBackUrl?: string | null;
+  fileMissing?: boolean;
+  backFileMissing?: boolean;
   isPublic: boolean;
   isVerified: boolean;
 }
@@ -125,40 +127,53 @@ export function CredentialList({
                   </p>
                 )}
                 {cred.description && <p className="text-ash">{cred.description}</p>}
-                {cred.fileUrl && (
-                  <a
-                    href={cred.signedUrl ?? cred.fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sun hover:underline inline-flex items-center gap-1"
-                  >
-                    <FileCheck className="h-3 w-3" /> View Document
-                  </a>
-                )}
-                {cred.backFileUrl && (
-                  <a
-                    href={cred.signedBackUrl ?? cred.backFileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sun hover:underline inline-flex items-center gap-1 ml-3"
-                  >
-                    <FileCheck className="h-3 w-3" /> View Back
-                  </a>
-                )}
+                {cred.fileUrl &&
+                  (cred.fileMissing ? (
+                    <p className="inline-flex items-center gap-1 text-bad">
+                      <FileCheck className="h-3 w-3" /> Document file unavailable — re-upload it via
+                      Edit
+                    </p>
+                  ) : cred.signedUrl ? (
+                    <a
+                      href={cred.signedUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sun hover:underline inline-flex items-center gap-1"
+                    >
+                      <FileCheck className="h-3 w-3" /> View Document
+                    </a>
+                  ) : null)}
+                {cred.backFileUrl &&
+                  (cred.backFileMissing ? (
+                    <p className="ml-3 inline-flex items-center gap-1 text-bad">
+                      <FileCheck className="h-3 w-3" /> Back of document unavailable — re-upload via
+                      Edit
+                    </p>
+                  ) : cred.signedBackUrl ? (
+                    <a
+                      href={cred.signedBackUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sun hover:underline inline-flex items-center gap-1 ml-3"
+                    >
+                      <FileCheck className="h-3 w-3" /> View Back
+                    </a>
+                  ) : null)}
               </div>
             </div>
             <div className="flex items-center gap-1 ml-4">
               <Button
                 size="sm"
-                variant="ghost"
+                variant="secondary"
                 onClick={() => copyRedactedSummary(cred)}
                 title="Copy a redacted text summary to share in messages — the document file stays private"
               >
                 {copiedId === cred.id ? (
-                  <Check className="h-4 w-4 text-ok" />
+                  <Check className="mr-1.5 h-4 w-4 text-ok" />
                 ) : (
-                  <Copy className="h-4 w-4" />
+                  <Copy className="mr-1.5 h-4 w-4" />
                 )}
+                {copiedId === cred.id ? "Copied" : "Share redacted"}
               </Button>
               <Button
                 size="sm"

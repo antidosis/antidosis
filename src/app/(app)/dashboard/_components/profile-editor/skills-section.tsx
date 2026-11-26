@@ -30,6 +30,22 @@ export function SkillsSection({ skills, embedded = false }: SkillsSectionProps) 
   const [value, setValue] = useState("");
   const [busy, setBusy] = useState(false);
   const [removing, setRemoving] = useState<string | null>(null);
+  // Skills the server hasn't confirmed yet — shown instantly so adding feels immediate.
+  const [pending, setPending] = useState<string[]>([]);
+
+  const visibleSkills = useMemo(() => {
+    const confirmed = new Set(skills.map((skill) => skill.name.toLowerCase()));
+    return [
+      ...skills,
+      ...pending
+        .filter((name) => !confirmed.has(name.toLowerCase()))
+        .map((name, index) => ({
+          id: `pending-${index}-${name}`,
+          name,
+          isVerified: false,
+        })),
+    ];
+  }, [skills, pending]);
 
   const suggestions = useMemo(() => {
     if (!value.trim()) return [];
@@ -41,12 +57,17 @@ export function SkillsSection({ skills, embedded = false }: SkillsSectionProps) 
   async function addSkill(name: string) {
     const clean = name.trim();
     if (!clean || busy) return;
-    if (skills.some((skill) => skill.name.toLowerCase() === clean.toLowerCase())) {
+    if (
+      skills.some((skill) => skill.name.toLowerCase() === clean.toLowerCase()) ||
+      pending.some((pendingName) => pendingName.toLowerCase() === clean.toLowerCase())
+    ) {
       toast("That skill is already on your profile", "info");
       return;
     }
 
     setBusy(true);
+    // Optimistic — the chip appears before the round trip completes.
+    setPending((current) => [...current, clean]);
     try {
       const response = await fetch("/api/v1/profiles/me/skills", {
         method: "POST",
@@ -55,15 +76,18 @@ export function SkillsSection({ skills, embedded = false }: SkillsSectionProps) 
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
+        setPending((current) => current.filter((item) => item !== clean));
         toast(data.error || "Couldn't add skill", "error");
         return;
       }
       setValue("");
       await mutate("/api/v1/profiles/me");
-      toast(`${clean} added to your profile`, "success");
     } catch {
+      setPending((current) => current.filter((item) => item !== clean));
       toast("Couldn't add skill — try again", "error");
     } finally {
+      // The revalidated list now holds the confirmed skill; drop the placeholder.
+      setPending((current) => current.filter((item) => item !== clean));
       setBusy(false);
     }
   }
@@ -142,7 +166,7 @@ export function SkillsSection({ skills, embedded = false }: SkillsSectionProps) 
           </p>
         ) : (
           <ul className="flex flex-wrap gap-2" aria-label="Your skills">
-            {skills.map((skill) => (
+            {visibleSkills.map((skill) => (
               <li
                 key={skill.id}
                 className="inline-flex items-center gap-2 rounded-md border border-line bg-raise px-3 py-1.5 text-sm text-parchment"

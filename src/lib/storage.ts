@@ -93,6 +93,52 @@ export async function createSignedUrlOrFallback(
 }
 
 /**
+ * Check whether a storage object actually exists. Used so the UI can distinguish
+ * "private but viewable" (signed URL) from "file lost — re-upload needed"
+ * instead of rendering a link that 404s with a raw storage error.
+ */
+export async function storageObjectExists(path: string): Promise<boolean> {
+  const serviceClient = createServiceClient();
+  try {
+    const { data, error } = await serviceClient.storage.from(bucketForPath(path)).exists(path);
+    if (error) return false;
+    return Boolean(data);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Signed access for a credential's files, with existence checks. When a stored
+ * file's object is gone from the bucket (old upload, deleted object), the
+ * corresponding `*Missing` flag is true and no URL is returned — the client
+ * prompts a re-upload instead of showing a dead link.
+ */
+export async function createCredentialFileAccess(credential: {
+  fileUrl?: string | null;
+  backFileUrl?: string | null;
+}): Promise<{
+  signedUrl: string | null;
+  signedBackUrl: string | null;
+  fileMissing: boolean;
+  backFileMissing: boolean;
+}> {
+  const { signedUrl, signedBackUrl } = await createCredentialSignedUrls(credential);
+  const frontPath = extractStoragePath(credential.fileUrl);
+  const backPath = extractStoragePath(credential.backFileUrl);
+  const [frontExists, backExists] = await Promise.all([
+    frontPath ? storageObjectExists(frontPath) : Promise.resolve(false),
+    backPath ? storageObjectExists(backPath) : Promise.resolve(false),
+  ]);
+  return {
+    signedUrl: frontPath && !frontExists ? null : signedUrl,
+    signedBackUrl: backPath && !backExists ? null : signedBackUrl,
+    fileMissing: Boolean(frontPath) && !frontExists,
+    backFileMissing: Boolean(backPath) && !backExists,
+  };
+}
+
+/**
  * Generate signed URLs for both front and back of a credential.
  */
 export async function createCredentialSignedUrls(credential: {
