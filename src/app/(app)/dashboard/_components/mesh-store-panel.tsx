@@ -41,6 +41,7 @@ type MeshBuilder = {
   status: string;
   reviewNote: string | null;
   products: MeshProduct[];
+  slotLimit?: number;
 };
 
 const inputClass =
@@ -541,14 +542,26 @@ export function MeshStorePanel() {
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <h3 className="text-lg font-medium text-gold">
             Product shelf
-            <span className="ml-2 text-sm font-normal text-ash">{builder.products.length}/12</span>
+            <span className="ml-2 text-sm font-normal text-ash">
+              {builder.products.length} of {builder.slotLimit ?? 3} slots used
+            </span>
           </h3>
-          {builder.status === "approved" && !addingProduct && (
-            <Button size="sm" onClick={() => setAddingProduct(true)}>
-              <Plus className="mr-2 h-4 w-4" /> Add product
-            </Button>
-          )}
+          {builder.status === "approved" &&
+            !addingProduct &&
+            builder.products.length < (builder.slotLimit ?? 3) && (
+              <Button size="sm" onClick={() => setAddingProduct(true)}>
+                <Plus className="mr-2 h-4 w-4" /> Add product
+              </Button>
+            )}
         </div>
+
+        {builder.status === "approved" && builder.products.length >= (builder.slotLimit ?? 3) && (
+          <p className="mb-4 rounded-md border border-sun/25 bg-sun/[0.04] px-4 py-3 text-sm text-ash">
+            Shelf full — {builder.slotLimit ?? 3} of {builder.slotLimit ?? 3} slots used. Extra
+            slots open up when slot rentals launch; message support if you need more during the
+            pilot.
+          </p>
+        )}
 
         {builder.status !== "approved" && (
           <p className="mb-4 rounded-md border border-dashed border-line px-4 py-3 text-sm text-ash">

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { updateMeshBuilderSchema } from "@/lib/schemas/store";
 import { assessProfileLink } from "@/lib/security/link-policy";
 import { sanitizePlainText } from "@/lib/security/sanitize";
+import { productSlotLimit } from "@/lib/store-slots";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -43,11 +44,14 @@ async function requireOwnBuilder() {
   return { ok: true as const, builder, profileId: profile.id };
 }
 
-/** The signed-in member's own builder record and products. */
+/** The signed-in member's own builder record and products, with slot usage. */
 export const GET = withApiHandler(async () => {
   const result = await requireOwnBuilder();
   if (!result.ok) return result.response;
-  return NextResponse.json({ builder: result.builder });
+  const builder = result.builder
+    ? { ...result.builder, slotLimit: productSlotLimit(result.builder) }
+    : null;
+  return NextResponse.json({ builder });
 });
 
 /**

@@ -8,6 +8,7 @@ import { getRateLimitIdentifier, rateLimit } from "@/lib/rate-limit";
 import { applyMeshBuilderSchema } from "@/lib/schemas/store";
 import { assessProfileLink } from "@/lib/security/link-policy";
 import { sanitizePlainText } from "@/lib/security/sanitize";
+import { isFeatured } from "@/lib/store-slots";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -32,11 +33,12 @@ const PUBLIC_BUILDER_SELECT = {
       priceAudCents: true,
       stockStatus: true,
       buyUrl: true,
+      featuredUntil: true,
     },
   },
 } as const;
 
-/** Public storefront: approved builders and their products. */
+/** Public storefront: approved builders and their products, featured first. */
 export const GET = withApiHandler(async () => {
   const builders = await prisma.meshBuilder.findMany({
     where: { status: "approved" },
@@ -45,7 +47,15 @@ export const GET = withApiHandler(async () => {
     select: PUBLIC_BUILDER_SELECT,
   });
 
-  return NextResponse.json({ builders });
+  const now = new Date();
+  const withFeatured = builders.map((builder) => ({
+    ...builder,
+    products: builder.products
+      .map((product) => ({ ...product, featured: isFeatured(product.featuredUntil, now) }))
+      .sort((a, b) => Number(b.featured) - Number(a.featured)),
+  }));
+
+  return NextResponse.json({ builders: withFeatured });
 });
 
 /**

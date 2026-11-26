@@ -57,12 +57,38 @@ describe("GET /api/v1/store/builders", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("returns only approved builders", async () => {
-    mockBuilderFindMany.mockResolvedValue([{ id: "b1", businessName: "CoastMesh Works" }]);
+    mockBuilderFindMany.mockResolvedValue([
+      { id: "b1", businessName: "CoastMesh Works", products: [] },
+    ]);
     const res = await GET(new Request("http://localhost/api/v1/store/builders") as NextRequest);
     expect(res.status).toBe(200);
     expect(mockBuilderFindMany).toHaveBeenCalledWith(
       expect.objectContaining({ where: { status: "approved" } })
     );
+  });
+
+  it("pins featured products first and flags them", async () => {
+    const future = new Date(Date.now() + 7 * 24 * 60 * 60_000);
+    const past = new Date(Date.now() - 24 * 60 * 60_000);
+    mockBuilderFindMany.mockResolvedValue([
+      {
+        id: "b1",
+        businessName: "CoastMesh Works",
+        products: [
+          { id: "p-standard", featuredUntil: null },
+          { id: "p-expired", featuredUntil: past },
+          { id: "p-featured", featuredUntil: future },
+        ],
+      },
+    ]);
+    const res = await GET(new Request("http://localhost/api/v1/store/builders") as NextRequest);
+    const body = await res.json();
+    const ids = body.builders[0].products.map((p: { id: string }) => p.id);
+    expect(ids[0]).toBe("p-featured");
+    const featured = body.builders[0].products.find((p: { id: string }) => p.id === "p-featured");
+    const expired = body.builders[0].products.find((p: { id: string }) => p.id === "p-expired");
+    expect(featured.featured).toBe(true);
+    expect(expired.featured).toBe(false);
   });
 });
 

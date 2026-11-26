@@ -734,6 +734,8 @@ model MeshBuilder {
   // "pending" | "approved" | "rejected" | "suspended"
   status       String    @default("pending")
   reviewNote   String?   @map("review_note")
+  // Product slots beyond the 3 free ones (pilot: granted by admin; later: rented monthly)
+  extraSlots   Int       @default(0) @map("extra_slots")
   reviewedAt   DateTime? @map("reviewed_at")
   createdAt    DateTime  @default(now()) @map("created_at")
   updatedAt    DateTime  @updatedAt @map("updated_at")
@@ -746,22 +748,24 @@ model MeshBuilder {
 }
 
 model MeshProduct {
-  id            String   @id @default(uuid())
-  builderId     String   @map("builder_id")
+  id            String    @id @default(uuid())
+  builderId     String    @map("builder_id")
   name          String
-  // "node" | "kit" | "gateway" | "accessory"
+  // "node" | "kit" | "gateway" | "board" | "antenna" | "power" | "enclosure" | "accessory"
   category      String
   description   String
   // board / antenna / battery / enclosure - free text, shown verbatim
   specs         String?
   // null = price on application
-  priceAudCents Int?     @map("price_aud_cents")
+  priceAudCents Int?      @map("price_aud_cents")
   // "in_stock" | "made_to_order" | "out_of_stock"
-  stockStatus   String   @default("in_stock") @map("stock_status")
+  stockStatus   String    @default("in_stock") @map("stock_status")
   // Builder's own checkout (Etsy/eBay/own site) - validated against link policy
-  buyUrl        String?  @map("buy_url")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  buyUrl        String?   @map("buy_url")
+  // Featured placement rental - pinned to the top of the store floor until this time
+  featuredUntil DateTime? @map("featured_until")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
 
   builder MeshBuilder @relation(fields: [builderId], references: [id], onDelete: Cascade)
 

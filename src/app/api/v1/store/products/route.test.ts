@@ -48,6 +48,7 @@ describe("POST /api/v1/store/products", () => {
     mockBuilderFindUnique.mockResolvedValue({
       id: "builder-1",
       status: "approved",
+      extraSlots: 0,
       _count: { products: 2 },
     });
     mockProductCreate.mockResolvedValue({ id: "prod-1" });
@@ -95,6 +96,7 @@ describe("POST /api/v1/store/products", () => {
     mockBuilderFindUnique.mockResolvedValue({
       id: "builder-1",
       status: "pending",
+      extraSlots: 0,
       _count: { products: 0 },
     });
     const res = await POST(makeRequest(PRODUCT));
@@ -102,14 +104,30 @@ describe("POST /api/v1/store/products", () => {
     expect(mockProductCreate).not.toHaveBeenCalled();
   });
 
-  it("caps the shelf at 12 products", async () => {
+  it("enforces the free slot limit (3 products)", async () => {
     mockBuilderFindUnique.mockResolvedValue({
       id: "builder-1",
       status: "approved",
-      _count: { products: 12 },
+      extraSlots: 0,
+      _count: { products: 3 },
     });
     const res = await POST(makeRequest(PRODUCT));
     expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.code).toBe("SLOT_LIMIT_REACHED");
+    expect(body.slotLimit).toBe(3);
+    expect(mockProductCreate).not.toHaveBeenCalled();
+  });
+
+  it("extra slots raise the shelf limit", async () => {
+    mockBuilderFindUnique.mockResolvedValue({
+      id: "builder-1",
+      status: "approved",
+      extraSlots: 2,
+      _count: { products: 4 },
+    });
+    const res = await POST(makeRequest(PRODUCT));
+    expect(res.status).toBe(201);
   });
 
   it("rejects blocked buy links", async () => {

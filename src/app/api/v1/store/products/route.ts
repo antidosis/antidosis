@@ -5,11 +5,10 @@ import { prisma } from "@/lib/prisma";
 import { createMeshProductSchema } from "@/lib/schemas/store";
 import { assessProfileLink } from "@/lib/security/link-policy";
 import { sanitizePlainText } from "@/lib/security/sanitize";
+import { productSlotLimit } from "@/lib/store-slots";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
-
-const MAX_PRODUCTS_PER_BUILDER = 12;
 
 /** Add a product to the signed-in builder's shelf. Approved builders only. */
 export const POST = withApiHandler(async (req: NextRequest) => {
@@ -30,7 +29,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
 
   const builder = await prisma.meshBuilder.findUnique({
     where: { profileId: profile.id },
-    select: { id: true, status: true, _count: { select: { products: true } } },
+    select: { id: true, status: true, extraSlots: true, _count: { select: { products: true } } },
   });
   if (!builder) {
     return NextResponse.json({ error: "Apply as a mesh builder first" }, { status: 404 });
@@ -47,9 +46,14 @@ export const POST = withApiHandler(async (req: NextRequest) => {
       { status: 403 }
     );
   }
-  if (builder._count.products >= MAX_PRODUCTS_PER_BUILDER) {
+  const slotLimit = productSlotLimit(builder);
+  if (builder._count.products >= slotLimit) {
     return NextResponse.json(
-      { error: `Listings are capped at ${MAX_PRODUCTS_PER_BUILDER} products per builder` },
+      {
+        error: `Your shelf holds ${slotLimit} products — extra slots open up when slot rentals launch. Message support if you need more during the pilot.`,
+        code: "SLOT_LIMIT_REACHED",
+        slotLimit,
+      },
       { status: 400 }
     );
   }

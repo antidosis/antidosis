@@ -84,10 +84,17 @@ export const updateMeshProductSchema = z.object({
   buyUrl: z.string().trim().max(500).nullable().optional(),
 });
 
-export const reviewMeshBuilderSchema = z.object({
-  status: z.enum(["approved", "rejected", "suspended"]),
-  reviewNote: optionalTrimmed(1000),
-});
+export const reviewMeshBuilderSchema = z
+  .object({
+    status: z.enum(["approved", "rejected", "suspended"]).optional(),
+    reviewNote: optionalTrimmed(1000),
+    // Pilot: admin grants extra product slots by hand; later the rental
+    // purchase flow increments this automatically.
+    extraSlots: z.number().int().min(0).max(60).optional(),
+  })
+  .refine((value) => value.status !== undefined || value.extraSlots !== undefined, {
+    message: "Nothing to update",
+  });
 
 export type MeshBuilderStatus = (typeof meshBuilderStatuses)[number];
 export type MeshProductCategory = (typeof meshProductCategories)[number];

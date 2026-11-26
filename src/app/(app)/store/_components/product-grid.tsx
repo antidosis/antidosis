@@ -24,6 +24,7 @@ export type StoreItem = {
   builderName?: string;
   buyUrl?: string | null;
   notifyKind?: InterestKind;
+  featured?: boolean;
 };
 
 export const CATEGORY_LABEL: Record<StoreCategory, string> = {
@@ -127,7 +128,7 @@ const STOCK_LABEL: Record<string, { label: string; tone: string }> = {
   out_of_stock: { label: "out of stock", tone: "text-ash" },
 };
 
-/** Flagship concepts are always on the floor; live builder products join them. */
+/** Flagship concepts are always on the floor; live builder products join them, featured placements first. */
 export function buildStoreItems(builders: PublicMeshBuilder[] | null): StoreItem[] {
   const live: StoreItem[] = (builders ?? []).flatMap((builder) =>
     builder.products.map((product) => ({
@@ -140,9 +141,12 @@ export function buildStoreItems(builders: PublicMeshBuilder[] | null): StoreItem
       status: STOCK_LABEL[product.stockStatus] ?? STOCK_LABEL.in_stock,
       builderName: builder.businessName,
       buyUrl: product.buyUrl,
+      featured: product.featured === true,
     }))
   );
-  return [...FLAGSHIP, ...live];
+  const featured = live.filter((item) => item.featured);
+  const standard = live.filter((item) => !item.featured);
+  return [...featured, ...FLAGSHIP, ...standard];
 }
 
 function ProductCard({
@@ -153,7 +157,14 @@ function ProductCard({
   onNotify: (kind: InterestKind) => void;
 }) {
   return (
-    <article className="group flex flex-col overflow-hidden rounded-lg border border-line/70 bg-void/40 transition-colors hover:border-sun/30">
+    <article
+      className={cn(
+        "group flex flex-col overflow-hidden rounded-lg border bg-void/40 transition-colors hover:border-sun/30",
+        item.featured
+          ? "border-sun/40 shadow-[0_0_24px_-8px_rgb(var(--c-sun)/0.35)]"
+          : "border-line/70"
+      )}
+    >
       <div className="border-b border-line/50 bg-gradient-to-b from-surface/50 to-transparent px-3 pt-3">
         <ProductArt
           variant={item.art}
@@ -162,8 +173,13 @@ function ProductCard({
       </div>
       <div className="flex flex-1 flex-col p-3 sm:p-4">
         <div className="flex items-center justify-between gap-2">
-          <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-mercury">
+          <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-mercury">
             {CATEGORY_LABEL[item.category]}
+            {item.featured && (
+              <span className="text-sun" title="Featured placement">
+                ★ featured
+              </span>
+            )}
           </span>
           <span className={cn("font-mono text-[10px] uppercase tracking-wider", item.status.tone)}>
             {item.status.label}

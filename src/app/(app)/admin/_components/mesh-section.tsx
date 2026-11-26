@@ -17,6 +17,7 @@ type AdminMeshBuilder = {
   description: string;
   status: string;
   reviewNote: string | null;
+  extraSlots: number;
   createdAt: string;
   profile: {
     id: string;
@@ -73,6 +74,8 @@ export function MeshSection() {
   const [noteFor, setNoteFor] = useState<string | null>(null);
   const [note, setNote] = useState("");
   const [acting, setActing] = useState(false);
+  const [slotsFor, setSlotsFor] = useState<string | null>(null);
+  const [slotsValue, setSlotsValue] = useState("0");
 
   const loadBuilders = useCallback(
     async (status: string) => {
@@ -146,6 +149,26 @@ export function MeshSection() {
       await loadInterests(interestFilter);
     } catch (err) {
       toast(err instanceof Error ? err.message : "Status update failed", "error");
+    }
+  }
+
+  async function grantSlots(builder: AdminMeshBuilder, value: number) {
+    setActing(true);
+    try {
+      const res = await fetch(`/api/v1/admin/store/builders/${builder.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ extraSlots: value }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Slot update failed");
+      toast(`${builder.businessName}: ${value} extra slot${value === 1 ? "" : "s"}`, "success");
+      setSlotsFor(null);
+      await loadBuilders(builderFilter);
+    } catch (err) {
+      toast(err instanceof Error ? err.message : "Slot update failed", "error");
+    } finally {
+      setActing(false);
     }
   }
 
@@ -261,6 +284,51 @@ export function MeshSection() {
                 {builder.reviewNote && (
                   <p className="mt-2 text-xs italic text-ash">note: {builder.reviewNote}</p>
                 )}
+
+                {/* Product slots — 3 free + granted extras (pilot: manual; later: rentals) */}
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-ash">
+                  <span className="font-mono">
+                    slots: {builder.products.length}/{3 + builder.extraSlots} used
+                    {builder.extraSlots > 0 ? ` (${builder.extraSlots} extra granted)` : ""}
+                  </span>
+                  {slotsFor === builder.id ? (
+                    <span className="flex items-center gap-1.5">
+                      <input
+                        type="number"
+                        min={0}
+                        max={60}
+                        value={slotsValue}
+                        onChange={(event) => setSlotsValue(event.target.value)}
+                        className="w-16 rounded border border-line bg-inset px-2 py-1 text-xs text-gold outline-none focus:border-sun"
+                        aria-label="Extra slots"
+                      />
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        disabled={acting}
+                        onClick={() =>
+                          grantSlots(builder, Math.max(0, Math.min(60, Number(slotsValue) || 0)))
+                        }
+                      >
+                        Set
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => setSlotsFor(null)}>
+                        Cancel
+                      </Button>
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSlotsFor(builder.id);
+                        setSlotsValue(String(builder.extraSlots));
+                      }}
+                      className="text-mercury underline-offset-2 hover:underline"
+                    >
+                      adjust extra slots
+                    </button>
+                  )}
+                </div>
 
                 <div className="mt-4 flex flex-wrap gap-2">
                   {noteFor === builder.id ? (

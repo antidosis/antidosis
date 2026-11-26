@@ -23,8 +23,9 @@ export const PATCH = withApiHandler(async (req: NextRequest, _ctx, { params }: R
 
   const parsed = reviewMeshBuilderSchema.safeParse(body);
   if (!parsed.success) {
+    const first = parsed.error.issues[0];
     return NextResponse.json(
-      { error: "Status must be approved, rejected or suspended" },
+      { error: first?.message ?? "Status must be approved, rejected or suspended" },
       { status: 400 }
     );
   }
@@ -37,9 +38,14 @@ export const PATCH = withApiHandler(async (req: NextRequest, _ctx, { params }: R
   const builder = await prisma.meshBuilder.update({
     where: { id: params.id },
     data: {
-      status: parsed.data.status,
-      reviewNote: parsed.data.reviewNote ? parsed.data.reviewNote : null,
-      reviewedAt: new Date(),
+      ...(parsed.data.status !== undefined && {
+        status: parsed.data.status,
+        reviewedAt: new Date(),
+      }),
+      ...(parsed.data.reviewNote !== undefined && {
+        reviewNote: parsed.data.reviewNote ? parsed.data.reviewNote : null,
+      }),
+      ...(parsed.data.extraSlots !== undefined && { extraSlots: parsed.data.extraSlots }),
     },
     include: {
       profile: { select: { id: true, fullName: true, handle: true, email: true } },

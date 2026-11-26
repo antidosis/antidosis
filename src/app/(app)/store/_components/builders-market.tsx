@@ -22,6 +22,8 @@ export type MeshProductListing = {
   priceAudCents: number | null;
   stockStatus: string;
   buyUrl: string | null;
+  featuredUntil?: string | null;
+  featured?: boolean;
 };
 
 export type PublicMeshBuilder = {
