@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { dispatchCommand } from "./terminal-handlers";
+import type { HandlerContext } from "./terminal-handlers/types";
 
 describe("terminal-handlers re-export", () => {
   it("exports dispatchCommand function", () => {
@@ -19,7 +20,7 @@ describe("terminal-handlers re-export", () => {
   it("dispatches a known command", async () => {
     const result = await dispatchCommand("help", [], {
       args: [],
-      router: { push: () => {} } as any,
+      router: { push: () => {} } as unknown as HandlerContext["router"],
       myProfile: null,
       user: { id: "u1" },
       isAdmin: false,

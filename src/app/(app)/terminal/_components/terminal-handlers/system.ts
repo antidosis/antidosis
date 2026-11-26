@@ -1,6 +1,7 @@
 "use client";
 
 import { generateHelpText, generateCommandsText, generateWhatisText } from "../terminal-commands";
+import type { Msg, SysMsg } from "../terminal-types";
 import { popUndo, peekUndo, formatUndoDescription } from "../terminal-undo";
 import type { HandlerContext, HandlerResult } from "./types";
 import { apiPost, apiGet, friendlyError, sanitizePath } from "./utils";
@@ -155,11 +156,13 @@ export async function handleUndo(ctx: HandlerContext): Promise<HandlerResult> {
 
   switch (action.type) {
     case "clear_messages": {
-      if (action.payload.sysMessages) {
-        ctx.setSysMessages(action.payload.sysMessages);
+      const sysMessages = action.payload.sysMessages as SysMsg[] | undefined;
+      const messages = action.payload.messages as Msg[] | undefined;
+      if (sysMessages) {
+        ctx.setSysMessages(sysMessages);
       }
-      if (action.payload.messages) {
-        ctx.setMessages(action.payload.messages);
+      if (messages) {
+        ctx.setMessages(messages);
       }
       ctx.addSys(`↩️ Undid: ${action.description}. Messages restored.`, "success");
       break;

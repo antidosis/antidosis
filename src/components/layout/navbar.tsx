@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import { ChevronDown, Menu, X } from "lucide-react";
 
@@ -92,6 +92,7 @@ function hubIsActive(hub: NavHub, pathname: string): boolean {
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [supabase] = useState(() => createClient());
   const [user, setUser] = useState<{ id: string } | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -109,11 +110,14 @@ export function Navbar() {
     return () => listener.subscription.unsubscribe();
   }, [supabase]);
 
-  useEffect(() => {
+  // Close menus on route change — render-adjust pattern
+  const [menusClosedFor, setMenusClosedFor] = useState(pathname);
+  if (menusClosedFor !== pathname) {
+    setMenusClosedFor(pathname);
     setMobileOpen(false);
     setOpenHub(null);
     setDesktopHub(null);
-  }, [pathname]);
+  }
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
@@ -218,7 +222,12 @@ export function Navbar() {
                 </Button>
                 <button
                   type="button"
-                  onClick={() => supabase.auth.signOut().then(() => (window.location.href = "/"))}
+                  onClick={() =>
+                    supabase.auth.signOut().then(() => {
+                      router.push("/");
+                      router.refresh();
+                    })
+                  }
                   className="text-sm text-ash transition-colors hover:text-gold"
                 >
                   Log out
@@ -329,7 +338,12 @@ export function Navbar() {
               ) : (
                 <button
                   type="button"
-                  onClick={() => supabase.auth.signOut().then(() => (window.location.href = "/"))}
+                  onClick={() =>
+                    supabase.auth.signOut().then(() => {
+                      router.push("/");
+                      router.refresh();
+                    })
+                  }
                   className="min-h-11 py-2.5 text-left text-base text-ash"
                 >
                   Log out

@@ -1,18 +1,21 @@
+import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
 import { dispatchCommand } from "./dispatch";
-import type { HandlerContext } from "./types";
+import type { HandlerContext, MyProfile } from "./types";
+import type { ActiveContext, Channel } from "../terminal-types";
 
 function makeCtx(overrides: Partial<HandlerContext> = {}): HandlerContext {
   return {
     args: [],
-    router: { push: vi.fn() } as any,
+    router: { push: vi.fn() } as unknown as AppRouterInstance,
     myProfile: null,
     user: { id: "user-1" },
     isAdmin: false,
     channels: [],
     setActiveContext: vi.fn(),
-    activeContext: { type: "none" as any, id: "" },
+    activeContext: { type: "none", id: "" } as unknown as ActiveContext,
     session: {
       version: 2,
       userId: "user-1",
@@ -84,7 +87,10 @@ describe("dispatchCommand", () => {
   });
 
   it("routes chat command to handleChat", async () => {
-    const ctx = makeCtx({ channels: [{ id: "ch1", name: "general" }] as any, args: ["general"] });
+    const ctx = makeCtx({
+      channels: [{ id: "ch1", name: "general" }] as unknown as Channel[],
+      args: ["general"],
+    });
     const result = await dispatchCommand("chat", ["general"], ctx);
     expect(result).toEqual({ handled: true });
     expect(ctx.setActiveContext).toHaveBeenCalled();
@@ -136,7 +142,7 @@ describe("dispatchCommand", () => {
   });
 
   it("routes whoami command", async () => {
-    const ctx = makeCtx({ myProfile: { id: "user-1", fullName: "Test" } as any });
+    const ctx = makeCtx({ myProfile: { id: "user-1", fullName: "Test" } as unknown as MyProfile });
     const result = await dispatchCommand("whoami", [], ctx);
     expect(result).toEqual({ handled: true });
     expect(ctx.addSys).toHaveBeenCalled();

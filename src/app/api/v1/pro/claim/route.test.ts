@@ -56,7 +56,7 @@ vi.mock("@/lib/audit", () => ({
 
 // ─── CORS mock ───
 vi.mock("@/lib/security/cors", () => ({
-  withCors: (handler: any) => handler,
+  withCors: (handler: unknown) => handler,
 }));
 
 // ─── Helpers ───

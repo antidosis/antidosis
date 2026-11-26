@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
+import type { WizardState } from "./terminal-session";
 import {
   createWizard,
   getPrompt,
@@ -16,10 +17,10 @@ vi.mock("@/lib/categories", () => ({
     { value: "money", label: "Money" },
   ],
   INCOMPATIBLE_EXCHANGE_MODES: {} as Record<string, string[]>,
-  getExchangeMode: (v: string) =>
-    (
-      ({ service: { label: "Service" }, item: { label: "Item" }, money: { label: "Money" } }) as any
-    )[v],
+  getExchangeMode: ((v: string) =>
+    ({ service: { label: "Service" }, item: { label: "Item" }, money: { label: "Money" } })[
+      v as "service" | "item" | "money"
+    ]) as unknown as (value: string | null | undefined) => { value: string; label: string } | null,
 }));
 
 vi.mock("@/lib/data/central-coast-suburbs", () => ({
@@ -115,7 +116,7 @@ describe("terminal-wizard", () => {
     });
 
     it("returns generic completion for unknown type", () => {
-      const prompt = getPrompt("unknown" as any, 0, {});
+      const prompt = getPrompt("unknown" as unknown as WizardState["type"], 0, {});
       expect(prompt).toContain("Wizard complete");
     });
   });
@@ -153,7 +154,7 @@ describe("terminal-wizard", () => {
     });
 
     it("returns empty for unknown type", () => {
-      const steps = getSteps("unknown" as any, {});
+      const steps = getSteps("unknown" as unknown as WizardState["type"], {});
       expect(steps).toEqual([]);
     });
   });
@@ -572,12 +573,13 @@ describe("terminal-wizard", () => {
     it("creates wizard with need data", () => {
       const need = {
         id: "n1",
+        status: "open",
         title: "Fix roof",
         description: "Leaky",
         needCategory: "service",
         offerType: "service",
         offerDescription: "$100",
-        offerValue: 100,
+        offerValue: "100",
         locationName: "Woy Woy",
         deadline: "2026-06-01T00:00:00Z",
         timeRange: "2 hours",

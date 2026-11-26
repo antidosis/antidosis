@@ -45,7 +45,7 @@ export async function handleLabDrafts(ctx: HandlerContext): Promise<HandlerResul
     return { handled: true };
   }
   ctx.addSys(
-    `📝 Drafts:\n${drafts.map((d: any, i: number) => `  ${i + 1}. ${d.title} (${new Date(d.createdAt).toLocaleDateString("en-AU")})`).join("\n")}`,
+    `📝 Drafts:\n${drafts.map((d, i) => `  ${i + 1}. ${d.title} (${new Date(d.createdAt).toLocaleDateString("en-AU")})`).join("\n")}`,
     "info"
   );
   return { handled: true };
@@ -89,7 +89,7 @@ export async function handleLabNotes(ctx: HandlerContext): Promise<HandlerResult
     return { handled: true };
   }
   ctx.addSys(
-    `📝 Notes:\n${notes.map((n: any, i: number) => `  ${i + 1}. ${truncate(n.text, 60)}`).join("\n")}`,
+    `📝 Notes:\n${notes.map((n, i) => `  ${i + 1}. ${truncate(n.text, 60)}`).join("\n")}`,
     "info"
   );
   return { handled: true };

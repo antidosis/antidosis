@@ -5,6 +5,7 @@
  * parsed by log aggregators. In development, logs are human-readable.
  */
 
+/* eslint-disable no-console -- this module is the single sanctioned console sink for the app */
 const isProduction = process.env.NODE_ENV === "production";
 
 interface LogContext {

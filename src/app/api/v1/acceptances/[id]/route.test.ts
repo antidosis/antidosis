@@ -111,7 +111,7 @@ describe("PATCH /api/v1/acceptances/[id]", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     mockRateLimit.mockResolvedValue({ allowed: true, remaining: 10, resetAt: Date.now() + 60_000 });
-    mockTransaction.mockImplementation(async (cb: any) => cb(mockTx));
+    mockTransaction.mockImplementation(async (cb: (tx: unknown) => Promise<unknown>) => cb(mockTx));
     mockSendInterestAcceptedEmail.mockResolvedValue(undefined);
     mockCreateNotification.mockResolvedValue(undefined);
     mockAcceptanceFindFirst.mockResolvedValue(null);

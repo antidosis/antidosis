@@ -1,3 +1,5 @@
+import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
 import {
@@ -21,17 +23,19 @@ import {
   handleCredentialDelete,
 } from "./profile";
 import type { HandlerContext } from "./types";
+import type { MyProfile } from "./types";
+import type { ActiveContext } from "../terminal-types";
 
 function makeCtx(overrides: Partial<HandlerContext> = {}): HandlerContext {
   return {
     args: [],
-    router: { push: vi.fn() } as any,
-    myProfile: { id: "user-1", fullName: "Test User" } as any,
+    router: { push: vi.fn() } as unknown as AppRouterInstance,
+    myProfile: { id: "user-1", fullName: "Test User" } as unknown as MyProfile,
     user: { id: "user-1" },
     isAdmin: false,
     channels: [],
     setActiveContext: vi.fn(),
-    activeContext: { type: "none" as any, id: "" },
+    activeContext: { type: "none", id: "" } as unknown as ActiveContext,
     session: {
       version: 2,
       userId: "user-1",
@@ -92,7 +96,7 @@ describe("profile handlers", () => {
           jobsCompleted: 5,
           locationName: "Sydney",
           skills: [{ id: "s1", name: "Plumbing" }],
-        } as any,
+        } as unknown as MyProfile,
       });
       await handleWhoami(ctx);
       expect(ctx.addSys).toHaveBeenCalledWith(expect.stringContaining("Alice"), "info");
@@ -100,7 +104,7 @@ describe("profile handlers", () => {
     });
 
     it("handles minimal profile", async () => {
-      const ctx = makeCtx({ myProfile: { id: "user-1", fullName: null } as any });
+      const ctx = makeCtx({ myProfile: { id: "user-1", fullName: null } as unknown as MyProfile });
       await handleWhoami(ctx);
       expect(ctx.addSys).toHaveBeenCalledWith(expect.stringContaining("You"), "info");
     });
@@ -112,7 +116,7 @@ describe("profile handlers", () => {
           fullName: "Bob",
           isVerified: false,
           skills: [],
-        } as any,
+        } as unknown as MyProfile,
       });
       await handleWhoami(ctx);
       expect(ctx.addSys).toHaveBeenCalledWith(expect.stringContaining("❌"), "info");
@@ -158,7 +162,12 @@ describe("profile handlers", () => {
   describe("handleReputation", () => {
     it("shows reputation", async () => {
       const ctx = makeCtx({
-        myProfile: { id: "user-1", ratingAvg: 4.5, ratingCount: 10, jobsCompleted: 5 } as any,
+        myProfile: {
+          id: "user-1",
+          ratingAvg: 4.5,
+          ratingCount: 10,
+          jobsCompleted: 5,
+        } as unknown as MyProfile,
       });
       await handleReputation(ctx);
       expect(ctx.addSys).toHaveBeenCalledWith(expect.stringContaining("Reputation"), "info");
@@ -166,7 +175,12 @@ describe("profile handlers", () => {
 
     it("handles null rating", async () => {
       const ctx = makeCtx({
-        myProfile: { id: "user-1", ratingAvg: null, ratingCount: null, jobsCompleted: 0 } as any,
+        myProfile: {
+          id: "user-1",
+          ratingAvg: null,
+          ratingCount: null,
+          jobsCompleted: 0,
+        } as unknown as MyProfile,
       });
       await handleReputation(ctx);
       expect(ctx.addSys).toHaveBeenCalledWith(expect.stringContaining("0"), "info");
@@ -182,7 +196,7 @@ describe("profile handlers", () => {
             { id: "s1", name: "Plumbing" },
             { id: "s2", name: "Carpentry" },
           ],
-        } as any,
+        } as unknown as MyProfile,
       });
       await handleSkills(ctx);
       expect(ctx.addSys).toHaveBeenCalledWith(expect.stringContaining("Plumbing"), "info");
@@ -190,7 +204,7 @@ describe("profile handlers", () => {
     });
 
     it("shows empty state", async () => {
-      const ctx = makeCtx({ myProfile: { id: "user-1", skills: [] } as any });
+      const ctx = makeCtx({ myProfile: { id: "user-1", skills: [] } as unknown as MyProfile });
       await handleSkills(ctx);
       expect(ctx.addSys).toHaveBeenCalledWith(expect.stringContaining("No skills yet"), "info");
     });
@@ -448,7 +462,9 @@ describe("profile handlers", () => {
 
   describe("handleDirectory", () => {
     it("rejects unverified users", async () => {
-      const ctx = makeCtx({ myProfile: { id: "user-1", isVerified: false } as any });
+      const ctx = makeCtx({
+        myProfile: { id: "user-1", isVerified: false } as unknown as MyProfile,
+      });
       await handleDirectory(ctx);
       expect(ctx.addSys).toHaveBeenCalledWith(
         expect.stringContaining("Verified members only"),
@@ -463,7 +479,7 @@ describe("profile handlers", () => {
           isVerified: true,
           mobileVerified: true,
           showInDirectory: true,
-        } as any,
+        } as unknown as MyProfile,
       });
       await handleDirectory(ctx);
       expect(ctx.addSys).toHaveBeenCalledWith(expect.stringContaining("Visible"), "info");
@@ -477,7 +493,7 @@ describe("profile handlers", () => {
           isVerified: true,
           mobileVerified: true,
           showInDirectory: false,
-        } as any,
+        } as unknown as MyProfile,
         args: ["on"],
       });
       await handleDirectory(ctx);
@@ -492,7 +508,7 @@ describe("profile handlers", () => {
           isVerified: true,
           mobileVerified: true,
           showInDirectory: true,
-        } as any,
+        } as unknown as MyProfile,
         args: ["off"],
       });
       await handleDirectory(ctx);
@@ -502,7 +518,7 @@ describe("profile handlers", () => {
     it("handles API error", async () => {
       vi.mocked(global.fetch).mockRejectedValue(new Error(""));
       const ctx = makeCtx({
-        myProfile: { id: "user-1", isVerified: true, mobileVerified: true } as any,
+        myProfile: { id: "user-1", isVerified: true, mobileVerified: true } as unknown as MyProfile,
         args: ["on"],
       });
       await handleDirectory(ctx);

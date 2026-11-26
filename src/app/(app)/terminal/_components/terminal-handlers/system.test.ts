@@ -1,3 +1,5 @@
+import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
 import {
@@ -17,17 +19,19 @@ import {
 } from "./system";
 import { clearUndoStack, pushUndo } from "../terminal-undo";
 import type { HandlerContext } from "./types";
+import type { MyProfile } from "./types";
+import type { ActiveContext } from "../terminal-types";
 
 function makeCtx(overrides: Partial<HandlerContext> = {}): HandlerContext {
   return {
     args: [],
-    router: { push: vi.fn() } as any,
-    myProfile: { id: "user-1", fullName: "Test" } as any,
+    router: { push: vi.fn() } as unknown as AppRouterInstance,
+    myProfile: { id: "user-1", fullName: "Test" } as unknown as MyProfile,
     user: { id: "user-1" },
     isAdmin: false,
     channels: [],
     setActiveContext: vi.fn(),
-    activeContext: { type: "none" as any, id: "" },
+    activeContext: { type: "none", id: "" } as unknown as ActiveContext,
     session: {
       version: 2,
       userId: "user-1",
@@ -226,7 +230,7 @@ describe("system handlers", () => {
     });
 
     it("shows profile id when available", async () => {
-      const ctx = makeCtx({ myProfile: { id: "profile-1" } as any });
+      const ctx = makeCtx({ myProfile: { id: "profile-1" } as unknown as MyProfile });
       await handleId(ctx);
       expect(ctx.addSys).toHaveBeenCalledWith(expect.stringContaining("profile-1"), "info");
     });
@@ -320,7 +324,10 @@ describe("system handlers", () => {
     });
 
     it("displays locally when no context", async () => {
-      const ctx = makeCtx({ args: ["waves"], activeContext: { type: "none" as any, id: "" } });
+      const ctx = makeCtx({
+        args: ["waves"],
+        activeContext: { type: "none", id: "" } as unknown as ActiveContext,
+      });
       await handleMe(ctx);
       expect(ctx.addSys).toHaveBeenCalledWith(expect.stringContaining("waves"), "info");
     });

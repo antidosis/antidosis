@@ -5,6 +5,8 @@
  * No LLM — fast, deterministic, offline-capable rule-based system.
  */
 
+import type { ApiAcceptance, ApiContract, ApiNeed, ApiNotification } from "@/lib/api-types";
+
 // ─── Intent Classification ───────────────────────────────────
 
 export type Intent =
@@ -326,15 +328,15 @@ function extractArgs(text: string): Record<string, string> {
 // ─── Agent Response Engine ───────────────────────────────────
 
 interface UserContext {
-  myProfile: any;
-  notifications: any[];
-  contracts: any[];
-  needs: any[];
-  acceptances: any[];
+  myProfile: { id: string; ratingAvg: number | null; ratingCount: number | null } | null;
+  notifications: ApiNotification[];
+  contracts: ApiContract[];
+  needs: ApiNeed[];
+  acceptances: ApiAcceptance[];
   unreadDmCount: number;
-  pendingSignatures: any[];
-  pendingCompletions: any[];
-  pendingReviews: any[];
+  pendingSignatures: ApiContract[];
+  pendingCompletions: ApiContract[];
+  pendingReviews: ApiContract[];
 }
 
 export async function generateAgentResponse(
@@ -418,7 +420,7 @@ function buildPendingActionsResponse(context: UserContext): string {
     parts.push(
       `  ⭐ ${context.pendingReviews.length} review${context.pendingReviews.length > 1 ? "s" : ""} pending:` +
         context.pendingReviews
-          .map((r) => `\n     • ${r.title || "Deal"} → /review ${r.id.slice(0, 8)}`)
+          .map((r) => `\n     • ${r.need?.title || "Deal"} → /review ${r.id.slice(0, 8)}`)
           .join("")
     );
   }

@@ -2,6 +2,8 @@ import { type NextRequest } from "next/server";
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+import { logger } from "@/lib/logger";
+
 import { POST } from "./route";
 
 // ─── Prisma mocks ───
@@ -21,7 +23,7 @@ vi.mock("@/lib/prisma", () => ({
       deleteMany: (...args: unknown[]) => mockDeleteMany(...args),
       create: (...args: unknown[]) => mockCreate(...args),
     },
-    $transaction: (cb: any) => mockTransaction(cb),
+    $transaction: (cb: unknown) => mockTransaction(cb),
   },
 }));
 
@@ -94,7 +96,7 @@ function makeAuthUser(overrides?: Partial<{ id: string; email: string }>) {
 describe("POST /api/v1/auth/send-otp", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockTransaction.mockImplementation(async (cb: any) => {
+    mockTransaction.mockImplementation(async (cb: (tx: unknown) => Promise<unknown>) => {
       const tx = {
         mobileVerificationCode: {
           deleteMany: mockDeleteMany,
@@ -221,17 +223,17 @@ describe("POST /api/v1/auth/send-otp", () => {
     expect(mockDeleteMany).not.toHaveBeenCalled();
   });
 
-  it("returns 200 and logs to console in dev fallback when Twilio not configured", async () => {
+  it("returns 200 and logs via logger in dev fallback when Twilio not configured", async () => {
     mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
-    const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const loggerSpy = vi.spyOn(logger, "info").mockImplementation(() => {});
 
     const res = await POST(makeRequest({ mobile: "0400123456" }));
     const body = await res.json();
 
     expect(res.status).toBe(200);
     expect(body.success).toBe(true);
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("[DEV OTP]"));
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("+61400123456"));
+    expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining("[DEV OTP]"));
+    expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining("+61400123456"));
     // Dev fallback stores a hashed code locally (verify-otp compares hashes)
     expect(mockCreate).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -244,7 +246,7 @@ describe("POST /api/v1/auth/send-otp", () => {
       })
     );
 
-    consoleSpy.mockRestore();
+    loggerSpy.mockRestore();
   });
 
   it("returns 502 when Twilio fails", async () => {

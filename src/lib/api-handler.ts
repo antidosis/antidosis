@@ -55,8 +55,8 @@ export function withApiHandler<TArgs extends unknown[]>(
   // The returned function is intentionally typed with `any[]` rest args: Next.js
   // validates exported handlers against `{ params: Promise<...> }` context types,
   // while our handlers keep receiving resolved (plain) objects.
-): (req: NextRequest, ...args: any[]) => Promise<NextResponse> {
-  return async (req: NextRequest, ...args: any[]) => {
+): (req: NextRequest, ...args: unknown[]) => Promise<NextResponse> {
+  return async (req: NextRequest, ...args: unknown[]) => {
     const requestId = generateRequestId();
     const startTime = Date.now();
     const method = req.method;
@@ -70,7 +70,9 @@ export function withApiHandler<TArgs extends unknown[]>(
 
     try {
       const resolvedArgs = await resolveRouteArgs(args);
-      const response = await (handler as any)(req, { requestId, startTime }, ...resolvedArgs);
+      const response = await (
+        handler as (req: NextRequest, ctx: ApiContext, ...args: unknown[]) => Promise<Response>
+      )(req, { requestId, startTime }, ...resolvedArgs);
       const latencyMs = Date.now() - startTime;
       const status = response.status;
 

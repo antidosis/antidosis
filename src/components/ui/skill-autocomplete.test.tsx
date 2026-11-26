@@ -49,7 +49,6 @@ describe("SkillAutocomplete", () => {
   it("removes a skill when chip X is clicked", () => {
     const onChange = vi.fn();
     render(<SkillAutocomplete value={["Electrical", "Plumbing"]} onChange={onChange} />);
-    const chips = screen.getAllByRole("button").filter((b) => b.querySelector("svg"));
     // The chip remove buttons are inline; click the first one
     const removeButtons = screen.getAllByRole("button").filter((b) => {
       const parent = b.closest("span");

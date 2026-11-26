@@ -1,11 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+import type { Prisma } from "@prisma/client";
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { isAdminEmail } from "@/lib/admin";
 import { withApiHandler } from "@/lib/api-handler";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 
-async function requireAdmin(supabase: any) {
+async function requireAdmin(supabase: SupabaseClient) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -24,7 +27,7 @@ export const GET = withApiHandler(async (req: NextRequest) => {
   const q = searchParams.get("q")?.trim();
   const limit = Math.min(parseInt(searchParams.get("limit") || "50"), 100);
 
-  const where: any = {};
+  const where: Prisma.ProfileWhereInput = {};
   if (q) {
     where.OR = [
       { fullName: { contains: q, mode: "insensitive" } },

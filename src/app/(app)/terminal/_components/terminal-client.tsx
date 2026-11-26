@@ -4,15 +4,18 @@ import { useState, useEffect, useRef, useCallback } from "react";
 
 import { useRouter } from "next/navigation";
 
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import { X, Menu, Loader2, Paperclip, Send, Smile, Mic, MicOff, Reply } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import type { ApiAcceptance, ApiContract } from "@/lib/api-types";
 import { compressImage } from "@/lib/image-compress";
 import { createClient } from "@/lib/supabase/client";
 
 import { parseIntent } from "./terminal-agent";
 import { COMMANDS, findClosestCommands } from "./terminal-commands";
 import { dispatchCommand } from "./terminal-handlers/index";
+import type { MyProfile } from "./terminal-handlers/types";
 import { useThemeStyles, useNotificationSound, useSwipeGesture } from "./terminal-hooks";
 import { parsePipeline, reverseISearch, type SearchMatch } from "./terminal-input-engine";
 import { TerminalMessageList } from "./terminal-message-list";
@@ -24,7 +27,9 @@ import {
   resolveAlias,
   resolveMacro,
   type TerminalSession,
+  type WizardData,
   type WizardState,
+  type WizardValue,
 } from "./terminal-session";
 import { TerminalSidebar } from "./terminal-sidebar";
 import type {
@@ -37,9 +42,63 @@ import type {
   PendingChoice,
   ReplyTarget,
   Attachment,
+  Reaction,
 } from "./terminal-types";
 import { pushUndo } from "./terminal-undo";
 import { advanceWizard, getSteps } from "./terminal-wizard";
+
+// Minimal Web Speech API surface (not in the TS DOM lib).
+interface SpeechRecognitionResultLike {
+  isFinal: boolean;
+  0: { transcript: string };
+}
+interface SpeechRecognitionEventLike {
+  resultIndex: number;
+  results: { length: number; [index: number]: SpeechRecognitionResultLike };
+}
+interface SpeechRecognitionErrorLike {
+  error: string;
+}
+interface SpeechRecognitionLike {
+  continuous: boolean;
+  interimResults: boolean;
+  onstart: (() => void) | null;
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorLike) => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
+}
+type SpeechRecognitionCtor = new () => SpeechRecognitionLike;
+
+/** Message row as delivered by Supabase Realtime `postgres_changes` payloads. */
+interface RealtimeIncomingMessage {
+  id: string;
+  senderId: string;
+  content: string;
+  createdAt: string;
+  channelId?: string | null;
+  threadId?: string | null;
+  attachments?: unknown;
+  reactions?: unknown;
+}
+
+/** Broadcast payload for the terminal typing indicator. */
+interface TypingBroadcastPayload {
+  threadId?: string;
+  channelId?: string;
+  senderName?: string;
+}
+
+type HandleSubmitFn = (e?: React.FormEvent, voiceText?: string) => Promise<void>;
+
+/** Coerce a wizard value to its string form. */
+function str(value: WizardValue | undefined): string {
+  if (typeof value === "string") return value;
+  if (typeof value === "number") return String(value);
+  return "";
+}
 
 // Constants
 
@@ -62,7 +121,7 @@ export default function TerminalClient() {
   // Auth
   const [authChecked, setAuthChecked] = useState(false);
   const [user, setUser] = useState<{ id: string } | null>(null);
-  const [myProfile, setMyProfile] = useState<any>(null);
+  const [myProfile, setMyProfile] = useState<MyProfile | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
   // Data
@@ -114,7 +173,7 @@ export default function TerminalClient() {
   const [wizard, setWizard] = useState<WizardState | null>(null);
 
   // Theme
-  const { vars: themeVars, t } = useThemeStyles(session?.settings.theme || "default");
+  const { vars: themeVars } = useThemeStyles(session?.settings.theme || "default");
 
   // Notification sound
   const notifySoundEnabled = !!session?.settings.notifyDm;
@@ -136,12 +195,12 @@ export default function TerminalClient() {
 
   // Voice input
   const [isListening, setIsListening] = useState(false);
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const voiceTranscriptRef = useRef("");
   const voiceInterimRef = useRef("");
   const voiceLastIndexRef = useRef(-1);
   const voiceManuallyStoppedRef = useRef(false);
-  const handleSubmitRef = useRef<any>(null);
+  const handleSubmitRef = useRef<HandleSubmitFn | null>(null);
   const activeContextRef = useRef<ActiveContext | null>(null);
 
   // Voice message recording
@@ -200,13 +259,14 @@ export default function TerminalClient() {
     };
   }, [router, supabase]);
 
-  // Session load
-  useEffect(() => {
-    if (!user?.id) return;
+  // Session load — render-adjust pattern (sanctioned alternative to setState-in-effect)
+  const [sessionLoadedFor, setSessionLoadedFor] = useState<string | null>(null);
+  if (user?.id && sessionLoadedFor !== user.id) {
+    setSessionLoadedFor(user.id);
     const s = loadSession(user.id);
     setSession(s);
     if (s.wizard) setWizard(s.wizard);
-  }, [user?.id]);
+  }
 
   // Welcome message
   useEffect(() => {
@@ -263,16 +323,24 @@ export default function TerminalClient() {
       .catch(() => {});
   }, [user]);
 
-  // Deep linking from URL
-  useEffect(() => {
+  // Deep linking from URL — parsed once, applied via render-adjust once data lands
+  const [deepLink] = useState<{ kind: "channel" | "dm"; value: string } | null>(() => {
+    if (typeof window === "undefined") return null;
     const params = new URLSearchParams(window.location.search);
     const channel = params.get("channel");
     const dm = params.get("dm");
-    if (channel) {
-      const ch = channels.find((c) => c.slug === channel || c.name === channel);
+    if (channel) return { kind: "channel", value: channel };
+    if (dm) return { kind: "dm", value: dm };
+    return null;
+  });
+  const [deepLinkApplied, setDeepLinkApplied] = useState(false);
+  if (deepLink && !deepLinkApplied && channels.length > 0) {
+    setDeepLinkApplied(true);
+    if (deepLink.kind === "channel") {
+      const ch = channels.find((c) => c.slug === deepLink.value || c.name === deepLink.value);
       if (ch) setActiveContext({ type: "channel", id: ch.id, name: ch.name });
-    } else if (dm) {
-      const thread = dmThreads.find((t) => t.otherUser.id === dm);
+    } else {
+      const thread = dmThreads.find((t) => t.otherUser.id === deepLink.value);
       if (thread) {
         setActiveContext({
           type: "dm",
@@ -282,17 +350,39 @@ export default function TerminalClient() {
         });
       }
     }
-  }, [channels, dmThreads]);
+  }
+
+  // Reset message state on context change — render-adjust pattern
+  const [messagesLoadedFor, setMessagesLoadedFor] = useState<ActiveContext | null>(null);
+  if (messagesLoadedFor !== activeContext) {
+    setMessagesLoadedFor(activeContext);
+    setMessages([]);
+    setIsLoading(!!activeContext && activeContext.type !== "console");
+  }
+
+  // Mark-as-read on context change — render-adjust pattern
+  const [readMarkedFor, setReadMarkedFor] = useState<string | null>(null);
+  if (session && activeContext) {
+    const readKey = activeContext.type === "channel" ? activeContext.id : activeContext.threadId;
+    if (readKey && readMarkedFor !== readKey) {
+      setReadMarkedFor(readKey);
+      setSession({
+        ...session,
+        lastReadAt: { ...session.lastReadAt, [readKey]: new Date().toISOString() },
+      });
+      if (activeContext.type === "channel") {
+        setChannelUnread((prev) => {
+          const n = { ...prev };
+          delete n[readKey];
+          return n;
+        });
+      }
+    }
+  }
 
   // Load messages when context changes
   useEffect(() => {
-    if (!activeContext || activeContext.type === "console") {
-      setMessages([]);
-      setIsLoading(false);
-      return;
-    }
-    setIsLoading(true);
-    setMessages([]);
+    if (!activeContext || activeContext.type === "console") return;
 
     let url: string;
     if (activeContext.type === "channel") {
@@ -310,26 +400,6 @@ export default function TerminalClient() {
       })
       .catch(() => {})
       .finally(() => setIsLoading(false));
-
-    // Mark as read
-    if (session && activeContext) {
-      const key = activeContext.type === "channel" ? activeContext.id : activeContext.threadId;
-      if (key) {
-        const updated = {
-          ...session,
-          lastReadAt: { ...session.lastReadAt, [key]: new Date().toISOString() },
-        };
-        setSession(updated);
-        if (activeContext.type === "channel") {
-          setChannelUnread((prev) => {
-            const n = { ...prev };
-            delete n[key];
-            return n;
-          });
-        }
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeContext]);
 
   // Auto-scroll (smart)
@@ -394,40 +464,51 @@ export default function TerminalClient() {
   // Hydrate realtime payloads directly (payload.new is the full row) instead of
   // fetching "latest" — the fetch-latest approach drops messages when two land
   // in the same fetch window.
-  function appendRealtimeMessage(msg: {
-    id: string;
-    senderId: string;
-    content: string;
-    createdAt: string;
-    attachments?: unknown;
-    reactions?: unknown;
-  }) {
-    const append = (sender: { id: string; fullName: string | null; avatarUrl: string | null }) =>
-      setMessages((prev) => {
-        if (prev.find((m) => m.id === msg.id)) return prev;
-        return [...prev, { ...msg, sender, reactions: msg.reactions ?? [] } as any];
-      });
+  const appendRealtimeMessage = useCallback(
+    (msg: {
+      id: string;
+      senderId: string;
+      content: string;
+      createdAt: string;
+      attachments?: unknown;
+      reactions?: unknown;
+    }) => {
+      const append = (sender: { id: string; fullName: string | null; avatarUrl: string | null }) =>
+        setMessages((prev) => {
+          if (prev.find((m) => m.id === msg.id)) return prev;
+          const incoming: Msg = {
+            id: msg.id,
+            content: msg.content,
+            createdAt: msg.createdAt,
+            sender,
+            attachments: (msg.attachments ?? []) as Attachment[],
+            reactions: (msg.reactions ?? []) as Reaction[],
+          };
+          return [...prev, incoming];
+        });
 
-    if (myProfile && msg.senderId === myProfile.id) {
-      append({ id: myProfile.id, fullName: myProfile.fullName, avatarUrl: myProfile.avatarUrl });
-      return;
-    }
-    const cached = senderCacheRef.current.get(msg.senderId);
-    if (cached) {
-      append(cached);
-      return;
-    }
-    fetch(`/api/v1/profiles/${msg.senderId}`)
-      .then((r) => (r.ok ? r.json() : null))
-      .then((p) => {
-        const s = p
-          ? { id: p.id as string, fullName: p.fullName, avatarUrl: p.avatarUrl }
-          : { id: msg.senderId, fullName: null, avatarUrl: null };
-        senderCacheRef.current.set(msg.senderId, s);
-        append(s);
-      })
-      .catch(() => {});
-  }
+      if (myProfile && msg.senderId === myProfile.id) {
+        append({ id: myProfile.id, fullName: myProfile.fullName, avatarUrl: myProfile.avatarUrl });
+        return;
+      }
+      const cached = senderCacheRef.current.get(msg.senderId);
+      if (cached) {
+        append(cached);
+        return;
+      }
+      fetch(`/api/v1/profiles/${msg.senderId}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((p) => {
+          const s = p
+            ? { id: p.id as string, fullName: p.fullName, avatarUrl: p.avatarUrl }
+            : { id: msg.senderId, fullName: null, avatarUrl: null };
+          senderCacheRef.current.set(msg.senderId, s);
+          append(s);
+        })
+        .catch(() => {});
+    },
+    [myProfile]
+  );
 
   useEffect(() => {
     if (!user || !activeContext || activeContext.type === "console") return;
@@ -446,15 +527,16 @@ export default function TerminalClient() {
           filter: channelIds ? `channelId=in.(${channelIds})` : undefined,
         },
         (payload) => {
-          const msg = payload.new as any;
+          const msg = payload.new as RealtimeIncomingMessage;
           if (activeContext.type === "channel" && msg.channelId === activeContext.id) {
             appendRealtimeMessage(msg);
           } else if (activeContext.type !== "channel" || msg.channelId !== activeContext.id) {
             // Message in another channel - increment unread
-            if (msg.channelId) {
+            const chId = msg.channelId;
+            if (chId) {
               setChannelUnread((prev) => ({
                 ...prev,
-                [msg.channelId]: (prev[msg.channelId] || 0) + 1,
+                [chId]: (prev[chId] || 0) + 1,
               }));
               if (document.hidden && notifyMentionRef.current) {
                 playNotifySound();
@@ -476,7 +558,7 @@ export default function TerminalClient() {
           filter: threadIds ? `threadId=in.(${threadIds})` : undefined,
         },
         (payload) => {
-          const msg = payload.new as any;
+          const msg = payload.new as RealtimeIncomingMessage;
           if (activeContext.type === "dm" && msg.threadId === activeContext.threadId) {
             appendRealtimeMessage(msg);
             if (document.hidden) {
@@ -503,20 +585,20 @@ export default function TerminalClient() {
       channelSub.unsubscribe();
       dmSub.unsubscribe();
     };
-  }, [user, activeContext, channels, dmThreads, supabase, playNotifySound]);
+  }, [user, activeContext, channels, dmThreads, supabase, playNotifySound, appendRealtimeMessage]);
 
   // Typing indicator
-  const typingChannelRef = useRef<any>(null);
+  const typingChannelRef = useRef<RealtimeChannel | null>(null);
   useEffect(() => {
     if (!user) return;
     const ch = supabase.channel("terminal-typing", { config: { broadcast: { self: false } } });
     typingChannelRef.current = ch;
     ch.on("broadcast", { event: "typing" }, (payload) => {
-      const { threadId, channelId, senderName } = payload.payload as any;
+      const { threadId, channelId, senderName } = payload.payload as TypingBroadcastPayload;
       if (!activeContext) return;
       const key = activeContext.type === "channel" ? activeContext.id : activeContext.threadId;
       const match = activeContext.type === "channel" ? channelId === key : threadId === key;
-      if (match) {
+      if (match && senderName) {
         setTypingUsers((prev) => ({ ...prev, [senderName]: Date.now() }));
         setTimeout(() => {
           setTypingUsers((prev) => {
@@ -535,7 +617,7 @@ export default function TerminalClient() {
   const sendTyping = useCallback(() => {
     if (!user || !activeContext || !typingChannelRef.current) return;
     const ch = typingChannelRef.current;
-    if (ch.subscribed) {
+    if (ch.state === "joined") {
       ch.send({
         type: "broadcast",
         event: "typing",
@@ -565,7 +647,19 @@ export default function TerminalClient() {
     }
 
     // Prefer webkit prefix — Edge's unprefixed SpeechRecognition can be non-functional
-    const SR = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+    const SR =
+      (
+        window as unknown as {
+          webkitSpeechRecognition?: SpeechRecognitionCtor;
+          SpeechRecognition?: SpeechRecognitionCtor;
+        }
+      ).webkitSpeechRecognition ??
+      (
+        window as unknown as {
+          webkitSpeechRecognition?: SpeechRecognitionCtor;
+          SpeechRecognition?: SpeechRecognitionCtor;
+        }
+      ).SpeechRecognition;
     if (!SR) {
       addSys("Voice input not supported in this browser. Try Chrome or Edge.", "error");
       return;
@@ -574,7 +668,7 @@ export default function TerminalClient() {
     // Diagnostic: log current mic permission state
     if (navigator.permissions) {
       navigator.permissions
-        .query({ name: "microphone" as any })
+        .query({ name: "microphone" as PermissionName })
         .then(() => {
           // mic permission checked silently
         })
@@ -596,7 +690,7 @@ export default function TerminalClient() {
       setIsListening(true);
     };
 
-    rec.onresult = (event: any) => {
+    rec.onresult = (event) => {
       for (let i = event.resultIndex; i < event.results.length; i++) {
         if (i > voiceLastIndexRef.current && event.results[i].isFinal) {
           voiceTranscriptRef.current += event.results[i][0].transcript;
@@ -630,7 +724,7 @@ export default function TerminalClient() {
       }
     };
 
-    rec.onerror = (event: any) => {
+    rec.onerror = (event) => {
       setIsListening(false);
       const err = event.error;
       if (err === "no-speech") {
@@ -653,14 +747,17 @@ export default function TerminalClient() {
 
     try {
       rec.start();
-    } catch (err: any) {
-      if (err?.name === "NotAllowedError") {
+    } catch (err) {
+      if ((err as DOMException | null)?.name === "NotAllowedError") {
         addSys(
           "Voice recognition blocked. Check: (1) Windows Settings → Privacy → Speech → 'Online speech recognition' = ON, (2) Edge lock icon → Microphone = Allow, (3) Try Chrome instead of Edge.",
           "error"
         );
       } else {
-        addSys("Could not start voice input. " + (err?.message || ""), "error");
+        addSys(
+          "Could not start voice input. " + (err instanceof Error ? err.message : ""),
+          "error"
+        );
       }
     }
   }, [isListening]);
@@ -702,8 +799,11 @@ export default function TerminalClient() {
           setRecordingDuration(Math.floor((Date.now() - recordStartTimeRef.current) / 1000));
         }, 1000);
       })
-      .catch((err: any) => {
-        addSys("Could not access microphone: " + (err?.message || ""), "error");
+      .catch((err: unknown) => {
+        addSys(
+          "Could not access microphone: " + (err instanceof Error ? err.message : ""),
+          "error"
+        );
       });
   }
 
@@ -750,11 +850,12 @@ export default function TerminalClient() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ channelId: ctx.id, content: "", attachments: [att] }),
         });
-        const d = await r.json();
-        if (r.ok && d.message) {
+        const d = (await r.json()) as { message?: Msg; error?: string };
+        const sent = d.message;
+        if (r.ok && sent) {
           setMessages((prev) => {
-            if (prev.find((m) => m.id === d.message.id)) return prev;
-            return [...prev, d.message];
+            if (prev.find((m) => m.id === sent.id)) return prev;
+            return [...prev, sent];
           });
           if (session) setSession(addXp(session, "send_message"));
         } else {
@@ -766,11 +867,12 @@ export default function TerminalClient() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ userId: ctx.otherUserId, content: "", attachments: [att] }),
         });
-        const d = await r.json();
-        if (r.ok && d.message) {
+        const d = (await r.json()) as { message?: Msg; threadId?: string; error?: string };
+        const sent = d.message;
+        if (r.ok && sent) {
           setMessages((prev) => {
-            if (prev.find((m) => m.id === d.message.id)) return prev;
-            return [...prev, d.message];
+            if (prev.find((m) => m.id === sent.id)) return prev;
+            return [...prev, sent];
           });
           if (session) setSession(addXp(session, "send_message"));
           if (d.threadId && d.threadId !== ctx.threadId) {
@@ -894,7 +996,7 @@ export default function TerminalClient() {
     }
   }
 
-  async function submitWizard(type: WizardState["type"], data: Record<string, any>) {
+  async function submitWizard(type: WizardState["type"], data: WizardData) {
     try {
       if (type === "post" || type === "edit_need") {
         const body = {
@@ -980,29 +1082,35 @@ export default function TerminalClient() {
           fetch("/api/v1/contracts/mine").then((r) => r.json()),
           fetch("/api/v1/acceptances/mine").then((r) => r.json()),
         ]);
-        const contracts = Array.isArray(contractsData)
+        const contracts: ApiContract[] = Array.isArray(contractsData)
           ? contractsData
-          : contractsData.contracts || [];
-        const acceptances = Array.isArray(acceptancesData)
+          : ((contractsData as { contracts?: ApiContract[] }).contracts ?? []);
+        const acceptances: ApiAcceptance[] = Array.isArray(acceptancesData)
           ? acceptancesData
-          : acceptancesData.acceptances || [];
-        const targetId = data.targetId;
+          : ((acceptancesData as { acceptances?: ApiAcceptance[] }).acceptances ?? []);
+        const targetId = str(data.targetId);
         let receiverId: string | undefined;
-        const payload: any = {
+        const payload: {
+          rating?: WizardValue;
+          comment?: WizardValue;
+          privateFeedback?: WizardValue;
+          contractId?: string;
+          acceptanceId?: string;
+          receiverId?: string;
+        } = {
           rating: data.rating,
           comment: data.comment,
           privateFeedback: data.privateFeedback,
         };
-        if (contracts.find((c: any) => c.id === targetId || c.id.startsWith(targetId))) {
-          const contract = contracts.find(
-            (c: any) => c.id === targetId || c.id.startsWith(targetId)
-          );
+        if (contracts.find((c) => c.id === targetId || c.id.startsWith(targetId))) {
+          const contract = contracts.find((c) => c.id === targetId || c.id.startsWith(targetId));
+          if (!contract) return;
           const isPartyA = contract.partyAId === myProfile?.id;
           receiverId = isPartyA ? contract.partyBId : contract.partyAId;
           payload.contractId = contract.id;
         } else {
           const acceptance = acceptances.find(
-            (a: any) => a.id === targetId || a.id.startsWith(targetId)
+            (a) => a.id === targetId || a.id.startsWith(targetId)
           );
           if (acceptance) {
             const needRes = await fetch("/api/v1/needs/" + (acceptance.need?.id || targetId));
@@ -1178,7 +1286,7 @@ export default function TerminalClient() {
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ userId: choice.id }),
             });
-            const d = await r.json();
+            const d = (await r.json()) as { threadId?: string };
             if (r.ok && d.threadId) {
               setActiveContext({
                 type: "dm",
@@ -2087,6 +2195,7 @@ export default function TerminalClient() {
           >
             <X className="h-6 w-6" />
           </button>
+          {}
           <img
             src={lightboxImage}
             alt="Preview"

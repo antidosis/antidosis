@@ -63,6 +63,7 @@ export function SupportSection() {
   );
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- data fetch triggered by filter/mount; setState lives inside the async loader
     load(filter);
   }, [filter, load]);
 

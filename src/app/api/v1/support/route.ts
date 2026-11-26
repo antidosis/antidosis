@@ -29,7 +29,7 @@ function generateReference(): string {
 }
 
 /** List the signed-in member's own support requests, newest first. */
-export const GET = withApiHandler(async (req: NextRequest) => {
+export const GET = withApiHandler(async (_req: NextRequest) => {
   const supabase = await createClient();
   const {
     data: { user },

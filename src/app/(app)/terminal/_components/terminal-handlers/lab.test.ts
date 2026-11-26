@@ -1,3 +1,5 @@
+import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
 import {
@@ -15,17 +17,18 @@ import {
   handleLabClear,
 } from "./lab";
 import type { HandlerContext } from "./types";
+import type { ActiveContext } from "../terminal-types";
 
 function makeCtx(overrides: Partial<HandlerContext> = {}): HandlerContext {
   return {
     args: [],
-    router: { push: vi.fn() } as any,
+    router: { push: vi.fn() } as unknown as AppRouterInstance,
     myProfile: null,
     user: { id: "user-1" },
     isAdmin: false,
     channels: [],
     setActiveContext: vi.fn(),
-    activeContext: { type: "none" as any, id: "" },
+    activeContext: { type: "none", id: "" } as unknown as ActiveContext,
     session: {
       version: 2,
       userId: "user-1",

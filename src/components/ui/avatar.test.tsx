@@ -11,7 +11,6 @@ vi.mock("next/image", () => ({
     className?: string;
     onError?: (e: { currentTarget: HTMLImageElement }) => void;
   }) => (
-    // eslint-disable-next-line @next/next/no-img-element
     <img
       src={props.src}
       alt={props.alt}

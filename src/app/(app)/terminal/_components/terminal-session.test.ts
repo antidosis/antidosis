@@ -12,18 +12,6 @@ import {
   type TerminalSession,
 } from "./terminal-session";
 
-const defaultSession = {
-  history: [],
-  cwd: "/",
-  env: {},
-  aliases: {},
-  macros: {},
-  xp: 0,
-  level: 1,
-  badges: [],
-  theme: "default",
-};
-
 const SESSION_KEY = "antidosis_terminal_session_v2";
 
 function makeSession(overrides: Partial<TerminalSession> = {}): TerminalSession {
@@ -144,7 +132,7 @@ describe("terminal-session", () => {
 
     it("adds zero for unknown action", () => {
       const session = makeSession({ xp: 100 });
-      const updated = addXp(session, "unknown_action" as any);
+      const updated = addXp(session, "unknown_action" as unknown as Parameters<typeof addXp>[1]);
       expect(updated.xp).toBe(100);
     });
 
@@ -447,7 +435,7 @@ describe("terminal-session", () => {
         isVerified: true,
       };
 
-      const result = await refreshBadges(session, profile as any);
+      const result = await refreshBadges(session, profile);
 
       expect(result.newBadges).toContain("🌱 Seedling");
       expect(result.newBadges).toContain("🤝 Dealmaker");

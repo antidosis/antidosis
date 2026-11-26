@@ -13,7 +13,7 @@ type Notification = {
   type: string;
   title: string;
   body: string;
-  data: any;
+  data?: Record<string, unknown> | null;
   isRead: boolean;
   createdAt: string;
 };
@@ -38,6 +38,7 @@ export function NotificationBell() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- polling fetch with 30s refresh interval
     fetchNotifications();
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
@@ -90,7 +91,9 @@ export function NotificationBell() {
     return "#";
   }
 
+  // Relative timestamps are intentionally computed at render; the 30s poll re-renders.
   function timeAgo(date: string): string {
+    // eslint-disable-next-line react-hooks/purity
     const seconds = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
     if (seconds < 60) return "just now";
     const minutes = Math.floor(seconds / 60);

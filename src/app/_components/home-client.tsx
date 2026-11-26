@@ -133,6 +133,7 @@ export default function HomePage() {
     const bootedBefore = sessionStorage.getItem("antidosis-booted");
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (bootedBefore || reducedMotion) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time boot gate reading sessionStorage + reduced-motion before first paint
       setHasBooted(true);
       setShowBoot(false);
     }

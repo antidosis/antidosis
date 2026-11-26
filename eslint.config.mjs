@@ -81,6 +81,16 @@ export default [
       "react-hooks/purity": "warn",
       "react-hooks/immutability": "warn",
       "no-console": ["warn", { allow: ["error", "warn", "info"] }],
+      // User-uploaded imagery (avatars, need photos, attachments) comes from
+      // Supabase Storage and renders as plain <img> — routing private user
+      // content through the next/image optimizer would proxy it ourselves.
+      "@next/next/no-img-element": "off",
+      // React Compiler compatibility hint. The app does not use the React
+      // Compiler, and react-hook-form is the mandated form stack (AGENTS.md §6).
+      "react-hooks/incompatible-library": "off",
+      // next/font/google downloads and self-hosts fonts at build time — there
+      // is no runtime fonts.gstatic.com connection to preconnect to.
+      "@next/next/google-font-preconnect": "off",
     },
     settings: {
       "import/resolver": {

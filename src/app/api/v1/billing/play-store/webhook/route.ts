@@ -170,10 +170,13 @@ export async function POST(req: NextRequest) {
 
     trackProcessed(messageId);
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error) {
     logger.error("[RTDN] Webhook processing failed", error instanceof Error ? error : undefined);
     return NextResponse.json(
-      { error: "Processing failed", message: error.message },
+      {
+        error: "Processing failed",
+        message: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }

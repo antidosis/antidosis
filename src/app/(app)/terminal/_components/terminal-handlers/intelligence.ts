@@ -1,22 +1,31 @@
 "use client";
 
+import {
+  asKeyedArray,
+  type ApiAcceptance,
+  type ApiContract,
+  type ApiNeed,
+  type ApiNotification,
+  type ApiReview,
+} from "@/lib/api-types";
+
 import { parseIntent, type Intent } from "../terminal-agent";
 import { fmtCard, xpBar } from "../terminal-render";
-import { getLevel } from "../terminal-session";
+import { getLevel, type TerminalTheme } from "../terminal-session";
 import { createWizard } from "../terminal-wizard";
-import type { HandlerContext, HandlerResult } from "./types";
+import type { HandlerContext, HandlerResult, MyProfile } from "./types";
 import { friendlyError } from "./utils";
 
 interface AgentContext {
-  myProfile: any;
-  notifications: any[];
-  contracts: any[];
-  needs: any[];
-  acceptances: any[];
+  myProfile: MyProfile | null;
+  notifications: ApiNotification[];
+  contracts: ApiContract[];
+  needs: ApiNeed[];
+  acceptances: ApiAcceptance[];
   unreadDmCount: number;
-  pendingSignatures: any[];
-  pendingCompletions: any[];
-  pendingReviews: any[];
+  pendingSignatures: ApiContract[];
+  pendingCompletions: ApiContract[];
+  pendingReviews: ApiContract[];
 }
 
 export async function handleAsk(ctx: HandlerContext): Promise<HandlerResult> {
@@ -33,28 +42,32 @@ export async function handleAsk(ctx: HandlerContext): Promise<HandlerResult> {
       fetch("/api/v1/notifications").then((r) => (r.ok ? r.json() : { notifications: [] })),
       fetch("/api/v1/reviews").then((r) => (r.ok ? r.json() : [])),
     ]);
-    const contracts = Array.isArray(cData) ? cData : cData.contracts || [];
-    const needs = Array.isArray(nData) ? nData : nData.needs || [];
-    const acceptances = Array.isArray(aData) ? aData : aData.acceptances || [];
-    const notifications = notifData.notifications || [];
-    const reviews = Array.isArray(reviewsData) ? reviewsData : reviewsData.reviews || [];
+    const contracts = asKeyedArray<ApiContract>(cData, "contracts");
+    const needs = asKeyedArray<ApiNeed>(nData, "needs");
+    const acceptances = asKeyedArray<ApiAcceptance>(aData, "acceptances");
+    const notifications = asKeyedArray<ApiNotification>(notifData, "notifications");
+    const reviews = asKeyedArray<ApiReview>(reviewsData, "reviews");
 
     const myReviewContractIds = new Set(
-      reviews.filter((r: any) => r.reviewerId === ctx.myProfile?.id).map((r: any) => r.contractId)
+      reviews
+        .filter((review) => review.reviewerId === ctx.myProfile?.id)
+        .map((review) => review.contractId)
     );
 
     const pendingSignatures = contracts.filter(
-      (c: any) =>
-        (c.status === "pending_terms" || c.status === "draft") &&
-        !(c.partyAId === ctx.myProfile?.id ? c.partyASigned : c.partyBSigned)
+      (contract) =>
+        (contract.status === "pending_terms" || contract.status === "draft") &&
+        !(contract.partyAId === ctx.myProfile?.id ? contract.partyASigned : contract.partyBSigned)
     );
     const pendingCompletions = contracts.filter(
-      (c: any) =>
-        c.status === "active" &&
-        !(c.partyAId === ctx.myProfile?.id ? c.aMarkedComplete : c.bMarkedComplete)
+      (contract) =>
+        contract.status === "active" &&
+        !(contract.partyAId === ctx.myProfile?.id
+          ? contract.aMarkedComplete
+          : contract.bMarkedComplete)
     );
     const pendingReviews = contracts.filter(
-      (c: any) => c.status === "completed" && !myReviewContractIds.has(c.id)
+      (contract) => contract.status === "completed" && !myReviewContractIds.has(contract.id)
     );
 
     const agentContext: AgentContext = {
@@ -63,7 +76,7 @@ export async function handleAsk(ctx: HandlerContext): Promise<HandlerResult> {
       contracts,
       needs,
       acceptances,
-      unreadDmCount: ctx.dmThreads.reduce((sum: number, t: any) => sum + (t.unreadCount || 0), 0),
+      unreadDmCount: ctx.dmThreads.reduce((sum, thread) => sum + (thread.unreadCount || 0), 0),
       pendingSignatures,
       pendingCompletions,
       pendingReviews,
@@ -121,7 +134,7 @@ When both parties agree on terms, you sign with your typed full name.
 → /sign <contractId> to sign
 → /contracts to see pending signatures
 
-${sigs.length > 0 ? `📝 You have ${sigs.length} contract${sigs.length > 1 ? "s" : ""} waiting:\n${sigs.map((c: any) => `• ${c.need?.title || "Contract"} → /sign ${c.id.slice(0, 8)}`).join("\n")}` : "No contracts waiting for your signature."}`;
+${sigs.length > 0 ? `📝 You have ${sigs.length} contract${sigs.length > 1 ? "s" : ""} waiting:\n${sigs.map((contract) => `• ${contract.need?.title || "Contract"} → /sign ${contract.id.slice(0, 8)}`).join("\n")}` : "No contracts waiting for your signature."}`;
     }
 
     case "COMPLETE_DEAL": {
@@ -133,7 +146,7 @@ Both parties must mark complete for the deal to finalize and for reviews to unlo
 → /complete <contractId>
 → /contracts to see active deals
 
-${comps.length > 0 ? `✅ You have ${comps.length} deal${comps.length > 1 ? "s" : ""} waiting:\n${comps.map((c: any) => `• ${c.need?.title || "Deal"} → /complete ${c.id.slice(0, 8)}`).join("\n")}` : "No deals waiting for completion."}`;
+${comps.length > 0 ? `✅ You have ${comps.length} deal${comps.length > 1 ? "s" : ""} waiting:\n${comps.map((contract) => `• ${contract.need?.title || "Deal"} → /complete ${contract.id.slice(0, 8)}`).join("\n")}` : "No deals waiting for completion."}`;
     }
 
     case "VIEW_CONTRACT": {
@@ -158,7 +171,7 @@ ${parts.length > 0 ? parts.join("\n") : "No pending actions on your contracts."}
 
 /review launches a wizard to leave feedback after a completed deal.
 
-${revs.length > 0 ? `You have ${revs.length} review${revs.length > 1 ? "s" : ""} pending:\n${revs.map((c: any) => `• ${c.need?.title || "Deal"} → /review ${c.id.slice(0, 8)}`).join("\n")}` : "No pending reviews. Complete a deal first to leave a review."}`;
+${revs.length > 0 ? `You have ${revs.length} review${revs.length > 1 ? "s" : ""} pending:\n${revs.map((contract) => `• ${contract.need?.title || "Deal"} → /review ${contract.id.slice(0, 8)}`).join("\n")}` : "No pending reviews. Complete a deal first to leave a review."}`;
     }
 
     case "HELP":
@@ -186,7 +199,7 @@ Current: Level ${level} ${title}`;
     }
 
     case "NOTIFICATIONS": {
-      const unread = ctx.notifications.filter((n: any) => !n.read).length;
+      const unread = ctx.notifications.filter((notif) => !notif.read).length;
       return `🔔 Notifications
 
 ${unread > 0 ? `You have ${unread} unread notification${unread > 1 ? "s" : ""}.` : "No unread notifications."}
@@ -254,7 +267,7 @@ After terms are locked: /request-cancel <id> <reason> (needs mutual agreement)
 If the other party declines, you can /escalate to admin.`;
 
     case "ACTIVITY": {
-      const unread = ctx.notifications.filter((n: any) => !n.read).length;
+      const unread = ctx.notifications.filter((notif) => !notif.read).length;
       return `📰 Recent Activity
 
 /activity — see recent mentions, DMs, and channel messages
@@ -286,7 +299,6 @@ Or type /help for all commands.`;
 
 export async function handleStatus(ctx: HandlerContext): Promise<HandlerResult> {
   const { level, title, nextThreshold } = getLevel(ctx.session.xp);
-  const xpPct = Math.round((ctx.session.xp / nextThreshold) * 100);
   ctx.addSys(
     `🏆 Level ${level} ${title}\n` +
       `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
@@ -307,8 +319,8 @@ export async function handleTutorial(ctx: HandlerContext): Promise<HandlerResult
 }
 
 export async function handleTheme(ctx: HandlerContext): Promise<HandlerResult> {
-  const theme = ctx.args[0] as any;
-  const valid = ["default", "cyberpunk", "matrix", "minimal", "ocean"];
+  const theme = ctx.args[0] as TerminalTheme | undefined;
+  const valid: TerminalTheme[] = ["default", "cyberpunk", "matrix", "minimal", "ocean"];
   if (!theme || !valid.includes(theme)) {
     ctx.addSys(
       `Usage: /theme <name>\nAvailable: ${valid.join(", ")}\nCurrent: ${ctx.session.settings.theme}`,
@@ -411,7 +423,10 @@ function buildPendingActionsResponse(context: AgentContext): string {
     parts.push(
       `  📝 ${context.pendingSignatures.length} contract${context.pendingSignatures.length > 1 ? "s" : ""} waiting for your signature:` +
         context.pendingSignatures
-          .map((c: any) => `\n     • ${c.need?.title || "Contract"} → /sign ${c.id.slice(0, 8)}`)
+          .map(
+            (contract) =>
+              `\n     • ${contract.need?.title || "Contract"} → /sign ${contract.id.slice(0, 8)}`
+          )
           .join("")
     );
   }
@@ -420,7 +435,10 @@ function buildPendingActionsResponse(context: AgentContext): string {
     parts.push(
       `  ✅ ${context.pendingCompletions.length} deal${context.pendingCompletions.length > 1 ? "s" : ""} waiting for completion:` +
         context.pendingCompletions
-          .map((c: any) => `\n     • ${c.need?.title || "Deal"} → /complete ${c.id.slice(0, 8)}`)
+          .map(
+            (contract) =>
+              `\n     • ${contract.need?.title || "Deal"} → /complete ${contract.id.slice(0, 8)}`
+          )
           .join("")
     );
   }
@@ -429,7 +447,10 @@ function buildPendingActionsResponse(context: AgentContext): string {
     parts.push(
       `  ⭐ ${context.pendingReviews.length} review${context.pendingReviews.length > 1 ? "s" : ""} pending:` +
         context.pendingReviews
-          .map((c: any) => `\n     • ${c.need?.title || "Deal"} → /review ${c.id.slice(0, 8)}`)
+          .map(
+            (contract) =>
+              `\n     • ${contract.need?.title || "Deal"} → /review ${contract.id.slice(0, 8)}`
+          )
           .join("")
     );
   }
@@ -440,7 +461,7 @@ function buildPendingActionsResponse(context: AgentContext): string {
     );
   }
 
-  const unreadNotifs = context.notifications.filter((n) => !n.read).length;
+  const unreadNotifs = context.notifications.filter((notif) => !notif.read).length;
   if (unreadNotifs > 0) {
     parts.push(
       `  🔴 ${unreadNotifs} unread notification${unreadNotifs > 1 ? "s" : ""} → /notifications`

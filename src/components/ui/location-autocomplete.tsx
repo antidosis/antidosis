@@ -27,9 +27,12 @@ export function LocationAutocomplete({
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  // Adjust local text when the external value changes — render-adjust pattern
+  const [queryFor, setQueryFor] = useState(value);
+  if (queryFor !== value) {
+    setQueryFor(value);
     setQuery(value ? displayLocation(value) : "");
-  }, [value]);
+  }
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {

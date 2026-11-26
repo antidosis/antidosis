@@ -1,5 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+import { type Prisma } from "@prisma/client";
+
 import { isAdminEmail } from "@/lib/admin";
 import { withApiHandler } from "@/lib/api-handler";
 import { createNotification } from "@/lib/notifications";
@@ -144,7 +146,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
       channelId,
       senderId: profile.id,
       content,
-      attachments: attachments as any,
+      attachments: attachments as Prisma.InputJsonValue,
     },
     select: {
       id: true,

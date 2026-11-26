@@ -25,7 +25,9 @@ export async function resolveEntityId(entity: IdEntity, id: string): Promise<str
   if (isUuid(id)) return id;
   if (!PREFIX_RE.test(id)) return null;
 
-  const delegate = (prisma as unknown as Record<string, any>)[entity];
+  const delegate = (
+    prisma as unknown as Record<string, { findMany: (args: unknown) => Promise<{ id: string }[]> }>
+  )[entity];
   const matches = await delegate.findMany({
     where: { id: { startsWith: id.toLowerCase() } },
     select: { id: true },

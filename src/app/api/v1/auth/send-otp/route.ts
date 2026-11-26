@@ -12,6 +12,7 @@ import { hashOtpCode } from "@/lib/otp";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
+import { twilioErrInfo } from "@/lib/twilio-error";
 
 export const dynamic = "force-dynamic";
 
@@ -97,13 +98,14 @@ export const POST = withApiHandler(async (req: NextRequest) => {
         to: normalizedMobile,
         channel: "sms",
       });
-    } catch (twilioErr: any) {
-      const twilioMessage = twilioErr?.message || String(twilioErr);
-      const twilioCode = twilioErr?.code || "unknown";
-      const twilioStatus = twilioErr?.status || "unknown";
+    } catch (twilioErr) {
+      const info = twilioErrInfo(twilioErr);
+      const twilioMessage = info.message;
+      const twilioCode = info.code;
+      const twilioStatus = info.status;
       logger.error(
         `Twilio Verify send failed — code:${twilioCode} status:${twilioStatus} msg:${twilioMessage}`,
-        twilioErr
+        twilioErr instanceof Error ? twilioErr : undefined
       );
       return NextResponse.json({ error: `SMS delivery failed: ${twilioMessage}` }, { status: 502 });
     }
@@ -132,7 +134,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
       });
     });
 
-    console.log(`[DEV OTP] Mobile: ${normalizedMobile}, Code: ${code}`);
+    logger.info(`[DEV OTP] Mobile: ${normalizedMobile}, Code: ${code}`);
   }
 
   return NextResponse.json({ success: true });

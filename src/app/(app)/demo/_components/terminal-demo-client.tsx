@@ -20,21 +20,6 @@ import {
 
 import { Button } from "@/components/ui/button";
 
-/* ─── Terminal CSS Variables (matches the real relay surface) ─── */
-
-const TERM_VARS = {
-  "--term-bg": "var(--x-0a0806)",
-  "--term-sidebar-bg": "var(--x-0f0c0a)",
-  "--term-accent": "var(--x-f5a623)",
-  "--term-accent-hover": "var(--x-ffb84d)",
-  "--term-text": "var(--x-e8d5a3)",
-  "--term-muted": "var(--x-8f7f6e)",
-  "--term-border": "var(--x-2a2420)",
-  "--term-error": "var(--x-ff5252)",
-  "--term-success": "var(--x-00e676)",
-  "--term-info": "var(--x-00e5ff)",
-} as React.CSSProperties;
-
 /* ─── Types ─── */
 
 type ScriptEvent =
@@ -559,15 +544,15 @@ export default function TerminalDemoClient() {
     setIsPlaying(true);
   }, []);
 
-  // Main playback loop
+  // Playback finished is derived from the script position
+  if (isPlaying && !isDone && stepIndex >= SCRIPT.length) {
+    setIsDone(true);
+    setIsPlaying(false);
+  }
+
+  // Main playback loop — time-driven demo state machine.
   useEffect(() => {
     if (!isPlaying || isDone) return;
-
-    if (stepIndex >= SCRIPT.length) {
-      setIsDone(true);
-      setIsPlaying(false);
-      return;
-    }
 
     const event = SCRIPT[stepIndex];
     const delay = ("delay" in event ? (event.delay ?? 200) : 200) * delayScale;
@@ -580,6 +565,8 @@ export default function TerminalDemoClient() {
     }
 
     if (event.type === "typing") {
+      // Scripted event dispatch, not a cascading-render hazard.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCurrentTypingUser(event.user);
       setTypingUsers((prev) => new Set(prev).add(event.user.id));
       timeoutRef.current = setTimeout(() => {

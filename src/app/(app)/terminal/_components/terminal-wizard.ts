@@ -5,10 +5,11 @@
  * All wizards mirror web form field order and validation exactly.
  */
 
+import type { ApiNeed } from "@/lib/api-types";
 import { EXCHANGE_MODES, INCOMPATIBLE_EXCHANGE_MODES, getExchangeMode } from "@/lib/categories";
 import { CENTRAL_COAST_SUBURBS } from "@/lib/data/central-coast-suburbs";
 
-import type { WizardState } from "./terminal-session";
+import type { WizardChoice, WizardData, WizardState, WizardValue } from "./terminal-session";
 
 // ─── Wizard Step Types ───────────────────────────────────────
 
@@ -20,11 +21,11 @@ interface WizardStep {
   type: StepType;
   prompt: string;
   placeholder?: string;
-  validate?: (value: string, data: Record<string, any>) => string | null; // null = valid, string = error
-  choices?: { value: string; label: string }[];
+  validate?: (value: string, data: WizardData) => string | null; // null = valid, string = error
+  choices?: WizardChoice[];
   optional?: boolean;
-  default?: (data: Record<string, any>) => string | undefined;
-  transform?: (value: string, data: Record<string, any>) => any;
+  default?: (data: WizardData) => string | undefined;
+  transform?: (value: string, data: WizardData) => WizardValue;
 }
 
 // ─── Shared Validators ───────────────────────────────────────
@@ -56,14 +57,6 @@ function choiceValidator(choices: string[]) {
     if (!isNaN(num) && num >= 1 && num <= choices.length) return null;
     if (choices.includes(v)) return null;
     return `Please choose one of: ${choices.join(", ")}`;
-  };
-}
-
-function confirmValidator() {
-  return (value: string) => {
-    const v = value.trim().toLowerCase();
-    if (["yes", "y", "no", "n", "/yes", "/no", "/cancel", "/back"].includes(v)) return null;
-    return "Please answer yes or no.";
   };
 }
 
@@ -178,7 +171,7 @@ const POST_WIZARD_STEPS: WizardStep[] = [
     choices: [],
     validate: (value, data) => {
       if (!value.trim()) return null;
-      const choices = getNeedCategoryChoices(data.offerType);
+      const choices = getNeedCategoryChoices(str(data.offerType) || undefined);
       const valid = choices.map((c) => c.value);
       const num = parseInt(value, 10);
       if (!isNaN(num) && num >= 1 && num <= choices.length) return null;
@@ -187,7 +180,7 @@ const POST_WIZARD_STEPS: WizardStep[] = [
     },
     transform: (value, data) => {
       const v = value.trim();
-      const choices = getNeedCategoryChoices(data.offerType);
+      const choices = getNeedCategoryChoices(str(data.offerType) || undefined);
       const num = parseInt(v, 10);
       if (!isNaN(num) && num >= 1 && num <= choices.length) {
         return choices[num - 1].value;
@@ -429,10 +422,7 @@ const TUTORIAL_STEPS: { prompt: string; check?: string; hint?: string }[] = [
 
 // ─── Wizard Engine ───────────────────────────────────────────
 
-export function createWizard(
-  type: WizardState["type"],
-  initData?: Record<string, any>
-): WizardState {
+export function createWizard(type: WizardState["type"], initData?: WizardData): WizardState {
   return {
     type,
     step: 0,
@@ -441,11 +431,7 @@ export function createWizard(
   };
 }
 
-export function getPrompt(
-  type: WizardState["type"],
-  step: number,
-  data: Record<string, any>
-): string {
+export function getPrompt(type: WizardState["type"], step: number, data: WizardData): string {
   if (type === "tutorial") {
     const s = TUTORIAL_STEPS[step];
     if (!s) return "Tutorial complete! Type /exit or continue exploring.";
@@ -464,14 +450,14 @@ export function getPrompt(
 
   // Dynamic category choices for post wizard
   if (type === "post" && s.field === "needCategory") {
-    const choices = getNeedCategoryChoices(data.offerType);
+    const choices = getNeedCategoryChoices(str(data.offerType) || undefined);
     const choiceText = choices.map((c) => `   ${c.label}`).join("\n");
     return `${s.prompt}\n${choiceText}\n\n> `;
   }
 
   // Review wizard: show the numbered deal list persisted in wizard data
   if (type === "review" && s.field === "targetId" && Array.isArray(data._dealChoices)) {
-    const list = (data._dealChoices as { value: string; label: string }[])
+    const list = (data._dealChoices as WizardChoice[])
       .map((c, i) => `   ${i + 1}. ${c.label}`)
       .join("\n");
     return `🧙 ${getWizardTitle(type)} (Step ${step + 1}/${getTotalSteps(type, data)})\n\n${s.prompt}\n${list}\n\n> `;
@@ -498,7 +484,7 @@ function getWizardTitle(type: WizardState["type"]): string {
   return titles[type] || "Wizard";
 }
 
-export function getSteps(type: WizardState["type"], data: Record<string, any>): WizardStep[] {
+export function getSteps(type: WizardState["type"], _data: WizardData): WizardStep[] {
   switch (type) {
     case "post":
       return POST_WIZARD_STEPS;
@@ -514,7 +500,7 @@ export function getSteps(type: WizardState["type"], data: Record<string, any>): 
   }
 }
 
-function getTotalSteps(type: WizardState["type"], data: Record<string, any>): number {
+function getTotalSteps(type: WizardState["type"], data: WizardData): number {
   if (type === "tutorial") return TUTORIAL_STEPS.length;
   return getSteps(type, data).length;
 }
@@ -634,7 +620,7 @@ export function advanceWizard(
     currentStep.field === "targetId" &&
     Array.isArray(state.data._dealChoices)
   ) {
-    const dealChoices = state.data._dealChoices as { value: string; label: string }[];
+    const dealChoices = state.data._dealChoices as WizardChoice[];
     effectiveStep = {
       ...currentStep,
       choices: dealChoices,
@@ -713,6 +699,13 @@ export function advanceWizard(
   };
 }
 
+/** Coerce a wizard value to its string form for display and validation. */
+function str(value: WizardValue | undefined): string {
+  if (typeof value === "string") return value;
+  if (typeof value === "number") return String(value);
+  return "";
+}
+
 // ─── Review Builders ─────────────────────────────────────────
 
 function getEditHint(steps: WizardStep[]): string {
@@ -720,67 +713,68 @@ function getEditHint(steps: WizardStep[]): string {
   return `Edit any field:\n${editable}`;
 }
 
-function buildPostReview(data: Record<string, any>): string {
-  const mode = getExchangeMode(data.needCategory);
-  const hasNeedImages = Array.isArray(data.images) && data.images.length > 0;
-  const hasOfferImages = Array.isArray(data.offerImages) && data.offerImages.length > 0;
+function buildPostReview(data: WizardData): string {
+  const mode = getExchangeMode(str(data.needCategory) || null);
+  const needImages = Array.isArray(data.images) ? data.images : [];
+  const offerImages = Array.isArray(data.offerImages) ? data.offerImages : [];
   return (
     `🧙 Review — Ready to Post?\n\n` +
     `  ┌─────────────────────────────────────────────────────────┐\n` +
-    `  │  1. Title        ${truncate(data.title || "—", 40)}\n` +
-    `  │  2. Description  ${truncate(data.description || "—", 40)}\n` +
-    `  │  3. Deadline     ${data.deadline || "—"}\n` +
-    `  │  4. Time         ${data.timeRange || "—"}\n` +
-    `  │  5. Need Photos  ${hasNeedImages ? data.images.length + " attached" : "None"}\n` +
+    `  │  1. Title        ${truncate(str(data.title) || "—", 40)}\n` +
+    `  │  2. Description  ${truncate(str(data.description) || "—", 40)}\n` +
+    `  │  3. Deadline     ${str(data.deadline) || "—"}\n` +
+    `  │  4. Time         ${str(data.timeRange) || "—"}\n` +
+    `  │  5. Need Photos  ${needImages.length > 0 ? needImages.length + " attached" : "None"}\n` +
     `  │\n` +
-    `  │  6. Offer Type   ${data.offerType || "—"}\n` +
+    `  │  6. Offer Type   ${str(data.offerType) || "—"}\n` +
     `  │  7. Category     ${mode?.label || "—"}\n` +
-    `  │  8. Offer Desc   ${truncate(data.offerDescription || "—", 40)}\n` +
-    `  │  9. Value        ${data.offerValue ? "$" + data.offerValue : "—"}\n` +
-    `  │ 10. Offer Photos ${hasOfferImages ? data.offerImages.length + " attached" : "None"}\n` +
+    `  │  8. Offer Desc   ${truncate(str(data.offerDescription) || "—", 40)}\n` +
+    `  │  9. Value        ${str(data.offerValue) ? "$" + str(data.offerValue) : "—"}\n` +
+    `  │ 10. Offer Photos ${offerImages.length > 0 ? offerImages.length + " attached" : "None"}\n` +
     `  │\n` +
     `  │ 11. Contract     ${data.requiresContract ? "Required" : "Not required"}\n` +
-    `  │ 12. Location     ${data.locationName || "—"}\n` +
+    `  │ 12. Location     ${str(data.locationName) || "—"}\n` +
     `  └─────────────────────────────────────────────────────────┘\n\n` +
     `  Post this need? /yes to confirm, /edit <number> to change, /cancel to abort.`
   );
 }
 
-function buildReviewReview(data: Record<string, any>): string {
-  const stars = "★".repeat(data.rating) + "☆".repeat(10 - data.rating);
+function buildReviewReview(data: WizardData): string {
+  const rating = Math.min(10, Math.max(0, Number(str(data.rating)) || 0));
+  const stars = "★".repeat(rating) + "☆".repeat(10 - rating);
   return (
     `🧙 Review — Ready to Submit?\n\n` +
-    `  Rating: ${stars} ${data.rating}/10\n` +
-    `  Comment: ${data.comment || "(no public comment)"}\n` +
-    `  Private: ${data.privateFeedback || "(no private feedback)"}\n\n` +
+    `  Rating: ${stars} ${rating}/10\n` +
+    `  Comment: ${str(data.comment) || "(no public comment)"}\n` +
+    `  Private: ${str(data.privateFeedback) || "(no private feedback)"}\n\n` +
     `  Submit this review? /yes to confirm, /back to edit, /cancel to abort.`
   );
 }
 
-function buildCredentialReview(data: Record<string, any>): string {
+function buildCredentialReview(data: WizardData): string {
   return (
     `🧙 Review — Ready to Save?\n\n` +
-    `  Type: ${data.type}\n` +
-    `  Title: ${data.title}\n` +
-    `  ${data.subType ? `Sub-type: ${data.subType}\n` : ""}` +
-    `  ${data.description ? `Description: ${truncate(data.description, 60)}\n` : ""}` +
-    `  ${data.documentNumber ? `Doc #: ${data.documentNumber}\n` : ""}` +
-    `  ${data.issuedBy ? `Issued by: ${data.issuedBy}\n` : ""}` +
-    `  ${data.issuedAt ? `Issued: ${data.issuedAt}\n` : ""}` +
-    `  ${data.expiresAt ? `Expires: ${data.expiresAt}\n` : ""}` +
+    `  Type: ${str(data.type)}\n` +
+    `  Title: ${str(data.title)}\n` +
+    `  ${str(data.subType) ? `Sub-type: ${str(data.subType)}\n` : ""}` +
+    `  ${str(data.description) ? `Description: ${truncate(str(data.description), 60)}\n` : ""}` +
+    `  ${str(data.documentNumber) ? `Doc #: ${str(data.documentNumber)}\n` : ""}` +
+    `  ${str(data.issuedBy) ? `Issued by: ${str(data.issuedBy)}\n` : ""}` +
+    `  ${str(data.issuedAt) ? `Issued: ${str(data.issuedAt)}\n` : ""}` +
+    `  ${str(data.expiresAt) ? `Expires: ${str(data.expiresAt)}\n` : ""}` +
     `  Public: ${data.isPublic ? "Yes" : "No"}\n\n` +
     `  Save this credential? /yes to confirm, /back to edit, /cancel to abort.`
   );
 }
 
-function buildEditNeedReview(data: Record<string, any>): string {
+function buildEditNeedReview(data: WizardData): string {
   return (
     `🧙 Review — Save Changes?\n\n` +
-    `  Title: ${data.title}\n` +
-    `  Description: ${truncate(data.description, 60)}\n` +
-    `  Offer: ${truncate(data.offerDescription, 60)} (${data.offerType})\n` +
-    `  ${data.offerValue ? `Value: $${data.offerValue}\n` : ""}` +
-    `  Location: ${data.locationName}\n\n` +
+    `  Title: ${str(data.title)}\n` +
+    `  Description: ${truncate(str(data.description), 60)}\n` +
+    `  Offer: ${truncate(str(data.offerDescription), 60)} (${str(data.offerType)})\n` +
+    `  ${str(data.offerValue) ? `Value: $${str(data.offerValue)}\n` : ""}` +
+    `  Location: ${str(data.locationName)}\n\n` +
     `  Save changes? /yes to confirm, /back to edit, /cancel to abort.`
   );
 }
@@ -792,20 +786,27 @@ function truncate(text: string, max: number): string {
 
 // ─── Edit Need Wizard Init ───────────────────────────────────
 
-export function createEditNeedWizard(need: any): WizardState {
-  const data: Record<string, any> = {
+export function createEditNeedWizard(
+  need: ApiNeed & {
+    offerValue?: string | null;
+    timeRange?: string | null;
+    requiredSkills?: ({ name: string } | string)[];
+    requiresContract?: boolean;
+  }
+): WizardState {
+  const data: WizardData = {
     needId: need.id,
     title: need.title,
-    description: need.description,
-    needCategory: need.needCategory,
-    offerType: need.offerType,
-    offerDescription: need.offerDescription,
-    offerValue: need.offerValue,
-    locationName: need.locationName,
+    description: need.description ?? "",
+    needCategory: need.needCategory ?? "",
+    offerType: need.offerType ?? "",
+    offerDescription: need.offerDescription ?? "",
+    offerValue: need.offerValue ?? "",
+    locationName: need.locationName ?? "",
     deadline: need.deadline ? need.deadline.split("T")[0] : "",
     timeRange: need.timeRange || "",
-    requiredSkills: need.requiredSkills?.map((s: any) => s.name || s) || [],
-    requiresContract: need.requiresContract,
+    requiredSkills: need.requiredSkills?.map((s) => (typeof s === "string" ? s : s.name)) ?? [],
+    requiresContract: need.requiresContract ?? false,
   };
   return createWizard("edit_need", data);
 }
@@ -825,10 +826,11 @@ export function createReviewWizard(choices: { value: string; label: string }[]):
   return state;
 }
 
-function getReviewPrompt(steps: WizardStep[], step: number, data: Record<string, any>): string {
+function getReviewPrompt(steps: WizardStep[], step: number, data: WizardData): string {
   const s = steps[step];
   if (!s) {
-    const stars = "★".repeat(data.rating || 0) + "☆".repeat(10 - (data.rating || 0));
+    const rating = Math.min(10, Math.max(0, Number(str(data.rating)) || 0));
+    const stars = "★".repeat(rating) + "☆".repeat(10 - rating);
     return (
       `🧙 Review — Ready to Submit?\n\n` +
       `  Rating: ${stars} ${data.rating || "—"}/10\n` +

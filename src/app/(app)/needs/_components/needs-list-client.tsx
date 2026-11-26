@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 
 import Link from "next/link";
 
@@ -77,8 +77,6 @@ export default function NeedsPage({ embedded = false, initialData }: NeedsListCl
   const [categoryFilter, setCategoryFilter] = useState("");
   const [skillFilter, setSkillFilter] = useState("");
   const [skillInput, setSkillInput] = useState("");
-  const [skillSuggestions, setSkillSuggestions] = useState<string[]>([]);
-  const [showSkillDropdown, setShowSkillDropdown] = useState(false);
   const [page, setPage] = useState(1);
 
   // Debounce search input
@@ -91,7 +89,13 @@ export default function NeedsPage({ embedded = false, initialData }: NeedsListCl
   }, [query]);
 
   // Reset page when filters change + clear category if incompatible with new type
-  useEffect(() => {
+  const [pageResetFor, setPageResetFor] = useState({ categoryFilter, typeFilter, skillFilter });
+  if (
+    pageResetFor.categoryFilter !== categoryFilter ||
+    pageResetFor.typeFilter !== typeFilter ||
+    pageResetFor.skillFilter !== skillFilter
+  ) {
+    setPageResetFor({ categoryFilter, typeFilter, skillFilter });
     setPage(1);
     if (categoryFilter && typeFilter) {
       const incompatible = INCOMPATIBLE_EXCHANGE_MODES[typeFilter] || [];
@@ -99,7 +103,7 @@ export default function NeedsPage({ embedded = false, initialData }: NeedsListCl
         setCategoryFilter("");
       }
     }
-  }, [typeFilter, categoryFilter]);
+  }
 
   // Build SWR key from filters
   const needsKey = (() => {
@@ -127,20 +131,17 @@ export default function NeedsPage({ embedded = false, initialData }: NeedsListCl
   const totalPages = needsData?.totalPages || 1;
   const availableCategories = needsData?.availableFilters?.categories || [];
 
-  // Skill input suggestions — only suggest skills that exist in real posts
-  useEffect(() => {
-    const skillsPool = needsData?.availableFilters?.skills || [];
-    if (skillInput.trim()) {
-      const matches = searchSkills(skillInput);
-      setSkillSuggestions(
-        skillsPool.length > 0 ? matches.filter((s) => skillsPool.includes(s)) : matches
-      );
-      setShowSkillDropdown(true);
-    } else {
-      setSkillSuggestions([]);
-      setShowSkillDropdown(false);
-    }
-  }, [skillInput, needsData?.availableFilters?.skills]);
+  // Skill suggestions are derived, not stored — only suggest skills in real posts
+  const skillsPool = useMemo(
+    () => needsData?.availableFilters?.skills || [],
+    [needsData?.availableFilters?.skills]
+  );
+  const skillSuggestions = useMemo(() => {
+    if (!skillInput.trim()) return [] as string[];
+    const matches = searchSkills(skillInput);
+    return skillsPool.length > 0 ? matches.filter((s) => skillsPool.includes(s)) : matches;
+  }, [skillInput, skillsPool]);
+  const showSkillDropdown = skillInput.trim().length > 0;
 
   const recMatchInfo: Record<string, { matchCount: number; matchingSkillNames: string[] }> = {};
   (recData?.matchInfo || []).forEach((m) => {
@@ -289,12 +290,9 @@ export default function NeedsPage({ embedded = false, initialData }: NeedsListCl
                 if (e.key === "Enter" && skillInput.trim()) {
                   setSkillFilter(skillInput.trim());
                   setSkillInput("");
-                  setShowSkillDropdown(false);
                 }
               }}
-              onFocus={() => {
-                if (skillSuggestions.length > 0) setShowSkillDropdown(true);
-              }}
+              onFocus={() => {}}
               className="pl-9"
             />
             {skillFilter && (
@@ -318,7 +316,6 @@ export default function NeedsPage({ embedded = false, initialData }: NeedsListCl
                     onClick={() => {
                       setSkillFilter(skill);
                       setSkillInput("");
-                      setShowSkillDropdown(false);
                     }}
                     className="w-full px-3 py-2 text-left text-sm text-parchment hover:bg-line hover:text-gold transition-colors flex items-center gap-2"
                   >

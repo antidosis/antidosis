@@ -1,3 +1,5 @@
+import { type Prisma } from "@prisma/client";
+
 import { prisma } from "@/lib/prisma";
 
 export async function createNotification({
@@ -11,7 +13,7 @@ export async function createNotification({
   type: string;
   title: string;
   body: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
 }) {
   try {
     await prisma.notification.create({
@@ -20,7 +22,7 @@ export async function createNotification({
         type,
         title,
         body,
-        data: data || {},
+        data: (data ?? {}) as Prisma.InputJsonValue,
       },
     });
   } catch (err) {

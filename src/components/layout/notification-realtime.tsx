@@ -5,9 +5,22 @@ import { useEffect, useRef } from "react";
 import { useToast } from "@/components/ui/toast";
 import { createClient } from "@/lib/supabase/client";
 
+interface NotificationPayload {
+  id: string;
+  type?: string;
+  title?: string;
+  body?: string;
+  data?: Record<string, unknown> | null;
+  isRead?: boolean;
+  createdAt?: string;
+}
+
 function playNotificationSound() {
   try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const ctx = new (
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext!
+    )();
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain);
@@ -60,7 +73,7 @@ export function NotificationRealtime() {
             filter: `user_id=eq.${profile.id}`,
           },
           (payload) => {
-            const notif = payload.new as any;
+            const notif = payload.new as NotificationPayload;
             if (!notif) return;
 
             // Toast

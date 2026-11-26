@@ -61,7 +61,7 @@ describe("auditLog", () => {
         ip: null,
         userAgent: null,
         path: null,
-        metadata: null,
+        metadata: undefined,
         severity: "info",
       }),
     });

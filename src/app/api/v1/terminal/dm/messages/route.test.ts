@@ -215,7 +215,6 @@ describe("GET /api/v1/terminal/dm/messages", () => {
     const res = await GET(
       makeRequest(`http://localhost/api/v1/terminal/dm/messages?userId=${validUserId}`)
     );
-    const body = await res.json();
 
     expect(res.status).toBe(200);
     expect(mockDirectMessageThreadCreate).toHaveBeenCalled();

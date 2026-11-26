@@ -1,5 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+import { type Prisma } from "@prisma/client";
+
 import { withApiHandler } from "@/lib/api-handler";
 import { isValidCentralCoastSuburb } from "@/lib/data/central-coast-suburbs";
 import { requireVerifiedParticipation } from "@/lib/participation";
@@ -161,18 +163,25 @@ export const GET = withApiHandler(
     }
 
     // Normalize poster fields for guests so the client doesn't crash
-    if (!isAuthenticated && need.poster) {
-      (need.poster as any).bio = null;
-      (need.poster as any).ratingAvg = 0;
-      (need.poster as any).ratingCount = 0;
-      (need.poster as any).locationName = null;
-      (need.poster as any).isPro = false;
-      (need.poster as any).jobsCompleted = 0;
-      (need.poster as any).skills = [];
-      (need.poster as any).socialLinks = [];
-    }
+    const safeNeed =
+      !isAuthenticated && need.poster
+        ? {
+            ...need,
+            poster: {
+              ...need.poster,
+              bio: null,
+              ratingAvg: 0,
+              ratingCount: 0,
+              locationName: null,
+              isPro: false,
+              jobsCompleted: 0,
+              skills: [],
+              socialLinks: [],
+            },
+          }
+        : need;
 
-    return NextResponse.json({ need, isWatching });
+    return NextResponse.json({ need: safeNeed, isWatching });
   }
 );
 
@@ -251,7 +260,7 @@ export const PATCH = withApiHandler(
       );
     }
 
-    const updateData: any = {};
+    const updateData: Prisma.NeedUpdateInput = {};
     if (data.title !== undefined) updateData.title = sanitizePlainText(data.title);
     if (data.description !== undefined)
       updateData.description = sanitizePlainText(data.description);

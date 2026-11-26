@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import {
   ArrowLeft,
@@ -357,6 +358,7 @@ function ScenePostNeed({
   useContract: boolean;
   onToggleContract: () => void;
 }) {
+  const router = useRouter();
   return (
     <div className="space-y-8">
       <div>
@@ -561,7 +563,7 @@ function ScenePostNeed({
           </button>
 
           <button
-            onClick={() => (window.location.href = "/demo/contract-flow")}
+            onClick={() => router.push("/demo/contract-flow")}
             className={`text-left p-5 rounded border transition-all ${
               useContract ? "border-sun bg-sun/5" : "border-line bg-inset hover:border-linehi"
             }`}
@@ -617,7 +619,7 @@ interface NeedView {
   offerDescription: string;
   offerValue: number;
   location: string;
-  requiredSkills: string[];
+  requiredSkills: readonly string[];
   poster: {
     id: string;
     name: string;
@@ -625,11 +627,13 @@ interface NeedView {
     rating: number;
     reviews: number;
     bio: string;
-    skills: string[];
+    skills: readonly string[];
   };
+  needCategory?: string;
+  requiresContract?: boolean;
 }
 
-function MockNeedDetail({ need, onBack }: { need: any; onBack: () => void }) {
+function MockNeedDetail({ need, onBack }: { need: NeedView; onBack: () => void }) {
   return (
     <div className="space-y-6">
       <div className="py-2">
@@ -668,7 +672,7 @@ function MockNeedDetail({ need, onBack }: { need: any; onBack: () => void }) {
               )}
             </div>
             <div className="flex flex-wrap items-center gap-2 mb-4">
-              {(need.requiredSkills as string[]).map((s: string) => (
+              {need.requiredSkills.map((s: string) => (
                 <span
                   key={s}
                   className="px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider border border-line text-ash bg-raise rounded"
@@ -751,11 +755,11 @@ interface UserView {
   reviews: number;
   completed: number;
   bio: string;
-  skills: string[];
+  skills: readonly string[];
   location: string;
 }
 
-function MockProfile({ user, onBack }: { user: any; onBack: () => void }) {
+function MockProfile({ user, onBack }: { user: UserView; onBack: () => void }) {
   return (
     <div className="max-w-3xl mx-auto space-y-10">
       <div className="py-6 flex items-center justify-between">

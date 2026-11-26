@@ -72,9 +72,12 @@ export function SkillAutocomplete({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  useEffect(() => {
+  // Reset highlight when the input changes — render-adjust pattern
+  const [highlightFor, setHighlightFor] = useState(input);
+  if (highlightFor !== input) {
+    setHighlightFor(input);
     setHighlightedIndex(0);
-  }, [input]);
+  }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (!open) {

@@ -1,5 +1,13 @@
 "use client";
 
+import {
+  asKeyedArray,
+  type ApiAcceptance,
+  type ApiContract,
+  type ApiNeed,
+  type ApiNeedsResponse,
+} from "@/lib/api-types";
+
 import { parseStructuredQuery, buildQueryUrl } from "../terminal-input-engine";
 import {
   contractPipeline,
@@ -32,8 +40,8 @@ export async function handleNeeds(ctx: HandlerContext): Promise<HandlerResult> {
       }
     }
 
-    const data = await apiGet(url);
-    const needs = data.needs || [];
+    const data = await apiGet<ApiNeedsResponse>(url);
+    const needs = data.needs ?? [];
     if (!needs.length) {
       ctx.addSys(
         queryText
@@ -49,7 +57,7 @@ export async function handleNeeds(ctx: HandlerContext): Promise<HandlerResult> {
           ["ID", "Title", "Type", "Status"],
           needs
             .slice(0, 15)
-            .map((n: any) => [
+            .map((n) => [
               shortId(n.id),
               truncate(n.title, 36),
               fmtExchangeMode(n.exchangeMode),
@@ -100,8 +108,8 @@ export async function handleNeed(ctx: HandlerContext): Promise<HandlerResult> {
 
 export async function handleRecommended(ctx: HandlerContext): Promise<HandlerResult> {
   try {
-    const data = await apiGet("/api/v1/needs/recommended");
-    const needs = data.needs || [];
+    const data = await apiGet<ApiNeedsResponse>("/api/v1/needs/recommended");
+    const needs = data.needs ?? [];
     if (!needs.length) {
       ctx.addSys("No recommended needs right now. Check back later!", "info");
       return { handled: true };
@@ -112,11 +120,7 @@ export async function handleRecommended(ctx: HandlerContext): Promise<HandlerRes
           ["ID", "Title", "Type"],
           needs
             .slice(0, 10)
-            .map((n: any) => [
-              shortId(n.id),
-              truncate(n.title, 36),
-              fmtExchangeMode(n.exchangeMode),
-            ])
+            .map((n) => [shortId(n.id), truncate(n.title, 36), fmtExchangeMode(n.exchangeMode)])
         ) +
         `\n\n💡 /accept <id> to express interest`,
       "info"
@@ -133,8 +137,8 @@ export async function handleNearby(ctx: HandlerContext): Promise<HandlerResult> 
     const url = loc
       ? `/api/v1/needs?location=${encodeURIComponent(loc)}&limit=10`
       : "/api/v1/needs?limit=10";
-    const data = await apiGet(url);
-    const needs = data.needs || [];
+    const data = await apiGet<ApiNeedsResponse>(url);
+    const needs = data.needs ?? [];
     if (!needs.length) {
       ctx.addSys("No nearby needs. Widen your search or post your own!", "info");
       return { handled: true };
@@ -145,7 +149,7 @@ export async function handleNearby(ctx: HandlerContext): Promise<HandlerResult> 
           ["ID", "Title", "Location"],
           needs
             .slice(0, 10)
-            .map((n: any) => [shortId(n.id), truncate(n.title, 36), n.locationName || "—"])
+            .map((n) => [shortId(n.id), truncate(n.title, 36), n.locationName || "—"])
         ) +
         `\n\n💡 /accept <id> to express interest`,
       "info"
@@ -178,10 +182,10 @@ export async function handleAcceptNeed(ctx: HandlerContext): Promise<HandlerResu
 
 export async function handleInterests(ctx: HandlerContext): Promise<HandlerResult> {
   try {
-    const data = await apiGet("/api/v1/needs/mine");
-    const needs = Array.isArray(data) ? data : data.needs || [];
+    const data = await apiGet<ApiNeed[]>("/api/v1/needs/mine");
+    const needs = asKeyedArray<ApiNeed>(data, "needs");
     const needsWithInterests = needs.filter(
-      (n: any) => (n._count?.acceptances || 0) > 0 || (n.acceptances?.length || 0) > 0
+      (n) => (n._count?.acceptances || 0) > 0 || (n.acceptances?.length || 0) > 0
     );
     if (!needsWithInterests.length) {
       ctx.addSys("No interests on your needs yet.", "info");
@@ -335,8 +339,8 @@ export async function handleContracts(ctx: HandlerContext): Promise<HandlerResul
       url += `?status=${filter}`;
     }
 
-    const data = await apiGet(url);
-    const contracts = Array.isArray(data) ? data : data.contracts || [];
+    const data = await apiGet<ApiContract[]>(url);
+    const contracts = asKeyedArray<ApiContract>(data, "contracts");
     if (!contracts.length) {
       ctx.addSys(
         filter ? `No ${filter} contracts found.` : "No contracts yet. Accept a need to start one!",
@@ -346,7 +350,7 @@ export async function handleContracts(ctx: HandlerContext): Promise<HandlerResul
     }
     const rows = contracts
       .slice(0, 15)
-      .map((c: any) => [
+      .map((c) => [
         shortId(c.id),
         truncate(c.need?.title || "—", 30),
         fmtStatus(c.status),
@@ -408,8 +412,10 @@ export async function handleSign(ctx: HandlerContext): Promise<HandlerResult> {
   }
   try {
     await apiPost(`/api/v1/contracts/${id}/sign`, signature ? { signature } : undefined);
-    const contract = await apiGet(`/api/v1/contracts/${id}`);
-    const c = contract.contract || contract;
+    const contract = await apiGet<{ contract?: ApiContract } & ApiContract>(
+      `/api/v1/contracts/${id}`
+    );
+    const c = contract.contract ?? contract;
     const isPartyA = c.partyAId === ctx.user.id;
     ctx.addSys(
       getCelebrationBanner("Contract Signed! ✅") +
@@ -438,8 +444,10 @@ export async function handleComplete(ctx: HandlerContext): Promise<HandlerResult
   }
   try {
     await apiPost(`/api/v1/contracts/${id}/complete`);
-    const contract = await apiGet(`/api/v1/contracts/${id}`);
-    const c = contract.contract || contract;
+    const contract = await apiGet<{ contract?: ApiContract } & ApiContract>(
+      `/api/v1/contracts/${id}`
+    );
+    const c = contract.contract ?? contract;
     const isPartyA = c.partyAId === ctx.user.id;
     ctx.addSys(
       getTrophyArt() +
@@ -630,21 +638,23 @@ export async function handleReview(ctx: HandlerContext): Promise<HandlerResult> 
   if (!id || !rating || rating < 1 || rating > 10) {
     // Start review wizard if no args provided
     const [contractsData, acceptancesData] = await Promise.all([
-      apiGet("/api/v1/contracts/mine").then((d: any) => (Array.isArray(d) ? d : d.contracts || [])),
-      apiGet("/api/v1/acceptances/mine").then((d: any) =>
-        Array.isArray(d) ? d : d.acceptances || []
+      apiGet<ApiContract[]>("/api/v1/contracts/mine").then((d) =>
+        asKeyedArray<ApiContract>(d, "contracts")
+      ),
+      apiGet<ApiAcceptance[]>("/api/v1/acceptances/mine").then((d) =>
+        asKeyedArray<ApiAcceptance>(d, "acceptances")
       ),
     ]);
-    const completedContracts = contractsData.filter((c: any) => c.status === "completed");
+    const completedContracts = contractsData.filter((c) => c.status === "completed");
     const completedAcceptances = acceptancesData.filter(
-      (a: any) => a.status === "completed" || a.status === "accepted"
+      (a) => a.status === "completed" || a.status === "accepted"
     );
     const choices = [
-      ...completedContracts.map((c: any) => ({
+      ...completedContracts.map((c) => ({
         value: c.id,
         label: `Contract: ${c.need?.title || c.id.slice(0, 8)}`,
       })),
-      ...completedAcceptances.map((a: any) => ({
+      ...completedAcceptances.map((a) => ({
         value: a.id,
         label: `Acceptance: ${a.need?.title || a.id.slice(0, 8)}`,
       })),
@@ -660,15 +670,17 @@ export async function handleReview(ctx: HandlerContext): Promise<HandlerResult> 
   }
   try {
     const [contracts, acceptances] = await Promise.all([
-      apiGet("/api/v1/contracts/mine").then((d: any) => (Array.isArray(d) ? d : d.contracts || [])),
-      apiGet("/api/v1/acceptances/mine").then((d: any) =>
-        Array.isArray(d) ? d : d.acceptances || []
+      apiGet<ApiContract[]>("/api/v1/contracts/mine").then((d) =>
+        asKeyedArray<ApiContract>(d, "contracts")
+      ),
+      apiGet<ApiAcceptance[]>("/api/v1/acceptances/mine").then((d) =>
+        asKeyedArray<ApiAcceptance>(d, "acceptances")
       ),
     ]);
     const contract =
-      contracts.find((c: any) => c.id === id) ??
+      contracts.find((c) => c.id === id) ??
       (() => {
-        const matches = contracts.filter((c: any) => c.id.startsWith(id));
+        const matches = contracts.filter((c) => c.id.startsWith(id));
         return matches.length === 1 ? matches[0] : undefined;
       })();
     if (contract) {
@@ -680,14 +692,16 @@ export async function handleReview(ctx: HandlerContext): Promise<HandlerResult> 
       return { handled: true };
     }
     const acceptance =
-      acceptances.find((a: any) => a.id === id) ??
+      acceptances.find((a) => a.id === id) ??
       (() => {
-        const matches = acceptances.filter((a: any) => a.id.startsWith(id));
+        const matches = acceptances.filter((a) => a.id.startsWith(id));
         return matches.length === 1 ? matches[0] : undefined;
       })();
     if (acceptance) {
-      const needData = await apiGet(`/api/v1/needs/${acceptance.need?.id || id}`);
-      const need = needData.need || needData;
+      const needData = await apiGet<{ need?: ApiNeed } & ApiNeed>(
+        `/api/v1/needs/${acceptance.need?.id || id}`
+      );
+      const need = needData.need ?? needData;
       const receiverId =
         acceptance.userId === ctx.myProfile?.id ? need.posterId : acceptance.userId;
       await apiPost("/api/v1/reviews", {
@@ -714,8 +728,8 @@ export async function handleNeedEdit(ctx: HandlerContext): Promise<HandlerResult
     return { handled: true };
   }
   try {
-    const data = await apiGet(`/api/v1/needs/${id}`);
-    const need = data.need || data;
+    const data = await apiGet<{ need?: ApiNeed } & ApiNeed>(`/api/v1/needs/${id}`);
+    const need = data.need ?? data;
     if (!need) {
       ctx.addSys("Need not found.", "error");
       return { handled: true };

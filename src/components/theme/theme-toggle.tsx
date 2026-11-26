@@ -22,6 +22,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
 
   useEffect(() => {
     const value = document.documentElement.dataset.theme;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydration-safe init from persisted DOM state before first paint
     setBrightness(isLightThemeId(value) ? "light" : "dark");
 
     function sync(e: Event) {

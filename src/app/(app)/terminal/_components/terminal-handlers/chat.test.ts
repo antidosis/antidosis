@@ -1,18 +1,21 @@
+import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
 import { handleChat, handleDm } from "./chat";
 import type { HandlerContext } from "./types";
+import type { ActiveContext, Channel } from "../terminal-types";
 
 function makeCtx(overrides: Partial<HandlerContext> = {}): HandlerContext {
   return {
     args: [],
-    router: { push: vi.fn() } as any,
+    router: { push: vi.fn() } as unknown as AppRouterInstance,
     myProfile: null,
     user: { id: "user-1" },
     isAdmin: false,
     channels: [],
     setActiveContext: vi.fn(),
-    activeContext: { type: "none" as any, id: "" },
+    activeContext: { type: "none", id: "" } as unknown as ActiveContext,
     session: {
       version: 2,
       userId: "user-1",
@@ -59,7 +62,7 @@ describe("handleChat", () => {
   it("switches to existing channel", async () => {
     const ctx = makeCtx({
       args: ["general"],
-      channels: [{ id: "ch1", name: "general" }] as any,
+      channels: [{ id: "ch1", name: "general" }] as unknown as Channel[],
     });
     await handleChat(ctx);
     expect(ctx.setActiveContext).toHaveBeenCalledWith({
@@ -72,7 +75,7 @@ describe("handleChat", () => {
 
   it("lists channels when no arg", async () => {
     const ctx = makeCtx({
-      channels: [{ id: "ch1", name: "general" }] as any,
+      channels: [{ id: "ch1", name: "general" }] as unknown as Channel[],
     });
     await handleChat(ctx);
     expect(ctx.addSys).toHaveBeenCalledWith(expect.stringContaining("general"), "info");
@@ -90,7 +93,7 @@ describe("handleChat", () => {
   it("is case-insensitive", async () => {
     const ctx = makeCtx({
       args: ["GENERAL"],
-      channels: [{ id: "ch1", name: "general" }] as any,
+      channels: [{ id: "ch1", name: "general" }] as unknown as Channel[],
     });
     await handleChat(ctx);
     expect(ctx.setActiveContext).toHaveBeenCalledWith({

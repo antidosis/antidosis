@@ -1,3 +1,5 @@
+import { type Prisma } from "@prisma/client";
+
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/prisma";
 
@@ -78,7 +80,7 @@ export async function auditLog(options: AuditOptions): Promise<void> {
         ip: logPayload.ip || null,
         userAgent: logPayload.userAgent || null,
         path: logPayload.path || null,
-        metadata: logPayload.metadata ? (logPayload.metadata as any) : null,
+        metadata: (logPayload.metadata ?? undefined) as Prisma.InputJsonValue | undefined,
         severity: logPayload.severity,
       },
     });

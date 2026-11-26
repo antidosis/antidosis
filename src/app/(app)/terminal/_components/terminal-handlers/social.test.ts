@@ -1,3 +1,5 @@
+import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
 import {
@@ -18,18 +20,19 @@ import {
   handleReadAll,
   handleActivity,
 } from "./social";
-import type { HandlerContext } from "./types";
+import type { HandlerContext, MyProfile } from "./types";
+import type { ActiveContext, OnlineUser } from "../terminal-types";
 
 function makeCtx(overrides: Partial<HandlerContext> = {}): HandlerContext {
   return {
     args: [],
-    router: { push: vi.fn() } as any,
+    router: { push: vi.fn() } as unknown as AppRouterInstance,
     myProfile: null,
     user: { id: "user-1" },
     isAdmin: false,
     channels: [],
     setActiveContext: vi.fn(),
-    activeContext: { type: "none" as any, id: "" },
+    activeContext: { type: "none", id: "" } as unknown as ActiveContext,
     session: {
       version: 2,
       userId: "user-1",
@@ -317,7 +320,7 @@ describe("social handlers", () => {
 
   describe("handleProfileView", () => {
     it("shows own profile when no target", async () => {
-      const ctx = makeCtx({ myProfile: { id: "user-1", fullName: "Me" } as any });
+      const ctx = makeCtx({ myProfile: { id: "user-1", fullName: "Me" } as unknown as MyProfile });
       await handleProfileView(ctx);
       expect(ctx.router.push).toHaveBeenCalledWith("/profile/user-1");
     });
@@ -387,7 +390,7 @@ describe("social handlers", () => {
 
     it("lists online users", async () => {
       const ctx = makeCtx({
-        onlineUsers: [{ id: "u1", fullName: "Alice" }] as any,
+        onlineUsers: [{ id: "u1", fullName: "Alice" }] as unknown as OnlineUser[],
       });
       await handleWho(ctx);
       expect(ctx.addSys).toHaveBeenCalledWith(expect.stringContaining("Alice"), "info");

@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     let event: Stripe.Event;
     try {
       event = getStripe().webhooks.constructEvent(payload, signature, webhookSecret);
-    } catch (err: any) {
+    } catch (err) {
       logger.error("Webhook signature verification failed", err instanceof Error ? err : undefined);
       return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
     }
@@ -28,7 +28,6 @@ export async function POST(req: NextRequest) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        const userId = session.metadata?.userId;
         const profileId = session.metadata?.profileId;
 
         if (profileId) {

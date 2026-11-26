@@ -2,6 +2,8 @@ import { type NextRequest } from "next/server";
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+import type { POST as PostHandler } from "./route";
+
 const mockProfileFindUnique = vi.fn();
 const mockProfileUpdate = vi.fn();
 
@@ -58,7 +60,7 @@ function makeRequest(body?: Record<string, unknown>): NextRequest {
 }
 
 describe("POST /api/v1/billing/play-store/verify", () => {
-  let POST: typeof import("./route").POST;
+  let POST: typeof PostHandler;
 
   beforeEach(async () => {
     vi.clearAllMocks();

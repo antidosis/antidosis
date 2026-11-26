@@ -272,6 +272,7 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
 
   useEffect(() => {
     if (profileExpanded && need && profileId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- conditional credential fetch when the profile panel expands
       fetchCredentials(need.poster.id);
     }
   }, [profileExpanded, need, profileId, fetchCredentials]);

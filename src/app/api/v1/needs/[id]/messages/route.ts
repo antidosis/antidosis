@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+import type { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { withApiHandler } from "@/lib/api-handler";
@@ -104,7 +105,7 @@ export const GET = withApiHandler(
     // Poster sees all messages (public + all private threads)
     // Fulfiller with acceptance sees poster's public messages + their own private thread
     // Visitor without acceptance sees poster's public messages + their own replies
-    let where: any;
+    let where: Prisma.NeedMessageWhereInput;
     if (profile.isPoster) {
       where = { needId: params.id };
     } else if (profile.acceptanceId) {
@@ -142,7 +143,7 @@ export const GET = withApiHandler(
     });
 
     // Mark messages from others as read
-    let readWhere: any;
+    let readWhere: Prisma.NeedMessageWhereInput;
     if (profile.isPoster) {
       readWhere = {
         needId: params.id,

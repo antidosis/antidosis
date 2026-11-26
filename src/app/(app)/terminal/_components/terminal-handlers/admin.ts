@@ -1,8 +1,17 @@
 "use client";
 
+import { type ApiContract, type ApiCredentialItem, type ApiUserSummary } from "@/lib/api-types";
+
 import { fmtTable, fmtCard, shortId } from "../terminal-render";
 import type { HandlerContext, HandlerResult } from "./types";
 import { apiGet, apiPost, friendlyError } from "./utils";
+
+interface ApiChannel {
+  id: string;
+  name: string;
+  slug?: string;
+  type?: string;
+}
 
 export async function handleAdminStats(ctx: HandlerContext): Promise<HandlerResult> {
   if (!ctx.isAdmin) {
@@ -10,8 +19,14 @@ export async function handleAdminStats(ctx: HandlerContext): Promise<HandlerResu
     return { handled: true };
   }
   try {
-    const data = await apiGet("/api/v1/admin/stats");
-    const s = data;
+    const s = await apiGet<{
+      totalUsers?: number;
+      totalPros?: number;
+      totalNeeds?: number;
+      totalContracts?: number;
+      pendingVerifications?: number;
+      pendingContractCancellations?: number;
+    }>("/api/v1/admin/stats");
     ctx.addSys(
       `🛡️ Admin Dashboard\n\n` +
         fmtCard({
@@ -37,13 +52,15 @@ export async function handleAdminVerifications(ctx: HandlerContext): Promise<Han
     return { handled: true };
   }
   try {
-    const data = await apiGet("/api/v1/admin/pending-credentials");
-    const creds = data.credentials || [];
+    const data = await apiGet<{
+      credentials: (ApiCredentialItem & { user?: { fullName: string | null } })[];
+    }>("/api/v1/admin/pending-credentials");
+    const creds = data.credentials ?? [];
     if (!creds.length) {
       ctx.addSys("🛡️ No pending verifications.", "info");
       return { handled: true };
     }
-    const rows = creds.map((c: any) => [shortId(c.id), c.user?.fullName || "—", c.type, c.title]);
+    const rows = creds.map((c) => [shortId(c.id), c.user?.fullName || "—", c.type, c.title]);
     ctx.addSys(
       `🛡️ Pending Verifications (${creds.length})\n\n${fmtTable(["ID", "User", "Type", "Title"], rows)}\n\n💡 /admin verify <id>  |  /admin reject <id> <reason>`,
       "info"
@@ -120,13 +137,13 @@ export async function handleAdminContracts(ctx: HandlerContext): Promise<Handler
     return { handled: true };
   }
   try {
-    const data = await apiGet("/api/v1/admin/pending-cancellations");
+    const data = await apiGet<{ contracts: ApiContract[] }>("/api/v1/admin/pending-cancellations");
     const contracts = data.contracts || [];
     if (!contracts.length) {
       ctx.addSys("🛡️ No escalated cancellation requests.", "info");
       return { handled: true };
     }
-    const rows = contracts.map((c: any) => [
+    const rows = contracts.map((c) => [
       shortId(c.id),
       c.need?.title || "—",
       c.partyA?.fullName || "—",
@@ -174,8 +191,8 @@ export async function handleAdminAnnounce(ctx: HandlerContext): Promise<HandlerR
     return { handled: true };
   }
   try {
-    const chData = await apiGet("/api/v1/terminal/channels");
-    const ch = chData.channels?.find((c: any) => c.slug === channel || c.id === channel);
+    const chData = await apiGet<{ channels: ApiChannel[] }>("/api/v1/terminal/channels");
+    const ch = chData.channels?.find((c) => c.slug === channel || c.id === channel);
     if (!ch) {
       ctx.addSys(`Channel "${channel}" not found.`, "error");
       return { handled: true };
@@ -197,12 +214,12 @@ export async function handleAdminUsers(ctx: HandlerContext): Promise<HandlerResu
     return { handled: true };
   }
   try {
-    const data = await apiGet("/api/v1/admin/users");
-    const users = data.users || [];
+    const data = await apiGet<{ users: ApiUserSummary[] }>("/api/v1/admin/users");
+    const users = data.users ?? [];
     ctx.addSys(
       `Users (${users.length}):\n${users
         .slice(0, 20)
-        .map((u: any) => `  ${shortId(u.id)}: ${u.fullName || "Anonymous"}`)
+        .map((u) => `  ${shortId(u.id)}: ${u.fullName || "Anonymous"}`)
         .join("\n")}`,
       "info"
     );
@@ -223,8 +240,8 @@ export async function handleStaff(ctx: HandlerContext): Promise<HandlerResult> {
     return { handled: true };
   }
   try {
-    const chData = await apiGet("/api/v1/terminal/channels");
-    const staffCh = chData.channels?.find((c: any) => c.type === "staff");
+    const chData = await apiGet<{ channels: ApiChannel[] }>("/api/v1/terminal/channels");
+    const staffCh = chData.channels?.find((c) => c.type === "staff");
     if (!staffCh) {
       ctx.addSys("No staff channel found.", "error");
       return { handled: true };

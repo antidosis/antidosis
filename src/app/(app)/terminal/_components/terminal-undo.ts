@@ -25,7 +25,7 @@ export interface UndoAction {
   type: UndoActionType;
   description: string;
   timestamp: number;
-  payload: Record<string, any>;
+  payload: Record<string, unknown>;
 }
 
 const MAX_UNDO_STACK = 50;

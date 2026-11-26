@@ -58,6 +58,7 @@ export function UserManagementSection() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- data fetch on mount; setState lives inside the async loader
     load("");
   }, []);
 

@@ -1,5 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+import { Prisma } from "@prisma/client";
+
 import { withApiHandler } from "@/lib/api-handler";
 import { createNotification } from "@/lib/notifications";
 import { requireVerifiedParticipation } from "@/lib/participation";
@@ -31,9 +33,9 @@ async function getOrCreateThread(myProfileId: string, otherProfileId: string) {
       },
       select: { id: true },
     });
-  } catch (e: any) {
+  } catch (e) {
     // Race condition: another request created the thread simultaneously
-    if (e.code === "P2002") {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
       const race = await prisma.directMessageThread.findFirst({
         where: {
           OR: [
@@ -246,7 +248,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
       threadId: thread.id,
       senderId: profile.id,
       content,
-      attachments: attachments as any,
+      attachments: attachments as Prisma.InputJsonValue,
     },
     select: {
       id: true,

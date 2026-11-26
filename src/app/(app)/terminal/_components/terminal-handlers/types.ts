@@ -24,6 +24,7 @@ export interface MyProfile {
   ratingAvg: number | null;
   ratingCount: number | null;
   jobsCompleted: number;
+  xp?: number;
   locationName: string | null;
   skills?: { id: string; name: string }[];
   showInDirectory?: boolean;

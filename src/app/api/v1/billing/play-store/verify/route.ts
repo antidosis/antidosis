@@ -78,10 +78,13 @@ export async function POST(req: NextRequest) {
       expiresAt: expiresAt?.toISOString() ?? null,
       autoRenewing,
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error("[PlayStore] Verification failed", error instanceof Error ? error : undefined);
     return NextResponse.json(
-      { error: "Verification failed", message: error.message },
+      {
+        error: "Verification failed",
+        message: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }

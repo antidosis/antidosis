@@ -28,8 +28,10 @@ export interface LabNote {
   createdAt: string;
 }
 
+export type TerminalTheme = "default" | "cyberpunk" | "matrix" | "minimal" | "ocean";
+
 export interface TerminalSettings {
-  theme: "default" | "cyberpunk" | "matrix" | "minimal" | "ocean";
+  theme: TerminalTheme;
   compactMode: boolean;
   notifyDm: boolean;
   notifyMention: boolean;
@@ -79,10 +81,21 @@ export interface TerminalSession {
   lastReadAt: Record<string, string>;
 }
 
+/** One selectable option persisted in wizard data (e.g. review deal choices). */
+export interface WizardChoice {
+  value: string;
+  label: string;
+}
+
+/** Values a wizard step can hold — strings, flags, tag lists, or choice lists. */
+export type WizardValue = string | number | boolean | string[] | WizardChoice[] | undefined;
+
+export type WizardData = Record<string, WizardValue>;
+
 export interface WizardState {
   type: "post" | "review" | "credential" | "tutorial" | "edit_need";
   step: number;
-  data: Record<string, any>;
+  data: WizardData;
   prompt: string;
 }
 

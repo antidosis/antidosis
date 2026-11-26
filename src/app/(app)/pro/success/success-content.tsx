@@ -17,6 +17,7 @@ export default function SuccessContent() {
   useEffect(() => {
     const sessionId = searchParams.get("session_id");
     if (!sessionId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot session verification fetch on mount
       setStatus("error");
       setErrorMsg("no session ID provided");
       return;

@@ -1,38 +1,43 @@
 "use client";
 
-export async function apiGet(path: string): Promise<any> {
-  const res = await fetch(path);
-  if (!res.ok) throw new Error(`GET ${path} failed: ${res.status}`);
-  return res.json();
+/** JSON envelope shapes some routes return instead of a bare array. */
+interface ErrorBody {
+  error?: string;
 }
 
-export async function apiPost(path: string, body?: any): Promise<any> {
+export async function apiGet<T = unknown>(path: string): Promise<T> {
+  const res = await fetch(path);
+  if (!res.ok) throw new Error(`GET ${path} failed: ${res.status}`);
+  return (await res.json()) as T;
+}
+
+export async function apiPost<T = unknown>(path: string, body?: unknown): Promise<T> {
   const res = await fetch(path, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
   });
-  const data = await res.json().catch(() => ({}));
+  const data = (await res.json().catch(() => ({}))) as ErrorBody;
   if (!res.ok) throw new Error(data.error || `POST ${path} failed: ${res.status}`);
-  return data;
+  return data as T;
 }
 
-export async function apiPatch(path: string, body: any): Promise<any> {
+export async function apiPatch<T = unknown>(path: string, body: unknown): Promise<T> {
   const res = await fetch(path, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-  const data = await res.json().catch(() => ({}));
+  const data = (await res.json().catch(() => ({}))) as ErrorBody;
   if (!res.ok) throw new Error(data.error || `PATCH ${path} failed: ${res.status}`);
-  return data;
+  return data as T;
 }
 
-export async function apiDelete(path: string): Promise<any> {
+export async function apiDelete<T = unknown>(path: string): Promise<T> {
   const res = await fetch(path, { method: "DELETE" });
-  const data = await res.json().catch(() => ({}));
+  const data = (await res.json().catch(() => ({}))) as ErrorBody;
   if (!res.ok) throw new Error(data.error || `DELETE ${path} failed: ${res.status}`);
-  return data;
+  return data as T;
 }
 
 export function friendlyError(err: unknown, fallback: string): string {

@@ -65,9 +65,32 @@ describe("useThemeStyles", () => {
 });
 
 describe("useNotificationSound", () => {
-  let audioCtxMock: any;
-  let oscillatorMock: any;
-  let gainMock: any;
+  interface OscillatorMock {
+    connect: () => OscillatorMock;
+    start: ReturnType<typeof vi.fn>;
+    stop: ReturnType<typeof vi.fn>;
+    frequency: {
+      setValueAtTime: ReturnType<typeof vi.fn>;
+      exponentialRampToValueAtTime: ReturnType<typeof vi.fn>;
+    };
+    type: string;
+  }
+  interface GainMock {
+    connect: () => GainMock;
+    gain: {
+      setValueAtTime: ReturnType<typeof vi.fn>;
+      exponentialRampToValueAtTime: ReturnType<typeof vi.fn>;
+    };
+  }
+  interface AudioCtxMock {
+    createOscillator: ReturnType<typeof vi.fn>;
+    createGain: ReturnType<typeof vi.fn>;
+    currentTime: number;
+    destination: unknown;
+  }
+  let audioCtxMock: AudioCtxMock;
+  let oscillatorMock: OscillatorMock;
+  let gainMock: GainMock;
 
   beforeEach(() => {
     oscillatorMock = {
@@ -182,12 +205,18 @@ describe("useSwipeGesture", () => {
     const touchStart = { clientX: startX, clientY: startY };
     const touchEnd = { clientX: endX, clientY: endY };
 
-    const startEvent = new Event("touchstart", { bubbles: true }) as any;
+    const startEvent = new Event("touchstart", { bubbles: true }) as Event & {
+      touches: unknown[];
+      changedTouches: unknown[];
+    };
     startEvent.touches = [touchStart];
     startEvent.changedTouches = [touchStart];
     document.dispatchEvent(startEvent);
 
-    const endEvent = new Event("touchend", { bubbles: true }) as any;
+    const endEvent = new Event("touchend", { bubbles: true }) as Event & {
+      touches: unknown[];
+      changedTouches: unknown[];
+    };
     endEvent.touches = [];
     endEvent.changedTouches = [touchEnd];
     document.dispatchEvent(endEvent);

@@ -1,5 +1,14 @@
 "use client";
 
+import { asKeyedArray } from "@/lib/api-types";
+import type {
+  ApiContract,
+  ApiCredentialItem,
+  ApiMyProfile,
+  ApiNeed,
+  ApiReview,
+} from "@/lib/api-types";
+
 import { fmtTable, fmtRating, truncate, shortId, xpBar } from "../terminal-render";
 import { getLevel } from "../terminal-session";
 import { createWizard } from "../terminal-wizard";
@@ -8,7 +17,7 @@ import { apiGet, apiPost, apiPatch, apiDelete, friendlyError, isSafeUrl } from "
 
 export async function handleWhoami(ctx: HandlerContext): Promise<HandlerResult> {
   const p = ctx.myProfile;
-  const skills = p?.skills?.map((s: any) => s.name).join(", ") || "None";
+  const skills = p?.skills?.map((s) => s.name).join(", ") || "None";
   ctx.addSys(
     `👤 ${p?.fullName || "You"}\n` +
       `   ID:        ${shortId(ctx.user.id)}\n` +
@@ -25,16 +34,16 @@ export async function handleWhoami(ctx: HandlerContext): Promise<HandlerResult> 
 export async function handleStats(ctx: HandlerContext): Promise<HandlerResult> {
   try {
     const [cData, nData, rData] = await Promise.all([
-      apiGet("/api/v1/contracts/mine"),
-      apiGet("/api/v1/needs/mine"),
-      apiGet("/api/v1/reviews"),
+      apiGet<ApiContract[]>("/api/v1/contracts/mine"),
+      apiGet<ApiNeed[]>("/api/v1/needs/mine"),
+      apiGet<{ reviews: ApiReview[] }>("/api/v1/reviews"),
     ]);
-    const contracts = Array.isArray(cData) ? cData : cData.contracts || [];
-    const needs = Array.isArray(nData) ? nData : nData.needs || [];
-    const reviews = rData.reviews || [];
-    const activeContracts = contracts.filter((c: any) => c.status === "active");
+    const contracts = asKeyedArray<ApiContract>(cData, "contracts");
+    const needs = asKeyedArray<ApiNeed>(nData, "needs");
+    const reviews = rData.reviews ?? [];
+    const activeContracts = contracts.filter((c) => c.status === "active");
     const pendingSign = contracts.filter(
-      (c: any) => c.status === "pending_terms" || c.status === "draft"
+      (c) => c.status === "pending_terms" || c.status === "draft"
     );
 
     const { level, title, nextThreshold } = getLevel(ctx.session.xp);
@@ -79,7 +88,7 @@ export async function handleSkills(ctx: HandlerContext): Promise<HandlerResult> 
   }
   ctx.addSys(
     `🛠️ Your Skills\n` +
-      skills.map((s: any, i: number) => `  ${i + 1}. ${s.name}`).join("\n") +
+      skills.map((s, i) => `  ${i + 1}. ${s.name}`).join("\n") +
       `\n\n💡 /addskill <name> to add  |  /removeskill <name> to remove`,
     "info"
   );
@@ -88,8 +97,10 @@ export async function handleSkills(ctx: HandlerContext): Promise<HandlerResult> 
 
 export async function handleCredentials(ctx: HandlerContext): Promise<HandlerResult> {
   try {
-    const data = await apiGet("/api/v1/profiles/me/credentials");
-    const creds = data.credentials || [];
+    const data = await apiGet<{ credentials: ApiCredentialItem[] }>(
+      "/api/v1/profiles/me/credentials"
+    );
+    const creds = data.credentials ?? [];
     if (!creds.length) {
       ctx.addSys("No credentials yet. Add one with /credential-add", "info");
       return { handled: true };
@@ -98,7 +109,7 @@ export async function handleCredentials(ctx: HandlerContext): Promise<HandlerRes
       `📋 Your Credentials (${creds.length})\n` +
         fmtTable(
           ["Type", "Title", "Status"],
-          creds.map((c: any) => [
+          creds.map((c) => [
             c.type,
             truncate(c.title, 30),
             c.isVerified ? "✅ Verified" : "⏳ Pending",
@@ -260,10 +271,10 @@ export async function handleLink(ctx: HandlerContext): Promise<HandlerResult> {
     return { handled: true };
   }
   try {
-    const profile = await apiGet("/api/v1/profiles/me");
-    const existing = profile.socialLinks || [];
+    const profile = await apiGet<ApiMyProfile>("/api/v1/profiles/me");
+    const existing = profile.socialLinks ?? [];
     const updated = [
-      ...existing.filter((l: any) => l.platform !== platform),
+      ...existing.filter((l) => l.platform !== platform),
       { platform, url, isPublic: true },
     ];
     await apiPatch("/api/v1/profiles/me", { socialLinks: updated });
@@ -281,9 +292,9 @@ export async function handleUnlink(ctx: HandlerContext): Promise<HandlerResult> 
     return { handled: true };
   }
   try {
-    const profile = await apiGet("/api/v1/profiles/me");
-    const existing = profile.socialLinks || [];
-    const updated = existing.filter((l: any) => l.platform !== provider);
+    const profile = await apiGet<ApiMyProfile>("/api/v1/profiles/me");
+    const existing = profile.socialLinks ?? [];
+    const updated = existing.filter((l) => l.platform !== provider);
     await apiPatch("/api/v1/profiles/me", { socialLinks: updated });
     ctx.addSys(`✅ Unlinked ${provider}.`, "success");
   } catch (err) {
@@ -310,7 +321,7 @@ export async function handleCredentialShare(ctx: HandlerContext): Promise<Handle
     return { handled: true };
   }
   try {
-    const data = await apiPost(`/api/v1/credentials/${id}/share`);
+    const data = await apiPost<{ shareText?: string }>(`/api/v1/credentials/${id}/share`);
     ctx.addSys(`📋 ${data.shareText || "Share link generated."}`, "info");
   } catch (err) {
     ctx.addSys(friendlyError(err, "Couldn't share credential."), "error");

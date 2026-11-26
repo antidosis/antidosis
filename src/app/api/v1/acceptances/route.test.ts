@@ -10,7 +10,6 @@ const mockProfileFindUnique = vi.fn();
 const mockAcceptanceFindFirst = vi.fn();
 const mockAcceptanceCreate = vi.fn();
 const mockCredentialFindMany = vi.fn();
-const mockPosterProfileFindUnique = vi.fn();
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {

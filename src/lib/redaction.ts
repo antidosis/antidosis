@@ -116,7 +116,7 @@ export function redactCredential<
     backFileUrl?: string | null;
   },
 >(credential: T): Omit<T, "fileUrl" | "backFileUrl"> {
-  const { fileUrl, backFileUrl, ...rest } = credential as any;
+  const { fileUrl: _omitFileUrl, backFileUrl: _omitBackFileUrl, ...rest } = credential;
   return {
     ...rest,
     documentNumber: rest.documentNumber

@@ -230,7 +230,7 @@ describe("PATCH /api/v1/needs/[id]", () => {
     mockTransaction.mockReset();
     mockNeedSkillDeleteMany.mockReset();
     mockRateLimit.mockResolvedValue({ allowed: true, remaining: 10, resetAt: Date.now() + 60_000 });
-    mockTransaction.mockImplementation(async (callback: any) => {
+    mockTransaction.mockImplementation(async (callback: (tx: unknown) => Promise<unknown>) => {
       return callback({
         needSkill: { deleteMany: mockNeedSkillDeleteMany },
         need: { update: (...args: unknown[]) => mockNeedUpdate(...args) },

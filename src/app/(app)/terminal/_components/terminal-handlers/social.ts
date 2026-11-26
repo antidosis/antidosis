@@ -1,14 +1,26 @@
 "use client";
 
+import {
+  asKeyedArray,
+  type ApiActivityResponse,
+  type ApiBlocksResponse,
+  type ApiFriendsResponse,
+  type ApiNeedsResponse,
+  type ApiNotificationsResponse,
+  type ApiProSummary,
+  type ApiSearchResponse,
+  type ApiUsersSearchResponse,
+} from "@/lib/api-types";
+
 import { fmtTable, fmtRating, truncate, shortId, formatTime } from "../terminal-render";
 import type { HandlerContext, HandlerResult } from "./types";
 import { apiGet, apiPost, apiDelete, friendlyError } from "./utils";
 
 export async function handleNotifications(ctx: HandlerContext): Promise<HandlerResult> {
   try {
-    const data = await apiGet("/api/v1/notifications");
-    const notifs = data.notifications || [];
-    const unread = notifs.filter((n: any) => !n.readAt);
+    const data = await apiGet<ApiNotificationsResponse>("/api/v1/notifications");
+    const notifs = data.notifications ?? [];
+    const unread = notifs.filter((n) => !n.readAt);
     if (!notifs.length) {
       ctx.addSys("📭 No notifications.", "info");
       return { handled: true };
@@ -18,8 +30,8 @@ export async function handleNotifications(ctx: HandlerContext): Promise<HandlerR
         notifs
           .slice(0, 10)
           .map(
-            (n: any) =>
-              `  ${n.readAt ? " " : "●"} ${truncate(n.title, 50)} — ${formatTime(n.createdAt)}`
+            (n) =>
+              `  ${n.readAt ? " " : "●"} ${truncate(n.title ?? "", 50)} — ${formatTime(n.createdAt ?? "")}`
           )
           .join("\n") +
         `\n\n💡 /read <id> to mark read  |  /readall to clear all`,
@@ -58,8 +70,8 @@ export async function handleReadAll(ctx: HandlerContext): Promise<HandlerResult>
 
 export async function handleActivity(ctx: HandlerContext): Promise<HandlerResult> {
   try {
-    const data = await apiGet("/api/v1/terminal/activity");
-    const activities = data.items || [];
+    const data = await apiGet<ApiActivityResponse>("/api/v1/terminal/activity");
+    const activities = data.items ?? [];
     if (!activities.length) {
       ctx.addSys("No recent activity.", "info");
       return { handled: true };
@@ -68,9 +80,7 @@ export async function handleActivity(ctx: HandlerContext): Promise<HandlerResult
       `📈 Recent Activity\n` +
         activities
           .slice(0, 10)
-          .map(
-            (a: any) => `  • ${a.type}: ${truncate(a.description, 50)} — ${formatTime(a.createdAt)}`
-          )
+          .map((a) => `  • ${a.type}: ${truncate(a.description, 50)} — ${formatTime(a.createdAt)}`)
           .join("\n"),
       "info"
     );
@@ -87,27 +97,25 @@ export async function handleSearch(ctx: HandlerContext): Promise<HandlerResult> 
     return { handled: true };
   }
   try {
-    const data = await apiGet(`/api/v1/search?q=${encodeURIComponent(query)}`);
-    const needs = data.needs || [];
-    const users = data.users || [];
-    const pros = data.pros || [];
+    const data = await apiGet<ApiSearchResponse>(`/api/v1/search?q=${encodeURIComponent(query)}`);
+    const needs = data.needs ?? [];
+    const users = data.users ?? [];
+    const pros = data.pros ?? [];
     let text = `🔍 Results for "${query}"\n`;
     if (needs.length)
       text += `\n📋 Needs (${needs.length}):\n${needs
         .slice(0, 5)
-        .map((n: any) => `  • ${truncate(n.title, 40)} — /need ${shortId(n.id)}`)
+        .map((n) => `  • ${truncate(n.title, 40)} — /need ${shortId(n.id)}`)
         .join("\n")}`;
     if (users.length)
       text += `\n\n👤 Users (${users.length}):\n${users
         .slice(0, 5)
-        .map((u: any) => `  • ${u.fullName || "Anonymous"} — /profile ${shortId(u.id)}`)
+        .map((u) => `  • ${u.fullName || "Anonymous"} — /profile ${shortId(u.id)}`)
         .join("\n")}`;
     if (pros.length)
       text += `\n\n⭐ Pros (${pros.length}):\n${pros
         .slice(0, 5)
-        .map(
-          (p: any) => `  • ${p.fullName || "Anonymous"} ${fmtRating(p.ratingAvg, p.ratingCount)}`
-        )
+        .map((p) => `  • ${p.fullName || "Anonymous"} ${fmtRating(p.ratingAvg, p.ratingCount)}`)
         .join("\n")}`;
     if (!needs.length && !users.length && !pros.length) text += "\n  No results found.";
     ctx.addSys(text, "info");
@@ -119,15 +127,15 @@ export async function handleSearch(ctx: HandlerContext): Promise<HandlerResult> 
 
 export async function handlePros(ctx: HandlerContext): Promise<HandlerResult> {
   try {
-    const data = await apiGet("/api/v1/pros");
-    const pros = Array.isArray(data) ? data : data.pros || [];
+    const data = await apiGet<ApiProSummary[]>("/api/v1/pros");
+    const pros = asKeyedArray<ApiProSummary>(data, "pros");
     if (!pros.length) {
       ctx.addSys("No verified pros yet.", "info");
       return { handled: true };
     }
     const rows = pros
       .slice(0, 15)
-      .map((p: any) => [
+      .map((p) => [
         shortId(p.id),
         p.fullName || "Anonymous",
         fmtRating(p.ratingAvg, p.ratingCount),
@@ -150,13 +158,15 @@ export async function handleUsers(ctx: HandlerContext): Promise<HandlerResult> {
     return { handled: true };
   }
   try {
-    const data = await apiGet(`/api/v1/terminal/users/search?q=${encodeURIComponent(query)}`);
+    const data = await apiGet<ApiUsersSearchResponse>(
+      `/api/v1/terminal/users/search?q=${encodeURIComponent(query)}`
+    );
     if (!data.users?.length) {
       ctx.addSys(`No one found matching "${query}".`, "error");
       return { handled: true };
     }
     ctx.addSys(
-      `Found ${data.users.length} member(s):\n${data.users.map((u: any, i: number) => `  ${i + 1}. ${u.fullName || "Anonymous"}${u.locationName ? ` — ${u.locationName}` : ""}  →  ${u.id}`).join("\n")}`,
+      `Found ${data.users.length} member(s):\n${data.users.map((u, i) => `  ${i + 1}. ${u.fullName || "Anonymous"}${u.locationName ? ` — ${u.locationName}` : ""}  →  ${u.id}`).join("\n")}`,
       "info"
     );
   } catch (err) {
@@ -188,7 +198,9 @@ export async function handleProfileView(ctx: HandlerContext): Promise<HandlerRes
     return { handled: true };
   }
   try {
-    const data = await apiGet(`/api/v1/terminal/users/search?q=${encodeURIComponent(target)}`);
+    const data = await apiGet<ApiUsersSearchResponse>(
+      `/api/v1/terminal/users/search?q=${encodeURIComponent(target)}`
+    );
     if (!data.users?.length) {
       ctx.addSys(
         `No one found matching "${target}".\n` +
@@ -207,7 +219,7 @@ export async function handleProfileView(ctx: HandlerContext): Promise<HandlerRes
       return { handled: true };
     }
     ctx.addSys(
-      `Multiple matches:\n${data.users.map((u: any, i: number) => `  ${i + 1}. ${u.fullName || "Anonymous"}`).join("\n")}`,
+      `Multiple matches:\n${data.users.map((u, i) => `  ${i + 1}. ${u.fullName || "Anonymous"}`).join("\n")}`,
       "info"
     );
   } catch (err) {
@@ -235,14 +247,16 @@ export async function handleFriend(ctx: HandlerContext): Promise<HandlerResult> 
     return { handled: true };
   }
   try {
-    const search = await apiGet(`/api/v1/terminal/users/search?q=${encodeURIComponent(target)}`);
+    const search = await apiGet<ApiUsersSearchResponse>(
+      `/api/v1/terminal/users/search?q=${encodeURIComponent(target)}`
+    );
     if (!search.users?.length) {
       ctx.addSys(`No one found matching "${target}".`, "error");
       return { handled: true };
     }
     if (search.users.length > 1) {
       ctx.addSys(
-        `Multiple matches:\n${search.users.map((u: any, i: number) => `  ${i + 1}. ${u.fullName || "Anonymous"}`).join("\n")}`,
+        `Multiple matches:\n${search.users.map((u, i) => `  ${i + 1}. ${u.fullName || "Anonymous"}`).join("\n")}`,
         "info"
       );
       return { handled: true };
@@ -262,8 +276,8 @@ export async function handleUnfriend(ctx: HandlerContext): Promise<HandlerResult
     return { handled: true };
   }
   try {
-    const list = await apiGet("/api/v1/terminal/friends");
-    const match = list.friends?.find((f: any) =>
+    const list = await apiGet<ApiFriendsResponse>("/api/v1/terminal/friends");
+    const match = list.friends?.find((f) =>
       (f.user.fullName || "").toLowerCase().includes(target.toLowerCase())
     );
     if (!match) {
@@ -280,13 +294,13 @@ export async function handleUnfriend(ctx: HandlerContext): Promise<HandlerResult
 
 export async function handleFriends(ctx: HandlerContext): Promise<HandlerResult> {
   try {
-    const list = await apiGet("/api/v1/terminal/friends");
+    const list = await apiGet<ApiFriendsResponse>("/api/v1/terminal/friends");
     if (!list.friends?.length) {
       ctx.addSys("No friends yet. Use /friend <username> to add someone.", "info");
       return { handled: true };
     }
     ctx.addSys(
-      `Your friends:\n${list.friends.map((f: any, i: number) => `  ${i + 1}. ${f.user.fullName || "Anonymous"}`).join("\n")}`,
+      `Your friends:\n${list.friends.map((f, i) => `  ${i + 1}. ${f.user.fullName || "Anonymous"}`).join("\n")}`,
       "info"
     );
   } catch (err) {
@@ -302,14 +316,16 @@ export async function handleBlock(ctx: HandlerContext): Promise<HandlerResult> {
     return { handled: true };
   }
   try {
-    const search = await apiGet(`/api/v1/terminal/users/search?q=${encodeURIComponent(target)}`);
+    const search = await apiGet<ApiUsersSearchResponse>(
+      `/api/v1/terminal/users/search?q=${encodeURIComponent(target)}`
+    );
     if (!search.users?.length) {
       ctx.addSys(`No one found matching "${target}".`, "error");
       return { handled: true };
     }
     if (search.users.length > 1) {
       ctx.addSys(
-        `Multiple matches:\n${search.users.map((u: any, i: number) => `  ${i + 1}. ${u.fullName || "Anonymous"}`).join("\n")}`,
+        `Multiple matches:\n${search.users.map((u, i) => `  ${i + 1}. ${u.fullName || "Anonymous"}`).join("\n")}`,
         "info"
       );
       return { handled: true };
@@ -329,8 +345,8 @@ export async function handleUnblock(ctx: HandlerContext): Promise<HandlerResult>
     return { handled: true };
   }
   try {
-    const list = await apiGet("/api/v1/terminal/blocks");
-    const match = list.blocks?.find((b: any) =>
+    const list = await apiGet<ApiBlocksResponse>("/api/v1/terminal/blocks");
+    const match = list.blocks?.find((b) =>
       (b.user.fullName || "").toLowerCase().includes(target.toLowerCase())
     );
     if (!match) {
@@ -347,13 +363,13 @@ export async function handleUnblock(ctx: HandlerContext): Promise<HandlerResult>
 
 export async function handleBlocks(ctx: HandlerContext): Promise<HandlerResult> {
   try {
-    const list = await apiGet("/api/v1/terminal/blocks");
+    const list = await apiGet<ApiBlocksResponse>("/api/v1/terminal/blocks");
     if (!list.blocks?.length) {
       ctx.addSys("You haven't blocked anyone.", "info");
       return { handled: true };
     }
     ctx.addSys(
-      `Blocked users:\n${list.blocks.map((b: any, i: number) => `  ${i + 1}. ${b.user.fullName || "Anonymous"}`).join("\n")}`,
+      `Blocked users:\n${list.blocks.map((b, i) => `  ${i + 1}. ${b.user.fullName || "Anonymous"}`).join("\n")}`,
       "info"
     );
   } catch (err) {
@@ -370,27 +386,24 @@ export async function handleSkillDiscovery(ctx: HandlerContext): Promise<Handler
   }
   try {
     const [needsData, prosData] = await Promise.all([
-      apiGet(`/api/v1/needs?skill=${encodeURIComponent(skill)}&limit=10`),
-      apiGet("/api/v1/pros"),
+      apiGet<ApiNeedsResponse>(`/api/v1/needs?skill=${encodeURIComponent(skill)}&limit=10`),
+      apiGet<ApiProSummary[]>("/api/v1/pros"),
     ]);
-    const needs = needsData.needs || [];
-    const matchingPros = (Array.isArray(prosData) ? prosData : prosData.pros || []).filter(
-      (p: any) =>
-        p.skills?.some((s: any) => (s.name || s).toLowerCase().includes(skill.toLowerCase()))
+    const needs = needsData.needs ?? [];
+    const matchingPros = asKeyedArray<ApiProSummary>(prosData, "pros").filter((p) =>
+      p.skills?.some((s) => s.name.toLowerCase().includes(skill.toLowerCase()))
     );
     let text = `🔍 Skill: "${skill}"\n`;
     if (needs.length)
       text += `\n📋 Matching Needs (${needs.length}):\n${needs
         .slice(0, 8)
-        .map((n: any) => `  • ${truncate(n.title, 36)} — /need ${shortId(n.id)}`)
+        .map((n) => `  • ${truncate(n.title, 36)} — /need ${shortId(n.id)}`)
         .join("\n")}`;
     else text += "\n📋 No matching needs.";
     if (matchingPros.length)
       text += `\n\n⭐ Matching Pros (${matchingPros.length}):\n${matchingPros
         .slice(0, 8)
-        .map(
-          (p: any) => `  • ${p.fullName || "Anonymous"} ${fmtRating(p.ratingAvg, p.ratingCount)}`
-        )
+        .map((p) => `  • ${p.fullName || "Anonymous"} ${fmtRating(p.ratingAvg, p.ratingCount)}`)
         .join("\n")}`;
     ctx.addSys(text, "info");
   } catch (err) {

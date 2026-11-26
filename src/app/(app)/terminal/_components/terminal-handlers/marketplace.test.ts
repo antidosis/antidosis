@@ -1,3 +1,5 @@
+import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
+
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
 import {
@@ -29,17 +31,19 @@ import {
   handlePost,
 } from "./marketplace";
 import type { HandlerContext } from "./types";
+import type { MyProfile } from "./types";
+import type { ActiveContext } from "../terminal-types";
 
 function makeCtx(overrides: Partial<HandlerContext> = {}): HandlerContext {
   return {
     args: [],
-    router: { push: vi.fn() } as any,
-    myProfile: { id: "user-1", fullName: "Test" } as any,
+    router: { push: vi.fn() } as unknown as AppRouterInstance,
+    myProfile: { id: "user-1", fullName: "Test" } as unknown as MyProfile,
     user: { id: "user-1" },
     isAdmin: false,
     channels: [],
     setActiveContext: vi.fn(),
-    activeContext: { type: "none" as any, id: "" },
+    activeContext: { type: "none", id: "" } as unknown as ActiveContext,
     session: {
       version: 2,
       userId: "user-1",
@@ -196,7 +200,11 @@ describe("marketplace handlers", () => {
         }),
       } as Response);
       const ctx = makeCtx({
-        myProfile: { id: "user-1", fullName: "Test", locationName: "Woy Woy" } as any,
+        myProfile: {
+          id: "user-1",
+          fullName: "Test",
+          locationName: "Woy Woy",
+        } as unknown as MyProfile,
       });
       await handleNearby(ctx);
       expect(global.fetch).toHaveBeenCalledWith("/api/v1/needs?location=Woy%20Woy&limit=10");
@@ -710,7 +718,7 @@ describe("marketplace handlers", () => {
           jobsCompleted: 5,
           ratingAvg: 9.5,
           isVerified: true,
-        } as any,
+        } as unknown as MyProfile,
       });
       await handleComplete(ctx);
       expect(ctx.addSys).toHaveBeenCalledWith(expect.stringContaining("New badge"), "success");
@@ -967,7 +975,12 @@ describe("marketplace handlers", () => {
   describe("handleReviews", () => {
     it("shows reputation", async () => {
       const ctx = makeCtx({
-        myProfile: { id: "user-1", ratingAvg: 4.5, ratingCount: 10, jobsCompleted: 5 } as any,
+        myProfile: {
+          id: "user-1",
+          ratingAvg: 4.5,
+          ratingCount: 10,
+          jobsCompleted: 5,
+        } as unknown as MyProfile,
       });
       await handleReviews(ctx);
       expect(ctx.addSys).toHaveBeenCalledWith(expect.stringContaining("Reputation"), "info");
@@ -1030,7 +1043,8 @@ describe("marketplace handlers", () => {
     });
 
     it("submits review for acceptance", async () => {
-      vi.mocked(global.fetch).mockImplementation(async (url: any) => {
+      vi.mocked(global.fetch).mockImplementation(async (input: RequestInfo | URL) => {
+        const url = String(input);
         if (url.includes("/contracts/mine")) {
           return { ok: true, json: async () => ({ contracts: [] }) } as Response;
         }

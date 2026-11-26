@@ -9,6 +9,7 @@ import { hashOtpCode } from "@/lib/otp";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
+import { twilioErrInfo } from "@/lib/twilio-error";
 
 export const dynamic = "force-dynamic";
 
@@ -80,15 +81,18 @@ export const POST = withApiHandler(async (req: NextRequest) => {
         .services(verifyServiceSid)
         .verificationChecks.create({ to: normalizedMobile, code });
       approved = check.status === "approved";
-    } catch (twilioErr: any) {
+    } catch (twilioErr) {
       // 20404 = no pending verification (expired or never sent)
-      if (twilioErr?.code === 20404) {
+      if (twilioErrInfo(twilioErr).code === 20404) {
         return NextResponse.json(
           { error: "Code has expired. Please request a new one." },
           { status: 410 }
         );
       }
-      logger.error("Twilio Verify check failed", twilioErr);
+      logger.error(
+        "Twilio Verify check failed",
+        twilioErr instanceof Error ? twilioErr : undefined
+      );
       return NextResponse.json({ error: "Verification service unavailable" }, { status: 502 });
     }
 

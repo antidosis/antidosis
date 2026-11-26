@@ -5,7 +5,7 @@ import { withApiHandler } from "@/lib/api-handler";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 
-export const GET = withApiHandler(async (req: NextRequest) => {
+export const GET = withApiHandler(async (_req: NextRequest) => {
   const supabase = await createClient();
   const {
     data: { user },

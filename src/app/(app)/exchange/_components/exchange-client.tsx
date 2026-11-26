@@ -83,11 +83,14 @@ function ExchangeClient() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
+  // Sync band from the URL — render-adjust pattern
+  const [bandSyncedFor, setBandSyncedFor] = useState(searchParams);
+  if (bandSyncedFor !== searchParams) {
+    setBandSyncedFor(searchParams);
     const next = parseBand(searchParams.get("band"));
     setBand(next);
     setVisited((current) => ({ ...current, [next]: true }));
-  }, [searchParams]);
+  }
 
   function tune(next: Band) {
     setBand(next);

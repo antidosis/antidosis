@@ -18,6 +18,6 @@ export const defaultConfig: SWRConfiguration = {
   errorRetryCount: 2,
 };
 
-export function useApi<T = any>(key: string | null, config?: SWRConfiguration) {
+export function useApi<T = unknown>(key: string | null, config?: SWRConfiguration) {
   return useSWR<T>(key, { ...defaultConfig, ...config });
 }

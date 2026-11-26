@@ -382,7 +382,6 @@ function StepGuide({
   const [dismissed, setDismissed] = useState(false);
   if (dismissed) return null;
 
-  const myAcceptance = acceptances.find((a) => a.userId === profileId);
   const accepted = acceptances.find((a) => a.status === "accepted" || a.status === "completed");
   const bothSigned = !!currentContract.partyASignedAt && !!currentContract.partyBSignedAt;
   const termsLocked = !!currentContract.termsLockedAt;
@@ -545,6 +544,7 @@ export default function ContractFlowDemoPage() {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- demo state restore from localStorage on mount
         if (parsed.currentUser) setCurrentUser(parsed.currentUser);
         if (typeof parsed.requiresContract === "boolean")
           setRequiresContract(parsed.requiresContract);
@@ -582,13 +582,16 @@ export default function ContractFlowDemoPage() {
     }
   }, []);
 
-  // Sync draft state when switching users so each party sees their own terms/checkbox
-  useEffect(() => {
+  // Sync draft state when switching users — render-adjust pattern so each
+  // party sees their own terms/checkbox
+  const draftSyncKey = `${currentUser}:${selectedAcceptanceId ?? ""}`;
+  const [draftSyncedFor, setDraftSyncedFor] = useState(draftSyncKey);
+  if (draftSyncedFor !== draftSyncKey) {
+    setDraftSyncedFor(draftSyncKey);
     const c = getContract(selectedAcceptanceId);
     setMyTermsDraft(isPartyA ? c.partyATerms : c.partyBTerms);
     setUseMessageTermsDraft(isPartyA ? c.partyAUseMessageTerms : c.partyBUseMessageTerms);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentUser, selectedAcceptanceId]);
+  }
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -919,31 +922,45 @@ export default function ContractFlowDemoPage() {
     setPosterReviewAccId(null);
   }
 
-  // Lock terms when both parties have agreed
-  useEffect(() => {
-    if (!selectedAcceptanceId) return;
-    const c = contracts[selectedAcceptanceId];
-    if (!c) return;
-    if (c.partyAAgreedAt && c.partyBAgreedAt && !c.termsLockedAt) {
+  // Lock terms when both parties have agreed — render-adjust state transition
+  const [lockAppliedFor, setLockAppliedFor] = useState<string | null>(null);
+  {
+    const c = selectedAcceptanceId ? contracts[selectedAcceptanceId] : null;
+    if (
+      c &&
+      selectedAcceptanceId &&
+      lockAppliedFor !== selectedAcceptanceId &&
+      c.partyAAgreedAt &&
+      c.partyBAgreedAt &&
+      !c.termsLockedAt
+    ) {
+      setLockAppliedFor(selectedAcceptanceId);
       updateContract(selectedAcceptanceId, {
         termsLockedAt: new Date().toISOString(),
         status: "pending_terms",
       });
     }
-  }, [contracts, selectedAcceptanceId]);
+  }
 
-  // Mark contract as completed when both parties have marked complete
-  useEffect(() => {
-    if (!selectedAcceptanceId) return;
-    const c = contracts[selectedAcceptanceId];
-    if (!c) return;
-    if (c.aMarkedComplete && c.bMarkedComplete && c.status !== "completed") {
+  // Mark completed when both parties marked complete — render-adjust transition
+  const [completionAppliedFor, setCompletionAppliedFor] = useState<string | null>(null);
+  {
+    const c = selectedAcceptanceId ? contracts[selectedAcceptanceId] : null;
+    if (
+      c &&
+      selectedAcceptanceId &&
+      completionAppliedFor !== selectedAcceptanceId &&
+      c.aMarkedComplete &&
+      c.bMarkedComplete &&
+      c.status !== "completed"
+    ) {
+      setCompletionAppliedFor(selectedAcceptanceId);
       updateContract(selectedAcceptanceId, {
         status: "completed",
         completedAt: new Date().toISOString(),
       });
     }
-  }, [contracts, selectedAcceptanceId]);
+  }
 
   function sendMessage(e: React.FormEvent) {
     e.preventDefault();

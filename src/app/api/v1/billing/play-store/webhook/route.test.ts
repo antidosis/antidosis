@@ -2,6 +2,8 @@ import { type NextRequest } from "next/server";
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+import type { POST as PostHandler } from "./route";
+
 const mockProfileFindFirst = vi.fn();
 const mockProfileUpdate = vi.fn();
 
@@ -92,7 +94,7 @@ function subNotification(notificationType: number, purchaseToken = "token-abc") 
 }
 
 describe("POST /api/v1/billing/play-store/webhook", () => {
-  let POST: typeof import("./route").POST;
+  let POST: typeof PostHandler;
 
   beforeEach(async () => {
     vi.clearAllMocks();

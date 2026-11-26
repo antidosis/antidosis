@@ -1,9 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
 
+import { logger } from "@/lib/logger";
 import { getStripe } from "@/lib/stripe";
 
 export const dynamic = "force-dynamic";
-import { logger } from "@/lib/logger";
 
 export async function GET(req: NextRequest) {
   try {
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
       customerId: session.customer,
       subscriptionId: session.subscription,
     });
-  } catch (error: any) {
+  } catch (error) {
     logger.error(
       "[API:/api/v1/billing/verify-session]",
       error instanceof Error ? error : undefined

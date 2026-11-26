@@ -1,5 +1,7 @@
 "use client";
 
+import type { ApiUserSummary } from "@/lib/api-types";
+
 import type { HandlerContext, HandlerResult } from "./types";
 
 export async function handleChat(ctx: HandlerContext): Promise<HandlerResult> {
@@ -9,7 +11,7 @@ export async function handleChat(ctx: HandlerContext): Promise<HandlerResult> {
       ctx.addSys("No channels available.", "info");
       return { handled: true };
     }
-    const list = ctx.channels.map((c: any) => `  #${c.name}`).join("\n");
+    const list = ctx.channels.map((c) => `  #${c.name}`).join("\n");
     ctx.addSys(
       `Available channels:\n${list}\n\n` +
         `💡 Type /chat <channel-name> to join one, or click it in the sidebar.`,
@@ -17,19 +19,17 @@ export async function handleChat(ctx: HandlerContext): Promise<HandlerResult> {
     );
     return { handled: true };
   }
-  const channel = ctx.channels.find(
-    (c: any) => c.name?.toLowerCase() === channelName.toLowerCase()
-  );
+  const channel = ctx.channels.find((c) => c.name?.toLowerCase() === channelName.toLowerCase());
   if (channel) {
     ctx.setActiveContext({ type: "channel", id: channel.id, name: channel.name });
     ctx.addSys(`Switched to #${channel.name}`, "success");
   } else {
     const closest = ctx.channels
-      .map((c: any) => ({
+      .map((c) => ({
         name: c.name,
         score: c.name.toLowerCase().includes(channelName.toLowerCase()) ? 1 : 0,
       }))
-      .sort((a: any, b: any) => b.score - a.score)[0];
+      .sort((a, b) => b.score - a.score)[0];
     ctx.addSys(
       `Channel "${channelName}" not found.` +
         (closest ? ` Did you mean #${closest.name}?` : "") +
@@ -54,7 +54,7 @@ export async function handleDm(ctx: HandlerContext): Promise<HandlerResult> {
     const list = threads
       .slice(0, 20)
       .map(
-        (t: any) =>
+        (t) =>
           `  ${t.otherUser.fullName || "User"}${t.unreadCount > 0 ? ` (${t.unreadCount} unread)` : ""} — ${(t.lastMessage?.content || "").slice(0, 40) || "no messages yet"}`
       )
       .join("\n");
@@ -69,7 +69,7 @@ export async function handleDm(ctx: HandlerContext): Promise<HandlerResult> {
     const lastUser = ctx.session.lastViewed?.userId;
     if (lastUser) {
       // Re-open last DM
-      const thread = ctx.dmThreads.find((t: any) => t.otherUser.id === lastUser);
+      const thread = ctx.dmThreads.find((t) => t.otherUser.id === lastUser);
       if (thread) {
         ctx.setActiveContext({
           type: "dm",
@@ -84,7 +84,7 @@ export async function handleDm(ctx: HandlerContext): Promise<HandlerResult> {
     const online = ctx.onlineUsers.slice(0, 5);
     let hint = `Usage: /dm <name-or-id> [message]\n\n`;
     if (online.length > 0) {
-      hint += `Online now:\n${online.map((u: any) => `  ${u.fullName || u.id}`).join("\n")}\n\n`;
+      hint += `Online now:\n${online.map((u) => `  ${u.fullName || u.id}`).join("\n")}\n\n`;
     }
     hint += `💡 Type /dm <name> to start a conversation, or click a user in the sidebar.`;
     ctx.addSys(hint, "info");
@@ -97,7 +97,7 @@ export async function handleDm(ctx: HandlerContext): Promise<HandlerResult> {
   const q = recipient.replace(/^@/, "").toLowerCase();
   try {
     const res = await fetch(`/api/v1/profiles/search?q=${encodeURIComponent(q)}&limit=10`);
-    const data = await res.json();
+    const data = (await res.json()) as { profiles?: ApiUserSummary[] };
     if (!res.ok || !data.profiles?.length) {
       ctx.addSys(`No users found matching "${recipient}".`, "error");
       return { handled: true };
@@ -142,8 +142,7 @@ export async function handleDm(ctx: HandlerContext): Promise<HandlerResult> {
           data.profiles
             .slice(0, 8)
             .map(
-              (p: any, i: number) =>
-                `${i + 1}. ${p.fullName || "Unknown"} (${p.locationName || "No location"})`
+              (p, i) => `${i + 1}. ${p.fullName || "Unknown"} (${p.locationName || "No location"})`
             )
             .join("\n") +
           `\n\nReply with a number to choose.`,

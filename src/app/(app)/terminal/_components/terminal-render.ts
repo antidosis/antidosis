@@ -83,9 +83,7 @@ export function getThemeColors(name: string): ThemeColors {
   return THEMES[name] || THEMES.default;
 }
 
-// ─── Sparklines ──────────────────────────────────────────────
-
-export function sparkline(values: number[], width = 20): string {
+export function sparkline(values: number[]): string {
   if (values.length === 0) return "(no data)";
   const blocks = ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"];
   const min = Math.min(...values);
@@ -227,7 +225,7 @@ export function fmtStatus(status: string): string {
   return map[status.toLowerCase()] || `⚪ ${status}`;
 }
 
-export function fmtExchangeMode(value: string | null): string {
+export function fmtExchangeMode(value: string | null | undefined): string {
   const mode = getExchangeMode(value);
   if (!mode) return "—";
   return `${mode.color} ${mode.label}`;

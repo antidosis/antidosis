@@ -2,6 +2,8 @@ import { type NextRequest } from "next/server";
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+import type { POST as PostHandler } from "./route";
+
 // Mocks must be declared before dynamic imports so they are hoisted by vitest
 const mockProfileFindUnique = vi.fn();
 const mockProfileFindFirst = vi.fn();
@@ -50,7 +52,7 @@ function makeRequest(body: string, signature?: string): NextRequest {
 }
 
 describe("POST /api/v1/billing/webhook", () => {
-  let POST: typeof import("./route").POST;
+  let POST: typeof PostHandler;
 
   beforeEach(async () => {
     vi.clearAllMocks();

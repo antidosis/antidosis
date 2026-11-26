@@ -8,29 +8,6 @@ import { bucketForPath } from "@/lib/storage";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 
-const ALLOWED_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/gif",
-  "audio/webm",
-  "audio/ogg",
-  "audio/wav",
-  "audio/mpeg",
-  "audio/mp3",
-];
-const ALLOWED_EXTENSIONS = [
-  "jpg",
-  "jpeg",
-  "png",
-  "webp",
-  "gif",
-  "webm",
-  "ogg",
-  "wav",
-  "mp3",
-  "mpeg",
-];
 const MAX_SIZE = 10 * 1024 * 1024; // 10MB
 
 function sanitizeFolder(input: string): string {

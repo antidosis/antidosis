@@ -23,7 +23,7 @@ vi.mock("@/lib/prisma", () => ({
       findFirst: (...args: unknown[]) => mockFindFirst(...args),
       update: (...args: unknown[]) => mockUpdateCode(...args),
     },
-    $transaction: (args: any) => mockTransaction(args),
+    $transaction: (args: unknown) => mockTransaction(args),
   },
 }));
 
