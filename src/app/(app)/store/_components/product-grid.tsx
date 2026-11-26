@@ -49,16 +49,6 @@ export const CATEGORY_LABEL: Record<StoreCategory, string> = {
 
 const FLAGSHIP: StoreItem[] = [
   {
-    key: "antidosis-node",
-    art: "node",
-    category: "node",
-    name: "The Antidosis Node",
-    line: "Turn it on — you're on the mesh. Ready out of the box.",
-    price: "Pilot pricing soon",
-    status: { label: "coming soon", tone: "text-sun" },
-    notifyKind: "node",
-  },
-  {
     key: "home-base",
     art: "base",
     category: "gateway",
