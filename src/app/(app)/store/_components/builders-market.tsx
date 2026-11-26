@@ -4,15 +4,7 @@ import { useEffect, useState } from "react";
 
 import Link from "next/link";
 
-import {
-  BadgeCheck,
-  ExternalLink,
-  Loader2,
-  MapPin,
-  PackageOpen,
-  Store,
-  Wrench,
-} from "lucide-react";
+import { BadgeCheck, ExternalLink, Loader2, MapPin, PackageOpen, Wrench } from "lucide-react";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -55,12 +47,12 @@ export function formatAud(cents: number | null): string {
 
 function BuilderCard({ builder }: { builder: PublicMeshBuilder }) {
   return (
-    <article className="vessel p-5 md:p-6">
+    <article className="rounded-lg border border-line/70 bg-void/40 p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           <Avatar src={builder.profile.avatarUrl} name={builder.businessName} size="lg" />
           <div>
-            <h3 className="flex items-center gap-1.5 text-lg font-medium text-gold">
+            <h3 className="flex items-center gap-1.5 text-base font-medium text-gold">
               {builder.businessName}
               {builder.profile.isVerified && (
                 <BadgeCheck className="h-4 w-4 text-mercury" aria-label="Verified member" />
@@ -97,21 +89,39 @@ function BuilderCard({ builder }: { builder: PublicMeshBuilder }) {
           verified builder
         </Badge>
       </div>
-
-      <p className="mt-3 text-[15px] leading-relaxed text-parchment">{builder.description}</p>
-
-      {builder.products.length > 0 ? (
-        <p className="mt-3 flex items-center gap-2 text-sm text-ash">
-          <PackageOpen className="h-4 w-4 text-sun" />
-          {builder.products.length} product{builder.products.length === 1 ? "" : "s"} on the shelf
-          above
-        </p>
-      ) : (
-        <p className="mt-3 flex items-center gap-2 rounded-md border border-dashed border-line px-4 py-3 text-sm text-ash">
-          <PackageOpen className="h-4 w-4" /> Shelf being stocked — products coming soon.
-        </p>
-      )}
+      <p className="mt-3 text-sm leading-relaxed text-parchment">{builder.description}</p>
+      <p className="mt-2 flex items-center gap-2 text-xs text-ash">
+        <PackageOpen className="h-3.5 w-3.5 text-sun" />
+        {builder.products.length > 0
+          ? `${builder.products.length} product${builder.products.length === 1 ? "" : "s"} on the floor`
+          : "Shelf being stocked — products coming soon"}
+      </p>
     </article>
+  );
+}
+
+/** The sellers directory — every verified builder with a stall in the store. */
+export function SellersList({ builders }: { builders: PublicMeshBuilder[] | null }) {
+  if (builders === null) {
+    return (
+      <p className="flex items-center justify-center gap-2 py-8 text-sm text-ash">
+        <Loader2 className="h-4 w-4 animate-spin" /> loading sellers…
+      </p>
+    );
+  }
+  if (builders.length === 0) {
+    return (
+      <p className="rounded-lg border border-dashed border-line px-4 py-8 text-center text-sm text-ash">
+        No sellers yet — the first verified builders are being reviewed now.
+      </p>
+    );
+  }
+  return (
+    <div className="space-y-3">
+      {builders.map((builder) => (
+        <BuilderCard key={builder.id} builder={builder} />
+      ))}
+    </div>
   );
 }
 
@@ -154,11 +164,8 @@ function ApplicationForm({ onApplied }: { onApplied: () => void }) {
   }
 
   return (
-    <form onSubmit={submit} className="rounded-lg border border-sun/25 bg-sun/[0.03] p-5 md:p-6">
-      <h3 className="flex items-center gap-2 text-lg font-medium text-gold">
-        <Wrench className="h-5 w-5 text-sun" /> Sell your nodes here
-      </h3>
-      <p className="mt-1.5 text-sm leading-relaxed text-ash">
+    <form onSubmit={submit}>
+      <p className="text-sm leading-relaxed text-ash">
         Approved builders get a public shelf in this store and manage it from their dashboard. We
         review manually — hardware, range tests, buyer support.
       </p>
@@ -217,6 +224,7 @@ function ApplicationForm({ onApplied }: { onApplied: () => void }) {
       {error && <p className="mt-3 text-sm text-bad">{error}</p>}
       <Button type="submit" className="mt-4" disabled={sending || description.trim().length < 40}>
         {sending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        <Wrench className="mr-2 h-4 w-4" />
         Apply as a builder
       </Button>
     </form>
@@ -226,17 +234,10 @@ function ApplicationForm({ onApplied }: { onApplied: () => void }) {
 type BuilderSession = "loading" | "anon" | "none" | "applied";
 
 /**
- * The builders marketplace. The builders list itself is fetched once by the
- * store page and shared with the shelf; this component renders the stalls
- * and owns the application path (login-gated — products need an owner).
+ * The sell flow, session-aware: anonymous visitors get a sign-in prompt,
+ * members get the application form, existing builders get a dashboard link.
  */
-export function BuildersMarket({
-  builders,
-  onApplied,
-}: {
-  builders: PublicMeshBuilder[] | null;
-  onApplied: () => void;
-}) {
+export function SellPanel({ onApplied }: { onApplied: () => void }) {
   const [session, setSession] = useState<BuilderSession>("loading");
 
   useEffect(() => {
@@ -263,65 +264,45 @@ export function BuildersMarket({
     })();
   }, []);
 
-  return (
-    <div>
-      {builders === null ? (
-        <div className="vessel flex items-center justify-center gap-2 p-10 text-sm text-ash">
-          <Loader2 className="h-4 w-4 animate-spin" /> loading builders…
-        </div>
-      ) : builders.length === 0 ? (
-        <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
-          {[0, 1].map((i) => (
-            <div
-              key={i}
-              className="flex flex-col items-center justify-center rounded-lg border border-dashed border-line/80 px-6 py-10 text-center"
-            >
-              <Store className="h-7 w-7 text-ash/60" />
-              <p className="mt-3 text-base font-medium text-parchment">This stall could be yours</p>
-              <p className="mt-1 text-sm text-ash">
-                The first verified builders are being reviewed now.
-              </p>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="space-y-5">
-          {builders.map((builder) => (
-            <BuilderCard key={builder.id} builder={builder} />
-          ))}
-        </div>
-      )}
-
-      <div className="mt-6">
-        {session === "loading" ? null : session === "anon" ? (
-          <div className="rounded-lg border border-line bg-surface/40 p-5 md:p-6">
-            <h3 className="text-lg font-medium text-gold">Build nodes? Join the shelf.</h3>
-            <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-ash">
-              Sign in (or create a free account and verify your mobile) to apply.
-            </p>
-            <Button asChild className="mt-4">
-              <Link href="/login?next=/store%23builders">Sign in to apply</Link>
-            </Button>
-          </div>
-        ) : session === "applied" ? (
-          <div className="rounded-lg border border-ok/25 bg-ok/[0.04] p-5 md:p-6">
-            <h3 className="text-lg font-medium text-gold">You have a builder record</h3>
-            <p className="mt-1.5 text-sm leading-relaxed text-ash">
-              Track your application and manage your shelf from your dashboard.
-            </p>
-            <Button asChild variant="secondary" className="mt-4">
-              <Link href="/dashboard?tab=mesh-store">Open Mesh store in dashboard</Link>
-            </Button>
-          </div>
-        ) : (
-          <ApplicationForm
-            onApplied={() => {
-              setSession("applied");
-              onApplied();
-            }}
-          />
-        )}
+  if (session === "loading") {
+    return (
+      <p className="flex items-center justify-center gap-2 py-8 text-sm text-ash">
+        <Loader2 className="h-4 w-4 animate-spin" /> checking your account…
+      </p>
+    );
+  }
+  if (session === "anon") {
+    return (
+      <div>
+        <p className="text-sm leading-relaxed text-ash">
+          Build nodes? Sell them here. Applications are tied to a verified account — sign in (or
+          create a free account and verify your mobile) to apply.
+        </p>
+        <Button asChild className="mt-4">
+          <Link href="/login?next=/store">Sign in to apply</Link>
+        </Button>
       </div>
-    </div>
+    );
+  }
+  if (session === "applied") {
+    return (
+      <div>
+        <p className="text-sm leading-relaxed text-ash">
+          You have a builder record. Track your application and manage your shelf from your
+          dashboard.
+        </p>
+        <Button asChild variant="secondary" className="mt-4">
+          <Link href="/dashboard?tab=mesh-store">Open Mesh store in dashboard</Link>
+        </Button>
+      </div>
+    );
+  }
+  return (
+    <ApplicationForm
+      onApplied={() => {
+        setSession("applied");
+        onApplied();
+      }}
+    />
   );
 }

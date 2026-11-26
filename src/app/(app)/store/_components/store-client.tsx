@@ -4,20 +4,25 @@ import { useCallback, useEffect, useState } from "react";
 
 import Link from "next/link";
 
-import { ArrowRight, Package, Power, Radio, RadioTower } from "lucide-react";
+import { ArrowRight, Package, Power, RadioTower } from "lucide-react";
 
+import { SellPanel, SellersList } from "./builders-market";
 import type { PublicMeshBuilder } from "./builders-market";
-import { BuildersMarket } from "./builders-market";
-import type { InterestKind } from "./interest-form";
 import { InterestForm } from "./interest-form";
+import type { InterestKind } from "./interest-form";
 import { MeshVisual } from "./mesh-visual";
-import { Shelf } from "./shelf";
+import { ProductArt } from "./product-art";
+import type { ProductArtVariant } from "./product-art";
+import { buildStoreItems } from "./product-grid";
+import { Shop } from "./shop";
+import type { StoreFilter, StorePopup } from "./shop";
+import { StoreModal } from "./store-modal";
 
-const STEPS = [
+const HOW_STEPS = [
   {
     icon: Package,
     title: "Get a node",
-    body: "One small device from the shelf — or any Meshtastic device you already own.",
+    body: "One small device from the floor — or any Meshtastic device you already own.",
   },
   {
     icon: Power,
@@ -31,44 +36,51 @@ const STEPS = [
   },
 ];
 
+const DEPARTMENTS: { id: StoreFilter; art: ProductArtVariant; label: string }[] = [
+  { id: "node", art: "node", label: "Nodes" },
+  { id: "gateway", art: "base", label: "Home bases" },
+  { id: "kit", art: "kit", label: "Field kits" },
+];
+
 /**
- * The mesh store. One job: show everyday people that off-grid comms is a
- * simple product they can get — a shelf of things, three steps, and a
- * marketplace of local builders. The technical depth lives in docs and in
- * the dashboard, not here.
+ * The mesh store. The banner is the shopfront window; below it, department
+ * tiles filter a framed shop floor. Everything informational — how it works,
+ * channel access, sellers, selling, the mailing list — lives in popups, so
+ * the page itself is just the store.
  */
 export function StoreClient() {
-  const [interestKind, setInterestKind] = useState<InterestKind>("node");
   const [builders, setBuilders] = useState<PublicMeshBuilder[] | null>(null);
+  const [filter, setFilter] = useState<StoreFilter>("all");
+  const [popup, setPopup] = useState<StorePopup | null>(null);
+  const [interestKind, setInterestKind] = useState<InterestKind>("node");
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch("/api/v1/store/builders");
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        setBuilders(data.builders ?? []);
-      } catch {
-        setBuilders([]);
-      }
-    })();
-  }, []);
-
-  const refreshBuilders = useCallback(async () => {
+  const loadBuilders = useCallback(async () => {
     try {
       const res = await fetch("/api/v1/store/builders");
       if (!res.ok) throw new Error();
       const data = await res.json();
       setBuilders(data.builders ?? []);
     } catch {
-      /* keep last good list */
+      setBuilders((current) => current ?? []);
     }
   }, []);
 
-  function goToInterest(kind: InterestKind) {
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- initial data fetch on mount; setState lives inside the async loader
+    void loadBuilders();
+  }, [loadBuilders]);
+
+  function openInterest(kind: InterestKind) {
     setInterestKind(kind);
-    document.getElementById("interest")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setPopup("list");
   }
+
+  function pickDepartment(id: StoreFilter) {
+    setFilter((current) => (current === id ? "all" : id));
+    document.getElementById("shop")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  const items = buildStoreItems(builders);
 
   return (
     <div className="chapter scene-mesh">
@@ -87,108 +99,122 @@ export function StoreClient() {
               <p className="mt-3 max-w-md text-sm text-ash md:text-base">
                 Every dot is a neighbour. Every line is a message finding its way home.
               </p>
-              <div className="pointer-events-auto mt-6 flex flex-wrap items-center justify-center gap-3">
+              <div className="pointer-events-auto mt-6">
                 <a
-                  href="#shelf"
+                  href="#shop"
                   className="inline-flex items-center gap-2 rounded bg-sun px-5 py-2.5 text-[15px] font-medium text-void transition-colors hover:bg-sunhi"
                 >
-                  <Package className="h-4 w-4" /> Browse the shelf
-                </a>
-                <a
-                  href="#how"
-                  className="inline-flex items-center gap-2 rounded border border-line bg-void/40 px-5 py-2.5 text-[15px] text-parchment backdrop-blur-sm transition-colors hover:border-sun/40 hover:text-sun"
-                >
-                  How it works <ArrowRight className="h-4 w-4" />
+                  Enter the store <ArrowRight className="h-4 w-4" />
                 </a>
               </div>
             </div>
           </div>
         </div>
 
-        {/* ── The shelf ── */}
-        <section id="shelf" className="scroll-mt-24 pt-14">
-          <div className="mb-8 text-center">
-            <h2 className="heading-display text-2xl text-gold md:text-3xl">The shelf</h2>
-            <p className="mx-auto mt-2 max-w-md text-base text-ash">
-              One small device. No SIM, no Wi-Fi, no internet needed.
-            </p>
-          </div>
-          <Shelf builders={builders} onNotify={goToInterest} />
-        </section>
-
-        {/* ── How it works ── */}
-        <section id="how" className="scroll-mt-24 pt-16">
-          <div className="mb-8 text-center">
-            <h2 className="heading-display text-2xl text-gold md:text-3xl">
-              If you can pair headphones, you can do this
-            </h2>
-          </div>
-          <div className="grid grid-cols-3 gap-3 md:gap-4">
-            {STEPS.map((step, i) => (
-              <div key={step.title} className="vessel p-4 text-center sm:p-6">
-                <p className="heading-display text-2xl text-sun/40 sm:text-3xl">0{i + 1}</p>
-                <step.icon className="mx-auto mt-2 h-6 w-6 text-sun sm:h-7 sm:w-7" />
-                <h3 className="mt-3 text-base font-medium text-gold sm:text-lg">{step.title}</h3>
-                <p className="mx-auto mt-1.5 max-w-[26ch] text-sm leading-snug text-ash sm:text-[15px]">
-                  {step.body}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          {/* BYO strip */}
-          <div className="mt-6 flex flex-col items-center justify-between gap-4 rounded-lg border border-mercury/25 bg-mercury/[0.04] p-5 sm:flex-row sm:p-6">
-            <div className="flex items-start gap-3">
-              <Radio className="mt-0.5 h-5 w-5 shrink-0 text-mercury" />
-              <p className="text-[15px] leading-relaxed text-parchment">
-                <span className="font-medium text-gold">Already have a device?</span> Any
-                Meshtastic-compatible node joins the antidosis channel — five-minute setup, no
-                firmware changes.
-              </p>
-            </div>
+        {/* Department tiles — filters, three-up on every screen */}
+        <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
+          {DEPARTMENTS.map((dept) => (
             <button
+              key={dept.id}
               type="button"
-              onClick={() => goToInterest("byo_device")}
-              className="shrink-0 rounded border border-mercury/40 px-4 py-2 text-[15px] font-medium text-mercury transition-colors hover:bg-mercury/10"
+              onClick={() => pickDepartment(dept.id)}
+              aria-pressed={filter === dept.id}
+              className={`vessel group flex flex-col items-center px-2 py-3 transition-colors sm:py-4 ${
+                filter === dept.id ? "border-sun/50 bg-sun/[0.05]" : "hover:border-sun/25"
+              }`}
             >
-              Get channel access
+              <ProductArt
+                variant={dept.art}
+                className="h-14 w-full max-w-[110px] transition-transform duration-300 group-hover:scale-105 sm:h-16"
+              />
+              <span
+                className={`mt-1 text-[13px] font-medium sm:text-[15px] ${
+                  filter === dept.id ? "text-sun" : "text-gold"
+                }`}
+              >
+                {dept.label}
+              </span>
             </button>
-          </div>
-        </section>
+          ))}
+        </div>
 
-        {/* ── Builders ── */}
-        <section id="builders" className="scroll-mt-24 pt-16">
-          <div className="mb-8 text-center">
-            <h2 className="heading-display text-2xl text-gold md:text-3xl">Built by locals</h2>
-            <p className="mx-auto mt-2 max-w-md text-base text-ash">
-              Verified makers sell their nodes here. Buy from them — or become one.
-            </p>
-          </div>
-          <BuildersMarket builders={builders} onApplied={refreshBuilders} />
-        </section>
-
-        {/* ── Interest ── */}
-        <section id="interest" className="scroll-mt-24 pt-16">
-          <div className="mb-8 text-center">
-            <h2 className="heading-display text-2xl text-gold md:text-3xl">Get on the list</h2>
-            <p className="mx-auto mt-2 max-w-md text-base text-ash">
-              Launch pricing, channel access, pilot news — leave an email, done.
-            </p>
-          </div>
-          <InterestForm key={interestKind} initialKind={interestKind} />
-        </section>
+        {/* The shop */}
+        <div id="shop" className="mt-6 scroll-mt-24">
+          <Shop
+            builders={builders}
+            items={items}
+            filter={filter}
+            onFilterChange={setFilter}
+            onNotify={openInterest}
+            onOpenPopup={setPopup}
+          />
+        </div>
 
         {/* Fine print */}
-        <p className="mt-14 border-t border-line/60 pt-6 text-sm leading-relaxed text-ash/70">
-          915–928 MHz ISM operation in Australia is licence-free under ACMA LIPD class conditions.
-          Antidosis is not the seller of builder-listed products — pricing, warranty and delivery
-          are between you and the builder.{" "}
+        <p className="mt-10 text-center text-sm leading-relaxed text-ash/70">
+          915–928 MHz ISM in Australia is licence-free under ACMA LIPD class conditions. Antidosis
+          is not the seller of builder-listed products — pricing, warranty and delivery are between
+          you and the builder.{" "}
           <Link href="/safety" className="underline-offset-4 hover:text-gold hover:underline">
             How we keep the platform safe
           </Link>
           .
         </p>
       </div>
+
+      {/* Popups — everything informational lives here */}
+      {popup === "how" && (
+        <StoreModal title="How it works" onClose={() => setPopup(null)}>
+          <div className="space-y-4">
+            {HOW_STEPS.map((step, i) => (
+              <div key={step.title} className="flex items-start gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-sun/30 bg-sun/[0.06]">
+                  <step.icon className="h-5 w-5 text-sun" />
+                </div>
+                <div>
+                  <p className="text-[15px] font-medium text-gold">
+                    <span className="mr-1.5 font-mono text-xs text-sun/60">0{i + 1}</span>
+                    {step.title}
+                  </p>
+                  <p className="mt-0.5 text-sm leading-relaxed text-ash">{step.body}</p>
+                </div>
+              </div>
+            ))}
+            <p className="border-t border-line/50 pt-3 text-sm text-ash">
+              If you can pair Bluetooth headphones, you can do this. Full setup guide ships with
+              every node.
+            </p>
+          </div>
+        </StoreModal>
+      )}
+
+      {popup === "byo" && (
+        <StoreModal title="Already have a device?" onClose={() => setPopup(null)}>
+          <p className="mb-4 text-sm leading-relaxed text-ash">
+            Any Meshtastic-compatible node joins the antidosis channel — five-minute setup, no
+            firmware changes. Tell us your model and we&apos;ll send channel access.
+          </p>
+          <InterestForm key="byo" initialKind="byo_device" />
+        </StoreModal>
+      )}
+
+      {popup === "sellers" && (
+        <StoreModal title="Verified sellers" onClose={() => setPopup(null)} wide>
+          <SellersList builders={builders} />
+        </StoreModal>
+      )}
+
+      {popup === "sell" && (
+        <StoreModal title="Sell in this store" onClose={() => setPopup(null)} wide>
+          <SellPanel onApplied={loadBuilders} />
+        </StoreModal>
+      )}
+
+      {popup === "list" && (
+        <StoreModal title="Get on the list" onClose={() => setPopup(null)}>
+          <InterestForm key={interestKind} initialKind={interestKind} />
+        </StoreModal>
+      )}
     </div>
   );
 }
