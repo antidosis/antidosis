@@ -64,11 +64,11 @@ export function IdentitySection({
 
   return (
     <SectionCard tone="identity" title="Identity" description="How you appear to other locals.">
-      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(300px,0.85fr)]">
-        {/* Left — photo, name, verification */}
-        <div>
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.9fr)]">
+        {/* Left — photo + name + badges + handle + phone, stacked dense */}
+        <div className="space-y-4">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1.5">
               <Avatar
                 src={avatarUrl || null}
                 name={fullName || null}
@@ -85,7 +85,7 @@ export function IdentitySection({
                 <button
                   type="button"
                   onClick={() => setValue("avatarUrl", null, { shouldDirty: true })}
-                  className="text-xs text-ash underline-offset-2 transition-colors hover:text-bad hover:underline"
+                  className="text-left text-xs text-ash underline-offset-2 transition-colors hover:text-bad hover:underline"
                 >
                   Remove photo
                 </button>
@@ -127,34 +127,32 @@ export function IdentitySection({
               {nameError && <p className="text-xs text-bad">{nameError}</p>}
             </div>
           </div>
-          <div className="mt-4 border-t border-line/40 pt-3">
-            <VerificationBadges
-              isVerified={isVerified}
-              mobileVerified={mobileVerified}
-              mobile={mobile}
-            />
-          </div>
-        </div>
 
-        {/* Right — profile link, public phone and connection card share one
-            tidy panel so the identity card reads as a single composed unit */}
-        <div className="vessel divide-y divide-line/50 rounded-xl border-sun/20">
-          <div className="p-3.5 sm:p-4">
+          <VerificationBadges
+            isVerified={isVerified}
+            mobileVerified={mobileVerified}
+            mobile={mobile}
+          />
+
+          <div className="border-t border-line/40 pt-4">
             <HandleSection handle={handle} />
           </div>
-          <div className="p-3.5 sm:p-4">
+
+          <div className="border-t border-line/40 pt-4">
             <PublicContactSection
               control={phoneControl}
               mobile={mobile}
               mobileVerified={mobileVerified}
             />
           </div>
-          <div className="p-3.5 sm:p-4">
-            <p className="mb-2.5 font-mono text-[10px] uppercase tracking-[0.2em] text-ash">
-              Invite people to connect
-            </p>
-            <ShareProfileCard profile={shareProfile} />
-          </div>
+        </div>
+
+        {/* Right — the connection card people receive, with its actions */}
+        <div>
+          <p className="mb-2.5 font-mono text-[10px] uppercase tracking-[0.2em] text-ash">
+            Your connection card
+          </p>
+          <ShareProfileCard profile={shareProfile} />
         </div>
       </div>
     </SectionCard>

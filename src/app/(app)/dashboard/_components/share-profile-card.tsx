@@ -120,19 +120,31 @@ export function ShareProfileCard({ profile }: ShareProfileCardProps) {
 
   return (
     <div>
-      <div className="flex items-center gap-3 rounded-lg border border-ok/25 bg-ok/[0.05] p-3">
-        <Avatar
-          src={profile.avatarUrl}
-          name={profile.fullName}
-          size="sm"
-          className="h-9 w-9 shrink-0"
-        />
-        <div className="min-w-0 flex-1">
-          <p className="flex items-center gap-1.5 truncate text-sm font-medium text-parchment">
-            <span className="truncate">{name}</span>
-            {profile.isVerified && <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-ok" />}
-          </p>
-          <p className="truncate font-mono text-[11px] text-ash">{handle} · antidosis.com</p>
+      {/* Visual card preview — the invite people receive */}
+      <div className="relative overflow-hidden rounded-lg border border-line bg-inset/70">
+        <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-sun via-mercury to-transparent" />
+        <div className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full border border-mercury/15" />
+        <div className="pointer-events-none absolute -right-4 -top-4 h-16 w-16 rounded-full border border-mercury/10" />
+        <div className="relative flex items-center gap-3 p-4">
+          <Avatar
+            src={profile.avatarUrl}
+            name={profile.fullName}
+            size="md"
+            className="h-12 w-12 shrink-0 ring-2 ring-sun/25"
+          />
+          <div className="min-w-0 flex-1">
+            <p className="flex items-center gap-1.5 text-sm font-medium text-gold">
+              <span className="truncate">{name}</span>
+              {profile.isVerified && <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-ok" />}
+            </p>
+            <p className="truncate font-mono text-[11px] text-ash">{handle}</p>
+            <p className="mt-0.5 truncate text-[11px] text-mercury">
+              antidosis.com/connect/{profile.handle || profile.id}
+            </p>
+          </div>
+          <span className="shrink-0 rotate-90 font-mono text-[9px] uppercase tracking-[0.25em] text-ash/50 [writing-mode:vertical-rl]">
+            Antidosis
+          </span>
         </div>
       </div>
       <div className="mt-2.5 flex flex-wrap gap-2">
