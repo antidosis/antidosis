@@ -13,6 +13,8 @@ import { useToast } from "@/components/ui/toast";
 import { displayHostname } from "@/lib/security/link-policy";
 import { createClient } from "@/lib/supabase/client";
 
+import { MessageSeller } from "./message-seller";
+
 export type MeshProductListing = {
   id: string;
   name: string;
@@ -102,6 +104,14 @@ function BuilderCard({ builder }: { builder: PublicMeshBuilder }) {
           ? `${builder.products.length} product${builder.products.length === 1 ? "" : "s"} on the floor`
           : "Shelf being stocked — products coming soon"}
       </p>
+      <div className="mt-3">
+        <MessageSeller
+          sellerProfileId={builder.profile.id}
+          sellerName={builder.businessName}
+          defaultMessage={`Hi ${builder.businessName} — I found you through the antidosis mesh store. I'd like to ask about your gear.`}
+          loginPath="/store"
+        />
+      </div>
     </article>
   );
 }

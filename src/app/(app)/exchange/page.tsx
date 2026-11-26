@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import type { Metadata } from "next";
 
 import ExchangePage from "./_components/exchange-client";
@@ -30,5 +32,15 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <ExchangePage />;
+  return (
+    <Suspense
+      fallback={
+        <div className="mx-auto max-w-5xl px-4 py-24 text-center text-sm text-ash">
+          loading the exchange…
+        </div>
+      }
+    >
+      <ExchangePage />
+    </Suspense>
+  );
 }

@@ -37,6 +37,7 @@ const PUBLIC_BUILDER_SELECT = {
       postageAudCents: true,
       localPickup: true,
       paymentTerms: true,
+      highlights: true,
       featuredUntil: true,
     },
   },

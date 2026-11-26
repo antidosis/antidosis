@@ -44,6 +44,7 @@ const PRODUCT = {
   postageNote: "AusPost tracked, ships in 2 business days",
   paymentTerms: ["bank_transfer", "payid"],
   paymentNote: "PayID details shared in chat once agreed",
+  highlights: ["7-day battery", "5 km tested range"],
 };
 
 describe("POST /api/v1/store/products", () => {
@@ -74,6 +75,7 @@ describe("POST /api/v1/store/products", () => {
           postageNote: "AusPost tracked, ships in 2 business days",
           paymentTerms: ["bank_transfer", "payid"],
           paymentNote: "PayID details shared in chat once agreed",
+          highlights: ["7-day battery", "5 km tested range"],
         }),
       })
     );

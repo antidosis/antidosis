@@ -77,6 +77,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
     postageNote: listing.postageNote,
     paymentTerms: listing.paymentTerms,
     paymentNote: listing.paymentNote,
+    highlights: listing.highlights,
     seller: {
       businessName: builder.businessName,
       suburb: builder.suburb,

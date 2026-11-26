@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { Check, X, Eye, EyeOff, Smartphone } from "lucide-react";
+import { Check, X, Eye, EyeOff, Loader2, Smartphone } from "lucide-react";
 
 import { TerminalCursor } from "@/components/effects/terminal-cursor";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,20 @@ import { validatePassword, getPasswordStrength } from "@/lib/security/password";
 import { createClient } from "@/lib/supabase/client";
 
 export default function RegisterPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-void">
+          <Loader2 className="h-8 w-8 animate-spin text-sun" />
+        </div>
+      }
+    >
+      <RegisterContent />
+    </Suspense>
+  );
+}
+
+function RegisterContent() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 import { TerminalCursor } from "@/components/effects/terminal-cursor";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,20 @@ import { safeInternalPath } from "@/lib/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-void">
+          <Loader2 className="h-8 w-8 animate-spin text-sun" />
+        </div>
+      }
+    >
+      <LoginContent />
+    </Suspense>
+  );
+}
+
+function LoginContent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);

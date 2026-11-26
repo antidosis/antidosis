@@ -771,6 +771,8 @@ model MeshProduct {
   // Preset payment terms: bank_transfer | payid | cash_on_pickup | card_checkout
   paymentTerms    String[]  @default([]) @map("payment_terms")
   paymentNote     String?   @map("payment_note")
+  // Optional seller-defined chips, e.g. "7-day battery" · "5 km range" · "915 MHz"
+  highlights      String[]  @default([])
   // Featured placement rental - pinned to the top of the store floor until this time
   featuredUntil   DateTime? @map("featured_until")
   createdAt       DateTime  @default(now()) @map("created_at")

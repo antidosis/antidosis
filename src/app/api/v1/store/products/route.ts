@@ -104,6 +104,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
       postageNote: input.postageNote ? sanitizePlainText(input.postageNote) : null,
       paymentTerms: input.paymentTerms,
       paymentNote: input.paymentNote ? sanitizePlainText(input.paymentNote) : null,
+      highlights: input.highlights.map((chip) => sanitizePlainText(chip)),
     },
   });
 

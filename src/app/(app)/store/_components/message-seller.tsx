@@ -21,21 +21,19 @@ type Session = "loading" | "anon" | "authed";
 export function MessageSeller({
   sellerProfileId,
   sellerName,
-  productName,
-  priceLabel,
-  productPath,
+  defaultMessage,
+  loginPath,
 }: {
   sellerProfileId: string;
   sellerName: string;
-  productName: string;
-  priceLabel: string;
-  productPath: string;
+  /** Pre-filled enquiry the buyer can edit before sending. */
+  defaultMessage: string;
+  /** Where /login returns the buyer after signing in. */
+  loginPath: string;
 }) {
   const [session, setSession] = useState<Session>("loading");
   const [open, setOpen] = useState(false);
-  const [content, setContent] = useState(
-    `Hi ${sellerName} — I'm interested in "${productName}" (${priceLabel}) from your mesh store shelf. Is it still available?`
-  );
+  const [content, setContent] = useState(defaultMessage);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [needsVerify, setNeedsVerify] = useState(false);
@@ -119,7 +117,7 @@ export function MessageSeller({
           side shares personal details.
         </p>
         <Button asChild className="mt-3">
-          <Link href={`/login?next=${encodeURIComponent(productPath)}`}>
+          <Link href={`/login?next=${encodeURIComponent(loginPath)}`}>
             <MessageSquare className="mr-2 h-4 w-4" /> Sign in to message the seller
           </Link>
         </Button>

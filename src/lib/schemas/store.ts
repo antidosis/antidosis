@@ -86,6 +86,8 @@ export const createMeshProductSchema = z
     postageNote: optionalTrimmed(300),
     paymentTerms: z.array(z.enum(meshPaymentTerms)).min(1).max(4),
     paymentNote: optionalTrimmed(300),
+    // Optional seller-defined chips: "7-day battery", "5 km range", …
+    highlights: z.array(z.string().trim().min(1).max(40)).max(6).default([]),
   })
   .superRefine((value, ctx) => {
     if (!value.offerPostage && !value.localPickup) {
@@ -117,6 +119,7 @@ export const updateMeshProductSchema = z.object({
   postageNote: z.string().trim().max(300).nullable().optional(),
   paymentTerms: z.array(z.enum(meshPaymentTerms)).min(1).max(4).optional(),
   paymentNote: z.string().trim().max(300).nullable().optional(),
+  highlights: z.array(z.string().trim().min(1).max(40)).max(6).optional(),
 });
 
 export const reviewMeshBuilderSchema = z

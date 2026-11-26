@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
-import { Mail, RefreshCw, ArrowLeft, Shield } from "lucide-react";
+import { Loader2, Mail, RefreshCw, ArrowLeft, Shield } from "lucide-react";
 
 import { TerminalCursor } from "@/components/effects/terminal-cursor";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,20 @@ import { safeInternalPath } from "@/lib/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function VerifyEmailPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-void">
+          <Loader2 className="h-8 w-8 animate-spin text-sun" />
+        </div>
+      }
+    >
+      <VerifyEmailContent />
+    </Suspense>
+  );
+}
+
+function VerifyEmailContent() {
   const supabase = createClient();
   const searchParams = useSearchParams();
   const redirectTarget = safeInternalPath(searchParams.get("next"));

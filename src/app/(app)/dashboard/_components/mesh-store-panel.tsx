@@ -42,6 +42,7 @@ type MeshProduct = {
   postageNote: string | null;
   paymentTerms: string[];
   paymentNote: string | null;
+  highlights: string[];
 };
 
 type MeshBuilder = {
@@ -120,6 +121,7 @@ type ProductDraft = {
   postageNote: string;
   paymentTerms: string[];
   paymentNote: string;
+  highlights: string[];
 };
 
 const EMPTY_DRAFT: ProductDraft = {
@@ -136,6 +138,7 @@ const EMPTY_DRAFT: ProductDraft = {
   postageNote: "",
   paymentTerms: ["bank_transfer"],
   paymentNote: "",
+  highlights: [],
 };
 
 function draftFromProduct(product: MeshProduct): ProductDraft {
@@ -153,6 +156,7 @@ function draftFromProduct(product: MeshProduct): ProductDraft {
     postageNote: product.postageNote ?? "",
     paymentTerms: product.paymentTerms,
     paymentNote: product.paymentNote ?? "",
+    highlights: product.highlights,
   };
 }
 
@@ -202,10 +206,29 @@ function ProductForm({
   submitLabel: string;
 }) {
   const [draft, setDraft] = useState<ProductDraft>(initial);
+  const [chipInput, setChipInput] = useState("");
   const set = (key: keyof ProductDraft) => (value: string) =>
     setDraft((current) => ({ ...current, [key]: value }));
   const setFlag = (key: "offerPostage" | "localPickup") => (value: boolean) =>
     setDraft((current) => ({ ...current, [key]: value }));
+
+  function addChip() {
+    const chip = chipInput.trim().slice(0, 40);
+    if (!chip) return;
+    setDraft((current) =>
+      current.highlights.includes(chip) || current.highlights.length >= 6
+        ? current
+        : { ...current, highlights: [...current.highlights, chip] }
+    );
+    setChipInput("");
+  }
+
+  function removeChip(chip: string) {
+    setDraft((current) => ({
+      ...current,
+      highlights: current.highlights.filter((value) => value !== chip),
+    }));
+  }
 
   function toggleTerm(term: string) {
     setDraft((current) => ({
@@ -299,6 +322,59 @@ function ProductForm({
             maxLength={1000}
           />
         </label>
+        <div className="block sm:col-span-2">
+          <span className="mb-1.5 block text-sm text-parchment">
+            Highlights{" "}
+            <span className="text-ash/60">(optional — battery life, range, frequency…)</span>
+          </span>
+          {draft.highlights.length > 0 && (
+            <div className="mb-2 flex flex-wrap gap-1.5">
+              {draft.highlights.map((chip) => (
+                <span
+                  key={chip}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-mercury/30 bg-mercury/[0.06] px-2.5 py-1 text-xs text-parchment"
+                >
+                  {chip}
+                  <button
+                    type="button"
+                    onClick={() => removeChip(chip)}
+                    className="text-ash hover:text-bad"
+                    aria-label={`Remove ${chip}`}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={chipInput}
+              onChange={(event) => setChipInput(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  addChip();
+                }
+              }}
+              placeholder="e.g. 7-day battery, 5 km tested range, 915 MHz"
+              className={inputClass}
+              maxLength={40}
+            />
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={addChip}
+              disabled={!chipInput.trim() || draft.highlights.length >= 6}
+            >
+              Add
+            </Button>
+          </div>
+          <span className="mt-1 block text-xs text-ash/60">
+            Up to 6 short chips — the details buyers scan first.
+          </span>
+        </div>
         <label className="block">
           <span className="mb-1.5 block text-sm text-parchment">Price (AUD)</span>
           <input
@@ -572,6 +648,7 @@ export function MeshStorePanel() {
         postageNote: draft.postageNote || null,
         paymentTerms: draft.paymentTerms,
         paymentNote: draft.paymentNote || null,
+        highlights: draft.highlights,
       };
       const res = await fetch(
         productId ? `/api/v1/store/products/${productId}` : "/api/v1/store/products",
@@ -693,6 +770,40 @@ export function MeshStorePanel() {
           </Link>
         )}
       </div>
+
+      {/* How selling works — the ground rules, always visible to approved builders */}
+      {builder.status === "approved" && (
+        <div className="vessel p-5 md:p-6">
+          <h3 className="text-lg font-medium text-gold">How selling works</h3>
+          <ol className="mt-3 grid gap-3 text-sm leading-relaxed text-ash sm:grid-cols-2">
+            <li className="flex gap-2.5">
+              <span className="font-mono text-sun/70">1</span>
+              List your gear with price, delivery options and the payment methods you accept.
+            </li>
+            <li className="flex gap-2.5">
+              <span className="font-mono text-sun/70">2</span>
+              Buyers message you through Relay (it lands in your inbox and notifications) — agree
+              the final price, postage and payment details in chat.
+            </li>
+            <li className="flex gap-2.5">
+              <span className="font-mono text-sun/70">3</span>
+              The buyer pays <span className="text-parchment">you directly</span> — bank transfer,
+              PayID, cash on pickup or your own checkout link. Antidosis never processes the
+              payment, never holds funds, and takes no cut during the pilot.
+            </li>
+            <li className="flex gap-2.5">
+              <span className="font-mono text-sun/70">4</span>
+              Ship it or meet up, then keep your stock status current so buyers aren&apos;t chasing
+              sold items.
+            </li>
+          </ol>
+          <p className="mt-3 rounded-md border border-line/60 bg-inset/40 px-3 py-2 text-xs leading-relaxed text-ash/80">
+            Safety: keep negotiations in Relay so both sides stay protected, never share your
+            PayID/bank details publicly (chat only, once agreed), and report suspicious buyers from
+            their profile.
+          </p>
+        </div>
+      )}
 
       {/* Shelf plan — slots + pricing, always visible */}
       <div className="vessel p-5 md:p-6">
@@ -907,6 +1018,18 @@ export function MeshStorePanel() {
                               className="rounded-full border border-line bg-inset px-2 py-0.5 text-[11px] text-parchment"
                             >
                               {paymentTermLabel(term)}
+                            </span>
+                          ))}
+                        </p>
+                      )}
+                      {product.highlights.length > 0 && (
+                        <p className="mt-1.5 flex flex-wrap gap-1.5">
+                          {product.highlights.map((chip) => (
+                            <span
+                              key={chip}
+                              className="rounded-full border border-mercury/30 bg-mercury/[0.06] px-2 py-0.5 text-[11px] text-parchment"
+                            >
+                              {chip}
                             </span>
                           ))}
                         </p>

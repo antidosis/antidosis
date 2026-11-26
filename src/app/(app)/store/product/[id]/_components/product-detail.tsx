@@ -19,7 +19,7 @@ import { displayHostname } from "@/lib/security/link-policy";
 import { deliverySummary, paymentTermLabel, postageLine } from "@/lib/store-delivery";
 import { cn } from "@/lib/utils";
 
-import { MessageSeller } from "./message-seller";
+import { MessageSeller } from "../../../_components/message-seller";
 import { ProductArt, type ProductArtVariant } from "../../../_components/product-art";
 import { CATEGORY_LABEL, type StoreCategory } from "../../../_components/product-grid";
 
@@ -38,6 +38,7 @@ export type ProductPageData = {
   postageNote: string | null;
   paymentTerms: string[];
   paymentNote: string | null;
+  highlights: string[];
   seller: {
     businessName: string;
     suburb: string | null;
@@ -172,6 +173,22 @@ export function ProductDetail({ product }: { product: ProductPageData }) {
                 </a>
               )}
             </div>
+
+            <ol className="mt-4 space-y-1.5 rounded-lg border border-line/50 bg-inset/30 p-3.5 text-xs leading-relaxed text-ash">
+              <li>
+                <span className="mr-1.5 font-mono text-sun/70">1</span>
+                Message the seller — agree price, postage and payment in chat.
+              </li>
+              <li>
+                <span className="mr-1.5 font-mono text-sun/70">2</span>
+                Pay the seller directly ({product.paymentTerms.map(paymentTermLabel).join(", ")}).
+                Antidosis never processes the payment.
+              </li>
+              <li>
+                <span className="mr-1.5 font-mono text-sun/70">3</span>
+                It ships to you{product.localPickup ? " or you pick it up locally" : ""} — done.
+              </li>
+            </ol>
           </div>
         </div>
 
@@ -184,6 +201,18 @@ export function ProductDetail({ product }: { product: ProductPageData }) {
             <p className="mt-3 whitespace-pre-line text-[15px] leading-relaxed text-parchment">
               {product.description}
             </p>
+            {product.highlights.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {product.highlights.map((chip) => (
+                  <span
+                    key={chip}
+                    className="rounded-full border border-mercury/30 bg-mercury/[0.06] px-3 py-1 text-sm text-parchment"
+                  >
+                    {chip}
+                  </span>
+                ))}
+              </div>
+            )}
             {product.specs && (
               <p className="mt-3 border-t border-line/50 pt-3 text-sm leading-relaxed text-ash">
                 {product.specs}
@@ -255,9 +284,8 @@ function MessageSellerSlot({ product }: { product: ProductPageData }) {
     <MessageSeller
       sellerProfileId={product.seller.profile.id}
       sellerName={product.seller.businessName}
-      productName={product.name}
-      priceLabel={priceLabel(product.priceAudCents)}
-      productPath={`/store/product/${product.id}`}
+      defaultMessage={`Hi ${product.seller.businessName} — I'm interested in "${product.name}" (${priceLabel(product.priceAudCents)}) from your mesh store shelf. Is it still available?`}
+      loginPath={`/store/product/${product.id}`}
     />
   );
 }

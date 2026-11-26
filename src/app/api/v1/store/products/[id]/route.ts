@@ -30,6 +30,7 @@ export const GET = withApiHandler(async (_req: NextRequest, _ctx, { params }: Ro
       postageNote: true,
       paymentTerms: true,
       paymentNote: true,
+      highlights: true,
       createdAt: true,
       builder: {
         select: {
@@ -164,6 +165,9 @@ export const PATCH = withApiHandler(async (req: NextRequest, _ctx, { params }: R
       ...(input.paymentTerms !== undefined && { paymentTerms: input.paymentTerms }),
       ...(input.paymentNote !== undefined && {
         paymentNote: input.paymentNote ? sanitizePlainText(input.paymentNote) : null,
+      }),
+      ...(input.highlights !== undefined && {
+        highlights: input.highlights.map((chip) => sanitizePlainText(chip)),
       }),
     },
   });
