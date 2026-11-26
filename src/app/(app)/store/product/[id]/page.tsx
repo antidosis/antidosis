@@ -32,8 +32,13 @@ async function loadProduct(id: string) {
   return product;
 }
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const product = await loadProduct(params.id);
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const product = await loadProduct(id);
   if (!product) return { title: "Listing unavailable" };
   const price =
     product.priceAudCents === null
@@ -57,8 +62,9 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   };
 }
 
-export default async function ProductPage({ params }: { params: { id: string } }) {
-  const product = await loadProduct(params.id);
+export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const product = await loadProduct(id);
   if (!product) notFound();
 
   const { builder, ...listing } = product;
