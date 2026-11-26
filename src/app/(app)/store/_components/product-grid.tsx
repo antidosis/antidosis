@@ -127,7 +127,7 @@ const STOCK_LABEL: Record<string, { label: string; tone: string }> = {
   out_of_stock: { label: "out of stock", tone: "text-ash" },
 };
 
-/** Flagship concepts are always on the floor; live builder products join them, featured placements first. */
+/** Flagship concepts fill empty departments; once a live listing exists in a category, its placeholder steps aside. Live products lead with featured placements first. */
 export function buildStoreItems(builders: PublicMeshBuilder[] | null): StoreItem[] {
   const live: StoreItem[] = (builders ?? []).flatMap((builder) =>
     builder.products.map((product) => ({
@@ -148,9 +148,11 @@ export function buildStoreItems(builders: PublicMeshBuilder[] | null): StoreItem
       image: product.images?.[0],
     }))
   );
+  const filledCategories = new Set(live.map((item) => item.category));
+  const placeholders = FLAGSHIP.filter((item) => !filledCategories.has(item.category));
   const featured = live.filter((item) => item.featured);
   const standard = live.filter((item) => !item.featured);
-  return [...featured, ...FLAGSHIP, ...standard];
+  return [...featured, ...placeholders, ...standard];
 }
 
 function ProductCard({
@@ -206,7 +208,7 @@ function ProductCard({
           </span>
         </div>
         <h3 className="mt-1.5 text-[15px] font-medium text-gold sm:text-base">{name}</h3>
-        <p className="mt-1 text-sm leading-snug text-ash">{item.line}</p>
+        <p className="mt-1 line-clamp-2 text-sm leading-snug text-ash">{item.line}</p>
         {item.soldByAntidosis ? (
           <p className="mt-1 text-xs font-medium text-sun">
             sold by antidosis
