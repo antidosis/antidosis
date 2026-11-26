@@ -46,6 +46,8 @@ export const updateProfileSchema = z.object({
   publicPhone: z.string().max(50).optional().nullable(),
   privatePhone: z.string().max(50).optional().nullable(),
   businessPhone: z.string().max(50).optional().nullable(),
+  // Trading name for the directory listing — shown instead of the personal name.
+  businessName: z.string().max(100).optional().nullable(),
   // Empty string is treated as "clear the field" — the route normalises it to
   // null after parsing, so allow it through the email check.
   businessEmail: z

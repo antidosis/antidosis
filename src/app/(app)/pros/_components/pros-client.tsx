@@ -178,7 +178,7 @@ export default function ProsDirectoryPage({ embedded = false, initialData }: Pro
               <div className="flex items-start gap-4">
                 <NodeAvatar
                   avatarUrl={pro.avatarUrl}
-                  name={pro.fullName}
+                  name={pro.businessName || pro.fullName}
                   ratingAvg={pro.ratingAvg}
                   ratingCount={pro.ratingCount}
                   accountType={pro.accountType}
@@ -186,7 +186,9 @@ export default function ProsDirectoryPage({ embedded = false, initialData }: Pro
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-base font-bold text-gold">{pro.fullName || "anonymous"}</h3>
+                    <h3 className="text-base font-bold text-gold">
+                      {pro.businessName || pro.fullName || "anonymous"}
+                    </h3>
                     {pro.isVerified && <Shield className="h-4 w-4 text-ok" />}
                     {pro.accountType === "business" && (
                       <span className="inline-flex items-center gap-1 text-[11px] uppercase tracking-wider px-2 py-0.5 rounded border border-sun/40 text-sun bg-sun/5">

@@ -88,11 +88,19 @@ export function SocialLinksSection({
         </ul>
       )}
 
-      <AddLinkRow
-        append={append}
-        defaultPlatform={variant === "business" ? "website" : "instagram"}
-        showVisibility={variant !== "business"}
-      />
+      {fields.length === 0 ? (
+        <AddLinkRow
+          append={append}
+          defaultPlatform={variant === "business" ? "website" : "instagram"}
+          showVisibility={variant !== "business"}
+        />
+      ) : (
+        <AddAnotherLink
+          append={append}
+          defaultPlatform={variant === "business" ? "website" : "instagram"}
+          showVisibility={variant !== "business"}
+        />
+      )}
 
       {showAudience && (
         <div className="mt-5 border-t border-orchid/20 pt-4">
@@ -288,6 +296,39 @@ function AddLinkRow({ append, defaultPlatform, showVisibility }: AddLinkRowProps
         </div>
       </div>
       {error && <p className="mt-2 text-xs text-bad">{error}</p>}
+    </div>
+  );
+}
+
+/** Once links exist the composer tucks away behind a toggle so it doesn't
+    sit there permanently cluttering the section. */
+function AddAnotherLink({ append, defaultPlatform, showVisibility }: AddLinkRowProps) {
+  const [open, setOpen] = useState(false);
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="mt-4 inline-flex items-center gap-1.5 border-t border-line/40 pt-4 text-xs font-medium text-ash transition-colors hover:text-sun"
+      >
+        <Plus className="h-3.5 w-3.5" /> Add another link
+      </button>
+    );
+  }
+  return (
+    <div>
+      <AddLinkRow
+        append={append}
+        defaultPlatform={defaultPlatform}
+        showVisibility={showVisibility}
+      />
+      <button
+        type="button"
+        onClick={() => setOpen(false)}
+        className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-ash transition-colors hover:text-gold"
+      >
+        <X className="h-3.5 w-3.5" /> Close
+      </button>
     </div>
   );
 }

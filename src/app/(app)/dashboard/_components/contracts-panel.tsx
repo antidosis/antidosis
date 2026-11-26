@@ -90,85 +90,150 @@ export function ContractsPanel({
           }
         />
       ) : (
-        <div className="space-y-3">
-          {contracts.map((contract) => {
-            const posterId = contract.partyAId ?? contract.partyA?.id;
-            const isPoster = profileId === posterId;
-            const fulfillerSigned = !!contract.partyBSignedAt;
-            const canCancel =
-              isPoster &&
-              !fulfillerSigned &&
-              (contract.status === "draft" ||
-                contract.status === "pending_terms" ||
-                contract.status === "active");
-            const title =
-              contract.kind === "direct"
-                ? contract.title || "Direct agreement"
-                : contract.need?.title || "Exchange contract";
-            const waitingForInvite = contract.kind === "direct" && !contract.partyBId;
-
-            return (
-              <article
-                key={contract.id}
-                className={cn(
-                  "vessel flex items-center justify-between gap-3 rounded-lg p-5 transition-colors hover:bg-raise/40",
-                  contract.status === "active" || contract.status === "completed"
-                    ? "border-l-2 border-l-ok/40"
-                    : contract.status === "cancelled"
-                      ? "border-l-2 border-l-bad/40"
-                      : "border-l-2 border-l-sun/40"
-                )}
-              >
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="truncate text-base font-medium text-gold">{title}</p>
-                    {contract.kind === "direct" && <Badge variant="outline">Direct</Badge>}
-                  </div>
-                  <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-ash">
-                    <Badge variant={statusBadgeVariant(contract.status)}>{contract.status}</Badge>
-                    <span>
-                      {contract.kind === "direct"
-                        ? isPoster
-                          ? "created by you"
-                          : "invited agreement"
-                        : isPoster
-                          ? "you are the poster"
-                          : "you are the fulfiller"}
-                    </span>
-                    {waitingForInvite && (
-                      <span className="text-sun">waiting for invite acceptance</span>
-                    )}
-                    {canCancel && !waitingForInvite && <span>waiting for signature</span>}
-                  </div>
-                </div>
-                <div className="flex shrink-0 items-center gap-1">
-                  {canCancel && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleCancelContract(contract)}
-                      disabled={cancellingId === contract.id}
-                      className="text-bad hover:bg-bad/10 hover:text-bad"
-                      aria-label={`Cancel ${title}`}
-                    >
-                      {cancellingId === contract.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <X className="h-4 w-4" />
-                      )}
-                    </Button>
-                  )}
-                  <Button size="sm" variant="ghost" asChild>
-                    <Link href={`/contracts/${contract.id}`} aria-label={`Open ${title}`}>
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
-              </article>
-            );
-          })}
-        </div>
+        <ContractFolders
+          contracts={contracts}
+          profileId={profileId}
+          cancellingId={cancellingId}
+          onCancel={handleCancelContract}
+        />
       )}
     </div>
+  );
+}
+
+const ACTIVE_STATUSES = new Set(["draft", "pending_terms", "active"]);
+
+function ContractFolders({
+  contracts,
+  profileId,
+  cancellingId,
+  onCancel,
+}: {
+  contracts: DashboardContract[];
+  profileId: string;
+  cancellingId: string | null;
+  onCancel: (contract: DashboardContract) => void;
+}) {
+  const inProgress = contracts.filter((contract) => ACTIVE_STATUSES.has(contract.status));
+  const completed = contracts.filter((contract) => contract.status === "completed");
+  const cancelled = contracts.filter(
+    (contract) => !ACTIVE_STATUSES.has(contract.status) && contract.status !== "completed"
+  );
+
+  const folders = [
+    { key: "in-progress", label: "In progress", items: inProgress, dim: false },
+    { key: "completed", label: "Completed", items: completed, dim: true },
+    { key: "cancelled", label: "Cancelled", items: cancelled, dim: true },
+  ].filter((folder) => folder.items.length > 0);
+
+  return (
+    <div className="space-y-6">
+      {folders.map((folder) => (
+        <section key={folder.key} aria-label={folder.label}>
+          <div className="mb-2 flex items-center gap-2">
+            <h3
+              className={`font-mono text-[11px] uppercase tracking-[0.2em] ${folder.dim ? "text-ash/70" : "text-sun"}`}
+            >
+              {folder.label}
+            </h3>
+            <span className={`font-mono text-[11px] ${folder.dim ? "text-ash/50" : "text-ash"}`}>
+              {folder.items.length}
+            </span>
+            <div className={`h-px flex-1 ${folder.dim ? "bg-line/40" : "bg-line"}`} />
+          </div>
+          <div className={folder.dim ? "space-y-2 opacity-75" : "space-y-3"}>
+            {folder.items.map((contract) => (
+              <ContractRow
+                key={contract.id}
+                contract={contract}
+                profileId={profileId}
+                cancelling={cancellingId === contract.id}
+                onCancel={() => onCancel(contract)}
+              />
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  );
+}
+
+function ContractRow({
+  contract,
+  profileId,
+  cancelling,
+  onCancel,
+}: {
+  contract: DashboardContract;
+  profileId: string;
+  cancelling: boolean;
+  onCancel: () => void;
+}) {
+  const posterId = contract.partyAId ?? contract.partyA?.id;
+  const isPoster = profileId === posterId;
+  const fulfillerSigned = !!contract.partyBSignedAt;
+  const canCancel =
+    isPoster &&
+    !fulfillerSigned &&
+    (contract.status === "draft" ||
+      contract.status === "pending_terms" ||
+      contract.status === "active");
+  const title =
+    contract.kind === "direct"
+      ? contract.title || "Direct agreement"
+      : contract.need?.title || "Exchange contract";
+  const waitingForInvite = contract.kind === "direct" && !contract.partyBId;
+
+  return (
+    <article
+      className={cn(
+        "vessel flex items-center justify-between gap-3 rounded-lg p-5 transition-colors hover:bg-raise/40",
+        contract.status === "active" || contract.status === "completed"
+          ? "border-l-2 border-l-ok/40"
+          : contract.status === "cancelled"
+            ? "border-l-2 border-l-bad/40"
+            : "border-l-2 border-l-sun/40"
+      )}
+    >
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="truncate text-base font-medium text-gold">{title}</p>
+          {contract.kind === "direct" && <Badge variant="outline">Direct</Badge>}
+        </div>
+        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-ash">
+          <Badge variant={statusBadgeVariant(contract.status)}>{contract.status}</Badge>
+          <span>
+            {contract.kind === "direct"
+              ? isPoster
+                ? "created by you"
+                : "invited agreement"
+              : isPoster
+                ? "you are the poster"
+                : "you are the fulfiller"}
+          </span>
+          {waitingForInvite && <span className="text-sun">waiting for invite acceptance</span>}
+          {canCancel && !waitingForInvite && <span>waiting for signature</span>}
+        </div>
+      </div>
+      <div className="flex shrink-0 items-center gap-1">
+        {canCancel && (
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={onCancel}
+            disabled={cancelling}
+            className="text-bad hover:bg-bad/10 hover:text-bad"
+            aria-label={`Cancel ${title}`}
+          >
+            {cancelling ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
+          </Button>
+        )}
+        <Button size="sm" variant="ghost" asChild>
+          <Link href={`/contracts/${contract.id}`} aria-label={`Open ${title}`}>
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </Button>
+      </div>
+    </article>
   );
 }

@@ -44,12 +44,13 @@ export function computeWizardSteps(
   total: number;
 } {
   const hasIdentification = profile.credentials?.some((c) => c.type === "identification") ?? false;
-  const profileComplete = !!(
-    profile.fullName &&
-    profile.bio &&
-    profile.avatarUrl &&
-    profile.locationName
-  );
+  const missingProfileFields = [
+    !profile.fullName && "name",
+    !profile.avatarUrl && "photo",
+    !profile.bio && "bio",
+    !profile.locationName && "suburb",
+  ].filter(Boolean) as string[];
+  const profileComplete = missingProfileFields.length === 0;
 
   const steps = [
     {
@@ -64,7 +65,9 @@ export function computeWizardSteps(
     {
       id: "profile",
       label: "Complete your profile",
-      description: "Name, photo, bio, and suburb — people trade with people they can see.",
+      description: profileComplete
+        ? "Name, photo, bio, and suburb — people trade with people they can see."
+        : `Still missing: ${missingProfileFields.join(", ")}.`,
       done: profileComplete,
       href: null,
       tab: "profile" as DashboardTabId,

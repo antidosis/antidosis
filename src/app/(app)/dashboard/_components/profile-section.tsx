@@ -71,6 +71,7 @@ function toFormValues(profile: EditorProfile): ProfileFormData {
     publicPhone: profile.publicPhone ?? undefined,
     businessPhone: profile.businessPhone ?? undefined,
     businessEmail: profile.businessEmail ?? undefined,
+    businessName: profile.businessName ?? undefined,
     abn: profile.abn ?? undefined,
     accountType: profile.accountType ?? "individual",
     audienceSize: profile.audienceSize ?? undefined,
@@ -413,7 +414,11 @@ export function ProfileSection({
               the sidebar shows <strong className="text-gold">business node</strong> — the listing
               marks the whole account as a business everywhere on Antidosis, not just this tab.
             </KnowledgeBox>
-            <DirectoryBioSection register={register} error={errors.directoryBio?.message} />
+            <DirectoryBioSection
+              register={register}
+              control={control}
+              error={errors.directoryBio?.message}
+            />
             <DirectorySlotsSection onSlotChange={handleSlotChange} />
             <PreferencesSection
               register={register}

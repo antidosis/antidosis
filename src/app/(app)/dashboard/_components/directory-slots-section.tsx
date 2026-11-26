@@ -167,7 +167,9 @@ export function DirectorySlotsSection({ onSlotChange }: DirectorySlotsSectionPro
               <div>
                 <p className="mt-2 text-sm font-medium text-ash">{SLOT_NAMES[slot - 1]}</p>
                 <p className="mt-0.5 text-xs leading-relaxed text-ash/80">
-                  Advertise another industry — for example a plumber who also does lawn care.
+                  {slot === 2
+                    ? "Advertise another industry — for example a plumber who also does lawn care."
+                    : "Go wider again — for example a cleaner who also walks dogs."}
                 </p>
               </div>
               {lockedInfo === slot ? (

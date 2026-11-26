@@ -19,6 +19,7 @@ const profile: EditorProfile = {
   privatePhone: null,
   businessPhone: null,
   businessEmail: null,
+  businessName: null,
   mobile: null,
   abn: null,
   accountType: "individual",

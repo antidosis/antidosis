@@ -1,6 +1,6 @@
 import { Info } from "lucide-react";
 import type { Control, FieldErrors, UseFormRegister } from "react-hook-form";
-import { Controller } from "react-hook-form";
+import { Controller, useWatch } from "react-hook-form";
 
 import { Label } from "@/components/ui/label";
 import { LocationAutocomplete } from "@/components/ui/location-autocomplete";
@@ -10,6 +10,8 @@ import { SectionCard } from "./section-card";
 import { SkillsSection } from "./skills-section";
 import type { ProfileFormData } from "./types";
 
+const BIO_MAX = 2000;
+
 interface AboutSectionProps {
   register: UseFormRegister<ProfileFormData>;
   control: Control<ProfileFormData>;
@@ -18,6 +20,7 @@ interface AboutSectionProps {
 }
 
 export function AboutSection({ register, control, errors, skills }: AboutSectionProps) {
+  const bioLength = useWatch({ control, name: "bio" })?.length ?? 0;
   return (
     <SectionCard
       tone="identity"
@@ -25,12 +28,21 @@ export function AboutSection({ register, control, errors, skills }: AboutSection
       description="Your story, where you're based, what you can help with, and how people reach you."
     >
       <div className="space-y-2">
-        <Label htmlFor="profile-bio">Bio</Label>
+        <div className="flex items-baseline justify-between gap-2">
+          <Label htmlFor="profile-bio">Bio</Label>
+          <span
+            className={`font-mono text-[10px] ${bioLength > BIO_MAX ? "text-bad" : "text-ash"}`}
+            aria-live="polite"
+          >
+            {bioLength}/{BIO_MAX}
+          </span>
+        </div>
         <Textarea
           id="profile-bio"
           {...register("bio")}
           placeholder="Tell people what you're good at and what you're looking for…"
           rows={4}
+          maxLength={BIO_MAX}
           className="text-base"
         />
         {errors.bio && <p className="text-xs text-bad">{errors.bio.message}</p>}

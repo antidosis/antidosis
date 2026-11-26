@@ -65,7 +65,7 @@ export default function ListingPage() {
     );
   }
 
-  const name = listing.fullName || "Antidosis listing";
+  const name = listing.businessName || listing.fullName || "Antidosis listing";
 
   return (
     <div className="mx-auto max-w-5xl px-4 pb-16 md:px-8">
@@ -88,7 +88,7 @@ export default function ListingPage() {
           <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
             <Avatar
               src={listing.avatarUrl}
-              name={listing.fullName}
+              name={listing.businessName || listing.fullName}
               size="lg"
               className="h-24 w-24 shrink-0 rounded-xl"
             />

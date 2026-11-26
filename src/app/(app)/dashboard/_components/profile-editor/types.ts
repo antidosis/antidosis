@@ -18,6 +18,8 @@ export interface EditorProfile {
   privatePhone: string | null;
   businessPhone: string | null;
   businessEmail: string | null;
+  /** Trading name for the directory listing — cards show this over fullName. */
+  businessName: string | null;
   mobile: string | null;
   abn: string | null;
   accountType: "individual" | "business";

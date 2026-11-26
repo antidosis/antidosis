@@ -143,6 +143,8 @@ export async function getPublicNeeds({
 export interface DirectoryProfile {
   id: string;
   fullName: string | null;
+  /** Trading name — directory cards show this over fullName when set. */
+  businessName: string | null;
   avatarUrl: string | null;
   /** The listing's own description — never the personal profile bio. */
   directoryBio: string | null;
@@ -188,7 +190,8 @@ export async function getDirectoryProfiles(
     const search: Prisma.ProfileWhereInput = {
       OR: [
         { fullName: { contains: query, mode: "insensitive" } },
-        { bio: { contains: query, mode: "insensitive" } },
+        { businessName: { contains: query, mode: "insensitive" } },
+        { directoryBio: { contains: query, mode: "insensitive" } },
         { skills: { some: { name: { contains: query, mode: "insensitive" } } } },
         { locationName: { contains: query, mode: "insensitive" } },
       ],
@@ -206,6 +209,7 @@ export async function getDirectoryProfiles(
     select: {
       id: true,
       fullName: true,
+      businessName: true,
       avatarUrl: true,
       directoryBio: true,
       locationName: true,
@@ -256,6 +260,7 @@ export async function getDirectoryProfile(id: string): Promise<DirectoryProfile 
     select: {
       id: true,
       fullName: true,
+      businessName: true,
       avatarUrl: true,
       directoryBio: true,
       locationName: true,

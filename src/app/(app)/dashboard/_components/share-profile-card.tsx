@@ -233,7 +233,8 @@ export function ShareProfileCard({ profile }: ShareProfileCardProps) {
         ))}
       </div>
 
-      {/* Visual card preview — the invite people receive */}
+      {/* Visual card preview — the invite people receive. A live replica of
+          the downloaded PNG: same layout, same hierarchy, logo leading. */}
       <div
         className="relative overflow-hidden rounded-xl border"
         style={{
@@ -242,73 +243,86 @@ export function ShareProfileCard({ profile }: ShareProfileCardProps) {
         }}
       >
         <div
-          className="absolute inset-x-0 top-0 h-0.5"
+          className="absolute inset-x-0 top-0 h-1"
           style={{ background: `linear-gradient(90deg, ${theme.accent}, transparent)` }}
         />
         <div
-          className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full border"
+          className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full border"
           style={{ borderColor: `${theme.accent}26` }}
         />
         <div
-          className="pointer-events-none absolute -right-5 -top-5 h-20 w-20 rounded-full border"
+          className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full border"
           style={{ borderColor: `${theme.accent}1a` }}
         />
-        <div className="relative p-5">
-          {/* Brand row */}
-          <div className="flex items-center justify-between">
-            <img src="/images/logo-sm.webp" alt="Antidosis" className="h-7 w-auto opacity-90" />
+        <div className="relative flex flex-col p-6">
+          {/* Brand row — the logo leads */}
+          <div className="flex items-start justify-between gap-3">
+            <img
+              src="/images/logo-sm.webp"
+              alt="Antidosis"
+              className="h-10 w-auto"
+              style={{ filter: `drop-shadow(0 0 12px ${theme.accent}55)` }}
+            />
             <span
-              className="font-mono text-[9px] uppercase tracking-[0.25em]"
+              className="mt-1 font-mono text-[9px] uppercase tracking-[0.25em]"
               style={{ color: `${theme.accent}b3` }}
             >
               Connection card
             </span>
           </div>
 
-          {/* Member row */}
-          <div className="mt-4 flex items-center gap-3.5">
+          {/* Member block */}
+          <div className="mt-6 flex items-center gap-4">
             <Avatar
               src={profile.avatarUrl}
               name={profile.fullName}
               size="lg"
-              className="h-14 w-14 shrink-0"
+              className="h-16 w-16 shrink-0"
               style={{ boxShadow: `0 0 0 2px ${theme.accent}40` }}
             />
             <div className="min-w-0 flex-1">
               <p className="flex items-center gap-1.5">
-                <span className="heading-display truncate text-lg leading-tight text-[#f4f7f2]">
+                <span className="heading-display truncate text-2xl leading-tight text-[#f4f7f2]">
                   {name}
                 </span>
                 {profile.isVerified && (
                   <ShieldCheck className="h-4 w-4 shrink-0" style={{ color: theme.accent }} />
                 )}
               </p>
-              <p className="truncate font-mono text-xs" style={{ color: theme.accentSoft }}>
+              <p className="mt-0.5 font-mono text-sm" style={{ color: theme.accentSoft }}>
                 {handle}
               </p>
-              <p className="mt-1 flex items-center gap-1 truncate text-xs text-[#9fb5aa]">
-                <Star
-                  className="h-3 w-3 shrink-0"
-                  style={{ color: theme.accent, fill: theme.accent }}
-                />
-                {ratingText}
+              <p className="mt-1.5 flex flex-wrap items-center gap-x-2 text-xs text-[#9fb5aa]">
+                <span className="inline-flex items-center gap-1">
+                  <Star
+                    className="h-3.5 w-3.5"
+                    style={{ color: theme.accent, fill: theme.accent }}
+                  />
+                  {ratingText}
+                </span>
                 {profile.jobsCompleted > 0 && (
                   <span>
                     · {profile.jobsCompleted} exchange{profile.jobsCompleted === 1 ? "" : "s"}
                   </span>
                 )}
-              </p>
-              <p className="mt-0.5 truncate font-mono text-[11px]" style={{ color: theme.accent }}>
-                antidosis.com/connect/{profile.handle || profile.id}
+                {profile.locationName && <span>· {profile.locationName}</span>}
               </p>
             </div>
             <span
-              className="shrink-0 rotate-90 font-mono text-[9px] uppercase tracking-[0.3em] [writing-mode:vertical-rl]"
+              className="hidden shrink-0 rotate-90 font-mono text-[10px] uppercase tracking-[0.3em] [writing-mode:vertical-rl] sm:block"
               style={{ color: `${theme.accent}66` }}
             >
               Antidosis
             </span>
           </div>
+
+          {/* CTA + link */}
+          <p className="heading-display mt-6 text-lg leading-snug text-[#f4f7f2]">
+            Connect with me on the local exchange network.
+          </p>
+          <p className="mt-1.5 font-mono text-xs" style={{ color: theme.accent }}>
+            antidosis.com/connect/{profile.handle || profile.id}
+          </p>
         </div>
       </div>
 

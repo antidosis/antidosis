@@ -1,4 +1,4 @@
-import { Building2, Mail, Phone } from "lucide-react";
+import { Building2, Mail, Phone, Store } from "lucide-react";
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
 
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,29 @@ export function BusinessContactSection({ register, errors }: BusinessContactSect
       description="How customers reach the business — shown on your directory listing only, separate from your personal public profile."
     >
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+        <div className="space-y-2 sm:col-span-2 sm:max-w-md">
+          <Label htmlFor="profile-businessName">
+            <span className="inline-flex items-center gap-1.5 normal-case tracking-normal">
+              <Store className="h-3.5 w-3.5 text-aero" /> Business name
+            </span>
+          </Label>
+          <div className="relative">
+            <Building2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ash" />
+            <Input
+              id="profile-businessName"
+              {...register("businessName")}
+              placeholder="e.g. Khoury Plumbing Co"
+              maxLength={100}
+              autoComplete="organization"
+              className={`pl-9 ${INPUT_CLASS}`}
+            />
+          </div>
+          <p className="text-xs text-ash">
+            Your trading name — the directory shows this instead of your personal name.
+          </p>
+          {errors.businessName && <p className="text-xs text-bad">{errors.businessName.message}</p>}
+        </div>
+
         <div className="space-y-2">
           <Label htmlFor="profile-businessPhone">
             <span className="inline-flex items-center gap-1.5 normal-case tracking-normal">

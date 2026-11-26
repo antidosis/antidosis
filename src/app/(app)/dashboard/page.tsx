@@ -42,6 +42,7 @@ type ProfileData = {
   privatePhone: string | null;
   businessPhone: string | null;
   businessEmail: string | null;
+  businessName: string | null;
   accountType: "individual" | "business";
   abn: string | null;
   abnVerified: boolean;

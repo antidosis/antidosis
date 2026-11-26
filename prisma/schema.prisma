@@ -23,6 +23,9 @@ model Profile {
   privatePhone           String?   @map("private_phone")
   businessPhone          String?   @map("business_phone")
   businessEmail          String?   @map("business_email")
+  // Trading name shown on the directory listing instead of the member's
+  // personal name — directory cards and search use this when set.
+  businessName           String?   @map("business_name")
   // JSON array of the listing's own web presence:
   // [{"platform":"website","url":"https://…"}] — independent from the
   // personal socialLinks relation, which never appears on directory cards.

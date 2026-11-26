@@ -147,6 +147,20 @@ describe("updateProfileSchema", () => {
     expect(result.success).toBe(false);
   });
 
+  it("rejects businessName over 100 chars", () => {
+    const result = updateProfileSchema.safeParse({
+      businessName: "a".repeat(101),
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts a valid businessName", () => {
+    const result = updateProfileSchema.safeParse({
+      businessName: "Khoury Plumbing Co",
+    });
+    expect(result.success).toBe(true);
+  });
+
   it("accepts null fields", () => {
     const result = updateProfileSchema.safeParse({
       fullName: null,
