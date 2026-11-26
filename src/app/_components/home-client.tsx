@@ -31,6 +31,7 @@ import { useInView } from "@/hooks/use-in-view";
 import { cn } from "@/lib/utils";
 
 import { DirectAgreementVisual } from "./direct-agreement-visual";
+import { BusinessCardShowcase, CreatorReachShowcase } from "./network-visuals";
 import { OffgridVision } from "./offgrid-vision";
 
 // Lazy-load below-the-fold components to reduce initial JS bundle
@@ -388,6 +389,7 @@ export default function HomePage() {
                   eyebrow="For businesses"
                   title="Local business, verified."
                   description="Post tasks, find skilled locals and build a public record of reliable work."
+                  visual={<BusinessCardShowcase />}
                   points={[
                     "Business profile with ABN and chosen trust credentials",
                     "Tasks, jobs and direct agreements on the same exchange flow",
@@ -405,6 +407,7 @@ export default function HomePage() {
                   eyebrow="For creators & reviewers"
                   title="Your reach is an exchange."
                   description="Share your audience, find local collaborations and build a reputation for delivering what you promise."
+                  visual={<CreatorReachShowcase />}
                   points={[
                     "Audience size, social links and niche skills in one profile",
                     "Products, meals, experiences or payment for genuine content",
@@ -505,6 +508,7 @@ function PathwayCard({
   linkLabel,
   className,
   iconClass,
+  visual,
 }: {
   icon: React.ElementType;
   eyebrow: string;
@@ -515,6 +519,7 @@ function PathwayCard({
   linkLabel: string;
   className: string;
   iconClass: string;
+  visual?: React.ReactNode;
 }) {
   return (
     <div className={cn("vessel flex h-full flex-col rounded-xl p-6 sm:p-8", className)}>
@@ -522,6 +527,7 @@ function PathwayCard({
         <p className="font-mono text-xs uppercase tracking-[0.18em] text-ash">{eyebrow}</p>
         <Icon className={cn("h-6 w-6", iconClass)} />
       </div>
+      {visual && <div className="mt-5">{visual}</div>}
       <h3 className="heading-display mt-7 text-2xl text-gold md:text-3xl">{title}</h3>
       <p className="mt-3 text-sm leading-relaxed text-ash">{description}</p>
       <ul className="mt-6 space-y-3">
