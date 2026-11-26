@@ -417,7 +417,10 @@ export function ProfileSection({
               into any other tab and you&apos;re the{" "}
               <strong className="text-gold">member node</strong> again.
             </KnowledgeBox>
-            <DirectorySlotsSection onSlotChange={handleSlotChange} />
+            <DirectorySlotsSection
+              onSlotChange={handleSlotChange}
+              identity={{ register, errors, abnVerified: initialProfile.abnVerified }}
+            />
             <AcceptedExchangesSection
               control={control}
               setValue={setValue}
@@ -436,7 +439,6 @@ export function ProfileSection({
               setValue={setChangedValue}
               showInDirectory={!!showInDirectory}
               hasSpecialty={hasSpecialty}
-              abnVerified={initialProfile.abnVerified}
               errors={errors}
               profileId={initialProfile.id}
             />

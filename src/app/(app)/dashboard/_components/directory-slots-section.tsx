@@ -6,16 +6,20 @@ import {
   ArrowRight,
   Award,
   BriefcaseBusiness,
+  Building2,
   Check,
   ChevronLeft,
+  FileText,
   Loader2,
   Lock,
   Plus,
   Search,
+  ShieldCheck,
   Sparkles,
   Trash2,
   X,
 } from "lucide-react";
+import type { FieldErrors, UseFormRegister } from "react-hook-form";
 import { mutate } from "swr";
 
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +45,8 @@ import {
 import { useApi } from "@/lib/swr-config";
 import { cn } from "@/lib/utils";
 
+import type { ProfileFormData } from "./profile-editor/types";
+
 interface SpecialtyRecord {
   id: string;
   profession: string;
@@ -52,6 +58,12 @@ interface SpecialtyRecord {
 interface DirectorySlotsSectionProps {
   /** Fired whenever slot-1 occupancy changes (claim or release). */
   onSlotChange?: (hasSlot: boolean) => void;
+  /** Business identity fields (trading name + ABN) shown once a slot is claimed. */
+  identity?: {
+    register: UseFormRegister<ProfileFormData>;
+    errors: FieldErrors<ProfileFormData>;
+    abnVerified: boolean;
+  };
 }
 
 const SLOT_NAMES = ["Primary specialty", "Second specialty", "Third specialty"];
@@ -66,12 +78,22 @@ function industryLabel(slotOne: SpecialtyRecord[]): string {
   return [...industries].map((key) => INDUSTRIES[key].label).join(" · ");
 }
 
-export function DirectorySlotsSection({ onSlotChange }: DirectorySlotsSectionProps) {
+/** A specialty counts as complete once it carries a headline or any answered field. */
+function specialtyComplete(specialty: SpecialtyRecord): boolean {
+  if (specialty.headline) return true;
+  const profession = getProfession(specialty.profession);
+  if (!profession) return false;
+  return attributeHighlights(profession, parseAttributes(specialty.attributes)).length > 0;
+}
+
+export function DirectorySlotsSection({ onSlotChange, identity }: DirectorySlotsSectionProps) {
   const { data, isLoading } = useApi<{ specialties: SpecialtyRecord[] }>(
     "/api/v1/profiles/me/specialties"
   );
   const [pickerOpen, setPickerOpen] = useState(false);
   const [lockedInfo, setLockedInfo] = useState<number | null>(null);
+  /** Specialty to open straight into its editor after a fresh claim. */
+  const [autoEditId, setAutoEditId] = useState<string | null>(null);
 
   const specialties = useMemo(() => data?.specialties ?? [], [data]);
   const slotOne = useMemo(
@@ -79,6 +101,10 @@ export function DirectorySlotsSection({ onSlotChange }: DirectorySlotsSectionPro
     [specialties]
   );
   const slotOneFull = slotOne.length >= FREE_SLOT_PROFESSIONS;
+  const incompleteCount = useMemo(
+    () => slotOne.filter((specialty) => !specialtyComplete(specialty)).length,
+    [slotOne]
+  );
   /** The single industry slot 1 is dedicated to, once professions are claimed. */
   const slotIndustry = useMemo(() => {
     const industries = new Set(
@@ -217,28 +243,117 @@ export function DirectorySlotsSection({ onSlotChange }: DirectorySlotsSectionPro
 
         {/* Claimed professions — compact rows, expand to edit */}
         {slotOne.length > 0 && (
-          <div className="mt-3 divide-y divide-line/40 rounded-lg border border-line/70 bg-surface/20">
-            {slotOne.map((specialty) => (
-              <SpecialtyRow key={specialty.id} specialty={specialty} />
-            ))}
-            {!slotOneFull && !pickerOpen && (
-              <div className="px-4 py-2.5">
-                <button
-                  type="button"
-                  onClick={() => setPickerOpen(true)}
-                  className="inline-flex items-center gap-1 text-xs font-medium text-aero transition-colors hover:text-gold"
-                >
-                  <Plus className="h-3.5 w-3.5" /> Add another profession (
-                  {FREE_SLOT_PROFESSIONS - slotOne.length} left in this slot)
-                </button>
+          <>
+            {incompleteCount > 0 && (
+              <div className="mt-3 flex items-start gap-3 rounded-lg border border-sun/40 bg-sun/[0.07] p-3.5">
+                <span className="relative mt-1 flex h-2.5 w-2.5 shrink-0">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sun opacity-60" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-sun" />
+                </span>
+                <p className="text-sm leading-relaxed text-parchment">
+                  <strong className="text-sun">
+                    {incompleteCount === 1
+                      ? "1 profession needs its details"
+                      : `${incompleteCount} professions need their details`}
+                    .
+                  </strong>{" "}
+                  These answers are what customers filter by — open each one below and complete it
+                  to get found.
+                </p>
               </div>
             )}
-            {slotOneFull && (
-              <p className="px-4 py-2.5 text-xs text-ash">
-                This slot is full — extra slots unlock soon for another industry.
-              </p>
+            <div className="mt-3 divide-y divide-line/40 rounded-lg border border-line/70 bg-surface/20">
+              {slotOne.map((specialty) => (
+                <SpecialtyRow
+                  key={specialty.id}
+                  specialty={specialty}
+                  startEditing={specialty.id === autoEditId}
+                />
+              ))}
+              {!slotOneFull && !pickerOpen && (
+                <div className="px-4 py-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setPickerOpen(true)}
+                    className="inline-flex items-center gap-1 text-xs font-medium text-aero transition-colors hover:text-gold"
+                  >
+                    <Plus className="h-3.5 w-3.5" /> Add another profession (
+                    {FREE_SLOT_PROFESSIONS - slotOne.length} left in this slot)
+                  </button>
+                </div>
+              )}
+              {slotOneFull && (
+                <p className="px-4 py-2.5 text-xs text-ash">
+                  This slot is full — extra slots unlock soon for another industry.
+                </p>
+              )}
+            </div>
+
+            {/* Business identity — claimed with the slot, not buried further down */}
+            {identity && (
+              <div className="mt-4 rounded-lg border border-line/70 bg-surface/20 p-4">
+                <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-aero">
+                  Business identity
+                </p>
+                <p className="mt-1 text-xs leading-relaxed text-ash">
+                  Appears on your directory listing — your trading name and ABN, never your personal
+                  details.
+                </p>
+                <div className="mt-3 grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="profile-businessName">
+                      <span className="inline-flex items-center gap-1.5 normal-case tracking-normal">
+                        <Building2 className="h-3.5 w-3.5 text-aero" /> Business name
+                      </span>
+                    </Label>
+                    <Input
+                      id="profile-businessName"
+                      {...identity.register("businessName")}
+                      placeholder="e.g. Khoury Plumbing Co"
+                      maxLength={100}
+                      autoComplete="organization"
+                      className="text-base"
+                    />
+                    {identity.errors.businessName && (
+                      <p className="text-xs text-bad">{identity.errors.businessName.message}</p>
+                    )}
+                    <p className="text-xs text-ash">
+                      Your trading name — the directory shows this instead of your personal name.
+                    </p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="profile-abn">
+                      <span className="inline-flex items-center gap-1.5 normal-case tracking-normal">
+                        <FileText className="h-3.5 w-3.5 text-aero" /> ABN{" "}
+                        <span className="text-bad">*</span>
+                      </span>
+                    </Label>
+                    <Input
+                      id="profile-abn"
+                      {...identity.register("abn")}
+                      placeholder="12 345 678 901"
+                      inputMode="numeric"
+                      className="text-base"
+                    />
+                    {identity.errors.abn && (
+                      <p className="text-xs text-bad">{identity.errors.abn.message}</p>
+                    )}
+                    {identity.abnVerified ? (
+                      <p className="inline-flex items-center gap-1 text-xs text-ok">
+                        <ShieldCheck className="h-3 w-3" /> Confirmed against the Australian
+                        Business Register.
+                      </p>
+                    ) : (
+                      <p className="text-xs text-ash">
+                        11 digits, required for directory listings — appears on ATO (SERR) reports
+                        and business contracts.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
             )}
-          </div>
+          </>
         )}
       </div>
 
@@ -248,6 +363,7 @@ export function DirectorySlotsSection({ onSlotChange }: DirectorySlotsSectionPro
           remaining={FREE_SLOT_PROFESSIONS - slotOne.length}
           lockedIndustry={slotIndustry}
           onClose={() => setPickerOpen(false)}
+          onClaimed={(ids) => setAutoEditId(ids[0] ?? null)}
         />
       )}
     </section>
@@ -261,12 +377,15 @@ function ProfessionPicker({
   remaining,
   lockedIndustry,
   onClose,
+  onClaimed,
 }: {
   existing: string[];
   remaining: number;
   /** Industry already claimed in slot 1 — the picker is confined to it. */
   lockedIndustry: keyof typeof INDUSTRIES | null;
   onClose: () => void;
+  /** Fired with the ids of the freshly created specialties. */
+  onClaimed?: (ids: string[]) => void;
 }) {
   const { toast } = useToast();
   const [query, setQuery] = useState("");
@@ -337,6 +456,7 @@ function ProfessionPicker({
     try {
       const keys = selected.length > 0 ? selected : [professionKeyFromInput(query)];
       let claimed = 0;
+      const createdIds: string[] = [];
       for (const key of keys) {
         const profession = getProfession(key);
         const response = await fetch("/api/v1/profiles/me/specialties", {
@@ -352,6 +472,8 @@ function ProfessionPicker({
           );
           break;
         }
+        const created = (result as { specialty?: { id?: string } }).specialty;
+        if (created?.id) createdIds.push(created.id);
         claimed += 1;
       }
       await mutate("/api/v1/profiles/me/specialties");
@@ -359,10 +481,11 @@ function ProfessionPicker({
       // business/member node lags until the next unrelated revalidation.
       await mutate("/api/v1/profiles/me");
       if (claimed > 0) {
+        onClaimed?.(createdIds);
         toast(
           claimed === 1
-            ? "Profession added to your listing"
-            : `${claimed} professions added to your listing`,
+            ? "Profession added — complete its details below"
+            : `${claimed} professions added — complete their details below`,
           "success"
         );
         onClose();
@@ -578,8 +701,15 @@ function ProfessionPicker({
 
 /* ─── One claimed profession row with expandable field editor ──────────── */
 
-function SpecialtyRow({ specialty }: { specialty: SpecialtyRecord }) {
-  const [editing, setEditing] = useState(false);
+function SpecialtyRow({
+  specialty,
+  startEditing = false,
+}: {
+  specialty: SpecialtyRecord;
+  /** Open straight into the editor — used right after the profession is claimed. */
+  startEditing?: boolean;
+}) {
+  const [editing, setEditing] = useState(startEditing);
   if (editing) {
     return (
       <div className="px-4 py-3">
@@ -634,7 +764,11 @@ function CompactSpecialtyRow({
         {specialty.headline && (
           <span className="truncate text-xs text-parchment">{specialty.headline}</span>
         )}
-        {!complete && <span className="shrink-0 text-xs italic text-ash/70">no details yet</span>}
+        {!complete && (
+          <span className="shrink-0 rounded-full border border-sun/40 bg-sun/[0.08] px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-sun">
+            details needed
+          </span>
+        )}
       </div>
       {highlights.length > 0 && (
         <div className="hidden min-w-0 flex-wrap items-center gap-1.5 md:flex">
@@ -652,7 +786,11 @@ function CompactSpecialtyRow({
         <button
           type="button"
           onClick={onEdit}
-          className="text-xs font-medium text-ash transition-colors hover:text-gold"
+          className={
+            complete
+              ? "text-xs font-medium text-ash transition-colors hover:text-gold"
+              : "inline-flex items-center gap-1 rounded-full border border-sun/50 bg-sun/10 px-2.5 py-1 text-xs font-medium text-sun transition-colors hover:bg-sun/20"
+          }
         >
           {complete ? "Edit" : "Add details"}
         </button>

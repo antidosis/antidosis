@@ -1,16 +1,6 @@
 import Link from "next/link";
 
-import {
-  ArrowUpRight,
-  Building2,
-  EyeOff,
-  FileText,
-  Mail,
-  Phone,
-  Radio,
-  ShieldCheck,
-  Store,
-} from "lucide-react";
+import { ArrowUpRight, Building2, EyeOff, Mail, Phone, Radio } from "lucide-react";
 import type { FieldErrors, UseFormRegister, UseFormSetValue } from "react-hook-form";
 
 import { Input } from "@/components/ui/input";
@@ -25,9 +15,8 @@ interface BusinessDetailsSectionProps {
   register: UseFormRegister<ProfileFormData>;
   setValue: UseFormSetValue<ProfileFormData>;
   showInDirectory: boolean;
-  /** True once a specialty slot is claimed — ABN and contact fields appear then. */
+  /** True once a specialty slot is claimed — contact fields appear then. */
   hasSpecialty: boolean;
-  abnVerified: boolean;
   errors: FieldErrors<ProfileFormData>;
   /** Own profile id, used for the "view live listing" deep link. */
   profileId: string;
@@ -38,15 +27,14 @@ export function BusinessDetailsSection({
   setValue,
   showInDirectory,
   hasSpecialty,
-  abnVerified,
   errors,
   profileId,
 }: BusinessDetailsSectionProps) {
   return (
     <SectionCard
       tone="directory"
-      title="Business details"
-      description="Live status, ABN and how customers reach the business — shown on your directory listing only, never on your personal profile."
+      title="Business contact"
+      description="Live status and how customers reach the business — shown on your directory listing only, never on your personal profile."
     >
       {/* Live / hidden status — flips its whole face with the toggle */}
       {showInDirectory ? (
@@ -107,61 +95,6 @@ export function BusinessDetailsSection({
 
       {hasSpecialty && (
         <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
-          <div className="space-y-2 sm:col-span-2 sm:max-w-md">
-            <Label htmlFor="profile-businessName">
-              <span className="inline-flex items-center gap-1.5 normal-case tracking-normal">
-                <Store className="h-3.5 w-3.5 text-aero" /> Business name
-              </span>
-            </Label>
-            <div className="relative">
-              <Building2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ash" />
-              <Input
-                id="profile-businessName"
-                {...register("businessName")}
-                placeholder="e.g. Khoury Plumbing Co"
-                maxLength={100}
-                autoComplete="organization"
-                className={`pl-9 ${INPUT_CLASS}`}
-              />
-            </div>
-            <p className="text-xs text-ash">
-              Your trading name — the directory shows this instead of your personal name.
-            </p>
-            {errors.businessName && (
-              <p className="text-xs text-bad">{errors.businessName.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="profile-abn">
-              <span className="inline-flex items-center gap-1.5 normal-case tracking-normal">
-                <FileText className="h-3.5 w-3.5 text-aero" /> ABN{" "}
-                <span className="text-bad">*</span>
-              </span>
-            </Label>
-            <div className="relative">
-              <FileText className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ash" />
-              <Input
-                id="profile-abn"
-                {...register("abn")}
-                placeholder="12 345 678 901"
-                inputMode="numeric"
-                className={`pl-9 ${INPUT_CLASS}`}
-              />
-            </div>
-            {errors.abn && <p className="text-xs text-bad">{errors.abn.message}</p>}
-            {abnVerified && (
-              <p className="text-xs text-ok inline-flex items-center gap-1">
-                <ShieldCheck className="h-3 w-3" /> ABN confirmed against the Australian Business
-                Register.
-              </p>
-            )}
-            <p className="text-xs text-ash">
-              11 digits, required for directory listings — it appears on ATO sharing-economy (SERR)
-              reports and on business contracts.
-            </p>
-          </div>
-
           <div className="space-y-2">
             <Label htmlFor="profile-businessPhone">
               <span className="inline-flex items-center gap-1.5 normal-case tracking-normal">
