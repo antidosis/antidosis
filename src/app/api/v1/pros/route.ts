@@ -10,7 +10,8 @@ export const GET = withCors(
     const profiles = await getDirectoryProfiles(
       searchParams.get("q")?.slice(0, 100),
       searchParams.get("type") ?? undefined,
-      searchParams.get("profession") ?? undefined
+      searchParams.get("profession") ?? undefined,
+      searchParams.get("exchange") ?? undefined
     );
 
     return NextResponse.json(profiles, {

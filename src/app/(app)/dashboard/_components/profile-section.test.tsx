@@ -20,6 +20,7 @@ const profile: EditorProfile = {
   businessPhone: null,
   businessEmail: null,
   businessName: null,
+  acceptedExchanges: [],
   mobile: null,
   abn: null,
   accountType: "individual",

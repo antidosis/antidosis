@@ -19,6 +19,7 @@ import type { CredentialData } from "./credential-list";
 import { CredentialsSection } from "./credentials-section";
 import { DirectorySlotsSection } from "./directory-slots-section";
 import { AboutSection } from "./profile-editor/about-section";
+import { AcceptedExchangesSection } from "./profile-editor/accepted-exchanges-section";
 import { BusinessContactSection } from "./profile-editor/business-contact-section";
 import { DirectoryBioSection } from "./profile-editor/directory-bio-section";
 import { IdentitySection } from "./profile-editor/identity-section";
@@ -87,6 +88,7 @@ function toFormValues(profile: EditorProfile): ProfileFormData {
       url: link.url,
       isPublic: true,
     })),
+    acceptedExchanges: profile.acceptedExchanges ?? [],
   };
 }
 
@@ -181,15 +183,13 @@ export function ProfileSection({
   }
 
   // Directory listings are business listings: claiming slot 1 upgrades the
-  // form's account type silently. Releasing a slot never auto-downgrades —
-  // staying business with an ABN on file is harmless and matches the server.
+  // form's account type, and releasing every slot downgrades it again — the
+  // server applies the same rule on save (accountType is directory-driven).
   const handleSlotChange = useCallback(
     (hasSlot: boolean) => {
       setHasSpecialty(hasSlot);
-      if (hasSlot) {
-        clearErrors("root");
-        setValue("accountType", "business", { shouldDirty: false });
-      }
+      clearErrors("root");
+      setValue("accountType", hasSlot ? "business" : "individual", { shouldDirty: false });
     },
     [clearErrors, setValue]
   );
@@ -420,6 +420,14 @@ export function ProfileSection({
               error={errors.directoryBio?.message}
             />
             <DirectorySlotsSection onSlotChange={handleSlotChange} />
+            <AcceptedExchangesSection
+              control={control}
+              setValue={setValue}
+              onChanged={() => {
+                setHasUnsavedChanges(true);
+                clearErrors("root");
+              }}
+            />
             <PreferencesSection
               register={register}
               setValue={setChangedValue}

@@ -2,6 +2,7 @@ import type { Prisma } from "@prisma/client";
 
 import { parseBusinessSocialLinks } from "@/lib/business-links";
 import { EXCHANGE_MODE_VALUES } from "@/lib/categories";
+import { parseExchangeModes } from "@/lib/exchange-modes";
 import { prisma } from "@/lib/prisma";
 
 export interface PublicNeedItem {
@@ -153,6 +154,8 @@ export interface DirectoryProfile {
   businessPhone: string | null;
   businessEmail: string | null;
   businessSocialLinks: { platform: string; url: string }[];
+  /** Accepted payment/exchange forms — keys from src/lib/exchange-modes.ts. */
+  acceptedExchanges: string[];
   ratingAvg: number;
   ratingCount: number;
   jobsCompleted: number;
@@ -173,7 +176,8 @@ export interface DirectoryProfile {
 export async function getDirectoryProfiles(
   query?: string,
   type?: string,
-  profession?: string
+  profession?: string,
+  exchange?: string
 ): Promise<DirectoryProfile[]> {
   const accountType = type === "businesses" ? "business" : type === "people" ? "individual" : null;
   const where: Prisma.ProfileWhereInput = {
@@ -185,6 +189,10 @@ export async function getDirectoryProfiles(
   if (accountType) where.accountType = accountType;
   if (profession) {
     where.directorySpecialties = { some: { profession } };
+  }
+  if (exchange) {
+    // Stored as a JSON array of keys — a quoted-contains match is exact per key.
+    where.acceptedExchanges = { contains: `"${exchange.slice(0, 20)}"` };
   }
   if (query) {
     const search: Prisma.ProfileWhereInput = {
@@ -217,6 +225,7 @@ export async function getDirectoryProfiles(
       businessPhone: true,
       businessEmail: true,
       businessSocialLinks: true,
+      acceptedExchanges: true,
       ratingAvg: true,
       ratingCount: true,
       jobsCompleted: true,
@@ -233,14 +242,17 @@ export async function getDirectoryProfiles(
     },
   });
 
-  return profiles.map(({ directorySpecialties, businessSocialLinks, ...profile }) => ({
-    ...profile,
-    specialties: directorySpecialties,
-    businessSocialLinks: parseBusinessSocialLinks(businessSocialLinks),
-    abn: profile.accountType === "business" ? profile.abn : null,
-    abnVerified: profile.accountType === "business" ? profile.abnVerified : false,
-    audienceSize: profile.accountType === "individual" ? profile.audienceSize : null,
-  }));
+  return profiles.map(
+    ({ directorySpecialties, businessSocialLinks, acceptedExchanges, ...profile }) => ({
+      ...profile,
+      specialties: directorySpecialties,
+      businessSocialLinks: parseBusinessSocialLinks(businessSocialLinks),
+      acceptedExchanges: parseExchangeModes(acceptedExchanges),
+      abn: profile.accountType === "business" ? profile.abn : null,
+      abnVerified: profile.accountType === "business" ? profile.abnVerified : false,
+      audienceSize: profile.accountType === "individual" ? profile.audienceSize : null,
+    })
+  );
 }
 
 /**
@@ -268,6 +280,7 @@ export async function getDirectoryProfile(id: string): Promise<DirectoryProfile 
       businessPhone: true,
       businessEmail: true,
       businessSocialLinks: true,
+      acceptedExchanges: true,
       ratingAvg: true,
       ratingCount: true,
       jobsCompleted: true,
@@ -285,11 +298,12 @@ export async function getDirectoryProfile(id: string): Promise<DirectoryProfile 
   });
 
   if (!profile) return null;
-  const { directorySpecialties, businessSocialLinks, ...rest } = profile;
+  const { directorySpecialties, businessSocialLinks, acceptedExchanges, ...rest } = profile;
   return {
     ...rest,
     specialties: directorySpecialties,
     businessSocialLinks: parseBusinessSocialLinks(businessSocialLinks),
+    acceptedExchanges: parseExchangeModes(acceptedExchanges),
     abn: profile.accountType === "business" ? profile.abn : null,
     abnVerified: profile.accountType === "business" ? profile.abnVerified : false,
     audienceSize: profile.accountType === "individual" ? profile.audienceSize : null,

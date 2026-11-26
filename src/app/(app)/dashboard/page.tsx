@@ -43,6 +43,7 @@ type ProfileData = {
   businessPhone: string | null;
   businessEmail: string | null;
   businessName: string | null;
+  acceptedExchanges: string[];
   accountType: "individual" | "business";
   abn: string | null;
   abnVerified: boolean;

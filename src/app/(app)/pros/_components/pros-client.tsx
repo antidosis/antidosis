@@ -17,6 +17,7 @@ import {
   Loader2,
   Building2,
   Globe,
+  ArrowLeftRight,
 } from "lucide-react";
 
 import { NodeAvatar } from "@/app/(app)/exchange/_components/node-avatar";
@@ -25,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { formatAbn } from "@/lib/abn";
+import { exchangeModeLabel } from "@/lib/exchange-modes";
 import {
   attributeHighlights,
   getProfession,
@@ -261,6 +263,23 @@ export default function ProsDirectoryPage({ embedded = false, initialData }: Pro
 
                   {pro.directoryBio && (
                     <p className="text-sm text-ash mt-3 line-clamp-2">{pro.directoryBio}</p>
+                  )}
+
+                  {pro.acceptedExchanges.length > 0 && (
+                    <div
+                      className="mt-3 flex flex-wrap gap-1.5"
+                      aria-label="Accepted payment and exchange"
+                    >
+                      {pro.acceptedExchanges.map((mode) => (
+                        <span
+                          key={mode}
+                          className="inline-flex items-center gap-1 rounded border border-sun/25 bg-sun/[0.05] px-2 py-0.5 text-[11px] text-sun"
+                        >
+                          <ArrowLeftRight className="h-3 w-3" />
+                          {exchangeModeLabel(mode)}
+                        </span>
+                      ))}
+                    </div>
                   )}
 
                   {pro.specialties.length > 0 && (

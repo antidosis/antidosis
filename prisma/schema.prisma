@@ -30,6 +30,9 @@ model Profile {
   // [{"platform":"website","url":"https://…"}] — independent from the
   // personal socialLinks relation, which never appears on directory cards.
   businessSocialLinks    String?   @map("business_social_links")
+  // JSON array of accepted payment/exchange forms for the directory listing:
+  // ["cash","goods","services","negotiable","iou"] — see src/lib/exchange-modes.ts.
+  acceptedExchanges      String?   @map("accepted_exchanges")
   mobile                 String?   @unique
   mobileVerified         Boolean   @default(false) @map("mobile_verified")
   isVerified             Boolean   @default(false) @map("is_verified")

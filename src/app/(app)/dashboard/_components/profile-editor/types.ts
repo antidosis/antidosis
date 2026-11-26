@@ -37,4 +37,6 @@ export interface EditorProfile {
   /** Business web presence — independent from personal socialLinks.
    *  Raw rows may carry the stored JSON string; always normalise via toFormValues. */
   businessSocialLinks?: { platform: string; url: string; isPublic?: boolean }[] | string | null;
+  /** Accepted payment/exchange forms for the directory listing (mode keys). */
+  acceptedExchanges: string[];
 }

@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 
 import {
   ArrowLeft,
+  ArrowLeftRight,
   ArrowUpRight,
   Award,
   Briefcase,
@@ -25,6 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ProfileActions } from "@/components/ui/profile-actions";
 import { formatAbn } from "@/lib/abn";
+import { exchangeModeLabel } from "@/lib/exchange-modes";
 import {
   attributeHighlights,
   getProfession,
@@ -222,6 +224,24 @@ export default function ListingPage() {
             <p className="mt-4 whitespace-pre-line text-base leading-relaxed text-parchment">
               {listing.directoryBio || "This listing has no introduction yet."}
             </p>
+            {listing.acceptedExchanges.length > 0 && (
+              <div className="mt-5" aria-label="Accepted payment and exchange">
+                <h2 className="mb-2.5 text-sm font-medium text-gold">
+                  Accepted payment & exchange
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  {listing.acceptedExchanges.map((mode) => (
+                    <span
+                      key={mode}
+                      className="inline-flex items-center gap-1.5 rounded-md border border-sun/25 bg-sun/[0.05] px-2.5 py-1 text-xs text-sun"
+                    >
+                      <ArrowLeftRight className="h-3 w-3" />
+                      {exchangeModeLabel(mode)}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
             {listing.skills.length > 0 && (
               <div className="mt-6 border-t border-line/60 pt-5">
                 <h2 className="mb-3 text-sm font-medium text-gold">Skills and services</h2>

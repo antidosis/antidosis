@@ -202,6 +202,60 @@ describe("GET /api/v1/profiles/me", () => {
 
     expect(res.headers.get("x-request-id")).toMatch(/^\w+-\w+$/);
   });
+
+  it("self-heals business accounts whose directory specialty was removed", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      accountType: "business",
+      abn: "51824753556",
+      skills: [],
+      socialLinks: [],
+      credentials: [],
+      reviewsReceived: [],
+    });
+    mockDirectorySpecialtyCount.mockResolvedValue(0);
+    mockProfileUpdate.mockResolvedValue({
+      id: "profile-1",
+      accountType: "individual",
+      businessSocialLinks: null,
+      acceptedExchanges: null,
+      skills: [],
+      socialLinks: [],
+      credentials: [],
+      reviewsReceived: [],
+    });
+
+    const res = await GET(makeRequest("http://localhost/api/v1/profiles/me"));
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(mockProfileUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: "profile-1" },
+        data: { accountType: "individual" },
+      })
+    );
+    expect(body.accountType).toBe("individual");
+  });
+
+  it("keeps business accounts that still hold a directory specialty", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      accountType: "business",
+      skills: [],
+      socialLinks: [],
+      credentials: [],
+      reviewsReceived: [],
+    });
+    mockDirectorySpecialtyCount.mockResolvedValue(2);
+
+    const res = await GET(makeRequest("http://localhost/api/v1/profiles/me"));
+
+    expect(res.status).toBe(200);
+    expect(mockProfileUpdate).not.toHaveBeenCalled();
+  });
 });
 
 describe("PATCH /api/v1/profiles/me", () => {

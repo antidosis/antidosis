@@ -76,6 +76,9 @@ export const updateProfileSchema = z.object({
     .optional(),
   socialLinks: z.array(socialLinkSchema).optional(),
   businessSocialLinks: z.array(socialLinkSchema).optional(),
+  // Accepted payment/exchange forms for the directory listing — keys from
+  // src/lib/exchange-modes.ts, stored as a JSON array.
+  acceptedExchanges: z.array(z.string().max(20)).max(8).optional().nullable(),
 });
 
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;

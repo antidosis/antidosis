@@ -7,6 +7,7 @@ import { withApiHandler } from "@/lib/api-handler";
 import { recordBannedMobile } from "@/lib/bans";
 import { parseBusinessSocialLinks, serializeBusinessSocialLinks } from "@/lib/business-links";
 import { isValidCentralCoastSuburb } from "@/lib/data/central-coast-suburbs";
+import { parseExchangeModes, serializeExchangeModes } from "@/lib/exchange-modes";
 import { logger } from "@/lib/logger";
 import { normalizeMobile, isValidAustralianMobile } from "@/lib/mobile";
 import { prisma } from "@/lib/prisma";
@@ -75,10 +76,45 @@ export const GET = withApiHandler(async () => {
     });
   }
 
-  const { businessSocialLinks: rawBusinessLinks, ...profileRest } = profile;
+  // Business-ness is directory-driven: claiming a specialty with an ABN
+  // upgrades the stored account type, but removing every specialty must flip
+  // it back — otherwise the node badge (and directory filters) get stuck on
+  // "business" forever. Self-heal the column here so every consumer of
+  // /api/v1/profiles/me sees the live state.
+  if (profile.accountType === "business") {
+    const specialtyCount = await prisma.directorySpecialty.count({
+      where: { profileId: profile.id },
+    });
+    if (specialtyCount === 0) {
+      profile = await prisma.profile.update({
+        where: { id: profile.id },
+        data: { accountType: "individual" },
+        include: {
+          skills: true,
+          socialLinks: true,
+          credentials: true,
+          reviewsReceived: {
+            orderBy: { createdAt: "desc" },
+            include: {
+              giver: { select: { fullName: true, avatarUrl: true } },
+              contract: { select: { kind: true, title: true, need: { select: { title: true } } } },
+            },
+            take: 10,
+          },
+        },
+      });
+    }
+  }
+
+  const {
+    businessSocialLinks: rawBusinessLinks,
+    acceptedExchanges: rawExchanges,
+    ...profileRest
+  } = profile;
   return NextResponse.json({
     ...profileRest,
     businessSocialLinks: parseBusinessSocialLinks(rawBusinessLinks),
+    acceptedExchanges: parseExchangeModes(rawExchanges),
   });
 });
 
@@ -127,7 +163,7 @@ export const PATCH = withApiHandler(async (req: NextRequest) => {
     );
   }
 
-  const { socialLinks, businessSocialLinks, ...profileData } = data;
+  const { socialLinks, businessSocialLinks, acceptedExchanges, ...profileData } = data;
 
   // Clean up empty strings to null for optional fields, sanitize URLs
   const cleanedData: Record<string, unknown> = Object.fromEntries(
@@ -272,6 +308,9 @@ export const PATCH = withApiHandler(async (req: NextRequest) => {
         .filter((link): link is { platform: string; url: string } => Boolean(link.url))
     );
   }
+  if (acceptedExchanges !== undefined) {
+    cleanedData.acceptedExchanges = serializeExchangeModes(acceptedExchanges);
+  }
 
   const profile = await prisma.profile.update({
     where: { userId: user.id },
@@ -304,10 +343,15 @@ export const PATCH = withApiHandler(async (req: NextRequest) => {
 
   // The stored column is a JSON string — clients (and the dashboard editor's
   // form reset) expect the parsed array, same as the GET response.
-  const { businessSocialLinks: rawBusinessLinks, ...profileRest } = profile;
+  const {
+    businessSocialLinks: rawBusinessLinks,
+    acceptedExchanges: rawExchanges,
+    ...profileRest
+  } = profile;
   return NextResponse.json({
     ...profileRest,
     businessSocialLinks: parseBusinessSocialLinks(rawBusinessLinks),
+    acceptedExchanges: parseExchangeModes(rawExchanges),
   });
 });
 
