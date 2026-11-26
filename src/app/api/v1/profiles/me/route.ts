@@ -9,6 +9,7 @@ import { parseBusinessSocialLinks, serializeBusinessSocialLinks } from "@/lib/bu
 import { isValidCentralCoastSuburb } from "@/lib/data/central-coast-suburbs";
 import { parseExchangeModes, serializeExchangeModes } from "@/lib/exchange-modes";
 import { logger } from "@/lib/logger";
+import { allocateMemberCode } from "@/lib/member-code";
 import { normalizeMobile, isValidAustralianMobile } from "@/lib/mobile";
 import { prisma } from "@/lib/prisma";
 import { updateProfileSchema } from "@/lib/schemas";
@@ -60,6 +61,7 @@ export const GET = withApiHandler(async () => {
         userId: user.id,
         email: user.email || "",
         fullName: user.user_metadata?.full_name || null,
+        memberCode: await allocateMemberCode(),
       },
       include: {
         skills: true,

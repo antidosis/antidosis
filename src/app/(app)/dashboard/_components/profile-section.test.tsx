@@ -13,6 +13,7 @@ vi.mock("swr", () => ({
 
 const profile: EditorProfile = {
   id: "profile-1",
+  memberCode: "ANT-TEST42",
   fullName: "Original Name",
   bio: null,
   directoryBio: null,

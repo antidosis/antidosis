@@ -26,6 +26,7 @@ interface IdentitySectionProps {
   mobileVerified: boolean;
   mobile: string | null;
   handle: string | null;
+  memberCode: string;
   socialLinks?: { platform: string; url: string }[];
   importingFromSocial?: string | null;
   onImportFromSocial?: (url: string) => void;
@@ -44,6 +45,7 @@ export function IdentitySection({
   mobileVerified,
   mobile,
   handle,
+  memberCode,
   socialLinks = [],
   importingFromSocial = null,
   onImportFromSocial,
@@ -135,7 +137,7 @@ export function IdentitySection({
               className="text-base"
             />
             {nameError && <p className="text-xs text-bad">{nameError}</p>}
-            <HandleSection handle={handle} />
+            <HandleSection handle={handle} memberCode={memberCode} />
           </div>
         </div>
 

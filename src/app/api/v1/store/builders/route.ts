@@ -39,6 +39,8 @@ const PUBLIC_BUILDER_SELECT = {
       paymentTerms: true,
       highlights: true,
       featuredUntil: true,
+      soldByAntidosis: true,
+      stockCount: true,
     },
   },
 } as const;

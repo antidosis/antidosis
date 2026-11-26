@@ -650,9 +650,48 @@ export default function TermsPage() {
           </p>
         </section>
 
-        {/* ── 19. Severability ── */}
+        {/* ── 19. Mesh Store Purchases ── */}
         <section>
-          <h2 className="text-lg font-semibold text-gold mb-3">19. Severability</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">19. Mesh Store Purchases</h2>
+          <p className="mb-3">
+            The Service includes a mesh hardware store with two kinds of listings, and the seller is
+            different for each:
+          </p>
+          <ul className="list-disc pl-5 space-y-1 mb-3">
+            <li>
+              <strong>Listings marked &ldquo;sold by antidosis&rdquo;</strong> are first-party stock
+              sold by Martin Khoury trading as antidosis (ABN 96 557 008 393). Orders are placed
+              through the Service by signed-in, mobile-verified members and paid directly to us by
+              PayID or bank transfer quoting the order reference. Nothing is charged at the time of
+              ordering. Australian Consumer Law applies to these sales: if a unit is faulty, not as
+              described, or unfit for purpose, you are entitled to a repair, replacement, or refund
+              as the law provides. Each unit is configured to the mesh name you supply (firmware,
+              Australia Mid radio profile at 915.075 MHz, and your chosen identity) before dispatch;
+              if you later re-flash the device or change its radio profile, that is your choice and
+              re-configuration may be offered as a paid service rather than assumed as warranty work
+            </li>
+            <li>
+              <strong>All other listings</strong> are sold by independent builders, not by us.
+              Price, payment, postage, warranty, and returns are agreed directly between you and the
+              builder. We do not process those payments, hold those funds, or take responsibility
+              for those goods — section 7 and the marketplace provisions of these Terms apply to
+              those transactions
+            </li>
+          </ul>
+          <p>
+            We may cancel and fully refund a first-party order where stock is unavailable, payment
+            cannot be matched to an order reference, or we reasonably suspect fraud. Delivery
+            details and mesh names supplied with an order are handled as described in our{" "}
+            <Link href="/privacy" className="text-gold hover:underline">
+              Privacy Policy
+            </Link>
+            .
+          </p>
+        </section>
+
+        {/* ── 20. Severability ── */}
+        <section>
+          <h2 className="text-lg font-semibold text-gold mb-3">20. Severability</h2>
           <p>
             If any provision of these Terms is held to be invalid, illegal, or unenforceable by a
             court of competent jurisdiction, such provision shall be severed from these Terms and
@@ -660,9 +699,9 @@ export default function TermsPage() {
           </p>
         </section>
 
-        {/* ── 20. Entire Agreement ── */}
+        {/* ── 21. Entire Agreement ── */}
         <section>
-          <h2 className="text-lg font-semibold text-gold mb-3">20. Entire Agreement</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">21. Entire Agreement</h2>
           <p>
             These Terms, together with our{" "}
             <Link href="/privacy" className="text-gold hover:underline">
@@ -674,9 +713,9 @@ export default function TermsPage() {
           </p>
         </section>
 
-        {/* ── 21. Contact ── */}
+        {/* ── 22. Contact ── */}
         <section>
-          <h2 className="text-lg font-semibold text-gold mb-3">21. Contact Us</h2>
+          <h2 className="text-lg font-semibold text-gold mb-3">22. Contact Us</h2>
           <p className="mb-3">If you have any questions about these Terms, please contact us:</p>
           <div className="pl-4 border-l-2 border-leather/30">
             <p>

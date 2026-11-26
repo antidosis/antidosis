@@ -168,12 +168,15 @@ export default function PrivacyPage() {
 
           <h3 className="text-base font-medium text-gold/90 mb-2 mt-4">2.4 Payment Information</h3>
           <p className="mb-3">
-            Antidosis is <strong>free</strong> — we do not collect or store your credit card
-            details, banking information, or other payment method details. If paid features are
-            introduced in future, payments will be processed by a third-party payment processor and
-            this policy will be updated beforehand. If you previously held a paid subscription
-            (processed by Stripe), we retain only the processor&apos;s customer and subscription
-            identifiers, and subscription status, for audit purposes.
+            Using the exchange platform is <strong>free</strong> — we do not collect or store your
+            credit card details or banking credentials. First-party mesh store orders (items marked
+            &quot;sold by antidosis&quot;) are paid by PayID or bank transfer directly from your own
+            bank — we never see or store your account login, card numbers, or balance; we only
+            record the order itself (see 2.7) and match incoming transfers by order reference. If
+            paid features are introduced in future, payments will be processed by a third-party
+            payment processor and this policy will be updated beforehand. If you previously held a
+            paid subscription (processed by Stripe), we retain only the processor&apos;s customer
+            and subscription identifiers, and subscription status, for audit purposes.
           </p>
 
           <h3 className="text-base font-medium text-gold/90 mb-2 mt-4">
@@ -207,6 +210,38 @@ export default function PrivacyPage() {
             The mobile app may access your device <strong>camera</strong> to capture photos for
             profile avatars, need listings, and credential documents. Camera access is optional —
             you may also select existing photos from your device gallery.
+          </p>
+        </section>
+
+        {/* ── 2.7 Mesh Store Orders ── */}
+        <section>
+          <h3 className="text-base font-medium text-gold/90 mb-2 mt-4">2.7 Mesh Store Orders</h3>
+          <p className="mb-3">
+            When you order an item marked &quot;sold by antidosis&quot; from the mesh store, we
+            collect and store:
+          </p>
+          <ul className="list-disc pl-5 space-y-1 mb-3">
+            <li>
+              <strong>Mesh name</strong> — the name or callsign you choose to be flashed onto the
+              device; this is broadcast publicly on the mesh network by design
+            </li>
+            <li>
+              <strong>Delivery name and address</strong> — used only to ship your order and meet our
+              consumer-law record-keeping obligations
+            </li>
+            <li>
+              <strong>Order reference, item, and price snapshot</strong> — used to match your PayID
+              or bank transfer to your order and to keep sales records
+            </li>
+            <li>
+              <strong>Optional note</strong> — anything you add for us about the order
+            </li>
+          </ul>
+          <p>
+            Order records are visible to you (in your dashboard) and to platform administrators who
+            fulfil orders. Your member ID (e.g. ANT-XXXXXX) is attached to each order so a person
+            can be identified in support and dispute handling without exposing your email. Delivery
+            details are never shown to other members.
           </p>
         </section>
 

@@ -141,3 +141,32 @@ export type ApplyMeshBuilderInput = z.infer<typeof applyMeshBuilderSchema>;
 export type CreateMeshProductInput = z.infer<typeof createMeshProductSchema>;
 export type UpdateMeshProductInput = z.infer<typeof updateMeshProductSchema>;
 export type ReviewMeshBuilderInput = z.infer<typeof reviewMeshBuilderSchema>;
+
+// ─── First-party orders: members buy Antidosis-stocked items on-site ───
+
+export const meshOrderStatuses = [
+  "placed",
+  "paid",
+  "preparing",
+  "shipped",
+  "delivered",
+  "cancelled",
+] as const;
+
+export const createMeshOrderSchema = z.object({
+  productId: z.string().uuid(),
+  // The name/callsign flashed onto the device before dispatch
+  meshName: z.string().trim().min(2).max(40),
+  deliveryName: z.string().trim().min(2).max(120),
+  deliveryAddress: z.string().trim().min(10).max(500),
+  buyerNote: optionalTrimmed(500),
+});
+
+export const updateMeshOrderSchema = z.object({
+  status: z.enum(meshOrderStatuses),
+  adminNote: optionalTrimmed(1000),
+});
+
+export type MeshOrderStatus = (typeof meshOrderStatuses)[number];
+export type CreateMeshOrderInput = z.infer<typeof createMeshOrderSchema>;
+export type UpdateMeshOrderInput = z.infer<typeof updateMeshOrderSchema>;

@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 import {
   applyMeshBuilderSchema,
   createMeshInterestSchema,
+  createMeshOrderSchema,
   createMeshProductSchema,
+  updateMeshOrderSchema,
   updateMeshProductSchema,
 } from "./store";
 
@@ -196,5 +198,52 @@ describe("createMeshInterestSchema", () => {
     });
     expect(result.success).toBe(true);
     if (result.success) expect(result.data.email).toBe("buyer@example.com");
+  });
+});
+
+describe("createMeshOrderSchema", () => {
+  const VALID_ORDER = {
+    productId: "8c964791-203f-489f-92a1-dfe805cadccd",
+    meshName: "Kookaburra-1",
+    deliveryName: "Sam Citizen",
+    deliveryAddress: "1 Beach St, Terrigal NSW 2260",
+  };
+
+  it("accepts a complete order", () => {
+    expect(createMeshOrderSchema.safeParse(VALID_ORDER).success).toBe(true);
+  });
+
+  it("requires a real product id", () => {
+    expect(
+      createMeshOrderSchema.safeParse({ ...VALID_ORDER, productId: "not-a-uuid" }).success
+    ).toBe(false);
+  });
+
+  it("requires a mesh name — the unit is flashed to it", () => {
+    expect(createMeshOrderSchema.safeParse({ ...VALID_ORDER, meshName: "x" }).success).toBe(false);
+  });
+
+  it("requires a deliverable address", () => {
+    expect(
+      createMeshOrderSchema.safeParse({ ...VALID_ORDER, deliveryAddress: "short" }).success
+    ).toBe(false);
+  });
+
+  it("caps the buyer note", () => {
+    expect(
+      createMeshOrderSchema.safeParse({ ...VALID_ORDER, buyerNote: "x".repeat(501) }).success
+    ).toBe(false);
+  });
+});
+
+describe("updateMeshOrderSchema", () => {
+  it("accepts every pipeline status", () => {
+    for (const status of ["placed", "paid", "preparing", "shipped", "delivered", "cancelled"]) {
+      expect(updateMeshOrderSchema.safeParse({ status }).success).toBe(true);
+    }
+  });
+
+  it("rejects unknown statuses", () => {
+    expect(updateMeshOrderSchema.safeParse({ status: "teleported" }).success).toBe(false);
   });
 });

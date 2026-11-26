@@ -12,6 +12,10 @@ model Profile {
   userId                 String    @unique @map("user_id")
   email                  String    @unique
   handle                 String?   @unique
+  // Permanent human-facing member ID ("ANT-XXXXXX") — stamped on store
+  // orders, support tickets and admin tooling so a person is identifiable
+  // without exposing their email or internal UUID.
+  memberCode             String    @unique @map("member_code")
   fullName               String?   @map("full_name")
   bio                    String?
   directoryBio           String?   @map("directory_bio")
@@ -100,6 +104,7 @@ model Profile {
   needWatches          NeedWatch[]
   meshInterests        MeshInterest[]
   meshBuilder          MeshBuilder?
+  meshOrders           MeshOrder[]
 
   @@index([isPro])
   @@index([stripeCustomerId])
@@ -775,11 +780,49 @@ model MeshProduct {
   highlights      String[]  @default([])
   // Featured placement rental - pinned to the top of the store floor until this time
   featuredUntil   DateTime? @map("featured_until")
+  // First-party stock: Antidosis itself is the seller (seed batches). These
+  // listings are orderable on-site; builder listings stay message-to-buy.
+  soldByAntidosis Boolean   @default(false) @map("sold_by_antidosis")
+  // Real units on hand — first-party only. Null for builder listings.
+  stockCount      Int?      @map("stock_count")
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
   builder MeshBuilder @relation(fields: [builderId], references: [id], onDelete: Cascade)
+  orders  MeshOrder[]
 
   @@index([builderId])
   @@map("mesh_products")
+}
+
+// A first-party store order: a verified member buys an Antidosis-stocked
+// item, pays by PayID/bank transfer quoting their order ref, and the unit is
+// flashed to their chosen mesh name before dispatch.
+model MeshOrder {
+  id              String   @id @default(uuid())
+  productId       String   @map("product_id")
+  buyerId         String   @map("buyer_id")
+  // Human-facing reference ("MESH-XXXXXX") quoted on the bank transfer
+  orderRef        String   @unique @map("order_ref")
+  // The name/callsign flashed onto the device before dispatch
+  meshName        String   @map("mesh_name")
+  deliveryName    String   @map("delivery_name")
+  deliveryAddress String   @map("delivery_address")
+  buyerNote       String?  @map("buyer_note")
+  // Money snapshot at order time (cents) — immune to later listing edits
+  priceAudCents   Int      @map("price_aud_cents")
+  postageAudCents Int      @map("postage_aud_cents")
+  totalAudCents   Int      @map("total_aud_cents")
+  // "placed" | "paid" | "preparing" | "shipped" | "delivered" | "cancelled"
+  status          String   @default("placed")
+  adminNote       String?  @map("admin_note")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  product MeshProduct @relation(fields: [productId], references: [id])
+  buyer   Profile     @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+
+  @@index([buyerId, createdAt])
+  @@index([status, createdAt])
+  @@map("mesh_orders")
 }

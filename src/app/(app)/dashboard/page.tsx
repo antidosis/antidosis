@@ -23,6 +23,7 @@ import type {
 import { MeshStorePanel } from "./_components/mesh-store-panel";
 import { NeedsPanel } from "./_components/needs-panel";
 import { OffersPanel } from "./_components/offers-panel";
+import { OrdersPanel } from "./_components/orders-panel";
 import { OverviewPanel } from "./_components/overview-panel";
 import type { ProfileTab } from "./_components/profile-editor/types";
 import { ProfileSection } from "./_components/profile-section";
@@ -33,6 +34,7 @@ import { WatchlistPanel } from "./_components/watchlist-panel";
 
 type ProfileData = {
   id: string;
+  memberCode: string;
   fullName: string | null;
   email: string;
   bio: string | null;
@@ -208,6 +210,9 @@ function DashboardPageInner() {
             </DashboardPanel>
             <DashboardPanel id="relay" activeTab={tab} mounted={visited.has("relay")}>
               <RelayPanel />
+            </DashboardPanel>
+            <DashboardPanel id="orders" activeTab={tab} mounted={visited.has("orders")}>
+              <OrdersPanel />
             </DashboardPanel>
             <DashboardPanel id="mesh-store" activeTab={tab} mounted={visited.has("mesh-store")}>
               <MeshStorePanel />

@@ -12,11 +12,12 @@ import { HANDLE_FORMAT_RE } from "@/lib/schemas";
 
 interface HandleSectionProps {
   handle: string | null;
+  memberCode: string;
 }
 
 const FORMAT_HINT = "3–20 characters: letters, numbers, underscore — starting with a letter.";
 
-export function HandleSection({ handle }: HandleSectionProps) {
+export function HandleSection({ handle, memberCode }: HandleSectionProps) {
   const { toast } = useToast();
   const [value, setValue] = useState("");
   const [pending, setPending] = useState(false);
@@ -99,6 +100,10 @@ export function HandleSection({ handle }: HandleSectionProps) {
         </div>
         <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-ash">
           <Lock className="h-3 w-3 shrink-0" /> Permanent — can&rsquo;t be changed.
+        </p>
+        <p className="mt-2 border-t border-line/40 pt-2 text-[11px] text-ash">
+          Member ID <span className="font-mono text-mercury">{memberCode}</span>
+          <span className="block text-ash/70">On store orders and support tickets.</span>
         </p>
       </div>
     );

@@ -31,6 +31,8 @@ export type StoreItem = {
   buyUrl?: string | null;
   notifyKind?: InterestKind;
   featured?: boolean;
+  soldByAntidosis?: boolean;
+  stockCount?: number | null;
 };
 
 export const CATEGORY_LABEL: Record<StoreCategory, string> = {
@@ -150,6 +152,8 @@ export function buildStoreItems(builders: PublicMeshBuilder[] | null): StoreItem
       builderName: builder.businessName,
       buyUrl: product.buyUrl,
       featured: product.featured === true,
+      soldByAntidosis: product.soldByAntidosis === true,
+      stockCount: product.stockCount ?? null,
     }))
   );
   const featured = live.filter((item) => item.featured);
@@ -202,7 +206,16 @@ function ProductCard({
         </div>
         <h3 className="mt-1.5 text-[15px] font-medium text-gold sm:text-base">{name}</h3>
         <p className="mt-1 text-sm leading-snug text-ash">{item.line}</p>
-        {item.builderName && <p className="mt-1 text-xs text-ash/80">by {item.builderName}</p>}
+        {item.soldByAntidosis ? (
+          <p className="mt-1 text-xs font-medium text-sun">
+            sold by antidosis
+            {item.stockCount !== null && item.stockCount !== undefined && item.stockCount > 0 && (
+              <span className="font-normal text-ash/80"> · {item.stockCount} left</span>
+            )}
+          </p>
+        ) : (
+          item.builderName && <p className="mt-1 text-xs text-ash/80">by {item.builderName}</p>
+        )}
         {item.delivery && <p className="mt-1.5 text-xs text-mercury/90">{item.delivery}</p>}
         <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-3">
           <span className="text-[15px] font-medium text-sun">{item.price}</span>

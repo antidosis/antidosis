@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { withApiHandler } from "@/lib/api-handler";
+import { allocateMemberCode } from "@/lib/member-code";
 import { normalizeMobile, isValidAustralianMobile } from "@/lib/mobile";
 import { prisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
@@ -69,6 +70,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
         email,
         fullName: fullName || null,
         mobile: normalizedMobile || null,
+        memberCode: await allocateMemberCode(),
       },
     });
 

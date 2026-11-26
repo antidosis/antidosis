@@ -8,6 +8,8 @@ export type ProfileTab = "public" | "directory" | "trust";
 /** Profile shape the editor needs from `/api/v1/profiles/me`. */
 export interface EditorProfile {
   id: string;
+  /** Permanent member ID ("ANT-XXXXXX") stamped on store orders and support. */
+  memberCode: string;
   fullName: string | null;
   bio: string | null;
   /** Business-facing description for the directory listing only. */

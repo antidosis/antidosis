@@ -2,12 +2,14 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import { CheckCircle2, Loader2, Mail, RadioTower, Wrench, XCircle } from "lucide-react";
+import { CheckCircle2, Loader2, Mail, Package, RadioTower, Wrench, XCircle } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
+
+import { MeshOrdersQueue } from "./mesh-orders-section";
 
 type AdminMeshBuilder = {
   id: string;
@@ -65,7 +67,7 @@ const BUILDER_TONE: Record<string, string> = {
 /** Mesh store operations: builder review queue + buyer interest list. */
 export function MeshSection() {
   const { toast } = useToast();
-  const [tab, setTab] = useState<"builders" | "interest">("builders");
+  const [tab, setTab] = useState<"builders" | "interest" | "orders">("builders");
   const [builders, setBuilders] = useState<AdminMeshBuilder[]>([]);
   const [interests, setInterests] = useState<AdminMeshInterest[]>([]);
   const [builderFilter, setBuilderFilter] = useState("pending");
@@ -180,6 +182,7 @@ export function MeshSection() {
             [
               { id: "builders", label: "Builder queue", icon: Wrench },
               { id: "interest", label: "Buyer interest", icon: Mail },
+              { id: "orders", label: "Orders", icon: Package },
             ] as const
           ).map((option) => (
             <button
@@ -200,30 +203,33 @@ export function MeshSection() {
           ))}
         </div>
         <div className="flex gap-2">
-          {(tab === "builders"
-            ? ["pending", "approved", "rejected", "suspended", "all"]
-            : ["new", "contacted", "closed", "all"]
-          ).map((option) => (
-            <button
-              key={option}
-              type="button"
-              onClick={() =>
-                tab === "builders" ? setBuilderFilter(option) : setInterestFilter(option)
-              }
-              className={cn(
-                "rounded-md px-2.5 py-1 text-xs",
-                (tab === "builders" ? builderFilter : interestFilter) === option
-                  ? "bg-sun/10 text-sun"
-                  : "text-ash hover:bg-surface hover:text-parchment"
-              )}
-            >
-              {option}
-            </button>
-          ))}
+          {tab !== "orders" &&
+            (tab === "builders"
+              ? ["pending", "approved", "rejected", "suspended", "all"]
+              : ["new", "contacted", "closed", "all"]
+            ).map((option) => (
+              <button
+                key={option}
+                type="button"
+                onClick={() =>
+                  tab === "builders" ? setBuilderFilter(option) : setInterestFilter(option)
+                }
+                className={cn(
+                  "rounded-md px-2.5 py-1 text-xs",
+                  (tab === "builders" ? builderFilter : interestFilter) === option
+                    ? "bg-sun/10 text-sun"
+                    : "text-ash hover:bg-surface hover:text-parchment"
+                )}
+              >
+                {option}
+              </button>
+            ))}
         </div>
       </div>
 
-      {loading ? (
+      {tab === "orders" ? (
+        <MeshOrdersQueue />
+      ) : loading ? (
         <div className="py-8 text-center text-sm text-ash">
           <Loader2 className="mx-auto mb-3 h-5 w-5 animate-spin" />
           loading…

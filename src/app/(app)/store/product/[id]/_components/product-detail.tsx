@@ -19,6 +19,7 @@ import { displayHostname } from "@/lib/security/link-policy";
 import { deliverySummary, paymentTermLabel, postageLine } from "@/lib/store-delivery";
 import { cn } from "@/lib/utils";
 
+import { OrderPanel } from "./order-panel";
 import { MessageSeller } from "../../../_components/message-seller";
 import { ProductArt, type ProductArtVariant } from "../../../_components/product-art";
 import { CATEGORY_LABEL, type StoreCategory } from "../../../_components/product-grid";
@@ -39,6 +40,8 @@ export type ProductPageData = {
   paymentTerms: string[];
   paymentNote: string | null;
   highlights: string[];
+  soldByAntidosis: boolean;
+  stockCount: number | null;
   seller: {
     businessName: string;
     suburb: string | null;
@@ -135,33 +138,69 @@ export function ProductDetail({ product }: { product: ProductPageData }) {
             </p>
 
             {/* Seller card */}
-            <div className="mt-4 flex items-center gap-3 rounded-lg border border-line/70 bg-inset/40 p-3">
-              <Avatar src={seller.profile.avatarUrl} name={seller.businessName} size="md" />
-              <div className="min-w-0">
-                <p className="flex items-center gap-1.5 text-[15px] font-medium text-gold">
-                  {seller.businessName}
-                  {seller.profile.isVerified && (
-                    <BadgeCheck
-                      className="h-4 w-4 shrink-0 text-mercury"
-                      aria-label="Verified member"
-                    />
-                  )}
-                </p>
-                <p className="flex flex-wrap items-center gap-x-3 text-xs text-ash">
-                  {seller.suburb && (
+            {product.soldByAntidosis ? (
+              <div className="mt-4 flex items-center gap-3 rounded-lg border border-sun/30 bg-sun/[0.05] p-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-sun/40 bg-void font-mono text-sm text-sun">
+                  A
+                </span>
+                <div className="min-w-0">
+                  <p className="flex items-center gap-1.5 text-[15px] font-medium text-gold">
+                    Sold by Antidosis
+                    <BadgeCheck className="h-4 w-4 shrink-0 text-sun" aria-label="First-party" />
+                  </p>
+                  <p className="flex flex-wrap items-center gap-x-3 text-xs text-ash">
                     <span className="inline-flex items-center gap-1">
-                      <MapPin className="h-3 w-3" /> {seller.suburb}
+                      <ShieldCheck className="h-3 w-3 text-ok" /> first-party stock — configured,
+                      tested and shipped by us
                     </span>
-                  )}
-                  <span className="inline-flex items-center gap-1">
-                    <ShieldCheck className="h-3 w-3 text-ok" /> verified antidosis builder
-                  </span>
-                </p>
+                    {product.stockCount !== null && product.stockCount > 0 && (
+                      <span className="text-sun">{product.stockCount} left in this batch</span>
+                    )}
+                  </p>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="mt-4 flex items-center gap-3 rounded-lg border border-line/70 bg-inset/40 p-3">
+                <Avatar src={seller.profile.avatarUrl} name={seller.businessName} size="md" />
+                <div className="min-w-0">
+                  <p className="flex items-center gap-1.5 text-[15px] font-medium text-gold">
+                    {seller.businessName}
+                    {seller.profile.isVerified && (
+                      <BadgeCheck
+                        className="h-4 w-4 shrink-0 text-mercury"
+                        aria-label="Verified member"
+                      />
+                    )}
+                  </p>
+                  <p className="flex flex-wrap items-center gap-x-3 text-xs text-ash">
+                    {seller.suburb && (
+                      <span className="inline-flex items-center gap-1">
+                        <MapPin className="h-3 w-3" /> {seller.suburb}
+                      </span>
+                    )}
+                    <span className="inline-flex items-center gap-1">
+                      <ShieldCheck className="h-3 w-3 text-ok" /> verified antidosis builder
+                    </span>
+                  </p>
+                </div>
+              </div>
+            )}
 
             <div className="mt-4 space-y-3">
-              <MessageSellerSlot product={product} />
+              {product.soldByAntidosis && product.priceAudCents !== null ? (
+                <>
+                  <OrderPanel
+                    productId={product.id}
+                    productName={product.name}
+                    priceAudCents={product.priceAudCents}
+                    postageAudCents={product.offerPostage ? (product.postageAudCents ?? 0) : 0}
+                    loginPath={`/store/product/${product.id}`}
+                  />
+                  <MessageSellerSlot product={product} />
+                </>
+              ) : (
+                <MessageSellerSlot product={product} />
+              )}
               {product.buyUrl && (
                 <a
                   href={product.buyUrl}
@@ -174,21 +213,38 @@ export function ProductDetail({ product }: { product: ProductPageData }) {
               )}
             </div>
 
-            <ol className="mt-4 space-y-1.5 rounded-lg border border-line/50 bg-inset/30 p-3.5 text-xs leading-relaxed text-ash">
-              <li>
-                <span className="mr-1.5 font-mono text-sun/70">1</span>
-                Message the seller — agree price, postage and payment in chat.
-              </li>
-              <li>
-                <span className="mr-1.5 font-mono text-sun/70">2</span>
-                Pay the seller directly ({product.paymentTerms.map(paymentTermLabel).join(", ")}).
-                Antidosis never processes the payment.
-              </li>
-              <li>
-                <span className="mr-1.5 font-mono text-sun/70">3</span>
-                It ships to you{product.localPickup ? " or you pick it up locally" : ""} — done.
-              </li>
-            </ol>
+            {product.soldByAntidosis ? (
+              <ol className="mt-4 space-y-1.5 rounded-lg border border-line/50 bg-inset/30 p-3.5 text-xs leading-relaxed text-ash">
+                <li>
+                  <span className="mr-1.5 font-mono text-sun/70">1</span>
+                  Order with your mesh name — the callsign the network will see.
+                </li>
+                <li>
+                  <span className="mr-1.5 font-mono text-sun/70">2</span>
+                  Pay by PayID or bank transfer, quoting your order reference.
+                </li>
+                <li>
+                  <span className="mr-1.5 font-mono text-sun/70">3</span>
+                  We flash, test and ship — tracking lands in your inbox.
+                </li>
+              </ol>
+            ) : (
+              <ol className="mt-4 space-y-1.5 rounded-lg border border-line/50 bg-inset/30 p-3.5 text-xs leading-relaxed text-ash">
+                <li>
+                  <span className="mr-1.5 font-mono text-sun/70">1</span>
+                  Message the seller — agree price, postage and payment in chat.
+                </li>
+                <li>
+                  <span className="mr-1.5 font-mono text-sun/70">2</span>
+                  Pay the seller directly ({product.paymentTerms.map(paymentTermLabel).join(", ")}).
+                  Antidosis never processes the payment.
+                </li>
+                <li>
+                  <span className="mr-1.5 font-mono text-sun/70">3</span>
+                  It ships to you{product.localPickup ? " or you pick it up locally" : ""} — done.
+                </li>
+              </ol>
+            )}
           </div>
         </div>
 
@@ -256,7 +312,9 @@ export function ProductDetail({ product }: { product: ProductPageData }) {
                 <p className="mt-2 text-sm text-ash">{product.paymentNote}</p>
               )}
               <p className="mt-3 border-t border-line/50 pt-3 text-xs leading-relaxed text-ash/80">
-                Payment happens directly with the seller — Antidosis never holds your money.
+                {product.soldByAntidosis
+                  ? "You pay Antidosis directly by PayID or bank transfer, quoting your order reference — payment is matched to your order before anything ships."
+                  : "Payment happens directly with the seller — Antidosis never holds your money."}
               </p>
             </section>
           </div>
@@ -265,8 +323,9 @@ export function ProductDetail({ product }: { product: ProductPageData }) {
         {/* Fine print + report */}
         <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-line/50 pt-4">
           <p className="max-w-xl text-xs leading-relaxed text-ash/70">
-            Antidosis is not the seller of this item. Price, delivery and warranty are between you
-            and {seller.businessName} — agree the details in chat before paying.
+            {product.soldByAntidosis
+              ? "Sold and shipped by Martin Khoury trading as antidosis (ABN 96 557 008 393). Australian Consumer Law applies — faulty units are replaced or refunded. Your unit is configured to your mesh name on the Australia Mid profile (915.075 MHz) before dispatch; re-flashing it yourself to other firmware or profiles is your choice and leaves our setup support."
+              : `Antidosis is not the seller of this item. Price, delivery and warranty are between you and ${seller.businessName} — agree the details in chat before paying.`}
           </p>
           <ReportButton
             targetType="profile"

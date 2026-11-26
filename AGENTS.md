@@ -232,7 +232,8 @@ needs/[id]/_components/
 - `Report` — user-filed trust-and-safety reports (`/api/v1/reports`, admin queue at `/api/v1/admin/reports`)
 - `DeviceToken` — push notification device registrations (`/api/v1/devices`)
 - `MeshInterest` — email-only mesh pilot interest capture (`POST /api/v1/store/interest`, honeypot + rate-limited, upsert on email+kind)
-- `MeshBuilder` / `MeshProduct` — verified node builders and their product shelves. Apply at `/store#builders` (mobile-verified members only), manage via dashboard "Mesh Store" tab, admin review queue at `/admin` → Mesh store. Products are listings only — builders sell direct; Antidosis is never the merchant
+- `MeshBuilder` / `MeshProduct` — verified node builders and their product shelves. Apply at `/store#builders` (mobile-verified members only), manage via dashboard "Mesh Store" tab, admin review queue at `/admin` → Mesh store. Builder products are listings only — builders sell direct; Antidosis is never the merchant **for those**. Products flagged `soldByAntidosis` are first-party stock (seed batches): orderable on-site with a real `stockCount`
+- `MeshOrder` — first-party store orders (`POST /api/v1/store/orders`, mobile-verified customers only). Human ref `MESH-XXXXXX` quoted on PayID/bank transfers (details from `MESH_STORE_*` env vars); status pipeline `placed → paid → preparing → shipped → delivered` (+ `cancelled`, which restores stock — never reopen a cancelled order). Buyers track orders in dashboard "Store Orders"; admins fulfil at `/admin` → Mesh store → Orders. Every profile carries a permanent `memberCode` (`ANT-XXXXXX`, `src/lib/member-code.ts`) stamped on orders and shown in the dashboard identity panel
 
 ### Migrations
 

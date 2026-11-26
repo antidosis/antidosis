@@ -159,9 +159,11 @@ export function StoreClient() {
 
         {/* Fine print */}
         <p className="mt-10 text-center text-sm leading-relaxed text-ash/70">
-          915–928 MHz ISM in Australia is licence-free under ACMA LIPD class conditions. Antidosis
-          is not the seller of builder-listed products — pricing, warranty and delivery are between
-          you and the builder.{" "}
+          915–928 MHz ISM in Australia is licence-free under ACMA LIPD class conditions. Items
+          marked <span className="text-sun">sold by antidosis</span> are our own stock — ordered
+          on-site, paid by PayID or bank transfer, covered by Australian Consumer Law. Everything
+          else is sold by independent builders — pricing, warranty and delivery are between you and
+          the builder.{" "}
           <Link href="/safety" className="underline-offset-4 hover:text-gold hover:underline">
             How we keep the platform safe
           </Link>

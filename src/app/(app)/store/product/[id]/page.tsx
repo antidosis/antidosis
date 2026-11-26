@@ -78,6 +78,8 @@ export default async function ProductPage({ params }: { params: { id: string } }
     paymentTerms: listing.paymentTerms,
     paymentNote: listing.paymentNote,
     highlights: listing.highlights,
+    soldByAntidosis: listing.soldByAntidosis,
+    stockCount: listing.stockCount,
     seller: {
       businessName: builder.businessName,
       suburb: builder.suburb,

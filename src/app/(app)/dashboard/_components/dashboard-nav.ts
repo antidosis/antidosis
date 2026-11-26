@@ -6,6 +6,7 @@ import {
   Inbox,
   LayoutDashboard,
   LifeBuoy,
+  Package,
   Radio,
   Settings,
   Store,
@@ -18,12 +19,13 @@ export type DashboardTabId =
   | "offers"
   | "contracts"
   | "watchlist"
-  | "profile"
   | "inbox"
   | "relay"
+  | "orders"
   | "mesh-store"
-  | "support"
-  | "settings";
+  | "profile"
+  | "settings"
+  | "support";
 
 export interface DashboardTab {
   id: DashboardTabId;
@@ -90,6 +92,14 @@ export const DASHBOARD_TABS: DashboardTab[] = [
     icon: Radio,
     section: "network",
     subtitle: "Direct messages, channels, friends, blocks and recent relay activity",
+  },
+  {
+    id: "orders",
+    label: "Store Orders",
+    shortLabel: "Orders",
+    icon: Package,
+    section: "network",
+    subtitle: "Mesh store purchases — payment, flashing and delivery status",
   },
   {
     id: "mesh-store",

@@ -30,6 +30,8 @@ export type MeshProductListing = {
   paymentTerms: string[];
   featuredUntil?: string | null;
   featured?: boolean;
+  soldByAntidosis?: boolean;
+  stockCount?: number | null;
 };
 
 export type PublicMeshBuilder = {
