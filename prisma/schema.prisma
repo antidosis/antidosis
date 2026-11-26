@@ -14,7 +14,7 @@ model Profile {
   handle                 String?   @unique
   fullName               String?   @map("full_name")
   bio                    String?
-  directoryBio           String?               @map("directory_bio")
+  directoryBio           String?   @map("directory_bio")
   avatarUrl              String?   @map("avatar_url")
   locationName           String?   @map("location_name")
   latitude               Float?
@@ -51,6 +51,9 @@ model Profile {
   jobsCompleted          Int       @default(0) @map("jobs_completed")
   abn                    String?
   accountType            String    @default("individual") @map("account_type")
+  // How many directory specialty slots this account may use. 1 = free tier;
+  // slots 2-3 become the paid unlock. Enforced in the specialties API.
+  specialtySlotsUnlocked Int       @default(1) @map("specialty_slots_unlocked")
   abnVerified            Boolean   @default(false) @map("abn_verified")
   audienceSize           Int?      @map("audience_size")
   // Trust-and-safety reporter reputation: admins score reports on resolution
@@ -69,32 +72,32 @@ model Profile {
   createdAt              DateTime  @default(now()) @map("created_at")
   updatedAt              DateTime  @updatedAt @map("updated_at")
 
-  skills           Skill[]
-  socialLinks      SocialLink[]
-  credentials      Credential[]
-  needsPosted      Need[]                @relation("NeedPoster")
-  acceptances      Acceptance[]
-  contractsAsA     Contract[]            @relation("ContractPartyA")
-  contractsAsB     Contract[]            @relation("ContractPartyB")
-  contractEvents   ContractEvent[]
-  reviewsGiven     Review[]              @relation("ReviewGiver")
-  reviewsReceived  Review[]              @relation("ReviewReceiver")
-  messages         Message[]
-  needMessages     NeedMessage[]
-  notifications    Notification[]
-  terminalMessages TerminalMessage[]
-  dmThreadsAsA     DirectMessageThread[] @relation("DMUserA")
-  dmThreadsAsB     DirectMessageThread[] @relation("DMUserB")
-  directMessages   DirectMessage[]
-  blocksInitiated  Block[]               @relation("blocksInitiated")
-  blocksReceived   Block[]               @relation("blocksReceived")
-  friendsAsA       Friend[]              @relation("friendsAsA")
-  friendsAsB       Friend[]              @relation("friendsAsB")
-  reportsFiled     Report[]
-  supportRequests  SupportRequest[]
+  skills               Skill[]
+  socialLinks          SocialLink[]
+  credentials          Credential[]
+  needsPosted          Need[]                @relation("NeedPoster")
+  acceptances          Acceptance[]
+  contractsAsA         Contract[]            @relation("ContractPartyA")
+  contractsAsB         Contract[]            @relation("ContractPartyB")
+  contractEvents       ContractEvent[]
+  reviewsGiven         Review[]              @relation("ReviewGiver")
+  reviewsReceived      Review[]              @relation("ReviewReceiver")
+  messages             Message[]
+  needMessages         NeedMessage[]
+  notifications        Notification[]
+  terminalMessages     TerminalMessage[]
+  dmThreadsAsA         DirectMessageThread[] @relation("DMUserA")
+  dmThreadsAsB         DirectMessageThread[] @relation("DMUserB")
+  directMessages       DirectMessage[]
+  blocksInitiated      Block[]               @relation("blocksInitiated")
+  blocksReceived       Block[]               @relation("blocksReceived")
+  friendsAsA           Friend[]              @relation("friendsAsA")
+  friendsAsB           Friend[]              @relation("friendsAsB")
+  reportsFiled         Report[]
+  supportRequests      SupportRequest[]
   directorySpecialties DirectorySpecialty[]
-  deviceTokens     DeviceToken[]
-  needWatches      NeedWatch[]
+  deviceTokens         DeviceToken[]
+  needWatches          NeedWatch[]
 
   @@index([isPro])
   @@index([stripeCustomerId])
@@ -254,9 +257,9 @@ model Contract {
   createdAt              DateTime  @default(now()) @map("created_at")
   updatedAt              DateTime  @updatedAt @map("updated_at")
 
-  need     Need?     @relation(fields: [needId], references: [id], onDelete: Cascade)
-  partyA   Profile   @relation("ContractPartyA", fields: [partyAId], references: [id], onDelete: Cascade)
-  partyB   Profile?  @relation("ContractPartyB", fields: [partyBId], references: [id], onDelete: Cascade)
+  need     Need?           @relation(fields: [needId], references: [id], onDelete: Cascade)
+  partyA   Profile         @relation("ContractPartyA", fields: [partyAId], references: [id], onDelete: Cascade)
+  partyB   Profile?        @relation("ContractPartyB", fields: [partyBId], references: [id], onDelete: Cascade)
   messages Message[]
   reviews  Review[]
   events   ContractEvent[]
@@ -273,16 +276,16 @@ model Contract {
 // written autonomously at every mutation point. Never updated, never deleted
 // (except with the contract itself).
 model ContractEvent {
-  id           String    @id @default(uuid())
-  contractId   String    @map("contract_id")
-  contract     Contract  @relation(fields: [contractId], references: [id], onDelete: Cascade)
-  actorId      String?   @map("actor_id")
-  actor        Profile?  @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  id           String   @id @default(uuid())
+  contractId   String   @map("contract_id")
+  contract     Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  actorId      String?  @map("actor_id")
+  actor        Profile? @relation(fields: [actorId], references: [id], onDelete: SetNull)
   action       String
   detail       Json?
-  statusBefore String?   @map("status_before")
-  statusAfter  String?   @map("status_after")
-  createdAt    DateTime  @default(now()) @map("created_at")
+  statusBefore String?  @map("status_before")
+  statusAfter  String?  @map("status_after")
+  createdAt    DateTime @default(now()) @map("created_at")
 
   @@index([contractId, createdAt])
   @@map("contract_events")

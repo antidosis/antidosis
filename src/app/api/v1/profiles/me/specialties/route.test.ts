@@ -13,6 +13,8 @@ const mockSpecialtyCreate = vi.fn();
 const mockSpecialtyCount = vi.fn();
 /** ABN returned when the account-type sync reads the profile — set per test. */
 let syncAbn: string | null = "12345678901";
+/** Slots the member has unlocked — set per test (1 = free tier). */
+let unlockedSlots = 1;
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
@@ -45,12 +47,12 @@ function makeRequest(url: string, init?: RequestInit): NextRequest {
 
 function authed() {
   mockGetUser.mockResolvedValue({ data: { user: { id: "user-1" } }, error: null });
-  // requireProfile reads { id, bannedAt }; the account-type sync reads
-  // { accountType, abn } — dispatch on the select shape.
+  // requireProfile reads { id, bannedAt, specialtySlotsUnlocked }; the
+  // account-type sync reads { accountType, abn } — dispatch on the select shape.
   mockProfileFindUnique.mockImplementation((args: { select?: Record<string, boolean> }) =>
     args?.select?.accountType !== undefined
       ? { accountType: "individual", abn: syncAbn }
-      : { id: "profile-1", bannedAt: null }
+      : { id: "profile-1", bannedAt: null, specialtySlotsUnlocked: unlockedSlots }
   );
 }
 
@@ -64,6 +66,7 @@ const PLUMBER_ATTRIBUTES = {
 describe("GET /api/v1/profiles/me/specialties", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    unlockedSlots = 1;
   });
 
   it("returns 401 when unauthenticated", async () => {
@@ -85,12 +88,23 @@ describe("GET /api/v1/profiles/me/specialties", () => {
       expect.objectContaining({ where: { profileId: "profile-1" }, orderBy: { slot: "asc" } })
     );
   });
+
+  it("reports how many slots the member has unlocked", async () => {
+    unlockedSlots = 3;
+    authed();
+    mockSpecialtyFindMany.mockResolvedValue([]);
+    const res = await GET(makeRequest("http://localhost/api/v1/profiles/me/specialties"));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.unlockedSlots).toBe(3);
+  });
 });
 
 describe("POST /api/v1/profiles/me/specialties", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     syncAbn = "12345678901";
+    unlockedSlots = 1;
     mockSpecialtyCount.mockResolvedValue(1);
   });
 
@@ -249,6 +263,94 @@ describe("POST /api/v1/profiles/me/specialties", () => {
       })
     );
     expect(res.status).toBe(409);
+    expect(mockSpecialtyCreate).not.toHaveBeenCalled();
+  });
+
+  it("allocates a different industry to slot 2 when the member has unlocked it", async () => {
+    unlockedSlots = 2;
+    authed();
+    mockSpecialtyFindMany.mockResolvedValue([{ slot: 1, profession: "plumber" }]);
+    mockSpecialtyCreate.mockResolvedValue({ id: "s2", profession: "web_developer", slot: 2 });
+
+    const res = await POST(
+      makeRequest("http://localhost/api/v1/profiles/me/specialties", {
+        method: "POST",
+        body: JSON.stringify({ profession: "web developer" }),
+      })
+    );
+
+    expect(res.status).toBe(201);
+    expect(mockSpecialtyCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ profession: "web_developer", slot: 2 }),
+      })
+    );
+  });
+
+  it("spills a fifth same-industry profession into the next unlocked slot", async () => {
+    unlockedSlots = 2;
+    authed();
+    mockSpecialtyFindMany.mockResolvedValue([
+      { slot: 1, profession: "plumber" },
+      { slot: 1, profession: "electrician" },
+      { slot: 1, profession: "carpenter" },
+      { slot: 1, profession: "handyman" },
+    ]);
+    mockSpecialtyCreate.mockResolvedValue({ id: "s5", profession: "painter", slot: 2 });
+
+    const res = await POST(
+      makeRequest("http://localhost/api/v1/profiles/me/specialties", {
+        method: "POST",
+        body: JSON.stringify({ profession: "painter" }),
+      })
+    );
+
+    expect(res.status).toBe(201);
+    expect(mockSpecialtyCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ profession: "painter", slot: 2 }),
+      })
+    );
+  });
+
+  it("joins the slot already dedicated to the profession's industry", async () => {
+    unlockedSlots = 2;
+    authed();
+    mockSpecialtyFindMany.mockResolvedValue([
+      { slot: 1, profession: "plumber" },
+      { slot: 2, profession: "web_developer" },
+    ]);
+    mockSpecialtyCreate.mockResolvedValue({ id: "s3", profession: "electrician", slot: 1 });
+
+    const res = await POST(
+      makeRequest("http://localhost/api/v1/profiles/me/specialties", {
+        method: "POST",
+        body: JSON.stringify({ profession: "electrician" }),
+      })
+    );
+
+    expect(res.status).toBe(201);
+    expect(mockSpecialtyCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ profession: "electrician", slot: 1 }),
+      })
+    );
+  });
+
+  it("keeps slot 2 locked for members on the free tier even when slot 1 has room elsewhere", async () => {
+    authed();
+    mockSpecialtyFindMany.mockResolvedValue([{ slot: 1, profession: "plumber" }]);
+
+    const res = await POST(
+      makeRequest("http://localhost/api/v1/profiles/me/specialties", {
+        method: "POST",
+        body: JSON.stringify({ profession: "web developer" }),
+      })
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(409);
+    expect(body.code).toBe("INDUSTRY_MISMATCH");
     expect(mockSpecialtyCreate).not.toHaveBeenCalled();
   });
 

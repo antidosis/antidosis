@@ -6,7 +6,6 @@ import { prisma } from "@/lib/prisma";
 import {
   getProfession,
   FREE_SLOT_PROFESSIONS,
-  FREE_SPECIALTY_SLOTS,
   MAX_SPECIALTY_SLOTS,
   INDUSTRIES,
   industryOfProfession,
@@ -22,13 +21,13 @@ const HEADLINE_MAX = 120;
 async function requireProfile(userId: string) {
   const profile = await prisma.profile.findUnique({
     where: { userId },
-    select: { id: true, bannedAt: true },
+    select: { id: true, bannedAt: true, specialtySlotsUnlocked: true },
   });
   if (!profile || profile.bannedAt) return null;
   return profile;
 }
 
-/** List the signed-in member's directory specialties. */
+/** List the signed-in member's directory specialties + how many slots they hold. */
 export const GET = withApiHandler(async () => {
   const supabase = await createClient();
   const {
@@ -43,7 +42,10 @@ export const GET = withApiHandler(async () => {
     where: { profileId: profile.id },
     orderBy: { slot: "asc" },
   });
-  return NextResponse.json({ specialties });
+  return NextResponse.json({
+    specialties,
+    unlockedSlots: Math.min(Math.max(profile.specialtySlotsUnlocked, 1), MAX_SPECIALTY_SLOTS),
+  });
 });
 
 interface SpecialtyBody {
@@ -164,40 +166,45 @@ export const POST = withApiHandler(async (req: NextRequest) => {
     );
   }
 
-  // Slot allocation: a slot is dedicated to one industry and holds up to
-  // FREE_SLOT_PROFESSIONS professions — "web developer + app developer" fits
-  // the free slot together, a plumber who also gardens needs slot 2. Custom
-  // (free-typed) professions carry no industry, so they join the free slot.
+  // Slot allocation: each slot is dedicated to one industry and holds up to
+  // FREE_SLOT_PROFESSIONS professions — "web developer + app developer" fit
+  // the free slot together, a plumber who also gardens lands in the next
+  // unlocked slot. Custom (free-typed) professions carry no industry, so they
+  // join the first slot with room.
+  const unlockedSlots = Math.min(Math.max(profile.specialtySlotsUnlocked, 1), MAX_SPECIALTY_SLOTS);
   const newIndustry = industryOfProfession(professionKey);
-  const slotOne = existing.filter((specialty) => specialty.slot === FREE_SPECIALTY_SLOTS);
-  const slotOneIndustries = new Set(
-    slotOne
-      .map((specialty) => industryOfProfession(specialty.profession))
-      .filter((industry): industry is NonNullable<typeof industry> => Boolean(industry))
-  );
 
-  let slot: number;
-  if (slotOne.length < FREE_SLOT_PROFESSIONS) {
-    if (newIndustry && slotOneIndustries.size > 0 && !slotOneIndustries.has(newIndustry)) {
-      const current = INDUSTRIES[[...slotOneIndustries][0]!].label;
+  let slot: number | null = null;
+  let conflictIndustry: keyof typeof INDUSTRIES | null = null;
+  for (let candidate = 1; candidate <= unlockedSlots; candidate += 1) {
+    const items = existing.filter((specialty) => specialty.slot === candidate);
+    if (items.length >= FREE_SLOT_PROFESSIONS) continue;
+    const industries = new Set(
+      items
+        .map((specialty) => industryOfProfession(specialty.profession))
+        .filter((industry): industry is NonNullable<typeof industry> => Boolean(industry))
+    );
+    if (newIndustry && industries.size > 0 && !industries.has(newIndustry)) {
+      conflictIndustry = conflictIndustry ?? [...industries][0]!;
+      continue;
+    }
+    slot = candidate;
+    break;
+  }
+
+  if (slot === null) {
+    if (conflictIndustry && newIndustry) {
+      const current = INDUSTRIES[conflictIndustry].label;
       const next = INDUSTRIES[newIndustry].label;
       return NextResponse.json(
         {
-          error: `Your free slot is dedicated to ${current}. ${next} needs its own slot — extra slots unlock soon.`,
+          error: `Your slot is dedicated to ${current}. ${next} needs its own slot — extra slots unlock soon.`,
           code: "INDUSTRY_MISMATCH",
         },
         { status: 409 }
       );
     }
-    slot = FREE_SPECIALTY_SLOTS;
-  } else {
-    const usedSlots = new Set(existing.map((specialty) => specialty.slot));
-    slot = FREE_SPECIALTY_SLOTS + 1;
-    while (usedSlots.has(slot) && slot <= MAX_SPECIALTY_SLOTS) slot += 1;
-    if (slot > MAX_SPECIALTY_SLOTS) {
-      return NextResponse.json({ error: "All specialty slots are in use" }, { status: 409 });
-    }
-    // Slots beyond the free tier are locked until the paid unlock ships.
+    // Every unlocked slot is full — more slots are the paid unlock.
     return NextResponse.json(
       { error: "Additional slots unlock soon — paid placement is coming", code: "SLOT_LOCKED" },
       { status: 402 }

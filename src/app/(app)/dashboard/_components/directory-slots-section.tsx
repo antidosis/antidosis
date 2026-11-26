@@ -87,7 +87,7 @@ function specialtyComplete(specialty: SpecialtyRecord): boolean {
 }
 
 export function DirectorySlotsSection({ onSlotChange, identity }: DirectorySlotsSectionProps) {
-  const { data, isLoading } = useApi<{ specialties: SpecialtyRecord[] }>(
+  const { data, isLoading } = useApi<{ specialties: SpecialtyRecord[]; unlockedSlots?: number }>(
     "/api/v1/profiles/me/specialties"
   );
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -96,28 +96,44 @@ export function DirectorySlotsSection({ onSlotChange, identity }: DirectorySlots
   const [autoEditId, setAutoEditId] = useState<string | null>(null);
 
   const specialties = useMemo(() => data?.specialties ?? [], [data]);
-  const slotOne = useMemo(
-    () => specialties.filter((specialty) => specialty.slot === 1),
+  /** How many slots this account may use — 1 on the free tier. */
+  const unlocked = Math.min(Math.max(data?.unlockedSlots ?? 1, 1), MAX_SPECIALTY_SLOTS);
+  const bySlot = useMemo(() => {
+    const groups = new Map<number, SpecialtyRecord[]>();
+    for (const specialty of specialties) {
+      const list = groups.get(specialty.slot) ?? [];
+      list.push(specialty);
+      groups.set(specialty.slot, list);
+    }
+    return groups;
+  }, [specialties]);
+  const slotOne = useMemo(() => bySlot.get(1) ?? [], [bySlot]);
+  /** Room left across every unlocked slot. */
+  const totalRemaining = useMemo(() => {
+    let remaining = 0;
+    for (let slot = 1; slot <= unlocked; slot += 1) {
+      remaining += Math.max(0, FREE_SLOT_PROFESSIONS - (bySlot.get(slot)?.length ?? 0));
+    }
+    return remaining;
+  }, [bySlot, unlocked]);
+  const incompleteCount = useMemo(
+    () => specialties.filter((specialty) => !specialtyComplete(specialty)).length,
     [specialties]
   );
-  const slotOneFull = slotOne.length >= FREE_SLOT_PROFESSIONS;
-  const incompleteCount = useMemo(
-    () => slotOne.filter((specialty) => !specialtyComplete(specialty)).length,
-    [slotOne]
-  );
-  /** The single industry slot 1 is dedicated to, once professions are claimed. */
-  const slotIndustry = useMemo(() => {
+  /** With a single unlocked slot the picker is confined to its industry. */
+  const lockedIndustry = useMemo(() => {
+    if (unlocked > 1) return null;
     const industries = new Set(
       slotOne
         .map((specialty) => industryOfProfession(specialty.profession))
         .filter((key): key is keyof typeof INDUSTRIES => key !== null)
     );
     return industries.size === 1 ? ([...industries][0] as keyof typeof INDUSTRIES) : null;
-  }, [slotOne]);
+  }, [slotOne, unlocked]);
 
   useEffect(() => {
-    onSlotChange?.(slotOne.length > 0);
-  }, [slotOne.length, onSlotChange]);
+    onSlotChange?.(specialties.length > 0);
+  }, [specialties.length, onSlotChange]);
 
   return (
     <section className="vessel overflow-hidden rounded-xl border-aero/25">
@@ -135,114 +151,120 @@ export function DirectorySlotsSection({ onSlotChange, identity }: DirectorySlots
             </p>
           </div>
           <Badge variant="quintessence" className="text-xs">
-            {slotOne.length}/{FREE_SLOT_PROFESSIONS} professions · {MAX_SPECIALTY_SLOTS} slots
+            {specialties.length}/{unlocked * FREE_SLOT_PROFESSIONS} professions · {unlocked}/
+            {MAX_SPECIALTY_SLOTS} slots unlocked
           </Badge>
         </div>
       </div>
 
       <div className="p-4 sm:p-5">
-        {/* Slot strip — the three slots always visible up top */}
+        {/* Slot strip — every slot visible; empty unlocked slots ARE the claim button */}
         <div className="grid gap-3 sm:grid-cols-3">
-          {/* Slot 1 — free, live */}
-          <div
-            className={cn(
-              "rounded-lg border p-3.5",
-              slotOne.length > 0
-                ? "border-aero/40 bg-aero/[0.05]"
-                : "border-dashed border-aero/30 bg-aero/[0.03]"
-            )}
-          >
-            <div className="flex items-center justify-between gap-2">
-              <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-aero">
-                <BriefcaseBusiness className="h-3.5 w-3.5" /> Slot 01 · Free
-              </span>
-              {slotOne.length > 0 ? (
-                <span className="h-2 w-2 rounded-full bg-ok shadow-[0_0_6px_rgba(61,220,151,0.8)]" />
+          {Array.from({ length: MAX_SPECIALTY_SLOTS }, (_, index) => index + 1).map((slot) => {
+            const items = bySlot.get(slot) ?? [];
+            const isUnlocked = slot <= unlocked;
+            const slotTitle =
+              slot === 1 ? (
+                <span className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-aero">
+                  <BriefcaseBusiness className="h-3.5 w-3.5" /> Slot 01 · Free
+                </span>
               ) : (
-                <Badge variant="quintessence" className="text-[10px]">
-                  empty
-                </Badge>
-              )}
-            </div>
-            <p className="mt-2 text-sm font-medium text-gold">
-              {slotOne.length > 0
-                ? `${slotOne.length} of ${FREE_SLOT_PROFESSIONS} professions live`
-                : "Claim your specialty"}
-            </p>
-            <p className="mt-0.5 text-xs leading-relaxed text-ash">
-              {slotOne.length > 0
-                ? industryLabel(slotOne)
-                : "One industry, up to 4 professions — free forever."}
-            </p>
-          </div>
-
-          {/* Slots 2–3 — locked until paid unlocks land */}
-          {[2, 3].map((slot) => (
-            <div
-              key={slot}
-              className="relative flex flex-col justify-between rounded-lg border border-line/60 bg-surface/25 p-3.5"
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-ash">
+                <span
+                  className={cn(
+                    "font-mono text-[10px] uppercase tracking-[0.2em]",
+                    isUnlocked ? "text-aero" : "text-ash"
+                  )}
+                >
                   Slot 0{slot}
                 </span>
-                <span className="inline-flex items-center gap-1 rounded-full border border-line px-2 py-0.5 text-[10px] uppercase tracking-wider text-ash">
-                  <Lock className="h-3 w-3" /> Locked
-                </span>
-              </div>
-              <div>
-                <p className="mt-2 text-sm font-medium text-ash">{SLOT_NAMES[slot - 1]}</p>
-                <p className="mt-0.5 text-xs leading-relaxed text-ash/80">
-                  {slot === 2
-                    ? "Advertise another industry — for example a plumber who also does lawn care."
-                    : "Go wider again — for example a cleaner who also walks dogs."}
-                </p>
-              </div>
-              {lockedInfo === slot ? (
-                <p className="mt-2 rounded-md border border-sun/25 bg-sun/[0.06] p-2 text-xs leading-relaxed text-sun">
-                  Paid slot unlocks are coming soon — a small one-off fee opens an extra industry
-                  slot.
-                </p>
-              ) : (
+              );
+
+            if (isUnlocked && items.length > 0) {
+              return (
+                <div key={slot} className="rounded-lg border border-aero/40 bg-aero/[0.05] p-3.5">
+                  <div className="flex items-center justify-between gap-2">
+                    {slotTitle}
+                    <span className="h-2 w-2 rounded-full bg-ok shadow-[0_0_6px_rgba(61,220,151,0.8)]" />
+                  </div>
+                  <p className="mt-2 text-sm font-medium text-gold">
+                    {items.length} of {FREE_SLOT_PROFESSIONS} professions live
+                  </p>
+                  <p className="mt-0.5 text-xs leading-relaxed text-ash">{industryLabel(items)}</p>
+                </div>
+              );
+            }
+
+            if (isUnlocked) {
+              return (
                 <button
+                  key={slot}
                   type="button"
-                  onClick={() => setLockedInfo(lockedInfo === slot ? null : slot)}
-                  className="mt-2 inline-flex items-center gap-1 self-start text-xs font-medium text-ash transition-colors hover:text-sun"
+                  onClick={() => setPickerOpen(true)}
+                  disabled={isLoading || pickerOpen}
+                  className={cn(
+                    "group rounded-lg border-2 border-dashed border-aero/30 bg-aero/[0.03] p-3.5 text-left transition-colors",
+                    "hover:border-aero/60 hover:bg-aero/[0.06] disabled:opacity-50"
+                  )}
                 >
-                  Notify me <ArrowRight className="h-3 w-3" />
+                  <div className="flex items-center justify-between gap-2">
+                    {slotTitle}
+                    <Badge variant="quintessence" className="text-[10px]">
+                      empty
+                    </Badge>
+                  </div>
+                  <p className="mt-2 flex items-center gap-1.5 text-sm font-medium text-gold">
+                    <Sparkles className="h-3.5 w-3.5 text-aero transition-transform group-hover:scale-110" />
+                    {slot === 1 ? "Claim your specialty" : "Claim another industry"}
+                  </p>
+                  <p className="mt-0.5 text-xs leading-relaxed text-ash">
+                    {slot === 1
+                      ? "Tap to browse industries — up to 4 professions, free forever."
+                      : "Tap to pick an industry — up to 4 professions in this slot."}
+                  </p>
                 </button>
-              )}
-            </div>
-          ))}
+              );
+            }
+
+            return (
+              <div
+                key={slot}
+                className="relative flex flex-col justify-between rounded-lg border border-line/60 bg-surface/25 p-3.5"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  {slotTitle}
+                  <span className="inline-flex items-center gap-1 rounded-full border border-line px-2 py-0.5 text-[10px] uppercase tracking-wider text-ash">
+                    <Lock className="h-3 w-3" /> Locked
+                  </span>
+                </div>
+                <div>
+                  <p className="mt-2 text-sm font-medium text-ash">{SLOT_NAMES[slot - 1]}</p>
+                  <p className="mt-0.5 text-xs leading-relaxed text-ash/80">
+                    {slot === 2
+                      ? "Advertise another industry — for example a plumber who also does lawn care."
+                      : "Go wider again — for example a cleaner who also walks dogs."}
+                  </p>
+                </div>
+                {lockedInfo === slot ? (
+                  <p className="mt-2 rounded-md border border-sun/25 bg-sun/[0.06] p-2 text-xs leading-relaxed text-sun">
+                    Paid slot unlocks are coming soon — a small one-off fee opens an extra industry
+                    slot.
+                  </p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setLockedInfo(lockedInfo === slot ? null : slot)}
+                    className="mt-2 inline-flex items-center gap-1 self-start text-xs font-medium text-ash transition-colors hover:text-sun"
+                  >
+                    Notify me <ArrowRight className="h-3 w-3" />
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
 
-        {/* Claim CTA when slot 1 is empty */}
-        {slotOne.length === 0 && !pickerOpen && (
-          <button
-            type="button"
-            onClick={() => setPickerOpen(true)}
-            disabled={isLoading}
-            className={cn(
-              "group mt-3 flex w-full items-center justify-between gap-4 rounded-lg border-2 border-dashed border-aero/30 bg-aero/[0.03] p-4 text-left transition-colors",
-              "hover:border-aero/60 hover:bg-aero/[0.06] disabled:opacity-50"
-            )}
-          >
-            <span>
-              <span className="block text-sm font-medium text-gold">
-                Pick an industry, then the professions you offer
-              </span>
-              <span className="mt-0.5 block text-xs text-ash">
-                Web developer and app developer share one slot, for example.
-              </span>
-            </span>
-            <span className="inline-flex shrink-0 items-center gap-1.5 text-sm font-medium text-aero">
-              <Sparkles className="h-4 w-4" /> Browse industries
-            </span>
-          </button>
-        )}
-
-        {/* Claimed professions — compact rows, expand to edit */}
-        {slotOne.length > 0 && (
+        {/* Claimed professions — grouped per slot, expand to edit */}
+        {specialties.length > 0 && (
           <>
             {incompleteCount > 0 && (
               <div className="mt-3 flex items-start gap-3 rounded-lg border border-sun/40 bg-sun/[0.07] p-3.5">
@@ -262,32 +284,45 @@ export function DirectorySlotsSection({ onSlotChange, identity }: DirectorySlots
                 </p>
               </div>
             )}
-            <div className="mt-3 divide-y divide-line/40 rounded-lg border border-line/70 bg-surface/20">
-              {slotOne.map((specialty) => (
-                <SpecialtyRow
-                  key={specialty.id}
-                  specialty={specialty}
-                  startEditing={specialty.id === autoEditId}
-                />
+            {[...bySlot.entries()]
+              .sort(([a], [b]) => a - b)
+              .map(([slot, items]) => (
+                <div key={slot} className="mt-3">
+                  {unlocked > 1 && (
+                    <p className="mb-1.5 font-mono text-[10px] uppercase tracking-[0.2em] text-aero">
+                      Slot 0{slot} · {industryLabel(items)}
+                    </p>
+                  )}
+                  <div className="divide-y divide-line/40 rounded-lg border border-line/70 bg-surface/20">
+                    {items.map((specialty) => (
+                      <SpecialtyRow
+                        key={specialty.id}
+                        specialty={specialty}
+                        startEditing={specialty.id === autoEditId}
+                      />
+                    ))}
+                  </div>
+                </div>
               ))}
-              {!slotOneFull && !pickerOpen && (
-                <div className="px-4 py-2.5">
+            {!pickerOpen &&
+              (totalRemaining > 0 ? (
+                <div className="mt-2.5">
                   <button
                     type="button"
                     onClick={() => setPickerOpen(true)}
                     className="inline-flex items-center gap-1 text-xs font-medium text-aero transition-colors hover:text-gold"
                   >
-                    <Plus className="h-3.5 w-3.5" /> Add another profession (
-                    {FREE_SLOT_PROFESSIONS - slotOne.length} left in this slot)
+                    <Plus className="h-3.5 w-3.5" /> Add another profession ({totalRemaining} left
+                    across your slots)
                   </button>
                 </div>
-              )}
-              {slotOneFull && (
-                <p className="px-4 py-2.5 text-xs text-ash">
-                  This slot is full — extra slots unlock soon for another industry.
+              ) : (
+                <p className="mt-2.5 text-xs text-ash">
+                  {unlocked < MAX_SPECIALTY_SLOTS
+                    ? "Your slots are full — extra slots unlock soon for more industries."
+                    : "All slots are full."}
                 </p>
-              )}
-            </div>
+              ))}
 
             {/* Business identity — claimed with the slot, not buried further down */}
             {identity && (
@@ -359,9 +394,9 @@ export function DirectorySlotsSection({ onSlotChange, identity }: DirectorySlots
 
       {pickerOpen && (
         <ProfessionPicker
-          existing={slotOne.map((specialty) => specialty.profession)}
-          remaining={FREE_SLOT_PROFESSIONS - slotOne.length}
-          lockedIndustry={slotIndustry}
+          existing={specialties.map((specialty) => specialty.profession)}
+          remaining={totalRemaining}
+          lockedIndustry={lockedIndustry}
           onClose={() => setPickerOpen(false)}
           onClaimed={(ids) => setAutoEditId(ids[0] ?? null)}
         />
