@@ -33,6 +33,7 @@ export type StoreItem = {
   featured?: boolean;
   soldByAntidosis?: boolean;
   stockCount?: number | null;
+  image?: string;
 };
 
 export const CATEGORY_LABEL: Record<StoreCategory, string> = {
@@ -154,6 +155,7 @@ export function buildStoreItems(builders: PublicMeshBuilder[] | null): StoreItem
       featured: product.featured === true,
       soldByAntidosis: product.soldByAntidosis === true,
       stockCount: product.stockCount ?? null,
+      image: product.images?.[0],
     }))
   );
   const featured = live.filter((item) => item.featured);
@@ -185,10 +187,19 @@ function ProductCard({
       )}
     >
       <div className="border-b border-line/50 bg-gradient-to-b from-surface/50 to-transparent px-3 pt-3">
-        <ProductArt
-          variant={item.art}
-          className="mx-auto h-24 w-full max-w-[180px] transition-transform duration-300 group-hover:scale-[1.04] sm:h-28"
-        />
+        {item.image ? (
+          <img
+            src={item.image}
+            alt={item.name}
+            loading="lazy"
+            className="mx-auto h-24 w-full max-w-[180px] object-contain transition-transform duration-300 group-hover:scale-[1.04] sm:h-28"
+          />
+        ) : (
+          <ProductArt
+            variant={item.art}
+            className="mx-auto h-24 w-full max-w-[180px] transition-transform duration-300 group-hover:scale-[1.04] sm:h-28"
+          />
+        )}
       </div>
       <div className="flex flex-1 flex-col p-3 sm:p-4">
         <div className="flex items-center justify-between gap-2">

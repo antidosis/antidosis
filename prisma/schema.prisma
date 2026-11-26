@@ -785,6 +785,8 @@ model MeshProduct {
   soldByAntidosis Boolean   @default(false) @map("sold_by_antidosis")
   // Real units on hand — first-party only. Null for builder listings.
   stockCount      Int?      @map("stock_count")
+  // Public photo paths (site-relative, e.g. /images/store/x.webp). First image is the hero.
+  images          String[]  @default([])
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
 

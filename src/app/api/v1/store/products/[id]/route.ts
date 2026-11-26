@@ -31,6 +31,7 @@ export const GET = withApiHandler(async (_req: NextRequest, _ctx, { params }: Ro
       paymentTerms: true,
       paymentNote: true,
       highlights: true,
+      images: true,
       createdAt: true,
       builder: {
         select: {

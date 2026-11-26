@@ -41,6 +41,7 @@ const PUBLIC_BUILDER_SELECT = {
       featuredUntil: true,
       soldByAntidosis: true,
       stockCount: true,
+      images: true,
     },
   },
 } as const;

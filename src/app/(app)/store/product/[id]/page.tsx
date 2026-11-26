@@ -56,7 +56,17 @@ export async function generateMetadata({
       siteName: "antidosis",
       title,
       description,
-      images: [{ url: "/images/social-card.png", width: 1200, height: 630, alt: product.name }],
+      images:
+        product.images.length > 0
+          ? [
+              {
+                url: `${siteUrl}${product.images[0]}`,
+                width: 1200,
+                height: 1200,
+                alt: product.name,
+              },
+            ]
+          : [{ url: "/images/social-card.png", width: 1200, height: 630, alt: product.name }],
     },
     alternates: { canonical: `${siteUrl}/store/product/${product.id}` },
   };
@@ -86,6 +96,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     highlights: listing.highlights,
     soldByAntidosis: listing.soldByAntidosis,
     stockCount: listing.stockCount,
+    images: listing.images,
     seller: {
       businessName: builder.businessName,
       suburb: builder.suburb,

@@ -32,6 +32,7 @@ export type MeshProductListing = {
   featured?: boolean;
   soldByAntidosis?: boolean;
   stockCount?: number | null;
+  images?: string[];
 };
 
 export type PublicMeshBuilder = {

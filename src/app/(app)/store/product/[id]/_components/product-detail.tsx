@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import Link from "next/link";
 
 import {
@@ -42,6 +44,7 @@ export type ProductPageData = {
   highlights: string[];
   soldByAntidosis: boolean;
   stockCount: number | null;
+  images: string[];
   seller: {
     businessName: string;
     suburb: string | null;
@@ -106,13 +109,17 @@ export function ProductDetail({ product }: { product: ProductPageData }) {
         </Link>
 
         <div className="mt-4 grid gap-6 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-          {/* Art panel */}
-          <div className="vessel flex items-center justify-center bg-gradient-to-b from-surface/60 to-transparent p-8 md:p-10">
-            <ProductArt
-              variant={CATEGORY_ART[product.category] ?? "node"}
-              className="h-44 w-full max-w-[260px] md:h-56"
-            />
-          </div>
+          {/* Art panel — real photos when the listing has them, SVG otherwise */}
+          {product.images.length > 0 ? (
+            <ProductGallery name={product.name} images={product.images} />
+          ) : (
+            <div className="vessel flex items-center justify-center bg-gradient-to-b from-surface/60 to-transparent p-8 md:p-10">
+              <ProductArt
+                variant={CATEGORY_ART[product.category] ?? "node"}
+                className="h-44 w-full max-w-[260px] md:h-56"
+              />
+            </div>
+          )}
 
           {/* Headline + actions */}
           <div className="min-w-0">
@@ -334,6 +341,45 @@ export function ProductDetail({ product }: { product: ProductPageData }) {
           />
         </div>
       </div>
+    </div>
+  );
+}
+
+function ProductGallery({ name, images }: { name: string; images: string[] }) {
+  const [active, setActive] = useState(0);
+  const current = images[Math.min(active, images.length - 1)];
+  return (
+    <div className="vessel overflow-hidden bg-gradient-to-b from-surface/60 to-transparent">
+      <div className="flex aspect-square items-center justify-center p-4">
+        {}
+        <img
+          src={current}
+          alt={`${name} — photo ${active + 1} of ${images.length}`}
+          className="max-h-full max-w-full rounded object-contain"
+        />
+      </div>
+      {images.length > 1 && (
+        <div className="flex gap-2 overflow-x-auto border-t border-line/50 p-3">
+          {images.map((src, index) => (
+            <button
+              key={src}
+              type="button"
+              onClick={() => setActive(index)}
+              aria-label={`Show photo ${index + 1}`}
+              aria-pressed={index === active}
+              className={cn(
+                "h-14 w-14 shrink-0 overflow-hidden rounded border transition-colors",
+                index === active
+                  ? "border-sun/70 bg-sun/10"
+                  : "border-line/60 opacity-70 hover:opacity-100"
+              )}
+            >
+              {}
+              <img src={src} alt="" className="h-full w-full object-cover" />
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

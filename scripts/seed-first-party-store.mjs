@@ -44,6 +44,13 @@ const productData = {
   ],
   soldByAntidosis: true,
   stockCount: 10,
+  images: [
+    "/images/store/wio-tracker-l1-1.webp",
+    "/images/store/wio-tracker-l1-2.webp",
+    "/images/store/wio-tracker-l1-3.webp",
+    "/images/store/wio-tracker-l1-4.webp",
+    "/images/store/wio-tracker-l1-5.webp",
+  ],
 };
 
 async function main() {
