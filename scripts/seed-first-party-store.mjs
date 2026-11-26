@@ -48,8 +48,8 @@ const productData = {
     "/images/store/wio-tracker-hero.webp",
     "/images/store/wio-tracker-checklist.webp",
     "/images/store/wio-tracker-ports.webp",
-    "/images/store/wio-tracker-l1-2.webp",
-    "/images/store/wio-tracker-dimensions.webp",
+    "/images/store/wio-card-front.webp",
+    "/images/store/wio-card-dims.webp",
   ],
 };
 
@@ -88,7 +88,7 @@ const accessoryData = [
     ],
     soldByAntidosis: true,
     stockCount: null,
-    images: ["/images/store/heltec-v3-hero.webp", "/images/store/heltec-v3-3.webp"],
+    images: ["/images/store/heltec-v3-card.webp", "/images/store/heltec-v3-card2.webp"],
   },
   {
     name: "RAK WisBlock starter kit — modular MeshCore board",
@@ -119,7 +119,7 @@ const accessoryData = [
     ],
     soldByAntidosis: true,
     stockCount: null,
-    images: ["/images/store/rak-starter-1.webp", "/images/store/rak-starter-2.webp"],
+    images: ["/images/store/rak-card.webp", "/images/store/rak-card2.webp"],
   },
   {
     name: "3000 mAh LiPo battery — Heltec / T114 drop-in",
@@ -140,7 +140,7 @@ const accessoryData = [
     highlights: ["3000 mAh genuine", "SH1.25 plug — no soldering", "Fits Heltec V3 / T114"],
     soldByAntidosis: true,
     stockCount: null,
-    images: ["/images/store/heltec-battery-1.webp"],
+    images: ["/images/store/battery-card.webp"],
   },
   {
     name: "Folding 915 MHz whip antenna — SMA upgrade",
@@ -161,7 +161,7 @@ const accessoryData = [
     highlights: ["Fold-flat pocket friendly", "915 MHz — AU legal", "SMA connector"],
     soldByAntidosis: true,
     stockCount: null,
-    images: ["/images/store/whip-antenna-3.webp", "/images/store/whip-antenna-2.webp"],
+    images: ["/images/store/whip-card.webp", "/images/store/whip-card2.webp"],
   },
   {
     name: "Outdoor omni antenna, 915 MHz — N-male base station whip",
@@ -182,7 +182,7 @@ const accessoryData = [
     highlights: ["Outdoor rated", "N-male connector", "915 MHz — AU legal"],
     soldByAntidosis: true,
     stockCount: null,
-    images: ["/images/store/outdoor-antenna-hero.webp", "/images/store/outdoor-antenna-2.webp"],
+    images: ["/images/store/outdoor-card.webp", "/images/store/outdoor-card2.webp"],
   },
   {
     name: "D5 solar power kit — keep a Heltec node alive off-grid",
@@ -205,7 +205,7 @@ const accessoryData = [
     highlights: ["Solar + charge management", "Pairs with Heltec / RAK", "Off-grid ready"],
     soldByAntidosis: true,
     stockCount: null,
-    images: ["/images/store/d5-solar-1.webp", "/images/store/d5-solar-2.webp"],
+    images: ["/images/store/d5-card.webp", "/images/store/d5-card2.webp"],
   },
   {
     name: "Heltec V3 case — colour options",
@@ -226,7 +226,7 @@ const accessoryData = [
     highlights: ["Fits Heltec V3", "OLED stays visible", "Colour options"],
     soldByAntidosis: true,
     stockCount: null,
-    images: ["/images/store/heltec-case-2.webp"],
+    images: ["/images/store/case-card.webp"],
   },
   {
     name: "Heltec V3 field kit — board, case & battery, flashed",
@@ -252,7 +252,7 @@ const accessoryData = [
     highlights: ["Board + case + battery", "MeshCore flashed for you", "Australia Mid · 915 MHz"],
     soldByAntidosis: true,
     stockCount: null,
-    images: ["/images/store/heltec-kit-1.webp", "/images/store/heltec-kit-2.webp"],
+    images: ["/images/store/kit-card.webp", "/images/store/kit-card2.webp"],
   },
   {
     name: "Heltec 4W solar outdoor node — IP67, flashed & tested",
@@ -282,7 +282,7 @@ const accessoryData = [
     ],
     soldByAntidosis: true,
     stockCount: null,
-    images: ["/images/store/heltec-solar-node-hero.webp", "/images/store/heltec-solar-node-2.webp"],
+    images: ["/images/store/solar-node-card.webp", "/images/store/solar-node-card2.webp"],
   },
 ];
 const repeaterData = {
@@ -322,9 +322,9 @@ const repeaterData = {
   images: [
     "/images/store/p1-pro-hero.webp",
     "/images/store/p1-pro-mto.webp",
-    "/images/store/p1-pro-1.webp",
-    "/images/store/p1-pro-3.webp",
-    "/images/store/p1-pro-4.webp",
+    "/images/store/p1-card-mounted.webp",
+    "/images/store/p1-card-kit.webp",
+    "/images/store/p1-card-inside.webp",
   ],
 };
 

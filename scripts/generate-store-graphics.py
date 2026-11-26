@@ -330,6 +330,116 @@ def p1_pro() -> None:
     print("wrote p1-pro-mto.webp")
 
 
+def product_card(src: str, out: str, title: str, sub: str, seed: int) -> None:
+    """Uniform 1200x1200 branded card for a raw product photo."""
+    palettes = [
+        ([(0.0, (8, 12, 8)), (0.45, (12, 26, 16)), (1.0, (30, 22, 8))],
+         [((760, -320, 1560, 420), (22, 78, 40), 56), ((-360, 820, 480, 1520), (90, 54, 10), 52)]),
+        ([(0.0, (6, 10, 14)), (0.5, (8, 24, 26)), (1.0, (14, 34, 18))],
+         [((-300, -260, 620, 560), (0, 70, 84), 62), ((620, 700, 1500, 1500), (20, 80, 40), 66)]),
+    ]
+    stops, glows = palettes[seed % 2]
+    card = base_card(stops, glows, seed=seed)
+
+    lg = logo(190)
+    card.alpha_composite(lg, (72, 48))
+    title_y = 48 + lg.height + 30
+
+    d = ImageDraw.Draw(card)
+    d.text((72, title_y), title, font=font("segoeuib.ttf", 54), fill=(*GOLD, 255))
+    d.rectangle([74, title_y + 78, 174, title_y + 84], fill=(*SUN, 255))
+
+    photo = Image.open(STORE / src).convert("RGB")
+    photo.thumbnail((860, 660), Image.LANCZOS)
+    frame = Image.new("RGBA", (photo.width + 8, photo.height + 8), (0, 0, 0, 0))
+    mask = Image.new("L", photo.size, 0)
+    ImageDraw.Draw(mask).rounded_rectangle([0, 0, photo.width, photo.height], radius=26, fill=255)
+    frame.paste(photo, (4, 4), mask)
+    ImageDraw.Draw(frame).rounded_rectangle(
+        [0, 0, frame.width - 1, frame.height - 1], radius=30, outline=(*GOLD, 110), width=2
+    )
+    panel_y = title_y + 124 + max(0, (700 - frame.height) // 2)
+    card.alpha_composite(frame, ((SIZE - frame.width) // 2, panel_y))
+
+    d = ImageDraw.Draw(card)
+    d.text((72, 1046), sub, font=font("consola.ttf", 26), fill=(*MERCURY, 235))
+    footer(card, "·  antidosis mesh store")
+    card.convert("RGB").save(STORE / out, "WEBP", quality=88)
+    print(f"wrote {out}")
+
+
+# (source image, output, card title, caption) per product — every raw photo
+# becomes a uniform branded card.
+PRODUCT_CARDS = [
+    ("wio-tracker-l1-2.webp", "wio-card-front.webp", "Wio Tracker L1 Pro", "front view — OLED shows network status at a glance"),
+    ("wio-tracker-dimensions.webp", "wio-card-dims.webp", "Pocket-sized", "56 × 26 mm body, 181 mm with antenna"),
+    ("p1-pro-1.webp", "p1-card-mounted.webp", "On the pole, on the air", "pole or wall mount — 8–9 km open-air range"),
+    ("p1-pro-3.webp", "p1-card-kit.webp", "Everything in the box", "brackets, clamp, antenna and cables included"),
+    ("p1-pro-4.webp", "p1-card-inside.webp", "Solar-charged, always on", "4× 18650 cells inside the IP-rated enclosure"),
+    ("heltec-v3-3.webp", "heltec-v3-card2.webp", "Case-ready", "fits the Heltec V3 case from this store"),
+    ("rak-starter-1.webp", "rak-card.webp", "RAK WisBlock starter", "RAK4631 · nRF52840 + SX1262"),
+    ("rak-starter-2.webp", "rak-card2.webp", "Modular by design", "stack WisBlock sensor modules as you grow"),
+    ("heltec-battery-1.webp", "battery-card.webp", "3000 mAh LiPo", "fits Heltec V3 / V4 / T114 — SH1.25 plug, no soldering"),
+    ("whip-antenna-3.webp", "whip-card.webp", "Folding 915 MHz whip", "fits Wio Tracker, Heltec & RAK nodes — SMA"),
+    ("whip-antenna-2.webp", "whip-card2.webp", "Spec sheet", "≥3 dBi · SMA male · tuned for AU 915 MHz"),
+    ("outdoor-antenna-hero.webp", "outdoor-card.webp", "Outdoor omni, 915 MHz", "for home bases & repeaters — N-male via coax"),
+    ("outdoor-antenna-2.webp", "outdoor-card2.webp", "Built properly inside", "copper oscillator, nickel-plated N connector"),
+    ("d5-solar-1.webp", "d5-card.webp", "D5 solar kit", "powers Heltec V3 & RAK nodes — batteries not included"),
+    ("d5-solar-2.webp", "d5-card2.webp", "Self-sufficient power", "fits Heltec V3 & RAK — 24.3% conversion, IP67"),
+    ("heltec-case-2.webp", "case-card.webp", "Heltec V3 case", "fits Heltec WiFi LoRa 32 V3 only"),
+    ("heltec-kit-1.webp", "kit-card.webp", "Everything in one box", "board + case + 800 mAh battery"),
+    ("heltec-kit-2.webp", "kit-card2.webp", "Full specs", "SX1262 · up to 2.8 km open air · USB-C"),
+    ("heltec-solar-node-hero.webp", "solar-node-card.webp", "4W solar outdoor node", "IP67 · 2A charging · mounts anywhere"),
+    ("heltec-solar-node-2.webp", "solar-node-card2.webp", "Inside the enclosure", "4× 18650 slots — batteries not included"),
+]
+
+
+def heltec_hero() -> None:
+    """Custom Heltec V3 card: board render (rotated upright, black bg keyed)."""
+    card = base_card(
+        [(0.0, (8, 12, 8)), (0.45, (12, 26, 16)), (1.0, (30, 22, 8))],
+        [((340, 300, 1350, 1250), (24, 92, 48), 70), ((-260, 780, 520, 1460), (96, 58, 10), 60)],
+        seed=23,
+    )
+
+    lg = logo(300)
+    card.alpha_composite(lg, (72, 64))
+
+    board = Image.open(STORE / "heltec-v3-2.webp").convert("RGB").rotate(180)
+    px = board.load()
+    alpha = Image.new("L", board.size, 0)
+    ap = alpha.load()
+    for y in range(board.height):
+        for x in range(board.width):
+            r, g, b = px[x, y]
+            lum = max(r, g, b)
+            ap[x, y] = 0 if lum <= 12 else (255 if lum >= 36 else int((lum - 12) / 24 * 255))
+    alpha = alpha.filter(ImageFilter.GaussianBlur(1.0))
+    board = board.convert("RGBA")
+    board.putalpha(alpha)
+    bbox = board.getchannel("A").getbbox()
+    board = board.crop(bbox)
+    board.thumbnail((640, 720), Image.LANCZOS)
+
+    dx, dy = SIZE - board.width - 60, (SIZE - board.height) // 2 + 80
+    halo = Image.new("RGBA", card.size, (0, 0, 0, 0))
+    ImageDraw.Draw(halo).ellipse(
+        [dx - 50, dy - 30, dx + board.width + 50, dy + board.height + 30], fill=(*GREEN, 34)
+    )
+    card = Image.alpha_composite(card, halo.filter(ImageFilter.GaussianBlur(80)))
+    card.alpha_composite(board, (dx, dy))
+
+    d = ImageDraw.Draw(card)
+    d.text((72, 330), "THE MAKER'S", font=font("segoeuib.ttf", 84), fill=(*GOLD, 255))
+    d.text((72, 428), "FIRST NODE.", font=font("segoeuib.ttf", 84), fill=(*GOLD, 255))
+    d.rectangle([74, 546, 208, 553], fill=(*SUN, 255))
+    chips(card, 72, 588, ["HELTEC WIFI LORA 32 V3", "ESP32-S3 + SX1262 + OLED", "MESHCORE FLASHED FOR YOU"])
+
+    footer(card, "·  australia mid · 915 mhz")
+    card.convert("RGB").save(STORE / "heltec-v3-card.webp", "WEBP", quality=90)
+    print("wrote heltec-v3-card.webp")
+
+
 if __name__ == "__main__":
     hero()
     checklist()
@@ -342,3 +452,6 @@ if __name__ == "__main__":
     )
     dimensions()
     p1_pro()
+    heltec_hero()
+    for i, (src, out, title, sub) in enumerate(PRODUCT_CARDS):
+        product_card(src, out, title, sub, seed=100 + i)
