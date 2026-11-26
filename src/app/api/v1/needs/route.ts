@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { withApiHandler } from "@/lib/api-handler";
 import { auditLog, getClientInfo } from "@/lib/audit";
+import { getBusinessPostingEligibility } from "@/lib/business-posting";
 import { isValidCentralCoastSuburb } from "@/lib/data/central-coast-suburbs";
 import { requireVerifiedParticipation } from "@/lib/participation";
 import { prisma } from "@/lib/prisma";
@@ -102,9 +103,32 @@ export const POST = withApiHandler(async (req: NextRequest) => {
     );
   }
 
+  // Business posting is verified against the live directory listing, and the
+  // business identity is snapshotted onto the need — later profile edits must
+  // never rewrite who the counterparty was.
+  let posterBusinessName: string | null = null;
+  let posterAbn: string | null = null;
+  if (data.postedAs === "business") {
+    const eligibility = await getBusinessPostingEligibility(profile.id);
+    if (!eligibility.eligible) {
+      return NextResponse.json(
+        {
+          error: eligibility.reason ?? "Business posting is not available for this account.",
+          code: "BUSINESS_POSTING_NOT_AVAILABLE",
+        },
+        { status: 403 }
+      );
+    }
+    posterBusinessName = eligibility.businessName;
+    posterAbn = eligibility.abn;
+  }
+
   const need = await prisma.need.create({
     data: {
       posterId: profile.id,
+      postedAs: data.postedAs,
+      posterBusinessName,
+      posterAbn,
       title: sanitizePlainText(data.title),
       description: sanitizePlainText(data.description),
       needCategory: data.needCategory ? sanitizePlainText(data.needCategory) : undefined,
@@ -148,7 +172,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
     ip,
     userAgent,
     path: "/api/v1/needs",
-    metadata: { needId: need.id, title: need.title },
+    metadata: { needId: need.id, title: need.title, postedAs: need.postedAs },
   });
 
   return NextResponse.json({ need }, { status: 201 });

@@ -560,18 +560,35 @@ export default function NeedsPage({ embedded = false, initialData }: NeedsListCl
                   </div>
                   <div className="flex items-center justify-between mt-4 pt-3 border-t border-line">
                     <Link
-                      href={`/profile/${need.poster.id}`}
+                      href={
+                        need.postedAs === "business"
+                          ? `/pros/${need.poster.id}`
+                          : `/profile/${need.poster.id}`
+                      }
                       className="flex items-center gap-3 group"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <Avatar src={need.poster.avatarUrl} name={need.poster.fullName} size="sm" />
                       <div className="text-sm text-parchment">
                         <span className="text-gold group-hover:text-sun transition-colors">
-                          {need.poster.fullName || "anonymous"}
+                          {need.postedAs === "business"
+                            ? need.posterBusinessName || need.poster.fullName || "business"
+                            : need.poster.fullName || "anonymous"}
                         </span>
-                        {need.poster.ratingCount > 0 && (
-                          <span className="ml-2">{need.poster.ratingAvg.toFixed(1)}</span>
+                        {need.postedAs === "business" && (
+                          <span className="ml-2 rounded-sm border border-mercury/40 bg-mercury/10 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wide text-mercury">
+                            Business
+                          </span>
                         )}
+                        {need.postedAs === "business"
+                          ? need.poster.businessRatingCount > 0 && (
+                              <span className="ml-2">
+                                {need.poster.businessRatingAvg.toFixed(1)}
+                              </span>
+                            )
+                          : need.poster.ratingCount > 0 && (
+                              <span className="ml-2">{need.poster.ratingAvg.toFixed(1)}</span>
+                            )}
                       </div>
                     </Link>
                     <div className="flex items-center gap-1.5 text-xs text-ash">

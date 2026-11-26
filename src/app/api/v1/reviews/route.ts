@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { withApiHandler } from "@/lib/api-handler";
+import { reviewReceiverContext } from "@/lib/business-posting";
 import { logContractEvent } from "@/lib/contract-events";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
@@ -68,11 +69,15 @@ export const POST = withApiHandler(async (req: NextRequest) => {
     }
 
     let review;
+    let receiverContext: "personal" | "business" = "personal";
 
     if (contractId) {
       const contract = await prisma.contract.findUnique({
         where: { id: contractId },
-        include: { reviews: true },
+        include: {
+          reviews: true,
+          need: { select: { postedAs: true, posterId: true } },
+        },
       });
 
       if (!contract) {
@@ -106,6 +111,12 @@ export const POST = withApiHandler(async (req: NextRequest) => {
         );
       }
 
+      receiverContext = reviewReceiverContext({
+        needPostedAs: contract.need?.postedAs,
+        needPosterId: contract.need?.posterId,
+        receiverId,
+      });
+
       review = await prisma.review.create({
         data: {
           contractId,
@@ -114,6 +125,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
           rating,
           comment: comment ? sanitizePlainText(comment) : null,
           privateFeedback: privateFeedback ? sanitizePlainText(privateFeedback) : null,
+          receiverContext,
         },
       });
     } else {
@@ -163,6 +175,12 @@ export const POST = withApiHandler(async (req: NextRequest) => {
         return NextResponse.json({ error: "You have already reviewed this deal" }, { status: 400 });
       }
 
+      receiverContext = reviewReceiverContext({
+        needPostedAs: acceptance.need.postedAs,
+        needPosterId: acceptance.need.posterId,
+        receiverId,
+      });
+
       review = await prisma.review.create({
         data: {
           acceptanceId,
@@ -171,6 +189,7 @@ export const POST = withApiHandler(async (req: NextRequest) => {
           rating,
           comment: comment ? sanitizePlainText(comment) : null,
           privateFeedback: privateFeedback ? sanitizePlainText(privateFeedback) : null,
+          receiverContext,
         },
       });
     }
@@ -185,18 +204,29 @@ export const POST = withApiHandler(async (req: NextRequest) => {
       });
     }
 
-    // Update receiver's rating average using aggregate (fast, no unbounded fetch)
-    const agg = await prisma.review.aggregate({
-      where: { receiverId },
-      _avg: { rating: true },
-      _count: { rating: true },
-    });
+    // Recompute both reputation buckets for the receiver. Personal and
+    // business ratings are aggregated separately so a business deal never
+    // moves the public-profile rating and vice versa.
+    const [personalAgg, businessAgg] = await Promise.all([
+      prisma.review.aggregate({
+        where: { receiverId, receiverContext: "personal" },
+        _avg: { rating: true },
+        _count: { rating: true },
+      }),
+      prisma.review.aggregate({
+        where: { receiverId, receiverContext: "business" },
+        _avg: { rating: true },
+        _count: { rating: true },
+      }),
+    ]);
 
     await prisma.profile.update({
       where: { id: receiverId },
       data: {
-        ratingAvg: agg._avg.rating ?? 0,
-        ratingCount: agg._count.rating,
+        ratingAvg: personalAgg._avg.rating ?? 0,
+        ratingCount: personalAgg._count.rating,
+        businessRatingAvg: businessAgg._avg.rating ?? 0,
+        businessRatingCount: businessAgg._count.rating,
       },
     });
 

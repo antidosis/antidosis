@@ -61,6 +61,21 @@ describe("createNeedSchema", () => {
     }
   });
 
+  it("defaults postedAs to personal and accepts business", () => {
+    const personal = createNeedSchema.safeParse(valid);
+    expect(personal.success).toBe(true);
+    if (personal.success) expect(personal.data.postedAs).toBe("personal");
+
+    const business = createNeedSchema.safeParse({ ...valid, postedAs: "business" });
+    expect(business.success).toBe(true);
+    if (business.success) expect(business.data.postedAs).toBe("business");
+  });
+
+  it("rejects an unknown postedAs value", () => {
+    const result = createNeedSchema.safeParse({ ...valid, postedAs: "anonymous" });
+    expect(result.success).toBe(false);
+  });
+
   it("accepts urgent contact only at urgency 7 or above", () => {
     expect(
       createNeedSchema.safeParse({ ...valid, urgency: 7, allowUrgentContact: true }).success

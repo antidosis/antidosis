@@ -49,6 +49,38 @@ export function formatPartyIdentityLine(party: ContractPartyPdfData): string {
 export const BUSINESS_PAYMENT_NOTICE =
   "Payment terms: where this contract records a payment, the parties arrange payment directly between themselves as described in the agreed terms. Antidosis does not hold, transfer, or guarantee funds.";
 
+/** The need-posting identity relevant to contract documents. */
+export interface NeedPostingIdentity {
+  postedAs: string;
+  posterBusinessName: string | null;
+  posterAbn: string | null;
+}
+
+/**
+ * Resolve a party's identity for contract documents based on how the need was
+ * posted. A business-posted need presents the poster as that business, using
+ * the name + ABN snapshotted at post time (never the live profile, which may
+ * have changed since). A personally-posted need strips business framing even
+ * when the account is a business — the deal's identity is the one chosen at
+ * post time. Non-posters and direct agreements pass through untouched.
+ */
+export function applyPostingIdentityToParty<T extends ContractPartyPdfData>(
+  party: T,
+  identity: NeedPostingIdentity | null | undefined,
+  partyIsPoster: boolean
+): T {
+  if (!partyIsPoster || !identity) return party;
+  if (identity.postedAs === "business") {
+    return {
+      ...party,
+      fullName: identity.posterBusinessName ?? party.fullName,
+      accountType: "business",
+      abn: identity.posterAbn ?? party.abn ?? null,
+    };
+  }
+  return { ...party, accountType: "individual", abn: null, abnVerified: false };
+}
+
 /** Preamble — frames every contract: what it is, who is (and isn't) a party,
  * and the consumer-law ground rules for business, payment, and promo deals. */
 export const CONTRACT_PREAMBLE =

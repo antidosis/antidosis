@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  applyPostingIdentityToParty,
   BUSINESS_PAYMENT_NOTICE,
   CONTRACT_TEMPLATE_NOTICE,
   formatPartyIdentityLine,
@@ -46,6 +47,52 @@ describe("isBusinessParty / isBusinessContract", () => {
     expect(isBusinessContract({ partyA: individual, partyB: individual })).toBe(false);
     expect(isBusinessContract({ partyA: business, partyB: individual })).toBe(true);
     expect(isBusinessContract({ partyA: individual, partyB: business })).toBe(true);
+  });
+});
+
+describe("applyPostingIdentityToParty", () => {
+  it("presents a business-posted need's poster as the business, using the snapshot", () => {
+    const party = applyPostingIdentityToParty(
+      { ...individual, accountType: "business", abn: "99999999999" },
+      { postedAs: "business", posterBusinessName: "Acme Plumbing", posterAbn: "51824753556" },
+      true
+    );
+    expect(party.fullName).toBe("Acme Plumbing");
+    expect(party.accountType).toBe("business");
+    expect(party.abn).toBe("51824753556");
+  });
+
+  it("strips business framing when the need was posted personally", () => {
+    const party = applyPostingIdentityToParty(
+      business,
+      {
+        postedAs: "personal",
+        posterBusinessName: null,
+        posterAbn: null,
+      },
+      true
+    );
+    expect(party.accountType).toBe("individual");
+    expect(party.abn).toBeNull();
+    expect(party.abnVerified).toBe(false);
+  });
+
+  it("never rewrites the non-poster's identity", () => {
+    const party = applyPostingIdentityToParty(
+      business,
+      {
+        postedAs: "business",
+        posterBusinessName: "Acme Plumbing",
+        posterAbn: "51824753556",
+      },
+      false
+    );
+    expect(party).toBe(business);
+  });
+
+  it("passes through when there is no need (direct agreements)", () => {
+    const party = applyPostingIdentityToParty(individual, null, true);
+    expect(party).toBe(individual);
   });
 });
 

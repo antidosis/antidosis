@@ -3,8 +3,11 @@ import { type NextRequest, NextResponse } from "next/server";
 import { withApiHandler } from "@/lib/api-handler";
 import { contractTitle } from "@/lib/direct-contract";
 import { logger } from "@/lib/logger";
-import { generateContractPdf, type ContractPdfData } from "@/lib/pdf-contract";
-// (ContractPdfData referenced via import below)
+import {
+  applyPostingIdentityToParty,
+  generateContractPdf,
+  type ContractPdfData,
+} from "@/lib/pdf-contract";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { createSignedUrlOrFallback, PRIVATE_BUCKET } from "@/lib/storage";
@@ -61,6 +64,10 @@ export const POST = withApiHandler(
             offerType: true,
             offerDescription: true,
             offerValue: true,
+            posterId: true,
+            postedAs: true,
+            posterBusinessName: true,
+            posterAbn: true,
           },
         },
         partyA: {
@@ -141,7 +148,11 @@ export const POST = withApiHandler(
         customTerms: terms.customTerms,
         notes: terms.notes,
       },
-      partyA: contract.partyA,
+      partyA: applyPostingIdentityToParty(
+        contract.partyA,
+        contract.need,
+        contract.need?.posterId === contract.partyAId
+      ),
       partyB: contract.partyB,
       negotiationMessages,
       partyASignedAt: contract.partyASignedAt?.toISOString() || null,

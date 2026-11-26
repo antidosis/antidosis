@@ -6,8 +6,11 @@ import { presentContract } from "@/lib/contract-presenter";
 import { contractTitle } from "@/lib/direct-contract";
 import { logger } from "@/lib/logger";
 import { requireActiveAccount } from "@/lib/participation";
-import { generateContractPdf, type ContractPdfData } from "@/lib/pdf-contract";
-// (ContractPdfData referenced via import below)
+import {
+  applyPostingIdentityToParty,
+  generateContractPdf,
+  type ContractPdfData,
+} from "@/lib/pdf-contract";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { resolveEntityId } from "@/lib/resolve-id";
@@ -202,13 +205,33 @@ export const PATCH = withApiHandler(
             offerType: true,
             offerDescription: true,
             offerValue: true,
+            posterId: true,
+            postedAs: true,
+            posterBusinessName: true,
+            posterAbn: true,
           },
         },
         partyA: {
-          select: { fullName: true, email: true, locationName: true, isVerified: true },
+          select: {
+            fullName: true,
+            email: true,
+            locationName: true,
+            isVerified: true,
+            accountType: true,
+            abn: true,
+            abnVerified: true,
+          },
         },
         partyB: {
-          select: { fullName: true, email: true, locationName: true, isVerified: true },
+          select: {
+            fullName: true,
+            email: true,
+            locationName: true,
+            isVerified: true,
+            accountType: true,
+            abn: true,
+            abnVerified: true,
+          },
         },
         events: {
           orderBy: [{ createdAt: "desc" }, { id: "desc" }],
@@ -498,7 +521,11 @@ export const PATCH = withApiHandler(
               customTerms: termsParsed.customTerms,
               notes: termsParsed.notes,
             },
-            partyA: contract.partyA,
+            partyA: applyPostingIdentityToParty(
+              contract.partyA,
+              contract.need,
+              contract.need?.posterId === contract.partyAId
+            ),
             partyB: contract.partyB,
             negotiationMessages,
             partyASignedAt: null,

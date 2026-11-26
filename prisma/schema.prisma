@@ -52,6 +52,11 @@ model Profile {
   playStoreAutoRenewing  Boolean?  @map("play_store_auto_renewing")
   ratingAvg              Float     @default(0) @map("rating_avg")
   ratingCount            Int       @default(0) @map("rating_count")
+  // Business reputation — reviews left on deals the member ran as a business
+  // (postedAs = "business"). Kept separate from the personal rating so the
+  // directory and the public profile never blend the two.
+  businessRatingAvg      Float     @default(0) @map("business_rating_avg")
+  businessRatingCount    Int       @default(0) @map("business_rating_count")
   jobsCompleted          Int       @default(0) @map("jobs_completed")
   abn                    String?
   accountType            String    @default("individual") @map("account_type")
@@ -154,6 +159,15 @@ model Need {
   longitude          Float?
   urgency            Int       @default(0)
   allowUrgentContact Boolean   @default(false) @map("allow_urgent_contact")
+  // Identity the need was posted under: "personal" (default) or "business".
+  // Business posting requires a live directory listing (business account +
+  // ABN + specialty + showInDirectory). The business name and ABN are
+  // snapshotted at post time so contracts, reviews and SERR exports keep
+  // referring to the entity as it was, even if the profile later changes.
+  // Locked once the need has acceptances.
+  postedAs           String    @default("personal") @map("posted_as")
+  posterBusinessName String?   @map("poster_business_name")
+  posterAbn          String?   @map("poster_abn")
   status             String    @default("open")
   requiresContract   Boolean   @default(false) @map("requires_contract")
   deadline           DateTime?
@@ -347,6 +361,10 @@ model Review {
   rating          Int
   comment         String?
   privateFeedback String?  @map("private_feedback")
+  // Which reputation this review accrues to: "personal" (default) feeds the
+  // public-profile rating, "business" feeds the directory listing rating.
+  // Derived server-side from the deal context — never client-supplied.
+  receiverContext String   @default("personal") @map("receiver_context")
   createdAt       DateTime @default(now()) @map("created_at")
 
   contract   Contract?   @relation(fields: [contractId], references: [id], onDelete: Cascade)

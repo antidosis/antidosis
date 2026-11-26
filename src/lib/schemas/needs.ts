@@ -4,6 +4,8 @@ import { EXCHANGE_MODE_VALUES } from "@/lib/categories";
 
 import { offerTypeSchema, uuidSchema } from "./common";
 
+export const postedAsSchema = z.enum(["personal", "business"]);
+
 const needCategoryEnum = z
   .enum(["", ...EXCHANGE_MODE_VALUES] as [string, ...string[]])
   .optional()
@@ -49,6 +51,9 @@ export const createNeedSchema = z
     images: z.array(z.string()).default([]),
     offerImages: z.array(z.string()).default([]),
     requiresContract: z.boolean().optional().default(false),
+    // Identity the need is posted under. "business" is verified server-side
+    // against the member's directory listing — the schema only carries intent.
+    postedAs: postedAsSchema.optional().default("personal"),
   })
   .superRefine((data, ctx) => {
     if (data.allowUrgentContact && data.urgency < 7) {
@@ -105,6 +110,9 @@ export const updateNeedSchema = z.object({
   images: z.array(z.string()).optional(),
   offerImages: z.array(z.string()).optional(),
   requiresContract: z.boolean().optional(),
+  // Switchable only while the need has no acceptances (enforced in the route);
+  // the business snapshot is re-taken on every switch.
+  postedAs: postedAsSchema.optional(),
   status: z.enum(["open", "archived"]).optional(),
 });
 

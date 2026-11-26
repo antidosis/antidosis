@@ -6,6 +6,7 @@ import { verifyAbn } from "@/lib/abn";
 import { withApiHandler } from "@/lib/api-handler";
 import { recordBannedMobile } from "@/lib/bans";
 import { parseBusinessSocialLinks, serializeBusinessSocialLinks } from "@/lib/business-links";
+import { assessBusinessPosting } from "@/lib/business-posting";
 import { isValidCentralCoastSuburb } from "@/lib/data/central-coast-suburbs";
 import { parseExchangeModes, serializeExchangeModes } from "@/lib/exchange-modes";
 import { logger } from "@/lib/logger";
@@ -84,30 +85,32 @@ export const GET = withApiHandler(async () => {
   // it back — otherwise the node badge (and directory filters) get stuck on
   // "business" forever. Self-heal the column here so every consumer of
   // /api/v1/profiles/me sees the live state.
-  if (profile.accountType === "business") {
-    const specialtyCount = await prisma.directorySpecialty.count({
-      where: { profileId: profile.id },
-    });
-    if (specialtyCount === 0) {
-      profile = await prisma.profile.update({
-        where: { id: profile.id },
-        data: { accountType: "individual" },
-        include: {
-          skills: true,
-          socialLinks: true,
-          credentials: true,
-          reviewsReceived: {
-            orderBy: { createdAt: "desc" },
-            include: {
-              giver: { select: { fullName: true, avatarUrl: true } },
-              contract: { select: { kind: true, title: true, need: { select: { title: true } } } },
-            },
-            take: 10,
+  const specialtyCount = await prisma.directorySpecialty.count({
+    where: { profileId: profile.id },
+  });
+  if (profile.accountType === "business" && specialtyCount === 0) {
+    profile = await prisma.profile.update({
+      where: { id: profile.id },
+      data: { accountType: "individual" },
+      include: {
+        skills: true,
+        socialLinks: true,
+        credentials: true,
+        reviewsReceived: {
+          orderBy: { createdAt: "desc" },
+          include: {
+            giver: { select: { fullName: true, avatarUrl: true } },
+            contract: { select: { kind: true, title: true, need: { select: { title: true } } } },
           },
+          take: 10,
         },
-      });
-    }
+      },
+    });
   }
+
+  // Drives the "post as business" selector on the need form — the same
+  // assessment the needs API enforces server-side.
+  const businessPosting = assessBusinessPosting(profile, specialtyCount);
 
   const {
     businessSocialLinks: rawBusinessLinks,
@@ -118,6 +121,9 @@ export const GET = withApiHandler(async () => {
     ...profileRest,
     businessSocialLinks: parseBusinessSocialLinks(rawBusinessLinks),
     acceptedExchanges: parseExchangeModes(rawExchanges),
+    businessPostingEligible: businessPosting.eligible,
+    businessPostingReason: businessPosting.reason,
+    businessPostingName: businessPosting.businessName,
   });
 });
 

@@ -57,6 +57,9 @@ export type NeedDetail = {
   timeRange: string | null;
   images: string[];
   offerImages: string[];
+  /** "personal" | "business" — business posts carry the snapshotted trading name. */
+  postedAs: string;
+  posterBusinessName: string | null;
   poster: Poster;
   requiredSkills: { id: string; name: string }[];
   acceptances: {
@@ -578,6 +581,8 @@ export default function NeedDetailClient({ needId }: { needId: string }) {
           credentials={credentials}
           credLoading={credLoading}
           onAuthRequired={handleAuthRequired}
+          postedAs={need.postedAs}
+          posterBusinessName={need.posterBusinessName}
         />
 
         {/* ========== CONTRACT BANNERS ========== */}

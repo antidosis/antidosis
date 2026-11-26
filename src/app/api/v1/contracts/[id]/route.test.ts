@@ -77,9 +77,13 @@ vi.mock("@/lib/logger", () => ({
 // ─── PDF contract mock ───
 const mockGenerateContractPdf = vi.fn();
 
-vi.mock("@/lib/pdf-contract", () => ({
-  generateContractPdf: (...args: unknown[]) => mockGenerateContractPdf(...args),
-}));
+vi.mock("@/lib/pdf-contract", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/pdf-contract")>();
+  return {
+    ...actual,
+    generateContractPdf: (...args: unknown[]) => mockGenerateContractPdf(...args),
+  };
+});
 
 // ─── Supabase service mock ───
 const mockUpload = vi.fn();

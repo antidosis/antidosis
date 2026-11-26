@@ -221,9 +221,12 @@ describe("POST /api/v1/reviews", () => {
         partyAId: PROF1,
         partyBId: PROF2,
         reviews: [],
+        need: null,
       });
       mockReviewCreate.mockResolvedValue({ id: "rev-1" });
-      mockReviewAggregate.mockResolvedValue({ _avg: { rating: 5 }, _count: { rating: 1 } });
+      mockReviewAggregate
+        .mockResolvedValueOnce({ _avg: { rating: 5 }, _count: { rating: 1 } })
+        .mockResolvedValueOnce({ _avg: { rating: null }, _count: { rating: 0 } });
       mockProfileUpdate.mockResolvedValue({ id: PROF2 });
       const res = await POST(
         makeRequest({ contractId: C1, receiverId: PROF2, rating: 5, comment: "Great" })
@@ -231,10 +234,81 @@ describe("POST /api/v1/reviews", () => {
       expect(res.status).toBe(201);
       const json = await res.json();
       expect(json.review.id).toBe("rev-1");
+      expect(mockReviewCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ receiverContext: "personal" }),
+        })
+      );
       expect(mockProfileUpdate).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: PROF2 },
-          data: { ratingAvg: 5, ratingCount: 1 },
+          data: {
+            ratingAvg: 5,
+            ratingCount: 1,
+            businessRatingAvg: 0,
+            businessRatingCount: 0,
+          },
+        })
+      );
+    });
+
+    it("attributes the review to the business bucket when the receiver posted as a business", async () => {
+      mockContractFindUnique.mockResolvedValue({
+        id: C1,
+        status: "completed",
+        partyAId: PROF1,
+        partyBId: PROF2,
+        reviews: [],
+        need: { postedAs: "business", posterId: PROF1 },
+      });
+      mockReviewCreate.mockResolvedValue({ id: "rev-1" });
+      mockReviewAggregate
+        .mockResolvedValueOnce({ _avg: { rating: null }, _count: { rating: 0 } })
+        .mockResolvedValueOnce({ _avg: { rating: 5 }, _count: { rating: 1 } });
+      mockProfileUpdate.mockResolvedValue({ id: PROF1 });
+      // PROF2 (fulfiller) reviews PROF1 (business poster)
+      mockProfileFindUnique.mockResolvedValue({ id: PROF2 });
+      const res = await POST(makeRequest({ contractId: C1, receiverId: PROF1, rating: 5 }));
+      expect(res.status).toBe(201);
+      expect(mockReviewCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ receiverContext: "business", receiverId: PROF1 }),
+        })
+      );
+      expect(mockProfileUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: PROF1 },
+          data: {
+            ratingAvg: 0,
+            ratingCount: 0,
+            businessRatingAvg: 5,
+            businessRatingCount: 1,
+          },
+        })
+      );
+    });
+
+    it("keeps the fulfiller's review personal even on a business-posted need", async () => {
+      mockContractFindUnique.mockResolvedValue({
+        id: C1,
+        status: "completed",
+        partyAId: PROF1,
+        partyBId: PROF2,
+        reviews: [],
+        need: { postedAs: "business", posterId: PROF1 },
+      });
+      mockReviewCreate.mockResolvedValue({ id: "rev-1" });
+      mockReviewAggregate
+        .mockResolvedValueOnce({ _avg: { rating: 4 }, _count: { rating: 1 } })
+        .mockResolvedValueOnce({ _avg: { rating: null }, _count: { rating: 0 } });
+      mockProfileUpdate.mockResolvedValue({ id: PROF2 });
+      // PROF1 (business poster) reviews PROF2 (fulfiller)
+      mockProfileFindUnique.mockResolvedValue({ id: PROF1 });
+      const res = await POST(makeRequest({ contractId: C1, receiverId: PROF2, rating: 4 }));
+      expect(res.status).toBe(201);
+      expect(mockReviewCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ receiverContext: "personal", receiverId: PROF2 }),
         })
       );
     });
@@ -340,22 +414,57 @@ describe("POST /api/v1/reviews", () => {
     it("returns 201 and updates receiver rating for acceptance review", async () => {
       mockAcceptanceFindUnique.mockResolvedValue({
         id: A1,
-        need: { requiresContract: false, posterId: PROF2 },
+        need: { requiresContract: false, posterId: PROF2, postedAs: "personal" },
         userId: PROF1,
         status: "completed",
         reviews: [],
       });
       mockReviewCreate.mockResolvedValue({ id: "rev-1" });
-      mockReviewAggregate.mockResolvedValue({ _avg: { rating: 4 }, _count: { rating: 2 } });
+      mockReviewAggregate
+        .mockResolvedValueOnce({ _avg: { rating: 4 }, _count: { rating: 2 } })
+        .mockResolvedValueOnce({ _avg: { rating: null }, _count: { rating: 0 } });
       mockProfileUpdate.mockResolvedValue({ id: PROF2 });
       const res = await POST(makeRequest({ acceptanceId: A1, receiverId: PROF2, rating: 4 }));
       expect(res.status).toBe(201);
       const json = await res.json();
       expect(json.review.id).toBe("rev-1");
+      expect(mockReviewCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ receiverContext: "personal" }),
+        })
+      );
       expect(mockProfileUpdate).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: PROF2 },
-          data: { ratingAvg: 4, ratingCount: 2 },
+          data: {
+            ratingAvg: 4,
+            ratingCount: 2,
+            businessRatingAvg: 0,
+            businessRatingCount: 0,
+          },
+        })
+      );
+    });
+
+    it("attributes acceptance reviews of a business poster to the business bucket", async () => {
+      mockAcceptanceFindUnique.mockResolvedValue({
+        id: A1,
+        need: { requiresContract: false, posterId: PROF2, postedAs: "business" },
+        userId: PROF1,
+        status: "completed",
+        reviews: [],
+      });
+      mockReviewCreate.mockResolvedValue({ id: "rev-1" });
+      mockReviewAggregate
+        .mockResolvedValueOnce({ _avg: { rating: null }, _count: { rating: 0 } })
+        .mockResolvedValueOnce({ _avg: { rating: 5 }, _count: { rating: 1 } });
+      mockProfileUpdate.mockResolvedValue({ id: PROF2 });
+      // PROF1 (fulfiller) reviews PROF2 (business poster)
+      const res = await POST(makeRequest({ acceptanceId: A1, receiverId: PROF2, rating: 5 }));
+      expect(res.status).toBe(201);
+      expect(mockReviewCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ receiverContext: "business", receiverId: PROF2 }),
         })
       );
     });

@@ -12,6 +12,8 @@ const mockProfileFindUnique = vi.fn();
 const mockTransaction = vi.fn();
 const mockNeedSkillDeleteMany = vi.fn();
 const mockNeedWatchFindUnique = vi.fn();
+const mockAcceptanceCount = vi.fn();
+const mockSpecialtyCount = vi.fn();
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
@@ -25,6 +27,12 @@ vi.mock("@/lib/prisma", () => ({
     },
     profile: {
       findUnique: (...args: unknown[]) => mockProfileFindUnique(...args),
+    },
+    acceptance: {
+      count: (...args: unknown[]) => mockAcceptanceCount(...args),
+    },
+    directorySpecialty: {
+      count: (...args: unknown[]) => mockSpecialtyCount(...args),
     },
     $transaction: (...args: unknown[]) => mockTransaction(...args),
     needSkill: {
@@ -494,6 +502,148 @@ describe("PATCH /api/v1/needs/[id]", () => {
     expect(mockNeedSkillDeleteMany).toHaveBeenCalledWith({
       where: { needId: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
     });
+  });
+
+  it("switches posting identity to business before anyone has engaged", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+      accountType: "business",
+      abn: "12345678901",
+      businessName: "Acme Plumbing",
+      fullName: "Martin K",
+      showInDirectory: true,
+    });
+    mockNeedFindUnique.mockResolvedValue({
+      posterId: "profile-1",
+      status: "open",
+      isLocal: true,
+      postedAs: "personal",
+    });
+    mockAcceptanceCount.mockResolvedValue(0);
+    mockSpecialtyCount.mockResolvedValue(1);
+    mockNeedUpdate.mockResolvedValue({
+      id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+      postedAs: "business",
+      poster: { id: "profile-1", fullName: "Test", avatarUrl: null },
+      requiredSkills: [],
+    });
+
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/needs/need-1", {
+        method: "PATCH",
+        body: JSON.stringify({ postedAs: "business" }),
+      }),
+      { params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
+    );
+
+    expect(res.status).toBe(200);
+    const updateData = mockNeedUpdate.mock.calls[0][0].data;
+    expect(updateData.postedAs).toBe("business");
+    expect(updateData.posterBusinessName).toBe("Acme Plumbing");
+    expect(updateData.posterAbn).toBe("12345678901");
+  });
+
+  it("locks posting identity once someone has expressed interest", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
+    mockNeedFindUnique.mockResolvedValue({
+      posterId: "profile-1",
+      status: "open",
+      isLocal: true,
+      postedAs: "personal",
+    });
+    mockAcceptanceCount.mockResolvedValue(1);
+
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/needs/need-1", {
+        method: "PATCH",
+        body: JSON.stringify({ postedAs: "business" }),
+      }),
+      { params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(body.code).toBe("POSTED_AS_LOCKED");
+    expect(mockNeedUpdate).not.toHaveBeenCalled();
+  });
+
+  it("rejects switching to business when the listing is not live", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+      accountType: "business",
+      abn: "12345678901",
+      businessName: "Acme Plumbing",
+      fullName: "Martin K",
+      showInDirectory: false,
+    });
+    mockNeedFindUnique.mockResolvedValue({
+      posterId: "profile-1",
+      status: "open",
+      isLocal: true,
+      postedAs: "personal",
+    });
+    mockAcceptanceCount.mockResolvedValue(0);
+    mockSpecialtyCount.mockResolvedValue(1);
+
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/needs/need-1", {
+        method: "PATCH",
+        body: JSON.stringify({ postedAs: "business" }),
+      }),
+      { params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(body.code).toBe("BUSINESS_POSTING_NOT_AVAILABLE");
+    expect(mockNeedUpdate).not.toHaveBeenCalled();
+  });
+
+  it("switches back to personal and clears the business snapshot", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: makeAuthUser() }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "profile-1",
+      mobileVerified: true,
+      bannedAt: null,
+    });
+    mockNeedFindUnique.mockResolvedValue({
+      posterId: "profile-1",
+      status: "open",
+      isLocal: true,
+      postedAs: "business",
+    });
+    mockAcceptanceCount.mockResolvedValue(0);
+    mockNeedUpdate.mockResolvedValue({
+      id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+      postedAs: "personal",
+      poster: { id: "profile-1", fullName: "Test", avatarUrl: null },
+      requiredSkills: [],
+    });
+
+    const res = await PATCH(
+      makeRequest("http://localhost/api/v1/needs/need-1", {
+        method: "PATCH",
+        body: JSON.stringify({ postedAs: "personal" }),
+      }),
+      { params: { id: "b1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" } }
+    );
+
+    expect(res.status).toBe(200);
+    const updateData = mockNeedUpdate.mock.calls[0][0].data;
+    expect(updateData.postedAs).toBe("personal");
+    expect(updateData.posterBusinessName).toBeNull();
+    expect(updateData.posterAbn).toBeNull();
   });
 
   it("includes x-request-id header", async () => {

@@ -117,6 +117,67 @@ describe("GET /api/v1/admin/serr", () => {
     expect(contractQuery.where.completedAt.lte).toEqual(new Date("2026-06-30"));
   });
 
+  it("attributes the poster's side of business-posted non-cash exchanges to the business ABN", async () => {
+    mockContractFindMany.mockResolvedValue([
+      {
+        id: "contract-biz",
+        acceptanceId: null,
+        completedAt: new Date("2026-03-12T00:00:00Z"),
+        need: {
+          title: "Website for the café",
+          offerType: "service",
+          offerValue: null,
+          postedAs: "business",
+          posterBusinessName: "Coast Café Pty Ltd",
+          posterAbn: "51824753556",
+          poster: { ...SELLER, id: "poster-1", fullName: "Pat Poster" },
+        },
+        partyB: SELLER,
+      },
+    ]);
+    mockAcceptanceFindMany.mockResolvedValue([]);
+
+    const res = await GET(makeRequest("http://localhost/api/v1/admin/serr"));
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.totals.sellers).toBe(2);
+    const business = body.sellers.find((s: { profileId: string }) => s.profileId === "poster-1");
+    expect(business.fullName).toBe("Coast Café Pty Ltd");
+    expect(business.abn).toBe("51824753556");
+    expect(business.transactionCount).toBe(1);
+    expect(business.totalCashAud).toBe(0);
+  });
+
+  it("does not report the business poster when the offer was cash — they are the buyer", async () => {
+    mockContractFindMany.mockResolvedValue([
+      {
+        id: "contract-cash",
+        acceptanceId: null,
+        completedAt: new Date("2026-03-12T00:00:00Z"),
+        need: {
+          title: "Fix the fence",
+          offerType: "money",
+          offerValue: 200,
+          postedAs: "business",
+          posterBusinessName: "Coast Café Pty Ltd",
+          posterAbn: "51824753556",
+          poster: { ...SELLER, id: "poster-1" },
+        },
+        partyB: SELLER,
+      },
+    ]);
+    mockAcceptanceFindMany.mockResolvedValue([]);
+
+    const res = await GET(makeRequest("http://localhost/api/v1/admin/serr"));
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.totals.sellers).toBe(1);
+    expect(body.sellers[0].profileId).toBe("seller-1");
+    expect(body.totals.totalCashAud).toBe(200);
+  });
+
   it("returns 400 when from is after to", async () => {
     const res = await GET(
       makeRequest("http://localhost/api/v1/admin/serr?from=2026-07-01&to=2026-01-01")

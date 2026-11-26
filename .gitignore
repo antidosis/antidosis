@@ -63,3 +63,4 @@ test-results/
 
 # Third-party audit (local reference only)
 third party audit/
+__pycache__/

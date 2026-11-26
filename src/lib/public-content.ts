@@ -18,12 +18,17 @@ export interface PublicNeedItem {
   destinationName: string | null;
   urgency: number;
   allowUrgentContact: boolean;
+  /** "personal" | "business" — business posts carry the snapshotted trading name. */
+  postedAs: string;
+  posterBusinessName: string | null;
   poster: {
     id: string;
     fullName: string | null;
     avatarUrl: string | null;
     ratingAvg: number;
     ratingCount: number;
+    businessRatingAvg: number;
+    businessRatingCount: number;
     locationName: string | null;
   };
   requiredSkills: { id: string; name: string }[];
@@ -95,6 +100,8 @@ export async function getPublicNeeds({
               avatarUrl: true,
               ratingAvg: true,
               ratingCount: true,
+              businessRatingAvg: true,
+              businessRatingCount: true,
               locationName: true,
             },
           },
@@ -219,7 +226,7 @@ export async function getDirectoryProfiles(
 
   const profiles = await prisma.profile.findMany({
     where,
-    orderBy: { ratingAvg: "desc" },
+    orderBy: { businessRatingAvg: "desc" },
     take: 100,
     select: {
       id: true,
@@ -233,8 +240,10 @@ export async function getDirectoryProfiles(
       businessEmail: true,
       businessSocialLinks: true,
       acceptedExchanges: true,
-      ratingAvg: true,
-      ratingCount: true,
+      // Directory cards rank and display the BUSINESS reputation bucket —
+      // personal reviews never surface here.
+      businessRatingAvg: true,
+      businessRatingCount: true,
       jobsCompleted: true,
       isVerified: true,
       accountType: true,
@@ -250,10 +259,19 @@ export async function getDirectoryProfiles(
   });
 
   return profiles.map(
-    ({ directorySpecialties, businessSocialLinks, acceptedExchanges, ...profile }) => {
+    ({
+      directorySpecialties,
+      businessSocialLinks,
+      acceptedExchanges,
+      businessRatingAvg,
+      businessRatingCount,
+      ...profile
+    }) => {
       const { publicPhone, businessPhone, businessEmail, ...rest } = profile;
       return {
         ...rest,
+        ratingAvg: businessRatingAvg,
+        ratingCount: businessRatingCount,
         contact: contactFlags(publicPhone, businessPhone, businessEmail, businessSocialLinks),
         specialties: directorySpecialties,
         acceptedExchanges: parseExchangeModes(acceptedExchanges),
@@ -309,8 +327,8 @@ export async function getDirectoryProfile(id: string): Promise<DirectoryProfile 
       businessEmail: true,
       businessSocialLinks: true,
       acceptedExchanges: true,
-      ratingAvg: true,
-      ratingCount: true,
+      businessRatingAvg: true,
+      businessRatingCount: true,
       jobsCompleted: true,
       isVerified: true,
       accountType: true,
@@ -326,10 +344,19 @@ export async function getDirectoryProfile(id: string): Promise<DirectoryProfile 
   });
 
   if (!profile) return null;
-  const { directorySpecialties, businessSocialLinks, acceptedExchanges, ...rest } = profile;
+  const {
+    directorySpecialties,
+    businessSocialLinks,
+    acceptedExchanges,
+    businessRatingAvg,
+    businessRatingCount,
+    ...rest
+  } = profile;
   const { publicPhone, businessPhone, businessEmail, ...safeRest } = rest;
   return {
     ...safeRest,
+    ratingAvg: businessRatingAvg,
+    ratingCount: businessRatingCount,
     contact: contactFlags(publicPhone, businessPhone, businessEmail, businessSocialLinks),
     specialties: directorySpecialties,
     acceptedExchanges: parseExchangeModes(acceptedExchanges),

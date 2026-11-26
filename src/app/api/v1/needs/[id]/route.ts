@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { type Prisma } from "@prisma/client";
 
 import { withApiHandler } from "@/lib/api-handler";
+import { getBusinessPostingEligibility } from "@/lib/business-posting";
 import { isValidCentralCoastSuburb } from "@/lib/data/central-coast-suburbs";
 import { requireVerifiedParticipation } from "@/lib/participation";
 import { prisma } from "@/lib/prisma";
@@ -211,6 +212,7 @@ export const PATCH = withApiHandler(
         isLocal: true,
         urgency: true,
         allowUrgentContact: true,
+        postedAs: true,
       },
     });
     if (!existingNeed) {
@@ -247,6 +249,48 @@ export const PATCH = withApiHandler(
           { error: "Verify your mobile before offering direct urgent contact." },
           { status: 400 }
         );
+      }
+    }
+
+    // Identity switches are only allowed before anyone has engaged — after
+    // that the poster's identity is part of the deal and stays locked.
+    let postedAsUpdate: {
+      postedAs: string;
+      posterBusinessName: string | null;
+      posterAbn: string | null;
+    } | null = null;
+    if (data.postedAs !== undefined && data.postedAs !== existingNeed.postedAs) {
+      const engagementCount = await prisma.acceptance.count({
+        where: { needId, status: { not: "removed" } },
+      });
+      if (engagementCount > 0) {
+        return NextResponse.json(
+          {
+            error:
+              "Posting identity is locked once someone has expressed interest — archive this need and post a new one instead.",
+            code: "POSTED_AS_LOCKED",
+          },
+          { status: 400 }
+        );
+      }
+      if (data.postedAs === "business") {
+        const eligibility = await getBusinessPostingEligibility(participation.profileId);
+        if (!eligibility.eligible) {
+          return NextResponse.json(
+            {
+              error: eligibility.reason ?? "Business posting is not available for this account.",
+              code: "BUSINESS_POSTING_NOT_AVAILABLE",
+            },
+            { status: 403 }
+          );
+        }
+        postedAsUpdate = {
+          postedAs: "business",
+          posterBusinessName: eligibility.businessName,
+          posterAbn: eligibility.abn,
+        };
+      } else {
+        postedAsUpdate = { postedAs: "personal", posterBusinessName: null, posterAbn: null };
       }
     }
 
@@ -293,6 +337,11 @@ export const PATCH = withApiHandler(
     if (data.offerImages !== undefined) updateData.offerImages = sanitizeUrlArray(data.offerImages);
     if (data.requiresContract !== undefined) updateData.requiresContract = data.requiresContract;
     if (data.status !== undefined) updateData.status = data.status;
+    if (postedAsUpdate) {
+      updateData.postedAs = postedAsUpdate.postedAs;
+      updateData.posterBusinessName = postedAsUpdate.posterBusinessName;
+      updateData.posterAbn = postedAsUpdate.posterAbn;
+    }
 
     // Handle requiredSkills update atomically
     let need;

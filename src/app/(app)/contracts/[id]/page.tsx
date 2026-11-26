@@ -150,6 +150,10 @@ type ContractData = {
     offerType: string;
     offerDescription: string;
     images: string[];
+    /** "personal" | "business" — business-posted needs name the poster's
+     *  business (snapshotted at post time) as the contracting entity. */
+    postedAs: string;
+    posterBusinessName: string | null;
     poster: { fullName: string | null };
   } | null;
   partyA: {
@@ -224,6 +228,8 @@ function displayNeed(contract: ContractData): NonNullable<ContractData["need"]> 
     offerType: "direct",
     offerDescription: "As recorded in both parties' agreed terms.",
     images: [],
+    postedAs: "personal",
+    posterBusinessName: null,
     poster: { fullName: contract.partyA.fullName },
   };
 }
@@ -955,6 +961,9 @@ export default function ContractPage() {
               party={contract.partyA}
               label={isDirect ? "Party A — Agreement creator" : "Party A — Need Poster"}
               isMe={isPartyA}
+              businessName={
+                contract.need?.postedAs === "business" ? contract.need.posterBusinessName : null
+              }
             />
             <PartySection
               party={partyB}
@@ -1847,11 +1856,16 @@ function PartySection({
   party,
   label,
   isMe,
+  businessName,
 }: {
   party: ContractData["partyA"];
   label: string;
   isMe: boolean;
+  /** Set when the need was posted as a business — the contracting entity is
+   *  the business (snapshotted at post time), with the person named under it. */
+  businessName?: string | null;
 }) {
+  const entityName = businessName || party.fullName || "anonymous";
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
@@ -1870,13 +1884,21 @@ function PartySection({
               href={`/profile/${party.id}`}
               className="text-base font-semibold truncate text-paperhead hover:text-linestrong transition-colors print:hidden"
             >
-              {party.fullName || "anonymous"}
+              {entityName}
             </Link>
             <span className="text-base font-semibold text-paperhead hidden print:inline">
-              {party.fullName || "anonymous"}
+              {entityName}
             </span>
+            {businessName && (
+              <span className="rounded-sm border border-linestrong/40 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider text-linestrong">
+                Business
+              </span>
+            )}
             {party.isVerified && <Shield className="h-3.5 w-3.5 text-emerald-600" />}
           </div>
+          {businessName && party.fullName && (
+            <p className="text-xs text-linestrong mt-0.5">represented by {party.fullName}</p>
+          )}
           <div className="text-sm text-linestrong mt-0.5">
             {party.ratingCount > 0 && <span>{party.ratingAvg.toFixed(1)} ★</span>}
             {party.locationName && <span className="ml-2">{party.locationName}</span>}

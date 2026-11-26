@@ -9,6 +9,7 @@ const mockCount = vi.fn();
 const mockQueryRaw = vi.fn();
 const mockNeedCreate = vi.fn();
 const mockProfileFindUnique = vi.fn();
+const mockSpecialtyCount = vi.fn();
 const mockAuditLog = vi.fn();
 
 vi.mock("@/lib/prisma", () => ({
@@ -20,6 +21,9 @@ vi.mock("@/lib/prisma", () => ({
     },
     profile: {
       findUnique: (...args: unknown[]) => mockProfileFindUnique(...args),
+    },
+    directorySpecialty: {
+      count: (...args: unknown[]) => mockSpecialtyCount(...args),
     },
     $queryRaw: (...args: unknown[]) => mockQueryRaw(...args),
   },
@@ -294,5 +298,130 @@ describe("POST /api/v1/needs (participation gate)", () => {
 
     expect(res.status).toBe(400);
     expect(mockNeedCreate).not.toHaveBeenCalled();
+  });
+});
+
+describe("POST /api/v1/needs (business posting)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGetUser.mockResolvedValue({
+      data: {
+        user: { id: "user-1", email: "test@example.com", email_confirmed_at: "2024-01-01" },
+      },
+      error: null,
+    });
+    mockRateLimit.mockResolvedValue({ allowed: true });
+    mockNeedCreate.mockImplementation(({ data }) => ({
+      id: "need-1",
+      ...data,
+      requiredSkills: [],
+    }));
+  });
+
+  function makePost(body: Record<string, unknown>): NextRequest {
+    return new Request("http://localhost/api/v1/needs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }) as NextRequest;
+  }
+
+  const businessProfile = {
+    id: "profile-1",
+    mobileVerified: true,
+    bannedAt: null,
+    mobile: "+61400000000",
+    accountType: "business",
+    abn: "12345678901",
+    businessName: "Acme Plumbing",
+    fullName: "Martin K",
+    showInDirectory: true,
+  };
+
+  const validBody = {
+    title: "Office cleaned weekly",
+    description: "Looking for a cleaner for our office, once a week ongoing.",
+    offerType: "money",
+    offerDescription: "$60 per visit",
+    isLocal: true,
+    locationName: "terrigal_2260",
+    requiredSkills: [],
+    images: [],
+    offerImages: [],
+  };
+
+  it("snapshots the business identity when posting as a business", async () => {
+    mockProfileFindUnique.mockResolvedValue(businessProfile);
+    mockSpecialtyCount.mockResolvedValue(1);
+
+    const res = await POST(makePost({ ...validBody, postedAs: "business" }));
+
+    expect(res.status).toBe(201);
+    const createData = mockNeedCreate.mock.calls[0][0].data;
+    expect(createData.postedAs).toBe("business");
+    expect(createData.posterBusinessName).toBe("Acme Plumbing");
+    expect(createData.posterAbn).toBe("12345678901");
+  });
+
+  it("falls back to the member's name when no trading name is set", async () => {
+    mockProfileFindUnique.mockResolvedValue({ ...businessProfile, businessName: null });
+    mockSpecialtyCount.mockResolvedValue(2);
+
+    const res = await POST(makePost({ ...validBody, postedAs: "business" }));
+
+    expect(res.status).toBe(201);
+    const createData = mockNeedCreate.mock.calls[0][0].data;
+    expect(createData.posterBusinessName).toBe("Martin K");
+  });
+
+  it("rejects business posting without a claimed specialty", async () => {
+    mockProfileFindUnique.mockResolvedValue(businessProfile);
+    mockSpecialtyCount.mockResolvedValue(0);
+
+    const res = await POST(makePost({ ...validBody, postedAs: "business" }));
+    const body = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(body.code).toBe("BUSINESS_POSTING_NOT_AVAILABLE");
+    expect(mockNeedCreate).not.toHaveBeenCalled();
+  });
+
+  it("rejects business posting when the directory listing is hidden", async () => {
+    mockProfileFindUnique.mockResolvedValue({ ...businessProfile, showInDirectory: false });
+    mockSpecialtyCount.mockResolvedValue(1);
+
+    const res = await POST(makePost({ ...validBody, postedAs: "business" }));
+    const body = await res.json();
+
+    expect(res.status).toBe(403);
+    expect(body.code).toBe("BUSINESS_POSTING_NOT_AVAILABLE");
+    expect(mockNeedCreate).not.toHaveBeenCalled();
+  });
+
+  it("rejects business posting for individual accounts", async () => {
+    mockProfileFindUnique.mockResolvedValue({
+      ...businessProfile,
+      accountType: "individual",
+      abn: null,
+    });
+    mockSpecialtyCount.mockResolvedValue(0);
+
+    const res = await POST(makePost({ ...validBody, postedAs: "business" }));
+
+    expect(res.status).toBe(403);
+    expect(mockNeedCreate).not.toHaveBeenCalled();
+  });
+
+  it("defaults to personal posting with no business snapshot", async () => {
+    mockProfileFindUnique.mockResolvedValue(businessProfile);
+    mockSpecialtyCount.mockResolvedValue(1);
+
+    const res = await POST(makePost(validBody));
+
+    expect(res.status).toBe(201);
+    const createData = mockNeedCreate.mock.calls[0][0].data;
+    expect(createData.postedAs).toBe("personal");
+    expect(createData.posterBusinessName).toBeNull();
+    expect(createData.posterAbn).toBeNull();
   });
 });

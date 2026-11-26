@@ -7,6 +7,7 @@ import {
   Star,
   Shield,
   Briefcase,
+  Building2,
   ChevronDown,
   ChevronUp,
   Lock,
@@ -44,6 +45,10 @@ interface PosterProfileCardProps {
   credentials: Credential[];
   credLoading: boolean;
   onAuthRequired: (register?: boolean) => void;
+  /** Business-posted needs lead with the business identity; the personal
+   *  card below becomes "the person behind the business". */
+  postedAs?: string;
+  posterBusinessName?: string | null;
 }
 
 export function PosterProfileCard({
@@ -54,9 +59,25 @@ export function PosterProfileCard({
   credentials,
   credLoading,
   onAuthRequired,
+  postedAs,
+  posterBusinessName,
 }: PosterProfileCardProps) {
+  const isBusinessPost = postedAs === "business";
   return (
     <div className="vessel p-4 mb-6">
+      {isBusinessPost && (
+        <Link
+          href={`/pros/${poster.id}`}
+          className="mb-3 flex items-center gap-2 rounded border border-mercury/30 bg-mercury/[0.06] px-3 py-2 text-xs text-mercury transition-colors hover:bg-mercury/10"
+        >
+          <Building2 className="h-3.5 w-3.5 shrink-0" />
+          <span className="min-w-0 truncate">
+            Posted by <span className="font-medium">{posterBusinessName || poster.fullName}</span> —
+            view business listing
+          </span>
+          <ExternalLink className="ml-auto h-3 w-3 shrink-0" />
+        </Link>
+      )}
       {/* Collapsed header */}
       <div className="flex items-center gap-3">
         <Avatar src={poster.avatarUrl} name={poster.fullName} size="md" />

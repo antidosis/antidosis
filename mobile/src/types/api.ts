@@ -24,6 +24,8 @@ export interface Profile {
   showInDirectory: boolean;
   ratingAvg: number;
   ratingCount: number;
+  businessRatingAvg: number;
+  businessRatingCount: number;
   jobsCompleted: number;
   createdAt: string;
   updatedAt: string;
@@ -91,6 +93,10 @@ export interface Need {
   destinationName: string | null;
   urgency: number;
   allowUrgentContact: boolean;
+  /** "personal" | "business" — business posts carry the snapshotted trading name. */
+  postedAs: string;
+  posterBusinessName: string | null;
+  posterAbn?: string | null;
   latitude: number | null;
   longitude: number | null;
   status: string;

@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ArrowLeft,
+  Building2,
   Calendar,
   CircleDollarSign,
   Clock,
@@ -17,6 +18,7 @@ import {
   Phone,
   Shield,
   SlidersHorizontal,
+  User,
   Wrench,
   Zap,
 } from "lucide-react";
@@ -48,6 +50,9 @@ export default function CreateNeedPage() {
   const [profile, setProfile] = useState<{
     mobileVerified: boolean;
     mobile: string | null;
+    businessPostingEligible?: boolean;
+    businessPostingName?: string | null;
+    businessPostingReason?: string | null;
   } | null>(null);
 
   const {
@@ -71,12 +76,14 @@ export default function CreateNeedPage() {
       images: [],
       offerImages: [],
       requiresContract: false,
+      postedAs: "personal",
     },
   });
 
   const offerType = watch("offerType");
   const exchangeMode = watch("needCategory");
   const urgency = watch("urgency") ?? 0;
+  const postedAs = watch("postedAs") ?? "personal";
   const watchedTitle = watch("title") ?? "";
   const watchedSkills = watch("requiredSkills") ?? [];
   const regulatedTrade = detectRegulatedTrade({ title: watchedTitle, skills: watchedSkills });
@@ -146,7 +153,9 @@ export default function CreateNeedPage() {
               : "Could not post your need";
         setError("root", { message });
         if (json.code === "MOBILE_NOT_VERIFIED")
-          setProfile({ mobileVerified: false, mobile: null });
+          setProfile((current) =>
+            current ? { ...current, mobileVerified: false, mobile: null } : current
+          );
         return;
       }
       sessionStorage.removeItem("antidosis-need-draft");
@@ -214,6 +223,67 @@ export default function CreateNeedPage() {
         </button>
       </div>
 
+      {profile?.businessPostingEligible && (
+        <div className="mb-6 rounded-lg border border-line bg-surface/40 p-4">
+          <p className="mb-3 font-mono text-xs uppercase tracking-[0.18em] text-mercury">
+            Posting as
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              aria-pressed={postedAs === "personal"}
+              onClick={() => setValue("postedAs", "personal")}
+              className={cn(
+                "flex min-h-14 items-center gap-3 rounded-md border px-3 py-2 text-left sm:px-4",
+                postedAs === "personal"
+                  ? "border-sun/40 bg-sun/[0.08]"
+                  : "border-transparent hover:bg-raise"
+              )}
+            >
+              <User
+                className={cn(
+                  "h-5 w-5 shrink-0",
+                  postedAs === "personal" ? "text-sun" : "text-ash"
+                )}
+              />
+              <span className="min-w-0">
+                <span className="block truncate text-sm font-medium text-gold">You</span>
+                <span className="block text-xs text-ash">Personal profile</span>
+              </span>
+            </button>
+            <button
+              type="button"
+              aria-pressed={postedAs === "business"}
+              onClick={() => setValue("postedAs", "business")}
+              className={cn(
+                "flex min-h-14 items-center gap-3 rounded-md border px-3 py-2 text-left sm:px-4",
+                postedAs === "business"
+                  ? "border-sun/40 bg-sun/[0.08]"
+                  : "border-transparent hover:bg-raise"
+              )}
+            >
+              <Building2
+                className={cn(
+                  "h-5 w-5 shrink-0",
+                  postedAs === "business" ? "text-sun" : "text-ash"
+                )}
+              />
+              <span className="min-w-0">
+                <span className="block truncate text-sm font-medium text-gold">
+                  {profile.businessPostingName ?? "Your business"}
+                </span>
+                <span className="block text-xs text-ash">Business listing</span>
+              </span>
+            </button>
+          </div>
+          <p className="mt-3 text-xs leading-relaxed text-ash">
+            {postedAs === "business"
+              ? "Shows your business name and ABN, links to your directory listing, and reviews count toward your business rating. Locks once someone responds."
+              : "Posted under your personal profile. Switch to your business to build its directory reputation."}
+          </p>
+        </div>
+      )}
+
       {mobileGate && (
         <div className="mb-6 rounded-lg border border-alert/30 bg-alert/[0.06] p-4">
           <div className="flex items-start gap-3">
@@ -236,6 +306,7 @@ export default function CreateNeedPage() {
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        <input type="hidden" {...register("postedAs")} />
         <section className="vessel-need rounded-lg p-5 sm:p-6">
           <div className="mb-5">
             <h2 className="text-lg font-medium text-gold">What do you need?</h2>

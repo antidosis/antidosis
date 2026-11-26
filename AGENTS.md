@@ -216,11 +216,11 @@ needs/[id]/_components/
 
 ### Key Models
 
-- `Need` — posted needs with title, description, offer, status; `boostTier`/`boostedUntil` reserve paid top-placement slots (see monetisation note)
+- `Need` — posted needs with title, description, offer, status. `postedAs` (`personal` | `business`) records the identity it was posted under; business posts require a live directory listing (enforced by `src/lib/business-posting.ts`) and snapshot `posterBusinessName`/`posterAbn` at post time. Locked once acceptances exist.; `boostTier`/`boostedUntil` reserve paid top-placement slots (see monetisation note)
 - `Acceptance` — expressions of interest on a need
 - `Contract` — marketplace agreements (`kind="exchange"`, linked `needId`) and private direct agreements (`kind="direct"`, no need). Direct invitations use a hashed single-use 30-day token, optional recipient email restriction, and nullable `partyBId` until claimed; never serialize `inviteTokenHash`/`inviteEmail` through general contract responses. Optional `considerationType`/`considerationValue` support direct-agreement records and SERR exports
 - `Notification` — active inbox plus `archivedAt`; API auto-archives items older than 30 days. Terminal activity API is likewise limited to 30 days
-- `Review` — ratings and feedback after completion
+- `Review` — ratings and feedback after completion. `receiverContext` (`personal` | `business`) routes the review to the receiver's public-profile rating or their directory (business) rating — the two aggregates (`ratingAvg`/`ratingCount` vs `businessRatingAvg`/`businessRatingCount`) never blend.
 - `Profile` — extended user profile (skills, credentials, etc.); `accountType` (`individual`|`business`), `abn`/`abnVerified` (business accounts), `audienceSize` (individuals, public creator metric) — ABN only public on business profiles, audience size only on individual; `preferences` (JSON blob, cross-device appearance prefs `{"theme","font"}` synced by the pickers, adopted by devices with no local choice). Business accounts: `accountType` ("individual" | "business"), `abn` + `abnVerified` (ABN checksum in `src/lib/abn.ts`; ABR live lookup when `ABR_LOOKUP_GUID` is set). Individual ABNs are never public — the public profile route gates ABN to business accounts.
 - `NeedMessage` — messages on needs (public + private threads)
 - `NeedView` / `NeedWatch` — per-need analytics: views are deduped 24h per viewer/IP-hash via `POST /api/v1/needs/[id]/view` (fired by the detail page); watchers follow a post via `POST/DELETE /api/v1/needs/[id]/watch` and surface in dashboard analytics
