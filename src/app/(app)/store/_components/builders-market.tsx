@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import Link from "next/link";
 
@@ -10,7 +10,7 @@ import {
   Loader2,
   MapPin,
   PackageOpen,
-  ShieldCheck,
+  Store,
   Wrench,
 } from "lucide-react";
 
@@ -20,7 +20,6 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { displayHostname } from "@/lib/security/link-policy";
 import { createClient } from "@/lib/supabase/client";
-import { cn } from "@/lib/utils";
 
 export type MeshProductListing = {
   id: string;
@@ -49,59 +48,9 @@ export type PublicMeshBuilder = {
   products: MeshProductListing[];
 };
 
-const CATEGORY_LABEL: Record<string, string> = {
-  node: "node",
-  kit: "kit",
-  gateway: "gateway",
-  accessory: "accessory",
-};
-
-const STOCK_LABEL: Record<string, { label: string; tone: string }> = {
-  in_stock: { label: "in stock", tone: "text-ok" },
-  made_to_order: { label: "made to order", tone: "text-mercury" },
-  out_of_stock: { label: "out of stock", tone: "text-ash" },
-};
-
 export function formatAud(cents: number | null): string {
   if (cents === null) return "POA";
   return `AU$${(cents / 100).toFixed(cents % 100 === 0 ? 0 : 2)}`;
-}
-
-function ProductCard({ product }: { product: MeshProductListing }) {
-  const stock = STOCK_LABEL[product.stockStatus] ?? STOCK_LABEL.in_stock;
-  return (
-    <div className="rounded-lg border border-line/70 bg-inset/40 p-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-mercury">
-          {CATEGORY_LABEL[product.category] ?? product.category}
-        </span>
-        <span className={cn("font-mono text-[10px] uppercase tracking-wider", stock.tone)}>
-          {stock.label}
-        </span>
-      </div>
-      <h4 className="mt-2 text-base font-medium text-gold">{product.name}</h4>
-      <p className="mt-1.5 text-sm leading-relaxed text-ash">{product.description}</p>
-      {product.specs && (
-        <p className="mt-2 border-l-2 border-line pl-3 font-mono text-xs leading-relaxed text-ash/80">
-          {product.specs}
-        </p>
-      )}
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-        <span className="text-base font-medium text-sun">{formatAud(product.priceAudCents)}</span>
-        {product.buyUrl && (
-          <a
-            href={product.buyUrl}
-            target="_blank"
-            rel="noopener noreferrer nofollow"
-            className="inline-flex items-center gap-1.5 rounded border border-line px-2.5 py-1.5 text-xs text-parchment transition-colors hover:border-sun/40 hover:text-sun"
-          >
-            <ExternalLink className="h-3 w-3" />
-            {displayHostname(product.buyUrl)}
-          </a>
-        )}
-      </div>
-    </div>
-  );
 }
 
 function BuilderCard({ builder }: { builder: PublicMeshBuilder }) {
@@ -152,13 +101,13 @@ function BuilderCard({ builder }: { builder: PublicMeshBuilder }) {
       <p className="mt-3 text-[15px] leading-relaxed text-parchment">{builder.description}</p>
 
       {builder.products.length > 0 ? (
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          {builder.products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        <p className="mt-3 flex items-center gap-2 text-sm text-ash">
+          <PackageOpen className="h-4 w-4 text-sun" />
+          {builder.products.length} product{builder.products.length === 1 ? "" : "s"} on the shelf
+          above
+        </p>
       ) : (
-        <p className="mt-4 flex items-center gap-2 rounded-md border border-dashed border-line px-4 py-3 text-sm text-ash">
+        <p className="mt-3 flex items-center gap-2 rounded-md border border-dashed border-line px-4 py-3 text-sm text-ash">
           <PackageOpen className="h-4 w-4" /> Shelf being stocked — products coming soon.
         </p>
       )}
@@ -207,12 +156,11 @@ function ApplicationForm({ onApplied }: { onApplied: () => void }) {
   return (
     <form onSubmit={submit} className="rounded-lg border border-sun/25 bg-sun/[0.03] p-5 md:p-6">
       <h3 className="flex items-center gap-2 text-lg font-medium text-gold">
-        <Wrench className="h-5 w-5 text-sun" /> Apply as a mesh builder
+        <Wrench className="h-5 w-5 text-sun" /> Sell your nodes here
       </h3>
       <p className="mt-1.5 text-sm leading-relaxed text-ash">
-        One application per account. We review manually — hardware specs, range-test evidence, buyer
-        support terms. Approved builders get a public shelf in this store and manage it from their
-        dashboard.
+        Approved builders get a public shelf in this store and manage it from their dashboard. We
+        review manually — hardware, range tests, buyer support.
       </p>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <label className="block">
@@ -246,7 +194,7 @@ function ApplicationForm({ onApplied }: { onApplied: () => void }) {
             type="url"
             value={website}
             onChange={(event) => setWebsite(event.target.value)}
-            placeholder="https://… (your own site, Etsy, eBay — full address, no shorteners)"
+            placeholder="https://… (full address, no shorteners)"
             className={applicationInputClass}
             maxLength={500}
           />
@@ -260,7 +208,7 @@ function ApplicationForm({ onApplied }: { onApplied: () => void }) {
             value={description}
             onChange={(event) => setDescription(event.target.value)}
             rows={4}
-            placeholder="Boards you flash, antennas and enclosures you use, range tests you've run, warranty/repair terms… (min 40 characters)"
+            placeholder="Boards you flash, antennas and enclosures, range tests you've run, warranty terms… (min 40 characters)"
             className={applicationInputClass}
             maxLength={2000}
           />
@@ -269,7 +217,7 @@ function ApplicationForm({ onApplied }: { onApplied: () => void }) {
       {error && <p className="mt-3 text-sm text-bad">{error}</p>}
       <Button type="submit" className="mt-4" disabled={sending || description.trim().length < 40}>
         {sending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        Submit application
+        Apply as a builder
       </Button>
     </form>
   );
@@ -278,27 +226,20 @@ function ApplicationForm({ onApplied }: { onApplied: () => void }) {
 type BuilderSession = "loading" | "anon" | "none" | "applied";
 
 /**
- * The builders marketplace: live approved builders + their product shelves,
- * plus the application path (login-gated — products need an owner).
+ * The builders marketplace. The builders list itself is fetched once by the
+ * store page and shared with the shelf; this component renders the stalls
+ * and owns the application path (login-gated — products need an owner).
  */
-export function BuildersMarket() {
-  const [builders, setBuilders] = useState<PublicMeshBuilder[] | null>(null);
+export function BuildersMarket({
+  builders,
+  onApplied,
+}: {
+  builders: PublicMeshBuilder[] | null;
+  onApplied: () => void;
+}) {
   const [session, setSession] = useState<BuilderSession>("loading");
 
-  const load = useCallback(async () => {
-    try {
-      const res = await fetch("/api/v1/store/builders");
-      if (!res.ok) throw new Error();
-      const data = await res.json();
-      setBuilders(data.builders ?? []);
-    } catch {
-      setBuilders([]);
-    }
-  }, []);
-
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- initial data fetch on mount; setState lives inside the async loaders
-    void load();
     (async () => {
       try {
         const supabase = createClient();
@@ -320,7 +261,7 @@ export function BuildersMarket() {
         setSession("anon");
       }
     })();
-  }, [load]);
+  }, []);
 
   return (
     <div>
@@ -329,16 +270,19 @@ export function BuildersMarket() {
           <Loader2 className="h-4 w-4 animate-spin" /> loading builders…
         </div>
       ) : builders.length === 0 ? (
-        <div className="vessel p-8 text-center md:p-10">
-          <ShieldCheck className="mx-auto h-8 w-8 text-mercury" />
-          <h3 className="heading-display mt-4 text-xl text-gold">
-            The first shelves are being built
-          </h3>
-          <p className="mx-auto mt-2 max-w-md text-[15px] leading-relaxed text-ash">
-            No builders listed yet — the pilot is reviewing its first applications. Listings are
-            earned through evidence (hardware specs, documented range tests, real buyer support),
-            never purchased.
-          </p>
+        <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
+          {[0, 1].map((i) => (
+            <div
+              key={i}
+              className="flex flex-col items-center justify-center rounded-lg border border-dashed border-line/80 px-6 py-10 text-center"
+            >
+              <Store className="h-7 w-7 text-ash/60" />
+              <p className="mt-3 text-base font-medium text-parchment">This stall could be yours</p>
+              <p className="mt-1 text-sm text-ash">
+                The first verified builders are being reviewed now.
+              </p>
+            </div>
+          ))}
         </div>
       ) : (
         <div className="space-y-5">
@@ -353,9 +297,7 @@ export function BuildersMarket() {
           <div className="rounded-lg border border-line bg-surface/40 p-5 md:p-6">
             <h3 className="text-lg font-medium text-gold">Build nodes? Join the shelf.</h3>
             <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-ash">
-              Verified builders get a public product shelf here and buyer referrals from the
-              platform. Applications are tied to a verified account — sign in (or create a free
-              account and verify your mobile) to apply.
+              Sign in (or create a free account and verify your mobile) to apply.
             </p>
             <Button asChild className="mt-4">
               <Link href="/login?next=/store%23builders">Sign in to apply</Link>
@@ -365,15 +307,19 @@ export function BuildersMarket() {
           <div className="rounded-lg border border-ok/25 bg-ok/[0.04] p-5 md:p-6">
             <h3 className="text-lg font-medium text-gold">You have a builder record</h3>
             <p className="mt-1.5 text-sm leading-relaxed text-ash">
-              Track your application status, edit your details and manage your product shelf from
-              your dashboard.
+              Track your application and manage your shelf from your dashboard.
             </p>
             <Button asChild variant="secondary" className="mt-4">
               <Link href="/dashboard?tab=mesh-store">Open Mesh store in dashboard</Link>
             </Button>
           </div>
         ) : (
-          <ApplicationForm onApplied={() => setSession("applied")} />
+          <ApplicationForm
+            onApplied={() => {
+              setSession("applied");
+              onApplied();
+            }}
+          />
         )}
       </div>
     </div>

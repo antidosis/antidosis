@@ -9,22 +9,10 @@ import { cn } from "@/lib/utils";
 
 export type InterestKind = "node" | "byo_device" | "updates";
 
-const KIND_OPTIONS: { id: InterestKind; label: string; hint: string }[] = [
-  {
-    id: "node",
-    label: "I want a node",
-    hint: "Pilot batch pricing and availability, straight to your inbox.",
-  },
-  {
-    id: "byo_device",
-    label: "I already have a device",
-    hint: "Tell us the model — we'll help with ANZ setup and channel access.",
-  },
-  {
-    id: "updates",
-    label: "Keep me posted",
-    hint: "Occasional mesh updates: pilot progress and range-test results.",
-  },
+const KIND_OPTIONS: { id: InterestKind; label: string }[] = [
+  { id: "node", label: "I want a node" },
+  { id: "byo_device", label: "I have a device" },
+  { id: "updates", label: "Keep me posted" },
 ];
 
 const inputClass =
@@ -37,10 +25,7 @@ const inputClass =
 export function InterestForm({ initialKind = "node" }: { initialKind?: InterestKind }) {
   const [kind, setKind] = useState<InterestKind>(initialKind);
   const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [suburb, setSuburb] = useState("");
   const [deviceModel, setDeviceModel] = useState("");
-  const [message, setMessage] = useState("");
   const [company, setCompany] = useState(""); // honeypot
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
@@ -57,10 +42,7 @@ export function InterestForm({ initialKind = "node" }: { initialKind?: InterestK
         body: JSON.stringify({
           kind,
           email,
-          name: name || undefined,
-          suburb: suburb || undefined,
           deviceModel: kind === "byo_device" && deviceModel ? deviceModel : undefined,
-          message: message || undefined,
           company,
         }),
       });
@@ -80,16 +62,11 @@ export function InterestForm({ initialKind = "node" }: { initialKind?: InterestK
         <CheckCircle2 className="mx-auto h-8 w-8 text-ok" />
         <h3 className="heading-display mt-4 text-xl text-gold">You&apos;re on the list</h3>
         <p className="mx-auto mt-2 max-w-md text-[15px] leading-relaxed text-ash">
-          Confirmation is on its way to <span className="text-parchment">{email}</span>. When the
-          relevant stage is ready — pricing, channel access or pilot news — you&apos;ll hear from us
-          first.
+          Confirmation is on its way to <span className="text-parchment">{email}</span>.
         </p>
         <button
           type="button"
-          onClick={() => {
-            setDone(false);
-            setMessage("");
-          }}
+          onClick={() => setDone(false)}
           className="mt-5 text-sm text-ash underline-offset-4 transition-colors hover:text-gold hover:underline"
         >
           Register another email
@@ -99,8 +76,8 @@ export function InterestForm({ initialKind = "node" }: { initialKind?: InterestK
   }
 
   return (
-    <form onSubmit={submit} className="vessel p-5 md:p-7">
-      <div className="grid gap-2 sm:grid-cols-3" role="radiogroup" aria-label="Interest type">
+    <form onSubmit={submit} className="vessel mx-auto max-w-xl p-5 md:p-7">
+      <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Interest type">
         {KIND_OPTIONS.map((option) => (
           <button
             key={option.id}
@@ -109,86 +86,39 @@ export function InterestForm({ initialKind = "node" }: { initialKind?: InterestK
             aria-checked={kind === option.id}
             onClick={() => setKind(option.id)}
             className={cn(
-              "rounded-lg border p-3.5 text-left transition-colors",
+              "rounded-lg border px-2 py-2.5 text-center text-sm font-medium transition-colors sm:text-[15px]",
               kind === option.id
-                ? "border-sun/60 bg-sun/[0.07]"
-                : "border-line bg-surface/30 hover:border-line hover:bg-surface/60"
+                ? "border-sun/60 bg-sun/[0.07] text-sun"
+                : "border-line bg-surface/30 text-gold hover:bg-surface/60"
             )}
           >
-            <span
-              className={cn(
-                "block text-[15px] font-medium",
-                kind === option.id ? "text-sun" : "text-gold"
-              )}
-            >
-              {option.label}
-            </span>
-            <span className="mt-1 block text-xs leading-relaxed text-ash">{option.hint}</span>
+            {option.label}
           </button>
         ))}
       </div>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        <label className="block sm:col-span-2">
-          <span className="mb-1.5 block text-sm text-parchment">
-            Email <span className="text-sun">*</span>
-          </span>
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="you@example.com"
-            className={inputClass}
-            maxLength={254}
-          />
-        </label>
-        <label className="block">
-          <span className="mb-1.5 block text-sm text-parchment">Name</span>
-          <input
-            type="text"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            placeholder="Optional"
-            className={inputClass}
-            maxLength={120}
-          />
-        </label>
-        <label className="block">
-          <span className="mb-1.5 block text-sm text-parchment">Suburb</span>
-          <input
-            type="text"
-            value={suburb}
-            onChange={(event) => setSuburb(event.target.value)}
-            placeholder="Helps us plan coverage"
-            className={inputClass}
-            maxLength={120}
-          />
-        </label>
+      <div className="mt-4 space-y-3">
+        <input
+          type="email"
+          required
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          placeholder="you@example.com"
+          aria-label="Email"
+          className={inputClass}
+          maxLength={254}
+        />
         {kind === "byo_device" && (
-          <label className="block sm:col-span-2">
-            <span className="mb-1.5 block text-sm text-parchment">Device model</span>
-            <input
-              type="text"
-              value={deviceModel}
-              onChange={(event) => setDeviceModel(event.target.value)}
-              placeholder="e.g. LilyGo T-Beam 915, Heltec V3…"
-              className={inputClass}
-              maxLength={120}
-            />
-          </label>
-        )}
-        <label className="block sm:col-span-2">
-          <span className="mb-1.5 block text-sm text-parchment">Anything else</span>
-          <textarea
-            value={message}
-            onChange={(event) => setMessage(event.target.value)}
-            rows={3}
-            placeholder="Optional — questions, your setup, where you'd place a node…"
+          <input
+            type="text"
+            value={deviceModel}
+            onChange={(event) => setDeviceModel(event.target.value)}
+            placeholder="Device model — e.g. LilyGo T-Beam 915, Heltec V3…"
+            aria-label="Device model"
             className={inputClass}
-            maxLength={2000}
+            maxLength={120}
           />
-        </label>
+        )}
       </div>
 
       {/* Honeypot — invisible to humans, catnip for bots */}
@@ -205,7 +135,7 @@ export function InterestForm({ initialKind = "node" }: { initialKind?: InterestK
 
       {error && <p className="mt-3 text-sm text-bad">{error}</p>}
 
-      <div className="mt-5 flex flex-wrap items-center gap-3">
+      <div className="mt-4 flex flex-wrap items-center gap-3">
         <Button type="submit" disabled={sending || !email}>
           {sending ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -214,9 +144,7 @@ export function InterestForm({ initialKind = "node" }: { initialKind?: InterestK
           )}
           Register interest
         </Button>
-        <p className="text-xs text-ash">
-          Free, no commitment, no spam — one confirmation, then only what you asked for.
-        </p>
+        <p className="text-xs text-ash">Free, no commitment, no spam.</p>
       </div>
     </form>
   );
