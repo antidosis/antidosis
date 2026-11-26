@@ -126,78 +126,75 @@ export function ShareProfileCard({ profile }: ShareProfileCardProps) {
         ))}
       </div>
 
-      {/* Visual card preview — the invite people receive. A live replica of
-          the downloaded PNG: same layout, same hierarchy, logo leading. */}
+      {/* Visual card preview — a live replica of the downloaded PNG: same
+          1200×630 aspect, same layout, so what you see is what you send. */}
       <div
-        className="relative overflow-hidden rounded-xl border"
+        className="relative aspect-[1200/630] overflow-hidden rounded-xl border"
         style={{
           background: `linear-gradient(135deg, ${theme.bgFrom}, ${theme.bgTo})`,
           borderColor: `${theme.accent}33`,
         }}
       >
         <div
-          className="absolute inset-x-0 top-0 h-1"
+          className="absolute inset-x-0 top-0 h-0.5"
           style={{ background: `linear-gradient(90deg, ${theme.accent}, transparent)` }}
         />
         <div
-          className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full border"
+          className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full border"
           style={{ borderColor: `${theme.accent}26` }}
         />
         <div
-          className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full border"
+          className="pointer-events-none absolute -right-4 -top-4 h-16 w-16 rounded-full border"
           style={{ borderColor: `${theme.accent}1a` }}
         />
         {/* inner frame — mirrors the PNG's framed border */}
         <div
-          className="pointer-events-none absolute inset-3 rounded-lg border"
+          className="pointer-events-none absolute inset-[3.5%] rounded-lg border"
           style={{ borderColor: `${theme.accent}38` }}
         />
-        <div className="relative flex flex-col p-6 sm:p-7">
+        <div className="relative flex h-full flex-col justify-between gap-2 p-[6%]">
           {/* Member block leads; badge + logo sit top-right */}
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex min-w-0 items-center gap-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
               <Avatar
                 src={profile.avatarUrl}
                 name={profile.fullName}
                 size="lg"
-                className="h-16 w-16 shrink-0"
+                className="h-9 w-9 shrink-0 sm:h-11 sm:w-11"
                 style={{ boxShadow: `0 0 0 2px ${theme.accent}40` }}
               />
-              <div className="min-w-0 flex-1">
-                <p className="flex items-center gap-1.5">
-                  <span className="heading-display truncate text-2xl leading-tight text-[#f4f7f2]">
+              <div className="min-w-0">
+                <p className="flex items-center gap-1">
+                  <span className="heading-display truncate text-base leading-tight text-[#f4f7f2] sm:text-xl">
                     {name}
                   </span>
                   {profile.isVerified && (
-                    <ShieldCheck className="h-4 w-4 shrink-0" style={{ color: theme.accent }} />
+                    <ShieldCheck className="h-3.5 w-3.5 shrink-0" style={{ color: theme.accent }} />
                   )}
                 </p>
                 <p
-                  className="mt-0.5 truncate font-mono text-sm"
+                  className="truncate font-mono text-[10px] sm:text-xs"
                   style={{ color: theme.accentSoft }}
                 >
                   {handle}
                 </p>
-                <p className="mt-1.5 flex flex-wrap items-center gap-x-2 text-xs text-[#9fb5aa]">
-                  <span className="inline-flex items-center gap-1">
-                    <Star
-                      className="h-3.5 w-3.5"
-                      style={{ color: theme.accent, fill: theme.accent }}
-                    />
+                <p className="mt-0.5 flex items-center gap-1 text-[9px] text-[#9fb5aa] sm:text-[10px]">
+                  <Star
+                    className="h-2.5 w-2.5 shrink-0"
+                    style={{ color: theme.accent, fill: theme.accent }}
+                  />
+                  <span className="truncate">
                     {ratingText}
+                    {profile.jobsCompleted > 0 &&
+                      ` · ${profile.jobsCompleted} exchange${profile.jobsCompleted === 1 ? "" : "s"}`}
+                    {profile.locationName && ` · ${profile.locationName}`}
                   </span>
-                  {profile.jobsCompleted > 0 && (
-                    <span>
-                      · {profile.jobsCompleted} exchange{profile.jobsCompleted === 1 ? "" : "s"}
-                    </span>
-                  )}
-                  {profile.locationName && <span>· {profile.locationName}</span>}
                 </p>
               </div>
             </div>
-            <div className="flex shrink-0 flex-col items-end gap-2">
+            <div className="flex shrink-0 flex-col items-end gap-1">
               <span
-                className="whitespace-nowrap font-mono text-[8px] uppercase tracking-[0.25em] sm:text-[9px]"
+                className="whitespace-nowrap font-mono text-[6px] uppercase tracking-[0.25em] sm:text-[7px]"
                 style={{ color: `${theme.accent}b3` }}
               >
                 Connection card
@@ -205,19 +202,22 @@ export function ShareProfileCard({ profile }: ShareProfileCardProps) {
               <img
                 src="/images/logo-sm.webp"
                 alt="Antidosis"
-                className="h-12 w-auto sm:h-14"
-                style={{ filter: `drop-shadow(0 0 14px ${theme.accent}66)` }}
+                className="h-7 w-auto sm:h-9"
+                style={{ filter: `drop-shadow(0 0 10px ${theme.accent}66)` }}
               />
             </div>
           </div>
 
-          {/* Every skill rides on the card — the point of the preview */}
+          {/* Skills ride on the card — capped like the PNG (six chips max) */}
           {skillNames.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-1.5">
-              {skillNames.map((skill) => (
+            <div className="flex flex-wrap gap-1">
+              {skillNames.slice(0, 6).map((skill, index) => (
                 <span
                   key={skill}
-                  className="rounded-full border px-2.5 py-1 text-xs"
+                  className={cn(
+                    "rounded-full border px-1.5 py-0.5 text-[9px] leading-tight sm:text-[10px]",
+                    index >= 3 && "hidden sm:inline-block"
+                  )}
                   style={{
                     borderColor: `${theme.accent}59`,
                     color: theme.accentSoft,
@@ -227,15 +227,30 @@ export function ShareProfileCard({ profile }: ShareProfileCardProps) {
                   {skill}
                 </span>
               ))}
+              {skillNames.length > 6 && (
+                <span
+                  className="rounded-full border px-1.5 py-0.5 text-[9px] leading-tight sm:text-[10px]"
+                  style={{
+                    borderColor: `${theme.accent}59`,
+                    color: theme.accentSoft,
+                    backgroundColor: `${theme.accent}1a`,
+                  }}
+                >
+                  +{skillNames.length - 6}
+                </span>
+              )}
             </div>
           )}
 
           {/* CTA + link — inside the frame, exactly like the PNG */}
-          <div className="mt-5 border-t pt-4" style={{ borderColor: `${theme.accent}26` }}>
-            <p className="heading-display text-lg leading-snug text-[#f4f7f2]">
+          <div className="border-t pt-1.5 sm:pt-2" style={{ borderColor: `${theme.accent}26` }}>
+            <p className="heading-display text-xs leading-snug text-[#f4f7f2] sm:text-sm">
               Connect with me on the local exchange network.
             </p>
-            <p className="mt-1.5 truncate font-mono text-xs" style={{ color: theme.accent }}>
+            <p
+              className="mt-0.5 truncate font-mono text-[9px] sm:text-[10px]"
+              style={{ color: theme.accent }}
+            >
               antidosis.com/connect/{profile.handle || profile.id}
             </p>
           </div>
