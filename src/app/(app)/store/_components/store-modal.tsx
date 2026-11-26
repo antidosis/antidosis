@@ -3,10 +3,13 @@
 import { useEffect } from "react";
 
 import { X } from "lucide-react";
+import { createPortal } from "react-dom";
 
 /**
  * Store popup — informational content (how it works, sell, sellers, list)
  * lives in these overlays so the page itself stays a clean shop floor.
+ * Portalled to <body>: the .chapter scene wrapper uses content-visibility
+ * (paint containment), which would trap a fixed overlay inside the page.
  */
 export function StoreModal({
   title,
@@ -31,7 +34,7 @@ export function StoreModal({
     };
   }, [onClose]);
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-end justify-center bg-void/80 backdrop-blur-sm sm:items-center sm:p-4"
       onClick={onClose}
@@ -56,6 +59,7 @@ export function StoreModal({
         </div>
         <div className="overflow-y-auto p-5">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
