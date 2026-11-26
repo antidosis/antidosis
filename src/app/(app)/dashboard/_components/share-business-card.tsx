@@ -163,56 +163,57 @@ export function ShareBusinessCard({ profile }: ShareBusinessCardProps) {
         />
 
         <div className="relative flex flex-col p-6 pl-8 sm:p-7 sm:pl-9">
-          <div className="flex items-start justify-between gap-3">
-            <img
-              src="/images/logo-sm.webp"
-              alt="Antidosis"
-              className="h-10 w-auto"
-              style={{ filter: `drop-shadow(0 0 12px ${texture.accent}55)` }}
-            />
-            <span
-              className="mt-1 font-mono text-[9px] uppercase tracking-[0.25em]"
-              style={{ color: `${texture.accent}b3` }}
-            >
-              Antidosis directory
-            </span>
-          </div>
-
-          <div className="mt-6 flex items-center gap-4">
-            <Avatar
-              src={profile.avatarUrl}
-              name={name}
-              size="lg"
-              className="h-16 w-16 shrink-0"
-              style={{ boxShadow: `0 0 0 2px ${texture.accent}40` }}
-            />
-            <div className="min-w-0 flex-1">
-              <p className="flex items-center gap-1.5">
-                <span
-                  className="heading-display truncate text-2xl leading-tight"
-                  style={{ color: texture.ink }}
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex min-w-0 items-center gap-4">
+              <Avatar
+                src={profile.avatarUrl}
+                name={name}
+                size="lg"
+                className="h-16 w-16 shrink-0"
+                style={{ boxShadow: `0 0 0 2px ${texture.accent}40` }}
+              />
+              <div className="min-w-0 flex-1">
+                <p className="flex items-center gap-1.5">
+                  <span
+                    className="heading-display truncate text-2xl leading-tight"
+                    style={{ color: texture.ink }}
+                  >
+                    {name}
+                  </span>
+                  {profile.isVerified && (
+                    <ShieldCheck className="h-4 w-4 shrink-0" style={{ color: texture.accent }} />
+                  )}
+                </p>
+                <p
+                  className="mt-0.5 flex items-center gap-1.5 font-mono text-sm"
+                  style={{ color: texture.accentSoft }}
                 >
-                  {name}
-                </span>
-                {profile.isVerified && (
-                  <ShieldCheck className="h-4 w-4 shrink-0" style={{ color: texture.accent }} />
-                )}
-              </p>
-              <p
-                className="mt-0.5 flex items-center gap-1.5 font-mono text-sm"
-                style={{ color: texture.accentSoft }}
+                  <Building2 className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate">{specialtyLabels[0] ?? "Directory listing"}</span>
+                </p>
+                <p
+                  className="mt-1.5 truncate text-xs"
+                  style={{ color: texture.sub }}
+                  title={contactLine}
+                >
+                  {contactLine}
+                  {ratingLine ? `  ·  ${ratingLine}` : ""}
+                </p>
+              </div>
+            </div>
+            <div className="flex shrink-0 flex-col items-end gap-2">
+              <span
+                className="whitespace-nowrap font-mono text-[8px] uppercase tracking-[0.25em] sm:text-[9px]"
+                style={{ color: `${texture.accent}b3` }}
               >
-                <Building2 className="h-3.5 w-3.5 shrink-0" />
-                <span className="truncate">{specialtyLabels[0] ?? "Directory listing"}</span>
-              </p>
-              <p
-                className="mt-1.5 truncate text-xs"
-                style={{ color: texture.sub }}
-                title={contactLine}
-              >
-                {contactLine}
-                {ratingLine ? `  ·  ${ratingLine}` : ""}
-              </p>
+                Antidosis directory
+              </span>
+              <img
+                src="/images/logo-sm.webp"
+                alt="Antidosis"
+                className="h-12 w-auto sm:h-14"
+                style={{ filter: `drop-shadow(0 0 14px ${texture.accent}66)` }}
+              />
             </div>
           </div>
 

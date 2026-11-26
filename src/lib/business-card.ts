@@ -39,7 +39,9 @@ const TITANIUM_LINES = `<pattern id="tex-titanium" width="4" height="4" patternU
 
 const CIRCUIT_PATTERN = `<pattern id="tex-circuit" width="96" height="96" patternUnits="userSpaceOnUse"><g fill="none" stroke="#39d98a" stroke-opacity="0.13"><path d="M8 8h40v24h24"/><path d="M88 16v32h-24v24"/><path d="M16 88V56h32"/><path d="M48 88V72h40"/></g><g fill="#39d98a" fill-opacity="0.22"><circle cx="8" cy="8" r="2.5"/><circle cx="72" cy="32" r="2.5"/><circle cx="88" cy="16" r="2.5"/><circle cx="64" cy="72" r="2.5"/><circle cx="16" cy="88" r="2.5"/><circle cx="48" cy="56" r="2.5"/><circle cx="88" cy="72" r="2.5"/></g></pattern>`;
 
-const TOPO_PATTERN = `<pattern id="tex-topo" width="140" height="140" patternUnits="userSpaceOnUse"><g fill="none" stroke="#51c8bc" stroke-opacity="0.09"><circle r="30"/><circle r="55"/><circle r="80"/><circle r="105"/><circle cx="140" cy="140" r="40"/><circle cx="140" cy="140" r="70"/><circle cx="140" cy="140" r="100"/><circle cx="140" r="45"/><circle cx="140" r="75"/><circle cy="140" r="50"/><circle cy="140" r="85"/></g></pattern>`;
+/** Seamless topo: every tile corner shares one radius set, so quarter-arcs
+ *  join into full rings across tile boundaries; centre rings stay interior. */
+const TOPO_PATTERN = `<pattern id="tex-topo" width="160" height="160" patternUnits="userSpaceOnUse"><g fill="none" stroke="#51c8bc" stroke-opacity="0.09"><circle r="24"/><circle r="48"/><circle r="72"/><circle r="96"/><circle r="120"/><circle cx="160" r="24"/><circle cx="160" r="48"/><circle cx="160" r="72"/><circle cx="160" r="96"/><circle cx="160" r="120"/><circle cy="160" r="24"/><circle cy="160" r="48"/><circle cy="160" r="72"/><circle cy="160" r="96"/><circle cy="160" r="120"/><circle cx="160" cy="160" r="24"/><circle cx="160" cy="160" r="48"/><circle cx="160" cy="160" r="72"/><circle cx="160" cy="160" r="96"/><circle cx="160" cy="160" r="120"/><circle cx="80" cy="80" r="20"/><circle cx="80" cy="80" r="36"/><circle cx="80" cy="80" r="52"/><circle cx="80" cy="80" r="68"/></g></pattern>`;
 
 export const BUSINESS_CARD_TEXTURES: BusinessCardTexture[] = [
   {
@@ -93,7 +95,7 @@ export const BUSINESS_CARD_TEXTURES: BusinessCardTexture[] = [
     accent: "#51c8bc",
     accentSoft: "#9fe8e0",
     cssBackground: svgDataUri(
-      `<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140">${TOPO_PATTERN}<rect width="140" height="140" fill="url(#tex-topo)"/></svg>`
+      `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160">${TOPO_PATTERN}<rect width="160" height="160" fill="url(#tex-topo)"/></svg>`
     ),
     svgDefs: TOPO_PATTERN,
     svgOverlay: `<rect width="1200" height="630" fill="url(#tex-topo)"/>`,
@@ -158,7 +160,7 @@ function layoutSpecialtyChips(labels: string[], accent: string, accentSoft: stri
       const text = fitCardText(raw, 300, CHIP_CHAR_WIDTH);
       const width = Math.ceil(text.length * CHIP_CHAR_WIDTH) + CHIP_PAD_X * 2;
       if (x + width > FRAME_RIGHT) return "";
-      const chip = `<g><rect x="${x}" y="402" width="${width}" height="${CHIP_HEIGHT}" rx="8" fill="${accent}" fill-opacity="0.1" stroke="${accent}" stroke-opacity="0.4"/><text x="${x + CHIP_PAD_X}" y="${402 + CHIP_HEIGHT / 2 + CHIP_FONT * 0.36}" fill="${accentSoft}" font-family="Arial, sans-serif" font-size="${CHIP_FONT}">${xmlEscape(text)}</text></g>`;
+      const chip = `<g><rect x="${x}" y="318" width="${width}" height="${CHIP_HEIGHT}" rx="8" fill="${accent}" fill-opacity="0.1" stroke="${accent}" stroke-opacity="0.4"/><text x="${x + CHIP_PAD_X}" y="${318 + CHIP_HEIGHT / 2 + CHIP_FONT * 0.36}" fill="${accentSoft}" font-family="Arial, sans-serif" font-size="${CHIP_FONT}">${xmlEscape(text)}</text></g>`;
       x += width + CHIP_GAP;
       return chip;
     })
@@ -168,12 +170,12 @@ function layoutSpecialtyChips(labels: string[], accent: string, accentSoft: stri
 export function renderBusinessCardSvg(fields: BusinessCardFields): string {
   const { texture } = fields;
   const logoImage = fields.logoDataUrl
-    ? `<image href="${fields.logoDataUrl}" x="${FRAME_LEFT}" y="66" width="132" height="58" preserveAspectRatio="xMinYMid meet" opacity="0.92"/>`
-    : `<text x="${FRAME_LEFT}" y="106" fill="${texture.accent}" font-family="Arial, sans-serif" font-size="30" font-weight="700" letter-spacing="6">ANTIDOSIS</text>`;
+    ? `<image href="${fields.logoDataUrl}" x="922" y="116" width="190" height="84" preserveAspectRatio="xMaxYMid meet" opacity="0.95"/>`
+    : `<text x="${FRAME_RIGHT}" y="182" text-anchor="end" fill="${texture.accent}" font-family="Arial, sans-serif" font-size="34" font-weight="700" letter-spacing="6">ANTIDOSIS</text>`;
 
-  const name = fitCardText(fields.name, CONTENT_WIDTH - 40, 36);
-  const subtitle = fields.subtitle ? fitCardText(fields.subtitle, CONTENT_WIDTH, 16.4) : null;
-  const line = fields.line ? fitCardText(fields.line, CONTENT_WIDTH, 11.8) : null;
+  const name = fitCardText(fields.name, 780, 34);
+  const subtitle = fields.subtitle ? fitCardText(fields.subtitle, 800, 15) : null;
+  const line = fields.line ? fitCardText(fields.line, CONTENT_WIDTH, 11.3) : null;
   const accepts =
     fields.accepts && fields.accepts.length > 0
       ? fitCardText(fields.accepts.join("  ·  ").toUpperCase(), CONTENT_WIDTH - 150, 12.8)
@@ -190,21 +192,21 @@ export function renderBusinessCardSvg(fields: BusinessCardFields): string {
   <rect width="1200" height="630" rx="32" fill="url(#bc-vignette)"/>
   <rect x="44" y="44" width="1112" height="542" rx="20" fill="none" stroke="${texture.accent}" stroke-opacity=".3"/>
   <rect x="44" y="44" width="6" height="542" fill="${texture.accent}" fill-opacity=".75"/>
+  <text x="${FRAME_RIGHT}" y="100" text-anchor="end" fill="${texture.accent}" font-family="monospace" font-size="19" letter-spacing="4">ANTIDOSIS DIRECTORY</text>
   ${logoImage}
-  <text x="${FRAME_RIGHT}" y="106" text-anchor="end" fill="${texture.accent}" font-family="monospace" font-size="19" letter-spacing="4">ANTIDOSIS DIRECTORY</text>
-  <text x="${FRAME_LEFT}" y="238" fill="${texture.ink}" font-family="Georgia, 'Times New Roman', serif" font-size="60" font-weight="700">${xmlEscape(name)}</text>
-  ${subtitle ? `<text x="${FRAME_LEFT}" y="288" fill="${texture.accentSoft}" font-family="monospace" font-size="27">${xmlEscape(subtitle)}</text>` : ""}
-  <rect x="${FRAME_LEFT}" y="318" width="${CONTENT_WIDTH}" height="1" fill="${texture.accent}" fill-opacity=".2"/>
-  ${line ? `<text x="${FRAME_LEFT}" y="360" fill="${texture.sub}" font-family="Arial, sans-serif" font-size="23">${xmlEscape(line)}</text>` : ""}
+  <text x="${FRAME_LEFT}" y="170" fill="${texture.ink}" font-family="Georgia, 'Times New Roman', serif" font-size="56" font-weight="700">${xmlEscape(name)}</text>
+  ${subtitle ? `<text x="${FRAME_LEFT}" y="222" fill="${texture.accentSoft}" font-family="monospace" font-size="25">${xmlEscape(subtitle)}</text>` : ""}
+  <rect x="${FRAME_LEFT}" y="250" width="${CONTENT_WIDTH}" height="1" fill="${texture.accent}" fill-opacity=".2"/>
+  ${line ? `<text x="${FRAME_LEFT}" y="286" fill="${texture.sub}" font-family="Arial, sans-serif" font-size="22">${xmlEscape(line)}</text>` : ""}
   ${chips}
   ${
     accepts
-      ? `<text x="${FRAME_LEFT}" y="498" fill="${texture.accent}" font-family="monospace" font-size="19" letter-spacing="3">ACCEPTS</text><text x="${FRAME_LEFT + 128}" y="498" fill="${texture.ink}" font-family="Arial, sans-serif" font-size="21">${xmlEscape(accepts)}</text>`
+      ? `<text x="${FRAME_LEFT}" y="424" fill="${texture.accent}" font-family="monospace" font-size="19" letter-spacing="3">ACCEPTS</text><text x="${FRAME_LEFT + 128}" y="424" fill="${texture.ink}" font-family="Arial, sans-serif" font-size="21">${xmlEscape(accepts)}</text>`
       : ""
   }
-  <text x="${FRAME_LEFT}" y="556" fill="${texture.ink}" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="600">${xmlEscape(fields.cta)}</text>
-  <text x="${FRAME_LEFT}" y="596" fill="${texture.accent}" font-family="monospace" font-size="19">${xmlEscape(fitCardText(fields.url, 700, 11.6))}</text>
-  ${fields.abn ? `<text x="${FRAME_RIGHT}" y="596" text-anchor="end" fill="${texture.sub}" font-family="monospace" font-size="18">ABN ${xmlEscape(fields.abn)}</text>` : ""}
+  <text x="${FRAME_LEFT}" y="490" fill="${texture.ink}" font-family="Georgia, 'Times New Roman', serif" font-size="29" font-weight="600">${xmlEscape(fields.cta)}</text>
+  <text x="${FRAME_LEFT}" y="540" fill="${texture.accent}" font-family="monospace" font-size="19">${xmlEscape(fitCardText(fields.url, 640, 11.2))}</text>
+  ${fields.abn ? `<text x="${FRAME_RIGHT}" y="540" text-anchor="end" fill="${texture.sub}" font-family="monospace" font-size="18">ABN ${xmlEscape(fields.abn)}</text>` : ""}
 </svg>`;
 }
 

@@ -75,6 +75,33 @@ describe("renderBusinessCardSvg", () => {
       expect(svg).toContain(option.base);
     }
   });
+
+  it("topo pattern tiles seamlessly — every corner shares one radius set", () => {
+    const topo = BUSINESS_CARD_TEXTURES.find((option) => option.id === "topo")!;
+    const byCenter = new Map<string, string[]>();
+    for (const match of topo.svgDefs.matchAll(/<circle([^>]*)\/>/g)) {
+      const attrs = match[1];
+      const cx = /cx="(\d+)"/.exec(attrs)?.[1] ?? "0";
+      const cy = /cy="(\d+)"/.exec(attrs)?.[1] ?? "0";
+      const r = /r="(\d+)"/.exec(attrs)?.[1];
+      if (!r) continue;
+      const key = `${cx},${cy}`;
+      byCenter.set(key, [...(byCenter.get(key) ?? []), r]);
+    }
+    // Circles centred on a tile corner are clipped by the tile edge; the four
+    // corners only join into continuous rings if they share identical radii.
+    const origin = (byCenter.get("0,0") ?? []).sort();
+    expect(origin.length).toBeGreaterThan(0);
+    expect((byCenter.get("160,0") ?? []).sort()).toEqual(origin);
+    expect((byCenter.get("0,160") ?? []).sort()).toEqual(origin);
+    expect((byCenter.get("160,160") ?? []).sort()).toEqual(origin);
+  });
+
+  it("footer text clears the inner frame (bottom edge y=586)", () => {
+    const svg = render();
+    expect(svg).toContain('y="540"');
+    expect(svg).not.toContain('y="596"');
+  });
 });
 
 describe("fitCardText", () => {
