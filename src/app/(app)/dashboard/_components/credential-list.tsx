@@ -54,6 +54,7 @@ export function CredentialList({
       documentNumber: cred.documentNumber,
       issuedBy: cred.issuedBy,
       expiresAt: cred.expiresAt ? new Date(cred.expiresAt) : null,
+      isVerified: cred.isVerified,
     });
     try {
       await navigator.clipboard.writeText(text);
@@ -95,8 +96,6 @@ export function CredentialList({
                         : cred.type}
                 </Badge>
                 {cred.isVerified && <Badge variant="quintessence">Verified</Badge>}
-                {!cred.isPublic && <EyeOff className="h-3.5 w-3.5 text-ash" />}
-                {cred.isPublic && <Eye className="h-3.5 w-3.5 text-mercury" />}
               </div>
               <div className="text-xs text-parchment mt-2 space-y-1">
                 {cred.documentNumber && (
@@ -179,9 +178,18 @@ export function CredentialList({
                 size="sm"
                 variant="ghost"
                 onClick={() => onToggleVisibility(cred.id, cred.isPublic)}
-                title={cred.isPublic ? "Make private" : "Make public"}
+                title={
+                  cred.isPublic
+                    ? "Shown on your public profile as a redacted badge — click to hide"
+                    : "Private — click to show a redacted badge on your public profile"
+                }
               >
-                {cred.isPublic ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {cred.isPublic ? (
+                  <Eye className="h-4 w-4 text-mercury" />
+                ) : (
+                  <EyeOff className="h-4 w-4" />
+                )}
+                <span className="ml-1.5 text-xs">{cred.isPublic ? "Public" : "Private"}</span>
               </Button>
               <Button size="sm" variant="ghost" onClick={() => onEdit(cred)} title="Edit">
                 <span className="text-xs">Edit</span>

@@ -394,6 +394,17 @@ export function getPublicProfile(id: string) {
   return fetchApi<import("@mobile/types/api").PublicProfile>(`/profiles/${id}`);
 }
 
+/**
+ * The single door for contact details — login-gated, rate-limited and
+ * audit-logged server-side. Never cache the response.
+ */
+export function revealContact(id: string) {
+  return fetchApi<import("@mobile/types/api").RevealContactResponse>(
+    `/profiles/${id}/reveal-contact`,
+    { method: "POST" }
+  );
+}
+
 export function updateProfile(data: UpdateProfileInput) {
   return fetchApi<import("@mobile/types/api").Profile>("/profiles/me", {
     method: "PATCH",

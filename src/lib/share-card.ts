@@ -138,13 +138,13 @@ function layoutChips(labels: string[]): { text: string; x: number; row: number }
 export function renderShareCardSvg(fields: ShareCardFields): string {
   const { theme } = fields;
   const logoImage = fields.logoDataUrl
-    ? `<image href="${fields.logoDataUrl}" x="88" y="72" width="132" height="58" preserveAspectRatio="xMinYMid meet" opacity="0.92"/>`
-    : `<text x="88" y="110" fill="${theme.accent}" font-family="Arial, sans-serif" font-size="30" font-weight="700" letter-spacing="6">ANTIDOSIS</text>`;
+    ? `<image href="${fields.logoDataUrl}" x="922" y="116" width="190" height="84" preserveAspectRatio="xMaxYMid meet" opacity="0.95"/>`
+    : `<text x="1112" y="182" text-anchor="end" fill="${theme.accent}" font-family="Arial, sans-serif" font-size="34" font-weight="700" letter-spacing="6">ANTIDOSIS</text>`;
 
   const chips = layoutChips(fields.chips ?? []);
   const chipSvg = chips
     .map(({ text, x, row }) => {
-      const y = 400 + row * (CHIP_HEIGHT + 12);
+      const y = 318 + row * (CHIP_HEIGHT + 12);
       const width = chipWidth(text);
       return `<g><rect x="${x}" y="${y}" width="${width}" height="${CHIP_HEIGHT}" rx="${CHIP_HEIGHT / 2}" fill="${theme.accent}" fill-opacity="0.1" stroke="${theme.accent}" stroke-opacity="0.35"/><text x="${x + CHIP_PAD_X}" y="${y + CHIP_HEIGHT / 2 + CHIP_FONT * 0.36}" fill="${theme.accentSoft}" font-family="Arial, sans-serif" font-size="${CHIP_FONT}">${xmlEscape(text)}</text></g>`;
     })
@@ -153,8 +153,8 @@ export function renderShareCardSvg(fields: ShareCardFields): string {
   // descriptor line otherwise.
   const metaY =
     chips.length > 0
-      ? 400 + (Math.max(...chips.map((chip) => chip.row)) + 1) * (CHIP_HEIGHT + 12) + 8
-      : 448;
+      ? 318 + (Math.max(...chips.map((chip) => chip.row)) + 1) * (CHIP_HEIGHT + 12) + 14
+      : 372;
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
@@ -168,15 +168,16 @@ export function renderShareCardSvg(fields: ShareCardFields): string {
   <g fill="none" stroke="${theme.accent}" stroke-opacity=".14"><circle cx="1040" cy="110" r="90"/><circle cx="1040" cy="110" r="160"/><circle cx="1040" cy="110" r="235"/></g>
   </g>
   <rect x="44" y="44" width="1112" height="542" rx="24" fill="none" stroke="${theme.accent}" stroke-opacity=".22"/>
+  <text x="1112" y="100" text-anchor="end" fill="${theme.accent}" font-family="monospace" font-size="19" letter-spacing="4">${xmlEscape(fields.badge)}</text>
   ${logoImage}
-  <text x="1112" y="112" text-anchor="end" fill="${theme.accent}" font-family="monospace" font-size="20" letter-spacing="4">${xmlEscape(fields.badge)}</text>
-  <text x="88" y="252" fill="#f4f7f2" font-family="Georgia, 'Times New Roman', serif" font-size="66" font-weight="700">${xmlEscape(fitCardText(fields.name, 984, 40))}</text>
-  ${fields.subtitle ? `<text x="88" y="304" fill="${theme.accentSoft}" font-family="monospace" font-size="30">${xmlEscape(fitCardText(fields.subtitle, 1024, 18))}</text>` : ""}
-  ${fields.line ? `<text x="88" y="356" fill="#c3d0c8" font-family="Arial, sans-serif" font-size="25">${xmlEscape(fitCardText(fields.line, 1024, 12.6))}</text>` : ""}
+  <text x="88" y="170" fill="#f4f7f2" font-family="Georgia, 'Times New Roman', serif" font-size="56" font-weight="700">${xmlEscape(fitCardText(fields.name, 780, 34))}</text>
+  ${fields.subtitle ? `<text x="88" y="222" fill="${theme.accentSoft}" font-family="monospace" font-size="25">${xmlEscape(fitCardText(fields.subtitle, 800, 15))}</text>` : ""}
+  <rect x="88" y="250" width="1024" height="1" fill="${theme.accent}" fill-opacity=".2"/>
+  ${fields.line ? `<text x="88" y="286" fill="#c3d0c8" font-family="Arial, sans-serif" font-size="22">${xmlEscape(fitCardText(fields.line, 1024, 12))}</text>` : ""}
   ${chipSvg}
-  ${fields.meta ? `<text x="88" y="${metaY}" fill="#9fb5aa" font-family="Arial, sans-serif" font-size="24">${xmlEscape(fitCardText(fields.meta, 1024, 12))}</text>` : ""}
-  <text x="88" y="560" fill="#f4f7f2" font-family="Georgia, 'Times New Roman', serif" font-size="34" font-weight="600">${xmlEscape(fitCardText(fields.cta, 1024, 20))}</text>
-  <text x="88" y="600" fill="${theme.accent}" font-family="monospace" font-size="20">${xmlEscape(fitCardText(fields.url, 1024, 12))}</text>
+  ${fields.meta ? `<text x="88" y="${metaY}" fill="#9fb5aa" font-family="Arial, sans-serif" font-size="22">${xmlEscape(fitCardText(fields.meta, 1024, 12))}</text>` : ""}
+  <text x="88" y="490" fill="#f4f7f2" font-family="Georgia, 'Times New Roman', serif" font-size="29" font-weight="600">${xmlEscape(fitCardText(fields.cta, 1024, 20))}</text>
+  <text x="88" y="540" fill="${theme.accent}" font-family="monospace" font-size="19">${xmlEscape(fitCardText(fields.url, 640, 11.5))}</text>
 </svg>`;
 }
 

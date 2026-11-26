@@ -17,7 +17,9 @@ import {
   Verified,
 } from "lucide-react";
 import { useState } from "react";
+import { revealContact } from "@mobile/lib/api";
 import { hapticImpact } from "@mobile/lib/native";
+import type { RevealContactResponse } from "@mobile/types/api";
 import { Vessel, Badge, Avatar, Divider } from "@mobile/components/ui";
 import type { BadgeVariant } from "@mobile/components/ui";
 
@@ -40,6 +42,23 @@ export function ProfileDetailScreen() {
   const { data, isLoading } = usePublicProfile(id);
   const { tap } = useHaptics();
   const [activeTab, setActiveTab] = useState<"overview" | "needs" | "reviews">("overview");
+  const [revealed, setRevealed] = useState<RevealContactResponse | null>(null);
+  const [revealing, setRevealing] = useState(false);
+  const [revealError, setRevealError] = useState<string | null>(null);
+
+  const handleReveal = async () => {
+    if (!id || revealing) return;
+    hapticImpact("light");
+    setRevealing(true);
+    setRevealError(null);
+    try {
+      setRevealed(await revealContact(id));
+    } catch {
+      setRevealError("Couldn't reveal contact details — please try again.");
+    } finally {
+      setRevealing(false);
+    }
+  };
 
   const profile = data;
 
@@ -74,6 +93,7 @@ export function ProfileDetailScreen() {
 
   const publicLinks = profile.socialLinks?.filter((l) => l.isPublic) ?? [];
   const publicCredentials = profile.credentials?.filter((c) => c.isPublic) ?? [];
+  const hasContact = Boolean(profile.contact?.phone) || publicLinks.length > 0;
 
   return (
     <div className="min-h-full pb-6 safe-top">
@@ -255,29 +275,69 @@ export function ProfileDetailScreen() {
               </Vessel>
             )}
 
-            {/* Social Links */}
-            {publicLinks.length > 0 && (
+            {/* Contact — tap to reveal (login-gated, rate-limited, audit-logged) */}
+            {hasContact && (
               <Vessel variant="default">
                 <div className="flex items-center gap-2 mb-3">
                   <Globe size={16} className="text-[var(--sun)]" />
-                  <h3 className="text-sm font-semibold text-[var(--gold)]">Links</h3>
+                  <h3 className="text-sm font-semibold text-[var(--gold)]">Contact</h3>
                 </div>
-                <div className="space-y-2">
-                  {publicLinks.map((link) => (
-                    <a
-                      key={link.id}
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => hapticImpact("light")}
-                      className="flex items-center gap-2 p-2 rounded bg-[var(--void)] border border-[var(--bronze)]/20 text-xs text-[var(--mercury)] hover:text-[var(--sun)] transition-colors"
+                {revealed ? (
+                  <div className="space-y-2">
+                    {revealed.personal?.phone && (
+                      <a
+                        href={`tel:${revealed.personal.phone}`}
+                        onClick={() => hapticImpact("light")}
+                        className="flex items-center gap-2 p-2 rounded bg-[var(--void)] border border-[var(--bronze)]/20 text-xs text-[var(--mercury)] hover:text-[var(--sun)] transition-colors"
+                      >
+                        <span className="font-mono text-[10px] text-[var(--leather)]">TEL:</span>
+                        {revealed.personal.phone}
+                      </a>
+                    )}
+                    {(revealed.personal?.links ?? []).map((link) => (
+                      <a
+                        key={link.url}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => hapticImpact("light")}
+                        className="flex items-center gap-2 p-2 rounded bg-[var(--void)] border border-[var(--bronze)]/20 text-xs text-[var(--mercury)] hover:text-[var(--sun)] transition-colors"
+                      >
+                        <Globe size={12} />
+                        <span className="capitalize">{link.platform}</span>
+                        <ChevronRight size={12} className="ml-auto text-[var(--leather)]" />
+                      </a>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="flex flex-wrap gap-1.5">
+                      {profile.contact?.phone && (
+                        <span className="px-2 py-1 rounded bg-[var(--void)] border border-[var(--bronze)]/20 text-[10px] text-[var(--leather)]">
+                          Phone · •••
+                        </span>
+                      )}
+                      {publicLinks.map((link) => (
+                        <span
+                          key={link.id}
+                          className="px-2 py-1 rounded bg-[var(--void)] border border-[var(--bronze)]/20 text-[10px] capitalize text-[var(--leather)]"
+                        >
+                          {link.platform} · •••
+                        </span>
+                      ))}
+                    </div>
+                    <button
+                      onClick={handleReveal}
+                      disabled={revealing}
+                      className="w-full flex items-center justify-center gap-2 p-2.5 rounded bg-[var(--void)] border border-[var(--sun)]/40 text-xs font-medium text-[var(--sun)] active:scale-[0.98] transition-transform disabled:opacity-60"
                     >
-                      <Globe size={12} />
-                      <span className="capitalize">{link.platform}</span>
-                      <ChevronRight size={12} className="ml-auto text-[var(--leather)]" />
-                    </a>
-                  ))}
-                </div>
+                      {revealing ? "Revealing…" : "Tap to reveal contact details"}
+                    </button>
+                    {revealError && (
+                      <p className="text-[10px] text-[var(--ruby,#ff5252)]">{revealError}</p>
+                    )}
+                  </div>
+                )}
               </Vessel>
             )}
 

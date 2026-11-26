@@ -83,7 +83,8 @@ export const GET = withApiHandler(
         skills: { select: { id: true, name: true, isVerified: true } },
         socialLinks: {
           where: { isPublic: true },
-          select: { id: true, platform: true, url: true, isPublic: true },
+          // Platform names only — URLs are served by the reveal endpoint.
+          select: { id: true, platform: true, isPublic: true },
         },
         credentials: {
           where: { isPublic: true },
@@ -135,8 +136,15 @@ export const GET = withApiHandler(
       return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
 
+    const { publicPhone, ...profileWithoutPhone } = profile;
     const safeProfile = {
-      ...profile,
+      ...profileWithoutPhone,
+      // Contact availability flags — values come only from the login-gated,
+      // rate-limited, audit-logged reveal endpoint.
+      contact: {
+        phone: Boolean(publicPhone),
+        socials: profile.socialLinks.map((link) => link.platform),
+      },
       credentials: profile.credentials.map(redactCredential),
       // ABNs are public register data, but only surface them for business
       // accounts — an individual's ABN (collected for SERR reporting) is

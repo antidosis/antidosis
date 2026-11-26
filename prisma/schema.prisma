@@ -676,3 +676,21 @@ model NeedWatch {
 
 // Note: Additional Profile indexes
 // isPro, stripeCustomerId, showInDirectory, lastSeenAt are declared on the model above
+
+model ContactReveal {
+  id        String   @id @default(uuid())
+  // No FKs — reveal audit must survive account deletion/anonymisation.
+  viewerId  String   @map("viewer_id")
+  targetId  String   @map("target_id")
+  // "listing" (directory business contact) or "personal" (public profile contact)
+  scope     String
+  // JSON array of field keys revealed in this event, e.g. ["phone","email","website","socials"]
+  fields    String
+  ip        String?
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([viewerId, createdAt])
+  @@index([targetId, createdAt])
+  @@map("contact_reveals")
+}

@@ -177,10 +177,14 @@ export function formatCredentialForMessage(credential: {
   documentNumber?: string | null;
   issuedBy?: string | null;
   expiresAt?: Date | null;
+  isVerified?: boolean;
 }): string {
   const lines: string[] = [];
   lines.push(`📋 Shared credential: ${credential.title}`);
   lines.push(`   Type: ${credential.type}`);
+  if (credential.isVerified) {
+    lines.push(`   ✅ Verified by Antidosis`);
+  }
 
   if (credential.documentNumber) {
     lines.push(`   Number: ${redactDocumentNumber(credential.documentNumber)}`);

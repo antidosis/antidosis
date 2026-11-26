@@ -6,7 +6,10 @@ import { ToastProvider } from "@/components/ui/toast";
 import type { EditorProfile } from "./profile-editor/types";
 import { ProfileSection } from "./profile-section";
 
-vi.mock("swr", () => ({ mutate: vi.fn() }));
+vi.mock("swr", () => ({
+  default: () => ({ data: undefined, error: undefined, mutate: vi.fn() }),
+  mutate: vi.fn(),
+}));
 
 const profile: EditorProfile = {
   id: "profile-1",

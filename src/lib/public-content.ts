@@ -141,6 +141,16 @@ export async function getPublicNeeds({
   };
 }
 
+/** Contact availability without the contact data — values are only served
+ *  by the login-gated, rate-limited reveal endpoint. */
+export interface DirectoryContactFlags {
+  phone: boolean;
+  email: boolean;
+  website: boolean;
+  /** Platform names only — URLs stay behind the reveal. */
+  socials: string[];
+}
+
 export interface DirectoryProfile {
   id: string;
   fullName: string | null;
@@ -150,10 +160,7 @@ export interface DirectoryProfile {
   /** The listing's own description — never the personal profile bio. */
   directoryBio: string | null;
   locationName: string | null;
-  publicPhone: string | null;
-  businessPhone: string | null;
-  businessEmail: string | null;
-  businessSocialLinks: { platform: string; url: string }[];
+  contact: DirectoryContactFlags;
   /** Accepted payment/exchange forms — keys from src/lib/exchange-modes.ts. */
   acceptedExchanges: string[];
   ratingAvg: number;
@@ -243,16 +250,37 @@ export async function getDirectoryProfiles(
   });
 
   return profiles.map(
-    ({ directorySpecialties, businessSocialLinks, acceptedExchanges, ...profile }) => ({
-      ...profile,
-      specialties: directorySpecialties,
-      businessSocialLinks: parseBusinessSocialLinks(businessSocialLinks),
-      acceptedExchanges: parseExchangeModes(acceptedExchanges),
-      abn: profile.accountType === "business" ? profile.abn : null,
-      abnVerified: profile.accountType === "business" ? profile.abnVerified : false,
-      audienceSize: profile.accountType === "individual" ? profile.audienceSize : null,
-    })
+    ({ directorySpecialties, businessSocialLinks, acceptedExchanges, ...profile }) => {
+      const { publicPhone, businessPhone, businessEmail, ...rest } = profile;
+      return {
+        ...rest,
+        contact: contactFlags(publicPhone, businessPhone, businessEmail, businessSocialLinks),
+        specialties: directorySpecialties,
+        acceptedExchanges: parseExchangeModes(acceptedExchanges),
+        abn: profile.accountType === "business" ? profile.abn : null,
+        abnVerified: profile.accountType === "business" ? profile.abnVerified : false,
+        audienceSize: profile.accountType === "individual" ? profile.audienceSize : null,
+      };
+    }
   );
+}
+
+/** Reduce raw contact columns to availability flags — never the values. */
+function contactFlags(
+  publicPhone: string | null,
+  businessPhone: string | null,
+  businessEmail: string | null,
+  businessSocialLinks: string | null
+): DirectoryContactFlags {
+  const links = parseBusinessSocialLinks(businessSocialLinks);
+  return {
+    phone: Boolean(businessPhone || publicPhone),
+    email: Boolean(businessEmail),
+    website: links.some((link) => link.platform.toLowerCase() === "website"),
+    socials: links
+      .filter((link) => link.platform.toLowerCase() !== "website")
+      .map((link) => link.platform),
+  };
 }
 
 /**
@@ -299,10 +327,11 @@ export async function getDirectoryProfile(id: string): Promise<DirectoryProfile 
 
   if (!profile) return null;
   const { directorySpecialties, businessSocialLinks, acceptedExchanges, ...rest } = profile;
+  const { publicPhone, businessPhone, businessEmail, ...safeRest } = rest;
   return {
-    ...rest,
+    ...safeRest,
+    contact: contactFlags(publicPhone, businessPhone, businessEmail, businessSocialLinks),
     specialties: directorySpecialties,
-    businessSocialLinks: parseBusinessSocialLinks(businessSocialLinks),
     acceptedExchanges: parseExchangeModes(acceptedExchanges),
     abn: profile.accountType === "business" ? profile.abn : null,
     abnVerified: profile.accountType === "business" ? profile.abnVerified : false,

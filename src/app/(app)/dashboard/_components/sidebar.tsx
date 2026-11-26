@@ -14,6 +14,9 @@ interface SidebarProps {
   onSelect: (tab: DashboardTabId, profileSection?: ProfileTab) => void;
   counts: Partial<Record<DashboardTabId, number>>;
   isBusiness: boolean;
+  /** Which identity the member is currently operating as — follows the
+   *  active surface (directory tab = business, everything else = member). */
+  nodeMode: "business" | "member";
   mobileOpen: boolean;
   onCloseMobile: () => void;
 }
@@ -23,6 +26,7 @@ export function Sidebar({
   onSelect,
   counts,
   isBusiness,
+  nodeMode,
   mobileOpen,
   onCloseMobile,
 }: SidebarProps) {
@@ -142,29 +146,35 @@ export function Sidebar({
         <div className="shrink-0 border-t border-line p-2 lg:p-3">
           <button
             type="button"
-            onClick={() => onSelect("profile", isBusiness ? "directory" : "public")}
+            onClick={() => onSelect("profile", nodeMode === "business" ? "directory" : "public")}
             title={
-              isBusiness
-                ? "Business node — your active directory listing marks this account as a business across Antidosis"
-                : "Member node — an individual account"
+              nodeMode === "business"
+                ? "Business node — you're in your directory listing, the business face of your account"
+                : isBusiness
+                  ? "Member node — your personal space. Your business listing lives under Profile & Presence → Directory"
+                  : "Member node — an individual account"
             }
             className={cn(
-              "flex w-full items-center gap-2 rounded border border-line bg-surface/60 px-2 py-2 text-left transition-colors hover:border-sun/30 hover:bg-surface",
+              "flex w-full items-center gap-2 rounded border px-2 py-2 text-left transition-colors",
+              nodeMode === "business"
+                ? "border-sun/30 bg-sun/[0.06] hover:bg-sun/[0.1]"
+                : "border-line bg-surface/60 hover:border-sun/30 hover:bg-surface",
               !mobileOpen && "justify-center lg:justify-start"
             )}
           >
-            {isBusiness ? (
+            {nodeMode === "business" ? (
               <Building2 className="h-4 w-4 shrink-0 text-sun" />
             ) : (
               <Radio className="h-4 w-4 shrink-0 text-mercury" />
             )}
             <span
               className={cn(
-                "font-mono text-[10px] uppercase tracking-wider text-ash",
+                "font-mono text-[10px] uppercase tracking-wider",
+                nodeMode === "business" ? "text-sun" : "text-ash",
                 mobileOpen ? "inline" : "hidden lg:inline"
               )}
             >
-              {isBusiness ? "business node" : "member node"}
+              {nodeMode === "business" ? "business node" : "member node"}
             </span>
           </button>
         </div>

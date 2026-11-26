@@ -154,6 +154,7 @@ function DashboardPageInner() {
     <DashboardShell
       initialTab={initialTab}
       isBusiness={profile?.accountType === "business"}
+      profileSection={profileTab}
       fullName={profile?.fullName ?? null}
       avatarUrl={profile?.avatarUrl ?? null}
       counts={counts}

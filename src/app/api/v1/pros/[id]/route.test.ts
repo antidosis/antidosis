@@ -20,8 +20,11 @@ vi.mock("@/lib/logger", () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 
+const BROWSER_UA =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36";
+
 function makeRequest(url: string): NextRequest {
-  const req = new Request(url) as NextRequest;
+  const req = new Request(url, { headers: { "user-agent": BROWSER_UA } }) as NextRequest;
   Object.defineProperty(req, "nextUrl", {
     value: new URL(url),
     writable: true,
@@ -71,8 +74,20 @@ describe("GET /api/v1/pros/[id]", () => {
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.id).toBe(LIVE_PROFILE.id);
-    expect(json.businessPhone).toBe("0457189685");
-    expect(json.businessSocialLinks).toEqual([{ platform: "website", url: "https://hekaweb.com" }]);
+    // Contact values never leave the public payload — only availability
+    // flags; the reveal endpoint is the single door for the values.
+    expect(json.contact).toEqual({
+      phone: true,
+      email: true,
+      website: true,
+      socials: [],
+    });
+    expect(json.businessPhone).toBeUndefined();
+    expect(json.businessEmail).toBeUndefined();
+    expect(json.businessSocialLinks).toBeUndefined();
+    expect(json.publicPhone).toBeUndefined();
+    expect(JSON.stringify(json)).not.toContain("0457189685");
+    expect(JSON.stringify(json)).not.toContain("hekaweb.com");
     expect(mockProfileFindFirst).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({

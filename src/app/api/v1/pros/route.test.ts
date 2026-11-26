@@ -20,8 +20,11 @@ vi.mock("@/lib/logger", () => ({
   logger: { info: vi.fn(), error: vi.fn(), warn: vi.fn(), debug: vi.fn() },
 }));
 
+const BROWSER_UA =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36";
+
 function makeRequest(url: string): NextRequest {
-  const req = new Request(url) as NextRequest;
+  const req = new Request(url, { headers: { "user-agent": BROWSER_UA } }) as NextRequest;
   Object.defineProperty(req, "nextUrl", {
     value: new URL(url),
     writable: true,

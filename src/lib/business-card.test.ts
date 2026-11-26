@@ -152,6 +152,6 @@ describe("renderShareCardSvg text fitting", () => {
       theme: SHARE_CARD_THEMES[0],
     });
     expect(svg).not.toContain(longName);
-    expect(svg).toContain(fitCardText(longName, 984, 40));
+    expect(svg).toContain(fitCardText(longName, 780, 34));
   });
 });

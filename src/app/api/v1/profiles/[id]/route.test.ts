@@ -334,4 +334,30 @@ describe("GET /api/v1/profiles/[id]", () => {
     }
     expect(selected).toContain("publicPhone");
   });
+
+  it("never serialises the phone value or social URLs — flags only", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
+    mockProfileFindUnique.mockResolvedValue({
+      id: "d1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+      fullName: "Test User",
+      publicPhone: "0457189685",
+      accountType: "individual",
+      skills: [],
+      socialLinks: [{ id: "s1", platform: "instagram", isPublic: true }],
+      credentials: [],
+      needsPosted: [],
+      reviewsReceived: [],
+    });
+
+    const res = await GET(makeRequest("http://localhost/api/v1/profiles/profile-1"), {
+      params: { id: "d1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d" },
+    });
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.contact).toEqual({ phone: true, socials: ["instagram"] });
+    expect(body.publicPhone).toBeUndefined();
+    expect(body.socialLinks[0].url).toBeUndefined();
+    expect(JSON.stringify(body)).not.toContain("0457189685");
+  });
 });

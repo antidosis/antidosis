@@ -170,5 +170,20 @@ describe("formatCredentialForMessage", () => {
     expect(result).toContain("Issued by: NSW");
     expect(result).toContain("Expires:");
     expect(result).toContain("🔒 Full details available upon request");
+    expect(result).not.toContain("Verified by Antidosis");
+  });
+
+  it("carries the verified mark when the credential is admin-approved", () => {
+    const result = formatCredentialForMessage({
+      title: "Driver License",
+      type: "identification",
+      documentNumber: "12345645",
+      issuedBy: "NSW, Australia",
+      isVerified: true,
+    });
+
+    expect(result).toContain("✅ Verified by Antidosis");
+    expect(result).not.toContain("12345645");
+    expect(result).toContain("5645");
   });
 });

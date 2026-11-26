@@ -26,6 +26,7 @@ import { IdentitySection } from "./profile-editor/identity-section";
 import { KnowledgeBox } from "./profile-editor/knowledge-box";
 import { SocialLinksSection } from "./profile-editor/social-links-section";
 import type { EditorProfile, ProfileFormData, ProfileTab } from "./profile-editor/types";
+import { RevealAnalytics } from "./reveal-analytics";
 import { ShareBusinessCard } from "./share-business-card";
 
 interface ProfileSectionProps {
@@ -401,6 +402,7 @@ export function ProfileSection({
               errors={errors}
               showAudience={accountType !== "business"}
             />
+            <RevealAnalytics scope="personal" />
           </div>
         )}
 
@@ -410,9 +412,10 @@ export function ProfileSection({
               This is <strong className="text-gold">your listing in the public directory</strong> —
               a separate, professional space from your personal profile. Claim a specialty to be
               discovered and filtered by; listings are business listings, so an ABN is required.
-              Your personal phone and personal socials stay out of it. While a specialty is live,
-              the sidebar shows <strong className="text-gold">business node</strong> — the listing
-              marks the whole account as a business everywhere on Antidosis, not just this tab.
+              Your personal phone and personal socials stay out of it. While you work in this tab
+              the sidebar shows <strong className="text-gold">business node</strong> — step back
+              into any other tab and you&apos;re the{" "}
+              <strong className="text-gold">member node</strong> again.
             </KnowledgeBox>
             <DirectorySlotsSection onSlotChange={handleSlotChange} />
             <AcceptedExchangesSection
@@ -453,6 +456,7 @@ export function ProfileSection({
             {(accountType === "business" || hasSpecialty) && (
               <ShareBusinessCard profile={initialProfile} />
             )}
+            {(accountType === "business" || hasSpecialty) && <RevealAnalytics scope="listing" />}
           </div>
         )}
 

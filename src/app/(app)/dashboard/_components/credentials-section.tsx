@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Info, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/toast";
 
 import { CredentialForm } from "./credential-form";
 import type { CredentialSavePayload } from "./credential-form";
@@ -17,6 +18,7 @@ export interface CredentialsSectionProps {
 }
 
 export function CredentialsSection({ initialCredentials, onUpdate }: CredentialsSectionProps) {
+  const { toast } = useToast();
   const [credentials, setCredentials] = useState<CredentialData[]>(initialCredentials);
   const [credFormOpen, setCredFormOpen] = useState(false);
   const [editingCred, setEditingCred] = useState<string | null>(null);
@@ -65,7 +67,17 @@ export function CredentialsSection({ initialCredentials, onUpdate }: Credentials
       body: JSON.stringify({ isPublic: !current }),
     });
     if (res.ok) {
-      setCredentials((prev) => prev.map((c) => (c.id === id ? { ...c, isPublic: !current } : c)));
+      const next = credentials.map((c) => (c.id === id ? { ...c, isPublic: !current } : c));
+      setCredentials(next);
+      onUpdate(next);
+      toast(
+        current
+          ? "Credential hidden — it no longer shows on your public profile"
+          : "Credential badge now shows on your public profile (always redacted)",
+        "success"
+      );
+    } else {
+      toast("Couldn't update visibility — please try again", "error");
     }
   }
 

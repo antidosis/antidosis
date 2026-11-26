@@ -289,6 +289,18 @@ export interface ReactionResponse {
   action: "added" | "removed";
 }
 
+// ── Contact reveal ───────────────────────────────────────────────────
+
+export interface RevealContactLink {
+  platform: string;
+  url: string;
+}
+
+export interface RevealContactResponse {
+  listing: { phone: string | null; email: string | null; links: RevealContactLink[] } | null;
+  personal: { phone: string | null; links: RevealContactLink[] } | null;
+}
+
 // ── Pros / Search ────────────────────────────────────────────────────
 
 export interface ProProfile {
@@ -297,9 +309,8 @@ export interface ProProfile {
   avatarUrl: string | null;
   bio: string | null;
   locationName: string | null;
-  publicPhone: string | null;
-  businessPhone: string | null;
-  businessEmail: string | null;
+  /** Availability flags — values come from the reveal-contact endpoint. */
+  contact: { phone: boolean; email: boolean; website: boolean; socials: string[] };
   ratingAvg: number;
   ratingCount: number;
   jobsCompleted: number;
@@ -425,7 +436,8 @@ export interface PublicProfile {
   bio: string | null;
   avatarUrl: string | null;
   locationName: string | null;
-  publicPhone: string | null;
+  /** Availability flags — values come from the reveal-contact endpoint. */
+  contact: { phone: boolean; socials: string[] };
   mobileVerified: boolean;
   isVerified: boolean;
   isPro: boolean;
@@ -434,7 +446,8 @@ export interface PublicProfile {
   jobsCompleted: number;
   createdAt: string;
   skills: Skill[];
-  socialLinks: SocialLink[];
+  /** Platform names only on the public route — URLs come from revealContact. */
+  socialLinks: { id: string; platform: string; isPublic: boolean }[];
   credentials: Credential[];
   needsPosted: {
     id: string;

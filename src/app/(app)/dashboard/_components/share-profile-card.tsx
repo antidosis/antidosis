@@ -147,66 +147,68 @@ export function ShareProfileCard({ profile }: ShareProfileCardProps) {
           className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full border"
           style={{ borderColor: `${theme.accent}1a` }}
         />
-        <div className="relative flex flex-col p-6">
-          {/* Brand row — the logo leads */}
-          <div className="flex items-start justify-between gap-3">
-            <img
-              src="/images/logo-sm.webp"
-              alt="Antidosis"
-              className="h-10 w-auto"
-              style={{ filter: `drop-shadow(0 0 12px ${theme.accent}55)` }}
-            />
-            <span
-              className="mt-1 font-mono text-[9px] uppercase tracking-[0.25em]"
-              style={{ color: `${theme.accent}b3` }}
-            >
-              Connection card
-            </span>
-          </div>
-
-          {/* Member block */}
-          <div className="mt-6 flex items-center gap-4">
-            <Avatar
-              src={profile.avatarUrl}
-              name={profile.fullName}
-              size="lg"
-              className="h-16 w-16 shrink-0"
-              style={{ boxShadow: `0 0 0 2px ${theme.accent}40` }}
-            />
-            <div className="min-w-0 flex-1">
-              <p className="flex items-center gap-1.5">
-                <span className="heading-display truncate text-2xl leading-tight text-[#f4f7f2]">
-                  {name}
-                </span>
-                {profile.isVerified && (
-                  <ShieldCheck className="h-4 w-4 shrink-0" style={{ color: theme.accent }} />
-                )}
-              </p>
-              <p className="mt-0.5 font-mono text-sm" style={{ color: theme.accentSoft }}>
-                {handle}
-              </p>
-              <p className="mt-1.5 flex flex-wrap items-center gap-x-2 text-xs text-[#9fb5aa]">
-                <span className="inline-flex items-center gap-1">
-                  <Star
-                    className="h-3.5 w-3.5"
-                    style={{ color: theme.accent, fill: theme.accent }}
-                  />
-                  {ratingText}
-                </span>
-                {profile.jobsCompleted > 0 && (
-                  <span>
-                    · {profile.jobsCompleted} exchange{profile.jobsCompleted === 1 ? "" : "s"}
+        {/* inner frame — mirrors the PNG's framed border */}
+        <div
+          className="pointer-events-none absolute inset-3 rounded-lg border"
+          style={{ borderColor: `${theme.accent}38` }}
+        />
+        <div className="relative flex flex-col p-6 sm:p-7">
+          {/* Member block leads; badge + logo sit top-right */}
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex min-w-0 items-center gap-4">
+              <Avatar
+                src={profile.avatarUrl}
+                name={profile.fullName}
+                size="lg"
+                className="h-16 w-16 shrink-0"
+                style={{ boxShadow: `0 0 0 2px ${theme.accent}40` }}
+              />
+              <div className="min-w-0 flex-1">
+                <p className="flex items-center gap-1.5">
+                  <span className="heading-display truncate text-2xl leading-tight text-[#f4f7f2]">
+                    {name}
                   </span>
-                )}
-                {profile.locationName && <span>· {profile.locationName}</span>}
-              </p>
+                  {profile.isVerified && (
+                    <ShieldCheck className="h-4 w-4 shrink-0" style={{ color: theme.accent }} />
+                  )}
+                </p>
+                <p
+                  className="mt-0.5 truncate font-mono text-sm"
+                  style={{ color: theme.accentSoft }}
+                >
+                  {handle}
+                </p>
+                <p className="mt-1.5 flex flex-wrap items-center gap-x-2 text-xs text-[#9fb5aa]">
+                  <span className="inline-flex items-center gap-1">
+                    <Star
+                      className="h-3.5 w-3.5"
+                      style={{ color: theme.accent, fill: theme.accent }}
+                    />
+                    {ratingText}
+                  </span>
+                  {profile.jobsCompleted > 0 && (
+                    <span>
+                      · {profile.jobsCompleted} exchange{profile.jobsCompleted === 1 ? "" : "s"}
+                    </span>
+                  )}
+                  {profile.locationName && <span>· {profile.locationName}</span>}
+                </p>
+              </div>
             </div>
-            <span
-              className="hidden shrink-0 rotate-90 font-mono text-[10px] uppercase tracking-[0.3em] [writing-mode:vertical-rl] sm:block"
-              style={{ color: `${theme.accent}66` }}
-            >
-              Antidosis
-            </span>
+            <div className="flex shrink-0 flex-col items-end gap-2">
+              <span
+                className="whitespace-nowrap font-mono text-[8px] uppercase tracking-[0.25em] sm:text-[9px]"
+                style={{ color: `${theme.accent}b3` }}
+              >
+                Connection card
+              </span>
+              <img
+                src="/images/logo-sm.webp"
+                alt="Antidosis"
+                className="h-12 w-auto sm:h-14"
+                style={{ filter: `drop-shadow(0 0 14px ${theme.accent}66)` }}
+              />
+            </div>
           </div>
 
           {/* Every skill rides on the card — the point of the preview */}
@@ -228,13 +230,15 @@ export function ShareProfileCard({ profile }: ShareProfileCardProps) {
             </div>
           )}
 
-          {/* CTA + link */}
-          <p className="heading-display mt-6 text-lg leading-snug text-[#f4f7f2]">
-            Connect with me on the local exchange network.
-          </p>
-          <p className="mt-1.5 font-mono text-xs" style={{ color: theme.accent }}>
-            antidosis.com/connect/{profile.handle || profile.id}
-          </p>
+          {/* CTA + link — inside the frame, exactly like the PNG */}
+          <div className="mt-5 border-t pt-4" style={{ borderColor: `${theme.accent}26` }}>
+            <p className="heading-display text-lg leading-snug text-[#f4f7f2]">
+              Connect with me on the local exchange network.
+            </p>
+            <p className="mt-1.5 truncate font-mono text-xs" style={{ color: theme.accent }}>
+              antidosis.com/connect/{profile.handle || profile.id}
+            </p>
+          </div>
         </div>
       </div>
 

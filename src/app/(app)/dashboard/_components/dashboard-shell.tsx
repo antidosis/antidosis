@@ -10,6 +10,8 @@ import { Topbar } from "./topbar";
 interface DashboardShellProps {
   initialTab: DashboardTabId;
   isBusiness: boolean;
+  /** Live profile sub-section — the sidebar node badge follows it. */
+  profileSection: ProfileTab;
   fullName: string | null;
   avatarUrl: string | null;
   counts: Partial<Record<DashboardTabId, number>>;
@@ -26,6 +28,7 @@ interface DashboardShellProps {
 export function DashboardShell({
   initialTab,
   isBusiness,
+  profileSection,
   fullName,
   avatarUrl,
   counts,
@@ -52,6 +55,7 @@ export function DashboardShell({
         onSelect={selectTab}
         counts={counts}
         isBusiness={isBusiness}
+        nodeMode={activeTab === "profile" && profileSection === "directory" ? "business" : "member"}
         mobileOpen={mobileNavOpen}
         onCloseMobile={() => setMobileNavOpen(false)}
       />

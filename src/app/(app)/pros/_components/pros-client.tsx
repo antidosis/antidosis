@@ -6,11 +6,10 @@ import Link from "next/link";
 
 import {
   Star,
+  Lock,
   MapPin,
   Briefcase,
   Shield,
-  Phone,
-  Mail,
   Award,
   Search,
   X,
@@ -235,22 +234,10 @@ export default function ProsDirectoryPage({ embedded = false, initialData }: Pro
                         {pro.locationName}
                       </span>
                     )}
-                    {pro.publicPhone && (
-                      <span className="flex items-center gap-1">
-                        <Phone className="h-3 w-3" />
-                        {pro.publicPhone}
-                      </span>
-                    )}
-                    {pro.accountType === "business" && pro.businessPhone && (
-                      <span className="flex items-center gap-1">
-                        <Phone className="h-3 w-3 text-sun" />
-                        Business: {pro.businessPhone}
-                      </span>
-                    )}
-                    {pro.accountType === "business" && pro.businessEmail && (
-                      <span className="flex items-center gap-1">
-                        <Mail className="h-3 w-3 text-sun" />
-                        {pro.businessEmail}
+                    {(pro.contact.phone || pro.contact.email || pro.contact.website) && (
+                      <span className="flex items-center gap-1 text-ash">
+                        <Lock className="h-3 w-3" />
+                        Contact on listing
                       </span>
                     )}
                     {pro.credentials.length > 0 && (
@@ -308,21 +295,22 @@ export default function ProsDirectoryPage({ embedded = false, initialData }: Pro
                     </div>
                   )}
 
-                  {pro.businessSocialLinks.length > 0 && (
+                  {(pro.contact.website || pro.contact.socials.length > 0) && (
                     <div className="flex flex-wrap gap-2 mt-3">
-                      {pro.businessSocialLinks.slice(0, 4).map((link) => (
-                        <a
-                          key={link.url}
-                          href={link.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 rounded border border-line bg-raise px-2 py-1 text-xs text-ash transition-colors hover:border-sun/40 hover:text-sun"
+                      {pro.contact.website && (
+                        <span className="inline-flex items-center gap-1 rounded border border-line bg-raise px-2 py-1 text-xs text-ash">
+                          <Globe className="h-3 w-3" />
+                          Website
+                        </span>
+                      )}
+                      {pro.contact.socials.slice(0, 4).map((platform) => (
+                        <span
+                          key={platform}
+                          className="inline-flex items-center gap-1 rounded border border-line bg-raise px-2 py-1 text-xs capitalize text-ash"
                         >
                           <Globe className="h-3 w-3" />
-                          {link.platform === "website"
-                            ? "Website"
-                            : link.platform.replace(/^./, (c) => c.toUpperCase())}
-                        </a>
+                          {platform}
+                        </span>
                       ))}
                     </div>
                   )}

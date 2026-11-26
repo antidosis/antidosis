@@ -10,7 +10,6 @@ import {
   Briefcase,
   Building2,
   FileCheck,
-  Globe,
   Loader2,
   MapPin,
   MessageSquareText,
@@ -19,6 +18,7 @@ import {
   UserPlus,
 } from "lucide-react";
 
+import { ContactReveal } from "@/components/contact-reveal";
 import { ReportButton } from "@/components/report-button";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +26,6 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ProfileActions } from "@/components/ui/profile-actions";
 import { formatAbn } from "@/lib/abn";
-import { displayHostname } from "@/lib/security/link-policy";
 import { useApi } from "@/lib/swr-config";
 
 interface ProfileData {
@@ -36,7 +35,7 @@ interface ProfileData {
   avatarUrl: string | null;
   bio: string | null;
   locationName: string | null;
-  publicPhone: string | null;
+  contact: { phone: boolean; socials: string[] };
   mobileVerified: boolean;
   ratingAvg: number;
   ratingCount: number;
@@ -47,7 +46,7 @@ interface ProfileData {
   abnVerified?: boolean;
   audienceSize?: number | null;
   skills: { id: string; name: string; isVerified: boolean }[];
-  socialLinks: { id: string; platform: string; url: string }[];
+  socialLinks: { id: string; platform: string }[];
   credentials: {
     id: string;
     type: string;
@@ -211,31 +210,13 @@ export default function ProfilePage() {
                 </div>
               </div>
             )}
-            {(profile.publicPhone || profile.socialLinks.length > 0) && (
-              <div className="mt-6 flex flex-wrap gap-3 border-t border-line/60 pt-5">
-                {profile.publicPhone && (
-                  <a
-                    href={`tel:${profile.publicPhone}`}
-                    className="rounded-md border border-line px-3 py-2 text-sm text-parchment hover:border-linehi hover:text-gold"
-                  >
-                    {profile.publicPhone}
-                  </a>
-                )}
-                {profile.socialLinks.map((link) => (
-                  <a
-                    key={link.id}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer nofollow"
-                    className="inline-flex items-center gap-1.5 rounded-md border border-line px-3 py-2 text-sm capitalize text-parchment hover:border-linehi hover:text-gold"
-                  >
-                    <Globe className="h-3.5 w-3.5" /> {link.platform}
-                    <span className="font-mono text-xs normal-case text-ash">
-                      {displayHostname(link.url)}
-                    </span>
-                    <ArrowUpRight className="h-3 w-3" />
-                  </a>
-                ))}
+            {(profile.contact.phone || profile.contact.socials.length > 0) && (
+              <div className="mt-6 border-t border-line/60 pt-5">
+                <ContactReveal
+                  profileId={profile.id}
+                  scope="personal"
+                  flags={{ phone: profile.contact.phone, socials: profile.contact.socials }}
+                />
               </div>
             )}
           </section>

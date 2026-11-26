@@ -6,20 +6,18 @@ import { useParams } from "next/navigation";
 import {
   ArrowLeft,
   ArrowLeftRight,
-  ArrowUpRight,
   Award,
   Briefcase,
   Building2,
   Globe,
   Loader2,
-  Mail,
   MapPin,
-  Phone,
   Shield,
   Star,
   UserPlus,
 } from "lucide-react";
 
+import { ContactReveal } from "@/components/contact-reveal";
 import { ReportButton } from "@/components/report-button";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +32,6 @@ import {
   professionDisplayLabel,
 } from "@/lib/professions";
 import type { DirectoryProfile } from "@/lib/public-content";
-import { displayHostname } from "@/lib/security/link-policy";
 import { useApi } from "@/lib/swr-config";
 
 export default function ListingPage() {
@@ -139,33 +136,13 @@ export default function ListingPage() {
             </Button>
           </div>
 
-          {/* Business contact — the point of a listing */}
-          {(listing.businessPhone || listing.businessEmail || listing.publicPhone) && (
-            <div className="mt-6 flex flex-wrap gap-3 border-t border-line/60 pt-5">
-              {listing.businessPhone && (
-                <a
-                  href={`tel:${listing.businessPhone}`}
-                  className="inline-flex items-center gap-2 rounded-md border border-line px-4 py-2 text-sm text-parchment transition-colors hover:border-linehi hover:text-gold"
-                >
-                  <Phone className="h-4 w-4 text-sun" /> {listing.businessPhone}
-                </a>
-              )}
-              {listing.businessEmail && (
-                <a
-                  href={`mailto:${listing.businessEmail}`}
-                  className="inline-flex items-center gap-2 rounded-md border border-line px-4 py-2 text-sm text-parchment transition-colors hover:border-linehi hover:text-gold"
-                >
-                  <Mail className="h-4 w-4 text-sun" /> {listing.businessEmail}
-                </a>
-              )}
-              {!listing.businessPhone && listing.publicPhone && (
-                <a
-                  href={`tel:${listing.publicPhone}`}
-                  className="inline-flex items-center gap-2 rounded-md border border-line px-4 py-2 text-sm text-parchment transition-colors hover:border-linehi hover:text-gold"
-                >
-                  <Phone className="h-4 w-4 text-sun" /> {listing.publicPhone}
-                </a>
-              )}
+          {/* Business contact — tap to reveal, login-gated and audit-logged */}
+          {(listing.contact.phone ||
+            listing.contact.email ||
+            listing.contact.website ||
+            listing.contact.socials.length > 0) && (
+            <div className="mt-6 border-t border-line/60 pt-5">
+              <ContactReveal profileId={listing.id} scope="listing" flags={listing.contact} />
             </div>
           )}
         </div>
@@ -262,7 +239,7 @@ export default function ListingPage() {
         </div>
 
         <aside className="space-y-8">
-          {listing.businessSocialLinks.length > 0 && (
+          {(listing.contact.website || listing.contact.socials.length > 0) && (
             <section>
               <div className="mb-4 flex items-center justify-between border-b border-line pb-3">
                 <h2 className="flex items-center gap-2 text-base font-medium text-gold">
@@ -270,20 +247,20 @@ export default function ListingPage() {
                 </h2>
               </div>
               <div className="flex flex-wrap gap-2">
-                {listing.businessSocialLinks.map((link) => (
-                  <a
-                    key={link.url}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer nofollow"
-                    className="inline-flex items-center gap-1.5 rounded-md border border-line px-3 py-2 text-sm capitalize text-parchment transition-colors hover:border-linehi hover:text-gold"
+                {listing.contact.website && (
+                  <span className="inline-flex items-center gap-1.5 rounded-md border border-line px-3 py-2 text-sm text-ash">
+                    <Globe className="h-3.5 w-3.5" /> Website
+                    <span className="font-mono text-xs tracking-widest text-ash/60">•••</span>
+                  </span>
+                )}
+                {listing.contact.socials.map((platform) => (
+                  <span
+                    key={platform}
+                    className="inline-flex items-center gap-1.5 rounded-md border border-line px-3 py-2 text-sm capitalize text-ash"
                   >
-                    <Globe className="h-3.5 w-3.5" /> {link.platform}
-                    <span className="font-mono text-xs normal-case text-ash">
-                      {displayHostname(link.url)}
-                    </span>
-                    <ArrowUpRight className="h-3 w-3" />
-                  </a>
+                    <Globe className="h-3.5 w-3.5" /> {platform}
+                    <span className="font-mono text-xs tracking-widest text-ash/60">•••</span>
+                  </span>
                 ))}
               </div>
               <p className="mt-3 rounded-md border border-mercury/20 bg-mercury/[0.03] p-3 text-xs leading-relaxed text-ash">
