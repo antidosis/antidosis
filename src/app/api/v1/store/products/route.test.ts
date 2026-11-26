@@ -38,6 +38,12 @@ const PRODUCT = {
   priceAud: 95,
   stockStatus: "in_stock",
   buyUrl: "https://www.etsy.com/shop/coastmesh",
+  offerPostage: true,
+  postageAud: 12,
+  localPickup: true,
+  postageNote: "AusPost tracked, ships in 2 business days",
+  paymentTerms: ["bank_transfer", "payid"],
+  paymentNote: "PayID details shared in chat once agreed",
 };
 
 describe("POST /api/v1/store/products", () => {
@@ -59,7 +65,63 @@ describe("POST /api/v1/store/products", () => {
     expect(res.status).toBe(201);
     expect(mockProductCreate).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({ builderId: "builder-1", priceAudCents: 9500 }),
+        data: expect.objectContaining({
+          builderId: "builder-1",
+          priceAudCents: 9500,
+          offerPostage: true,
+          postageAudCents: 1200,
+          localPickup: true,
+          postageNote: "AusPost tracked, ships in 2 business days",
+          paymentTerms: ["bank_transfer", "payid"],
+          paymentNote: "PayID details shared in chat once agreed",
+        }),
+      })
+    );
+  });
+
+  it("rejects a listing with no delivery method", async () => {
+    const res = await POST(
+      makeRequest({ ...PRODUCT, offerPostage: false, localPickup: false, postageAud: null })
+    );
+    expect(res.status).toBe(400);
+    expect(mockProductCreate).not.toHaveBeenCalled();
+  });
+
+  it("rejects a postage cost when postage is not offered", async () => {
+    const res = await POST(makeRequest({ ...PRODUCT, offerPostage: false, postageAud: 12 }));
+    expect(res.status).toBe(400);
+    expect(mockProductCreate).not.toHaveBeenCalled();
+  });
+
+  it("rejects a listing with no payment terms", async () => {
+    const res = await POST(makeRequest({ ...PRODUCT, paymentTerms: [] }));
+    expect(res.status).toBe(400);
+    expect(mockProductCreate).not.toHaveBeenCalled();
+  });
+
+  it("accepts free postage (0) and chat-arranged postage (null)", async () => {
+    const free = await POST(makeRequest({ ...PRODUCT, postageAud: 0 }));
+    expect(free.status).toBe(201);
+    expect(mockProductCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ postageAudCents: 0 }) })
+    );
+
+    mockProductCreate.mockClear();
+    const chat = await POST(makeRequest({ ...PRODUCT, postageAud: null }));
+    expect(chat.status).toBe(201);
+    expect(mockProductCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ postageAudCents: null }) })
+    );
+  });
+
+  it("pickup-only listings are valid", async () => {
+    const res = await POST(
+      makeRequest({ ...PRODUCT, offerPostage: false, postageAud: null, localPickup: true })
+    );
+    expect(res.status).toBe(201);
+    expect(mockProductCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ offerPostage: false, localPickup: true }),
       })
     );
   });

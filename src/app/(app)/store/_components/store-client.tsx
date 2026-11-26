@@ -7,7 +7,7 @@ import Link from "next/link";
 import { ArrowRight, Package, Power, RadioTower } from "lucide-react";
 
 import { probeBuilderSession, SellPanel, SellersList } from "./builders-market";
-import type { BuilderSession, PublicMeshBuilder } from "./builders-market";
+import type { BuilderSession, BuilderSnapshot, PublicMeshBuilder } from "./builders-market";
 import { InterestForm } from "./interest-form";
 import type { InterestKind } from "./interest-form";
 import { MeshVisual } from "./mesh-visual";
@@ -52,6 +52,7 @@ const DEPARTMENTS: { id: StoreFilter; art: ProductArtVariant; label: string }[] 
 export function StoreClient() {
   const [builders, setBuilders] = useState<PublicMeshBuilder[] | null>(null);
   const [builderSession, setBuilderSession] = useState<BuilderSession>("loading");
+  const [builderSnapshot, setBuilderSnapshot] = useState<BuilderSnapshot | null>(null);
   const [filter, setFilter] = useState<StoreFilter>("all");
   const [popup, setPopup] = useState<StorePopup | null>(null);
   const [interestKind, setInterestKind] = useState<InterestKind>("node");
@@ -70,7 +71,10 @@ export function StoreClient() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- initial data fetch on mount; setState lives inside the async loaders
     void loadBuilders();
-    void probeBuilderSession().then(setBuilderSession);
+    void probeBuilderSession().then((probe) => {
+      setBuilderSession(probe.session);
+      setBuilderSnapshot(probe.builder);
+    });
   }, [loadBuilders]);
 
   function openInterest(kind: InterestKind) {
@@ -211,9 +215,14 @@ export function StoreClient() {
         <StoreModal title="Sell in this store" onClose={() => setPopup(null)} wide>
           <SellPanel
             session={builderSession}
+            builder={builderSnapshot}
             onApplied={() => {
               setBuilderSession("applied");
               void loadBuilders();
+              void probeBuilderSession().then((probe) => {
+                setBuilderSession(probe.session);
+                setBuilderSnapshot(probe.builder);
+              });
             }}
           />
         </StoreModal>

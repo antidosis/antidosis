@@ -9,6 +9,12 @@ export const FREE_PRODUCT_SLOTS = 3;
 /** Absolute ceiling regardless of granted slots — abuse guard. */
 export const MAX_PRODUCT_SLOTS = 60;
 
+/**
+ * Monthly rent per extra product slot once slot rentals launch. During the
+ * pilot no charges apply — admin grants slots manually on request.
+ */
+export const EXTRA_SLOT_MONTHLY_AUD = 4;
+
 export function productSlotLimit(builder: { extraSlots: number }): number {
   return Math.min(FREE_PRODUCT_SLOTS + Math.max(0, builder.extraSlots), MAX_PRODUCT_SLOTS);
 }

@@ -1,8 +1,11 @@
 "use client";
 
-import { BellRing, ExternalLink } from "lucide-react";
+import Link from "next/link";
+
+import { ArrowUpRight, BellRing, ExternalLink } from "lucide-react";
 
 import { displayHostname } from "@/lib/security/link-policy";
+import { deliverySummary } from "@/lib/store-delivery";
 import { cn } from "@/lib/utils";
 
 import { formatAud } from "./builders-market";
@@ -15,11 +18,14 @@ export type StoreCategory =
 
 export type StoreItem = {
   key: string;
+  /** Live listings have an id and a public product page; flagship concepts don't. */
+  id?: string;
   art: ProductArtVariant;
   category: StoreCategory;
   name: string;
   line: string;
   price: string;
+  delivery?: string;
   status: { label: string; tone: string };
   builderName?: string;
   buyUrl?: string | null;
@@ -133,11 +139,13 @@ export function buildStoreItems(builders: PublicMeshBuilder[] | null): StoreItem
   const live: StoreItem[] = (builders ?? []).flatMap((builder) =>
     builder.products.map((product) => ({
       key: product.id,
+      id: product.id,
       art: CATEGORY_ART[product.category] ?? "node",
       category: (product.category in CATEGORY_LABEL ? product.category : "node") as StoreCategory,
       name: product.name,
       line: product.description,
       price: formatAud(product.priceAudCents),
+      delivery: deliverySummary(product, builder.suburb),
       status: STOCK_LABEL[product.stockStatus] ?? STOCK_LABEL.in_stock,
       builderName: builder.businessName,
       buyUrl: product.buyUrl,
@@ -156,6 +164,13 @@ function ProductCard({
   item: StoreItem;
   onNotify: (kind: InterestKind) => void;
 }) {
+  const name = item.id ? (
+    <Link href={`/store/product/${item.id}`} className="transition-colors hover:text-sun">
+      {item.name}
+    </Link>
+  ) : (
+    item.name
+  );
   return (
     <article
       className={cn(
@@ -185,12 +200,21 @@ function ProductCard({
             {item.status.label}
           </span>
         </div>
-        <h3 className="mt-1.5 text-[15px] font-medium text-gold sm:text-base">{item.name}</h3>
+        <h3 className="mt-1.5 text-[15px] font-medium text-gold sm:text-base">{name}</h3>
         <p className="mt-1 text-sm leading-snug text-ash">{item.line}</p>
         {item.builderName && <p className="mt-1 text-xs text-ash/80">by {item.builderName}</p>}
+        {item.delivery && <p className="mt-1.5 text-xs text-mercury/90">{item.delivery}</p>}
         <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-3">
           <span className="text-[15px] font-medium text-sun">{item.price}</span>
-          {item.buyUrl ? (
+          {item.id ? (
+            <Link
+              href={`/store/product/${item.id}`}
+              className="inline-flex items-center gap-1.5 rounded bg-sun px-2.5 py-1.5 text-sm font-medium text-void transition-colors hover:bg-sunhi"
+            >
+              View listing
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </Link>
+          ) : item.buyUrl ? (
             <a
               href={item.buyUrl}
               target="_blank"

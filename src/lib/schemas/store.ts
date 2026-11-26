@@ -46,6 +46,12 @@ export const meshProductCategories = [
   "accessory",
 ] as const;
 export const meshProductStockStatuses = ["in_stock", "made_to_order", "out_of_stock"] as const;
+export const meshPaymentTerms = [
+  "bank_transfer",
+  "payid",
+  "cash_on_pickup",
+  "card_checkout",
+] as const;
 
 export const applyMeshBuilderSchema = z.object({
   businessName: z.string().trim().min(2).max(160),
@@ -62,16 +68,39 @@ export const updateMeshBuilderSchema = z.object({
   description: z.string().trim().min(40).max(2000).optional(),
 });
 
-export const createMeshProductSchema = z.object({
-  name: z.string().trim().min(3).max(120),
-  category: z.enum(meshProductCategories),
-  description: z.string().trim().min(20).max(1500),
-  specs: optionalTrimmed(1000),
-  // Dollars in the form, cents at the API boundary; null = price on application
-  priceAud: z.number().min(0).max(100_000).nullable().optional(),
-  stockStatus: z.enum(meshProductStockStatuses).default("in_stock"),
-  buyUrl: optionalTrimmed(500),
-});
+export const createMeshProductSchema = z
+  .object({
+    name: z.string().trim().min(3).max(120),
+    category: z.enum(meshProductCategories),
+    description: z.string().trim().min(20).max(1500),
+    specs: optionalTrimmed(1000),
+    // Dollars in the form, cents at the API boundary; null = price on application
+    priceAud: z.number().min(0).max(100_000).nullable().optional(),
+    stockStatus: z.enum(meshProductStockStatuses).default("in_stock"),
+    buyUrl: optionalTrimmed(500),
+    // Delivery: postage and/or local pickup — at least one is required
+    offerPostage: z.boolean().default(false),
+    // Flat postage in dollars: 0 = free postage, null = worked out in chat
+    postageAud: z.number().min(0).max(1_000).nullable().optional(),
+    localPickup: z.boolean().default(false),
+    postageNote: optionalTrimmed(300),
+    paymentTerms: z.array(z.enum(meshPaymentTerms)).min(1).max(4),
+    paymentNote: optionalTrimmed(300),
+  })
+  .superRefine((value, ctx) => {
+    if (!value.offerPostage && !value.localPickup) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Offer postage, local pickup, or both — buyers need a way to receive it",
+      });
+    }
+    if (!value.offerPostage && value.postageAud != null) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "A postage cost only makes sense when postage is offered",
+      });
+    }
+  });
 
 export const updateMeshProductSchema = z.object({
   name: z.string().trim().min(3).max(120).optional(),
@@ -82,6 +111,12 @@ export const updateMeshProductSchema = z.object({
   priceAud: z.number().min(0).max(100_000).nullable().optional(),
   stockStatus: z.enum(meshProductStockStatuses).optional(),
   buyUrl: z.string().trim().max(500).nullable().optional(),
+  offerPostage: z.boolean().optional(),
+  postageAud: z.number().min(0).max(1_000).nullable().optional(),
+  localPickup: z.boolean().optional(),
+  postageNote: z.string().trim().max(300).nullable().optional(),
+  paymentTerms: z.array(z.enum(meshPaymentTerms)).min(1).max(4).optional(),
+  paymentNote: z.string().trim().max(300).nullable().optional(),
 });
 
 export const reviewMeshBuilderSchema = z
@@ -98,6 +133,7 @@ export const reviewMeshBuilderSchema = z
 
 export type MeshBuilderStatus = (typeof meshBuilderStatuses)[number];
 export type MeshProductCategory = (typeof meshProductCategories)[number];
+export type MeshPaymentTerm = (typeof meshPaymentTerms)[number];
 export type ApplyMeshBuilderInput = z.infer<typeof applyMeshBuilderSchema>;
 export type CreateMeshProductInput = z.infer<typeof createMeshProductSchema>;
 export type UpdateMeshProductInput = z.infer<typeof updateMeshProductSchema>;

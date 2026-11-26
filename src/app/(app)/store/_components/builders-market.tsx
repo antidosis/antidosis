@@ -22,6 +22,10 @@ export type MeshProductListing = {
   priceAudCents: number | null;
   stockStatus: string;
   buyUrl: string | null;
+  offerPostage: boolean;
+  postageAudCents: number | null;
+  localPickup: boolean;
+  paymentTerms: string[];
   featuredUntil?: string | null;
   featured?: boolean;
 };
@@ -233,35 +237,57 @@ function ApplicationForm({ onApplied }: { onApplied: () => void }) {
   );
 }
 
+export type BuilderSnapshot = {
+  businessName: string;
+  status: string;
+  used: number;
+  limit: number;
+};
+
 export type BuilderSession = "loading" | "anon" | "none" | "applied";
 
 /** Probe once (page mount) so the sell popup opens instantly. */
-export async function probeBuilderSession(): Promise<BuilderSession> {
+export async function probeBuilderSession(): Promise<{
+  session: BuilderSession;
+  builder: BuilderSnapshot | null;
+}> {
   try {
     const supabase = createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    if (!user) return "anon";
+    if (!user) return { session: "anon", builder: null };
     const res = await fetch("/api/v1/store/builders/mine");
-    if (!res.ok) return "none";
+    if (!res.ok) return { session: "none", builder: null };
     const data = await res.json();
-    return data.builder ? "applied" : "none";
+    if (!data.builder) return { session: "none", builder: null };
+    return {
+      session: "applied",
+      builder: {
+        businessName: data.builder.businessName,
+        status: data.builder.status,
+        used: (data.builder.products ?? []).length,
+        limit: data.builder.slotLimit ?? 3,
+      },
+    };
   } catch {
-    return "anon";
+    return { session: "anon", builder: null };
   }
 }
 
 /**
  * The sell flow, session-aware: anonymous visitors get a sign-in prompt,
- * members get the application form, existing builders get a dashboard link.
- * The session is probed by the page on mount and passed in.
+ * members get the application form, existing builders get their live slot
+ * usage and a straight path to adding products. The session is probed by
+ * the page on mount and passed in.
  */
 export function SellPanel({
   session,
+  builder,
   onApplied,
 }: {
   session: BuilderSession;
+  builder: BuilderSnapshot | null;
   onApplied: () => void;
 }) {
   if (session === "loading") {
@@ -285,15 +311,32 @@ export function SellPanel({
     );
   }
   if (session === "applied") {
+    const approved = builder?.status === "approved";
     return (
       <div>
         <p className="text-sm leading-relaxed text-ash">
-          You have a builder record. Track your application and manage your shelf from your
-          dashboard.
+          {approved
+            ? `${builder?.businessName ?? "Your shelf"} is live in this store — ${builder?.used ?? 0} of ${builder?.limit ?? 3} slots used.`
+            : builder?.status === "pending"
+              ? "Your builder application is in review — products unlock once approved."
+              : "You have a builder record — check its status in your dashboard."}
         </p>
-        <Button asChild variant="secondary" className="mt-4">
-          <Link href="/dashboard?tab=mesh-store">Open Mesh store in dashboard</Link>
-        </Button>
+        <p className="mt-2 text-xs leading-relaxed text-ash/70">
+          Every builder gets 3 free product slots; extra slots are AU$4/month each once rentals
+          launch (free during the pilot).
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button asChild>
+            <Link href="/dashboard?tab=mesh-store">
+              {approved ? "Manage shelf & add products" : "Open Mesh store dashboard"}
+            </Link>
+          </Button>
+          {approved && (
+            <Button asChild variant="secondary">
+              <a href="#shop">View the floor</a>
+            </Button>
+          )}
+        </div>
       </div>
     );
   }

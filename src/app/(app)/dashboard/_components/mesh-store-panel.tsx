@@ -5,20 +5,26 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 
 import {
+  Banknote,
   CheckCircle2,
   Clock,
+  ExternalLink,
   Loader2,
   PackageOpen,
   Pencil,
   Plus,
   Store,
   Trash2,
+  Truck,
   XCircle,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
+import type { MeshPaymentTerm } from "@/lib/schemas/store";
+import { deliverySummary, paymentTermLabel } from "@/lib/store-delivery";
+import { EXTRA_SLOT_MONTHLY_AUD, FREE_PRODUCT_SLOTS } from "@/lib/store-slots";
 import { cn } from "@/lib/utils";
 
 type MeshProduct = {
@@ -30,6 +36,12 @@ type MeshProduct = {
   priceAudCents: number | null;
   stockStatus: string;
   buyUrl: string | null;
+  offerPostage: boolean;
+  postageAudCents: number | null;
+  localPickup: boolean;
+  postageNote: string | null;
+  paymentTerms: string[];
+  paymentNote: string | null;
 };
 
 type MeshBuilder = {
@@ -64,6 +76,13 @@ const STOCK_OPTIONS = [
   { value: "out_of_stock", label: "Out of stock" },
 ];
 
+const PAYMENT_OPTIONS: { value: MeshPaymentTerm; label: string }[] = [
+  { value: "bank_transfer", label: "Bank transfer" },
+  { value: "payid", label: "PayID" },
+  { value: "cash_on_pickup", label: "Cash on pickup" },
+  { value: "card_checkout", label: "Card via my checkout link" },
+];
+
 const STATUS_UI: Record<string, { label: string; tone: string; body: string }> = {
   pending: {
     label: "in review",
@@ -95,6 +114,12 @@ type ProductDraft = {
   price: string;
   stockStatus: string;
   buyUrl: string;
+  offerPostage: boolean;
+  postage: string;
+  localPickup: boolean;
+  postageNote: string;
+  paymentTerms: string[];
+  paymentNote: string;
 };
 
 const EMPTY_DRAFT: ProductDraft = {
@@ -105,6 +130,12 @@ const EMPTY_DRAFT: ProductDraft = {
   price: "",
   stockStatus: "in_stock",
   buyUrl: "",
+  offerPostage: true,
+  postage: "",
+  localPickup: false,
+  postageNote: "",
+  paymentTerms: ["bank_transfer"],
+  paymentNote: "",
 };
 
 function draftFromProduct(product: MeshProduct): ProductDraft {
@@ -116,7 +147,45 @@ function draftFromProduct(product: MeshProduct): ProductDraft {
     price: product.priceAudCents === null ? "" : (product.priceAudCents / 100).toString(),
     stockStatus: product.stockStatus,
     buyUrl: product.buyUrl ?? "",
+    offerPostage: product.offerPostage,
+    postage: product.postageAudCents === null ? "" : (product.postageAudCents / 100).toString(),
+    localPickup: product.localPickup,
+    postageNote: product.postageNote ?? "",
+    paymentTerms: product.paymentTerms,
+    paymentNote: product.paymentNote ?? "",
   };
+}
+
+function draftIsValid(draft: ProductDraft): boolean {
+  if (draft.name.trim().length < 3 || draft.description.trim().length < 20) return false;
+  if (draft.price !== "" && Number.isNaN(Number(draft.price))) return false;
+  if (!draft.offerPostage && !draft.localPickup) return false;
+  if (draft.offerPostage && draft.postage !== "" && Number.isNaN(Number(draft.postage))) {
+    return false;
+  }
+  return draft.paymentTerms.length > 0;
+}
+
+function Checkbox({
+  checked,
+  onChange,
+  label,
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  label: string;
+}) {
+  return (
+    <label className="flex cursor-pointer items-center gap-2 text-sm text-parchment">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(event) => onChange(event.target.checked)}
+        className="h-4 w-4 accent-[rgb(var(--c-sun))]"
+      />
+      {label}
+    </label>
+  );
 }
 
 function ProductForm({
@@ -135,6 +204,17 @@ function ProductForm({
   const [draft, setDraft] = useState<ProductDraft>(initial);
   const set = (key: keyof ProductDraft) => (value: string) =>
     setDraft((current) => ({ ...current, [key]: value }));
+  const setFlag = (key: "offerPostage" | "localPickup") => (value: boolean) =>
+    setDraft((current) => ({ ...current, [key]: value }));
+
+  function toggleTerm(term: string) {
+    setDraft((current) => ({
+      ...current,
+      paymentTerms: current.paymentTerms.includes(term)
+        ? current.paymentTerms.filter((value) => value !== term)
+        : [...current.paymentTerms, term],
+    }));
+  }
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -143,111 +223,193 @@ function ProductForm({
   }
 
   const priceInvalid = draft.price !== "" && Number.isNaN(Number(draft.price));
+  const postageInvalid =
+    draft.offerPostage && draft.postage !== "" && Number.isNaN(Number(draft.postage));
 
   return (
-    <form onSubmit={handleSubmit} className="grid gap-3 sm:grid-cols-2">
-      <label className="block">
-        <span className="mb-1.5 block text-sm text-parchment">
-          Product name <span className="text-sun">*</span>
-        </span>
-        <input
-          type="text"
-          required
-          value={draft.name}
-          onChange={(event) => set("name")(event.target.value)}
-          placeholder="e.g. CoastMesh Field Node — T-Beam 915"
-          className={inputClass}
-          maxLength={120}
-        />
-      </label>
-      <div className="grid grid-cols-2 gap-3">
+    <form onSubmit={handleSubmit} className="grid gap-4">
+      {/* Basics */}
+      <div className="grid gap-3 sm:grid-cols-2">
         <label className="block">
-          <span className="mb-1.5 block text-sm text-parchment">Category</span>
-          <select
-            value={draft.category}
-            onChange={(event) => set("category")(event.target.value)}
+          <span className="mb-1.5 block text-sm text-parchment">
+            Product name <span className="text-sun">*</span>
+          </span>
+          <input
+            type="text"
+            required
+            value={draft.name}
+            onChange={(event) => set("name")(event.target.value)}
+            placeholder="e.g. CoastMesh Field Node — T-Beam 915"
             className={inputClass}
-          >
-            {CATEGORIES.map((category) => (
-              <option key={category.value} value={category.value}>
-                {category.label}
-              </option>
-            ))}
-          </select>
+            maxLength={120}
+          />
+        </label>
+        <div className="grid grid-cols-2 gap-3">
+          <label className="block">
+            <span className="mb-1.5 block text-sm text-parchment">Category</span>
+            <select
+              value={draft.category}
+              onChange={(event) => set("category")(event.target.value)}
+              className={inputClass}
+            >
+              {CATEGORIES.map((category) => (
+                <option key={category.value} value={category.value}>
+                  {category.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className="mb-1.5 block text-sm text-parchment">Stock</span>
+            <select
+              value={draft.stockStatus}
+              onChange={(event) => set("stockStatus")(event.target.value)}
+              className={inputClass}
+            >
+              {STOCK_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <label className="block sm:col-span-2">
+          <span className="mb-1.5 block text-sm text-parchment">
+            Description <span className="text-sun">*</span>
+          </span>
+          <textarea
+            required
+            value={draft.description}
+            onChange={(event) => set("description")(event.target.value)}
+            rows={3}
+            placeholder="What it is, who it's for, what's included… (min 20 characters)"
+            className={inputClass}
+            maxLength={1500}
+          />
+        </label>
+        <label className="block sm:col-span-2">
+          <span className="mb-1.5 block text-sm text-parchment">Specs</span>
+          <textarea
+            value={draft.specs}
+            onChange={(event) => set("specs")(event.target.value)}
+            rows={2}
+            placeholder="Board · antenna · battery · enclosure — shown verbatim on your listing"
+            className={inputClass}
+            maxLength={1000}
+          />
         </label>
         <label className="block">
-          <span className="mb-1.5 block text-sm text-parchment">Stock</span>
-          <select
-            value={draft.stockStatus}
-            onChange={(event) => set("stockStatus")(event.target.value)}
+          <span className="mb-1.5 block text-sm text-parchment">Price (AUD)</span>
+          <input
+            type="text"
+            inputMode="decimal"
+            value={draft.price}
+            onChange={(event) => set("price")(event.target.value)}
+            placeholder="Blank = price on application"
             className={inputClass}
-          >
-            {STOCK_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          />
+          {priceInvalid && <span className="mt-1 block text-xs text-bad">Enter a number</span>}
+        </label>
+        <label className="block">
+          <span className="mb-1.5 block text-sm text-parchment">Buy link</span>
+          <input
+            type="url"
+            value={draft.buyUrl}
+            onChange={(event) => set("buyUrl")(event.target.value)}
+            placeholder="https://… your own checkout (no shorteners)"
+            className={inputClass}
+            maxLength={500}
+          />
         </label>
       </div>
-      <label className="block sm:col-span-2">
-        <span className="mb-1.5 block text-sm text-parchment">
-          Description <span className="text-sun">*</span>
-        </span>
-        <textarea
-          required
-          value={draft.description}
-          onChange={(event) => set("description")(event.target.value)}
-          rows={3}
-          placeholder="What it is, who it's for, what's included… (min 20 characters)"
-          className={inputClass}
-          maxLength={1500}
-        />
-      </label>
-      <label className="block sm:col-span-2">
-        <span className="mb-1.5 block text-sm text-parchment">Specs</span>
-        <textarea
-          value={draft.specs}
-          onChange={(event) => set("specs")(event.target.value)}
-          rows={2}
-          placeholder="Board · antenna · battery · enclosure — shown verbatim on your shelf"
-          className={inputClass}
-          maxLength={1000}
-        />
-      </label>
-      <label className="block">
-        <span className="mb-1.5 block text-sm text-parchment">Price (AUD)</span>
-        <input
-          type="text"
-          inputMode="decimal"
-          value={draft.price}
-          onChange={(event) => set("price")(event.target.value)}
-          placeholder="Blank = price on application"
-          className={inputClass}
-        />
-        {priceInvalid && <span className="mt-1 block text-xs text-bad">Enter a number</span>}
-      </label>
-      <label className="block">
-        <span className="mb-1.5 block text-sm text-parchment">Buy link</span>
-        <input
-          type="url"
-          value={draft.buyUrl}
-          onChange={(event) => set("buyUrl")(event.target.value)}
-          placeholder="https://… your own checkout (no shorteners)"
-          className={inputClass}
-          maxLength={500}
-        />
-      </label>
-      <div className="flex flex-wrap gap-2 sm:col-span-2">
-        <Button
-          type="submit"
-          disabled={
-            submitting ||
-            priceInvalid ||
-            draft.name.trim().length < 3 ||
-            draft.description.trim().length < 20
-          }
-        >
+
+      {/* Delivery */}
+      <fieldset className="rounded-lg border border-line/70 bg-inset/30 p-4">
+        <legend className="flex items-center gap-1.5 px-1 font-mono text-xs uppercase tracking-[0.16em] text-ash">
+          <Truck className="h-3.5 w-3.5 text-sun" /> delivery
+        </legend>
+        <div className="flex flex-wrap gap-x-6 gap-y-2">
+          <Checkbox
+            checked={draft.offerPostage}
+            onChange={setFlag("offerPostage")}
+            label="Postage (Australia-wide)"
+          />
+          <Checkbox
+            checked={draft.localPickup}
+            onChange={setFlag("localPickup")}
+            label="Local pickup"
+          />
+        </div>
+        {!draft.offerPostage && !draft.localPickup && (
+          <p className="mt-2 text-xs text-bad">
+            Offer postage, local pickup, or both — buyers need a way to receive it.
+          </p>
+        )}
+        {draft.offerPostage && (
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <label className="block">
+              <span className="mb-1.5 block text-sm text-parchment">Flat postage cost (AUD)</span>
+              <input
+                type="text"
+                inputMode="decimal"
+                value={draft.postage}
+                onChange={(event) => set("postage")(event.target.value)}
+                placeholder="0 = free · blank = work it out in chat"
+                className={inputClass}
+              />
+              {postageInvalid && (
+                <span className="mt-1 block text-xs text-bad">Enter a number</span>
+              )}
+            </label>
+            <label className="block">
+              <span className="mb-1.5 block text-sm text-parchment">Delivery note</span>
+              <input
+                type="text"
+                value={draft.postageNote}
+                onChange={(event) => set("postageNote")(event.target.value)}
+                placeholder="e.g. AusPost tracked, ships in 2 business days"
+                className={inputClass}
+                maxLength={300}
+              />
+            </label>
+          </div>
+        )}
+      </fieldset>
+
+      {/* Payment */}
+      <fieldset className="rounded-lg border border-line/70 bg-inset/30 p-4">
+        <legend className="flex items-center gap-1.5 px-1 font-mono text-xs uppercase tracking-[0.16em] text-ash">
+          <Banknote className="h-3.5 w-3.5 text-sun" /> payment you accept
+        </legend>
+        <div className="flex flex-wrap gap-x-6 gap-y-2">
+          {PAYMENT_OPTIONS.map((option) => (
+            <Checkbox
+              key={option.value}
+              checked={draft.paymentTerms.includes(option.value)}
+              onChange={() => toggleTerm(option.value)}
+              label={option.label}
+            />
+          ))}
+        </div>
+        {draft.paymentTerms.length === 0 && (
+          <p className="mt-2 text-xs text-bad">Pick at least one way buyers can pay you.</p>
+        )}
+        <label className="mt-3 block">
+          <span className="mb-1.5 block text-sm text-parchment">Payment note</span>
+          <input
+            type="text"
+            value={draft.paymentNote}
+            onChange={(event) => set("paymentNote")(event.target.value)}
+            placeholder="e.g. PayID sent once you message me — never pay before we agree details"
+            className={inputClass}
+            maxLength={300}
+          />
+        </label>
+      </fieldset>
+
+      <div className="flex flex-wrap gap-2">
+        <Button type="submit" disabled={submitting || !draftIsValid(draft)}>
           {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {submitLabel}
         </Button>
@@ -261,18 +423,59 @@ function ProductForm({
   );
 }
 
+/** Visual slot meter: free slots in sun, rented/granted extras in mercury. */
+function SlotPips({ used, limit }: { used: number; limit: number }) {
+  if (limit > 12) {
+    return (
+      <span className="font-mono text-sm text-parchment">
+        {used} of {limit} slots used
+      </span>
+    );
+  }
+  return (
+    <span
+      className="flex flex-wrap items-center gap-1.5"
+      aria-label={`${used} of ${limit} slots used`}
+    >
+      {Array.from({ length: limit }, (_, index) => {
+        const isExtra = index >= FREE_PRODUCT_SLOTS;
+        const filled = index < used;
+        return (
+          <span
+            key={index}
+            title={isExtra ? "Extra slot" : "Free slot"}
+            className={cn(
+              "h-3.5 w-3.5 rounded-sm border",
+              filled
+                ? isExtra
+                  ? "border-mercury bg-mercury/70"
+                  : "border-sun bg-sun/70"
+                : isExtra
+                  ? "border-mercury/40 bg-transparent"
+                  : "border-sun/40 bg-transparent"
+            )}
+          />
+        );
+      })}
+    </span>
+  );
+}
+
 /**
- * Mesh Store — the member's builder workspace: application status, listing
- * details, and the product shelf shown publicly at /store#builders.
+ * Mesh Store — the member's builder workspace: application status, shelf
+ * plan (slots + pricing), listing details, and the product shelf shown
+ * publicly at /store.
  */
 export function MeshStorePanel() {
   const { toast } = useToast();
   const [builder, setBuilder] = useState<MeshBuilder | null>(null);
+  const [slotRequestPending, setSlotRequestPending] = useState(false);
   const [loading, setLoading] = useState(true);
   const [editingDetails, setEditingDetails] = useState(false);
   const [editingProduct, setEditingProduct] = useState<string | null>(null);
   const [addingProduct, setAddingProduct] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [requestingSlot, setRequestingSlot] = useState(false);
   const [details, setDetails] = useState({
     businessName: "",
     suburb: "",
@@ -282,13 +485,16 @@ export function MeshStorePanel() {
 
   const load = useCallback(async () => {
     try {
-      const res = await fetch("/api/v1/store/builders/mine");
-      if (res.status === 404) {
+      const [builderRes, supportRes] = await Promise.all([
+        fetch("/api/v1/store/builders/mine"),
+        fetch("/api/v1/support"),
+      ]);
+      if (builderRes.status === 404) {
         setBuilder(null);
         return;
       }
-      if (!res.ok) throw new Error("Your builder record could not be loaded");
-      const data = await res.json();
+      if (!builderRes.ok) throw new Error("Your builder record could not be loaded");
+      const data = await builderRes.json();
       setBuilder(data.builder ?? null);
       if (data.builder) {
         setDetails({
@@ -297,6 +503,16 @@ export function MeshStorePanel() {
           website: data.builder.website ?? "",
           description: data.builder.description,
         });
+      }
+      if (supportRes.ok) {
+        const support = await supportRes.json();
+        setSlotRequestPending(
+          (support.requests ?? []).some(
+            (request: { subject: string; status: string }) =>
+              request.subject === "mesh_store" &&
+              (request.status === "open" || request.status === "in_progress")
+          )
+        );
       }
     } catch (err) {
       toast(
@@ -350,6 +566,12 @@ export function MeshStorePanel() {
         priceAud: draft.price === "" ? null : Number(draft.price),
         stockStatus: draft.stockStatus,
         buyUrl: draft.buyUrl || null,
+        offerPostage: draft.offerPostage,
+        postageAud: !draft.offerPostage || draft.postage === "" ? null : Number(draft.postage),
+        localPickup: draft.localPickup,
+        postageNote: draft.postageNote || null,
+        paymentTerms: draft.paymentTerms,
+        paymentNote: draft.paymentNote || null,
       };
       const res = await fetch(
         productId ? `/api/v1/store/products/${productId}` : "/api/v1/store/products",
@@ -361,7 +583,7 @@ export function MeshStorePanel() {
       );
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || "Save failed");
-      toast(productId ? "Product updated" : "Product added to your shelf", "success");
+      toast(productId ? "Listing updated" : "Listing added to your shelf", "success");
       setAddingProduct(false);
       setEditingProduct(null);
       await load();
@@ -379,10 +601,34 @@ export function MeshStorePanel() {
     try {
       const res = await fetch(`/api/v1/store/products/${product.id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Delete failed");
-      toast("Product removed", "success");
+      toast("Listing removed", "success");
       await load();
     } catch (err) {
       toast(err instanceof Error ? err.message : "Delete failed", "error");
+    }
+  }
+
+  async function requestExtraSlot() {
+    if (!builder) return;
+    setRequestingSlot(true);
+    try {
+      const limit = builder.slotLimit ?? FREE_PRODUCT_SLOTS;
+      const res = await fetch("/api/v1/support", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subject: "mesh_store",
+          message: `Extra product slot request — ${builder.businessName} is using ${builder.products.length} of ${limit} shelf slots and wants to list more. (Pilot: grant via admin → mesh store → adjust extra slots.)`,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Request failed — try again");
+      setSlotRequestPending(true);
+      toast("Slot request sent — we switch extras on manually during the pilot", "success");
+    } catch (err) {
+      toast(err instanceof Error ? err.message : "Request failed — try again", "error");
+    } finally {
+      setRequestingSlot(false);
     }
   }
 
@@ -411,6 +657,9 @@ export function MeshStorePanel() {
   }
 
   const status = STATUS_UI[builder.status] ?? STATUS_UI.pending;
+  const slotLimit = builder.slotLimit ?? FREE_PRODUCT_SLOTS;
+  const used = builder.products.length;
+  const shelfFull = used >= slotLimit;
 
   return (
     <div className="space-y-6">
@@ -437,11 +686,65 @@ export function MeshStorePanel() {
         )}
         {builder.status === "approved" && (
           <Link
-            href="/store#builders"
+            href="/store#shop"
             className="mt-3 inline-block text-sm text-mercury underline-offset-4 hover:underline"
           >
             View your live shelf in the store →
           </Link>
+        )}
+      </div>
+
+      {/* Shelf plan — slots + pricing, always visible */}
+      <div className="vessel p-5 md:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h3 className="text-lg font-medium text-gold">Shelf plan</h3>
+          <SlotPips used={used} limit={slotLimit} />
+        </div>
+        <p className="mt-1 font-mono text-xs text-ash">
+          {used} of {slotLimit} slots used
+          {slotLimit > FREE_PRODUCT_SLOTS
+            ? ` (${slotLimit - FREE_PRODUCT_SLOTS} extra granted)`
+            : ""}
+        </p>
+        <div className="mt-3 grid gap-3 text-sm leading-relaxed text-ash sm:grid-cols-2">
+          <p className="rounded-md border border-sun/25 bg-sun/[0.04] px-3 py-2.5">
+            <span className="font-medium text-sun">{FREE_PRODUCT_SLOTS} slots free</span> with every
+            builder account — list your main products at no cost, forever.
+          </p>
+          <p className="rounded-md border border-mercury/25 bg-mercury/[0.04] px-3 py-2.5">
+            <span className="font-medium text-mercury">
+              Extra slots AU${EXTRA_SLOT_MONTHLY_AUD}/month each
+            </span>{" "}
+            when slot rentals launch — <span className="text-parchment">free during the pilot</span>
+            , just ask.
+          </p>
+        </div>
+
+        {shelfFull && builder.status === "approved" && (
+          <div className="mt-4 rounded-lg border border-sun/30 bg-sun/[0.05] p-4">
+            <p className="text-[15px] font-medium text-gold">Your shelf is full</p>
+            <p className="mt-1 text-sm leading-relaxed text-ash">
+              You&apos;re using all {slotLimit} slots. Need room for another product? Request an
+              extra slot — AU${EXTRA_SLOT_MONTHLY_AUD}/month once rentals launch,{" "}
+              <span className="text-parchment">free while the pilot runs</span>.
+            </p>
+            {slotRequestPending ? (
+              <p className="mt-3 flex items-center gap-2 text-sm text-ok">
+                <CheckCircle2 className="h-4 w-4" /> Slot request received — we switch extras on
+                manually during the pilot, usually within a day. Track it in Support &amp; Report.
+              </p>
+            ) : (
+              <Button
+                size="sm"
+                className="mt-3"
+                onClick={requestExtraSlot}
+                disabled={requestingSlot}
+              >
+                {requestingSlot && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Plus className="mr-2 h-4 w-4" /> Request an extra slot
+              </Button>
+            )}
+          </div>
         )}
       </div>
 
@@ -540,28 +843,13 @@ export function MeshStorePanel() {
       {/* Product shelf */}
       <div className="vessel p-5 md:p-6">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-          <h3 className="text-lg font-medium text-gold">
-            Product shelf
-            <span className="ml-2 text-sm font-normal text-ash">
-              {builder.products.length} of {builder.slotLimit ?? 3} slots used
-            </span>
-          </h3>
-          {builder.status === "approved" &&
-            !addingProduct &&
-            builder.products.length < (builder.slotLimit ?? 3) && (
-              <Button size="sm" onClick={() => setAddingProduct(true)}>
-                <Plus className="mr-2 h-4 w-4" /> Add product
-              </Button>
-            )}
+          <h3 className="text-lg font-medium text-gold">Product shelf</h3>
+          {builder.status === "approved" && !addingProduct && !shelfFull && (
+            <Button size="sm" onClick={() => setAddingProduct(true)}>
+              <Plus className="mr-2 h-4 w-4" /> Add product
+            </Button>
+          )}
         </div>
-
-        {builder.status === "approved" && builder.products.length >= (builder.slotLimit ?? 3) && (
-          <p className="mb-4 rounded-md border border-sun/25 bg-sun/[0.04] px-4 py-3 text-sm text-ash">
-            Shelf full — {builder.slotLimit ?? 3} of {builder.slotLimit ?? 3} slots used. Extra
-            slots open up when slot rentals launch; message support if you need more during the
-            pilot.
-          </p>
-        )}
 
         {builder.status !== "approved" && (
           <p className="mb-4 rounded-md border border-dashed border-line px-4 py-3 text-sm text-ash">
@@ -595,7 +883,7 @@ export function MeshStorePanel() {
                     onSubmit={(draft) => submitProduct(draft, product.id)}
                     onCancel={() => setEditingProduct(null)}
                     submitting={submitting}
-                    submitLabel="Save product"
+                    submitLabel="Save listing"
                   />
                 ) : (
                   <div className="flex flex-wrap items-start justify-between gap-3">
@@ -608,9 +896,32 @@ export function MeshStorePanel() {
                           : `AU$${(product.priceAudCents / 100).toFixed(2)}`}{" "}
                         · {product.stockStatus.replace(/_/g, " ")}
                       </p>
+                      <p className="mt-1 text-xs text-mercury/90">
+                        {deliverySummary(product, builder.suburb)}
+                      </p>
+                      {product.paymentTerms.length > 0 && (
+                        <p className="mt-1.5 flex flex-wrap gap-1.5">
+                          {product.paymentTerms.map((term) => (
+                            <span
+                              key={term}
+                              className="rounded-full border border-line bg-inset px-2 py-0.5 text-[11px] text-parchment"
+                            >
+                              {paymentTermLabel(term)}
+                            </span>
+                          ))}
+                        </p>
+                      )}
                       <p className="mt-1.5 line-clamp-2 text-sm text-ash">{product.description}</p>
                     </div>
-                    <div className="flex shrink-0 gap-1.5">
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      {builder.status === "approved" && (
+                        <Button asChild size="sm" variant="ghost">
+                          <Link href={`/store/product/${product.id}`}>
+                            <ExternalLink className="h-4 w-4" />
+                            <span className="sr-only">View {product.name} live</span>
+                          </Link>
+                        </Button>
+                      )}
                       <Button
                         size="sm"
                         variant="ghost"

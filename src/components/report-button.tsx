@@ -88,6 +88,8 @@ interface ReportButtonProps {
   /** Render as a bare inline trigger (for embedding inside sentences). */
   inline?: boolean;
   className?: string;
+  /** Prepended to the reporter's details so reviewers see the context (e.g. which listing). */
+  detailsPrefix?: string;
 }
 
 /**
@@ -95,7 +97,13 @@ interface ReportButtonProps {
  * (POST /api/v1/reports). Requires mobile-verified participation —
  * a 403 funnels the user to verify instead of failing silently.
  */
-export function ReportButton({ targetType, targetId, inline, className }: ReportButtonProps) {
+export function ReportButton({
+  targetType,
+  targetId,
+  inline,
+  className,
+  detailsPrefix,
+}: ReportButtonProps) {
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState<string>("scam");
   const [details, setDetails] = useState("");
@@ -107,6 +115,10 @@ export function ReportButton({ targetType, targetId, inline, className }: Report
     setSubmitting(true);
     setError(null);
     try {
+      const userDetails = details.trim();
+      const combined = detailsPrefix
+        ? `${detailsPrefix}${userDetails ? ` — ${userDetails}` : ""}`
+        : userDetails || undefined;
       const res = await fetch("/api/v1/reports", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -114,7 +126,7 @@ export function ReportButton({ targetType, targetId, inline, className }: Report
           targetType,
           targetId,
           reason,
-          details: details.trim() || undefined,
+          details: combined,
         }),
       });
       if (res.ok) {

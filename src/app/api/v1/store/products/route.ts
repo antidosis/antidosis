@@ -95,6 +95,15 @@ export const POST = withApiHandler(async (req: NextRequest) => {
           : Math.round(input.priceAud * 100),
       stockStatus: input.stockStatus,
       buyUrl: input.buyUrl ?? null,
+      offerPostage: input.offerPostage,
+      postageAudCents:
+        !input.offerPostage || input.postageAud === null || input.postageAud === undefined
+          ? null
+          : Math.round(input.postageAud * 100),
+      localPickup: input.localPickup,
+      postageNote: input.postageNote ? sanitizePlainText(input.postageNote) : null,
+      paymentTerms: input.paymentTerms,
+      paymentNote: input.paymentNote ? sanitizePlainText(input.paymentNote) : null,
     },
   });
 

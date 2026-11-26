@@ -40,6 +40,7 @@ interface ReportItem {
 const SUBJECT_OPTIONS = [
   { value: "account", label: "Account & sign-in" },
   { value: "payment_or_billing", label: "Payments & billing" },
+  { value: "mesh_store", label: "Mesh store & selling" },
   { value: "safety_report", label: "Safety concern" },
   { value: "technical_issue", label: "Something is broken" },
   { value: "other", label: "Something else" },

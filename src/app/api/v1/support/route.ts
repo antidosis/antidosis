@@ -13,6 +13,7 @@ const SUBJECTS = [
   "payment_or_billing",
   "safety_report",
   "technical_issue",
+  "mesh_store",
   "other",
 ] as const;
 

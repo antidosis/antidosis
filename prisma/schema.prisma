@@ -748,24 +748,33 @@ model MeshBuilder {
 }
 
 model MeshProduct {
-  id            String    @id @default(uuid())
-  builderId     String    @map("builder_id")
-  name          String
+  id              String    @id @default(uuid())
+  builderId       String    @map("builder_id")
+  name            String
   // "node" | "kit" | "gateway" | "board" | "antenna" | "power" | "enclosure" | "accessory"
-  category      String
-  description   String
+  category        String
+  description     String
   // board / antenna / battery / enclosure - free text, shown verbatim
-  specs         String?
+  specs           String?
   // null = price on application
-  priceAudCents Int?      @map("price_aud_cents")
+  priceAudCents   Int?      @map("price_aud_cents")
   // "in_stock" | "made_to_order" | "out_of_stock"
-  stockStatus   String    @default("in_stock") @map("stock_status")
+  stockStatus     String    @default("in_stock") @map("stock_status")
   // Builder's own checkout (Etsy/eBay/own site) - validated against link policy
-  buyUrl        String?   @map("buy_url")
+  buyUrl          String?   @map("buy_url")
+  // Delivery — a listing must offer postage and/or local pickup
+  offerPostage    Boolean   @default(false) @map("offer_postage")
+  // Flat postage in cents: 0 = free postage, null = worked out in chat
+  postageAudCents Int?      @map("postage_aud_cents")
+  localPickup     Boolean   @default(false) @map("local_pickup")
+  postageNote     String?   @map("postage_note")
+  // Preset payment terms: bank_transfer | payid | cash_on_pickup | card_checkout
+  paymentTerms    String[]  @default([]) @map("payment_terms")
+  paymentNote     String?   @map("payment_note")
   // Featured placement rental - pinned to the top of the store floor until this time
-  featuredUntil DateTime? @map("featured_until")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
+  featuredUntil   DateTime? @map("featured_until")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
 
   builder MeshBuilder @relation(fields: [builderId], references: [id], onDelete: Cascade)
 
