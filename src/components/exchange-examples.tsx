@@ -61,7 +61,7 @@ export function ExchangeExamples() {
           href="/examples"
           className="text-xs text-ash hover:text-sun transition-colors inline-flex items-center gap-1.5 font-mono"
         >
-          Explore 90+ illustrative exchanges <ArrowRight className="h-3 w-3" />
+          Explore 300+ illustrative exchanges <ArrowRight className="h-3 w-3" />
         </Link>
       </div>
     </div>
