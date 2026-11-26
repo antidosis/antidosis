@@ -20,6 +20,7 @@ import { CredentialsSection } from "./credentials-section";
 import { DirectorySlotsSection } from "./directory-slots-section";
 import { AboutSection } from "./profile-editor/about-section";
 import { BusinessContactSection } from "./profile-editor/business-contact-section";
+import { DirectoryBioSection } from "./profile-editor/directory-bio-section";
 import { IdentitySection } from "./profile-editor/identity-section";
 import { KnowledgeBox } from "./profile-editor/knowledge-box";
 import { PreferencesSection } from "./profile-editor/preferences-section";
@@ -64,6 +65,7 @@ function toFormValues(profile: EditorProfile): ProfileFormData {
   return {
     fullName: profile.fullName ?? undefined,
     bio: profile.bio ?? undefined,
+    directoryBio: profile.directoryBio ?? undefined,
     avatarUrl: profile.avatarUrl ?? undefined,
     locationName: profile.locationName ?? undefined,
     publicPhone: profile.publicPhone ?? undefined,
@@ -410,6 +412,7 @@ export function ProfileSection({
               discovered and filtered by; listings are business listings, so an ABN is required.
               Your personal phone and personal socials stay out of it.
             </KnowledgeBox>
+            <DirectoryBioSection register={register} error={errors.directoryBio?.message} />
             <DirectorySlotsSection onSlotChange={handleSlotChange} />
             <PreferencesSection
               register={register}

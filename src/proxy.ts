@@ -106,7 +106,8 @@ export async function proxy(request: NextRequest) {
         { status: 403 }
       );
     }
-    return NextResponse.redirect(new URL("/verify-email", request.url));
+    const next = encodeURIComponent(pathname + request.nextUrl.search);
+    return NextResponse.redirect(new URL(`/verify-email?next=${next}`, request.url));
   }
 
   return response;

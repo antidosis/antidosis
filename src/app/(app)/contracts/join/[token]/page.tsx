@@ -7,6 +7,7 @@ import { useParams, useRouter } from "next/navigation";
 
 import { ArrowRight, Check, Loader2, LockKeyhole, ShieldCheck } from "lucide-react";
 
+import { InlineMobileVerify } from "@/components/inline-mobile-verify";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
@@ -29,7 +30,19 @@ export default function ContractInvitationPage() {
   const [loading, setLoading] = useState(true);
   const [accepting, setAccepting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [needsVerification, setNeedsVerification] = useState(false);
   const next = `/contracts/join/${token}`;
+
+  // Remember this invitation through signup/login even if a `next` param is
+  // dropped along the way (email clients, verification bounces).
+  useEffect(() => {
+    try {
+      sessionStorage.setItem("antidosis-pending-invite", next);
+    } catch {
+      /* ignore */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -54,6 +67,11 @@ export default function ContractInvitationPage() {
       const response = await fetch(`/api/v1/contracts/invite/${token}`, { method: "POST" });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
+        if (response.status === 403 && data.code === "MOBILE_NOT_VERIFIED") {
+          // Verify right here instead of bouncing the member across the site.
+          setNeedsVerification(true);
+          return;
+        }
         setError(data.error || "Couldn't accept this invitation");
         return;
       }
@@ -157,10 +175,22 @@ export default function ContractInvitationPage() {
             ))}
           </ol>
 
-          {error && (
+          {error && !needsVerification && (
             <p className="mt-5 rounded border border-bad/30 bg-bad/5 p-3 text-sm text-bad">
               {error}
             </p>
+          )}
+
+          {needsVerification && (
+            <div className="mt-5">
+              <InlineMobileVerify
+                onVerified={() => {
+                  setNeedsVerification(false);
+                  setError(null);
+                  accept();
+                }}
+              />
+            </div>
           )}
 
           <div className="mt-6">

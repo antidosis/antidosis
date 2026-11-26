@@ -3,7 +3,8 @@ import { type NextRequest, NextResponse } from "next/server";
 import { withApiHandler } from "@/lib/api-handler";
 import { contractTitle } from "@/lib/direct-contract";
 import { logger } from "@/lib/logger";
-import { generateContractPdf } from "@/lib/pdf-contract";
+import { generateContractPdf, type ContractPdfData } from "@/lib/pdf-contract";
+// (ContractPdfData referenced via import below)
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { createSignedUrlOrFallback, PRIVATE_BUCKET } from "@/lib/storage";
@@ -108,14 +109,15 @@ export const POST = withApiHandler(
       );
     }
 
-    let terms: any = {};
+    let terms: ContractPdfData["terms"] = {};
     try {
       terms = JSON.parse(contract.terms);
     } catch {
       /* ignore */
     }
 
-    const negotiationMessages = (contract.negotiationMessages as any[]) || [];
+    const negotiationMessages =
+      (contract.negotiationMessages as ContractPdfData["negotiationMessages"]) || [];
 
     const pdfBytes = await generateContractPdf({
       contractId: contract.id,
@@ -158,7 +160,7 @@ export const POST = withApiHandler(
     // Upload PDF to the private storage bucket
     const serviceClient = createServiceClient();
     const fileName = `contracts/${contract.id}.pdf`;
-    const { data: uploadData, error: uploadError } = await serviceClient.storage
+    const { error: uploadError } = await serviceClient.storage
       .from(PRIVATE_BUCKET)
       .upload(fileName, pdfBytes, {
         contentType: "application/pdf",

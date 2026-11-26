@@ -43,7 +43,7 @@ vi.mock("@/lib/prisma", () => ({
       updateMany: (...args: unknown[]) => mockAcceptanceUpdateMany(...args),
     },
     $queryRaw: (...args: unknown[]) => mockQueryRaw(...args),
-    $transaction: (cb: any) => mockTransaction(cb),
+    $transaction: (cb: unknown) => mockTransaction(cb),
   },
 }));
 
@@ -179,7 +179,7 @@ function makeContract(overrides?: Record<string, unknown>) {
 describe("GET /api/v1/contracts/[id]", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockTransaction.mockImplementation(async (cb: any) => cb(mockTx));
+    mockTransaction.mockImplementation(async (cb: (tx: unknown) => Promise<unknown>) => cb(mockTx));
     mockRateLimit.mockResolvedValue({ allowed: true, remaining: 10, resetAt: Date.now() + 60_000 });
   });
 
@@ -315,7 +315,7 @@ describe("GET /api/v1/contracts/[id]", () => {
 describe("PATCH /api/v1/contracts/[id]", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockTransaction.mockImplementation(async (cb: any) => cb(mockTx));
+    mockTransaction.mockImplementation(async (cb: (tx: unknown) => Promise<unknown>) => cb(mockTx));
     mockRateLimit.mockResolvedValue({ allowed: true, remaining: 10, resetAt: Date.now() + 60_000 });
   });
 

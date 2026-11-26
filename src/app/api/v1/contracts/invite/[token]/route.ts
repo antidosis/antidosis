@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import { withApiHandler } from "@/lib/api-handler";
+import { logContractEvent } from "@/lib/contract-events";
 import { hashInviteToken } from "@/lib/invite-token";
 import { createNotification } from "@/lib/notifications";
 import { requireVerifiedParticipation } from "@/lib/participation";
@@ -143,6 +144,15 @@ export const POST = withApiHandler(
       body: `Your invitation for "${contract.title}" has been accepted. You can now review and finalise the terms together.`,
       data: { contractId: contract.id },
     }).catch(() => undefined);
+
+    await logContractEvent({
+      contractId: contract.id,
+      actorId: participation.profileId,
+      action: "invite_claimed",
+      detail: { inviteEmail: contract.inviteEmail ?? null },
+      statusBefore: "draft",
+      statusAfter: "draft",
+    });
 
     return NextResponse.json({ contractId: contract.id });
   }

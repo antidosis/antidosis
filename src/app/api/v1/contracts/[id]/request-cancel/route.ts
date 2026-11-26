@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { withApiHandler } from "@/lib/api-handler";
 import { auditLog, getClientInfo } from "@/lib/audit";
+import { logContractEvent } from "@/lib/contract-events";
 import { contractTitle } from "@/lib/direct-contract";
 import { createNotification } from "@/lib/notifications";
 import { requireActiveAccount } from "@/lib/participation";
@@ -123,6 +124,15 @@ export const POST = withApiHandler(
     });
 
     // Notify the other party
+    await logContractEvent({
+      contractId: contract.id,
+      actorId: profile.id,
+      action: "cancel_requested",
+      detail: { isPartyA, reason: reason || null },
+      statusBefore: contract.status,
+      statusAfter: contract.status,
+    });
+
     const otherParty = isPartyA ? contract.partyB : contract.partyA;
     await createNotification({
       userId: otherParty.id,

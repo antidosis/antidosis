@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { withApiHandler } from "@/lib/api-handler";
 import { auditLog, getClientInfo } from "@/lib/audit";
+import { logContractEvent } from "@/lib/contract-events";
 import { contractTitle } from "@/lib/direct-contract";
 import { createNotification } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
@@ -109,6 +110,15 @@ export const POST = withApiHandler(
       userAgent,
       path: `/api/v1/admin/contracts/${params.id}/force-cancel`,
       metadata: { contractId: params.id },
+    });
+
+    await logContractEvent({
+      contractId: params.id,
+      actorId: null,
+      action: "force_cancelled",
+      detail: { adminUserId: auth.user!.id },
+      statusBefore: "cancel_requested",
+      statusAfter: updatedContract?.status ?? "cancelled",
     });
 
     return NextResponse.json({ contract: updatedContract });

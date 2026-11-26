@@ -30,7 +30,7 @@ vi.mock("@/lib/prisma", () => ({
     contract: {
       findUnique: (...args: unknown[]) => mockContractFindUnique(...args),
     },
-    $transaction: (cb: any) => mockTransaction(cb),
+    $transaction: (cb: unknown) => mockTransaction(cb),
   },
 }));
 
@@ -60,7 +60,7 @@ function makeRequest(url: string): NextRequest {
 describe("POST /api/v1/admin/contracts/[id]/force-cancel", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockTransaction.mockImplementation(async (cb: any) => cb(mockTx));
+    mockTransaction.mockImplementation(async (cb: (tx: unknown) => Promise<unknown>) => cb(mockTx));
   });
 
   it("returns 401 when not admin", async () => {

@@ -12,6 +12,7 @@ const profile: EditorProfile = {
   id: "profile-1",
   fullName: "Original Name",
   bio: null,
+  directoryBio: null,
   avatarUrl: null,
   locationName: "terrigal_2260",
   publicPhone: null,

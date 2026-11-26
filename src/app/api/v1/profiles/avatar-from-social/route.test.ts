@@ -2,6 +2,8 @@ import { type NextRequest } from "next/server";
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+import type * as socialAvatar from "@/lib/social-avatar";
+
 import { POST } from "./route";
 
 const mockGetUser = vi.fn();
@@ -28,9 +30,10 @@ vi.mock("@/lib/supabase/service", () => ({
 }));
 
 const mockFetchOgImage = vi.fn();
+
 const mockFetchImage = vi.fn();
 vi.mock("@/lib/social-avatar", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/lib/social-avatar")>();
+  const actual = await importOriginal<typeof socialAvatar>();
   return {
     ...actual,
     fetchOgImage: (...a: unknown[]) => mockFetchOgImage(...a),

@@ -39,6 +39,28 @@ const ebGaramond = EB_Garamond({
 /** Click-to-insert clause starters — plain-language terms that cover the
  * deals the platform actually sees. Clicking appends a bullet to the terms
  * box; members edit the [brackets] to fit. */
+const EVENT_LABELS: Record<string, string> = {
+  created: "Contract created",
+  invited: "Invitation link created",
+  invite_claimed: "Invitation accepted",
+  terms_updated: "Terms updated",
+  terms_submitted: "Terms submitted for review",
+  terms_agreed: "Terms agreed",
+  terms_rejected: "Terms rejected",
+  terms_locked: "Terms locked",
+  signed: "Contract signed",
+  completion_marked: "Completion marked",
+  completed: "Contract completed",
+  cancel_requested: "Cancellation requested",
+  cancel_request_accepted: "Cancellation accepted",
+  cancel_request_declined: "Cancellation declined",
+  cancel_escalated: "Escalated to admin",
+  cancelled: "Contract cancelled",
+  force_cancelled: "Cancelled by admin",
+  reminder_sent: "Signature reminder sent",
+  review_submitted: "Review submitted",
+};
+
 const CLAUSE_PRESETS: { group: string; clauses: string[] }[] = [
   {
     group: "Payment",
@@ -164,6 +186,15 @@ type ContractData = {
     receiverId: string;
     rating: number;
     comment: string | null;
+  }[];
+  events: {
+    id: string;
+    action: string;
+    detail: Record<string, unknown> | null;
+    statusBefore: string | null;
+    statusAfter: string | null;
+    createdAt: string;
+    actor: { id: string; fullName: string | null } | null;
   }[];
   negotiationMessages: Array<{
     senderName: string | null;
@@ -711,6 +742,62 @@ export default function ContractPage() {
           itself prove identity or guarantee enforceability.
         </div>
 
+        {/* Full audit trail — every action on this contract, timestamped */}
+        {contract.events.length > 0 && (
+          <details className="contract-page vessel rounded-lg p-5 print-hidden group">
+            <summary className="flex cursor-pointer list-none items-center justify-between">
+              <span>
+                <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-mercury">
+                  Audit log
+                </span>
+                <span className="ml-2 text-xs text-ash">
+                  {contract.events.length} recorded event{contract.events.length !== 1 ? "s" : ""}—
+                  every action timestamped
+                </span>
+              </span>
+              <span className="text-xs text-ash transition-transform group-open:rotate-180">▾</span>
+            </summary>
+            <ol className="mt-4 space-y-0">
+              {contract.events.map((event, index) => (
+                <li key={event.id} className="relative flex gap-3 pb-4 text-sm last:pb-0">
+                  {index < contract.events.length - 1 && (
+                    <span className="absolute left-[5px] top-4 h-full w-px bg-line/60" />
+                  )}
+                  <span className="mt-1.5 h-[11px] w-[11px] shrink-0 rounded-full border-2 border-sun bg-void" />
+                  <div className="min-w-0">
+                    <p className="text-parchment">
+                      <span className="font-medium text-gold">
+                        {EVENT_LABELS[event.action] || event.action}
+                      </span>{" "}
+                      <span className="text-ash">
+                        {event.actor?.fullName || "Antidosis system"}
+                      </span>
+                    </p>
+                    <p className="font-mono text-[11px] text-ash">
+                      {new Date(event.createdAt).toLocaleString("en-AU", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                        hour12: false,
+                      })}
+                      {event.statusBefore &&
+                        event.statusAfter &&
+                        event.statusBefore !== event.statusAfter && (
+                          <span className="ml-2 text-mercury">
+                            {event.statusBefore} → {event.statusAfter}
+                          </span>
+                        )}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </details>
+        )}
+
         {/* Cancelled banner */}
         {contract.status === "cancelled" && (
           <div className="contract-page p-4 print-hidden border-l-2 border-l-bad bg-bad/5">
@@ -1007,16 +1094,21 @@ export default function ContractPage() {
                           </div>
                         </>
                       )}
-                      <div className="flex gap-2 mt-3">
-                        <Button onClick={saveTerms} disabled={savingTerms} size="sm">
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        <Button
+                          onClick={saveTerms}
+                          disabled={savingTerms}
+                          size="sm"
+                          className="flex-1 sm:flex-none"
+                        >
                           {savingTerms ? "Saving..." : "Save Terms"}
                         </Button>
                         <Button
                           onClick={submitTerms}
                           disabled={submittingTerms || (!useMessageTerms && !myTerms.trim())}
-                          className="bg-bad hover:bg-bad text-white border-bad shadow-lg shadow-bad/30 font-semibold px-4"
+                          className="bg-bad hover:bg-bad text-white border-bad shadow-lg shadow-bad/30 font-semibold px-4 flex-1 sm:flex-none"
                         >
-                          <Send className="h-4 w-4 mr-2" />
+                          <Send className="h-4 w-4 mr-2 shrink-0" />
                           {submittingTerms ? "Submitting..." : "Submit for Review"}
                         </Button>
                       </div>

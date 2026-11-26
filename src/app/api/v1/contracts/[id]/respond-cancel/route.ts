@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { withApiHandler } from "@/lib/api-handler";
 import { auditLog, getClientInfo } from "@/lib/audit";
+import { logContractEvent } from "@/lib/contract-events";
 import { contractTitle } from "@/lib/direct-contract";
 import { createNotification } from "@/lib/notifications";
 import { requireActiveAccount } from "@/lib/participation";
@@ -181,6 +182,15 @@ export const POST = withApiHandler(
         metadata: { contractId: params.id, agreed: true },
       });
 
+      await logContractEvent({
+        contractId: contract.id,
+        actorId: profile.id,
+        action: "cancel_request_accepted",
+        detail: { isPartyA },
+        statusBefore: contract.status,
+        statusAfter: updatedContract?.status ?? "cancelled",
+      });
+
       return NextResponse.json({ contract: updatedContract });
     } else {
       // Decline the cancellation request
@@ -210,6 +220,15 @@ export const POST = withApiHandler(
         userAgent,
         path: `/api/v1/contracts/${params.id}/respond-cancel`,
         metadata: { contractId: params.id, agreed: false },
+      });
+
+      await logContractEvent({
+        contractId: contract.id,
+        actorId: profile.id,
+        action: "cancel_request_declined",
+        detail: { isPartyA },
+        statusBefore: contract.status,
+        statusAfter: contract.status,
       });
 
       return NextResponse.json({ contract: updatedContract });

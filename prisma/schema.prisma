@@ -14,6 +14,7 @@ model Profile {
   handle                 String?   @unique
   fullName               String?   @map("full_name")
   bio                    String?
+  directoryBio           String?               @map("directory_bio")
   avatarUrl              String?   @map("avatar_url")
   locationName           String?   @map("location_name")
   latitude               Float?
@@ -63,6 +64,7 @@ model Profile {
   acceptances      Acceptance[]
   contractsAsA     Contract[]            @relation("ContractPartyA")
   contractsAsB     Contract[]            @relation("ContractPartyB")
+  contractEvents   ContractEvent[]
   reviewsGiven     Review[]              @relation("ReviewGiver")
   reviewsReceived  Review[]              @relation("ReviewReceiver")
   messages         Message[]
@@ -245,6 +247,7 @@ model Contract {
   partyB   Profile?  @relation("ContractPartyB", fields: [partyBId], references: [id], onDelete: Cascade)
   messages Message[]
   reviews  Review[]
+  events   ContractEvent[]
 
   @@index([needId])
   @@index([partyAId])
@@ -252,6 +255,25 @@ model Contract {
   @@index([status])
   @@index([kind, createdAt])
   @@map("contracts")
+}
+
+// Append-only contract audit trail. One row per state change or action,
+// written autonomously at every mutation point. Never updated, never deleted
+// (except with the contract itself).
+model ContractEvent {
+  id           String    @id @default(uuid())
+  contractId   String    @map("contract_id")
+  contract     Contract  @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  actorId      String?   @map("actor_id")
+  actor        Profile?  @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action       String
+  detail       Json?
+  statusBefore String?   @map("status_before")
+  statusAfter  String?   @map("status_after")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  @@index([contractId, createdAt])
+  @@map("contract_events")
 }
 
 model NeedMessage {

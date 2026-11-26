@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import { withApiHandler } from "@/lib/api-handler";
+import { logContractEvent } from "@/lib/contract-events";
 import { contractTitle } from "@/lib/direct-contract";
 import { sendContractSignReminderEmail } from "@/lib/email";
 import { createNotification } from "@/lib/notifications";
@@ -110,6 +111,15 @@ export const POST = withApiHandler(
       title: "Reminder: sign contract",
       body: `${profile.fullName || "The other party"} is waiting for you to sign the contract for "${contractTitle(contract)}"`,
       data: { contractId: contract.id, needId: contract.needId },
+    });
+
+    await logContractEvent({
+      contractId: contract.id,
+      actorId: profile.id,
+      action: "reminder_sent",
+      detail: { recipientId: otherParty.id },
+      statusBefore: contract.status,
+      statusAfter: contract.status,
     });
 
     return NextResponse.json({ success: true });

@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-export const GET = withApiHandler(async (req: NextRequest) => {
+export const GET = withApiHandler(async (_req: NextRequest) => {
   const supabase = await createClient();
   const {
     data: { user },

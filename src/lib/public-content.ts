@@ -144,7 +144,8 @@ export interface DirectoryProfile {
   id: string;
   fullName: string | null;
   avatarUrl: string | null;
-  bio: string | null;
+  /** The listing's own description — never the personal profile bio. */
+  directoryBio: string | null;
   locationName: string | null;
   publicPhone: string | null;
   businessPhone: string | null;
@@ -206,7 +207,7 @@ export async function getDirectoryProfiles(
       id: true,
       fullName: true,
       avatarUrl: true,
-      bio: true,
+      directoryBio: true,
       locationName: true,
       publicPhone: true,
       businessPhone: true,
@@ -256,7 +257,7 @@ export async function getDirectoryProfile(id: string): Promise<DirectoryProfile 
       id: true,
       fullName: true,
       avatarUrl: true,
-      bio: true,
+      directoryBio: true,
       locationName: true,
       publicPhone: true,
       businessPhone: true,

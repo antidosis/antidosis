@@ -220,7 +220,7 @@ export default function ListingPage() {
           <section className="vessel rounded-lg p-6">
             <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-mercury">About</p>
             <p className="mt-4 whitespace-pre-line text-base leading-relaxed text-parchment">
-              {listing.bio || "This listing has no introduction yet."}
+              {listing.directoryBio || "This listing has no introduction yet."}
             </p>
             {listing.skills.length > 0 && (
               <div className="mt-6 border-t border-line/60 pt-5">

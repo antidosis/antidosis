@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { randomBytes } from "node:crypto";
 
 import { withApiHandler } from "@/lib/api-handler";
+import { logContractEvent } from "@/lib/contract-events";
 import { hashInviteToken } from "@/lib/invite-token";
 import { requireVerifiedParticipation } from "@/lib/participation";
 import { prisma } from "@/lib/prisma";
@@ -61,6 +62,19 @@ export const POST = withApiHandler(async (req: NextRequest) => {
       status: "draft",
     },
     select: { id: true, title: true, status: true, createdAt: true },
+  });
+
+  await logContractEvent({
+    contractId: contract.id,
+    actorId: participation.profileId,
+    action: "created",
+    detail: {
+      source: "direct_agreement",
+      title: parsed.data.title,
+      inviteEmail: parsed.data.inviteEmail ?? null,
+    },
+    statusBefore: null,
+    statusAfter: contract.status,
   });
 
   const origin = process.env.NEXT_PUBLIC_APP_URL || req.nextUrl.origin;

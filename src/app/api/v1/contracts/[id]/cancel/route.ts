@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { withApiHandler } from "@/lib/api-handler";
 import { auditLog, getClientInfo } from "@/lib/audit";
+import { logContractEvent } from "@/lib/contract-events";
 import { requireActiveAccount } from "@/lib/participation";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
@@ -160,6 +161,15 @@ export const POST = withApiHandler(
       userAgent,
       path: `/api/v1/contracts/${params.id}/cancel`,
       metadata: { contractId: params.id, cancelReason },
+    });
+
+    await logContractEvent({
+      contractId: contract.id,
+      actorId: profile.id,
+      action: "cancelled",
+      detail: { cancelledById: profile.id, cancelReason: cancelReason || null },
+      statusBefore: contract.status,
+      statusAfter: updatedContract?.status ?? "cancelled",
     });
 
     return NextResponse.json({ contract: updatedContract });

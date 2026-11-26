@@ -7,10 +7,6 @@ import { POST } from "./route";
 // ─── Prisma mocks ───
 const mockProfileFindUnique = vi.fn();
 const mockContractFindUnique = vi.fn();
-const mockContractUpdate = vi.fn();
-const mockNeedUpdate = vi.fn();
-const mockAcceptanceUpdate = vi.fn();
-const mockAcceptanceUpdateMany = vi.fn();
 const mockTransaction = vi.fn();
 
 const mockTx = {
@@ -34,7 +30,7 @@ vi.mock("@/lib/prisma", () => ({
     contract: {
       findUnique: (...args: unknown[]) => mockContractFindUnique(...args),
     },
-    $transaction: (cb: any) => mockTransaction(cb),
+    $transaction: (cb: unknown) => mockTransaction(cb),
   },
 }));
 
@@ -110,7 +106,7 @@ function makeContract(overrides?: Record<string, unknown>) {
 describe("POST /api/v1/contracts/[id]/cancel", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockTransaction.mockImplementation(async (cb: any) => cb(mockTx));
+    mockTransaction.mockImplementation(async (cb: (tx: unknown) => Promise<unknown>) => cb(mockTx));
     mockRateLimit.mockResolvedValue({ allowed: true, remaining: 10, resetAt: Date.now() + 60_000 });
     mockGetClientInfo.mockReturnValue({ ip: "127.0.0.1", userAgent: "test-agent" });
   });

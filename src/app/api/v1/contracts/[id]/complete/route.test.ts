@@ -30,7 +30,7 @@ vi.mock("@/lib/prisma", () => ({
     contract: {
       findUnique: (...args: unknown[]) => mockContractFindUnique(...args),
     },
-    $transaction: (cb: any) => mockTransaction(cb),
+    $transaction: (cb: unknown) => mockTransaction(cb),
   },
 }));
 
@@ -117,7 +117,7 @@ function makeContract(overrides?: Record<string, unknown>) {
 describe("POST /api/v1/contracts/[id]/complete", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockTransaction.mockImplementation(async (cb: any) => cb(mockTx));
+    mockTransaction.mockImplementation(async (cb: (tx: unknown) => Promise<unknown>) => cb(mockTx));
     mockRateLimit.mockResolvedValue({
       allowed: true,
       remaining: 10,

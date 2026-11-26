@@ -1,11 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import { withApiHandler } from "@/lib/api-handler";
+import { logContractEvent } from "@/lib/contract-events";
 import { presentContract } from "@/lib/contract-presenter";
 import { contractTitle } from "@/lib/direct-contract";
 import { logger } from "@/lib/logger";
 import { requireActiveAccount } from "@/lib/participation";
-import { generateContractPdf } from "@/lib/pdf-contract";
+import { generateContractPdf, type ContractPdfData } from "@/lib/pdf-contract";
+// (ContractPdfData referenced via import below)
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { resolveEntityId } from "@/lib/resolve-id";
@@ -117,6 +119,11 @@ export const GET = withApiHandler(
             createdAt: true,
           },
         },
+        events: {
+          orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+          take: 200,
+          include: { actor: { select: { id: true, fullName: true } } },
+        },
       },
     });
 
@@ -134,6 +141,7 @@ export const GET = withApiHandler(
       contract: {
         ...presentContract(contract),
         negotiationMessages: contract.negotiationMessages ?? [],
+        events: contract.events,
         pdfUrl: await createSignedUrlOrFallback(contract.pdfUrl),
       },
     });
@@ -201,6 +209,11 @@ export const PATCH = withApiHandler(
         },
         partyB: {
           select: { fullName: true, email: true, locationName: true, isVerified: true },
+        },
+        events: {
+          orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+          take: 200,
+          include: { actor: { select: { id: true, fullName: true } } },
         },
       },
     });
@@ -293,6 +306,18 @@ export const PATCH = withApiHandler(
         data: updateData,
       });
 
+      await logContractEvent({
+        contractId: contract.id,
+        actorId: profile.id,
+        action: "terms_updated",
+        detail: {
+          fields: Object.keys(updateData).filter((k) => k !== "status"),
+          isPartyA,
+        },
+        statusBefore: contract.status,
+        statusAfter: updated.status,
+      });
+
       return NextResponse.json({ contract: presentContract(updated) });
     }
 
@@ -319,6 +344,20 @@ export const PATCH = withApiHandler(
           partyAAgreedAt: null,
           partyBAgreedAt: null,
         },
+      });
+
+      await logContractEvent({
+        contractId: contract.id,
+        actorId: profile.id,
+        action: "terms_submitted",
+        detail: {
+          isPartyA,
+          useMessageTerms: isPartyA
+            ? contract.partyAUseMessageTerms
+            : contract.partyBUseMessageTerms,
+        },
+        statusBefore: contract.status,
+        statusAfter: updated.status,
       });
 
       return NextResponse.json({ contract: presentContract(updated) });
@@ -403,18 +442,38 @@ export const PATCH = withApiHandler(
         return await tx.contract.findUnique({ where: { id: params.id } });
       });
 
+      await logContractEvent({
+        contractId: contract.id,
+        actorId: profile.id,
+        action: "terms_agreed",
+        detail: { isPartyA },
+        statusBefore: contract.status,
+        statusAfter: updatedContract?.status ?? contract.status,
+      });
+      if (updatedContract?.termsLockedAt && !contract.termsLockedAt) {
+        await logContractEvent({
+          contractId: contract.id,
+          actorId: null,
+          action: "terms_locked",
+          detail: { reason: "both_parties_agreed" },
+          statusBefore: contract.status,
+          statusAfter: "pending_terms",
+        });
+      }
+
       // After transaction: if terms were just locked, generate PDF
       let finalContract = updatedContract;
       if (updatedContract?.termsLockedAt && !contract.termsLockedAt) {
         try {
-          let termsParsed: any = {};
+          let termsParsed: ContractPdfData["terms"] = {};
           try {
             termsParsed = JSON.parse(contract.terms);
           } catch {
             /* ignore */
           }
 
-          const negotiationMessages = (contract.negotiationMessages as any[]) || [];
+          const negotiationMessages =
+            (contract.negotiationMessages as ContractPdfData["negotiationMessages"]) || [];
 
           const pdfBytes = await generateContractPdf({
             contractId: contract.id,
@@ -483,6 +542,7 @@ export const PATCH = withApiHandler(
         contract: finalContract
           ? {
               ...presentContract(finalContract),
+              events: contract.events,
               pdfUrl: await createSignedUrlOrFallback(finalContract.pdfUrl),
             }
           : finalContract,
@@ -493,6 +553,7 @@ export const PATCH = withApiHandler(
       contract: {
         ...presentContract(contract),
         negotiationMessages: contract.negotiationMessages ?? [],
+        events: contract.events,
         pdfUrl: await createSignedUrlOrFallback(contract.pdfUrl),
       },
     });

@@ -36,6 +36,9 @@ export type CreateProfileInput = z.infer<typeof createProfileSchema>;
 export const updateProfileSchema = z.object({
   fullName: z.string().max(100).optional().nullable(),
   bio: z.string().max(2000).optional().nullable(),
+  // Business-facing description for the directory listing. Independent from
+  // the personal bio — never rendered on the public profile or vice versa.
+  directoryBio: z.string().max(800).optional().nullable(),
   avatarUrl: optionalUrlSchema,
   locationName: z.string().max(200).optional().nullable(),
   ...coordinatesSchema.shape,

@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-export const GET = withApiHandler(async (req: NextRequest) => {
+export const GET = withApiHandler(async (_req: NextRequest) => {
   const auth = await requireAdmin();
   if (!auth.authorized) {
     return auth.response;

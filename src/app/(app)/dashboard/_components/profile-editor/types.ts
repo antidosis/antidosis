@@ -10,6 +10,8 @@ export interface EditorProfile {
   id: string;
   fullName: string | null;
   bio: string | null;
+  /** Business-facing description for the directory listing only. */
+  directoryBio: string | null;
   avatarUrl: string | null;
   locationName: string | null;
   publicPhone: string | null;

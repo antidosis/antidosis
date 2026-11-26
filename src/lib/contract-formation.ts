@@ -1,6 +1,7 @@
 import { sendContractFormedEmail } from "@/lib/email";
 import { logger } from "@/lib/logger";
 import { createNotification } from "@/lib/notifications";
+import type { ContractPdfData } from "@/lib/pdf-contract";
 import { prisma } from "@/lib/prisma";
 
 async function notifyContractFormed(data: {
@@ -171,7 +172,7 @@ export async function createContractFromAcceptance(acceptanceId: string, posterP
         additionalTerms: null,
         partyAUseMessageTerms: false,
         partyBUseMessageTerms: false,
-        negotiationMessages: archivedMessages as any,
+        negotiationMessages: archivedMessages as ContractPdfData["negotiationMessages"],
         status: "draft",
       },
     });
@@ -180,6 +181,25 @@ export async function createContractFromAcceptance(acceptanceId: string, posterP
     await tx.acceptance.update({
       where: { id: acceptanceId },
       data: { status: "selected" },
+    });
+
+    // Audit trail — atomic with contract creation
+    await tx.contractEvent.create({
+      data: {
+        contractId: created.id,
+        actorId: posterProfileId,
+        action: "created",
+        detail: {
+          source: "acceptance",
+          acceptanceId,
+          needId: acceptance.needId,
+          needTitle: need?.title ?? null,
+          partyAId: acceptance.need.posterId,
+          partyBId: acceptance.userId,
+        },
+        statusBefore: null,
+        statusAfter: "draft",
+      },
     });
 
     // Capture notification data for after transaction

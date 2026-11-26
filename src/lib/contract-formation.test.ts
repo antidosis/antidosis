@@ -10,6 +10,8 @@ const mockUpdate = vi.fn();
 const mockDelete = vi.fn();
 const mockDeleteMany = vi.fn();
 
+const mockContractEventCreate = vi.fn();
+
 const mockTx = {
   acceptance: { findUnique: mockFindUnique, update: mockUpdate },
   contract: {
@@ -18,6 +20,9 @@ const mockTx = {
     create: mockCreate,
     delete: mockDelete,
     update: mockUpdate,
+  },
+  contractEvent: {
+    create: mockContractEventCreate,
   },
   need: { findUnique: mockFindUnique },
   needMessage: { findMany: mockFindMany },
@@ -29,7 +34,7 @@ const mockTransaction = vi.fn((cb) => cb(mockTx));
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    $transaction: (cb: any) => mockTransaction(cb),
+    $transaction: (cb: unknown) => mockTransaction(cb),
   },
 }));
 
@@ -105,6 +110,13 @@ describe("createContractFromAcceptance", () => {
     expect(createCall.data.partyBId).toBe("user-b");
     expect(createCall.data.status).toBe("draft");
     expect(createCall.data.terms).toContain("deadline");
+    // Audit trail: creation event written atomically in the same transaction
+    expect(mockContractEventCreate).toHaveBeenCalledTimes(1);
+    const eventCall = mockContractEventCreate.mock.calls[0][0];
+    expect(eventCall.data.contractId).toBe("contract-1");
+    expect(eventCall.data.actorId).toBe("poster-1");
+    expect(eventCall.data.action).toBe("created");
+    expect(eventCall.data.statusAfter).toBe("draft");
   });
 
   it("throws when acceptance not found", async () => {

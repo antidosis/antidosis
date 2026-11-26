@@ -26,6 +26,7 @@ export function ThemePicker() {
 
   useEffect(() => {
     const current = currentSiteTheme();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydration-safe init from persisted DOM state before first paint
     setActive(current);
     setPair(getThemePair());
     setTab(isLightThemeId(current) ? "light" : "dark");

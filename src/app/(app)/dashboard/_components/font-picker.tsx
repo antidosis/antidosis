@@ -13,6 +13,7 @@ export function FontPicker() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydration-safe init from persisted DOM state before first paint
     setActive(currentFontPack());
     setReady(true);
     function sync(e: Event) {

@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { randomBytes } from "node:crypto";
 
 import { withApiHandler } from "@/lib/api-handler";
+import { logContractEvent } from "@/lib/contract-events";
 import { hashInviteToken } from "@/lib/invite-token";
 import { requireActiveAccount } from "@/lib/participation";
 import { prisma } from "@/lib/prisma";
@@ -54,6 +55,15 @@ export const POST = withApiHandler(
     });
 
     const origin = process.env.NEXT_PUBLIC_APP_URL || req.nextUrl.origin;
+    await logContractEvent({
+      contractId: params.id,
+      actorId: active.profileId,
+      action: "invited",
+      detail: { source: "reinvite" },
+      statusBefore: contract.status,
+      statusAfter: contract.status,
+    });
+
     return NextResponse.json({ inviteUrl: `${origin}/contracts/join/${token}` });
   }
 );

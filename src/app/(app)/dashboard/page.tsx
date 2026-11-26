@@ -35,6 +35,7 @@ type ProfileData = {
   fullName: string | null;
   email: string;
   bio: string | null;
+  directoryBio: string | null;
   avatarUrl: string | null;
   locationName: string | null;
   publicPhone: string | null;

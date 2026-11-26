@@ -257,7 +257,9 @@ export default function ProsDirectoryPage({ embedded = false, initialData }: Pro
                     )}
                   </div>
 
-                  {pro.bio && <p className="text-sm text-ash mt-3 line-clamp-2">{pro.bio}</p>}
+                  {pro.directoryBio && (
+                    <p className="text-sm text-ash mt-3 line-clamp-2">{pro.directoryBio}</p>
+                  )}
 
                   {pro.specialties.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-3">

@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { Eye, EyeOff, CheckCircle } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 
 import { TerminalCursor } from "@/components/effects/terminal-cursor";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,6 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [emailVerified, setEmailVerified] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createClient();
@@ -28,12 +27,24 @@ export default function LoginPage() {
 
   // Internal-path-only redirect target for post-login (set by the proxy when
   // a protected page bounced an unauthenticated user here)
-  const redirectTarget = safeInternalPath(searchParams.get("next"));
+  // Invitation links survive signup even if `next` was dropped along the way
+  const nextParam = searchParams.get("next");
+  let stashedInvite: string | null = null;
+  if (!nextParam) {
+    try {
+      stashedInvite = sessionStorage.getItem("antidosis-pending-invite");
+      sessionStorage.removeItem("antidosis-pending-invite");
+    } catch {
+      /* ignore */
+    }
+  }
+  const redirectTarget = nextParam ? safeInternalPath(nextParam) : safeInternalPath(stashedInvite);
 
   // Handle email verification callback from Supabase
   useEffect(() => {
     const urlError = searchParams.get("error");
     if (urlError) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- OAuth/email verification callback handling from the URL
       setError(urlError);
       return;
     }
@@ -104,14 +115,7 @@ export default function LoginPage() {
             access your account and manage your exchanges
           </p>
 
-          {emailVerified && (
-            <div className="border border-ok/30 bg-ok/5 p-5 mb-8 flex items-center gap-3">
-              <CheckCircle className="h-5 w-5 text-ok flex-shrink-0" />
-              <p className="text-sm text-ok">Email verified — you can now log in.</p>
-            </div>
-          )}
-
-          {justRegistered && !emailVerified && (
+          {justRegistered && (
             <div className="border border-line bg-surface p-5 mb-8">
               <p className="text-sm text-ok">
                 Account created. Please verify your email before logging in.

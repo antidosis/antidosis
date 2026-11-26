@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { withApiHandler } from "@/lib/api-handler";
+import { logContractEvent } from "@/lib/contract-events";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getRateLimitIdentifier } from "@/lib/rate-limit";
 import { isUuid, resolveEntityId } from "@/lib/resolve-id";
@@ -171,6 +172,16 @@ export const POST = withApiHandler(async (req: NextRequest) => {
           comment: comment ? sanitizePlainText(comment) : null,
           privateFeedback: privateFeedback ? sanitizePlainText(privateFeedback) : null,
         },
+      });
+    }
+
+    if (contractId) {
+      await logContractEvent({
+        contractId,
+        actorId: profile.id,
+        action: "review_submitted",
+        detail: { rating },
+        statusAfter: "completed",
       });
     }
 

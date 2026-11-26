@@ -20,9 +20,9 @@ vi.mock("@/lib/prisma", () => ({
 }));
 
 // ─── Redaction mock ───
-const mockRedactCredential = vi.fn((c: any) => c);
+const mockRedactCredential = vi.fn((c: unknown) => c);
 vi.mock("@/lib/redaction", () => ({
-  redactCredential: (c: any) => mockRedactCredential(c),
+  redactCredential: (c: unknown) => mockRedactCredential(c),
 }));
 
 // ─── Logger mock ───

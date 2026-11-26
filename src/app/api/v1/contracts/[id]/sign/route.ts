@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 
 import { withApiHandler } from "@/lib/api-handler";
 import { auditLog, getClientInfo } from "@/lib/audit";
+import { logContractEvent } from "@/lib/contract-events";
 import { contractTitle } from "@/lib/direct-contract";
 import { sendContractSignedEmail } from "@/lib/email";
 import { logger } from "@/lib/logger";
@@ -202,6 +203,15 @@ export const POST = withApiHandler(
       userAgent,
       path: `/api/v1/contracts/${params.id}/sign`,
       metadata: { contractId: params.id, bothSigned },
+    });
+
+    await logContractEvent({
+      contractId: contract.id,
+      actorId: profile.id,
+      action: "signed",
+      detail: { isPartyA, bothSigned },
+      statusBefore: contract.status,
+      statusAfter: updatedContract?.status ?? contract.status,
     });
 
     return NextResponse.json({ contract: updatedContract });
