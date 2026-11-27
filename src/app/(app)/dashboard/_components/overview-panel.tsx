@@ -187,7 +187,9 @@ export function OverviewPanel({
                   <Megaphone className="h-4 w-4 text-orchid" />
                 )}
                 {isBusiness
-                  ? `Business directory ${profile.showInDirectory ? "visible" : "hidden"} · ABN ${profile.abnVerified ? "verified" : "unverified"}`
+                  ? `Business directory ${profile.showInDirectory ? "visible" : "hidden"} · ABN ${
+                      profile.abnVerified ? "verified" : profile.abn ? "on file" : "missing"
+                    }`
                   : `Creator reach: approximately ${profile.audienceSize?.toLocaleString()} people`}
               </span>
               <button

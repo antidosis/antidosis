@@ -57,7 +57,7 @@ export function SettingsPanel({ profile, onNavigate }: SettingsPanelProps) {
       value:
         profile.accountType === "business"
           ? profile.abn
-            ? `${profile.abn}${profile.abnVerified ? " (verified)" : " (unverified)"}`
+            ? `${profile.abn}${profile.abnVerified ? " (verified)" : " (on file)"}`
             : "Missing — required for business accounts"
           : "Not set",
     },
