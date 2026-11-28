@@ -9,3 +9,7 @@ prisma/migrations
 *.lock
 *.log
 public/images
+
+# Prebuilt 3D scenario (vendored source + build output)
+scenario/
+public/scenario/

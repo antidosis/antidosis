@@ -33,6 +33,7 @@ import { cn } from "@/lib/utils";
 import { DirectAgreementVisual } from "./direct-agreement-visual";
 import { BusinessCardShowcase, CreatorReachShowcase } from "./network-visuals";
 import { OffgridVision } from "./offgrid-vision";
+import { ScenarioTeaser } from "./scenario-teaser";
 
 // Lazy-load below-the-fold components to reduce initial JS bundle
 const TerminalPreview = dynamic(() =>
@@ -430,6 +431,9 @@ export default function HomePage() {
         <LaunchCountdown />
 
         <OffgridVision />
+
+        {/* FIELD STORY — the off-grid vision you can actually watch */}
+        <ScenarioTeaser />
 
         {/* CTA */}
         <section

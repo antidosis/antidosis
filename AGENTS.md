@@ -51,7 +51,18 @@ src/
 prisma/
   schema.prisma           # Database schema (20 models)
 mobile/                   # Capacitor mobile app
+scenario/                 # Vendored Vite/Three.js source for the /scenario 3D mesh field story
 ```
+
+### The `/scenario` page
+
+`/scenario` ("When the coast goes quiet") is a **prebuilt static app**, not a Next route:
+`scenario/` holds the editable Vite + Three.js source; the built bundle is committed to
+`public/scenario/` and served via a rewrite in `next.config.mjs`. Links to it must use
+plain `<a>` (hard navigation), never Next `Link` — the router cannot fetch an RSC payload
+for it. Rebuild instructions live in `scenario/README.md`; `src/test/scenario-bundle.test.ts`
+guards the shipped bundle. Keep the "illustrative scenario, not live listings" honesty
+notice intact — it is part of our compliance posture.
 
 ## 4. Coding Conventions
 

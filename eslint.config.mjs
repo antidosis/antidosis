@@ -22,6 +22,8 @@ export default [
       "check-syntax.js",
       "next.config.mjs",
       "scripts/**",
+      "scenario/**",
+      "public/scenario/**",
     ],
   },
   ...nextCoreWebVitals,

@@ -18,6 +18,8 @@ interface NavLink {
   href: string;
   label: string;
   description: string;
+  /** Hard navigation — for prebuilt static pages outside the Next router */
+  hard?: boolean;
 }
 
 interface NavHub {
@@ -74,6 +76,12 @@ const NAV_HUBS: NavHub[] = [
         href: "/safety",
         label: "Safety & trust",
         description: "Verification, contracts, guarded links and reporting",
+      },
+      {
+        href: "/scenario",
+        label: "Mesh scenario",
+        description: "Watch the coast stay on the air in 3D",
+        hard: true,
       },
     ],
   },
@@ -198,18 +206,35 @@ export function Navbar() {
                       <div className="border-b border-line/60 bg-inset/60 px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.18em] text-ash">
                         {hub.label} hub
                       </div>
-                      {hub.links.map((link) => (
-                        <Link
-                          key={link.href}
-                          href={link.href}
-                          className="block border-b border-line/40 px-4 py-3 transition-colors last:border-0 hover:bg-raise focus:bg-raise"
-                        >
-                          <span className="block text-sm font-medium text-gold">{link.label}</span>
-                          <span className="mt-0.5 block text-xs leading-relaxed text-ash">
-                            {link.description}
-                          </span>
-                        </Link>
-                      ))}
+                      {hub.links.map((link) =>
+                        link.hard ? (
+                          <a
+                            key={link.href}
+                            href={link.href}
+                            className="block border-b border-line/40 px-4 py-3 transition-colors last:border-0 hover:bg-raise focus:bg-raise"
+                          >
+                            <span className="block text-sm font-medium text-gold">
+                              {link.label}
+                            </span>
+                            <span className="mt-0.5 block text-xs leading-relaxed text-ash">
+                              {link.description}
+                            </span>
+                          </a>
+                        ) : (
+                          <Link
+                            key={link.href}
+                            href={link.href}
+                            className="block border-b border-line/40 px-4 py-3 transition-colors last:border-0 hover:bg-raise focus:bg-raise"
+                          >
+                            <span className="block text-sm font-medium text-gold">
+                              {link.label}
+                            </span>
+                            <span className="mt-0.5 block text-xs leading-relaxed text-ash">
+                              {link.description}
+                            </span>
+                          </Link>
+                        )
+                      )}
                     </div>
                   </div>
                 </div>
@@ -311,15 +336,25 @@ export function Navbar() {
                       id={`mobile-${hub.label.toLowerCase()}-links`}
                       className="mb-3 ml-3 border-l border-line pl-4"
                     >
-                      {hub.links.map((link) => (
-                        <Link
-                          key={link.href}
-                          href={link.href}
-                          className="block min-h-11 py-2.5 text-sm text-ash hover:text-gold"
-                        >
-                          {link.label}
-                        </Link>
-                      ))}
+                      {hub.links.map((link) =>
+                        link.hard ? (
+                          <a
+                            key={link.href}
+                            href={link.href}
+                            className="block min-h-11 py-2.5 text-sm text-ash hover:text-gold"
+                          >
+                            {link.label}
+                          </a>
+                        ) : (
+                          <Link
+                            key={link.href}
+                            href={link.href}
+                            className="block min-h-11 py-2.5 text-sm text-ash hover:text-gold"
+                          >
+                            {link.label}
+                          </Link>
+                        )
+                      )}
                     </div>
                   )}
                 </div>

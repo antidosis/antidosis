@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#071113">
+  <meta name="description" content="An interactive 3D scenario on real Central Coast geography: the internet fails, and 44 communities keep exchanging through a future community LoRa mesh. Eight exchanges, six solar relays, one neighbourhood that stays on the air.">
+  <link rel="canonical" href="https://antidosis.com/scenario">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="en_AU">
+  <meta property="og:site_name" content="antidosis">
+  <meta property="og:url" content="https://antidosis.com/scenario">
+  <meta property="og:title" content="When the coast goes quiet — an Antidosis mesh scenario">
+  <meta property="og:description" content="The internet goes down. The coast doesn't. Explore an interactive 3D scenario of 44 Central Coast communities coordinating exchange over a future LoRa mesh.">
+  <meta property="og:image" content="https://antidosis.com/images/social-card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="When the coast goes quiet — an Antidosis mesh scenario">
+  <meta name="twitter:description" content="The internet goes down. The coast doesn't. An interactive 3D scenario of exchange over a future community LoRa mesh.">
+  <meta name="twitter:image" content="https://antidosis.com/images/social-card.png">
+  <title>When the Coast Goes Quiet — Antidosis Mesh Scenario</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23071113'/%3E%3Ccircle cx='32' cy='32' r='7' fill='%23d7f99a'/%3E%3Cpath d='M17 25a20 20 0 0 1 30 0M17 39a20 20 0 0 0 30 0' fill='none' stroke='%23d7f99a' stroke-width='3'/%3E%3C/svg%3E">
+  <link rel="preload" href="/scenario/fonts/NotoSansDisplay-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <script type="module" crossorigin src="/scenario/assets/index-cro32NJW.js"></script>
+  <link rel="stylesheet" crossorigin href="/scenario/assets/index-BEgV7vqx.css">
+</head>
+<body>
+  <div id="scene" aria-label="Interactive geographic 3D coastal exchange network. Story, place, relay, and timeline controls provide keyboard alternatives." role="img"></div>
+  <div class="atmosphere" aria-hidden="true"></div>
+
+  <div id="loading" class="loading-screen">
+    <div class="loading-mark" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="brand brand--loading">antidosis<span>°</span></div>
+    <p>Charting 44 communities · bringing the coast on air</p>
+    <div class="loading-track"><span></span></div>
+  </div>
+
+  <header class="topbar">
+    <a class="brand" href="https://antidosis.com" target="_blank" rel="noreferrer" aria-label="Visit Antidosis">antidosis<span>°</span></a>
+    <div class="broadcast"><span class="live-dot"></span><span id="broadcast-text">ONLINE · CENTRAL COAST EXCHANGE</span></div>
+    <button id="about-button" class="scenario-badge" type="button"><span>FUTURE MESH SCENARIO</span><span class="info-glyph" aria-hidden="true">i</span></button>
+  </header>
+
+  <main class="interface">
+    <section id="opening" class="opening" aria-labelledby="opening-title">
+      <p class="eyebrow">AN ANTIDOSIS FIELD STORY · WOY WOY TO WYEE</p>
+      <h1 id="opening-title">When the coast<br>goes <em>quiet.</em></h1>
+      <p class="opening-copy">The signal can disappear.<br>The capacity to help each other doesn’t.</p>
+      <div class="opening-hint"><span></span> A 120-second, eight-exchange community scenario</div>
+    </section>
+
+    <section id="story-card" class="story-card" aria-live="polite">
+      <div class="story-card-top"><span id="story-time">18:40</span><span id="story-place">CENTRAL COAST</span></div>
+      <h2 id="story-title">A coast full of capacity.</h2>
+      <p id="story-copy">Every home holds something someone else may need: time, tools, food, skills, or simply showing up.</p>
+      <div id="exchange-pair" class="exchange-pair" hidden>
+        <div><span>NEED</span><strong id="need-text"></strong></div>
+        <div><span>RETURN</span><strong id="offer-text"></strong></div>
+      </div>
+      <div class="stage-heading"><span id="stage-label">Exchange stage</span><span>01 → 06</span></div>
+      <div id="stage-track" class="stage-track" aria-label="Exchange progress"></div>
+      <div id="story-progress" class="story-progress"><span></span></div>
+      <div class="story-actions">
+        <button id="story-detail-button" type="button">Full exchange</button>
+        <button id="route-focus-button" type="button">Frame route</button>
+      </div>
+    </section>
+
+    <aside class="network-panel" aria-label="Scenario network status">
+      <div class="network-heading"><span id="network-state-dot"></span><span id="network-state">ONLINE</span></div>
+      <div class="network-stat"><strong id="resolved-count">0</strong><span>needs<br>answered</span></div>
+      <div class="network-stat"><strong id="return-count">0</strong><span>returns<br>agreed</span></div>
+      <div class="network-route"><span id="route-label">Internet uplink</span><strong id="route-value">Connected</strong></div>
+      <div class="relay-lab">
+        <label for="relay-select">RESILIENCE LAB · SELECT RELAY</label>
+        <select id="relay-select" aria-label="Relay to test"></select>
+        <button id="relay-button" class="relay-button" type="button" aria-pressed="false">
+          <span class="relay-icon" aria-hidden="true"></span><strong id="relay-label">Disable West ridge</strong>
+        </button>
+        <p id="relay-impact">Choose any relay. Removing it recomputes every new exchange path.</p>
+      </div>
+    </aside>
+
+    <div id="ending" class="ending" aria-hidden="true">
+      <p class="eyebrow">THE NETWORK IS THE NEIGHBOURHOOD</p>
+      <h2>The internet went down.<br><em>The coast didn’t.</em></h2>
+      <p id="ending-copy">Eight needs answered. Eight returns agreed.<br>Trust remains after the signal fades.</p>
+      <div class="ending-actions">
+        <a href="/register">Join the network</a>
+        <a class="ghost" href="/store">Explore the mesh store</a>
+      </div>
+    </div>
+
+    <div class="legend" aria-label="Visual legend">
+      <span><i class="legend-internet"></i>Internet agreement</span>
+      <span><i class="legend-radio"></i>Radio packet</span>
+      <span><i class="legend-journey"></i>Road journey</span>
+      <span><i class="legend-trust"></i>Trust earned</span>
+    </div>
+
+    <nav class="story-nav" aria-label="Follow one of eight exchanges">
+      <button type="button" data-story="care"><span>01</span>Care</button>
+      <button type="button" data-story="garden"><span>02</span>Garden</button>
+      <button type="button" data-story="skills"><span>03</span>Skills</button>
+      <button type="button" data-story="repair"><span>04</span>Repair</button>
+      <button type="button" data-story="ride"><span>05</span>Ride</button>
+      <button type="button" data-story="website"><span>06</span>Website</button>
+      <button type="button" data-story="market"><span>07</span>Market</button>
+      <button type="button" data-story="bees"><span>08</span>Bees</button>
+    </nav>
+  </main>
+
+  <div class="geo-instrument" aria-hidden="true"><span class="north">N</span><i></i><span>REAL GEOGRAPHY · 10× HEIGHT</span></div>
+  <button id="atlas-button" class="atlas-button" type="button">Exchange atlas <span>8 detailed stories</span></button>
+
+  <div class="control-wrap">
+    <div class="mode-control" role="group" aria-label="Network comparison">
+      <button id="mesh-on" class="active" type="button" aria-pressed="true">With mesh</button>
+      <button id="mesh-off" type="button" aria-pressed="false">Without mesh</button>
+    </div>
+    <div class="transport">
+      <button id="play-button" class="round-button" type="button" aria-label="Pause scenario"><span class="pause-icon" aria-hidden="true"></span></button>
+      <span id="elapsed" class="timecode">00:00</span>
+      <label class="timeline-label"><span class="sr-only">Scenario timeline</span><input id="timeline" type="range" min="0" max="120" step="0.05" value="0"></label>
+      <span class="timecode duration">02:00</span>
+      <button id="restart-button" class="text-button" type="button">Restart</button>
+    </div>
+    <div class="view-controls">
+      <label class="place-picker"><span class="sr-only">Focus a Central Coast community</span><select id="place-select"><option value="">Go to place</option></select></label>
+      <button id="whole-coast-button" class="text-button" type="button">Whole coast</button>
+      <button id="layers-button" class="text-button" type="button" aria-expanded="false" aria-controls="layers-panel">Layers</button>
+      <button id="explore-button" class="text-button" type="button" aria-pressed="false">Explore</button>
+    </div>
+  </div>
+
+  <section id="layers-panel" class="layers-panel" hidden aria-label="Scene layers">
+    <div><strong>Visible signals</strong><button id="close-layers" type="button" aria-label="Close layers">Close</button></div>
+    <label><input type="checkbox" data-layer="radio" checked><span>LoRa nodes and radio routes</span></label>
+    <label><input type="checkbox" data-layer="people" checked><span>People, vehicles, and road journeys</span></label>
+    <label><input type="checkbox" data-layer="resources" checked><span>Resources and reciprocal returns</span></label>
+    <label><input type="checkbox" data-layer="trust" checked><span>Retained trust connections</span></label>
+    <label><input type="checkbox" data-layer="labels" checked><span>Community and relay labels</span></label>
+  </section>
+
+  <div class="gesture-hint">Drag to orbit · Scroll to zoom · Select any relay</div>
+  <div class="scenario-note">Illustrative future mesh · Real geography and roads · Not live listings or telemetry</div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <dialog id="atlas-dialog" class="atlas-dialog">
+    <button id="close-atlas" class="modal-close" type="button" aria-label="Close exchange atlas">Close</button>
+    <p class="eyebrow">THE RECIPROCITY ATLAS</p>
+    <h2>Eight agreements.<br>Eight ways to keep living.</h2>
+    <p class="dialog-intro">Each example follows a request, responder, explicit return, physical journey, completion, and retained trust. Status changes live with the network comparison.</p>
+    <div id="atlas-list" class="atlas-list"></div>
+  </dialog>
+
+  <dialog id="exchange-dialog" class="exchange-dialog">
+    <button id="close-exchange" class="modal-close" type="button" aria-label="Close exchange details">Close</button>
+    <p id="detail-subtitle" class="eyebrow"></p>
+    <h2 id="detail-title"></h2>
+    <div class="detail-status"><span id="detail-stage-label"></span></div>
+    <div id="detail-timeline" class="detail-timeline"></div>
+    <div class="detail-pair">
+      <div><span>THE REQUEST</span><strong id="detail-need"></strong></div>
+      <div><span>THE AGREED RETURN</span><strong id="detail-return"></strong></div>
+    </div>
+    <div class="detail-sections">
+      <section><h3>Request and useful context</h3><p id="detail-requester"></p></section>
+      <section><h3>Responder and capability</h3><p id="detail-responder"></p></section>
+      <section><h3>Agreement before movement</h3><p id="detail-agreement"></p></section>
+    </div>
+    <div class="route-readout">
+      <div><span>PHYSICAL ROAD JOURNEY</span><strong id="detail-road"></strong></div>
+      <div><span>COORDINATION PATH</span><strong id="detail-radio"></strong></div>
+    </div>
+    <p id="detail-stage-copy" class="detail-stage-copy"></p>
+    <div class="dialog-actions"><button id="detail-follow" type="button">Follow this chapter</button><button id="detail-focus" type="button">Frame the whole route</button></div>
+  </dialog>
+
+  <dialog id="about-dialog" class="about-dialog">
+    <button id="close-about" class="modal-close" type="button" aria-label="Close explanation">Close</button>
+    <p class="eyebrow">READING THE REAL COAST</p>
+    <h2>Coordination is the first lifeline.</h2>
+    <p>This is an illustrative vision of Antidosis coordinating local exchange over a future LoRa mesh during an internet outage. It is not a live service demonstration or network-coverage prediction.</p>
+    <div class="about-grid">
+      <div><span>01</span><strong>Real place, simplified height</strong><p>44 communities use geographic coordinates. Elevation, water, and named major roads are bundled from OpenStreetMap and AWS/Mapzen terrain sources. Terrain height is exaggerated tenfold for legibility.</p></div>
+      <div><span>02</span><strong>Routes have consequences</strong><p>Relay failure removes a graph node and recomputes every new exchange. Added hops create scenario delays; missing paths isolate requests. Amber journeys follow eight bundled OSRM road routes.</p></div>
+      <div><span>03</span><strong>Prior agreements are different</strong><p>The garden and hospital-ride examples are agreed online before the outage. Their physical journeys can continue. Six new requests need either restored internet or the future local mesh.</p></div>
+    </div>
+    <p class="about-fact">Today’s Antidosis marketplace requires internet access. Offline exchange and the LoRa mesh are part of the project’s design-stage vision. The exchanges are detailed illustrative scenarios, not current listings.</p>
+  </dialog>
+
+  <div id="fallback" class="fallback" hidden>
+    <h1>The internet went down.<br>The coast didn’t.</h1>
+    <p>This 3D scenario needs WebGL. The story illustrates neighbours coordinating care, repairs, food, skills, and enterprise through a future community LoRa mesh.</p>
+  </div>
+
+</body>
+</html>

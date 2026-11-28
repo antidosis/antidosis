@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 const linkGroups: {
   title: string;
-  links: { href?: string; email?: string; label: string }[];
+  links: { href?: string; email?: string; label: string; hard?: boolean }[];
 }[] = [
   {
     title: "Exchange",
@@ -22,7 +22,11 @@ const linkGroups: {
   },
   {
     title: "Off-grid",
-    links: [{ href: "/store", label: "Mesh store" }],
+    links: [
+      { href: "/store", label: "Mesh store" },
+      // Prebuilt static app behind a rewrite — needs a hard navigation, not the Next router
+      { href: "/scenario", label: "Mesh scenario", hard: true },
+    ],
   },
   {
     title: "Learn",
@@ -97,6 +101,13 @@ export function Footer() {
                         >
                           {link.label}
                         </EmailLink>
+                      ) : link.hard ? (
+                        <a
+                          href={link.href ?? "/"}
+                          className="text-sm text-ash hover:text-gold transition-colors"
+                        >
+                          {link.label}
+                        </a>
                       ) : (
                         <Link
                           href={link.href ?? "/"}

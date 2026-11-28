@@ -6,6 +6,12 @@ const nextConfig = {
       { source: "/needs", destination: "/exchange", permanent: false },
     ];
   },
+  async rewrites() {
+    return [
+      // The 3D mesh scenario is a prebuilt static app in public/scenario
+      { source: "/scenario", destination: "/scenario/index.html" },
+    ];
+  },
   poweredByHeader: false,
   eslint: {
     ignoreDuringBuilds: true,

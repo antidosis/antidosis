@@ -118,6 +118,27 @@ export function StoreClient() {
           </div>
         </div>
 
+        {/* Field story banner — watch the mesh before you buy into it */}
+        <a
+          href="/scenario"
+          className="vessel group mt-4 flex items-center justify-between gap-4 px-4 py-3.5 transition-colors hover:border-sun/40 sm:px-5"
+        >
+          <div className="flex items-center gap-3.5">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-sun/30 bg-sun/[0.06]">
+              <RadioTower className="h-4 w-4 text-sun" />
+            </span>
+            <div>
+              <p className="text-sm font-medium text-gold sm:text-[15px]">
+                When the coast goes quiet
+              </p>
+              <p className="text-xs leading-relaxed text-ash sm:text-sm">
+                Watch the internet fail and the coast stay on the air — an interactive 3D scenario.
+              </p>
+            </div>
+          </div>
+          <ArrowRight className="h-4 w-4 shrink-0 text-ash transition-transform group-hover:translate-x-1 group-hover:text-sun" />
+        </a>
+
         {/* Department tiles — filters, side by side on every screen */}
         <div className="mt-6 grid grid-cols-4 gap-2 sm:gap-3">
           {DEPARTMENTS.map((dept) => (
