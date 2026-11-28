@@ -268,8 +268,8 @@ function roadIndex() {
   return cells;
 }
 
-function createTown() {
-  const group = new THREE.Group(), count = 1080;
+function createTown(count = 1080) {
+  const group = new THREE.Group();
   const bases = new THREE.InstancedMesh(new THREE.BoxGeometry(0.48, 0.32, 0.4), mat(0xb5b4a2), count);
   const roofs = new THREE.InstancedMesh(gableGeometry(), mat(0x55635d, 0.72, 0.08), count);
   const windows = new THREE.InstancedMesh(new THREE.BoxGeometry(0.18, 0.09, 0.018), new THREE.MeshStandardMaterial({
@@ -306,8 +306,8 @@ function createTown() {
   return group;
 }
 
-function createTrees() {
-  const group = new THREE.Group(), count = 2200;
+function createTrees(count = 2200) {
+  const group = new THREE.Group();
   const trunks = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.025, 0.045, 0.4, 5), mat(0x3d392c), count);
   const crowns = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.26, 1), mat(0x244638), count);
   trunks.castShadow = crowns.castShadow = true;
@@ -331,8 +331,8 @@ function createTrees() {
   return group;
 }
 
-function createStreetLights() {
-  const group = new THREE.Group(), max = 96;
+function createStreetLights(max = 96) {
+  const group = new THREE.Group();
   const poles = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.012, 0.018, 0.58, 5), mat(0x59645f, 0.6, 0.35), max);
   const bulbs = new THREE.InstancedMesh(new THREE.SphereGeometry(0.025, 6, 5), new THREE.MeshBasicMaterial({ color: C.warm }), max);
   const dummy = new THREE.Object3D(); let n = 0;
@@ -427,7 +427,7 @@ function createCloudCore() {
   return group;
 }
 
-function createStorm() {
+function createStorm(rainCount = 1300) {
   const group = new THREE.Group();
   const cloudMat = new THREE.MeshStandardMaterial({ color: 0x172326, transparent: true, opacity: 0, roughness: 1, depthWrite: false });
   for (let i = 0; i < 24; i++) {
@@ -435,7 +435,7 @@ function createStorm() {
     cloud.position.set(extents.minX + rand() * (extents.maxX - extents.minX), 16 + rand() * 3, -8 + rand() * 33);
     cloud.scale.y = 0.38 + rand() * 0.22; group.add(cloud);
   }
-  const rainCount = 1300, positions = new Float32Array(rainCount * 3), seeds = new Float32Array(rainCount);
+  const positions = new Float32Array(rainCount * 3), seeds = new Float32Array(rainCount);
   for (let i = 0; i < rainCount; i++) {
     positions[i * 3] = extents.minX + rand() * (extents.maxX - extents.minX);
     positions[i * 3 + 1] = rand() * 22;
@@ -611,7 +611,8 @@ function batchStaticAsset(root) {
   return batch;
 }
 
-export async function createWorld(scene) {
+export async function createWorld(scene, options = {}) {
+  const low = Boolean(options.low);
   const baseUrl = import.meta.env.BASE_URL || '/';
   const response = await fetch(new URL(`${baseUrl}data/coast.json`, location.href));
   if (!response.ok) throw new Error(`Geography ${response.status}`);
@@ -623,8 +624,8 @@ export async function createWorld(scene) {
   base.position.set((extents.minX + extents.maxX) / 2, -1.0, (extents.minZ + extents.maxZ) / 2);
   base.receiveShadow = true; root.add(base);
   const terrain = createTerrain(), water = createWater(), roads = createRoads();
-  const town = createTown(), trees = createTrees();
-  root.add(terrain, water, roads.group, town, trees, createStreetLights());
+  const town = createTown(low ? 520 : 1080), trees = createTrees(low ? 900 : 2200);
+  root.add(terrain, water, roads.group, town, trees, createStreetLights(low ? 54 : 96));
   scene.add(createFarField());
 
   const cloud = createCloudCore(); root.add(cloud);
@@ -642,7 +643,7 @@ export async function createWorld(scene) {
   const relays = Object.keys(GEO.relays).map(key => createSolarRelay(key));
   relays.forEach(relay => radio.add(relay));
   const meshTopology = new THREE.Group(); radio.add(meshTopology);
-  const storm = createStorm(); root.add(storm);
+  const storm = createStorm(low ? 600 : 1300); root.add(storm);
   const boats = createBoats(); root.add(boats);
 
   const world = {

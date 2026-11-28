@@ -192,9 +192,23 @@
 
   <div id="fallback" class="fallback" hidden>
     <h1>The internet went down.<br>The coast didn’t.</h1>
-    <p>This 3D scenario needs WebGL. The story illustrates neighbours coordinating care, repairs, food, skills, and enterprise through a future community LoRa mesh.</p>
+    <p data-fallback-copy>This 3D scenario needs WebGL. The story illustrates neighbours coordinating care, repairs, food, skills, and enterprise through a future community LoRa mesh.</p>
+    <button id="fallback-reload" type="button">Reload the scenario</button>
   </div>
 
+  <script>
+    // Boot watchdog: if the module bundle fails to start (old browser, blocked
+    // script, lost GPU), surface the fallback instead of a stuck loader.
+    window.__SCENE_WATCHDOG__ = setTimeout(function () {
+      if (!window.__SCENE_READY__) {
+        var fallback = document.getElementById('fallback');
+        var loading = document.getElementById('loading');
+        if (loading) loading.classList.add('loaded');
+        if (fallback) fallback.hidden = false;
+      }
+    }, 25000);
+    document.getElementById('fallback-reload').addEventListener('click', function () { location.reload(); });
+  </script>
   <script type="module" src="./src/scene.js"></script>
 </body>
 </html>

@@ -22,8 +22,8 @@
   <title>When the Coast Goes Quiet — Antidosis Mesh Scenario</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23071113'/%3E%3Ccircle cx='32' cy='32' r='7' fill='%23d7f99a'/%3E%3Cpath d='M17 25a20 20 0 0 1 30 0M17 39a20 20 0 0 0 30 0' fill='none' stroke='%23d7f99a' stroke-width='3'/%3E%3C/svg%3E">
   <link rel="preload" href="/scenario/fonts/NotoSansDisplay-Regular.woff2" as="font" type="font/woff2" crossorigin>
-  <script type="module" crossorigin src="/scenario/assets/index-cro32NJW.js"></script>
-  <link rel="stylesheet" crossorigin href="/scenario/assets/index-BEgV7vqx.css">
+  <script type="module" crossorigin src="/scenario/assets/index-a_M9uzex.js"></script>
+  <link rel="stylesheet" crossorigin href="/scenario/assets/index-BBW93Rfd.css">
 </head>
 <body>
   <div id="scene" aria-label="Interactive geographic 3D coastal exchange network. Story, place, relay, and timeline controls provide keyboard alternatives." role="img"></div>
@@ -193,8 +193,22 @@
 
   <div id="fallback" class="fallback" hidden>
     <h1>The internet went down.<br>The coast didn’t.</h1>
-    <p>This 3D scenario needs WebGL. The story illustrates neighbours coordinating care, repairs, food, skills, and enterprise through a future community LoRa mesh.</p>
+    <p data-fallback-copy>This 3D scenario needs WebGL. The story illustrates neighbours coordinating care, repairs, food, skills, and enterprise through a future community LoRa mesh.</p>
+    <button id="fallback-reload" type="button">Reload the scenario</button>
   </div>
 
+  <script>
+    // Boot watchdog: if the module bundle fails to start (old browser, blocked
+    // script, lost GPU), surface the fallback instead of a stuck loader.
+    window.__SCENE_WATCHDOG__ = setTimeout(function () {
+      if (!window.__SCENE_READY__) {
+        var fallback = document.getElementById('fallback');
+        var loading = document.getElementById('loading');
+        if (loading) loading.classList.add('loaded');
+        if (fallback) fallback.hidden = false;
+      }
+    }, 25000);
+    document.getElementById('fallback-reload').addEventListener('click', function () { location.reload(); });
+  </script>
 </body>
 </html>

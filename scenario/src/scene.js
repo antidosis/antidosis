@@ -13,21 +13,59 @@ const smooth = THREE.MathUtils.smoothstep;
 const params = new URLSearchParams(location.search);
 const captureMode = params.get('capture') === '1';
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Quality tiers. Phones and low-power hardware get a lighter scene: mobile
+// GPUs have hard memory and fill-rate budgets, and blowing them loses the
+// WebGL context entirely (the "white screen" failure).
+const coarsePointer = matchMedia('(pointer: coarse)').matches;
+const smallScreen = Math.min(innerWidth, innerHeight) < 760;
+const lowMemory = (navigator.deviceMemory !== undefined && navigator.deviceMemory <= 4)
+  || (navigator.hardwareConcurrency !== undefined && navigator.hardwareConcurrency <= 4);
+const lowTier = !captureMode && (coarsePointer || smallScreen || lowMemory);
+if (lowTier) document.body.classList.add('low-tier');
+
+function pickPixelRatio(cap) {
+  const ratioCap = cap ?? (lowTier ? 1.25 : 1.5);
+  const budget = lowTier ? 1400000 : 3200000;
+  const raw = Math.min(devicePixelRatio || 1, ratioCap);
+  const pixels = innerWidth * innerHeight * raw * raw;
+  return pixels > budget ? Math.max(0.8, raw * Math.sqrt(budget / pixels)) : raw;
+}
+
 const mount = document.getElementById('scene');
+
+function showFallback(message) {
+  const fallback = document.getElementById('fallback');
+  if (message) {
+    const copy = fallback.querySelector('[data-fallback-copy]');
+    if (copy) copy.textContent = message;
+  }
+  document.getElementById('loading')?.classList.add('loaded');
+  fallback.hidden = false;
+}
 
 let renderer;
 try {
-  renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true, powerPreference: 'high-performance' });
+  renderer = new THREE.WebGLRenderer({
+    antialias: lowTier,
+    preserveDrawingBuffer: captureMode,
+    powerPreference: lowTier ? 'default' : 'high-performance',
+  });
 } catch (error) {
-  document.getElementById('loading').classList.add('loaded');
-  document.getElementById('fallback').hidden = false;
+  showFallback();
   throw error;
 }
-renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+renderer.domElement.addEventListener('webglcontextlost', event => {
+  event.preventDefault();
+  renderer.setAnimationLoop(null);
+  showFallback('The graphics context was interrupted on this device. Reload to restart the scenario.');
+});
+renderer.setPixelRatio(pickPixelRatio());
 renderer.setSize(innerWidth, innerHeight);
-renderer.shadowMap.enabled = true;
+renderer.shadowMap.enabled = !lowTier;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.toneMapping = THREE.NoToneMapping;
+renderer.toneMapping = lowTier ? THREE.ACESFilmicToneMapping : THREE.NoToneMapping;
+renderer.toneMappingExposure = 1.08;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.info.autoReset = false;
 mount.appendChild(renderer.domElement);
@@ -56,7 +94,7 @@ const hemi = new THREE.HemisphereLight(0x91b9b7, 0x17261c, 1.45);
 scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xffd8a3, 2.5);
 sun.position.set(-28, 42, 24);
-sun.castShadow = true;
+sun.castShadow = !lowTier;
 sun.shadow.mapSize.set(2048, 2048);
 Object.assign(sun.shadow.camera, { left: -45, right: 45, top: 45, bottom: -45, near: 1, far: 120 });
 sun.shadow.normalBias = 0.045;
@@ -70,11 +108,11 @@ bounce.position.set(0, -6, 4); scene.add(bounce);
 const ground = new THREE.Mesh(new THREE.CircleGeometry(350, 80).rotateX(-Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0x081716, roughness: 1 }));
 ground.position.y = -1.62; scene.add(ground);
 
-function createStars() {
+function createStars(count = 650) {
   const positions = [];
   let seed = 71237;
   const random = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
-  for (let i = 0; i < 650; i++) {
+  for (let i = 0; i < count; i++) {
     const angle = random() * Math.PI * 2, y = 24 + random() * 90, radius = 115 + random() * 70;
     positions.push(Math.cos(angle) * radius, y, Math.sin(angle) * radius);
   }
@@ -82,12 +120,20 @@ function createStars() {
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
   return new THREE.Points(geometry, new THREE.PointsMaterial({ color: 0xc5d9ca, size: 0.19, transparent: true, opacity: 0.55, depthWrite: false }));
 }
-const stars = createStars(); scene.add(stars);
+const stars = createStars(lowTier ? 350 : 650); scene.add(stars);
 const moon = halo(0xb8d6cc, 12); moon.position.set(58, 48, -88); scene.add(moon);
 
-const post = new SignalPost(renderer, innerWidth, innerHeight);
-post.sceneTarget.samples = 2;
-const world = await createWorld(scene);
+// The bloom/grade pipeline is the largest per-frame cost; low tier renders
+// the scene directly with ACES tone mapping instead.
+let post = lowTier ? null : new SignalPost(renderer, innerWidth, innerHeight);
+let world;
+try {
+  world = await createWorld(scene, { low: lowTier });
+} catch (error) {
+  console.error(error);
+  showFallback('The scenario data could not be loaded. Check your connection and reload.');
+  throw error;
+}
 const peopleLayer = new THREE.Group(), resourceLayer = new THREE.Group(), trustLayer = new THREE.Group(), signalLayer = new THREE.Group();
 world.root.add(peopleLayer, resourceLayer, trustLayer);
 world.radio.add(signalLayer);
@@ -180,8 +226,10 @@ const storyRuntime = {};
 const labelObjects = [];
 const majorLabels = new Set(['Wyee', 'Blue Haven', 'Budgewoi', 'Noraville', 'Norah Head', 'Wyong', 'The Entrance', 'Terrigal', 'Gosford', 'Kincumber', 'Woy Woy', 'Umina Beach', 'Somersby']);
 for (const [key, place] of Object.entries(world.geo.places)) {
+  const major = majorLabels.has(key);
+  if (lowTier && !major) continue;
   const element = document.createElement('button');
-  element.type = 'button'; element.className = `map-label ${majorLabels.has(key) ? 'major' : 'minor'}`;
+  element.type = 'button'; element.className = `map-label ${major ? 'major' : 'minor'}`;
   element.textContent = place.name.toUpperCase(); element.setAttribute('aria-label', `Focus ${place.name}`);
   element.addEventListener('click', event => { event.stopPropagation(); focusPlace(key); });
   const label = new CSS2DObject(element); label.position.copy(at(key, majorLabels.has(key) ? 1.15 : 0.72));
@@ -518,14 +566,16 @@ for (const key of relayKeys) {
 for (const [key, place] of Object.entries(world.geo.places)) {
   const option = document.createElement('option'); option.value = key; option.textContent = place.name; ui['place-select'].appendChild(option);
 }
-const atlasButtons = {};
+const atlasButtons = {}, atlasStatus = {};
 for (const key of storyKeys) {
   const def = storyDefs[key], button = document.createElement('button');
   button.type = 'button'; button.className = 'atlas-item'; button.dataset.atlas = key;
   button.innerHTML = `<span class="atlas-number">${def.number}</span><span class="atlas-main"><small>${def.category} · ${def.requester} ↔ ${def.responder}</small><strong>${def.title}</strong><span>${def.need}</span><em data-atlas-status></em></span><span class="atlas-arrow" aria-hidden="true">→</span>`;
   button.addEventListener('click', () => { ui['atlas-dialog'].close(); openExchange(key); });
   ui['atlas-list'].appendChild(button); atlasButtons[key] = button;
+  atlasStatus[key] = button.querySelector('[data-atlas-status]');
 }
+const storyNavButtons = [...document.querySelectorAll('[data-story]')];
 
 function activeStoryAt(t) {
   if (t < 20) return null;
@@ -536,7 +586,7 @@ function activeStoryAt(t) {
 
 function setStoryCard(key, t) {
   const state = key ? storyState(key, t) : t < 18 ? 'outage' : 'awakening';
-  const chapter = `${key || state}|${meshOn}|${offlineRelay}|${storyRuntime[key]?.currentPath?.path.join(',')}`;
+  const chapter = `${key || 'coast'}|${state}|${meshOn}|${offlineRelay}|${storyRuntime[key]?.currentPath?.path.join(',')}`;
   if (chapter === activeChapter) return;
   activeChapter = chapter;
   if (key) {
@@ -596,7 +646,9 @@ function updateRelayUi() {
   else ui['relay-impact'].textContent = `${name} offline · ${relayImpact.affected} path${relayImpact.affected === 1 ? '' : 's'} changed · +${relayImpact.addedHops} hops · up to ${Math.round(relayImpact.maxDelay)}s delay${relayImpact.isolated ? ` · ${relayImpact.isolated} isolated` : ''}.`;
 }
 
-function updateUi(t) {
+let lastPanelUpdate = 0, lastElapsedSecond = -1;
+function updateUi(t, force = false) {
+  // Cheap per-frame chrome: fades, progress bars, the scrubber.
   const openingOpacity = 1 - smooth(t, 6, 10);
   document.body.classList.toggle('opening-active', openingOpacity > 0.05);
   ui.opening.style.opacity = openingOpacity;
@@ -609,13 +661,23 @@ function updateUi(t) {
   ui.ending.setAttribute('aria-hidden', endingOpacity < 0.5 ? 'true' : 'false');
 
   const storyKey = manualStory || activeStoryAt(t);
-  setStoryCard(storyKey, t);
   if (storyKey) {
     const def = storyDefs[storyKey], runtime = storyRuntime[storyKey], times = timesFor(def, runtime);
     const progress = storyComplete(storyKey, t) ? 1 : clamp((t - def.start) / Math.max(1, times.complete - def.start), 0, 1);
     ui['story-progress'].firstElementChild.style.width = `${progress * 100}%`;
   } else ui['story-progress'].firstElementChild.style.width = `${clamp(t / 20, 0, 1) * 100}%`;
 
+  const second = Math.floor(t);
+  if (second !== lastElapsedSecond) { lastElapsedSecond = second; ui.elapsed.textContent = formatTime(t); }
+  ui.timeline.value = t; ui.timeline.style.setProperty('--progress', `${t / DURATION * 100}%`);
+
+  // Heavier DOM work (card text, counters, lists) runs at ~8Hz — per-frame
+  // text writes were a major source of jank on slower machines.
+  const now = performance.now();
+  if (!force && now - lastPanelUpdate < 120) return;
+  lastPanelUpdate = now;
+
+  setStoryCard(storyKey, t);
   const completed = storyKeys.filter(key => storyComplete(key, t)).length;
   const agreed = storyKeys.filter(key => storyAgreed(key, t)).length;
   ui['resolved-count'].textContent = completed; ui['return-count'].textContent = agreed;
@@ -636,17 +698,14 @@ function updateUi(t) {
       : '2 can proceed · 6 wait';
     ui['broadcast-text'].textContent = meshOn ? 'ON AIR · 6 RELAYS · 44 COMMUNITIES' : 'OFFLINE · 2 PRIOR AGREEMENTS';
   }
-  ui.elapsed.textContent = formatTime(t);
-  ui.timeline.value = t; ui.timeline.style.setProperty('--progress', `${t / DURATION * 100}%`);
   ui['explore-button'].textContent = explore ? 'Resume tour' : 'Explore';
   ui['explore-button'].setAttribute('aria-pressed', String(explore));
   ui['play-button'].setAttribute('aria-label', paused ? 'Play scenario' : 'Pause scenario');
   ui['play-button'].firstElementChild.className = paused ? 'play-icon' : 'pause-icon';
-  document.querySelectorAll('[data-story]').forEach(button => button.classList.toggle('active', button.dataset.story === storyKey));
+  storyNavButtons.forEach(button => button.classList.toggle('active', button.dataset.story === storyKey));
   for (const key of storyKeys) {
-    const status = atlasButtons[key].querySelector('[data-atlas-status]');
-    status.textContent = stateLabel(key, t);
-    status.dataset.state = storyState(key, t);
+    atlasStatus[key].textContent = stateLabel(key, t);
+    atlasStatus[key].dataset.state = storyState(key, t);
   }
   updateRelayUi();
 
@@ -738,7 +797,7 @@ function updateRadioRoute(runtime, t, active) {
   }
 }
 
-function sample(inputT) {
+function sample(inputT, forceUi = true) {
   const t = ((inputT % DURATION) + DURATION) % DURATION;
   const stormAmount = smooth(t, 7, 14) * (1 - smooth(t, 102, 118));
   const internetAmount = 1 - smooth(t, 11, 17);
@@ -821,34 +880,51 @@ function sample(inputT) {
   world.radio.visible = layers.radio;
   labelObjects.forEach(label => { label.visible = layers.labels; });
   if (!explore) cinematicCamera(t);
-  updateUi(t);
+  updateUi(t, forceUi);
 }
 
 const clock = new THREE.Clock();
-let frameEMA = 16, frameCount = 0, quality = 2;
+let frameEMA = 16, frameCount = 0, qualityStep = 0, needsDraw = true;
 function draw() {
   controls.enableDamping = explore && !captureMode;
-  controls.update(); renderer.info.reset(); post.render(scene, camera); labelRenderer.render(scene, camera);
+  controls.update(); renderer.info.reset();
+  if (post) post.render(scene, camera); else renderer.render(scene, camera);
+  labelRenderer.render(scene, camera);
 }
+function disablePostPipeline() {
+  if (!post) return;
+  post = null;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.08;
+  scene.traverse(object => { if (object.material) object.material.needsUpdate = true; });
+}
+// If frames stay slow, shed cost in order: pixel ratio, shadows, bloom.
 function adaptQuality(dt) {
-  frameEMA = frameEMA * 0.97 + dt * 1000 * 0.03; frameCount++;
-  if (frameCount === 240 && frameEMA > 28 && quality === 2) {
-    quality = 1; renderer.setPixelRatio(Math.min(devicePixelRatio, 1));
-    renderer.setSize(innerWidth, innerHeight); post.setSize(innerWidth, innerHeight);
-  } else if (frameCount === 480 && frameEMA > 34 && quality === 1) {
-    quality = 0; sun.shadow.mapSize.set(1024, 1024); sun.shadow.map?.dispose(); sun.shadow.map = null;
-    post.composite.uniforms.uBloom.value = 0.3;
-  }
+  if (captureMode) return;
+  frameEMA = frameEMA * 0.95 + dt * 1000 * 0.05; frameCount++;
+  if (frameCount < 150 || frameCount % 150 !== 0 || frameEMA <= 30) return;
+  qualityStep++;
+  if (qualityStep === 1) {
+    renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1));
+    renderer.setSize(innerWidth, innerHeight); post?.setSize(innerWidth, innerHeight);
+  } else if (qualityStep === 2 && renderer.shadowMap.enabled) {
+    renderer.shadowMap.enabled = false; sun.castShadow = false;
+    scene.traverse(object => { if (object.material) object.material.needsUpdate = true; });
+  } else if (qualityStep === 3) disablePostPipeline();
 }
 function tick() {
   const dt = Math.min(clock.getDelta(), 0.1);
   if (!paused) {
     simT = (simT + dt) % DURATION;
     if (manualStory) manualStory = null;
-    sample(simT); adaptQuality(dt);
+    sample(simT, false); adaptQuality(dt); draw();
+  } else if (needsDraw) {
+    // Paused scenes only redraw on demand — idle phones should not burn GPU.
+    needsDraw = false; draw();
   }
-  draw();
 }
+controls.addEventListener('change', () => { needsDraw = true; });
+renderer.domElement.addEventListener('wheel', () => { needsDraw = true; }, { passive: true });
 if (!captureMode) renderer.setAnimationLoop(tick);
 
 window.__seek = value => {
@@ -860,7 +936,8 @@ window.__play = () => { if (captureMode) return; paused = false; manualStory = n
 window.__pause = () => { paused = true; updateUi(simT); };
 window.__metrics = () => ({
   calls: renderer.info.render.calls, triangles: renderer.info.render.triangles,
-  pixelRatio: renderer.getPixelRatio(), frameMs: Number(frameEMA.toFixed(2)), quality,
+  pixelRatio: renderer.getPixelRatio(), frameMs: Number(frameEMA.toFixed(2)), quality: qualityStep,
+  tier: lowTier ? 'low' : 'high', post: Boolean(post), shadows: renderer.shadowMap.enabled,
   time: simT, meshOn, offlineRelay, relayImpact: { ...relayImpact }, layers: { ...layers },
   places: Object.keys(world.geo.places).length, roads: world.roads.ways, homes: world.town.userData.count,
   trees: world.trees.userData.count, assetBounds: world.assetBounds,
@@ -927,7 +1004,7 @@ ui['explore-button'].addEventListener('click', () => {
 });
 document.getElementById('whole-coast-button').addEventListener('click', wholeCoast);
 ui['place-select'].addEventListener('change', () => { if (ui['place-select'].value) focusPlace(ui['place-select'].value); });
-renderer.domElement.addEventListener('pointerdown', () => { if (!captureMode) { explore = true; updateUi(simT); } });
+renderer.domElement.addEventListener('pointerdown', () => { needsDraw = true; if (!captureMode) { explore = true; updateUi(simT); } });
 
 document.getElementById('atlas-button').addEventListener('click', () => { paused = true; updateUi(simT); ui['atlas-dialog'].showModal(); });
 document.getElementById('close-atlas').addEventListener('click', () => ui['atlas-dialog'].close());
@@ -972,14 +1049,16 @@ renderer.domElement.addEventListener('pointerup', event => {
 
 function resize() {
   camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight); post.setSize(innerWidth, innerHeight);
+  renderer.setPixelRatio(pickPixelRatio());
+  renderer.setSize(innerWidth, innerHeight); post?.setSize(innerWidth, innerHeight);
   labelRenderer.setSize(innerWidth, innerHeight);
 }
-addEventListener('resize', () => { resize(); sample(simT); draw(); });
+addEventListener('resize', () => { resize(); sample(simT); needsDraw = true; draw(); });
 
 resize();
 sample(simT); controls.update(); draw();
 document.getElementById('loading').classList.add('loaded');
+clearTimeout(window.__SCENE_WATCHDOG__);
 window.__SCENE_READY__ = true;
 const tParam = params.get('t');
 if (tParam !== null) window.__seek(tParam);
