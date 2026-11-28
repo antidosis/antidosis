@@ -9,6 +9,7 @@ import { ArrowRight, Check, Loader2, Send, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { mutate } from "swr";
 
+import { ActionProgress } from "@/components/ui/action-progress";
 import { Button } from "@/components/ui/button";
 import { CopyLinkButton } from "@/components/ui/copy-link";
 import { Input } from "@/components/ui/input";
@@ -190,6 +191,14 @@ export function DirectContractForm({ onClose }: { onClose: () => void }) {
           This is a general-purpose agreement tool, not legal advice. You are responsible for
           suitable terms, authority, licensing, insurance, tax and independent legal advice.
         </p>
+        <ActionProgress
+          active={isSubmitting}
+          stages={[
+            "Drafting your agreement",
+            "Creating the invitation",
+            "Preparing the secure link",
+          ]}
+        />
         <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto">
           {isSubmitting ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />

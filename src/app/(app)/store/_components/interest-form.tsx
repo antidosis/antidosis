@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { CheckCircle2, Loader2, Mail } from "lucide-react";
 
+import { ActionProgress } from "@/components/ui/action-progress";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -134,6 +135,12 @@ export function InterestForm({ initialKind = "node" }: { initialKind?: InterestK
       />
 
       {error && <p className="mt-3 text-sm text-bad">{error}</p>}
+
+      <ActionProgress
+        active={sending}
+        stages={["Registering your interest", "Sending confirmation"]}
+        className="mt-4"
+      />
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <Button type="submit" disabled={sending || !email}>

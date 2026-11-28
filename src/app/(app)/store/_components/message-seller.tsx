@@ -7,6 +7,7 @@ import Link from "next/link";
 import { CheckCircle2, Loader2, MessageSquare, Send } from "lucide-react";
 
 import { InlineMobileVerify } from "@/components/inline-mobile-verify";
+import { ActionProgress } from "@/components/ui/action-progress";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 
@@ -166,6 +167,11 @@ export function MessageSeller({
             sides stay protected.
           </p>
           {error && <p className="mt-2 text-sm text-bad">{error}</p>}
+          <ActionProgress
+            active={sending}
+            stages={["Sending your enquiry", "Notifying the seller"]}
+            className="mt-3"
+          />
           <div className="mt-3 flex flex-wrap gap-2">
             <Button onClick={send} disabled={sending || content.trim().length === 0}>
               {sending ? (

@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Flag, LifeBuoy, Loader2, MessageSquareReply, Send } from "lucide-react";
 import { mutate } from "swr";
 
+import { ActionProgress } from "@/components/ui/action-progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -210,6 +211,10 @@ function TicketsView() {
             <p className="text-xs text-ash">{message.length}/4000</p>
           </div>
 
+          <ActionProgress
+            active={sending}
+            stages={["Sending your ticket", "Creating your reference number"]}
+          />
           <Button type="button" onClick={submit} disabled={sending}>
             {sending ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

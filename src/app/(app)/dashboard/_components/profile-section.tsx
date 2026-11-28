@@ -9,6 +9,7 @@ import { ArrowUpRight, BriefcaseBusiness, Loader2, ShieldCheck, UserRound } from
 import { useFieldArray, useForm } from "react-hook-form";
 import { mutate } from "swr";
 
+import { ActionProgress } from "@/components/ui/action-progress";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { parseBusinessSocialLinks } from "@/lib/business-links";
@@ -486,15 +487,17 @@ export function ProfileSection({
 
       {(hasUnsavedChanges || isSaving) && (
         <div className="vessel sticky bottom-4 z-20 mt-5 flex items-center gap-3 rounded-lg bg-surface/95 p-3 shadow-lg backdrop-blur">
-          <Button
-            type="button"
-            onClick={onSave}
-            disabled={isSaving}
-            className="flex-1 sm:flex-none"
-          >
-            {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isSaving ? "Saving…" : "Save profile"}
-          </Button>
+          <div className="min-w-0 flex-1 sm:flex-none sm:basis-64">
+            <ActionProgress
+              active={isSaving}
+              stages={["Saving your profile", "Updating your presence"]}
+              className="mb-2"
+            />
+            <Button type="button" onClick={onSave} disabled={isSaving} className="w-full sm:w-auto">
+              {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isSaving ? "Saving…" : "Save profile"}
+            </Button>
+          </div>
           <Button type="button" variant="ghost" onClick={onCancel} disabled={isSaving}>
             Cancel
           </Button>

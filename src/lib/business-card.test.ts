@@ -116,6 +116,26 @@ describe("renderBusinessCardSvg", () => {
     expect(svg).toContain('y="540"');
     expect(svg).not.toContain('y="596"');
   });
+
+  it("renders the presence line when links exist, and shifts the chips down", () => {
+    const svg = render({ presence: "hekaweb.com  ·  instagram @hekaweb" });
+    expect(svg).toContain("hekaweb.com");
+    expect(svg).toContain("WEB ");
+    // Chips drop from y=318 to y=330 to make room for the presence line.
+    expect(svg).toContain('y="330"');
+    expect(render()).not.toContain("WEB ");
+  });
+
+  it("embeds the QR plate and keeps ACCEPTS/ABN clear of it", () => {
+    const qrDataUrl = "data:image/png;base64,AAAA";
+    const svg = render({ qrDataUrl });
+    expect(svg).toContain(`href="${qrDataUrl}"`);
+    expect(svg).toContain("SCAN FOR FULL LISTING");
+    // ABN end-anchors left of the plate (x=972) instead of the frame edge.
+    expect(svg).toContain('x="972"');
+    expect(svg).not.toContain('<text x="1112" y="540"');
+    expect(render({ qrDataUrl: null })).not.toContain("SCAN FOR FULL LISTING");
+  });
 });
 
 describe("fitCardText", () => {

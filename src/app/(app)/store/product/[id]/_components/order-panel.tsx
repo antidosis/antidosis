@@ -7,6 +7,7 @@ import Link from "next/link";
 import { CheckCircle2, Copy, Loader2, PackageCheck, ShoppingBag } from "lucide-react";
 
 import { InlineMobileVerify } from "@/components/inline-mobile-verify";
+import { ActionProgress } from "@/components/ui/action-progress";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import type { MeshPaymentInstructions } from "@/lib/store-first-party";
@@ -277,6 +278,10 @@ export function OrderPanel({
             />
           </div>
           {error && <p className="text-sm text-bad">{error}</p>}
+          <ActionProgress
+            active={submitting}
+            stages={["Placing your order", "Reserving your unit", "Preparing payment details"]}
+          />
           <div className="flex flex-wrap items-center gap-2">
             <Button
               onClick={submit}

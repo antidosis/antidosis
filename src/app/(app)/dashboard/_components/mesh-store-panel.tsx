@@ -19,6 +19,7 @@ import {
   XCircle,
 } from "lucide-react";
 
+import { ActionProgress } from "@/components/ui/action-progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
@@ -485,6 +486,13 @@ function ProductForm({
       </fieldset>
 
       <div className="flex flex-wrap gap-2">
+        <div className="w-full">
+          <ActionProgress
+            active={submitting}
+            stages={["Saving your listing", "Publishing to the store shelf"]}
+            className="mb-1"
+          />
+        </div>
         <Button type="submit" disabled={submitting || !draftIsValid(draft)}>
           {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {submitLabel}
@@ -922,10 +930,17 @@ export function MeshStorePanel() {
               />
             </label>
             <div className="flex gap-2 sm:col-span-2">
-              <Button type="submit" disabled={submitting}>
-                {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save details
-              </Button>
+              <div className="w-full">
+                <ActionProgress
+                  active={submitting}
+                  stages={["Saving your builder details", "Updating the marketplace"]}
+                  className="mb-1"
+                />
+                <Button type="submit" disabled={submitting}>
+                  {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Save details
+                </Button>
+              </div>
               <Button type="button" variant="ghost" onClick={() => setEditingDetails(false)}>
                 Cancel
               </Button>

@@ -1,10 +1,15 @@
 import { describe, it, expect } from "vitest";
 
 import {
+  AUTO_EXCHANGE_MODE,
   EXCHANGE_MODES,
   EXCHANGE_MODE_VALUES,
+  compatibleExchangeModes,
+  deriveNeedType,
+  exchangeNeedSide,
   getExchangeMode,
   INCOMPATIBLE_EXCHANGE_MODES,
+  type NeedTypeChoice,
 } from "./categories";
 
 describe("EXCHANGE_MODES", () => {
@@ -96,5 +101,58 @@ describe("INCOMPATIBLE_EXCHANGE_MODES", () => {
         expect(EXCHANGE_MODE_VALUES).toContain(mode);
       }
     }
+  });
+});
+
+describe("cascade helpers", () => {
+  it("classifies every exchange mode's need side", () => {
+    for (const mode of EXCHANGE_MODES) {
+      expect(["service", "goods", "money", "open"]).toContain(exchangeNeedSide(mode.value));
+    }
+    expect(exchangeNeedSide("goods-swap")).toBe("goods");
+    expect(exchangeNeedSide("money-for-service")).toBe("service");
+    expect(exchangeNeedSide("eccentric")).toBe("open");
+    expect(exchangeNeedSide("nonexistent")).toBe("open");
+    expect(exchangeNeedSide(null)).toBe("open");
+  });
+
+  it("derives the need-type chip from an existing exchange mode", () => {
+    expect(deriveNeedType("goods-swap")).toBe("item");
+    expect(deriveNeedType("skill-swap")).toBe("service");
+    expect(deriveNeedType("goods-for-money")).toBe("money");
+    expect(deriveNeedType("eccentric")).toBeNull();
+    expect(deriveNeedType(undefined)).toBeNull();
+  });
+
+  it("narrows by both sides of the pair", () => {
+    // Service for service: the skill swap must survive, goods-needing modes must not.
+    const values = compatibleExchangeModes("service", "service").map((m) => m.value);
+    expect(values).toContain("skill-swap");
+    expect(values).not.toContain("service-for-goods");
+    expect(values).not.toContain("service-for-money");
+    // Social "open" modes are never hidden by the need side.
+    expect(values).toContain("eccentric");
+    expect(values).toContain("promotion");
+  });
+
+  it("need side alone filters when no offer constraint applies", () => {
+    const values = compatibleExchangeModes("money", "item").map((m) => m.value);
+    expect(values).toContain("money-for-goods");
+    expect(values).not.toContain("money-for-service");
+    expect(values).not.toContain("paid-work");
+  });
+
+  it("every auto-pair maps to a real mode compatible with that pair", () => {
+    for (const [pair, mode] of Object.entries(AUTO_EXCHANGE_MODE)) {
+      const [offer, need] = pair.split("+") as [string, NeedTypeChoice];
+      expect(EXCHANGE_MODE_VALUES).toContain(mode);
+      expect(compatibleExchangeModes(offer, need).map((m) => m.value)).toContain(mode);
+    }
+  });
+
+  it("ambiguous pairs have no auto mode", () => {
+    expect(AUTO_EXCHANGE_MODE["service+item"]).toBeUndefined();
+    expect(AUTO_EXCHANGE_MODE["money+service"]).toBeUndefined();
+    expect(AUTO_EXCHANGE_MODE["money+money"]).toBeUndefined();
   });
 });

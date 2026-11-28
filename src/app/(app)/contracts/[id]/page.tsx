@@ -21,6 +21,7 @@ import {
   Printer,
 } from "lucide-react";
 
+import { ActionProgress } from "@/components/ui/action-progress";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -1104,6 +1105,13 @@ export default function ContractPage() {
                         </>
                       )}
                       <div className="flex flex-wrap gap-2 mt-3">
+                        <div className="w-full">
+                          <ActionProgress
+                            active={savingTerms}
+                            stages={["Saving your terms", "Recording the change"]}
+                            className="mb-2"
+                          />
+                        </div>
                         <Button
                           onClick={saveTerms}
                           disabled={savingTerms}
@@ -1675,6 +1683,11 @@ export default function ContractPage() {
               <p className="text-sm text-gold mb-4">
                 Are you sure both parties have fulfilled their obligations?
               </p>
+              <ActionProgress
+                active={completing}
+                stages={["Marking the work complete", "Recording completion", "Opening reviews"]}
+                className="mb-3"
+              />
               <div className="flex gap-3">
                 <Button
                   onClick={markComplete}
@@ -1824,14 +1837,25 @@ export default function ContractPage() {
               </div>
 
               <div className="flex gap-3 mt-5">
-                <Button
-                  onClick={() => signContract(signatureInput.trim())}
-                  disabled={signing || !signatureInput.trim() || !agreedToTermsCheck}
-                  className="flex-1"
-                  style={{ background: "#1a0f08", color: "#f5e6c8", border: "1px solid #2c1810" }}
-                >
-                  {signing ? "Signing..." : "Sign Contract"}
-                </Button>
+                <div className="flex-1">
+                  <ActionProgress
+                    active={signing}
+                    stages={[
+                      "Recording your signature",
+                      "Sealing the contract",
+                      "Notifying the other party",
+                    ]}
+                    className="mb-2"
+                  />
+                  <Button
+                    onClick={() => signContract(signatureInput.trim())}
+                    disabled={signing || !signatureInput.trim() || !agreedToTermsCheck}
+                    className="w-full"
+                    style={{ background: "#1a0f08", color: "#f5e6c8", border: "1px solid #2c1810" }}
+                  >
+                    {signing ? "Signing..." : "Sign Contract"}
+                  </Button>
+                </div>
                 <Button
                   onClick={() => {
                     setShowSignModal(false);

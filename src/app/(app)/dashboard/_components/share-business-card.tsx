@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Building2, Download, Loader2, Share2, ShieldCheck } from "lucide-react";
 
@@ -14,8 +14,14 @@ import {
   renderBusinessCardSvg,
   type BusinessCardTexture,
 } from "@/lib/business-card";
+import {
+  businessPresenceLine,
+  parseBusinessSocialLinks,
+  type BusinessSocialLink,
+} from "@/lib/business-links";
 import { exchangeModeLabel, parseExchangeModes } from "@/lib/exchange-modes";
 import { professionDisplayLabel } from "@/lib/professions";
+import { qrCodeDataUrl } from "@/lib/qr";
 import { downloadSvgAsPng, fetchSiteLogoDataUrl, formatRatingLine } from "@/lib/share-card";
 import { useApi } from "@/lib/swr-config";
 import { cn } from "@/lib/utils";
@@ -29,6 +35,7 @@ interface ShareBusinessCardProps {
     locationName: string | null;
     businessPhone: string | null;
     businessEmail: string | null;
+    businessSocialLinks?: string | BusinessSocialLink[] | null;
     abn: string | null;
     isVerified: boolean;
     ratingAvg: number;
@@ -42,6 +49,18 @@ interface SpecialtyRecord {
   profession: string;
   headline: string | null;
   slot: number;
+}
+
+/** The editor hands links over as an array; the API stores them as JSON text. */
+function presenceLinksFrom(raw: ShareBusinessCardProps["profile"]["businessSocialLinks"]) {
+  if (typeof raw === "string" || raw == null) return parseBusinessSocialLinks(raw);
+  return raw.filter(
+    (link): link is BusinessSocialLink =>
+      typeof link?.platform === "string" &&
+      typeof link?.url === "string" &&
+      Boolean(link.platform.trim()) &&
+      Boolean(link.url.trim())
+  );
 }
 
 /**
@@ -67,11 +86,27 @@ export function ShareBusinessCard({ profile }: ShareBusinessCardProps) {
     professionDisplayLabel(specialty.profession)
   );
   const acceptLabels = parseExchangeModes(profile.acceptedExchanges).map(exchangeModeLabel);
+  const presenceLine = businessPresenceLine(presenceLinksFrom(profile.businessSocialLinks));
   const listingUrl = `${window.location.origin}/pros/${profile.id}`;
   const contactLine =
     [profile.locationName, profile.businessPhone, profile.businessEmail]
       .filter(Boolean)
       .join("  ·  ") || "Central Coast NSW";
+
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    qrCodeDataUrl(listingUrl)
+      .then((dataUrl) => {
+        if (!cancelled) setQrDataUrl(dataUrl);
+      })
+      .catch(() => {
+        if (!cancelled) setQrDataUrl(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [listingUrl]);
 
   async function nativeShare() {
     setSharing(true);
@@ -105,6 +140,8 @@ export function ShareBusinessCard({ profile }: ShareBusinessCardProps) {
         specialties: specialtyLabels,
         accepts: acceptLabels,
         abn: profile.abn ? formatAbnDisplay(profile.abn) : null,
+        presence: presenceLine || null,
+        qrDataUrl,
         cta: "Find us in the Antidosis directory.",
         url: `antidosis.com/pros/${profile.id}`,
         texture,
@@ -199,6 +236,21 @@ export function ShareBusinessCard({ profile }: ShareBusinessCardProps) {
                   {contactLine}
                   {ratingLine ? `  ·  ${ratingLine}` : ""}
                 </p>
+                {presenceLine && (
+                  <p
+                    className="mt-1 truncate font-mono text-[11px]"
+                    style={{ color: texture.sub }}
+                    title={presenceLine}
+                  >
+                    <span
+                      className="mr-1.5 uppercase tracking-[0.2em]"
+                      style={{ color: texture.accent }}
+                    >
+                      Web
+                    </span>
+                    {presenceLine}
+                  </p>
+                )}
               </div>
             </div>
             <div className="flex shrink-0 flex-col items-end gap-2">
@@ -252,20 +304,42 @@ export function ShareBusinessCard({ profile }: ShareBusinessCardProps) {
             </p>
           )}
 
-          <div className="mt-5 border-t pt-4" style={{ borderColor: `${texture.accent}26` }}>
-            <p className="heading-display text-lg leading-snug" style={{ color: texture.ink }}>
-              Find us in the Antidosis directory.
-            </p>
-            <div className="mt-1.5 flex items-baseline justify-between gap-3">
-              <p className="min-w-0 truncate font-mono text-xs" style={{ color: texture.accent }}>
-                antidosis.com/pros/{profile.id}
+          <div
+            className="mt-5 flex items-end justify-between gap-4 border-t pt-4"
+            style={{ borderColor: `${texture.accent}26` }}
+          >
+            <div className="min-w-0">
+              <p className="heading-display text-lg leading-snug" style={{ color: texture.ink }}>
+                Find us in the Antidosis directory.
               </p>
-              {profile.abn && (
-                <p className="shrink-0 font-mono text-[11px]" style={{ color: texture.sub }}>
-                  ABN {formatAbnDisplay(profile.abn)}
+              <div className="mt-1.5 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <p className="min-w-0 truncate font-mono text-xs" style={{ color: texture.accent }}>
+                  antidosis.com/pros/{profile.id}
                 </p>
-              )}
+                {profile.abn && (
+                  <p className="shrink-0 font-mono text-[11px]" style={{ color: texture.sub }}>
+                    ABN {formatAbnDisplay(profile.abn)}
+                  </p>
+                )}
+              </div>
             </div>
+            {qrDataUrl && (
+              <div className="shrink-0 text-center">
+                <div className="rounded-lg bg-[#f4f6f5] p-1.5">
+                  <img
+                    src={qrDataUrl}
+                    alt={`QR code linking to the ${name} directory listing`}
+                    className="h-16 w-16 sm:h-20 sm:w-20"
+                  />
+                </div>
+                <p
+                  className="mt-1 font-mono text-[7px] uppercase tracking-[0.18em] sm:text-[8px]"
+                  style={{ color: texture.sub }}
+                >
+                  Scan for full listing
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

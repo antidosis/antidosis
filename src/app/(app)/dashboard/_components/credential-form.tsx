@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 
+import { ActionProgress } from "@/components/ui/action-progress";
 import { Button } from "@/components/ui/button";
 import { FileUpload } from "@/components/ui/file-upload";
 import { Input } from "@/components/ui/input";
@@ -329,9 +330,20 @@ function CredentialFormContent({
         )}
 
         <div className="flex gap-2 pt-2">
-          <Button type="submit" disabled={saving}>
-            {saving ? "Saving..." : "Save"}
-          </Button>
+          <div className="min-w-0 flex-1 sm:flex-none sm:basis-72">
+            <ActionProgress
+              active={saving}
+              stages={[
+                "Uploading your document",
+                "Encrypting and storing it",
+                "Sending for review",
+              ]}
+              className="mb-2"
+            />
+            <Button type="submit" disabled={saving} className="w-full sm:w-auto">
+              {saving ? "Saving..." : "Save"}
+            </Button>
+          </div>
           <Button type="button" variant="ghost" onClick={onCancel}>
             Cancel
           </Button>

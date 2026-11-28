@@ -2,6 +2,7 @@
 
 import { Check, X, Star, Loader2, Clock, MessageSquare, Handshake, Lock } from "lucide-react";
 
+import { ActionProgress } from "@/components/ui/action-progress";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -120,6 +121,11 @@ export function InterestSection({
               />
               <p className="text-xs text-ash mt-1 text-right">{offerMessage.length}/1000</p>
             </div>
+            <ActionProgress
+              active={submittingOffer}
+              stages={["Sending your interest", "Notifying the poster"]}
+              className="mb-2"
+            />
             <Button type="submit" variant="default" size="sm" disabled={submittingOffer}>
               {submittingOffer ? (
                 <>

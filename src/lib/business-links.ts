@@ -48,3 +48,27 @@ export function serializeBusinessSocialLinks(links: { platform: string; url: str
     .slice(0, 20);
   return JSON.stringify(cleaned);
 }
+
+/**
+ * Compact display label for one presence link — the form that fits on a
+ * business card: websites collapse to their domain ("hekaweb.com"), social
+ * profiles to "platform @handle" where a handle can be read from the path.
+ */
+export function businessPresenceLabel(link: BusinessSocialLink): string {
+  const platform = link.platform.trim().toLowerCase();
+  try {
+    const url = new URL(link.url);
+    const host = url.hostname.replace(/^www\./, "");
+    if (platform === "website" || platform === "web" || platform === "site") return host;
+    const segment = url.pathname.split("/").filter(Boolean)[0] ?? "";
+    const handle = segment.replace(/^@/, "");
+    return handle ? `${platform} @${handle}` : host;
+  } catch {
+    return link.url.slice(0, 40);
+  }
+}
+
+/** One-line presence summary for cards: "hekaweb.com · instagram @hekaweb". */
+export function businessPresenceLine(links: BusinessSocialLink[], max = 4): string {
+  return links.slice(0, max).map(businessPresenceLabel).filter(Boolean).join("  ·  ");
+}

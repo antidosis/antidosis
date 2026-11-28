@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -26,6 +26,7 @@ import { Controller, useForm } from "react-hook-form";
 import { type z } from "zod";
 
 import { UrgencyField } from "@/components/needs/urgency-field";
+import { ActionProgress } from "@/components/ui/action-progress";
 import { Button } from "@/components/ui/button";
 import { ImageGallery } from "@/components/ui/image-gallery";
 import { Input } from "@/components/ui/input";
@@ -33,7 +34,12 @@ import { Label } from "@/components/ui/label";
 import { LocationAutocomplete } from "@/components/ui/location-autocomplete";
 import { SkillAutocomplete } from "@/components/ui/skill-autocomplete";
 import { Textarea } from "@/components/ui/textarea";
-import { EXCHANGE_MODES, INCOMPATIBLE_EXCHANGE_MODES, getExchangeMode } from "@/lib/categories";
+import {
+  AUTO_EXCHANGE_MODE,
+  compatibleExchangeModes,
+  getExchangeMode,
+  type NeedTypeChoice,
+} from "@/lib/categories";
 import { detectRegulatedTrade } from "@/lib/regulated-trades";
 import { createNeedSchema } from "@/lib/schemas";
 import { createClient } from "@/lib/supabase/client";
@@ -89,6 +95,11 @@ export default function CreateNeedPage() {
   const regulatedTrade = detectRegulatedTrade({ title: watchedTitle, skills: watchedSkills });
   const mobileGate = profile ? !profile.mobileVerified : false;
 
+  // What the poster is asking FOR — pairs with offerType to cascade the
+  // exchange-type list. UI-level only; the chosen exchange mode is what saves.
+  const [needType, setNeedType] = useState<NeedTypeChoice | null>(null);
+  const lastAutoModeRef = useRef<string | null>(null);
+
   useEffect(() => {
     try {
       const saved = sessionStorage.getItem("antidosis-need-draft");
@@ -96,6 +107,13 @@ export default function CreateNeedPage() {
         const draft = JSON.parse(saved);
         reset(draft.values);
         if (draft.mode === "detailed") setMode("detailed");
+        if (
+          draft.needType === "service" ||
+          draft.needType === "item" ||
+          draft.needType === "money"
+        ) {
+          setNeedType(draft.needType);
+        }
       }
     } catch {
       sessionStorage.removeItem("antidosis-need-draft");
@@ -109,12 +127,27 @@ export default function CreateNeedPage() {
       .catch(() => {});
   }, []);
 
+  // Clear the exchange type when either chip selection makes it incompatible.
   useEffect(() => {
-    const incompatible = INCOMPATIBLE_EXCHANGE_MODES[offerType] || [];
-    if (exchangeMode && incompatible.includes(exchangeMode)) {
+    if (
+      exchangeMode &&
+      !compatibleExchangeModes(offerType, needType).some((mode) => mode.value === exchangeMode)
+    ) {
       setValue("needCategory", undefined);
     }
-  }, [offerType, exchangeMode, setValue]);
+  }, [offerType, needType, exchangeMode, setValue]);
+
+  // Unambiguous pairs name themselves — pick the tag for the member unless
+  // they've chosen one by hand.
+  useEffect(() => {
+    if (!needType) return;
+    const auto = AUTO_EXCHANGE_MODE[`${offerType}+${needType}`];
+    if (!auto) return;
+    const userHasOwnPick = exchangeMode && exchangeMode !== lastAutoModeRef.current;
+    if (userHasOwnPick) return;
+    lastAutoModeRef.current = auto;
+    if (exchangeMode !== auto) setValue("needCategory", auto);
+  }, [offerType, needType, exchangeMode, setValue]);
 
   useEffect(() => {
     if (exchangeMode !== "rideshare") setValue("destinationName", undefined);
@@ -125,7 +158,10 @@ export default function CreateNeedPage() {
   }, [urgency, setValue]);
 
   function saveDraft() {
-    sessionStorage.setItem("antidosis-need-draft", JSON.stringify({ mode, values: getValues() }));
+    sessionStorage.setItem(
+      "antidosis-need-draft",
+      JSON.stringify({ mode, needType, values: getValues() })
+    );
   }
 
   async function onSubmit(data: FormData) {
@@ -316,6 +352,36 @@ export default function CreateNeedPage() {
           </div>
           <div className="space-y-5">
             <div className="space-y-2">
+              <Label>I&apos;m looking for</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {(
+                  [
+                    { value: "service", label: "A service", icon: Wrench },
+                    { value: "item", label: "Goods", icon: Package },
+                    { value: "money", label: "Money", icon: CircleDollarSign },
+                  ] as const
+                ).map(({ value, label, icon: Icon }) => (
+                  <Button
+                    key={value}
+                    type="button"
+                    variant="outline"
+                    onClick={() => setNeedType((current) => (current === value ? null : value))}
+                    aria-pressed={needType === value}
+                    className={cn(
+                      "h-auto flex-col gap-2 px-2 py-3",
+                      needType === value && "border-sun bg-sun/5 text-gold"
+                    )}
+                  >
+                    <Icon className="h-5 w-5" />
+                    <span className="text-sm font-medium">{label}</span>
+                  </Button>
+                ))}
+              </div>
+              <p className="text-xs text-ash">
+                Optional — pick both sides and the exchange type names itself below.
+              </p>
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="need-title">Title</Label>
               <Input
                 id="need-title"
@@ -417,17 +483,14 @@ export default function CreateNeedPage() {
           </div>
           <div className="mt-5 grid gap-5 sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
             <div className="space-y-2">
-              <Label htmlFor="need-category">Category (optional)</Label>
+              <Label htmlFor="need-category">Exchange type (optional)</Label>
               <select
                 id="need-category"
                 {...register("needCategory")}
                 className="h-10 w-full rounded border border-line bg-inset px-3 text-base text-gold outline-none focus:border-sun"
               >
-                <option value="">Choose a category</option>
-                {EXCHANGE_MODES.filter((modeItem) => {
-                  const incompatible = INCOMPATIBLE_EXCHANGE_MODES[offerType] || [];
-                  return !incompatible.includes(modeItem.value);
-                }).map((modeItem) => (
+                <option value="">Choose an exchange type</option>
+                {compatibleExchangeModes(offerType, needType).map((modeItem) => (
                   <option key={modeItem.value} value={modeItem.value}>
                     {modeItem.label}
                   </option>
@@ -435,6 +498,11 @@ export default function CreateNeedPage() {
               </select>
               {exchangeMode && getExchangeMode(exchangeMode)?.example && (
                 <p className="text-xs text-ash">{getExchangeMode(exchangeMode)?.example}</p>
+              )}
+              {!exchangeMode && needType && (
+                <p className="text-xs text-ash">
+                  Narrowed to match what you need and what you offer.
+                </p>
               )}
             </div>
             <div className="space-y-2">
@@ -657,6 +725,12 @@ export default function CreateNeedPage() {
             {errors.root.message}
           </p>
         )}
+
+        <ActionProgress
+          active={isSubmitting}
+          stages={["Checking your details", "Publishing your need", "Alerting nearby members"]}
+          className="mb-3"
+        />
 
         <div className="sticky bottom-3 z-20 flex gap-3 rounded-lg border border-line bg-surface/95 p-3 shadow-lg backdrop-blur">
           <Button type="submit" size="lg" disabled={isSubmitting || mobileGate} className="flex-1">

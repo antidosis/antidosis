@@ -134,6 +134,13 @@ export interface BusinessCardFields {
   cta: string;
   /** Footer URL. */
   url: string;
+  /** Compact web/social presence line (see businessPresenceLine). */
+  presence?: string | null;
+  /**
+   * QR code PNG data URL pointing at the live listing — the card's answer to
+   * "everything can't fit": the face stays clean, the code carries the rest.
+   */
+  qrDataUrl?: string | null;
   texture: BusinessCardTexture;
   logoDataUrl?: string | null;
 }
@@ -149,18 +156,30 @@ const CHIP_GAP = 12;
 const CHIP_CHAR_WIDTH = 11.5;
 const MAX_CHIPS = 4;
 
+/** QR plate geometry — bottom-right corner, inside the frame. */
+const QR_PLATE_X = 996;
+const QR_PLATE_Y = 430;
+const QR_PLATE_SIZE = 116;
+const QR_INNER_PAD = 8;
+
 function chipSvg(
   text: string,
   x: number,
+  y: number,
   width: number,
   accent: string,
   accentSoft: string
 ): string {
-  return `<g><rect x="${x}" y="318" width="${width}" height="${CHIP_HEIGHT}" rx="8" fill="${accent}" fill-opacity="0.1" stroke="${accent}" stroke-opacity="0.4"/><text x="${x + CHIP_PAD_X}" y="${318 + CHIP_HEIGHT / 2 + CHIP_FONT * 0.36}" fill="${accentSoft}" font-family="Arial, sans-serif" font-size="${CHIP_FONT}">${xmlEscape(text)}</text></g>`;
+  return `<g><rect x="${x}" y="${y}" width="${width}" height="${CHIP_HEIGHT}" rx="8" fill="${accent}" fill-opacity="0.1" stroke="${accent}" stroke-opacity="0.4"/><text x="${x + CHIP_PAD_X}" y="${y + CHIP_HEIGHT / 2 + CHIP_FONT * 0.36}" fill="${accentSoft}" font-family="Arial, sans-serif" font-size="${CHIP_FONT}">${xmlEscape(text)}</text></g>`;
 }
 
 /** One row of rectangular chips; anything that doesn't fit collapses into a trailing "+n". */
-function layoutSpecialtyChips(labels: string[], accent: string, accentSoft: string): string {
+function layoutSpecialtyChips(
+  labels: string[],
+  y: number,
+  accent: string,
+  accentSoft: string
+): string {
   const chips: string[] = [];
   let x = FRAME_LEFT;
   let placed = 0;
@@ -168,7 +187,7 @@ function layoutSpecialtyChips(labels: string[], accent: string, accentSoft: stri
     const text = fitCardText(raw, 300, CHIP_CHAR_WIDTH);
     const width = Math.ceil(text.length * CHIP_CHAR_WIDTH) + CHIP_PAD_X * 2;
     if (x + width > FRAME_RIGHT) break;
-    chips.push(chipSvg(text, x, width, accent, accentSoft));
+    chips.push(chipSvg(text, x, y, width, accent, accentSoft));
     x += width + CHIP_GAP;
     placed += 1;
   }
@@ -176,7 +195,7 @@ function layoutSpecialtyChips(labels: string[], accent: string, accentSoft: stri
   if (remaining > 0) {
     const text = `+${remaining}`;
     const width = Math.ceil(text.length * CHIP_CHAR_WIDTH) + CHIP_PAD_X * 2;
-    if (x + width <= FRAME_RIGHT) chips.push(chipSvg(text, x, width, accent, accentSoft));
+    if (x + width <= FRAME_RIGHT) chips.push(chipSvg(text, x, y, width, accent, accentSoft));
   }
   return chips.join("\n  ");
 }
@@ -190,11 +209,29 @@ export function renderBusinessCardSvg(fields: BusinessCardFields): string {
   const name = fitCardText(fields.name, 780, 34);
   const subtitle = fields.subtitle ? fitCardText(fields.subtitle, 800, 15) : null;
   const line = fields.line ? fitCardText(fields.line, CONTENT_WIDTH, 12) : null;
+  const presence = fields.presence ? fitCardText(fields.presence, CONTENT_WIDTH, 10.5) : null;
+  const hasQr = Boolean(fields.qrDataUrl);
+  // When the QR plate occupies the bottom-right, the ACCEPTS line and the ABN
+  // stop short of it so nothing ever renders underneath the code.
   const accepts =
     fields.accepts && fields.accepts.length > 0
-      ? fitCardText(fields.accepts.join("  ·  ").toUpperCase(), CONTENT_WIDTH - 150, 12.8)
+      ? fitCardText(
+          fields.accepts.join("  ·  ").toUpperCase(),
+          hasQr ? QR_PLATE_X - (FRAME_LEFT + 128) - 24 : CONTENT_WIDTH - 150,
+          12.8
+        )
       : null;
-  const chips = layoutSpecialtyChips(fields.specialties ?? [], texture.accent, texture.accentSoft);
+  const chipsY = presence ? 330 : 318;
+  const chips = layoutSpecialtyChips(
+    fields.specialties ?? [],
+    chipsY,
+    texture.accent,
+    texture.accentSoft
+  );
+
+  const qrBlock = hasQr
+    ? `<rect x="${QR_PLATE_X}" y="${QR_PLATE_Y}" width="${QR_PLATE_SIZE}" height="${QR_PLATE_SIZE}" rx="12" fill="#f4f6f5"/><image href="${fields.qrDataUrl}" x="${QR_PLATE_X + QR_INNER_PAD}" y="${QR_PLATE_Y + QR_INNER_PAD}" width="${QR_PLATE_SIZE - QR_INNER_PAD * 2}" height="${QR_PLATE_SIZE - QR_INNER_PAD * 2}"/><text x="${QR_PLATE_X + QR_PLATE_SIZE / 2}" y="${QR_PLATE_Y + QR_PLATE_SIZE + 22}" text-anchor="middle" fill="${texture.sub}" font-family="monospace" font-size="14" letter-spacing="2">SCAN FOR FULL LISTING</text>`
+    : "";
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
@@ -214,7 +251,8 @@ export function renderBusinessCardSvg(fields: BusinessCardFields): string {
   <text x="${FRAME_LEFT}" y="170" fill="${texture.ink}" font-family="Georgia, 'Times New Roman', serif" font-size="56" font-weight="700">${xmlEscape(name)}</text>
   ${subtitle ? `<text x="${FRAME_LEFT}" y="222" fill="${texture.accentSoft}" font-family="monospace" font-size="25">${xmlEscape(subtitle)}</text>` : ""}
   <rect x="${FRAME_LEFT}" y="250" width="${CONTENT_WIDTH}" height="1" fill="${texture.accent}" fill-opacity=".2"/>
-  ${line ? `<text x="${FRAME_LEFT}" y="286" fill="${texture.sub}" font-family="Arial, sans-serif" font-size="22">${xmlEscape(line)}</text>` : ""}
+  ${line ? `<text x="${FRAME_LEFT}" y="${presence ? 280 : 286}" fill="${texture.sub}" font-family="Arial, sans-serif" font-size="22">${xmlEscape(line)}</text>` : ""}
+  ${presence ? `<text x="${FRAME_LEFT}" y="308" fill="${texture.sub}" font-family="monospace" font-size="18"><tspan fill="${texture.accent}" letter-spacing="2">WEB </tspan>${xmlEscape(presence)}</text>` : ""}
   ${chips}
   ${
     accepts
@@ -222,8 +260,9 @@ export function renderBusinessCardSvg(fields: BusinessCardFields): string {
       : ""
   }
   <text x="${FRAME_LEFT}" y="490" fill="${texture.ink}" font-family="Georgia, 'Times New Roman', serif" font-size="29" font-weight="600">${xmlEscape(fields.cta)}</text>
-  <text x="${FRAME_LEFT}" y="540" fill="${texture.accent}" font-family="monospace" font-size="19">${xmlEscape(fitCardText(fields.url, 640, 11.5))}</text>
-  ${fields.abn ? `<text x="${FRAME_RIGHT}" y="540" text-anchor="end" fill="${texture.sub}" font-family="monospace" font-size="18">ABN ${xmlEscape(fields.abn)}</text>` : ""}
+  <text x="${FRAME_LEFT}" y="540" fill="${texture.accent}" font-family="monospace" font-size="19">${xmlEscape(fitCardText(fields.url, hasQr ? QR_PLATE_X - FRAME_LEFT - 240 : 640, 11.5))}</text>
+  ${fields.abn ? `<text x="${hasQr ? QR_PLATE_X - 24 : FRAME_RIGHT}" y="540" text-anchor="end" fill="${texture.sub}" font-family="monospace" font-size="18">ABN ${xmlEscape(fields.abn)}</text>` : ""}
+  ${qrBlock}
 </svg>`;
 }
 

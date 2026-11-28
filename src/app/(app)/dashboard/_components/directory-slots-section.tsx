@@ -22,6 +22,7 @@ import {
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
 import { mutate } from "swr";
 
+import { ActionProgress } from "@/components/ui/action-progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1113,6 +1114,13 @@ function SpecialtyEditor({
         })}
 
         <div className="flex flex-wrap items-center gap-2 pt-1">
+          <div className="w-full">
+            <ActionProgress
+              active={saving}
+              stages={["Saving your specialty", "Updating your live listing"]}
+              className="mb-1"
+            />
+          </div>
           <Button type="button" size="sm" onClick={save} disabled={saving}>
             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Save specialty

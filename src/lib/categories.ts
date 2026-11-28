@@ -17,6 +17,11 @@
  * offers goods and needs a service. Labels read "NEED → OFFER" ("Service →
  * Goods" = needs a service, offers goods). Each mode carries a short
  * `example` hint rendered in the need form when that mode is selected.
+ *
+ * `NEED_SIDE` classifies what each mode asks for ("service" | "goods" |
+ * "money"), or "open" for social modes that don't pin one side. The need form
+ * uses it to cascade: picking "what do you need" + "what can you offer"
+ * narrows the exchange-type list to the pairings that actually make sense.
  */
 
 export const EXCHANGE_MODES = [
@@ -322,4 +327,89 @@ export const INCOMPATIBLE_EXCHANGE_MODES: Record<string, string[]> = {
     "goods-for-money",
     "free-giveaway",
   ],
+};
+
+/** What the poster is asking for in the need form's first section. */
+export type NeedTypeChoice = "service" | "item" | "money";
+
+/** Which side of the exchange a mode pins down — "open" pins neither. */
+export type ExchangeSide = "service" | "goods" | "money" | "open";
+
+const NEED_SIDE: Record<string, ExchangeSide> = {
+  "goods-swap": "goods",
+  "goods-for-service": "service",
+  "goods-for-skills": "service",
+  "goods-for-money": "money",
+  "skill-swap": "service",
+  "service-for-goods": "goods",
+  "skills-for-goods": "goods",
+  "service-for-money": "money",
+  "money-for-anything": "open",
+  "paid-work": "service",
+  "money-for-service": "service",
+  "money-for-goods": "goods",
+  "community-help": "service",
+  "free-giveaway": "open",
+  "borrow-lend": "goods",
+  rideshare: "service",
+  "errands-delivery": "service",
+  "care-support": "service",
+  "learning-mentoring": "service",
+  creative: "open",
+  experiences: "open",
+  "backpacker-life": "open",
+  promotion: "open",
+  eccentric: "open",
+};
+
+const NEED_TYPE_TO_SIDE: Record<NeedTypeChoice, ExchangeSide> = {
+  service: "service",
+  item: "goods",
+  money: "money",
+};
+
+export function exchangeNeedSide(value: string | null | undefined): ExchangeSide {
+  return (value && NEED_SIDE[value]) || "open";
+}
+
+/** Reverse lookup for pre-filling the need-type chips when editing a need. */
+export function deriveNeedType(modeValue: string | null | undefined): NeedTypeChoice | null {
+  const side = exchangeNeedSide(modeValue);
+  if (side === "service") return "service";
+  if (side === "goods") return "item";
+  if (side === "money") return "money";
+  return null;
+}
+
+/**
+ * The exchange types that make sense for a chosen pair — the offer side via
+ * INCOMPATIBLE_EXCHANGE_MODES, the need side via NEED_SIDE ("open" modes stay
+ * visible for every need type so social exchanges are never hidden).
+ */
+export function compatibleExchangeModes(
+  offerType: string,
+  needType?: NeedTypeChoice | null
+): typeof EXCHANGE_MODES {
+  const incompatible = INCOMPATIBLE_EXCHANGE_MODES[offerType] || [];
+  const needSide = needType ? NEED_TYPE_TO_SIDE[needType] : null;
+  return EXCHANGE_MODES.filter(
+    (mode) =>
+      !incompatible.includes(mode.value) &&
+      (!needSide || NEED_SIDE[mode.value] === needSide || NEED_SIDE[mode.value] === "open")
+  ) as unknown as typeof EXCHANGE_MODES;
+}
+
+/**
+ * Pairs with exactly one sensible exchange mode get it auto-selected — the
+ * form fills the tag for the member instead of asking them to name it.
+ * Ambiguous pairs (service↔goods, money→service) stay manual.
+ * Key: "{offerType}+{needType}".
+ */
+export const AUTO_EXCHANGE_MODE: Record<string, ExchangeMode> = {
+  "service+service": "skill-swap",
+  "item+item": "goods-swap",
+  "item+service": "goods-for-service",
+  "item+money": "goods-for-money",
+  "service+money": "service-for-money",
+  "money+item": "money-for-goods",
 };
